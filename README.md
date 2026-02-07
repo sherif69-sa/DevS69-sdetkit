@@ -1,39 +1,68 @@
-# sdetkit
+<div align="center">
 
-[![quality](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml)
-[![pages](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml)
+# SDET Bootcamp (sdetkit)
 
+Production-style SDET utilities + exercises (CLI tools, quality gates, and testable modules).
 
+[![Quality](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml)
+[![Pages](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml)
+[![Release](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml)
+[![Mutation Tests](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutmut.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutmut.yml)
 
+[![Latest Release](https://img.shields.io/github/v/release/sherif69-sa/sdet_bootcamp?sort=semver)](https://github.com/sherif69-sa/sdet_bootcamp/releases)
+[![License](https://img.shields.io/github/license/sherif69-sa/sdet_bootcamp)](LICENSE)
 
-Small utilities for SDET-style exercises:
+</div>
 
-- `sdetkit.kvcli`: CLI that reads key=value pairs from stdin / --text / --path and prints JSON.
-- `sdetkit.atomicio`: atomic write helper.
-- `sdetkit.apiclient`: tiny JSON fetch helpers (sync + async).
-- `sdetkit.textutil`: parsing utilities.
+## What you get
 
-Quality gates:
-- pytest
-- 100% line coverage
-- mutmut (mutation testing)
+- **CLI tools**
+  - `sdetkit kv` / `kvcli`: parse `key=value` input and output JSON
+  - `sdetkit apiget` / `apigetcli`: fetch JSON with pagination/retries/timeouts
+- **Importable modules**
+  - `sdetkit.atomicio`: atomic write helper
+  - `sdetkit.apiclient`: JSON fetch helpers (sync + async)
+  - `sdetkit.textutil`: parsing helpers
 
-## CLI
+## Quickstart
 
-### apiget
-Fetch JSON from an endpoint.
+> Tip: you don't need to activate the venv. Use `.venv/bin/...`.
 
-- Get a JSON object:
-  - sdetkit apiget https://example.com/api --expect dict
+### One-time setup
 
-- Get a JSON array:
-  - sdetkit apiget https://example.com/items --expect list
+```bash
+cd ~/sdet_bootcamp
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
+````
 
-- Pagination (Link: rel="next"):
-  - sdetkit apiget https://example.com/items --expect list --paginate --max-pages 50
+### Daily commands
 
-- Retries + 429 retry + timeout:
-  - sdetkit apiget https://example.com/items --expect list --retries 3 --retry-429 --timeout 2
+```bash
+./.venv/bin/python -m pytest
+bash scripts/check.sh all
+```
 
-- Trace header:
-  - sdetkit apiget https://example.com/items --expect list --trace-header X-Request-ID
+## CLI usage
+
+```bash
+./.venv/bin/sdetkit --help
+./.venv/bin/python -m sdetkit --help
+
+./.venv/bin/kvcli --help
+./.venv/bin/apigetcli --help
+```
+
+## Optional: shell with venv tools on PATH (no activate)
+
+```bash
+cd ~/sdet_bootcamp
+bash scripts/shell.sh
+# Now you can run:
+#   apigetcli --help
+#   kvcli --help
+```
+
+## License
+
+MIT. See `LICENSE`.
