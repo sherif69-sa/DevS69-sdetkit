@@ -66,3 +66,17 @@ def test_sdetkit_apiget_expect_dict_mismatch_is_error(monkeypatch, capsys):
 
     err = capsys.readouterr().err
     assert "expected json object" in err
+
+def test_python_m_sdetkit_help():
+    import subprocess
+    import sys
+
+    p = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "--help"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    assert p.returncode == 0
+    assert "usage: sdetkit" in p.stdout
+
