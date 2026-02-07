@@ -23,3 +23,5 @@ src/*.egg-info/
 dist/
 build/
 *.egg-info/
+
+site/

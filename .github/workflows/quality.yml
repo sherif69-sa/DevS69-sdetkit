@@ -3,28 +3,103 @@ name: quality
 on:
   push:
   pull_request:
-  workflow_dispatch:
 
 jobs:
-  quality:
+  lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
+      - name: Install
+        run: |
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+      - name: Lint
+        run: |
+          bash scripts/check.sh lint
 
+  types:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+      - name: Types
+        run: |
+          bash scripts/check.sh types
+
+  tests-311:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+      - name: Tests
+        run: |
+          bash scripts/check.sh tests
+
+  tests-312:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+      - name: Tests
+        run: |
+          bash scripts/check.sh tests
+
+  coverage:
+    runs-on: ubuntu-latest
+    env:
+      COV_FAIL_UNDER: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: |
+          python -m pip install -r requirements-test.txt
+          python -m pip install -e .
+      - name: Coverage
+        run: |
+          bash scripts/check.sh coverage
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
       - name: Install
         run: |
           python -m pip install -r requirements-test.txt
           python -m pip install -r requirements-docs.txt
           python -m pip install -e .
-
-      - name: Quality gate
-        env:
-          COV_FAIL_UNDER: "0"
+      - name: Docs
         run: |
-          bash scripts/check.sh all
+          bash scripts/check.sh docs
