@@ -2,10 +2,13 @@ name: mutmut
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 6"
 
 jobs:
-  mutmut:
+  mutate:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -21,4 +24,4 @@ jobs:
 
       - name: Mutmut
         run: |
-          mutmut run
+          mutmut run --paths-to-mutate src/sdetkit --runner "pytest -q"
