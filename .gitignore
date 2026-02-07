@@ -7,7 +7,6 @@ __pycache__/
 .hypothesis/
 htmlcov/
 mutants/
-
 # local quality artifacts
 htmlcov/
 coverage.xml
@@ -23,5 +22,5 @@ src/*.egg-info/
 dist/
 build/
 *.egg-info/
-
 site/
+.mypy_cache/
