@@ -80,3 +80,41 @@ def test_python_m_sdetkit_help():
     assert p.returncode == 0
     assert "usage: sdetkit" in p.stdout
 
+
+def test_kvcli_help():
+    import subprocess
+    import sysconfig
+    from pathlib import Path
+
+    scripts = Path(sysconfig.get_path("scripts"))
+    kv = scripts / "kvcli"
+    if not kv.exists():
+        kv = scripts / "kvcli.exe"
+
+    p = subprocess.run(
+        [str(kv) if kv.exists() else "kvcli", "--help"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    assert p.returncode == 0
+    assert "usage:" in p.stdout
+
+def test_apigetcli_help():
+    import subprocess
+    import sysconfig
+    from pathlib import Path
+
+    scripts = Path(sysconfig.get_path("scripts"))
+    apiget = scripts / "apigetcli"
+    if not apiget.exists():
+        apiget = scripts / "apigetcli.exe"
+
+    p = subprocess.run(
+        [str(apiget) if apiget.exists() else "apigetcli", "--help"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    assert p.returncode == 0
+    assert "usage:" in p.stdout
