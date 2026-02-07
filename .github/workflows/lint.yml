@@ -23,3 +23,4 @@ jobs:
       - name: Ruff
         run: |
           ruff check .
+          ruff format --check .
