@@ -1,4 +1,6 @@
 import pytest
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from sdetkit.textutil import normalize_line, parse_kv_line
 
@@ -37,6 +39,7 @@ def test_parse_kv_line_bad(raw):
     with pytest.raises(ValueError):
         parse_kv_line(raw)
 
+
 def test_parse_kv_line_returns_fresh_dict_each_time():
     a = parse_kv_line("")
     b = parse_kv_line("")
@@ -44,8 +47,48 @@ def test_parse_kv_line_returns_fresh_dict_each_time():
     assert b == {}
     assert a is not b
 
+
 def test_parse_kv_line_supports_double_quoted_values_with_spaces():
     assert parse_kv_line('a="hello world" b=2') == {"a": "hello world", "b": "2"}
 
+
 def test_parse_kv_line_allows_equals_inside_double_quotes():
     assert parse_kv_line('a="x=y" b=2') == {"a": "x=y", "b": "2"}
+
+
+_key = st.text(
+    alphabet=st.sampled_from(
+        list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
+    ),
+    min_size=1,
+    max_size=12,
+)
+
+_val = st.text(
+    alphabet=st.sampled_from(
+        list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-=.")
+    ),
+    min_size=1,
+    max_size=20,
+)
+
+_pairs = st.lists(st.tuples(_key, _val), min_size=1, max_size=8)
+
+
+@settings(max_examples=200)
+@given(_pairs)
+def test_parse_kv_line_round_trip_hypothesis(pairs):
+    d = {}
+    for k, v in pairs:
+        d[k] = v
+
+    parts = []
+    for k, v in d.items():
+        if any(ch.isspace() for ch in v):
+            parts.append(f'{k}="{v}"')
+        else:
+            parts.append(f"{k}={v}")
+
+    line = " ".join(parts)
+    out = parse_kv_line(line)
+    assert out == d

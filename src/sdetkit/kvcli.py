@@ -32,7 +32,6 @@ def main(argv=None) -> int:
         raw = sys.stdin.read()
 
     data: dict[str, str] = {}
-    had_any = False
 
     for line in raw.splitlines():
         try:
@@ -40,10 +39,9 @@ def main(argv=None) -> int:
         except ValueError:
             continue
         if chunk:
-            had_any = True
             data.update(chunk)
 
-    if not had_any and raw.strip() != "":
+    if raw.strip() != "" and not data:
         _die("invalid input")
 
     sys.stdout.write(json.dumps(data, sort_keys=True) + "\n")

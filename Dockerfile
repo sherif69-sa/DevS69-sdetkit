@@ -5,9 +5,11 @@ WORKDIR /app
 RUN groupadd -g 1001 app \
  && useradd -u 1001 -g app -m app
 
+COPY requirements-test.txt /app/requirements-test.txt
+
 RUN python3 -m venv .venv \
  && . .venv/bin/activate \
- && python -m pip install -q pytest
+ && python -m pip install -q -r /app/requirements-test.txt
 
 ENV PYTHONPATH=src
 
