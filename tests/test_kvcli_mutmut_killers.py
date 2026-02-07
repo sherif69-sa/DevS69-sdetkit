@@ -1,6 +1,8 @@
 import argparse
 import pathlib
+
 import pytest
+
 import sdetkit.kvcli as kvcli
 
 
@@ -139,6 +141,7 @@ def test_main_add_argument_sets_default_none_for_text_and_path(monkeypatch):
     assert "default" in seen["--text"] and seen["--text"]["default"] is None
     assert "default" in seen["--path"] and seen["--path"]["default"] is None
 
+
 def test_main_reads_from_stdin_when_no_text_or_path(monkeypatch, capsys):
     import io
     import json
@@ -180,6 +183,7 @@ def test_main_invalid_stdin_dies(monkeypatch, capsys):
     assert out.out == ""
     assert out.err == "invalid input\n"
 
+
 def test_main_help_mentions_prog_and_options(capsys):
     with pytest.raises(SystemExit) as exc:
         kvcli.main(["--help"])
@@ -208,6 +212,7 @@ def test_main_unknown_arg_mentions_prog_and_arg(capsys):
     assert "kvcli" in err
     assert "--nope" in out.err
 
+
 def test_main_text_success_prints_and_returns_zero(capsys):
     rc = kvcli.main(["--text", "a=1\n"])
     assert rc == 0
@@ -232,6 +237,7 @@ def test_main_path_success_prints_and_returns_zero(tmp_path, capsys):
     assert "a" in out.out
     assert "1" in out.out
 
+
 def test_main_text_success_output_exact(capsys):
     rc = kvcli.main(["--text", "a=1\n"])
     assert rc == 0
@@ -239,6 +245,7 @@ def test_main_text_success_output_exact(capsys):
     out = capsys.readouterr()
     assert out.err == ""
     assert out.out == '{"a": "1"}\n'
+
 
 def test_main_path_success_output_exact(tmp_path, capsys):
     f = tmp_path / "in.txt"
@@ -251,6 +258,7 @@ def test_main_path_success_output_exact(tmp_path, capsys):
     assert out.err == ""
     assert out.out == '{"a": "1"}\n'
 
+
 def test_main_help_mentions_prog(capsys):
     import pytest
 
@@ -261,6 +269,7 @@ def test_main_help_mentions_prog(capsys):
     out = capsys.readouterr()
     assert out.err == ""
     assert "kvcli" in out.out
+
 
 def test_main_text_json_format_is_default(capsys):
     rc = kvcli.main(["--text", "b=2\na=1\n"])
@@ -273,6 +282,7 @@ def test_main_text_json_format_is_default(capsys):
 
     s = out.out[:-1]
     import json
+
     obj = json.loads(s)
     assert obj == {"b": "2", "a": "1"}
     assert json.dumps(obj) == s
@@ -339,6 +349,7 @@ def test_main_text_whitespace_only_outputs_empty_json(capsys):
     assert out.err == ""
     assert out.out == "{}\n"
 
+
 def test_main_text_blank_lines_output_empty_json(capsys):
     rc = kvcli.main(["--text", "\n\n"])
     assert rc == 0
@@ -349,6 +360,7 @@ def test_main_text_blank_lines_output_empty_json(capsys):
     assert out.out.count("\n") == 1
 
     import json
+
     line = out.out[:-1]
     obj = json.loads(line)
     assert obj == {}
@@ -365,10 +377,12 @@ def test_main_text_whitespace_only_output_empty_json(capsys):
     assert out.out.count("\n") == 1
 
     import json
+
     line = out.out[:-1]
     obj = json.loads(line)
     assert obj == {}
     assert json.dumps(obj) == line
+
 
 def test_main_text_nonempty_with_no_pairs_is_error(capsys):
     try:

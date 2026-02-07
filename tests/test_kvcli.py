@@ -13,10 +13,7 @@ def run_kvcli(
     timeout: float | None = None,
     env: dict[str, str] | None = None,
 ):
-    import os
-    import subprocess
     import sys
-    from pathlib import Path
 
     here = Path(__file__).resolve()
     if "mutants" in here.parts:

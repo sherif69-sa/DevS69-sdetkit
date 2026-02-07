@@ -104,8 +104,8 @@ def test_fetch_json_dict_retries_must_be_ge_1_sync():
 
 
 def test_fetch_json_dict_status_code_edges_mutmut():
-    import httpx
     import pytest
+
     from sdetkit.apiclient import fetch_json_dict
 
     class Resp:
@@ -145,6 +145,7 @@ def test_fetch_json_dict_status_code_edges_mutmut():
 
 def test_fetch_json_dict_retries_stop_after_success_mutmut():
     import httpx
+
     from sdetkit.apiclient import fetch_json_dict
 
     class Resp:
@@ -177,6 +178,7 @@ def test_fetch_json_dict_retries_stop_after_success_mutmut():
 def test_fetch_json_dict_retries_exhausted_call_count_mutmut():
     import httpx
     import pytest
+
     from sdetkit.apiclient import fetch_json_dict
 
     class Client:
@@ -199,6 +201,7 @@ def test_fetch_json_dict_retries_exhausted_call_count_mutmut():
 def test_fetch_json_dict_timeout_is_timeout_error_mutmut():
     import httpx
     import pytest
+
     from sdetkit.apiclient import fetch_json_dict
 
     class Client:

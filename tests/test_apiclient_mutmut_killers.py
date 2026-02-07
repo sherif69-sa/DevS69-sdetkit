@@ -75,7 +75,9 @@ async def test_fetch_json_dict_async_default_does_not_retry():
         calls += 1
         raise httpx.ConnectError("boom", request=request)
 
-    client = httpx.AsyncClient(base_url="https://example.test", transport=httpx.MockTransport(handler))
+    client = httpx.AsyncClient(
+        base_url="https://example.test", transport=httpx.MockTransport(handler)
+    )
     try:
         with pytest.raises(RuntimeError, match=r"^request failed$"):
             await fetch_json_dict_async(client, "/x")
@@ -90,7 +92,9 @@ async def test_fetch_json_dict_async_timeout_error_message():
     def handler(request: httpx.Request) -> httpx.Response:
         raise httpx.ReadTimeout("slow", request=request)
 
-    client = httpx.AsyncClient(base_url="https://example.test", transport=httpx.MockTransport(handler))
+    client = httpx.AsyncClient(
+        base_url="https://example.test", transport=httpx.MockTransport(handler)
+    )
     try:
         with pytest.raises(TimeoutError, match=r"^request timed out$"):
             await fetch_json_dict_async(client, "/x", retries=3)
@@ -103,7 +107,9 @@ async def test_fetch_json_dict_async_non_2xx_message():
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(418, content=b"nope")
 
-    client = httpx.AsyncClient(base_url="https://example.test", transport=httpx.MockTransport(handler))
+    client = httpx.AsyncClient(
+        base_url="https://example.test", transport=httpx.MockTransport(handler)
+    )
     try:
         with pytest.raises(RuntimeError, match=r"^non-2xx response$"):
             await fetch_json_dict_async(client, "/x")
@@ -116,7 +122,9 @@ async def test_fetch_json_dict_async_expected_object_message():
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=[1, 2, 3])
 
-    client = httpx.AsyncClient(base_url="https://example.test", transport=httpx.MockTransport(handler))
+    client = httpx.AsyncClient(
+        base_url="https://example.test", transport=httpx.MockTransport(handler)
+    )
     try:
         with pytest.raises(ValueError, match=r"^expected json object$"):
             await fetch_json_dict_async(client, "/x")

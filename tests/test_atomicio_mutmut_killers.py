@@ -47,6 +47,8 @@ def test_atomic_write_text_mkdir_uses_parents_true_and_exist_ok_true(tmp_path, m
             hits.append((pp, args, kw))
 
     assert hits
+
+
 def test_atomic_write_text_uses_utf8_even_under_C_locale(tmp_path):
     orig = locale.setlocale(locale.LC_ALL)
     try:
@@ -136,7 +138,9 @@ def test_atomic_write_text_opens_parent_dir_with_O_DIRECTORY_and_fsyncs(tmp_path
 
     atomic_write_text(target, "x")
 
-    good = [r for r in open_records if r[0] == "ok" and r[1] == (str(parent), atomicio.os.O_DIRECTORY)]
+    good = [
+        r for r in open_records if r[0] == "ok" and r[1] == (str(parent), atomicio.os.O_DIRECTORY)
+    ]
     assert good
     dir_fd = good[-1][3]
     assert dir_fd in fsync_calls
@@ -162,9 +166,12 @@ def test_atomic_write_text_leaves_no_extra_files(tmp_path):
     atomic_write_text(target, "x")
     assert sorted(p.name for p in tmp_path.iterdir()) == ["out.txt"]
 
+
 def test_atomic_write_text_cleanup_unlink_error_is_swallowed(tmp_path, monkeypatch):
     import pathlib
+
     import pytest
+
     import sdetkit.atomicio as atomicio
 
     class Boom(Exception):
@@ -183,4 +190,3 @@ def test_atomic_write_text_cleanup_unlink_error_is_swallowed(tmp_path, monkeypat
         atomicio.atomic_write_text(tmp_path / "out.txt", "x")
 
     assert str(ei.value) == "boom"
-
