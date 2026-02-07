@@ -5,101 +5,35 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install
-        run: |
-          python -m pip install -r requirements-test.txt
-          python -m pip install -e .
-      - name: Lint
-        run: |
-          bash scripts/check.sh lint
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-test.txt
+            requirements-docs.txt
 
-  types:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-          cache: pip
-      - name: Install
+      - name: Install dependencies
         run: |
-          python -m pip install -r requirements-test.txt
-          python -m pip install -e .
-      - name: Types
-        run: |
-          bash scripts/check.sh types
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
 
-  tests-311:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-          cache: pip
-      - name: Install
-        run: |
-          python -m pip install -r requirements-test.txt
-          python -m pip install -e .
-      - name: Tests
-        run: |
-          bash scripts/check.sh tests
+      - name: Run pre-commit
+        run: pre-commit run -a
 
-  tests-312:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-          cache: pip
-      - name: Install
-        run: |
-          python -m pip install -r requirements-test.txt
-          python -m pip install -e .
-      - name: Tests
-        run: |
-          bash scripts/check.sh tests
+      - name: Run tests
+        run: python -m pytest -q
 
-  coverage:
-    runs-on: ubuntu-latest
-    env:
-      COV_FAIL_UNDER: "0"
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-          cache: pip
-      - name: Install
-        run: |
-          python -m pip install -r requirements-test.txt
-          python -m pip install -e .
-      - name: Coverage
-        run: |
-          bash scripts/check.sh coverage
+      - name: Build docs
+        run: mkdocs build -q
 
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-          cache: pip
-      - name: Install
-        run: |
-          python -m pip install -r requirements-test.txt
-          python -m pip install -r requirements-docs.txt
-          python -m pip install -e .
-      - name: Docs
-        run: |
-          bash scripts/check.sh docs
+      - name: Build distributions
+        run: python -m build

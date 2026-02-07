@@ -7,6 +7,24 @@ name = "sdetkit"
 version = "0.2.2"
 requires-python = ">=3.11"
 readme = "README.md"
+dependencies = [
+  "httpx>=0.27,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build",
+  "hypothesis",
+  "mkdocs==1.6.1",
+  "mkdocs-material==9.7.1",
+  "mypy",
+  "mutmut",
+  "pre-commit",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov",
+  "ruff",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -36,6 +54,15 @@ strict_equality = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "httpx"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "httpx.*"
+ignore_missing_imports = true
 
 [tool.mutmut]
 paths_to_mutate = ["src/sdetkit"]
