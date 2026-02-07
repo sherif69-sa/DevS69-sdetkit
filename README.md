@@ -1,5 +1,9 @@
 # sdetkit
 
+![tests](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/ci.yml/badge.svg)
+![lint](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/lint.yml/badge.svg)
+
+
 Small utilities for SDET-style exercises:
 
 - `sdetkit.kvcli`: CLI that reads key=value pairs from stdin / --text / --path and prints JSON.
