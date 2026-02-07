@@ -1,15 +1,9 @@
-name: release
+name: Release
 
 on:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag to release (e.g. v0.2.3)"
-        required: true
-        type: string
 
 permissions:
   contents: write
@@ -17,40 +11,33 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
-
     steps:
-      - name: Validate workflow_dispatch tag exists
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          git ls-remote --exit-code --tags "https://github.com/${GITHUB_REPOSITORY}.git" "refs/tags/${RELEASE_TAG}" >/dev/null \
-            || {
-              echo "::error::workflow_dispatch tag '${RELEASE_TAG}' was not found in ${GITHUB_REPOSITORY}. Push the tag before running this workflow."
-              exit 1
-            }
+      - uses: actions/checkout@v4
 
-      - name: Checkout release ref
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-          ref: ${{ env.RELEASE_TAG }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-test.txt
+            requirements-docs.txt
 
-      - name: Build dist
+      - name: Build
         run: |
-          python -m pip install --upgrade pip build
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install build twine
           python -m build
+          python -m twine check dist/*
 
-      - name: Create GitHub release
+      - name: GitHub Release (attach dist/*)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          generate_release_notes: true
-          files: |
-            dist/*
+          files: dist/*
+
+      - name: Publish to PyPI (optional)
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
