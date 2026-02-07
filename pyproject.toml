@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sdetkit"
 version = "0.1.2"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 readme = "README.md"
 
 [tool.setuptools]
