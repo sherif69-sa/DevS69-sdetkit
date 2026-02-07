@@ -1,10 +1,11 @@
-site_name: sdetkit
-site_url: https://sherif69-sa.github.io/sdet_bootcamp/
+site_name: SDET Bootcamp (sdetkit)
 repo_url: https://github.com/sherif69-sa/sdet_bootcamp
-repo_name: sherif69-sa/sdet_bootcamp
-
+theme:
+  name: material
+plugins:
+  - search
 nav:
   - Home: index.md
-  - CLI: cli.md
-  - API: api.md
-  - Design: design.md
+  - Project structure: project-structure.md
+  - Roadmap: roadmap.md
+  - Contributing: contributing.md

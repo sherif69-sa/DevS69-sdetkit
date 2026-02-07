@@ -1,11 +1,11 @@
-# Source this file to put the repo venv scripts on PATH.
-# Example:
-#   cd ~/sdet_bootcamp
-#   source scripts/env.sh
-#   apigetcli --help
+#!/usr/bin/env bash
 
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+set -euo pipefail
 
-if [ -d "$repo_root/.venv/bin" ]; then
-  export PATH="$repo_root/.venv/bin:$PATH"
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$root"
+
+if [ -d ".venv/bin" ]; then
+  PATH="$root/.venv/bin:$PATH"
+  export PATH
 fi

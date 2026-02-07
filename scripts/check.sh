@@ -13,31 +13,38 @@ fi
 mode=${1:-}
 
 case "$mode" in
+  fmt)
+    shift || true
+    ruff format "${@:-.}"
+    ;;
   lint)
-    ruff check .
     ruff format --check .
+    ruff check .
     ;;
   types)
     mypy src
     ;;
   tests)
-    ./.venv/bin/python -m pytest
+    pytest
     ;;
   coverage)
-    ./.venv/bin/python -m pytest --cov=src --cov-report=term-missing --cov-report=xml
+    pytest --cov=src/sdetkit --cov-report=term-missing --cov-report=xml
     ;;
   docs)
     mkdocs build
     ;;
   all)
-    "$0" lint
-    "$0" types
-    "$0" tests
-    "$0" coverage
-    "$0" docs
+    ruff format --check .
+    ruff check .
+    mypy src
+    pytest
+    pytest --cov=src/sdetkit --cov-report=term-missing --cov-report=xml
+    mkdocs build
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {lint|types|tests|coverage|docs|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|all}" >&2
     exit 2
     ;;
 esac
+
+echo "All checks passed!"

@@ -1,3 +1,3 @@
 # Roadmap
 
-See the GitHub version here: ../ROADMAP.md
+See the repo roadmap: `ROADMAP.md`.

@@ -10,4 +10,4 @@ if [ -d ".venv/bin" ]; then
   export PATH
 fi
 
-exec "${SHELL:-/bin/bash}" -i
+exec "${SHELL:-bash}" -i

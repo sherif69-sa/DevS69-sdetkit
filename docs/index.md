@@ -1,9 +1,20 @@
-# sdetkit
+# SDET Bootcamp (sdetkit)
 
-This site documents the sdetkit tools and patterns used in the bootcamp.
+A practical repo for production-style SDET workflows:
+- CLI exercises
+- quality gates (ruff/mypy/pytest/coverage/docs)
+- testable modules for katas and tasks
 
-CLI tools: kv, apiget
+## Start
 
-Quality gates: lint, types, tests, coverage, docs
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
+bash scripts/check.sh all
+```
 
-Practical patterns: retries, pagination, atomic writes
+## Pages
+
+- Project structure: project-structure.md
+- Roadmap: roadmap.md
+- Contributing: contributing.md

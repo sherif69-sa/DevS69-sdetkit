@@ -1,66 +1,42 @@
+# Contributing
 
+Thanks for helping improve sdetkit.
 
-Contributing
-Thanks for helping improve sdetkit. This repo is meant to be a long-running, production-style training project.
+## Setup
 
-Development setup
-cd sdet_bootcamp
+```bash
+cd ~/sdet_bootcamp
 python3 -m venv .venv
 ./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
-Quality gates (same as CI)
-bash scripts/check.sh all
-Individual modes:
+```
 
+## Quality gates (same as CI)
+
+```bash
+bash scripts/check.sh all
+```
+
+Individual steps:
+
+```bash
+bash scripts/check.sh fmt
 bash scripts/check.sh lint
 bash scripts/check.sh types
 bash scripts/check.sh tests
 bash scripts/check.sh coverage
 bash scripts/check.sh docs
-Running CLIs locally
-./.venv/bin/sdetkit --help
-./.venv/bin/kvcli --help
-./.venv/bin/apigetcli --help
-Optional (current shell):
+```
 
-source scripts/env.sh
-kvcli --help
-apigetcli --help
-Style and rules
-Keep changes small and focused.
+## Making changes
 
-Add tests for behavior changes and bug fixes.
+- Prefer small PRs with clear intent.
+- Add/extend tests for behavior changes.
+- Keep types clean (mypy passes).
+- Keep formatting/lint clean (ruff passes).
 
-Prefer deterministic tests (no flaky timing, no external network).
+## PR checklist
 
-Follow ruff formatting and linting.
-
-Keep types clean (mypy passes).
-
-Adding a new module
-Add code under src/sdetkit/.
-
-Add tests under tests/.
-
-Ensure bash scripts/check.sh all passes.
-
-Adding a new CLI command
-Implement logic in a module under src/sdetkit/.
-
-Wire the command in src/sdetkit/cli.py (or the current CLI router).
-
-Add tests in tests/:
-
-Unit tests for parsing/options
-
-Smoke test for --help
-
-Update README docs if the command is user-facing.
-
-Pull request checklist
- bash scripts/check.sh all passes locally
-
- Tests added/updated
-
- Docs updated if needed (README/docs/)
-
- Clear PR title and description
+- [ ] `bash scripts/check.sh all` is green locally
+- [ ] Tests added/updated for the change
+- [ ] Docs updated if the CLI/API changed
+- [ ] PR description includes what/why + how to verify

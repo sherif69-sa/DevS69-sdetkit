@@ -1,43 +1,33 @@
+# Roadmap
 
+This repo is a long-term SDET bootcamp project. The goal is to grow it into a practical toolkit + training track.
 
-Roadmap
-This roadmap is intentionally practical: ship small, testable improvements that build real SDET skills.
+## Now (stabilize)
 
-Vision
-A compact toolkit + training ground for:
+- Keep CI green (quality, pages, releases, mutation tests)
+- Improve docs (examples, recipes, troubleshooting)
+- Add more CLI examples and realistic test scenarios
 
-CLI tooling used in real projects
+## Next (features)
 
-Quality gates (lint, types, tests, coverage, docs)
+- `apiget`:
+  - Better pagination strategies (cursor/offset/link-header recipes)
+  - More observability hooks (trace/request-id)
+  - More failure-mode tests (timeouts, retries, bad JSON, partial pages)
+- `kv`:
+  - More input edge cases and strict/relaxed modes
 
-Robust test design (including mutation testing)
+## Later (professional polish)
 
-Now (stabilize + polish)
-Improve docs and examples for existing CLIs (kv, apiget)
+- More modules:
+  - contract testing helpers
+  - test data builders/factories
+  - logging/metrics helpers
+- More exercises:
+  - kata tasks with progressive difficulty
+  - mutation-test "killers" as training objectives
 
-More end-to-end CLI tests (help, exit codes, common failure modes)
+## Release plan
 
-Expand docs site content (guides, examples, patterns)
-
-Next (capability upgrades)
-Add structured logging and request tracing patterns
-
-Add configurable retry/backoff strategies and better error classification
-
-Add fixtures and helpers for testing APIs (mock servers, recorded responses)
-
-Later (bigger features)
-Add a small "kata" folder with graded exercises
-
-Add a plugin system for extending sdetkit commands
-
-Add performance-oriented testing examples (profiling, load patterns)
-
-Definition of done
-A feature is "done" when:
-
-Tests cover behavior and edge cases
-
-bash scripts/check.sh all is green
-
-Docs/examples are updated for user-facing changes
+- v0.x: ship improvements frequently while APIs are still flexible
+- v1.0: lock in stable CLI/API once patterns are proven
