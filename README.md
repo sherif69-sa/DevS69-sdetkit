@@ -1,7 +1,9 @@
 # sdetkit
 
-![tests](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/ci.yml/badge.svg)
-![lint](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/lint.yml/badge.svg)
+[![quality](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml)
+[![pages](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml)
+
+
 
 
 Small utilities for SDET-style exercises:
