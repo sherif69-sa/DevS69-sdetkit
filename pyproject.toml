@@ -44,3 +44,6 @@ runner = "PYTHONPATH=src pytest -q --ignore=mutants"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[project.scripts]
+sdetkit = "sdetkit.cli:main"
