@@ -34,6 +34,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(str(e), file=sys.stderr)
             return 1
 
+    if argv and argv[0] == "doctor":
+        from .doctor import main as _doctor_main
+
+        return _doctor_main(argv[1:])
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     sub = p.add_subparsers(dest="cmd", required=True)
 
