@@ -32,11 +32,11 @@ jobs:
           python -m pip install -e .
           python -m pip install pre-commit
 
-      - name: Lint (pre-commit)
+      - name: Lint
         run: |
           pre-commit run -a
 
-      - name: Tests (coverage gate)
+      - name: Tests
         env:
           COV_FAIL_UNDER: "70"
         run: |
