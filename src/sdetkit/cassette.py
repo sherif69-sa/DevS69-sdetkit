@@ -268,6 +268,8 @@ def open_transport(
         raise ValueError("cassette mode must be one of: auto, record, replay")
 
     if m == "replay":
+        if not p.exists():
+            raise RuntimeError("cassette not found")
         cassette = Cassette.load(p)
         return CassetteReplayTransport(cassette)
 

@@ -89,3 +89,23 @@ def test_apiget_record_failure_does_not_write_empty_cassette(tmp_path, capsys, m
 
     assert rc != 0
     assert not cassette.exists()
+
+
+def test_apiget_replay_missing_cassette_is_error(tmp_path, capsys):
+    cassette = tmp_path / "missing.cassette"
+
+    rc = cli.main(
+        [
+            "apiget",
+            "https://example.test/x",
+            "--expect",
+            "dict",
+            "--cassette",
+            str(cassette),
+            "--cassette-mode",
+            "replay",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert rc == 1
+    assert "cassette not found" in captured.err
