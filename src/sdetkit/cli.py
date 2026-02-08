@@ -8,26 +8,15 @@ from . import apiget, kvcli
 
 
 def _add_apiget_args(p: argparse.ArgumentParser) -> None:
-    p.add_argument("url")
-    p.add_argument("--expect", choices=["any", "dict", "list"], default="any")
-    p.add_argument("--paginate", action="store_true")
-    p.add_argument("--max-pages", type=int, default=100)
-    p.add_argument("--retries", type=int, default=1)
-    p.add_argument("--retry-429", action="store_true")
-    p.add_argument("--timeout", type=float, default=None)
-    p.add_argument("--trace-header", default=None)
-    p.add_argument("--request-id", default=None)
-    p.add_argument("--pretty", action="store_true")
-    p.add_argument("--print-status", action="store_true")
-    p.add_argument("--method", default="GET")
-    p.add_argument("--header", action="append", default=None)
-    p.add_argument("--data", default=None)
-    p.add_argument("--json", dest="json_data", default=None)
-    p.add_argument("--query", action="append", default=None)
-    p.add_argument("--out", default=None)
+    apiget._add_apiget_args(p)
 
-    p.add_argument("--cassette", default=None)
-    p.add_argument("--cassette-mode", choices=["auto", "record", "replay"], default=None)
+    p.add_argument("--cassette", default=None, help="Cassette file path (enables record/replay).")
+    p.add_argument(
+        "--cassette-mode",
+        choices=["auto", "record", "replay"],
+        default=None,
+        help="Cassette mode: auto, record, or replay.",
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
