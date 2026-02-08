@@ -54,6 +54,12 @@ jobs:
             requirements-test.txt
             requirements-docs.txt
 
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/check_release_tag_version.py "${{ steps.resolved.outputs.tag }}"
       - name: Install + quality gates
         shell: bash
         env:
