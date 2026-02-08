@@ -108,6 +108,9 @@ class CassetteReplayTransport(httpx.BaseTransport):
                 f"cassette not exhausted: played={self._i} total={len(self._cassette.interactions)}"
             )
 
+    def close(self) -> None:
+        self.assert_exhausted()
+
     def handle_request(self, request: httpx.Request) -> httpx.Response:
         if self._i >= len(self._cassette.interactions):
             raise RuntimeError("cassette mismatch: no more recorded interactions")
@@ -185,6 +188,9 @@ class AsyncCassetteReplayTransport(httpx.AsyncBaseTransport):
             raise AssertionError(
                 f"cassette not exhausted: played={self._i} total={len(self._cassette.interactions)}"
             )
+
+    async def aclose(self) -> None:
+        self.assert_exhausted()
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
         if self._i >= len(self._cassette.interactions):

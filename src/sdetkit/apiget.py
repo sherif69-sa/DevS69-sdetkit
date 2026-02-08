@@ -90,7 +90,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as e:
         sys.stderr.write(str(e).rstrip() + "\n")
         return 1
-    except RuntimeError as e:
+    except (RuntimeError, AssertionError) as e:
         sys.stderr.write(str(e).rstrip() + "\n")
         return 1
 
