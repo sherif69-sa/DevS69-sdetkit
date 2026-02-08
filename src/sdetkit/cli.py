@@ -20,6 +20,20 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    import sys
+
+    if argv is None:
+        argv = sys.argv[1:]
+
+    if argv and argv[0] == "cassette-get":
+        from .__main__ import _cassette_get
+
+        try:
+            return _cassette_get(argv[1:])
+        except Exception as e:
+            print(str(e), file=sys.stderr)
+            return 1
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     sub = p.add_subparsers(dest="cmd", required=True)
 
