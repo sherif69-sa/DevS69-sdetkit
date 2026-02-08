@@ -6,6 +6,7 @@ import os
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 
@@ -34,12 +35,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     p.add_argument("--data", default=None)
     p.add_argument("--json", dest="json_data", default=None)
     p.add_argument("--out", default=None)
+    p.add_argument("--query", action="append", default=None)
 
     ns = p.parse_args(argv)
 
     def _read_at_file(v: str) -> str:
         if not v.startswith("@"):
             return v
+        if v == "@-":
+            try:
+                return sys.stdin.read()
+            except Exception as err:
+                raise ValueError("could not read stdin") from err
         path = v[1:]
         try:
             return Path(path).read_text(encoding="utf-8")
@@ -48,12 +55,39 @@ def main(argv: Sequence[str] | None = None) -> int:
         except OSError as err:
             raise ValueError(f"could not read file: {path}") from err
 
+    _q = getattr(ns, "query", None)
+    if _q:
+        extra: list[tuple[str, str]] = []
+        for _item in _q:
+            _item = str(_item)
+            if "=" not in _item:
+                _die("query must be KEY=VALUE")
+            _k, _v = _item.split("=", 1)
+            if _k == "":
+                _die("query must be KEY=VALUE")
+            extra.append((_k, _v))
+        sp = urlsplit(str(ns.url))
+        base = parse_qsl(sp.query, keep_blank_values=True)
+        q = urlencode(base + extra, doseq=True)
+        ns.url = urlunsplit((sp.scheme, sp.netloc, sp.path, q, sp.fragment))
+
     _req_method = str(getattr(ns, "method", "GET")).upper() or "GET"
     _req_headers: dict[str, str] = {}
     _hdrs = getattr(ns, "header", None)
     if _hdrs:
         for _h in _hdrs:
             _h = str(_h)
+            if _h.startswith("@"):
+                _txt = _read_at_file(_h)
+                for _ln in _txt.splitlines():
+                    _ln = _ln.strip()
+                    if _ln == "" or _ln.startswith("#"):
+                        continue
+                    if ":" not in _ln:
+                        _die("header must be KEY:VALUE")
+                    _k, _v = _ln.split(":", 1)
+                    _req_headers[_k.strip()] = _v.lstrip()
+                continue
             if ":" not in _h:
                 _die("header must be KEY:VALUE")
             _k, _v = _h.split(":", 1)

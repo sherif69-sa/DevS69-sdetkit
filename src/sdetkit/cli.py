@@ -22,6 +22,7 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--header", action="append", default=None)
     p.add_argument("--data", default=None)
     p.add_argument("--json", dest="json_data", default=None)
+    p.add_argument("--query", action="append", default=None)
     p.add_argument("--out", default=None)
 
     p.add_argument("--cassette", default=None)
