@@ -10,8 +10,7 @@ Production-style SDET utilities + bootcamp exercises: CLI tools, quality gates, 
 [![Security](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml)
 [![Dependency Audit](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependency-audit.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependency-audit.yml)
 [![Pages](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml)
-[![Release](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml)
-[![Dependabot Updates](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates)
+[![Release](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml)[![Dependabot Updates](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates)
 
 [![Latest Release](https://img.shields.io/github/v/release/sherif69-sa/sdet_bootcamp?sort=semver)](https://github.com/sherif69-sa/sdet_bootcamp/releases)
 [![License](https://img.shields.io/github/license/sherif69-sa/sdet_bootcamp)](LICENSE)
