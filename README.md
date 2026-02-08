@@ -7,7 +7,9 @@ Production-style SDET utilities + exercises (CLI tools, quality gates, and testa
 [![Quality](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml)
 [![Pages](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml)
 [![Release](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml)
-[![Mutation Tests](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutmut.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutmut.yml)
+[![Mutation Tests](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutation-tests.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutation-tests.yml)
+[![Security](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml)
+[![Dependency Audit](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependency-audit.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependency-audit.yml)
 
 [![Latest Release](https://img.shields.io/github/v/release/sherif69-sa/sdet_bootcamp?sort=semver)](https://github.com/sherif69-sa/sdet_bootcamp/releases)
 [![License](https://img.shields.io/github/license/sherif69-sa/sdet_bootcamp)](LICENSE)
@@ -31,7 +33,7 @@ cd ~/sdet_bootcamp
 python3 -m venv .venv
 ./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
 bash scripts/check.sh all
-```
+````
 
 ## CLI
 
@@ -61,9 +63,9 @@ kvcli --help
 
 ## Repo docs
 
-- Project structure: docs/project-structure.md
-- Roadmap: docs/roadmap.md
-- Contributing: docs/contributing.md
+* Project structure: docs/project-structure.md
+* Roadmap: docs/roadmap.md
+* Contributing: docs/contributing.md
 
 ## Contributing
 
@@ -75,10 +77,13 @@ MIT. See LICENSE.
 
 ## Development
 
-- Install deps:
-  - `pip install -r requirements-test.txt -r requirements-docs.txt`
-- Run:
-  - `bash ci.sh`
-  - `bash quality.sh`
-- Enable git hooks:
-  - `pip install pre-commit && pre-commit install`
+* Install deps:
+
+  * `pip install -r requirements-test.txt -r requirements-docs.txt`
+* Run:
+
+  * `bash ci.sh`
+  * `bash quality.sh`
+* Enable git hooks:
+
+  * `pip install pre-commit && pre-commit install`
