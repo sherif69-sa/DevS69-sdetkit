@@ -18,6 +18,7 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--trace-header", default=None)
     p.add_argument("--request-id", default=None)
     p.add_argument("--pretty", action="store_true")
+    p.add_argument("--print-status", action="store_true")
     p.add_argument("--method", default="GET")
     p.add_argument("--header", action="append", default=None)
     p.add_argument("--data", default=None)
