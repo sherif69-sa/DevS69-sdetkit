@@ -5,6 +5,7 @@ import base64
 import json
 import os
 import sys
+import traceback
 from collections.abc import Sequence
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -18,6 +19,64 @@ from .netclient import (
     SdetHttpClient,
     _link_next_url,
 )
+
+
+def _is_sensitive_header(name: str) -> bool:
+    n = name.strip().lower()
+    if n in {"authorization", "proxy-authorization", "cookie", "set-cookie"}:
+        return True
+    if "api-key" in n or "apikey" in n:
+        return True
+    if "token" in n or "secret" in n or "password" in n:
+        return True
+    return False
+
+
+def _redact_header_value(name: str, value: str) -> str:
+    if _is_sensitive_header(name):
+        return "<redacted>"
+    return value
+
+
+def _merged_headers(client, extra, debug: bool) -> dict[str, str]:
+    out: dict[str, str] = {}
+    try:
+        for k, v in client.headers.items():
+            out[str(k)] = str(v)
+    except Exception:
+        pass
+    if extra:
+        try:
+            for k, v in dict(extra).items():
+                out[str(k)] = str(v)
+        except Exception:
+            try:
+                for k, v in extra.items():
+                    out[str(k)] = str(v)
+            except Exception:
+                if debug:
+                    traceback.print_exc()
+                pass
+    return out
+
+
+def _verbose_request(method: str, url: str, headers: dict[str, str]) -> None:
+    sys.stderr.write(f"http request: {method} {url}\n")
+    items = list(headers.items())
+    items.sort(key=lambda kv: kv[0].lower())
+    for k, v in items:
+        vv = _redact_header_value(k, v)
+        sys.stderr.write(f"http request header: {k}: {vv}\n")
+
+
+def _verbose_response(resp) -> None:
+    sys.stderr.write(f"http response: {resp.status_code}\n")
+    items = list(resp.headers.items())
+    items.sort(key=lambda kv: str(kv[0]).lower())
+    for k, v in items:
+        kk = str(k)
+        vv = _redact_header_value(kk, str(v))
+        sys.stderr.write(f"http response header: {kk}: {vv}\n")
 
 
 def _die(msg: str) -> None:
@@ -57,6 +116,16 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     p.add_argument("--print-status", action="store_true", help="Print HTTP status code to stderr.")
     p.add_argument("--dump-headers", action="store_true", help="Print response headers to stderr.")
+    p.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print request/response metadata to stderr (redacting secrets).",
+    )
+    p.add_argument(
+        "--debug",
+        action="store_true",
+        help="Print debug diagnostics (tracebacks) to stderr.",
+    )
     g = p.add_mutually_exclusive_group()
     g.add_argument(
         "--fail",
@@ -103,6 +172,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     _add_apiget_args(p)
 
     ns = p.parse_args(argv)
+    _printed_req = {"v": False}
 
     def _read_at_file(v: str) -> str:
         if not v.startswith("@"):
@@ -111,6 +181,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             try:
                 return sys.stdin.read()
             except Exception as err:
+                if getattr(ns, "debug", False):
+                    traceback.print_exc()
+                if getattr(ns, "verbose", False) and not _printed_req["v"]:
+                    _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), {})
                 raise ValueError("could not read stdin") from err
         path = v[1:]
         try:
@@ -199,6 +273,20 @@ def main(argv: Sequence[str] | None = None) -> int:
         if _json_data is not None:
             _json_data = _read_at_file(str(_json_data))
     except ValueError as e:
+        if getattr(ns, "verbose", False):
+            _raw = locals().get("raw")
+            _hdr_src = locals().get("headers") or {}
+            try:
+                _hdrs = (
+                    _merged_headers(_raw, _hdr_src, getattr(ns, "debug", False))
+                    if _raw is not None
+                    else _hdr_src
+                )
+            except Exception:
+                _hdrs = _hdr_src
+            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+        if getattr(ns, "debug", False):
+            traceback.print_exc()
         sys.stderr.write(str(e).rstrip() + "\n")
         return 1
     if _data is not None and _json_data is not None:
@@ -237,7 +325,33 @@ def main(argv: Sequence[str] | None = None) -> int:
 
             upstream_transport = httpx.HTTPTransport() if cassette_mode == "record" else None
             transport = open_transport(cassette_path, cassette_mode, upstream=upstream_transport)
-        with httpx.Client() if transport is None else httpx.Client(transport=transport) as raw:
+        _client_kwargs: dict[str, object] = {}
+        if transport is not None:
+            _client_kwargs["transport"] = transport
+        with httpx.Client(**_client_kwargs) as raw:
+            if getattr(ns, "verbose", False) and callable(getattr(raw, "request", None)):
+                _orig_request = raw.request
+
+                def _wrapped_request(method, url, **kwargs):
+                    resp = _orig_request(method, url, **kwargs)
+                    try:
+                        req = getattr(resp, "request", None)
+                        if req is not None:
+                            _verbose_request(req.method, str(req.url), dict(req.headers))
+                        else:
+                            _verbose_request(
+                                str(method), str(url), dict(kwargs.get("headers") or {})
+                            )
+                        _printed_req["v"] = True
+                    except Exception:
+                        pass
+                    try:
+                        _verbose_response(resp)
+                    except Exception:
+                        pass
+                    return resp
+
+                raw.request = _wrapped_request
             c = SdetHttpClient(raw, retry=pol, trace_header=ns.trace_header)
 
             def _print_status_and_headers(resp: httpx.Response) -> None:
@@ -366,10 +480,32 @@ def main(argv: Sequence[str] | None = None) -> int:
                                     ns.url, request_id=ns.request_id, timeout=ns.timeout
                                 )
                             except ValueError:
+                                if getattr(ns, "debug", False):
+                                    traceback.print_exc()
+                                if getattr(ns, "verbose", False) and not _printed_req["v"]:
+                                    _verbose_request(
+                                        getattr(ns, "method", "GET"),
+                                        getattr(ns, "url", ""),
+                                        _merged_headers(
+                                            raw,
+                                            locals().get("headers"),
+                                            getattr(ns, "debug", False),
+                                        ),
+                                    )
                                 data = c.get_json_list(
                                     ns.url, request_id=ns.request_id, timeout=ns.timeout
                                 )
                     except HttpStatusError as e:
+                        if getattr(ns, "debug", False):
+                            traceback.print_exc()
+                        if getattr(ns, "verbose", False) and not _printed_req["v"]:
+                            _verbose_request(
+                                getattr(ns, "method", "GET"),
+                                getattr(ns, "url", ""),
+                                _merged_headers(
+                                    raw, locals().get("headers"), getattr(ns, "debug", False)
+                                ),
+                            )
                         if (
                             getattr(ns, "fail", False) or getattr(ns, "fail_with_body", False)
                         ) and e.status_code >= 400:
@@ -396,15 +532,71 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     except TimeoutError:
+        if getattr(ns, "verbose", False):
+            _raw = locals().get("raw")
+            _hdr_src = locals().get("headers") or {}
+            try:
+                _hdrs = (
+                    _merged_headers(_raw, _hdr_src, getattr(ns, "debug", False))
+                    if _raw is not None
+                    else _hdr_src
+                )
+            except Exception:
+                _hdrs = _hdr_src
+            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+        if getattr(ns, "debug", False):
+            traceback.print_exc()
         sys.stderr.write("request timed out\n")
         return 1
     except CircuitOpenError:
+        if getattr(ns, "verbose", False):
+            _raw = locals().get("raw")
+            _hdr_src = locals().get("headers") or {}
+            try:
+                _hdrs = (
+                    _merged_headers(_raw, _hdr_src, getattr(ns, "debug", False))
+                    if _raw is not None
+                    else _hdr_src
+                )
+            except Exception:
+                _hdrs = _hdr_src
+            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+        if getattr(ns, "debug", False):
+            traceback.print_exc()
         sys.stderr.write("circuit open\n")
         return 1
     except ValueError as e:
+        if getattr(ns, "verbose", False):
+            _raw = locals().get("raw")
+            _hdr_src = locals().get("headers") or {}
+            try:
+                _hdrs = (
+                    _merged_headers(_raw, _hdr_src, getattr(ns, "debug", False))
+                    if _raw is not None
+                    else _hdr_src
+                )
+            except Exception:
+                _hdrs = _hdr_src
+            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+        if getattr(ns, "debug", False):
+            traceback.print_exc()
         sys.stderr.write(str(e).rstrip() + "\n")
         return 1
     except (RuntimeError, AssertionError) as e:
+        if getattr(ns, "verbose", False):
+            _raw = locals().get("raw")
+            _hdr_src = locals().get("headers") or {}
+            try:
+                _hdrs = (
+                    _merged_headers(_raw, _hdr_src, getattr(ns, "debug", False))
+                    if _raw is not None
+                    else _hdr_src
+                )
+            except Exception:
+                _hdrs = _hdr_src
+            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+        if getattr(ns, "debug", False):
+            traceback.print_exc()
         sys.stderr.write(str(e).rstrip() + "\n")
         return 1
 
