@@ -51,6 +51,18 @@ class CircuitOpenError(RuntimeError):
     pass
 
 
+class HttpStatusError(RuntimeError):
+    def __init__(self, message: str, *, response: httpx.Response, body: bytes | None = None):
+        super().__init__(message)
+        self.response = response
+        self.status_code = response.status_code
+        try:
+            self.url = str(response.request.url)
+        except Exception:
+            self.url = str(response.url)
+        self.body = response.content if body is None else body
+
+
 @dataclass
 class CircuitBreaker:
     failure_threshold: int = 5
@@ -422,7 +434,7 @@ class SdetHttpClient:
                         elapsed_seconds=elapsed,
                     ),
                 )
-                raise RuntimeError("non-2xx response")
+                raise HttpStatusError("non-2xx response", response=r, body=r.content)
 
             data = r.json()
             if b is not None:
@@ -717,7 +729,7 @@ class SdetAsyncHttpClient:
                         elapsed_seconds=elapsed,
                     ),
                 )
-                raise RuntimeError("non-2xx response")
+                raise HttpStatusError("non-2xx response", response=r, body=r.content)
 
             data = r.json()
             if b is not None:

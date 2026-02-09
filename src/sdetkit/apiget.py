@@ -11,7 +11,13 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 
-from .netclient import CircuitOpenError, RetryPolicy, SdetHttpClient, _link_next_url
+from .netclient import (
+    CircuitOpenError,
+    HttpStatusError,
+    RetryPolicy,
+    SdetHttpClient,
+    _link_next_url,
+)
 
 
 def _die(msg: str) -> None:
@@ -51,6 +57,17 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     p.add_argument("--print-status", action="store_true", help="Print HTTP status code to stderr.")
     p.add_argument("--dump-headers", action="store_true", help="Print response headers to stderr.")
+    g = p.add_mutually_exclusive_group()
+    g.add_argument(
+        "--fail",
+        action="store_true",
+        help="Fail with rc=1 on HTTP status >= 400 and suppress body.",
+    )
+    g.add_argument(
+        "--fail-with-body",
+        action="store_true",
+        help="Fail like --fail but still write response body to stdout.",
+    )
     p.add_argument("--method", default="GET", help="HTTP method (default: GET).")
     p.add_argument(
         "--header",
@@ -296,6 +313,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     or _req_headers
                     or getattr(ns, "print_status", False)
                     or getattr(ns, "dump_headers", False)
+                    or getattr(ns, "fail", False)
+                    or getattr(ns, "fail_with_body", False)
                 )
 
                 if needs_raw:
@@ -308,6 +327,19 @@ def main(argv: Sequence[str] | None = None) -> int:
                         timeout=ns.timeout,
                     )
                     _print_status_and_headers(resp)
+                    if getattr(ns, "fail", False) or getattr(ns, "fail_with_body", False):
+                        if resp.status_code >= 400:
+                            if getattr(ns, "fail_with_body", False):
+                                body = resp.content
+                                out_path = getattr(ns, "out", None)
+                                if out_path:
+                                    pp = Path(str(out_path))
+                                    pp.parent.mkdir(parents=True, exist_ok=True)
+                                    pp.write_bytes(body)
+                                else:
+                                    sys.stdout.write(body.decode("utf-8", errors="replace"))
+                            sys.stderr.write(f"http error: {resp.status_code}\n")
+                            return 1
                     _check_status(resp)
                     data = resp.json()
 
@@ -319,19 +351,40 @@ def main(argv: Sequence[str] | None = None) -> int:
                         raise ValueError("expected dict or list")
 
                 else:
-                    if ns.expect == "dict":
-                        data = c.get_json_dict(ns.url, request_id=ns.request_id, timeout=ns.timeout)
-                    elif ns.expect == "list":
-                        data = c.get_json_list(ns.url, request_id=ns.request_id, timeout=ns.timeout)
-                    else:
-                        try:
+                    try:
+                        if ns.expect == "dict":
                             data = c.get_json_dict(
                                 ns.url, request_id=ns.request_id, timeout=ns.timeout
                             )
-                        except ValueError:
+                        elif ns.expect == "list":
                             data = c.get_json_list(
                                 ns.url, request_id=ns.request_id, timeout=ns.timeout
                             )
+                        else:
+                            try:
+                                data = c.get_json_dict(
+                                    ns.url, request_id=ns.request_id, timeout=ns.timeout
+                                )
+                            except ValueError:
+                                data = c.get_json_list(
+                                    ns.url, request_id=ns.request_id, timeout=ns.timeout
+                                )
+                    except HttpStatusError as e:
+                        if (
+                            getattr(ns, "fail", False) or getattr(ns, "fail_with_body", False)
+                        ) and e.status_code >= 400:
+                            if getattr(ns, "fail_with_body", False):
+                                body = e.body
+                                out_path = getattr(ns, "out", None)
+                                if out_path:
+                                    pp = Path(str(out_path))
+                                    pp.parent.mkdir(parents=True, exist_ok=True)
+                                    pp.write_bytes(body)
+                                else:
+                                    sys.stdout.write(body.decode("utf-8", errors="replace"))
+                            sys.stderr.write(f"http error: {e.status_code}\n")
+                            return 1
+                        raise
         out_s = json.dumps(data, sort_keys=True, indent=2 if ns.pretty else None) + "\n"
         out_path = getattr(ns, "out", None)
         if out_path:
