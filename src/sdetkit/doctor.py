@@ -78,6 +78,10 @@ def main(argv: list[str] | None = None) -> int:
             for fp in root.rglob("*"):
                 if not fp.is_file():
                     continue
+                if "__pycache__" in fp.parts:
+                    continue
+                if fp.suffix in (".pyc", ".pyo"):
+                    continue
                 try:
                     b = fp.read_bytes()
                 except OSError:
