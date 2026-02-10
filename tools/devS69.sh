@@ -50,6 +50,9 @@ case "$cmd" in
   push)
     git push --force-with-lease
     ;;
+  doctor)
+    PYTHONPATH=src python -m sdetkit.doctor --ascii
+    ;;
   *)
     echo "Usage: bash tools/devS69.sh {patch SPEC|fmt|test|all [SPEC]|amend|push}" >&2
     exit 2
