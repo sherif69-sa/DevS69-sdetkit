@@ -10,18 +10,24 @@ Production-style SDET utilities + bootcamp exercises: CLI tools, quality gates, 
 [![Security](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml)
 [![Dependency Audit](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependency-audit.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependency-audit.yml)
 [![Pages](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg?branch=main)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml)
-[![Release](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml)[![Dependabot Updates](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates)
+[![Release](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/release.yml)
+[![Dependabot Updates](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/dependabot/dependabot-updates)
 
 [![Latest Release](https://img.shields.io/github/v/release/sherif69-sa/sdet_bootcamp?sort=semver)](https://github.com/sherif69-sa/sdet_bootcamp/releases)
 [![License](https://img.shields.io/github/license/sherif69-sa/sdet_bootcamp)](LICENSE)
 
 </div>
 
+<!-- Optional: add a banner image at docs/assets/banner.png and link it here -->
+<!-- ![Banner](docs/assets/banner.png) -->
+
 ## What you get
 
 - CLI tools:
   - `sdetkit kv` / `kvcli`: parse `key=value` input and output JSON
   - `sdetkit apiget` / `apigetcli`: fetch JSON with pagination/retries/timeouts
+  - `sdetkit doctor`: repo health checks and diagnostics
+  - `tools/patch_harness.py`: deterministic spec-driven edits with strict --check
 - Quality gates (local + CI):
   - ruff (lint + format), mypy, pytest, coverage gate, docs build
 - Importable modules (easy to unit test):
@@ -62,8 +68,37 @@ apigetcli --help
 kvcli --help
 ```
 
+## Quick examples
+
+apiget:
+
+```bash
+./.venv/bin/sdetkit apiget https://example.com/api --expect dict
+./.venv/bin/sdetkit apiget https://example.com/items --expect list --paginate --max-pages 50
+./.venv/bin/sdetkit apiget https://example.com/items --expect any --header "X-Request-ID: abc-123"
+```
+
+doctor:
+
+```bash
+./.venv/bin/sdetkit doctor --ascii
+./.venv/bin/sdetkit doctor --all
+./.venv/bin/sdetkit doctor --all --json
+```
+
+patch_harness:
+
+```bash
+./.venv/bin/python tools/patch_harness.py spec.json --check
+./.venv/bin/python tools/patch_harness.py spec.json --dry-run
+./.venv/bin/python tools/patch_harness.py spec.json
+```
+
 ## Repo docs
 
+* CLI: docs/cli.md
+* Doctor: docs/doctor.md
+* Patch harness: docs/patch-harness.md
 * Project structure: docs/project-structure.md
 * Roadmap: docs/roadmap.md
 * Contributing: docs/contributing.md
@@ -91,20 +126,24 @@ MIT. See LICENSE.
 
 ## Release
 
-- Releases are triggered by pushing an annotated tag like vX.Y.Z.
-- The tag version must exactly match pyproject.toml [project].version (enforced in CI).
-- After releasing X.Y.Z, bump main to the next version before creating the next tag.
+* Releases are triggered by pushing an annotated tag like vX.Y.Z.
+* The tag version must exactly match pyproject.toml [project].version (enforced in CI).
+* After releasing X.Y.Z, bump main to the next version before creating the next tag.
 
 Example:
-- update pyproject.toml version
-- git tag -a vX.Y.Z -m "vX.Y.Z"
-- git push origin vX.Y.Z
+
+* update pyproject.toml version
+* git tag -a vX.Y.Z -m "vX.Y.Z"
+* git push origin vX.Y.Z
 
 ## Development (local)
 
-- Setup (creates .venv and installs deps):
-  - bash scripts/bootstrap.sh
-- Run quality gates:
-  - bash quality.sh cov
-- Or use Make targets:
-  - make cov
+* Setup (creates .venv and installs deps):
+
+  * bash scripts/bootstrap.sh
+* Run quality gates:
+
+  * bash quality.sh cov
+* Or use Make targets:
+
+  * make cov
