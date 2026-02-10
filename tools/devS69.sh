@@ -51,10 +51,10 @@ case "$cmd" in
     git push --force-with-lease
     ;;
   doctor)
-    PYTHONPATH=src python -m sdetkit.doctor --ascii
+    PYTHONPATH=src python3 -m sdetkit.doctor --ascii
     ;;
   check)
-    PYTHONPATH=src python -m sdetkit.doctor --ascii
+    PYTHONPATH=src python3 -m sdetkit.doctor --ascii
     pre-commit run ruff-format -a
     pre-commit run ruff -a
     python -m pytest -q
