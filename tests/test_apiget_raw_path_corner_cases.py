@@ -160,3 +160,29 @@ def test_data_stdin_binary_safe(monkeypatch, capsys):
     assert json.loads(out.out) == {"ok": True}
     assert out.err.strip() == ""
     assert seen["content"] == payload
+
+
+def test_expect_any_with_headers_makes_single_request(monkeypatch, capsys):
+    calls = {"n": 0}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        return httpx.Response(200, json=[1, 2, 3], request=request)
+
+    monkeypatch.setattr(httpx, "Client", _client_factory(handler))
+
+    rc = cli.main(
+        [
+            "apiget",
+            "https://example.test/x",
+            "--expect",
+            "any",
+            "--header",
+            "X-Test: ok",
+        ]
+    )
+    out = capsys.readouterr()
+    assert rc == 0
+    assert json.loads(out.out) == [1, 2, 3]
+    assert calls["n"] == 1
+    assert out.err.strip() == ""
