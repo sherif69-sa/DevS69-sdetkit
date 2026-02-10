@@ -1,3 +1,4 @@
+````markdown
 # SDET Bootcamp (sdetkit)
 
 A practical repo for production-style SDET workflows:
@@ -11,10 +12,13 @@ A practical repo for production-style SDET workflows:
 python3 -m venv .venv
 ./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
 bash scripts/check.sh all
-```
+````
 
 ## Pages
 
-- Project structure: project-structure.md
-- Roadmap: roadmap.md
-- Contributing: contributing.md
+* CLI: cli.md
+* Doctor: doctor.md
+* Patch harness: patch-harness.md
+* Project structure: project-structure.md
+* Roadmap: roadmap.md
+* Contributing: contributing.md
