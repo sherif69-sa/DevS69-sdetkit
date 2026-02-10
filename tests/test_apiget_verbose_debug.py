@@ -52,7 +52,19 @@ def test_verbose_prints_request_and_response_meta_redacting_secrets(monkeypatch,
     err = out.err
     low = err.lower()
 
+    for k in ["accept:", "accept-encoding:", "connection:", "host:", "user-agent:"]:
+        assert k not in low
+
     assert "http request:" in low
+
+    assert "http request curl:" in low
+
+    assert "curl" in low
+
+    assert "authorization: <redacted>" in low
+
+    assert "x-api-key: <redacted>" in low
+
     assert "http response:" in low
     assert "authorization" in low
     assert "x-api-key" in low
@@ -94,3 +106,28 @@ def test_verbose_does_not_print_traceback_on_transport_error(monkeypatch, capsys
     assert "Traceback" not in out.err
     assert "boom" in out.err
     assert "http request:" in out.err.lower(), out.err
+
+
+def test_verbose_keeps_user_agent_when_user_provided(monkeypatch, capsys):
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers.get("User-Agent") == "MINE"
+        return httpx.Response(200, json={"ok": True}, request=request)
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setattr(apiget.httpx, "Client", _client_factory(transport))
+
+    rc = cli.main(
+        [
+            "apiget",
+            "https://example.test/ok",
+            "--verbose",
+            "--header",
+            "User-Agent: MINE",
+            "--expect",
+            "any",
+        ]
+    )
+    out = capsys.readouterr()
+    assert rc == 0
+    low = out.err.lower()
+    assert "user-agent: mine" in low

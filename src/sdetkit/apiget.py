@@ -4,6 +4,7 @@ import argparse
 import base64
 import json
 import os
+import shlex
 import sys
 import traceback
 from collections.abc import Sequence
@@ -60,13 +61,37 @@ def _merged_headers(client, extra, debug: bool) -> dict[str, str]:
     return out
 
 
-def _verbose_request(method: str, url: str, headers: dict[str, str]) -> None:
+def _verbose_request(
+    method: str,
+    url: str,
+    headers: dict[str, str],
+    keep: set[str] | None = None,
+) -> None:
     sys.stderr.write(f"http request: {method} {url}\n")
-    items = list(headers.items())
-    items.sort(key=lambda kv: kv[0].lower())
-    for k, v in items:
-        vv = _redact_header_value(k, v)
-        sys.stderr.write(f"http request header: {k}: {vv}\n")
+
+    keep_lc = {k.strip().lower() for k in (keep or set())}
+    drop = {"accept", "accept-encoding", "connection", "host", "user-agent"}
+
+    items: list[tuple[str, str]] = []
+    for k, v in headers.items():
+        kl = k.strip().lower()
+        if kl in drop and kl not in keep_lc:
+            if kl == "user-agent":
+                vv = str(v).strip()
+                if vv.lower().startswith("python-httpx/"):
+                    continue
+                items.append((kl, v))
+                continue
+            continue
+        items.append((kl, v))
+
+    parts = ["curl", "-X", str(method), str(url)]
+    for k, v in sorted(items, key=lambda kv: kv[0]):
+        parts.extend(["-H", f"{k}: {_redact_header_value(k, v)}"])
+    sys.stderr.write("http request curl: " + " ".join(shlex.quote(x) for x in parts) + "\n")
+
+    for k, v in sorted(items, key=lambda kv: kv[0]):
+        sys.stderr.write(f"http request header: {k}: {_redact_header_value(k, v)}\n")
 
 
 def _verbose_response(resp) -> None:
@@ -174,25 +199,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     ns = p.parse_args(argv)
     _printed_req = {"v": False}
 
+    class _AtFileError(Exception):
+        pass
+
     def _read_at_file(v: str) -> str:
+        if not isinstance(v, str):
+            return v
         if not v.startswith("@"):
             return v
-        if v == "@-":
-            try:
-                return sys.stdin.read()
-            except Exception as err:
-                if getattr(ns, "debug", False):
-                    traceback.print_exc()
-                if getattr(ns, "verbose", False) and not _printed_req["v"]:
-                    _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), {})
-                raise ValueError("could not read stdin") from err
         path = v[1:]
+        if path == "-":
+            return sys.stdin.read()
+        if path == "":
+            raise _AtFileError("apiget: cannot read file: <empty path>")
         try:
             return Path(path).read_text(encoding="utf-8")
-        except FileNotFoundError as err:
-            raise ValueError(f"file not found: {path}") from err
-        except OSError as err:
-            raise ValueError(f"could not read file: {path}") from err
+        except FileNotFoundError:
+            raise _AtFileError("apiget: file not found: " + path) from None
+        except OSError:
+            raise _AtFileError("apiget: cannot read file: " + path) from None
 
     def _auth_to_header_value(v: str) -> str:
         v = v.strip()
@@ -245,7 +270,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         for _h in _hdrs:
             _h = str(_h)
             if _h.startswith("@"):
-                _txt = _read_at_file(_h)
+                try:
+                    _txt = _read_at_file(_h)
+                except _AtFileError as e:
+                    sys.stderr.write(str(e).rstrip() + "\n")
+                    return 1
                 for _ln in _txt.splitlines():
                     _ln = _ln.strip()
                     if _ln == "" or _ln.startswith("#"):
@@ -269,9 +298,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     _json_data = getattr(ns, "json_data", None)
     try:
         if _data is not None:
-            _data = _read_at_file(str(_data))
+            try:
+                _data = _read_at_file(str(_data))
+            except _AtFileError as e:
+                sys.stderr.write(str(e).rstrip() + "\n")
+                return 1
         if _json_data is not None:
-            _json_data = _read_at_file(str(_json_data))
+            try:
+                _json_data = _read_at_file(str(_json_data))
+            except _AtFileError as e:
+                sys.stderr.write(str(e).rstrip() + "\n")
+                return 1
     except ValueError as e:
         if getattr(ns, "verbose", False):
             _raw = locals().get("raw")
