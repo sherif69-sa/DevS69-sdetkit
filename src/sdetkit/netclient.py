@@ -197,6 +197,181 @@ class SdetHttpClient:
         self._clock = clock
         self._sleep = sleep
 
+    def request(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: dict[str, str] | None = None,
+        request_id: str | None = None,
+        content: bytes | None = None,
+        json: Any | None = None,
+        timeout: float | httpx.Timeout | None = None,
+        retry: RetryPolicy | None = None,
+        hook: Hook | None = None,
+        breaker: CircuitBreaker | None = None,
+    ) -> httpx.Response:
+        pol = retry or self._retry
+        if pol.retries < 1:
+            raise ValueError("retries must be >= 1")
+
+        hdrs, rid = _merge_headers(headers, self._trace_header, request_id)
+        h = hook or self._hook
+        b = breaker or self._breaker
+        start = self._clock()
+        last_err: BaseException | None = None
+
+        for attempt in range(pol.retries):
+            if b is not None:
+                b.allow(self._clock())
+
+            _emit(
+                h,
+                ClientEvent(
+                    type="attempt_start",
+                    url=url,
+                    attempt=attempt,
+                    retries=pol.retries,
+                    request_id=rid,
+                ),
+            )
+
+            try:
+                kwargs: dict[str, Any] = {}
+                if hdrs is not None:
+                    kwargs["headers"] = hdrs
+                if content is not None:
+                    kwargs["content"] = content
+                if json is not None:
+                    kwargs["json"] = json
+                r = self._client.request(method, url, timeout=timeout, **kwargs)
+            except httpx.TimeoutException as e:
+                if b is not None:
+                    b.record_failure(self._clock())
+                _emit(
+                    h,
+                    ClientEvent(
+                        type="attempt_error",
+                        url=url,
+                        attempt=attempt,
+                        retries=pol.retries,
+                        request_id=rid,
+                        error="timeout",
+                    ),
+                )
+                raise TimeoutError("request timed out") from e
+            except httpx.RequestError as e:
+                last_err = e
+                if b is not None:
+                    b.record_failure(self._clock())
+                _emit(
+                    h,
+                    ClientEvent(
+                        type="attempt_error",
+                        url=url,
+                        attempt=attempt,
+                        retries=pol.retries,
+                        request_id=rid,
+                        error="request_error",
+                    ),
+                )
+                if attempt < pol.retries - 1:
+                    d = _backoff_delay(
+                        attempt, pol.backoff_base, pol.backoff_factor, pol.backoff_jitter
+                    )
+                    if d > 0:
+                        _emit(
+                            h,
+                            ClientEvent(
+                                type="sleep",
+                                url=url,
+                                attempt=attempt,
+                                retries=pol.retries,
+                                request_id=rid,
+                                sleep_seconds=d,
+                            ),
+                        )
+                        self._sleep(d)
+                    continue
+                break
+
+            _emit(
+                h,
+                ClientEvent(
+                    type="attempt_response",
+                    url=url,
+                    attempt=attempt,
+                    retries=pol.retries,
+                    request_id=rid,
+                    status_code=r.status_code,
+                ),
+            )
+
+            if r.status_code == 429 and pol.retry_on_429 and attempt < pol.retries - 1:
+                if b is not None:
+                    b.record_failure(self._clock())
+                ra = _retry_after_seconds(r.headers)
+                d = (
+                    ra
+                    if ra is not None
+                    else _backoff_delay(
+                        attempt, pol.backoff_base, pol.backoff_factor, pol.backoff_jitter
+                    )
+                )
+                if d > 0:
+                    _emit(
+                        h,
+                        ClientEvent(
+                            type="sleep",
+                            url=url,
+                            attempt=attempt,
+                            retries=pol.retries,
+                            request_id=rid,
+                            sleep_seconds=d,
+                        ),
+                    )
+                    self._sleep(d)
+                continue
+
+            ok = 200 <= r.status_code < 300
+            if b is not None:
+                if ok:
+                    b.record_success()
+                else:
+                    b.record_failure(self._clock())
+
+            elapsed = self._clock() - start
+            _emit(
+                h,
+                ClientEvent(
+                    type="complete",
+                    url=url,
+                    attempt=attempt,
+                    retries=pol.retries,
+                    request_id=rid,
+                    ok=ok,
+                    elapsed_seconds=elapsed,
+                ),
+            )
+            return r
+
+        elapsed = self._clock() - start
+        _emit(
+            h,
+            ClientEvent(
+                type="complete",
+                url=url,
+                attempt=pol.retries - 1,
+                retries=pol.retries,
+                request_id=rid,
+                ok=False,
+                elapsed_seconds=elapsed,
+            ),
+        )
+        if last_err is not None:
+            raise RuntimeError("request failed") from last_err
+        raise RuntimeError("request failed")
+
     def get_json_dict(
         self,
         url: str,
@@ -287,6 +462,30 @@ class SdetHttpClient:
             cur = nxt
 
         raise RuntimeError("pagination limit exceeded")
+
+    def get_json_any(
+        self,
+        url: str,
+        *,
+        headers: dict[str, str] | None = None,
+        request_id: str | None = None,
+        timeout: float | httpx.Timeout | None = None,
+        retry: RetryPolicy | None = None,
+        hook: Hook | None = None,
+        breaker: CircuitBreaker | None = None,
+    ) -> dict | list:
+        r, data, rid = self._request_json(
+            url,
+            headers=headers,
+            request_id=request_id,
+            timeout=timeout,
+            retry=retry,
+            hook=hook,
+            breaker=breaker,
+        )
+        if not isinstance(data, (dict, list)):
+            raise ValueError("expected json object or array")
+        return data
 
     def _request_json(
         self,

@@ -202,7 +202,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     class _AtFileError(Exception):
         pass
 
-    def _read_at_file(v: str) -> str:
+    def _read_at_file_text(v: str) -> str:
         if not isinstance(v, str):
             return v
         if not v.startswith("@"):
@@ -214,6 +214,29 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise _AtFileError("apiget: cannot read file: <empty path>")
         try:
             return Path(path).read_text(encoding="utf-8")
+        except FileNotFoundError:
+            raise _AtFileError("apiget: file not found: " + path) from None
+        except (OSError, UnicodeError):
+            raise _AtFileError("apiget: cannot read file: " + path) from None
+
+    def _read_at_file_bytes(v: str) -> bytes | str:
+        if not isinstance(v, str):
+            return v
+        if not v.startswith("@"):
+            return v
+        path = v[1:]
+        if path == "-":
+            try:
+                b = sys.stdin.buffer.read()
+                if isinstance(b, (bytes, bytearray)):
+                    return bytes(b)
+            except Exception:
+                pass
+            return sys.stdin.read()
+        if path == "":
+            raise _AtFileError("apiget: cannot read file: <empty path>")
+        try:
+            return Path(path).read_bytes()
         except FileNotFoundError:
             raise _AtFileError("apiget: file not found: " + path) from None
         except OSError:
@@ -271,7 +294,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             _h = str(_h)
             if _h.startswith("@"):
                 try:
-                    _txt = _read_at_file(_h)
+                    _txt = _read_at_file_text(_h)
                 except _AtFileError as e:
                     sys.stderr.write(str(e).rstrip() + "\n")
                     return 1
@@ -299,13 +322,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         if _data is not None:
             try:
-                _data = _read_at_file(str(_data))
+                _data = _read_at_file_bytes(str(_data))
             except _AtFileError as e:
                 sys.stderr.write(str(e).rstrip() + "\n")
                 return 1
         if _json_data is not None:
             try:
-                _json_data = _read_at_file(str(_json_data))
+                _json_data = _read_at_file_text(str(_json_data))
             except _AtFileError as e:
                 sys.stderr.write(str(e).rstrip() + "\n")
                 return 1
@@ -329,7 +352,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     if _data is not None and _json_data is not None:
         _die("use only one of: --data, --json")
     if _data is not None:
-        _req_content = str(_data).encode("utf-8")
+        if isinstance(_data, (bytes, bytearray)):
+            _req_content = bytes(_data)
+        else:
+            _req_content = str(_data).encode("utf-8")
     if _json_data is not None:
         try:
             _req_json = json.loads(str(_json_data))
@@ -461,7 +487,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                     _req_method != "GET"
                     or _req_content is not None
                     or _req_json is not None
-                    or _req_headers
                     or getattr(ns, "print_status", False)
                     or getattr(ns, "dump_headers", False)
                     or getattr(ns, "fail", False)
@@ -469,10 +494,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
 
                 if needs_raw:
-                    resp = raw.request(
+                    resp = c.request(
                         _req_method,
                         ns.url,
                         headers=_req_headers or None,
+                        request_id=ns.request_id,
                         content=_req_content,
                         json=_req_json,
                         timeout=ns.timeout,
@@ -505,33 +531,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                     try:
                         if ns.expect == "dict":
                             data = c.get_json_dict(
-                                ns.url, request_id=ns.request_id, timeout=ns.timeout
+                                ns.url,
+                                headers=_req_headers or None,
+                                request_id=ns.request_id,
+                                timeout=ns.timeout,
                             )
                         elif ns.expect == "list":
                             data = c.get_json_list(
-                                ns.url, request_id=ns.request_id, timeout=ns.timeout
+                                ns.url,
+                                headers=_req_headers or None,
+                                request_id=ns.request_id,
+                                timeout=ns.timeout,
                             )
                         else:
-                            try:
-                                data = c.get_json_dict(
-                                    ns.url, request_id=ns.request_id, timeout=ns.timeout
-                                )
-                            except ValueError:
-                                if getattr(ns, "debug", False):
-                                    traceback.print_exc()
-                                if getattr(ns, "verbose", False) and not _printed_req["v"]:
-                                    _verbose_request(
-                                        getattr(ns, "method", "GET"),
-                                        getattr(ns, "url", ""),
-                                        _merged_headers(
-                                            raw,
-                                            locals().get("headers"),
-                                            getattr(ns, "debug", False),
-                                        ),
-                                    )
-                                data = c.get_json_list(
-                                    ns.url, request_id=ns.request_id, timeout=ns.timeout
-                                )
+                            data = c.get_json_any(
+                                ns.url,
+                                headers=_req_headers or None,
+                                request_id=ns.request_id,
+                                timeout=ns.timeout,
+                            )
+
                     except HttpStatusError as e:
                         if getattr(ns, "debug", False):
                             traceback.print_exc()
