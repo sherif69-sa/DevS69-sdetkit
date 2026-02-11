@@ -158,3 +158,22 @@ def test_repo_check_ignores_egg_info_metadata(tmp_path: Path) -> None:
 
     rc = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json"])
     assert rc == 0
+
+
+def test_repo_check_skips_venv_prefix_and_dist_build_dirs(tmp_path: Path) -> None:
+    venv = tmp_path / ".venv-smoke" / "bin"
+    venv.mkdir(parents=True)
+    (venv / "python").write_bytes(b"\xff\xfe")
+
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "artifact.whl").write_bytes(b"\x80\x03")
+
+    build = tmp_path / "build"
+    build.mkdir()
+    (build / "tmp.bin").write_bytes(b"\x00\xff")
+
+    (tmp_path / "clean.txt").write_text("clean\n", encoding="utf-8")
+
+    rc = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json"])
+    assert rc == 0
