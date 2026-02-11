@@ -10,13 +10,13 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="grid cards" markdown>
 
-- **Reliable local + CI workflows**  
+- **Reliable local + CI workflows**
   Move from laptop validation to pipeline checks with consistent scripts and quality gates.
 
-- **Focused command-line experience**  
+- **Focused command-line experience**
   Use purpose-built commands for health checks, API calls, cassette workflows, and patch-safe operations.
 
-- **Designed for maintainability**  
+- **Designed for maintainability**
   Organized modules, explicit docs, and test coverage make extension safer and faster.
 
 </div>
@@ -38,13 +38,13 @@ bash scripts/check.sh all
 
 <div class="grid cards" markdown>
 
-- [**CLI**](cli.md)  
+- [**CLI**](cli.md)
   Command reference and practical usage patterns.
 
-- [**Doctor**](doctor.md)  
+- [**Doctor**](doctor.md)
   Environment and repository diagnostics with actionable recommendations.
 
-- [**Repo audit**](repo-audit.md)  
+- [**Repo audit**](repo-audit.md)
   Safety-focused checks and guided remediations.
 
 </div>
@@ -53,13 +53,13 @@ bash scripts/check.sh all
 
 <div class="grid cards" markdown>
 
-- [**API**](api.md)  
+- [**API**](api.md)
   Programmatic interfaces and API usage flows.
 
-- [**n8n integration**](n8n.md)  
+- [**n8n integration**](n8n.md)
   Automation patterns for workflow orchestration.
 
-- [**Patch harness**](patch-harness.md)  
+- [**Patch harness**](patch-harness.md)
   Controlled patch application and validation.
 
 </div>
@@ -68,10 +68,10 @@ bash scripts/check.sh all
 
 <div class="grid cards" markdown>
 
-- [**Project structure**](project-structure.md)  
+- [**Project structure**](project-structure.md)
   Repository layout and module roles.
 
-- [**Design**](design.md)  
+- [**Design**](design.md)
   Engineering decisions, principles, and trade-offs.
 
 - [**Contributing**](contributing.md) • [**Security**](security.md) • [**Releasing**](releasing.md)
