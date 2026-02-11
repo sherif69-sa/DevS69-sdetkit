@@ -1,0 +1,32 @@
+name: Repo Audit
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: repo-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repo-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run sdetkit repo audit action
+        uses: ./.github/actions/repo-audit
+        with:
+          path: .
+          profile: default
+          fail_on: ${{ github.event_name == 'pull_request' && 'warn' || 'error' }}
+          write_summary: true
+          output_json: true
+          upload_json: true
+          upload_sarif: true

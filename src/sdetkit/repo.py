@@ -837,6 +837,15 @@ def _report_payload(
 
 
 def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
+    def _sarif_uri(path: str) -> str:
+        normalized = path.replace("\\", "/")
+        while normalized.startswith("./"):
+            normalized = normalized[2:]
+        if re.match(r"^[A-Za-z]:/", normalized):
+            normalized = normalized[3:]
+        normalized = normalized.lstrip("/")
+        return normalized or "."
+
     rules: dict[str, dict[str, Any]] = {}
     results: list[dict[str, Any]] = []
     for item in payload["findings"]:
@@ -850,24 +859,31 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
         results.append(
             {
                 "ruleId": rid,
-                "level": "error" if item["severity"] == "error" else "warning",
+                "level": (
+                    "error"
+                    if item["severity"] == "error"
+                    else "warning"
+                    if item["severity"] == "warn"
+                    else "note"
+                ),
                 "message": {"text": item["message"]},
                 "locations": [
                     {
                         "physicalLocation": {
-                            "artifactLocation": {"uri": item["path"]},
+                            "artifactLocation": {"uri": _sarif_uri(str(item.get("path") or "."))},
                             "region": {"startLine": item["line"], "startColumn": item["column"]},
                         }
                     }
                 ],
             }
         )
+    rules_list = [rules[key] for key in sorted(rules)]
     return {
         "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
         "version": "2.1.0",
         "runs": [
             {
-                "tool": {"driver": {"name": "sdetkit", "rules": list(rules.values())}},
+                "tool": {"driver": {"name": "sdetkit", "rules": rules_list}},
                 "results": results,
             }
         ],

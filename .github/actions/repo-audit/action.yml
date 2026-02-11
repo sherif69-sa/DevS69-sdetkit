@@ -1,0 +1,201 @@
+name: sdetkit repo audit
+description: Run sdetkit repo audit with SARIF upload, step summary, and JSON artifact options.
+
+inputs:
+  path:
+    description: Repository path to audit.
+    default: "."
+  profile:
+    description: Audit profile.
+    default: "default"
+  fail_on:
+    description: Severity threshold that fails the step.
+    default: "warn"
+  python_version:
+    description: Python version used for audit tooling.
+    default: "3.12"
+  upload_sarif:
+    description: Upload SARIF report to GitHub code scanning.
+    default: "true"
+  sarif_path:
+    description: Path to write SARIF output.
+    default: "sdetkit-audit.sarif.json"
+  write_summary:
+    description: Append a markdown summary to GITHUB_STEP_SUMMARY.
+    default: "true"
+  output_json:
+    description: Write JSON report.
+    default: "true"
+  json_path:
+    description: Path to write JSON output.
+    default: "sdetkit-audit.json"
+  upload_json:
+    description: Upload JSON report as a workflow artifact.
+    default: "true"
+  json_artifact_name:
+    description: Artifact name for uploaded JSON report.
+    default: "sdetkit-audit-json"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python_version }}
+
+    - name: Install sdetkit
+      shell: bash
+      env:
+        AUDIT_PATH: ${{ inputs.path }}
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+
+        if python -m pip install sdetkit; then
+          exit 0
+        fi
+
+        if [ -f "$GITHUB_WORKSPACE/pyproject.toml" ]; then
+          echo "PyPI install unavailable; falling back to editable install from GITHUB_WORKSPACE." >&2
+          python -m pip install -e "$GITHUB_WORKSPACE"
+          exit 0
+        fi
+
+        if [ -f "$AUDIT_PATH/pyproject.toml" ]; then
+          echo "PyPI install unavailable; falling back to editable install from audit path." >&2
+          python -m pip install -e "$AUDIT_PATH"
+          exit 0
+        fi
+
+        echo "Failed to install sdetkit from PyPI, and no local pyproject.toml was found for fallback install." >&2
+        echo "Publish sdetkit, configure an internal index, or run this action in a repo containing sdetkit source." >&2
+        exit 1
+
+    - name: Run sdetkit repo audit
+      shell: bash
+      env:
+        AUDIT_PATH: ${{ inputs.path }}
+        AUDIT_PROFILE: ${{ inputs.profile }}
+        AUDIT_FAIL_ON: ${{ inputs.fail_on }}
+        AUDIT_SARIF_PATH: ${{ inputs.sarif_path }}
+        AUDIT_OUTPUT_JSON: ${{ inputs.output_json }}
+        AUDIT_JSON_PATH: ${{ inputs.json_path }}
+      run: |
+        set -euo pipefail
+        mkdir -p .sdetkit-action
+
+        sdetkit repo audit "$AUDIT_PATH" \
+          --profile "$AUDIT_PROFILE" \
+          --format text \
+          --fail-on none > .sdetkit-action/audit.txt
+
+        sdetkit repo audit "$AUDIT_PATH" \
+          --profile "$AUDIT_PROFILE" \
+          --format json \
+          --output .sdetkit-action/audit-summary.json \
+          --fail-on none \
+          --force
+
+        if [ "$AUDIT_OUTPUT_JSON" = "true" ]; then
+          sdetkit repo audit "$AUDIT_PATH" \
+            --profile "$AUDIT_PROFILE" \
+            --format json \
+            --output "$AUDIT_JSON_PATH" \
+            --fail-on none \
+            --force
+        fi
+
+        sdetkit repo audit "$AUDIT_PATH" \
+          --profile "$AUDIT_PROFILE" \
+          --format sarif \
+          --output "$AUDIT_SARIF_PATH" \
+          --fail-on "$AUDIT_FAIL_ON" \
+          --force
+
+    - name: Write step summary
+      if: ${{ inputs.write_summary == 'true' }}
+      shell: bash
+      env:
+        AUDIT_FAIL_ON: ${{ inputs.fail_on }}
+        AUDIT_PROFILE: ${{ inputs.profile }}
+        AUDIT_UPLOAD_SARIF: ${{ inputs.upload_sarif }}
+        AUDIT_OUTPUT_JSON: ${{ inputs.output_json }}
+        AUDIT_UPLOAD_JSON: ${{ inputs.upload_json }}
+        AUDIT_JSON_ARTIFACT_NAME: ${{ inputs.json_artifact_name }}
+      run: |
+        set -euo pipefail
+        python - <<'PY'
+        import json
+        import os
+        from pathlib import Path
+
+        summary_path = Path(os.environ["GITHUB_STEP_SUMMARY"])
+        payload = json.loads(Path(".sdetkit-action/audit-summary.json").read_text(encoding="utf-8"))
+        counts = payload.get("summary", {}).get("counts", {})
+        findings = payload.get("findings", [])
+
+        lines = [
+            "## sdetkit repo audit",
+            "",
+            f"- Profile: `{os.environ['AUDIT_PROFILE']}`",
+            f"- Fail policy: `{os.environ['AUDIT_FAIL_ON']}`",
+            f"- Findings: {payload.get('summary', {}).get('findings', 0)}",
+            (
+                "- Severity counts: "
+                f"info={counts.get('info', 0)}, "
+                f"warn={counts.get('warn', 0)}, "
+                f"error={counts.get('error', 0)}"
+            ),
+            "",
+            "### Top findings",
+        ]
+
+        if findings:
+            lines.append("| Severity | Check | Code | Path | Message |")
+            lines.append("| --- | --- | --- | --- | --- |")
+            for item in findings[:10]:
+                sev = str(item.get("severity", "")).replace("|", "\\|")
+                check = str(item.get("check", "")).replace("|", "\\|")
+                code = str(item.get("code", "")).replace("|", "\\|")
+                path = str(item.get("path", "")).replace("|", "\\|")
+                message = str(item.get("message", "")).replace("|", "\\|")
+                lines.append(f"| {sev} | {check} | {code} | `{path}` | {message} |")
+        else:
+            lines.append("No findings.")
+
+        lines.append("")
+        lines.append("### Notes")
+        if os.environ["AUDIT_UPLOAD_SARIF"] == "true":
+            lines.append("- SARIF uploaded to **Security → Code scanning alerts**.")
+        else:
+            lines.append("- SARIF upload disabled.")
+
+        if os.environ["AUDIT_OUTPUT_JSON"] == "true" and os.environ["AUDIT_UPLOAD_JSON"] == "true":
+            lines.append(
+                f"- JSON report uploaded as artifact: `{os.environ['AUDIT_JSON_ARTIFACT_NAME']}`."
+            )
+        elif os.environ["AUDIT_OUTPUT_JSON"] == "true":
+            lines.append("- JSON report generated locally but artifact upload is disabled.")
+        else:
+            lines.append("- JSON report generation disabled.")
+
+        with summary_path.open("a", encoding="utf-8") as fh:
+            fh.write("\n".join(lines) + "\n")
+        PY
+
+    - name: Upload SARIF
+      if: ${{ inputs.upload_sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif_path }}
+
+    - name: Upload JSON report artifact
+      if: ${{ inputs.upload_json == 'true' && inputs.output_json == 'true' }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: ${{ inputs.json_artifact_name }}
+        path: ${{ inputs.json_path }}

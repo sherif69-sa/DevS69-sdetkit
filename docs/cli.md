@@ -79,7 +79,7 @@ Tool-specific notes:
 
 ## `repo`
 
-- `sdetkit repo audit [PATH] [--format text|json] [--out PATH] [--force]`
+- `sdetkit repo audit [PATH] [--profile default|enterprise] [--format text|json|sarif] [--output PATH] [--fail-on none|warn|error] [--force]`
 - `sdetkit repo check [PATH] [--format text|json|md] [--out PATH] [--fail-on LEVEL] [--min-score N]`
 - `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
 - `sdetkit repo init [PATH] [--profile default|enterprise] [--dry-run] [--apply] [--force] [--diff]`
@@ -97,3 +97,8 @@ Init examples:
 - `sdetkit repo init --apply --profile enterprise`
 
 See: repo-init.md
+
+GitHub Action integration:
+
+- Use `.github/actions/repo-audit` for CI summary + SARIF + JSON artifact workflows.
+- See: github-action.md

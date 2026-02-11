@@ -71,11 +71,40 @@ def test_repo_audit_sarif_has_required_fields(tmp_path: Path) -> None:
 
     sarif = json.loads(result.stdout)
     assert sarif["version"] == "2.1.0"
-    assert sarif["runs"][0]["tool"]["driver"]["name"] == "sdetkit"
-    first_result = sarif["runs"][0]["results"][0]
+    run = sarif["runs"][0]
+    assert run["tool"]["driver"]["name"] == "sdetkit"
+    rule_ids = {rule["id"] for rule in run["tool"]["driver"]["rules"]}
+    first_result = run["results"][0]
     assert "ruleId" in first_result
+    assert first_result["ruleId"] in rule_ids
     assert "text" in first_result["message"]
-    assert first_result["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
+    uri = first_result["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
+    assert uri
+    assert not uri.startswith("/")
+
+
+def test_repo_audit_sarif_normalizes_absolute_like_paths_to_relative(tmp_path: Path) -> None:
+    from sdetkit import repo
+
+    payload = {
+        "findings": [
+            {
+                "check": "repo_audit",
+                "code": "missing_repo_hygiene_item",
+                "severity": "error",
+                "message": "required repository hygiene item is missing: LICENSE",
+                "path": "/tmp/example/LICENSE",
+                "line": 1,
+                "column": 1,
+            }
+        ]
+    }
+
+    sarif = repo._to_sarif(payload)
+    uri = sarif["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"][
+        "uri"
+    ]
+    assert uri == "tmp/example/LICENSE"
 
 
 def test_repo_audit_fail_on_exit_codes(tmp_path: Path) -> None:

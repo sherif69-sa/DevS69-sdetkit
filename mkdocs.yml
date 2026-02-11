@@ -56,6 +56,7 @@ nav:
       - Repo init: repo-init.md
       - Patch harness: patch-harness.md
   - Integrations:
+      - GitHub Action: github-action.md
       - n8n integration: n8n.md
       - API: api.md
   - Engineering reference:
