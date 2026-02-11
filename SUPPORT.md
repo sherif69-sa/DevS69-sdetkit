@@ -11,7 +11,6 @@ For questions, licensing inquiries, or feature requests, please open an issue wi
 ## Contact
 
 For private inquiries (including commercial licensing permissions), use one of the channels below:
-- LinkedIn: add your maintainer profile URL here
-- Email: add your maintainer email address here
+- LinkedIn: https://www.linkedin.com/in/sherif-atef-b1077a124/
+- Email: sherif.atef6300@gmail.com
 
-> Maintainers: update these contact entries with your real LinkedIn and Gmail details.
