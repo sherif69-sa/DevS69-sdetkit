@@ -117,3 +117,33 @@ def test_patch_check_is_deterministic_for_same_inputs(tmp_path: Path, capsys):
 
     assert rc1 == rc2 == 1
     assert out1 == out2
+
+
+def test_patch_missing_spec_version_defaults_to_v1(tmp_path: Path):
+    (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
+    spec = {
+        "files": [{"path": "a.txt", "ops": [{"op": "insert_after", "pattern": r"^A$", "text": "B\\n"}]}],
+    }
+    (tmp_path / "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+
+    old = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        rc = patch.main(["spec.json", "--check"])
+    finally:
+        os.chdir(old)
+
+    assert rc == 1
+
+
+def test_patch_spec_size_limit(tmp_path: Path):
+    (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
+    spec = {
+        "spec_version": 1,
+        "files": [{"path": "a.txt", "ops": [{"op": "insert_after", "pattern": r"^A$", "text": "B\\n"}]}],
+    }
+    payload = json.dumps(spec)
+    (tmp_path / "spec.json").write_text(payload, encoding="utf-8")
+
+    rc = patch.main([str(tmp_path / "spec.json"), "--max-spec-bytes", "8"])
+    assert rc == 2

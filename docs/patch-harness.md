@@ -12,6 +12,7 @@ sdetkit patch spec.json
 sdetkit patch spec.json --dry-run
 sdetkit patch spec.json --check
 sdetkit patch spec.json --root . --report-json patch-report.json
+sdetkit patch spec.json --max-spec-bytes 1048576
 ```
 
 Backward compatibility wrapper (still supported):
@@ -22,7 +23,7 @@ python tools/patch_harness.py spec.json
 
 ## Spec format (versioned)
 
-A spec is a JSON file with `spec_version: 1` and a `files` section.
+A spec is a JSON file with `spec_version: 1` and a `files` section. For backward compatibility, omitted `spec_version` is treated as `1`.
 
 List form:
 
@@ -74,6 +75,7 @@ Dict form (also supported):
   - `--max-bytes-per-file`
   - `--max-total-bytes-changed`
   - `--max-op-count`
+  - `--max-spec-bytes`
 
 ## Indentation token
 

@@ -47,6 +47,8 @@ Examples:
 
 Exit codes: `0` success/no-op, `1` changes required in `--check`, `2` invalid/unsafe/error.
 
+Safety limits include `--max-files`, `--max-bytes-per-file`, `--max-total-bytes-changed`, `--max-op-count`, and `--max-spec-bytes`.
+
 Backward compatibility wrapper still works:
 
 - `python tools/patch_harness.py spec.json --check`

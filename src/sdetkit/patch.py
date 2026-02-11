@@ -17,6 +17,7 @@ _DEFAULT_MAX_FILES = 200
 _DEFAULT_MAX_BYTES_PER_FILE = 2 * 1024 * 1024
 _DEFAULT_MAX_TOTAL_BYTES_CHANGED = 5 * 1024 * 1024
 _DEFAULT_MAX_OP_COUNT = 5000
+_DEFAULT_MAX_SPEC_BYTES = 1024 * 1024
 _MAX_PATTERN_LENGTH = 2000
 _MAX_MATCHES = 1000
 
@@ -50,10 +51,12 @@ def _normalize_spec_strings(x: Any) -> Any:
     return x
 
 
-def _load_json(path: str) -> Any:
+def _load_json(path: str) -> tuple[Any, int]:
     if path == "-":
-        return json.loads(sys.stdin.read())
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+        raw = sys.stdin.read()
+        return json.loads(raw), len(raw.encode("utf-8"))
+    raw = Path(path).read_text(encoding="utf-8")
+    return json.loads(raw), len(raw.encode("utf-8"))
 
 
 def _read_text_raw(path: Path) -> str:
@@ -632,6 +635,14 @@ def _resolve_target(root: Path, rel_path: str, allow_symlinks: bool) -> Path:
     return target
 
 
+def _count_changed_bytes(old: str, new: str) -> int:
+    changed = 0
+    for line in difflib.ndiff(old.splitlines(True), new.splitlines(True)):
+        if line.startswith("+ ") or line.startswith("- "):
+            changed += len(line[2:].encode("utf-8"))
+    return changed
+
+
 def _validate_op(op: Any) -> dict[str, Any]:
     if not isinstance(op, dict):
         raise PatchSpecError("spec.files[].ops[]: expected object")
@@ -741,7 +752,8 @@ def _validate_spec(spec: Any) -> list[dict[str, Any]]:
         extra = ", ".join(sorted(set(spec.keys()) - {"spec_version", "files"}))
         raise PatchSpecError(f"spec: unknown keys: {extra}")
 
-    if spec.get("spec_version") != 1:
+    version = spec.get("spec_version", 1)
+    if version != 1:
         raise PatchSpecError("spec.spec_version: expected integer value 1")
 
     return _normalize_files(spec)
@@ -794,6 +806,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--max-bytes-per-file", type=int, default=_DEFAULT_MAX_BYTES_PER_FILE)
     ap.add_argument("--max-total-bytes-changed", type=int, default=_DEFAULT_MAX_TOTAL_BYTES_CHANGED)
     ap.add_argument("--max-op-count", type=int, default=_DEFAULT_MAX_OP_COUNT)
+    ap.add_argument("--max-spec-bytes", type=int, default=_DEFAULT_MAX_SPEC_BYTES)
     ap.add_argument("--report-json", default=None, help="Write operation report to path or '-' for stdout")
     ns = ap.parse_args(argv)
 
@@ -805,6 +818,7 @@ def main(argv: list[str] | None = None) -> int:
             "path_validation",
             "symlink_policy",
             "resource_limits",
+            "spec_size_limit",
             "atomic_write",
         ],
         "status_code": 2,
@@ -819,12 +833,17 @@ def main(argv: list[str] | None = None) -> int:
             raise PatchSpecError("--max-total-bytes-changed must be > 0")
         if ns.max_op_count <= 0:
             raise PatchSpecError("--max-op-count must be > 0")
+        if ns.max_spec_bytes <= 0:
+            raise PatchSpecError("--max-spec-bytes must be > 0")
 
         root = Path(ns.root).resolve(strict=True)
         if not root.is_dir():
             raise PatchSpecError("--root must resolve to a directory")
 
-        spec = _normalize_spec_strings(_load_json(ns.spec))
+        raw_spec, spec_bytes = _load_json(ns.spec)
+        if spec_bytes > ns.max_spec_bytes:
+            raise PatchSpecError(f"spec exceeds max bytes ({ns.max_spec_bytes})")
+        spec = _normalize_spec_strings(raw_spec)
         files = _validate_spec(spec)
 
         total_ops = sum(len(item["ops"]) for item in files)
@@ -848,7 +867,7 @@ def main(argv: list[str] | None = None) -> int:
                 continue
 
             any_change = True
-            total_changed_bytes += abs(len(new.encode("utf-8")) - len(old.encode("utf-8")))
+            total_changed_bytes += _count_changed_bytes(old, new)
             if total_changed_bytes > ns.max_total_bytes_changed:
                 raise PatchSpecError(f"changes exceed max total bytes ({ns.max_total_bytes_changed})")
 
