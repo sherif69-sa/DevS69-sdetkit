@@ -150,7 +150,9 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
         tools = ", ".join(str(x) for x in data["missing"])
         recs.append(f"Install missing developer tools: {tools}.")
     if data.get("non_ascii"):
-        recs.append("Replace non-ASCII artifacts in src/tools with UTF-8 text or move binaries outside scanned paths.")
+        recs.append(
+            "Replace non-ASCII artifacts in src/tools with UTF-8 text or move binaries outside scanned paths."
+        )
     if data.get("ci_missing"):
         missing = ", ".join(str(x) for x in data["ci_missing"])
         recs.append(f"Add missing CI workflows: {missing}.")
@@ -165,7 +167,9 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
         recs.append("Commit or stash pending changes before release/CI validation.")
 
     if not recs:
-        recs.append("No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality.")
+        recs.append(
+            "No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality."
+        )
     return recs
 
 
@@ -221,7 +225,9 @@ def main(argv: list[str] | None = None) -> int:
         check_ok = not bool(missing)
         data["checks"]["dev_tools"] = {
             "ok": check_ok,
-            "summary": "all required developer tools are available" if check_ok else "some developer tools are missing",
+            "summary": "all required developer tools are available"
+            if check_ok
+            else "some developer tools are missing",
         }
         score_items.append(check_ok)
         if not check_ok:
@@ -235,7 +241,9 @@ def main(argv: list[str] | None = None) -> int:
         check_ok = not bool(bad)
         data["checks"]["ascii"] = {
             "ok": check_ok,
-            "summary": "only ASCII content found under src/tools" if check_ok else "non-ASCII bytes detected under src/tools",
+            "summary": "only ASCII content found under src/tools"
+            if check_ok
+            else "non-ASCII bytes detected under src/tools",
         }
         score_items.append(check_ok)
         if not check_ok:
