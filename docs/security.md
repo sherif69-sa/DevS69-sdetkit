@@ -45,6 +45,8 @@ The repository includes always-on security maintenance so it behaves like an aut
 - **Dependabot auto-merge** is enabled for **minor/patch** updates after checks pass.
 - **Secret scanning bot** runs daily using gitleaks and uploads SARIF to GitHub code scanning.
 - **Weekly maintenance issue** is refreshed automatically with checklist items and links.
+- **OSV vulnerability scanning** runs daily and uploads SARIF into code scanning.
+- **Pre-commit hooks auto-update** runs weekly and opens a maintenance PR.
 
 Use the GitHub Security tab to review alerts:
 

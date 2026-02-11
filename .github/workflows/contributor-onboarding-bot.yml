@@ -20,7 +20,7 @@ jobs:
               '### 👋 Premium contribution quick-start',
               '',
               'To keep this PR at premium quality, run:',
-              '- `python -m ruff format --check .`
+              '- `python -m ruff format --check .`',
               '- `python -m pre_commit run -a`',
               '- `bash quality.sh cov`',
               '- `python -m build && python -m twine check dist/*`',
@@ -28,7 +28,7 @@ jobs:
               '',
               'Need bot help?',
               '- comment `/doctor` for diagnostics',
-              '- comment `/check` to run validation checks
+              '- comment `/check` to run validation checks',
               '- comment `/quality` to run the full coverage gate',
               '- comment `/hint` for a compact quality checklist',
               '',
