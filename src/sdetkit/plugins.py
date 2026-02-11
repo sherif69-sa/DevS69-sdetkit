@@ -64,7 +64,7 @@ class AuditRule(Protocol):
     def meta(self) -> RuleMeta: ...
 
     def run(self, repo_root: Path, context: dict[str, Any]) -> list[Finding]:
-        ...
+        pass
 
 
 class Fixer(Protocol):
