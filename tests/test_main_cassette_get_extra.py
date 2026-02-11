@@ -58,7 +58,9 @@ def test_cassette_get_record_refuses_overwrite_without_force(tmp_path: Path, cap
 def test_cassette_get_replay_load_error_returns_2(monkeypatch: pytest.MonkeyPatch, capsys) -> None:
     import sdetkit.cassette as cassette_mod
 
-    monkeypatch.setattr(cassette_mod.Cassette, "load", lambda _p: (_ for _ in ()).throw(ValueError("boom")))
+    monkeypatch.setattr(
+        cassette_mod.Cassette, "load", lambda _p: (_ for _ in ()).throw(ValueError("boom"))
+    )
     rc = mainmod._cassette_get(["https://example.invalid", "--replay", "x.json"])
 
     err = capsys.readouterr().err
@@ -80,7 +82,9 @@ def test_cassette_get_plain_mode_writes_json(monkeypatch: pytest.MonkeyPatch, ca
 
 
 def test_main_cassette_get_exception_path(monkeypatch: pytest.MonkeyPatch, capsys) -> None:
-    monkeypatch.setattr(mainmod, "_cassette_get", lambda _argv: (_ for _ in ()).throw(RuntimeError("boom")))
+    monkeypatch.setattr(
+        mainmod, "_cassette_get", lambda _argv: (_ for _ in ()).throw(RuntimeError("boom"))
+    )
 
     old_argv = sys.argv[:]
     try:

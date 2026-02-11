@@ -20,6 +20,7 @@ jobs:
       (
         github.event.comment.body == '/doctor' || startsWith(github.event.comment.body, '/doctor ') ||
         github.event.comment.body == '/check'  || startsWith(github.event.comment.body, '/check ') ||
+        github.event.comment.body == '/quality' || startsWith(github.event.comment.body, '/quality ') ||
         github.event.comment.body == '/hint'   || startsWith(github.event.comment.body, '/hint ')
       )
     runs-on: ubuntu-latest
@@ -71,10 +72,18 @@ jobs:
           PYTHONPATH=src python -m sdetkit.doctor --ascii
           python -m pytest -q
 
+      - name: Run quality gate
+        if: steps.pr.outputs.cmd == '/quality'
+        continue-on-error: true
+        id: quality
+        run: |
+          bash quality.sh cov 2>&1 | tee quality.log
+
       - uses: actions/github-script@v7
         if: always()
         with:
           script: |
+            const fs = require('fs');
             const prNumber = Number('${{ steps.pr.outputs.number }}');
             const cmd = '${{ steps.pr.outputs.cmd }}';
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
@@ -83,22 +92,41 @@ jobs:
 
             if (cmd === '/doctor') {
               try {
-                const fs = require('fs');
                 const data = JSON.parse(fs.readFileSync('doctor.json', 'utf8'));
                 const items = (data.non_ascii || []).map(p => `- \`${p}\``).join('\n') || '- (none)';
                 body += `\nNon-ASCII files:\n${items}\n`;
               } catch (e) {
-                body += `\nCould not read doctor.json.\n`;
+                body += '\nCould not read doctor.json.\n';
               }
+            }
+
+            if (cmd === '/quality') {
+              let coverage = 'unknown';
+              try {
+                const log = fs.readFileSync('quality.log', 'utf8');
+                const match = log.match(/Total coverage: ([0-9]+\.[0-9]+)%/g);
+                if (match && match.length > 0) {
+                  coverage = match[match.length - 1].replace('Total coverage: ', '');
+                }
+                if ('${{ steps.quality.outcome }}' !== 'success') {
+                  body = `❌ Bot finished \`${cmd}\` with failures.\n\nWorkflow run: ${runUrl}\n`;
+                }
+              } catch (e) {
+                body += '\nCould not read quality.log.\n';
+              }
+              body += `\nCoverage (last reported): ${coverage}\n`;
+              body += '- Suggested local fix: `python -m pip install -r requirements-test.txt -e . && bash quality.sh cov`\n';
             }
 
             if (cmd === '/hint') {
               body = `### Premium quality hints\n` +
-                `- Run: \`pre-commit run -a\`\n` +
+                `- Run: \`python -m ruff format --check .\`\n` +
+                `- Run: \`python -m pre_commit run -a\`\n` +
                 `- Run: \`bash quality.sh cov\`\n` +
                 `- Run: \`python -m build && python -m twine check dist/*\`\n` +
                 `- Run docs gate for docs changes: \`mkdocs build\`\n` +
                 `- Ensure PR summary includes: What, Why, Risks, Tests.\n` +
+                `- Bot shortcuts: \`/doctor\`, \`/check\`, \`/quality\`, \`/hint\`\n` +
                 `- Reference guide: \`docs/premium-quality-gate.md\`\n\n` +
                 `Workflow run: ${runUrl}`;
             }

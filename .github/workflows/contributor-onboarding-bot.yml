@@ -20,14 +20,16 @@ jobs:
               '### 👋 Premium contribution quick-start',
               '',
               'To keep this PR at premium quality, run:',
-              '- `pre-commit run -a`',
+              '- `python -m ruff format --check .`
+              '- `python -m pre_commit run -a`',
               '- `bash quality.sh cov`',
               '- `python -m build && python -m twine check dist/*`',
               '- `mkdocs build` (when docs are touched)',
               '',
               'Need bot help?',
               '- comment `/doctor` for diagnostics',
-              '- comment `/check` to run validation checks',
+              '- comment `/check` to run validation checks
+              '- comment `/quality` to run the full coverage gate',
               '- comment `/hint` for a compact quality checklist',
               '',
               'Reference: `docs/premium-quality-gate.md`',

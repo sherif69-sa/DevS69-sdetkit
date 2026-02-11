@@ -16,7 +16,8 @@ Every change should be:
 Run these from repo root:
 
 ```bash
-pre-commit run -a
+python -m ruff format --check .
+python -m pre_commit run -a
 bash quality.sh cov
 python -m build
 python -m twine check dist/*
@@ -44,6 +45,7 @@ The repository supports helper comment commands on PRs:
 
 - `/doctor` — run doctor checks and return a report.
 - `/check` — run validation checks.
+- `/quality` — run full coverage gate (`bash quality.sh cov`) and report coverage.
 - `/hint` — post premium guideline hints and high-impact next actions.
 
 Use these commands to quickly diagnose PR quality issues and unblock reviews.

@@ -16,7 +16,8 @@ python -m pip install -e .[dev,test,docs]
 
 ```bash
 pre-commit install
-pre-commit run -a
+python -m ruff format --check .
+python -m pre_commit run -a
 ```
 
 ## 3) Run quality gates locally
@@ -24,7 +25,8 @@ pre-commit run -a
 Use the same commands expected by CI:
 
 ```bash
-pre-commit run -a
+python -m ruff format --check .
+python -m pre_commit run -a
 bash quality.sh cov
 python -m build
 python -m twine check dist/*
