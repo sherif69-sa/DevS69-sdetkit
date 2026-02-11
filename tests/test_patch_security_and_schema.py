@@ -197,6 +197,7 @@ def test_patch_error_path_still_writes_report_when_requested(tmp_path: Path):
     assert data["status_code"] == 2
     assert data["files_touched"] == []
 
+
 def test_patch_main_and_report_failures_are_both_reported(tmp_path: Path, capsys):
     spec = {"files": []}
     (tmp_path / "spec.json").write_text(json.dumps(spec), encoding="utf-8")

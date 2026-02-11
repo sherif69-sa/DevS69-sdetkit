@@ -918,7 +918,8 @@ def main(argv: list[str] | None = None) -> int:
         except OSError as e:
             report_error = e
             rc = 2
-            report["status_code"] = 2
+
+    report["status_code"] = rc
 
     if main_error is not None:
         print(f"error: {main_error}", file=sys.stderr)
