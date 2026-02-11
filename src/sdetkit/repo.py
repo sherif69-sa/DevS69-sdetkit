@@ -163,8 +163,8 @@ def run_checks(root: Path) -> list[Finding]:
             )
 
         lines = text.splitlines(keepends=True)
-        for idx, line in enumerate(lines, start=1):
-            content = line.rstrip("\r\n")
+        for idx, text_row in enumerate(lines, start=1):
+            content = text_row.rstrip("\r\n")
             stripped = content.rstrip(" \t")
             if content != stripped:
                 findings.append(
@@ -207,9 +207,9 @@ def run_checks(root: Path) -> list[Finding]:
                     )
                 )
 
-        for idx, line in enumerate(text.splitlines(), start=1):
+        for idx, text_line in enumerate(text.splitlines(), start=1):
             for label, pattern in SECRET_PATTERNS:
-                if pattern.search(line):
+                if pattern.search(text_line):
                     findings.append(
                         Finding(
                             "secret_scan",
