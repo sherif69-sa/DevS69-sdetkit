@@ -61,7 +61,8 @@ class Fix:
 
 class AuditRule(Protocol):
     @property
-    def meta(self) -> RuleMeta: ...
+    def meta(self) -> RuleMeta:
+        raise NotImplementedError
 
     def run(self, repo_root: Path, context: dict[str, Any]) -> list[Finding]:
         pass
