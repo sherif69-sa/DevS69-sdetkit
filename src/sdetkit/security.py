@@ -55,8 +55,8 @@ def redact_json(value: object, *, enabled: bool, keys: set[str]) -> object:
         return value
     if isinstance(value, dict):
         out: dict[object, object] = {}
-        for k in sorted(value.keys(), key=str):
             v = value[k]
+        for k in sorted(value.keys(), key=str):
             if isinstance(k, str) and is_sensitive_key(k, keys):
                 out[k] = "<redacted>"
             else:
@@ -82,6 +82,9 @@ def redact_url(url: str, *, enabled: bool, keys: set[str]) -> str:
     q = []
     for k, v in parse_qsl(split.query, keep_blank_values=True):
         q.append((k, "<redacted>" if is_sensitive_key(k, keys) else v))
+    return urlunsplit(
+        (split.scheme, split.netloc, split.path, urlencode(q, doseq=True), split.fragment)
+    )
     return urlunsplit((split.scheme, split.netloc, split.path, urlencode(q, doseq=True), split.fragment))
 
 
