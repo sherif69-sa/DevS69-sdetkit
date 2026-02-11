@@ -483,6 +483,7 @@ def _apply_baseline(findings: list[Finding], baseline: list[dict[str, Any]]) -> 
                 if dt.date.fromisoformat(exp) < today:
                     continue
             except ValueError:
+                # Invalid expires format: treat as non-expiring and keep the item active.
                 pass
         active.append(item)
 
