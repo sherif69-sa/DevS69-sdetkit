@@ -26,6 +26,8 @@ jobs:
           python -m pip install -U pip
           python -m pip install pip-audit
 
-      - name: Audit dependencies (blocking)
+      - name: Audit dependencies (blocking, baseline aware)
         run: |
-          pip-audit -r requirements-test.txt -r requirements-docs.txt
+          python -m pip install -e .
+          pip-audit --format json -o pip-audit-report.json -r requirements-test.txt -r requirements-docs.txt
+          python .github/scripts/check_pip_audit_baseline.py

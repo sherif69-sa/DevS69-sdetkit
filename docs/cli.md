@@ -42,8 +42,10 @@ Examples:
 
 - `sdetkit patch spec.json --check`
 - `sdetkit patch spec.json --dry-run`
-- `sdetkit patch spec.json --root .`
+- `sdetkit patch spec.json --root /workspace/myrepo`
 - `sdetkit patch spec.json --report-json patch-report.json`
+
+`--root` defaults to the current Git repository root (when inside a repo) and falls back to the current working directory otherwise.
 
 Exit codes: `0` success/no-op, `1` changes required in `--check`, `2` invalid/unsafe/error.
 

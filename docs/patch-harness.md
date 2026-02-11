@@ -11,7 +11,7 @@ Preferred (official):
 sdetkit patch spec.json
 sdetkit patch spec.json --dry-run
 sdetkit patch spec.json --check
-sdetkit patch spec.json --root . --report-json patch-report.json
+sdetkit patch spec.json --root /workspace/myrepo --report-json patch-report.json
 sdetkit patch spec.json --max-spec-bytes 1048576
 ```
 
@@ -55,8 +55,9 @@ Dict form (also supported):
 ```
 
 - `path` is relative to `--root`.
-- absolute paths and `..` are rejected.
-- default symlink policy is deny (`--allow-symlinks` to opt in).
+- default `--root`: git top-level directory when available, else current working directory.
+- absolute paths, `..`, empty paths, control bytes, doubled separators, and backslash separators are rejected.
+- symlinks are always denied for both target files and parent directories.
 - unknown keys in the spec or operation objects are rejected.
 
 ## Exit code contract
@@ -101,3 +102,13 @@ Example:
   ]
 }
 ```
+
+
+## SECURITY
+
+The patch harness is root-confined by design:
+
+- every path is validated as a strict relative path under `--root`.
+- realpath confinement prevents symlink and traversal escapes.
+- if a target file or any parent directory is a symlink, the run fails safely with exit code `2`.
+- writes are atomic (`fsync` + `os.replace`) to avoid partial file corruption.

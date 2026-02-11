@@ -11,6 +11,7 @@ description = "Developer productivity and QA automation toolkit: CLI utilities, 
 license = "MIT"
 keywords = ["sdet", "testing", "qa", "automation", "cli", "devtools", "quality-gates"]
 authors = [{ name = "SDET Bootcamp contributors" }]
+maintainers = [{ name = "SDET Bootcamp maintainers" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -30,10 +31,12 @@ license-files = ["LICENSE"]
 
 
 [project.urls]
-Source = "https://github.com/sherif69-sa/sdet_bootcamp"
+Homepage = "https://github.com/sherif69-sa/sdet_bootcamp"
+Repository = "https://github.com/sherif69-sa/sdet_bootcamp"
+Documentation = "https://github.com/sherif69-sa/sdet_bootcamp/tree/main/docs"
 Issues = "https://github.com/sherif69-sa/sdet_bootcamp/issues"
 Changelog = "https://github.com/sherif69-sa/sdet_bootcamp/blob/main/CHANGELOG.md"
-Docs = "https://github.com/sherif69-sa/sdet_bootcamp/tree/main/docs"
+
 [project.optional-dependencies]
 test = [
   "hypothesis",

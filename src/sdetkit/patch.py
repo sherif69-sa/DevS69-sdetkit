@@ -7,6 +7,7 @@ import errno
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
@@ -607,7 +608,9 @@ def _normalize_rel_path(raw_path: str) -> str:
         raise PatchSpecError("spec.files[].path: expected non-empty string")
     if "\x00" in raw_path:
         raise PatchSpecError("spec.files[].path: contains NUL byte")
-    path = raw_path.replace("\\", "/")
+    if "\\" in raw_path:
+        raise PatchSpecError(f"unsafe path rejected: {raw_path}")
+    path = raw_path
     if path.startswith("/") or path.startswith("//"):
         raise PatchSpecError(f"unsafe path rejected: {raw_path}")
     if re.match(r"^[A-Za-z]:", path):
@@ -617,26 +620,49 @@ def _normalize_rel_path(raw_path: str) -> str:
         raise PatchSpecError(f"unsafe path rejected: {raw_path}")
     if any(part in ("", ".", "..") for part in pp.parts):
         raise PatchSpecError(f"unsafe path rejected: {raw_path}")
+    if "//" in path:
+        raise PatchSpecError(f"unsafe path rejected: {raw_path}")
+    if any(ord(ch) < 32 for ch in path):
+        raise PatchSpecError(f"unsafe path rejected: {raw_path}")
     return pp.as_posix()
 
 
-def _resolve_target(root: Path, rel_path: str, allow_symlinks: bool) -> Path:
+def _resolve_target(root: Path, rel_path: str) -> Path:
     root_real = root.resolve(strict=True)
     target = root_real / Path(rel_path)
 
     cursor = root_real
     for part in Path(rel_path).parts[:-1]:
         cursor = cursor / part
-        if cursor.exists() and cursor.is_symlink() and not allow_symlinks:
+        if cursor.exists() and cursor.is_symlink():
             raise PatchSpecError(f"symlink parent rejected: {rel_path}")
 
-    if target.exists() and target.is_symlink() and not allow_symlinks:
+    if target.exists() and target.is_symlink():
         raise PatchSpecError(f"symlink target rejected: {rel_path}")
 
     resolved = target.resolve(strict=False)
     if resolved != root_real and root_real not in resolved.parents:
         raise PatchSpecError(f"path escapes root: {rel_path}")
     return target
+
+
+def _default_root() -> Path:
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode == 0:
+            out = proc.stdout.strip()
+            if out:
+                return Path(out)
+    except OSError:
+        # If git is not available or the command fails due to an OS error,
+        # fall back to the current working directory.
+        return Path.cwd()
+    return Path.cwd()
 
 
 def _count_changed_bytes(old: str, new: str) -> int:
@@ -804,8 +830,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("spec", help="json spec path, or '-' for stdin")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--root", default=".", help="Project root confinement path")
-    ap.add_argument("--allow-symlinks", action="store_true")
+    ap.add_argument(
+        "--root",
+        default=None,
+        help="Project root confinement path (default: git root, else current directory)",
+    )
     ap.add_argument("--max-files", type=int, default=_DEFAULT_MAX_FILES)
     ap.add_argument("--max-bytes-per-file", type=int, default=_DEFAULT_MAX_BYTES_PER_FILE)
     ap.add_argument("--max-total-bytes-changed", type=int, default=_DEFAULT_MAX_TOTAL_BYTES_CHANGED)
@@ -822,7 +851,7 @@ def main(argv: list[str] | None = None) -> int:
         "safety_checks": [
             "spec_version",
             "path_validation",
-            "symlink_policy",
+            "symlink_policy_deny_all",
             "resource_limits",
             "spec_size_limit",
             "atomic_write",
@@ -842,7 +871,8 @@ def main(argv: list[str] | None = None) -> int:
         if ns.max_spec_bytes <= 0:
             raise PatchSpecError("--max-spec-bytes must be > 0")
 
-        root = Path(ns.root).resolve(strict=True)
+        root = _default_root() if ns.root is None else Path(ns.root)
+        root = root.resolve(strict=True)
         if not root.is_dir():
             raise PatchSpecError("--root must resolve to a directory")
 
@@ -863,7 +893,7 @@ def main(argv: list[str] | None = None) -> int:
         total_changed_bytes = 0
 
         for f in files:
-            path = _resolve_target(root, f["path"], allow_symlinks=ns.allow_symlinks)
+            path = _resolve_target(root, f["path"])
             if not path.exists():
                 raise PatchSpecError(f"target file does not exist: {f['path']}")
             old, new = apply_ops(path, f["ops"])
