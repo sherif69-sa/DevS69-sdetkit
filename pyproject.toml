@@ -8,7 +8,7 @@ version = "0.2.8"
 requires-python = ">=3.11"
 readme = "README.md"
 description = "Developer productivity and QA automation toolkit: CLI utilities, quality gates, and testable modules."
-license = "MIT"
+license = "LicenseRef-Proprietary"
 keywords = ["sdet", "testing", "qa", "automation", "cli", "devtools", "quality-gates"]
 authors = [{ name = "DevS69 contributors" }]
 maintainers = [{ name = "DevS69 maintainers" }]

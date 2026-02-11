@@ -56,7 +56,7 @@
 - [Contributing](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 - [Support](SUPPORT.md)
-- [MIT License](LICENSE)
+- [Proprietary License](LICENSE)
 
 ### Engineering standards
 - [Quality Playbook](QUALITY_PLAYBOOK.md)
@@ -159,4 +159,4 @@ bash scripts/shell.sh
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Proprietary (All Rights Reserved). See [LICENSE](LICENSE).
