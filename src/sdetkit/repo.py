@@ -14,7 +14,7 @@ import sys
 import tomllib as _tomllib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .atomicio import atomic_write_text
 from .plugins import (
@@ -1665,7 +1665,7 @@ def _load_repo_audit_config(root: Path, config_path: Path | None) -> dict[str, A
     if not candidate.exists():
         return {}
     try:
-        data = _tomllib.loads(candidate.read_text(encoding="utf-8"))
+        data = cast(Any, _tomllib).loads(candidate.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise RepoAuditConfigError(f"unable to parse repo audit config: {exc}") from exc
     if not isinstance(data, dict):
