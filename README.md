@@ -16,6 +16,21 @@ Production-style SDET toolkit and exercises with a strong focus on **clarity**, 
 
 </div>
 
+## 🚀 Experience hub (start here)
+
+Pick the path that matches what you want to do right now:
+
+| Goal | Open this | Why it helps |
+|---|---|---|
+| Get running in minutes | [Quick start](#quick-start) | Fast environment setup + first quality run |
+| Learn the repo quickly | [Repo tour](docs/repo-tour.md) | Visual orientation map + role-based walkthrough |
+| Use the CLI productively | [CLI guide](docs/cli.md) | Practical command examples |
+| Check repo health | [Doctor docs](docs/doctor.md) | Diagnostics and recommendations |
+| Run safe repo checks and fixes | [Repo audit](docs/repo-audit.md) | Enterprise-focused safety profile |
+| Contribute confidently | [Contributing guide](CONTRIBUTING.md) | Branching, quality gates, and expectations |
+
+> 🌐 Prefer a polished docs UI? Open the docs site via **GitHub Pages** from the workflow badge above or build it locally with `mkdocs serve`.
+
 ## Why this repo exists
 
 This repo is designed to be easy to navigate for new contributors and practical for daily engineering work:
@@ -27,10 +42,10 @@ This repo is designed to be easy to navigate for new contributors and practical 
 
 ## 30-second orientation
 
-- Start with **this README** for setup and command snippets.
-- Read **`docs/project-structure.md`** for the architecture map.
-- Use **`docs/cli.md`** and **`docs/doctor.md`** for day-to-day command usage.
-- Check **`CONTRIBUTING.md`** before opening a pull request.
+1. Start with **this README** for setup and command snippets.
+2. Jump to **[`docs/repo-tour.md`](docs/repo-tour.md)** for a role-based navigation map.
+3. Use **[`docs/cli.md`](docs/cli.md)** and **[`docs/doctor.md`](docs/doctor.md)** for daily command usage.
+4. Check **[`CONTRIBUTING.md`](CONTRIBUTING.md)** before opening a pull request.
 
 ## Quick start
 
@@ -76,6 +91,7 @@ bash scripts/shell.sh
 ## Documentation index
 
 - `docs/index.md` — docs homepage
+- `docs/repo-tour.md` — visual orientation + role-based quick links
 - `docs/project-structure.md` — architecture + file/folder map
 - `docs/cli.md` — CLI command guide
 - `docs/doctor.md` — repository health diagnostics

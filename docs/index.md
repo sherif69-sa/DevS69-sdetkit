@@ -6,6 +6,12 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 </div>
 
+<div class="quick-jump" markdown>
+
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+
+</div>
+
 ## Why teams use this project
 
 <div class="grid cards" markdown>
@@ -30,7 +36,7 @@ bash scripts/check.sh all
 ```
 
 !!! tip "Choose your starting point"
-    New to the project? Start with **CLI**, then run **Doctor**, then review **Repo audit** for best-practice checks.
+    New to the project? Start with **Repo tour**, then run **CLI**, then execute **Doctor**.
 
 ## Navigate by goal
 
@@ -67,6 +73,9 @@ bash scripts/check.sh all
 ### Understand architecture and contribute
 
 <div class="grid cards" markdown>
+
+- [**Repo tour**](repo-tour.md)
+  Visual orientation map and role-based pathways.
 
 - [**Project structure**](project-structure.md)
   Repository layout and module roles.
