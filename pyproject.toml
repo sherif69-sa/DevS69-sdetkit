@@ -35,18 +35,23 @@ Issues = "https://github.com/sherif69-sa/sdet_bootcamp/issues"
 Changelog = "https://github.com/sherif69-sa/sdet_bootcamp/blob/main/CHANGELOG.md"
 Docs = "https://github.com/sherif69-sa/sdet_bootcamp/tree/main/docs"
 [project.optional-dependencies]
+test = [
+  "hypothesis",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-cov"
+]
+docs = [
+  "mkdocs==1.6.1",
+  "mkdocs-material==9.7.1"
+]
 dev = [
   "build",
-  "hypothesis",
-  "mkdocs==1.6.1",
-  "mkdocs-material==9.7.1",
   "mypy",
   "mutmut",
   "pre-commit",
-  "pytest",
-  "pytest-asyncio",
-  "pytest-cov",
-  "ruff"
+  "ruff",
+  "sdetkit[test,docs]"
 ]
 
 [tool.setuptools]

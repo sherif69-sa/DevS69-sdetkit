@@ -42,7 +42,10 @@ Examples:
 
 - `sdetkit patch spec.json --check`
 - `sdetkit patch spec.json --dry-run`
-- `sdetkit patch spec.json`
+- `sdetkit patch spec.json --root .`
+- `sdetkit patch spec.json --report-json patch-report.json`
+
+Exit codes: `0` success/no-op, `1` changes required in `--check`, `2` invalid/unsafe/error.
 
 Backward compatibility wrapper still works:
 

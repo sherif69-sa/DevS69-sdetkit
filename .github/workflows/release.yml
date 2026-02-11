@@ -77,6 +77,23 @@ jobs:
           python -m build
           python -m twine check dist/*
 
+      - name: Wheel smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --force-reinstall dist/*.whl
+          sdetkit --help
+
+      - name: Publish to PyPI
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m twine upload dist/*
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
 
 from sdetkit import patch
 
@@ -100,7 +99,7 @@ def test_patch_main_errors_on_unknown_operation(tmp_path: Path):
     f.write_text("hi\n", encoding="utf-8")
     spec = tmp_path / "spec.json"
     spec.write_text(
-        '{"files":[{"path":"x.txt","ops":[{"op":"nope"}]}]}',
+        '{"spec_version":1,"files":[{"path":"x.txt","ops":[{"op":"nope"}]}]}',
         encoding="utf-8",
     )
 
@@ -109,7 +108,7 @@ def test_patch_main_errors_on_unknown_operation(tmp_path: Path):
         import os
 
         os.chdir(tmp_path)
-        with pytest.raises(SystemExit):
-            patch.main(["spec.json"])
+        rc = patch.main(["spec.json"])
+        assert rc == 2
     finally:
         os.chdir(old)
