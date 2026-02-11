@@ -13,6 +13,9 @@ import tempfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from .atomicio import atomic_write_text
+from .security import SecurityError, safe_path
+
 INDENT_TOKEN = "<<INDENT>>"
 _DEFAULT_MAX_FILES = 200
 _DEFAULT_MAX_BYTES_PER_FILE = 2 * 1024 * 1024
@@ -629,7 +632,10 @@ def _normalize_rel_path(raw_path: str) -> str:
 
 def _resolve_target(root: Path, rel_path: str) -> Path:
     root_real = root.resolve(strict=True)
-    target = root_real / Path(rel_path)
+    try:
+        target = safe_path(root_real, rel_path)
+    except SecurityError as exc:
+        raise PatchSpecError(str(exc)) from exc
 
     cursor = root_real
     for part in Path(rel_path).parts[:-1]:
@@ -817,12 +823,15 @@ def apply_ops(path: Path, ops: list[dict[str, Any]]) -> tuple[str, str]:
     return old, new
 
 
-def _write_report(path: str, report: dict[str, Any]) -> None:
+def _write_report(path: str, report: dict[str, Any], *, force: bool = False) -> None:
     payload = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if path == "-":
         sys.stdout.write(payload)
         return
-    Path(path).write_text(payload, encoding="utf-8")
+    p = safe_path(Path.cwd(), path, allow_absolute=True)
+    if p.exists() and not force:
+        raise PatchSpecError("refusing to overwrite existing report file (use --force)")
+    atomic_write_text(p, payload)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -843,6 +852,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument(
         "--report-json", default=None, help="Write operation report to path or '-' for stdout"
     )
+    ap.add_argument("--force", action="store_true", help="Allow overwriting report output files.")
     ns = ap.parse_args(argv)
 
     report: dict[str, Any] = {
@@ -936,7 +946,7 @@ def main(argv: list[str] | None = None) -> int:
         report["status_code"] = rc
 
     if ns.report_json:
-        _write_report(ns.report_json, report)
+        _write_report(ns.report_json, report, force=bool(ns.force))
 
     return rc
 

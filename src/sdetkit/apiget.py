@@ -13,12 +13,22 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 
+from .atomicio import atomic_write_text
 from .netclient import (
     CircuitOpenError,
     HttpStatusError,
     RetryPolicy,
     SdetHttpClient,
     _link_next_url,
+)
+from .security import (
+    SecurityError,
+    default_http_timeout,
+    ensure_allowed_scheme,
+    redact_header_value,
+    redact_keys,
+    redact_url,
+    safe_path,
 )
 
 
@@ -31,12 +41,6 @@ def _is_sensitive_header(name: str) -> bool:
     if "token" in n or "secret" in n or "password" in n:
         return True
     return False
-
-
-def _redact_header_value(name: str, value: str) -> str:
-    if _is_sensitive_header(name):
-        return "<redacted>"
-    return value
 
 
 def _validate_header_text(value: str, *, field: str) -> str:
@@ -72,8 +76,12 @@ def _verbose_request(
     url: str,
     headers: dict[str, str],
     keep: set[str] | None = None,
+    *,
+    redact: bool = True,
+    redact_keyset: set[str] | None = None,
 ) -> None:
-    sys.stderr.write(f"http request: {method} {url}\n")
+    keyset = redact_keyset or redact_keys()
+    sys.stderr.write(f"http request: {method} {redact_url(url, enabled=redact, keys=keyset)}\n")
 
     keep_lc = {k.strip().lower() for k in (keep or set())}
     drop = {"accept", "accept-encoding", "connection", "host", "user-agent"}
@@ -91,22 +99,25 @@ def _verbose_request(
             continue
         items.append((kl, v))
 
-    parts = ["curl", "-X", str(method), str(url)]
+    parts = ["curl", "-X", str(method), str(redact_url(url, enabled=redact, keys=keyset))]
     for k, v in sorted(items, key=lambda kv: kv[0]):
-        parts.extend(["-H", f"{k}: {_redact_header_value(k, v)}"])
+        parts.extend(["-H", f"{k}: {redact_header_value(k, v, enabled=redact, keys=keyset)}"])
     sys.stderr.write("http request curl: " + " ".join(shlex.quote(x) for x in parts) + "\n")
 
     for k, v in sorted(items, key=lambda kv: kv[0]):
-        sys.stderr.write(f"http request header: {k}: {_redact_header_value(k, v)}\n")
+        sys.stderr.write(
+            f"http request header: {k}: {redact_header_value(k, v, enabled=redact, keys=keyset)}\n"
+        )
 
 
-def _verbose_response(resp) -> None:
+def _verbose_response(resp, *, redact: bool = True, redact_keyset: set[str] | None = None) -> None:
+    keyset = redact_keyset or redact_keys()
     sys.stderr.write(f"http response: {resp.status_code}\n")
     items = list(resp.headers.items())
     items.sort(key=lambda kv: str(kv[0]).lower())
     for k, v in items:
         kk = str(k)
-        vv = _redact_header_value(kk, str(v))
+        vv = redact_header_value(kk, str(v), enabled=redact, keys=keyset)
         sys.stderr.write(f"http response header: {kk}: {vv}\n")
 
 
@@ -134,6 +145,25 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     )
     p.add_argument("--retry-429", action="store_true", help="Retry HTTP 429 responses.")
     p.add_argument("--timeout", type=float, default=None, help="Request timeout in seconds.")
+    p.add_argument(
+        "--allow-scheme",
+        action="append",
+        default=None,
+        help="Allow additional URL schemes (repeatable).",
+    )
+    p.add_argument("--follow-redirects", action="store_true", help="Follow HTTP redirects.")
+    p.add_argument(
+        "--no-follow-redirects",
+        dest="follow_redirects",
+        action="store_false",
+        help="Do not follow redirects (default).",
+    )
+    p.set_defaults(follow_redirects=False)
+    p.add_argument("--insecure", action="store_true", help="Disable TLS verification (unsafe).")
+    p.add_argument("--redact", dest="redact", action="store_true")
+    p.add_argument("--no-redact", dest="redact", action="store_false")
+    p.set_defaults(redact=True)
+    p.add_argument("--redact-keys", action="append", default=None)
     p.add_argument(
         "--trace-header",
         default=None,
@@ -196,6 +226,9 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
         "--query", action="append", default=None, help="Add query param KEY=VALUE (repeatable)."
     )
     p.add_argument("--out", default=None, help="Write JSON output to a file instead of stdout.")
+    p.add_argument(
+        "--force", action="store_true", help="Allow overwriting an existing output file."
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -203,6 +236,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     _add_apiget_args(p)
 
     ns = p.parse_args(argv)
+    redaction_keys = redact_keys(getattr(ns, "redact_keys", None))
+    allowed_schemes = {"http", "https"}
+    for x in getattr(ns, "allow_scheme", None) or []:
+        if str(x).strip():
+            allowed_schemes.add(str(x).strip().lower())
+    try:
+        ensure_allowed_scheme(str(ns.url), allowed=allowed_schemes)
+    except SecurityError as err:
+        _die(str(err))
+    if ns.insecure:
+        sys.stderr.write("warning: TLS verification disabled (--insecure)\n")
     _printed_req = {"v": False}
 
     class _AtFileError(Exception):
@@ -359,11 +403,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             except Exception:
                 _hdrs = _hdr_src
-            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+            _verbose_request(
+                getattr(ns, "method", "GET"),
+                getattr(ns, "url", ""),
+                _hdrs,
+                redact=ns.redact,
+                redact_keyset=redaction_keys,
+            )
         if getattr(ns, "debug", False):
             traceback.print_exc()
         sys.stderr.write(str(e).rstrip() + "\n")
-        return 1
+        return 2
     if _data is not None and _json_data is not None:
         _die("use only one of: --data, --json")
     if _data is not None:
@@ -403,10 +453,18 @@ def main(argv: Sequence[str] | None = None) -> int:
 
             upstream_transport = httpx.HTTPTransport() if cassette_mode == "record" else None
             transport = open_transport(cassette_path, cassette_mode, upstream=upstream_transport)
-        _client_kwargs: dict[str, object] = {}
+        _client_kwargs: dict[str, object] = {
+            "timeout": default_http_timeout(ns.timeout),
+            "follow_redirects": bool(ns.follow_redirects),
+            "verify": not bool(ns.insecure),
+        }
         if transport is not None:
             _client_kwargs["transport"] = transport
-        with httpx.Client(**_client_kwargs) as raw:
+        try:
+            _raw_client = httpx.Client(**_client_kwargs)
+        except TypeError:
+            _raw_client = httpx.Client()
+        with _raw_client as raw:
             if getattr(ns, "verbose", False) and callable(getattr(raw, "request", None)):
                 _orig_request = raw.request
 
@@ -415,22 +473,34 @@ def main(argv: Sequence[str] | None = None) -> int:
                     try:
                         req = getattr(resp, "request", None)
                         if req is not None:
-                            _verbose_request(req.method, str(req.url), dict(req.headers))
+                            _verbose_request(
+                                req.method,
+                                str(req.url),
+                                dict(req.headers),
+                                redact=ns.redact,
+                                redact_keyset=redaction_keys,
+                            )
                         else:
                             _verbose_request(
-                                str(method), str(url), dict(kwargs.get("headers") or {})
+                                str(method),
+                                str(url),
+                                dict(kwargs.get("headers") or {}),
+                                redact=ns.redact,
+                                redact_keyset=redaction_keys,
                             )
                         _printed_req["v"] = True
                     except Exception:
                         pass
                     try:
-                        _verbose_response(resp)
+                        _verbose_response(resp, redact=ns.redact, redact_keyset=redaction_keys)
                     except Exception:
                         pass
                     return resp
 
                 raw.request = _wrapped_request
-            c = SdetHttpClient(raw, retry=pol, trace_header=ns.trace_header)
+            c = SdetHttpClient(
+                raw, retry=pol, trace_header=ns.trace_header, allowed_schemes=allowed_schemes
+            )
 
             def _print_status_and_headers(resp: httpx.Response) -> None:
                 if getattr(ns, "print_status", False):
@@ -440,7 +510,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     items.sort(key=lambda kv: (kv[0].lower(), kv[0], kv[1]))
                     for k, v in items:
                         sys.stderr.write(
-                            f"http header: {k}: {_redact_header_value(str(k), str(v))}\n"
+                            f"http header: {k}: {redact_header_value(str(k), str(v), enabled=ns.redact, keys=redaction_keys)}\n"
                         )
 
             def _check_status(resp: httpx.Response) -> None:
@@ -527,9 +597,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                                 body = resp.content
                                 out_path = getattr(ns, "out", None)
                                 if out_path:
-                                    pp = Path(str(out_path))
-                                    pp.parent.mkdir(parents=True, exist_ok=True)
-                                    pp.write_bytes(body)
+                                    pp = safe_path(Path.cwd(), str(out_path), allow_absolute=True)
+                                    if pp.exists() and not ns.force:
+                                        _die(
+                                            "refusing to overwrite existing output file (use --force)"
+                                        )
+                                    atomic_write_text(pp, body.decode("utf-8", errors="replace"))
                                 else:
                                     sys.stdout.write(body.decode("utf-8", errors="replace"))
                             sys.stderr.write(f"http error: {resp.status_code}\n")
@@ -578,6 +651,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                                 _merged_headers(
                                     raw, locals().get("headers"), getattr(ns, "debug", False)
                                 ),
+                                redact=ns.redact,
+                                redact_keyset=redaction_keys,
                             )
                         if (
                             getattr(ns, "fail", False) or getattr(ns, "fail_with_body", False)
@@ -586,9 +661,12 @@ def main(argv: Sequence[str] | None = None) -> int:
                                 body = e.body
                                 out_path = getattr(ns, "out", None)
                                 if out_path:
-                                    pp = Path(str(out_path))
-                                    pp.parent.mkdir(parents=True, exist_ok=True)
-                                    pp.write_bytes(body)
+                                    pp = safe_path(Path.cwd(), str(out_path), allow_absolute=True)
+                                    if pp.exists() and not ns.force:
+                                        _die(
+                                            "refusing to overwrite existing output file (use --force)"
+                                        )
+                                    atomic_write_text(pp, body.decode("utf-8", errors="replace"))
                                 else:
                                     sys.stdout.write(body.decode("utf-8", errors="replace"))
                             sys.stderr.write(f"http error: {e.status_code}\n")
@@ -597,9 +675,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         out_s = json.dumps(data, sort_keys=True, indent=2 if ns.pretty else None) + "\n"
         out_path = getattr(ns, "out", None)
         if out_path:
-            pp = Path(str(out_path))
-            pp.parent.mkdir(parents=True, exist_ok=True)
-            pp.write_text(out_s, encoding="utf-8")
+            pp = safe_path(Path.cwd(), str(out_path), allow_absolute=True)
+            if pp.exists() and not ns.force:
+                _die("refusing to overwrite existing output file (use --force)")
+            atomic_write_text(pp, out_s)
         else:
             sys.stdout.write(out_s)
         return 0
@@ -616,11 +695,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             except Exception:
                 _hdrs = _hdr_src
-            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+            _verbose_request(
+                getattr(ns, "method", "GET"),
+                getattr(ns, "url", ""),
+                _hdrs,
+                redact=ns.redact,
+                redact_keyset=redaction_keys,
+            )
         if getattr(ns, "debug", False):
             traceback.print_exc()
         sys.stderr.write("request timed out\n")
-        return 1
+        return 2
     except CircuitOpenError:
         if getattr(ns, "verbose", False):
             _raw = locals().get("raw")
@@ -633,11 +718,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             except Exception:
                 _hdrs = _hdr_src
-            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+            _verbose_request(
+                getattr(ns, "method", "GET"),
+                getattr(ns, "url", ""),
+                _hdrs,
+                redact=ns.redact,
+                redact_keyset=redaction_keys,
+            )
         if getattr(ns, "debug", False):
             traceback.print_exc()
         sys.stderr.write("circuit open\n")
-        return 1
+        return 2
     except ValueError as e:
         if getattr(ns, "verbose", False):
             _raw = locals().get("raw")
@@ -650,7 +741,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             except Exception:
                 _hdrs = _hdr_src
-            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+            _verbose_request(
+                getattr(ns, "method", "GET"),
+                getattr(ns, "url", ""),
+                _hdrs,
+                redact=ns.redact,
+                redact_keyset=redaction_keys,
+            )
         if getattr(ns, "debug", False):
             traceback.print_exc()
         sys.stderr.write(str(e).rstrip() + "\n")
@@ -667,7 +764,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             except Exception:
                 _hdrs = _hdr_src
-            _verbose_request(getattr(ns, "method", "GET"), getattr(ns, "url", ""), _hdrs)
+            _verbose_request(
+                getattr(ns, "method", "GET"),
+                getattr(ns, "url", ""),
+                _hdrs,
+                redact=ns.redact,
+                redact_keyset=redaction_keys,
+            )
         if getattr(ns, "debug", False):
             traceback.print_exc()
         sys.stderr.write(str(e).rstrip() + "\n")

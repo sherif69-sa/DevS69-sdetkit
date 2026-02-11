@@ -32,7 +32,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _cassette_get(argv[1:])
         except Exception as e:
             print(str(e), file=sys.stderr)
-            return 1
+            return 2
 
     if argv and argv[0] == "doctor":
         from .doctor import main as _doctor_main
