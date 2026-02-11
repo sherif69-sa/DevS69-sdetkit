@@ -632,6 +632,7 @@ def _normalize_rel_path(raw_path: str) -> str:
 
 def _resolve_target(root: Path, rel_path: str) -> Path:
     root_real = root.resolve(strict=True)
+    raw_target = root_real / rel_path
     try:
         target = safe_path(root_real, rel_path)
     except SecurityError as exc:
@@ -643,7 +644,7 @@ def _resolve_target(root: Path, rel_path: str) -> Path:
         if cursor.exists() and cursor.is_symlink():
             raise PatchSpecError(f"symlink parent rejected: {rel_path}")
 
-    if target.exists() and target.is_symlink():
+    if raw_target.exists() and raw_target.is_symlink():
         raise PatchSpecError(f"symlink target rejected: {rel_path}")
 
     resolved = target.resolve(strict=False)

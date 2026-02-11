@@ -48,11 +48,9 @@ def _cassette_get(argv: list[str]) -> int:
 
     if ns.replay:
         try:
-                Path.cwd(), ns.replay, allow_absolute=True
-            )
+            replay_path = safe_path(Path.cwd(), ns.replay, allow_absolute=True)
             cass = Cassette.load(replay_path)
         except (SecurityError, ValueError, OSError) as exc:
-
             print(str(exc), file=sys.stderr)
             return 2
         transport = CassetteReplayTransport(cass)
@@ -68,8 +66,8 @@ def _cassette_get(argv: list[str]) -> int:
     if ns.record:
         try:
             record_path = safe_path(
+                Path.cwd(), ns.record, allow_absolute=bool(ns.allow_absolute_path)
             )
-                print("refusing to overwrite existing cassette (use --force)", file=sys.stderr)
             if record_path.exists() and not ns.force:
                 print("refusing to overwrite existing cassette (use --force)", file=sys.stderr)
                 return 2
