@@ -11,11 +11,11 @@ need_cmd() {
   exit 127
 }
 
-run_fmt()     { need_cmd ruff; ruff format .; }
-run_lint()    { need_cmd ruff; ruff check .; }
-run_type()    { need_cmd mypy; mypy src; }
-run_test()    { need_cmd pytest; pytest; }
-run_cov()     { need_cmd pytest; pytest --cov=sdetkit --cov-report=term-missing --cov-fail-under="$cov_fail_under"; }
+run_fmt()     { need_cmd ruff; python -m ruff format .; }
+run_lint()    { need_cmd ruff; python -m ruff check .; }
+run_type()    { need_cmd mypy; python -m mypy --config-file pyproject.toml src; }
+run_test()    { need_cmd pytest; python -m pytest; }
+run_cov()     { need_cmd pytest; python -m pytest --cov=sdetkit --cov-report=term-missing --cov-fail-under="$cov_fail_under"; }
 run_mut()     { need_cmd mutmut; mutmut run; }
 run_muthtml() { need_cmd mutmut; mutmut html; }
 

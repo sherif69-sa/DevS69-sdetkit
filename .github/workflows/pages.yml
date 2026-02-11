@@ -36,7 +36,7 @@ jobs:
       - uses: actions/configure-pages@v5
 
       - name: Build mkdocs site
-        run: mkdocs build --strict
+        run: python -m mkdocs build --strict
 
       - uses: actions/upload-pages-artifact@v3
         with:
