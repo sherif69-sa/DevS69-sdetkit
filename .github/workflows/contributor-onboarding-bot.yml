@@ -1,0 +1,41 @@
+name: Contributor Onboarding Bot
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post onboarding hints
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              '### 👋 Premium contribution quick-start',
+              '',
+              'To keep this PR at premium quality, run:',
+              '- `pre-commit run -a`',
+              '- `bash quality.sh cov`',
+              '- `python -m build && python -m twine check dist/*`',
+              '- `mkdocs build` (when docs are touched)',
+              '',
+              'Need bot help?',
+              '- comment `/doctor` for diagnostics',
+              '- comment `/check` to run validation checks',
+              '- comment `/hint` for a compact quality checklist',
+              '',
+              'Reference: `docs/premium-quality-gate.md`',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });

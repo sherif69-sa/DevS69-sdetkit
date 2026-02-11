@@ -42,6 +42,9 @@ pytest -q
 
 ## 5) Pull request checklist
 
+Premium reference: `docs/premium-quality-gate.md`
+
+
 - [ ] `pre-commit run -a` passes.
 - [ ] `bash quality.sh cov` passes.
 - [ ] `python -m build` and `python -m twine check dist/*` pass.
