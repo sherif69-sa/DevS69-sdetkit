@@ -16,19 +16,19 @@
   </p>
 
   <p>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/ci.yml"><img src="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml"><img src="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/quality.yml/badge.svg?branch=main" alt="Quality"></a>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutation-tests.yml"><img src="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/mutation-tests.yml/badge.svg?branch=main" alt="Mutation Tests"></a>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml"><img src="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/security.yml/badge.svg?branch=main" alt="Security"></a>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml"><img src="https://github.com/sherif69-sa/sdet_bootcamp/actions/workflows/pages.yml/badge.svg?branch=main" alt="Pages"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main" alt="Quality"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml/badge.svg?branch=main" alt="Mutation Tests"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml/badge.svg?branch=main" alt="Security"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main" alt="Pages"></a>
   </p>
 
   <p>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/releases"><img src="https://img.shields.io/github/v/release/sherif69-sa/sdet_bootcamp?sort=semver" alt="Latest Release"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/sherif69-sa/sdet_bootcamp" alt="License"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/releases"><img src="https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?sort=semver" alt="Latest Release"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/sherif69-sa/DevS69-sdetkit" alt="License"></a>
     <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/security/code-scanning"><img src="https://img.shields.io/badge/security-code%20scanning-success" alt="Code Scanning"></a>
-    <a href="https://github.com/sherif69-sa/sdet_bootcamp/security/dependabot"><img src="https://img.shields.io/badge/dependencies-auto%20update-success" alt="Dependabot"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/security/code-scanning"><img src="https://img.shields.io/badge/security-code%20scanning-success" alt="Code Scanning"></a>
+    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/security/dependabot"><img src="https://img.shields.io/badge/dependencies-auto%20update-success" alt="Dependabot"></a>
   </p>
 </div>
 
@@ -111,6 +111,7 @@ tools/                    # extra developer tooling + patch harness wrapper
 ./.venv/bin/sdetkit --help
 ./.venv/bin/sdetkit doctor --all
 ./.venv/bin/sdetkit apiget https://example.com/api --expect dict
+./.venv/bin/sdetkit repo audit --format text
 ./.venv/bin/sdetkit repo check . --profile enterprise --format json
 ./.venv/bin/python tools/patch_harness.py spec.json --check
 ```
@@ -135,7 +136,7 @@ bash scripts/shell.sh
 - [docs/project-structure.md](docs/project-structure.md) — architecture + file/folder map
 - [docs/cli.md](docs/cli.md) — CLI command guide
 - [docs/doctor.md](docs/doctor.md) — repository health diagnostics
-- [docs/repo-audit.md](docs/repo-audit.md) — repo audit and safe fixes
+- [docs/repo-audit.md](docs/repo-audit.md) — repo audit and repository hardening
 - [docs/patch-harness.md](docs/patch-harness.md) — spec-driven patch harness usage
 - [docs/security.md](docs/security.md) — security policies and notes
 - [docs/releasing.md](docs/releasing.md) — release process

@@ -1,6 +1,6 @@
 <div class="hero-panel" markdown>
 
-# SDET Bootcamp (sdetkit)
+# DevS69 sdetkit
 
 A practical, production-ready toolkit for SDET workflows — with clean CLI ergonomics, diagnostics, API automation, and repository safety checks.
 

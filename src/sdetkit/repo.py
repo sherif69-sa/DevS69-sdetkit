@@ -179,6 +179,22 @@ class Finding:
         }
 
 
+@dataclass(frozen=True)
+class RepoAuditCheck:
+    key: str
+    title: str
+    passed: bool
+    details: tuple[str, ...]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "key": self.key,
+            "title": self.title,
+            "status": "pass" if self.passed else "fail",
+            "details": list(self.details),
+        }
+
+
 def _iter_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
@@ -854,6 +870,149 @@ def _resolve_root(user_path: str, *, allow_absolute: bool) -> Path:
         raise
 
 
+def _audit_oss_readiness(root: Path) -> RepoAuditCheck:
+    required = (
+        "README.md",
+        "LICENSE",
+        "CONTRIBUTING.md",
+        "CODE_OF_CONDUCT.md",
+        "SECURITY.md",
+        "CHANGELOG.md",
+    )
+    missing = [name for name in required if not (root / name).exists()]
+    if not missing:
+        return RepoAuditCheck(
+            key="oss_readiness",
+            title="OSS readiness files",
+            passed=True,
+            details=("All required governance files are present.",),
+        )
+    return RepoAuditCheck(
+        key="oss_readiness",
+        title="OSS readiness files",
+        passed=False,
+        details=tuple(f"Missing: {name}" for name in missing),
+    )
+
+
+def _audit_ci_security_workflows(root: Path) -> RepoAuditCheck:
+    workflows_dir = root / ".github" / "workflows"
+    workflow_files: list[str] = []
+    if workflows_dir.exists() and workflows_dir.is_dir():
+        workflow_files = sorted(
+            p.name for p in workflows_dir.iterdir() if p.is_file() and p.suffix in {".yml", ".yaml"}
+        )
+
+    ci_present = any("ci" in name for name in workflow_files)
+    security_present = any(
+        "security" in name or "codeql" in name or "dependabot" in name for name in workflow_files
+    )
+    details = [
+        "Discovered workflows: " + (", ".join(workflow_files) if workflow_files else "none"),
+        f"CI workflow present: {'yes' if ci_present else 'no'}",
+        f"Security workflow present: {'yes' if security_present else 'no'}",
+    ]
+    return RepoAuditCheck(
+        key="ci_security_workflows",
+        title="CI and security workflow presence",
+        passed=ci_present and security_present,
+        details=tuple(details),
+    )
+
+
+def _audit_python_tooling(root: Path) -> RepoAuditCheck:
+    checks = {
+        "pyproject.toml": (root / "pyproject.toml").exists(),
+        "noxfile.py": (root / "noxfile.py").exists(),
+        "quality.sh": (root / "quality.sh").exists(),
+        "requirements-test.txt": (root / "requirements-test.txt").exists(),
+    }
+    missing = [name for name, present in checks.items() if not present]
+    details = tuple(
+        f"{name}: {'present' if present else 'missing'}" for name, present in sorted(checks.items())
+    )
+    return RepoAuditCheck(
+        key="python_tooling",
+        title="Python tooling config presence",
+        passed=len(missing) == 0,
+        details=details,
+    )
+
+
+def _audit_repo_hygiene(root: Path) -> RepoAuditCheck:
+    checks = {
+        ".gitignore": (root / ".gitignore").exists(),
+        "tests/": (root / "tests").is_dir(),
+        "docs/": (root / "docs").is_dir(),
+    }
+    large_files: list[str] = []
+    for p in _iter_files(root):
+        try:
+            size = p.stat().st_size
+        except OSError:
+            continue
+        if size > 5 * 1024 * 1024:
+            large_files.append(f"{p.relative_to(root).as_posix()} ({size} bytes)")
+
+    details = [
+        f"{name}: {'present' if present else 'missing'}" for name, present in sorted(checks.items())
+    ]
+    if large_files:
+        details.extend(f"Large tracked file: {item}" for item in sorted(large_files))
+    else:
+        details.append("No files larger than 5 MiB detected.")
+    return RepoAuditCheck(
+        key="repo_hygiene",
+        title="Basic repository hygiene",
+        passed=all(checks.values()) and not large_files,
+        details=tuple(details),
+    )
+
+
+def run_repo_audit(root: Path) -> dict[str, Any]:
+    checks = [
+        _audit_oss_readiness(root),
+        _audit_ci_security_workflows(root),
+        _audit_python_tooling(root),
+        _audit_repo_hygiene(root),
+    ]
+    passed = sum(1 for item in checks if item.passed)
+    failed = len(checks) - passed
+    return {
+        "root": str(root),
+        "summary": {
+            "checks": len(checks),
+            "passed": passed,
+            "failed": failed,
+            "ok": failed == 0,
+        },
+        "checks": [item.to_dict() for item in checks],
+    }
+
+
+def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
+    if fmt == "json":
+        return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+
+    lines = [
+        f"Repo audit: {payload['root']}",
+        (
+            "Result: PASS"
+            if payload["summary"]["ok"]
+            else f"Result: FAIL ({payload['summary']['failed']} checks failed)"
+        ),
+        (f"Checks: {payload['summary']['passed']}/{payload['summary']['checks']} passed"),
+        "",
+    ]
+    for item in payload["checks"]:
+        icon = "PASS" if item["status"] == "pass" else "FAIL"
+        lines.append(f"[{icon}] {item['title']} ({item['key']})")
+        for detail in item["details"]:
+            lines.append(f"  - {detail}")
+        lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="sdetkit repo")
     sub = parser.add_subparsers(dest="repo_cmd", required=True)
@@ -881,6 +1040,13 @@ def main(argv: list[str] | None = None) -> int:
     fp.add_argument("--eol", choices=["lf", "crlf"], default=None)
     fp.add_argument("--force", action="store_true")
     fp.add_argument("--allow-absolute-path", action="store_true")
+
+    ap = sub.add_parser("audit")
+    ap.add_argument("path", nargs="?", default=".")
+    ap.add_argument("--format", choices=["text", "json"], default="text")
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--force", action="store_true")
+    ap.add_argument("--allow-absolute-path", action="store_true")
 
     ns = parser.parse_args(argv)
 
@@ -947,6 +1113,22 @@ def main(argv: list[str] | None = None) -> int:
                 print(str(exc), file=sys.stderr)
                 return 2
         return 1 if _needs_fail(findings, ns.fail_on, ns.min_score) else 0
+
+    if ns.repo_cmd == "audit":
+        payload = run_repo_audit(root)
+        rendered = _render_repo_audit(payload, ns.format)
+        sys.stdout.write(rendered)
+        if ns.out:
+            try:
+                out_path = safe_path(root, ns.out, allow_absolute=bool(ns.allow_absolute_path))
+                if out_path.exists() and not ns.force:
+                    print("refusing to overwrite existing output (use --force)", file=sys.stderr)
+                    return 2
+                atomic_write_text(out_path, rendered)
+            except (SecurityError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        return 0 if payload["summary"]["ok"] else 1
 
     if ns.check and ns.dry_run:
         print("cannot use --check and --dry-run together", file=sys.stderr)
