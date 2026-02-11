@@ -91,6 +91,7 @@ WORKFLOW_USE_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s]+)\s*$")
 UNPINNED_DEP_RE = re.compile(r"^(?:[A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*(?:>=|>|~=|\*|$)")
 PRIVATE_KEY_FILES: frozenset[str] = frozenset({"id_rsa", "id_dsa"})
 PRIVATE_KEY_SUFFIXES: tuple[str, ...] = (".pem", ".p12", ".pfx", ".key")
+_UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 
 
 def _shannon_entropy(s: str) -> float:
@@ -108,6 +109,7 @@ def _shannon_entropy(s: str) -> float:
 def _safe_snippet(line: str) -> str:
     if len(line) <= 10:
         return "<redacted>"
+    return f"{line[:3]}...{line[-3:]}"
     return f"{line[:3]}…{line[-3:]}"
 
 
@@ -128,6 +130,15 @@ def _git_commit_sha(root: Path) -> str | None:
 def _changed_files(root: Path, base: str) -> set[str]:
     try:
         proc = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "diff",
+                "--name-only",
+                "--diff-filter=ACMRTUXB",
+                f"{base}...HEAD",
+            ],
             ["git", "-C", str(root), "diff", "--name-only", "--diff-filter=ACMRTUXB", f"{base}...HEAD"],
             check=False,
             capture_output=True,
@@ -337,6 +348,10 @@ def run_checks(
                         )
 
             lower = text_line.lower().replace(" ", "")
+            config_like = rel.endswith(
+                (".env", ".ini", ".cfg", ".conf", ".toml", ".yaml", ".yml", ".json")
+            )
+            if config_like and ("debug=true" in lower or "allow_all_origins=true" in lower):
             if "debug=true" in lower or "allow_all_origins=true" in lower:
                 findings.append(
                     Finding(
@@ -355,6 +370,11 @@ def run_checks(
         if profile == "enterprise" and rel.endswith(".py"):
             findings.extend(_scan_python_ast(rel, text))
 
+        if (
+            profile == "enterprise"
+            and rel.startswith(".github/workflows/")
+            and rel.endswith((".yml", ".yaml"))
+        ):
         if profile == "enterprise" and rel.startswith(".github/workflows/") and rel.endswith((".yml", ".yaml")):
             findings.extend(_scan_workflow(rel, text))
 
@@ -411,6 +431,37 @@ def _scan_python_ast(rel: str, text: str) -> list[Finding]:
             elif isinstance(node.func, ast.Attribute):
                 name = f"{getattr(node.func.value, 'id', '')}.{node.func.attr}".lstrip(".")
             if name in {"eval", "exec", "pickle.loads", "yaml.load"}:
+                out.append(
+                    Finding(
+                        "code_risk",
+                        "error",
+                        rel,
+                        node.lineno,
+                        node.col_offset + 1,
+                        name.replace(".", "_"),
+                        f"unsafe call: {name}",
+                        remediation="use safer alternatives",
+                    )
+                )
+            if name == "subprocess.run" or name == "subprocess.Popen":
+                for kw in node.keywords:
+                    if (
+                        kw.arg == "shell"
+                        and isinstance(kw.value, ast.Constant)
+                        and kw.value.value is True
+                    ):
+                        out.append(
+                            Finding(
+                                "code_risk",
+                                "error",
+                                rel,
+                                node.lineno,
+                                node.col_offset + 1,
+                                "subprocess_shell_true",
+                                "subprocess with shell=True",
+                                remediation="pass argv list and keep shell=False",
+                            )
+                        )
                 out.append(Finding("code_risk", "error", rel, node.lineno, node.col_offset + 1, name.replace(".", "_"), f"unsafe call: {name}", remediation="use safer alternatives"))
             if name == "subprocess.run" or name == "subprocess.Popen":
                 for kw in node.keywords:
@@ -426,6 +477,58 @@ def _scan_workflow(rel: str, text: str) -> list[Finding]:
         if m:
             uses = m.group(1)
             if "@" in uses and re.search(r"@[0-9a-f]{40}$", uses) is None:
+                out.append(
+                    Finding(
+                        "gha_hardening",
+                        "warn",
+                        rel,
+                        idx,
+                        1,
+                        "unpinned_action",
+                        "GitHub Action is not pinned to full commit SHA",
+                        remediation="pin action with @<40-char-SHA>",
+                    )
+                )
+        lower = line.lower()
+        if "pull_request_target" in lower:
+            out.append(
+                Finding(
+                    "gha_hardening",
+                    "error",
+                    rel,
+                    idx,
+                    1,
+                    "pull_request_target",
+                    "pull_request_target requires strict hardening",
+                    remediation="prefer pull_request unless privileged flow is required",
+                )
+            )
+        if "permissions: write-all" in lower:
+            out.append(
+                Finding(
+                    "gha_hardening",
+                    "error",
+                    rel,
+                    idx,
+                    1,
+                    "write_all_permissions",
+                    "workflow uses write-all permissions",
+                    remediation="use least privilege permissions block",
+                )
+            )
+        if "curl" in lower and "|" in lower and "bash" in lower:
+            out.append(
+                Finding(
+                    "gha_hardening",
+                    "error",
+                    rel,
+                    idx,
+                    1,
+                    "curl_bash",
+                    "curl|bash pattern in workflow",
+                    remediation="download, verify checksum/signature, then execute",
+                )
+            )
                 out.append(Finding("gha_hardening", "warn", rel, idx, 1, "unpinned_action", "GitHub Action is not pinned to full commit SHA", remediation="pin action with @<40-char-SHA>"))
         lower = line.lower()
         if "pull_request_target" in lower:
@@ -443,6 +546,40 @@ def _scan_dependency_hygiene(root: Path, only: set[str] | None) -> list[Finding]
     has_node_manifest = (root / "package.json").exists()
     if has_py_manifest and not ((root / "poetry.lock").exists() or (root / "uv.lock").exists()):
         if only is None or "pyproject.toml" in only or "requirements.txt" in only:
+            out.append(
+                Finding(
+                    "dependency_hygiene",
+                    "warn",
+                    "pyproject.toml",
+                    1,
+                    1,
+                    "missing_python_lockfile",
+                    "Python manifest found without lockfile",
+                    remediation="add poetry.lock or uv.lock for deterministic installs",
+                )
+            )
+    if has_node_manifest and not any(
+        (root / x).exists() for x in ("package-lock.json", "pnpm-lock.yaml", "yarn.lock")
+    ):
+        if only is None or "package.json" in only:
+            out.append(
+                Finding(
+                    "dependency_hygiene",
+                    "warn",
+                    "package.json",
+                    1,
+                    1,
+                    "missing_node_lockfile",
+                    "Node manifest found without lockfile",
+                    remediation="commit a Node lockfile",
+                )
+            )
+
+    req = root / "requirements.txt"
+    if req.exists() and (only is None or "requirements.txt" in only):
+        for i, line in enumerate(
+            req.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1
+        ):
             out.append(Finding("dependency_hygiene", "warn", "pyproject.toml", 1, 1, "missing_python_lockfile", "Python manifest found without lockfile", remediation="add poetry.lock or uv.lock for deterministic installs"))
     if has_node_manifest and not any((root / x).exists() for x in ("package-lock.json", "pnpm-lock.yaml", "yarn.lock")):
         if only is None or "package.json" in only:
@@ -455,6 +592,18 @@ def _scan_dependency_hygiene(root: Path, only: set[str] | None) -> list[Finding]
             if not stripped or stripped.startswith("#"):
                 continue
             if UNPINNED_DEP_RE.match(stripped):
+                out.append(
+                    Finding(
+                        "dependency_hygiene",
+                        "warn",
+                        "requirements.txt",
+                        i,
+                        1,
+                        "unpinned_dependency",
+                        "dependency is not pinned to exact version",
+                        remediation="pin with == exact version",
+                    )
+                )
                 out.append(Finding("dependency_hygiene", "warn", "requirements.txt", i, 1, "unpinned_dependency", "dependency is not pinned to exact version", remediation="pin with == exact version"))
     return out
 
@@ -516,6 +665,9 @@ def _score(findings: list[Finding]) -> int:
     return max(0, 100 - min(100, penalty))
 
 
+def _report_payload(
+    root: Path, findings: list[Finding], *, profile: str, policy_text: str | None
+) -> dict[str, Any]:
 def _report_payload(root: Path, findings: list[Finding], *, profile: str, policy_text: str | None) -> dict[str, Any]:
     counts = {"info": 0, "warn": 0, "error": 0}
     by_check: dict[str, int] = {}
@@ -530,6 +682,9 @@ def _report_payload(root: Path, findings: list[Finding], *, profile: str, policy
             "version": "0.2.8",
             "profile": profile,
             "git_commit": _git_commit_sha(root),
+            "generated_at_utc": dt.datetime.now(_UTC).isoformat()
+            if profile == "enterprise"
+            else "",
             "generated_at_utc": dt.datetime.now(dt.timezone.utc).isoformat() if profile == "enterprise" else "",  # noqa: UP017
             "policy_hash": policy_hash,
         },
@@ -550,6 +705,11 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
     for item in payload["findings"]:
         rid = f"{item['check']}/{item['code']}"
         if rid not in rules:
+            rules[rid] = {
+                "id": rid,
+                "name": item["check"],
+                "shortDescription": {"text": item["message"]},
+            }
             rules[rid] = {"id": rid, "name": item["check"], "shortDescription": {"text": item["message"]}}
         results.append(
             {
@@ -569,6 +729,15 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
     return {
         "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
         "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {"driver": {"name": "sdetkit", "rules": list(rules.values())}},
+                "results": results,
+            }
+        ],
+    }
+
+
         "runs": [{"tool": {"driver": {"name": "sdetkit", "rules": list(rules.values())}}, "results": results}],
     }
 
@@ -580,6 +749,7 @@ def _generate_sbom(root: Path) -> dict[str, Any]:
     pyproject = root / "pyproject.toml"
     if pyproject.exists():
         text = pyproject.read_text(encoding="utf-8", errors="ignore")
+        for dep in re.findall(r"[\"\']([A-Za-z0-9_.-]+)(?:[^\"\']*)[\"\']", text):
         for dep in re.findall(r'[\"\']([A-Za-z0-9_.-]+)(?:[^\"\']*)[\"\']', text):
             if dep.lower() in {"project", "dependencies", "name", "x"}:
                 continue
@@ -602,6 +772,7 @@ def _generate_sbom(root: Path) -> dict[str, Any]:
         "metadata": {"component": {"type": "application", "name": root.name}},
         "components": components,
     }
+
 
 def _render(payload: dict[str, Any], fmt: str) -> str:
     if fmt == "json":
@@ -756,6 +927,9 @@ def main(argv: list[str] | None = None) -> int:
         policy_text = None
         if ns.policy:
             try:
+                policy_path = safe_path(
+                    root, ns.policy, allow_absolute=bool(ns.allow_absolute_path)
+                )
                 policy_path = safe_path(root, ns.policy, allow_absolute=bool(ns.allow_absolute_path))
                 policy_text = policy_path.read_text(encoding="utf-8")
             except (SecurityError, OSError):
@@ -763,6 +937,9 @@ def main(argv: list[str] | None = None) -> int:
         baseline_path = None
         if ns.baseline:
             try:
+                baseline_path = safe_path(
+                    root, ns.baseline, allow_absolute=bool(ns.allow_absolute_path)
+                )
                 baseline_path = safe_path(root, ns.baseline, allow_absolute=bool(ns.allow_absolute_path))
             except SecurityError:
                 baseline_path = None
@@ -777,6 +954,19 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _render(payload, ns.format)
         if ns.sbom_out:
             try:
+                sbom_path = safe_path(
+                    root, ns.sbom_out, allow_absolute=bool(ns.allow_absolute_path)
+                )
+                if sbom_path.exists() and not ns.force:
+                    print(
+                        "refusing to overwrite existing SBOM output (use --force)", file=sys.stderr
+                    )
+                    return 2
+                atomic_write_text(
+                    sbom_path,
+                    json.dumps(_generate_sbom(root), ensure_ascii=True, sort_keys=True, indent=2)
+                    + "\n",
+                )
                 sbom_path = safe_path(root, ns.sbom_out, allow_absolute=bool(ns.allow_absolute_path))
                 if sbom_path.exists() and not ns.force:
                     print("refusing to overwrite existing SBOM output (use --force)", file=sys.stderr)
