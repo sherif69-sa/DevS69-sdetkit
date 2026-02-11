@@ -147,7 +147,7 @@ def _check_clean_tree(root: Path) -> bool:
 
 
 def _check_tools() -> tuple[list[str], list[str]]:
-    want = ["git", "pre-commit", "pytest", "ruff", "python3"]
+    want = ["git", "pytest", "ruff", "python3"]
     present: list[str] = []
     missing: list[str] = []
     for t in want:
@@ -282,6 +282,8 @@ def main(argv: list[str] | None = None) -> int:
             else "virtual environment is not active (recommended for stable tooling/deps)",
         }
         score_items.append(venv_ok)
+        # Keep this check informational so CI/local tooling still works when
+        # running in a managed interpreter without an activated venv.
 
         present, missing = _check_tools()
         data["tools"] = present

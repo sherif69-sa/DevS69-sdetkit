@@ -55,3 +55,12 @@ def test_doctor_pyproject_parse_failure(tmp_path: Path, monkeypatch, capsys):
     assert data["pyproject_ok"] is False
     assert data["checks"]["pyproject"]["ok"] is False
     assert any("Fix pyproject.toml syntax" in item for item in data["recommendations"])
+
+
+def test_check_tools_does_not_require_pre_commit_binary(monkeypatch):
+    monkeypatch.setattr(doctor.shutil, "which", lambda _name: "/usr/bin/mock")
+
+    present, missing = doctor._check_tools()
+
+    assert "pre-commit" not in present
+    assert "pre-commit" not in missing
