@@ -85,6 +85,15 @@ doctor:
 ./.venv/bin/sdetkit doctor --all --json
 ```
 
+repo audit:
+
+```bash
+./.venv/bin/sdetkit repo check . --profile enterprise --format sarif --out results.sarif
+./.venv/bin/sdetkit repo check . --profile enterprise --changed-only --diff-base origin/main
+./.venv/bin/sdetkit repo check . --format json --baseline .sdetkit-baseline.json --policy sdetkit.policy.toml
+./.venv/bin/sdetkit repo check . --sbom-out sbom.cdx.json
+```
+
 patch_harness:
 
 ```bash
