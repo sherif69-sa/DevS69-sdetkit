@@ -5,7 +5,13 @@ from pathlib import Path
 
 from sdetkit import cli
 from sdetkit.atomicio import atomic_write_bytes
-from sdetkit.security import SecurityError, redact_keys, redact_secrets_headers, redact_secrets_text, safe_path
+from sdetkit.security import (
+    SecurityError,
+    redact_keys,
+    redact_secrets_headers,
+    redact_secrets_text,
+    safe_path,
+)
 
 
 def test_safe_path_allows_dot_and_blocks_traversal(tmp_path: Path) -> None:
@@ -15,7 +21,7 @@ def test_safe_path_allows_dot_and_blocks_traversal(tmp_path: Path) -> None:
     except SecurityError:
         pass
     else:  # pragma: no cover
-        assert False
+        raise AssertionError("expected SecurityError for traversal path")
 
 
 def test_atomic_write_bytes_writes_exact(tmp_path: Path) -> None:
@@ -27,7 +33,10 @@ def test_atomic_write_bytes_writes_exact(tmp_path: Path) -> None:
 def test_redact_secrets_helpers_are_deterministic() -> None:
     keys = redact_keys(["x-auth-token"])
     text = "authorization: abc token=xyz"
-    assert redact_secrets_text(text, enabled=True, keys=keys) == "authorization: <redacted> token=<redacted>"
+    assert (
+        redact_secrets_text(text, enabled=True, keys=keys)
+        == "authorization: <redacted> token=<redacted>"
+    )
 
     headers = {"X-Api-Key": "abc", "Accept": "application/json"}
     assert redact_secrets_headers(headers, enabled=True, keys=keys) == {
@@ -41,7 +50,7 @@ def _create_bad_repo(root: Path) -> None:
     (root / "b.txt").write_bytes(b"x\r\ny\n")
     (root / "bad.bin").write_bytes(b"\xff\xfe")
     (root / "secret.env").write_text("API_KEY=shhh\n", encoding="utf-8")
-    (root / "hidden.txt").write_text("ok\u202Eoops\n", encoding="utf-8")
+    (root / "hidden.txt").write_text("ok\u202eoops\n", encoding="utf-8")
 
 
 def test_repo_check_json_is_deterministic_and_stable(tmp_path: Path, capsys) -> None:
@@ -67,14 +76,36 @@ def test_repo_fix_then_recheck_clean(tmp_path: Path) -> None:
     rc = cli.main(["repo", "fix", str(tmp_path), "--allow-absolute-path", "--eol", "lf"])
     assert rc == 0
 
-    rc2 = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json", "--fail-on", "warn"])
+    rc2 = cli.main(
+        [
+            "repo",
+            "check",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--format",
+            "json",
+            "--fail-on",
+            "warn",
+        ]
+    )
     assert rc2 == 1  # utf8 decode + secret + hidden unicode still present
 
     # remove unsafe/unfixable files then re-check clean
     (tmp_path / "bad.bin").unlink()
     (tmp_path / "secret.env").write_text("SAFE=value\n", encoding="utf-8")
     (tmp_path / "hidden.txt").write_text("ok\n", encoding="utf-8")
-    rc3 = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json", "--fail-on", "warn"])
+    rc3 = cli.main(
+        [
+            "repo",
+            "check",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--format",
+            "json",
+            "--fail-on",
+            "warn",
+        ]
+    )
     assert rc3 == 0
 
 
@@ -89,18 +120,41 @@ def test_repo_check_out_requires_force(tmp_path: Path) -> None:
     (tmp_path / "x.txt").write_text("ok\n", encoding="utf-8")
     report = tmp_path / "report.json"
     report.write_text("old", encoding="utf-8")
-    rc = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json", "--out", "report.json"])
+    rc = cli.main(
+        [
+            "repo",
+            "check",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--format",
+            "json",
+            "--out",
+            "report.json",
+        ]
+    )
     assert rc == 2
-    rc2 = cli.main([
-        "repo",
-        "check",
-        str(tmp_path),
-        "--allow-absolute-path",
-        "--format",
-        "json",
-        "--out",
-        "report.json",
-        "--force",
-    ])
+    rc2 = cli.main(
+        [
+            "repo",
+            "check",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--format",
+            "json",
+            "--out",
+            "report.json",
+            "--force",
+        ]
+    )
     assert rc2 == 1
     assert json.loads(report.read_text(encoding="utf-8"))["summary"]["ok"] is False
+
+
+def test_repo_check_ignores_egg_info_metadata(tmp_path: Path) -> None:
+    egg_info = tmp_path / "src" / "sdetkit.egg-info"
+    egg_info.mkdir(parents=True)
+    (egg_info / "SOURCES.txt").write_text("no trailing newline", encoding="utf-8")
+    (tmp_path / "clean.txt").write_text("clean\n", encoding="utf-8")
+
+    rc = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json"])
+    assert rc == 0

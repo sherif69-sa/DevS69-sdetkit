@@ -13,6 +13,26 @@ from typing import Any
 from .atomicio import atomic_write_text
 from .security import SecurityError, safe_path
 
+SKIP_DIRS: frozenset[str] = frozenset(
+    {
+        ".git",
+        ".hg",
+        ".svn",
+        "__pycache__",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".hypothesis",
+        ".nox",
+        ".tox",
+        ".venv",
+        "venv",
+        "node_modules",
+    }
+)
+
+SKIP_FILES: frozenset[str] = frozenset({".coverage"})
+
 BIDI_HIDDEN_CODEPOINTS: frozenset[str] = frozenset(
     {
         "\u200b",  # zero width space
@@ -75,8 +95,12 @@ class Finding:
 def _iter_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = sorted(d for d in dirnames if d not in {".git", ".hg", ".svn", "__pycache__"})
+        dirnames[:] = sorted(
+            d for d in dirnames if d not in SKIP_DIRS and not d.endswith(".egg-info")
+        )
         for fname in sorted(filenames):
+            if fname in SKIP_FILES:
+                continue
             p = Path(dirpath) / fname
             if p.is_file():
                 files.append(p)
@@ -123,7 +147,9 @@ def run_checks(root: Path) -> list[Finding]:
 
         if b"\r\n" in data and b"\n" in data.replace(b"\r\n", b""):
             findings.append(
-                Finding("line_endings", "warn", rel, 1, 1, "mixed_eol", "mixed line endings detected")
+                Finding(
+                    "line_endings", "warn", rel, 1, 1, "mixed_eol", "mixed line endings detected"
+                )
             )
         elif b"\r\n" in data:
             findings.append(
@@ -131,7 +157,9 @@ def run_checks(root: Path) -> list[Finding]:
             )
         elif b"\r" in data:
             findings.append(
-                Finding("line_endings", "warn", rel, 1, 1, "cr_eol", "legacy CR line endings detected")
+                Finding(
+                    "line_endings", "warn", rel, 1, 1, "cr_eol", "legacy CR line endings detected"
+                )
             )
 
         lines = text.splitlines(keepends=True)
@@ -153,7 +181,15 @@ def run_checks(root: Path) -> list[Finding]:
 
         if data and not data.endswith(b"\n"):
             findings.append(
-                Finding("eof_newline", "warn", rel, max(1, len(lines)), 1, "missing_eof_nl", "missing EOF newline")
+                Finding(
+                    "eof_newline",
+                    "warn",
+                    rel,
+                    max(1, len(lines)),
+                    1,
+                    "missing_eof_nl",
+                    "missing EOF newline",
+                )
             )
 
         for i, ch in enumerate(text):
