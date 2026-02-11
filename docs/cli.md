@@ -1,4 +1,3 @@
-```markdown
 # CLI
 
 ## kv
@@ -31,18 +30,22 @@ Examples:
 - `sdetkit doctor --ascii`
 - `sdetkit doctor --all`
 - `sdetkit doctor --all --json`
+- `sdetkit doctor --dev --ci --deps --clean-tree --pr`
 
 See: doctor.md
 
-## patch_harness
+## patch
 
-Deterministic, spec-driven file edits.
+Deterministic, spec-driven file edits (official CLI command).
 
 Examples:
 
+- `sdetkit patch spec.json --check`
+- `sdetkit patch spec.json --dry-run`
+- `sdetkit patch spec.json`
+
+Backward compatibility wrapper still works:
+
 - `python tools/patch_harness.py spec.json --check`
-- `python tools/patch_harness.py spec.json --dry-run`
-- `python tools/patch_harness.py spec.json`
 
 See: patch-harness.md
-````

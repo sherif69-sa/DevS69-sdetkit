@@ -19,6 +19,7 @@ bash scripts/check.sh all
 * CLI: cli.md
 * Doctor: doctor.md
 * Patch harness: patch-harness.md
+* n8n integration: n8n.md
 * Project structure: project-structure.md
 * Roadmap: roadmap.md
 * Contributing: contributing.md

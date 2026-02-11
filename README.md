@@ -26,8 +26,8 @@ Production-style SDET utilities + bootcamp exercises: CLI tools, quality gates, 
 - CLI tools:
   - `sdetkit kv` / `kvcli`: parse `key=value` input and output JSON
   - `sdetkit apiget` / `apigetcli`: fetch JSON with pagination/retries/timeouts
-  - `sdetkit doctor`: repo health checks and diagnostics
-  - `tools/patch_harness.py`: deterministic spec-driven edits with strict --check
+  - `sdetkit doctor`: repo health checks, venv/pyproject validation, score, and actionable recommendations
+  - `sdetkit patch`: deterministic spec-driven edits with strict --check (plus legacy tools/patch_harness.py wrapper)
 - Quality gates (local + CI):
   - ruff (lint + format), mypy, pytest, coverage gate, docs build
 - Importable modules (easy to unit test):
@@ -106,6 +106,14 @@ patch_harness:
 ## Contributing
 
 See CONTRIBUTING.md.
+
+## Automation
+
+- Docs deploy: `.github/workflows/pages.yml` builds mkdocs on every push to `main` and deploys GitHub Pages.
+- Release: `.github/workflows/release.yml` publishes built artifacts on `vX.Y.Z` tags.
+- Versioning guard: `.github/workflows/versioning.yml` validates that `CHANGELOG.md` contains the active package version.
+- PR quality feedback: `.github/workflows/pr-quality-comment.yml` runs `quality.sh cov` on PR updates and comments the result.
+
 
 ## License
 
