@@ -41,6 +41,10 @@ def _seed_repo(root: Path) -> None:
     wf = root / ".github" / "workflows"
     wf.mkdir(parents=True)
     (wf / "ci.yml").write_text("name: ci\n", encoding="utf-8")
+    issue = root / ".github" / "ISSUE_TEMPLATE"
+    issue.mkdir(parents=True, exist_ok=True)
+    (issue / "config.yml").write_text("blank_issues_enabled: false\n", encoding="utf-8")
+    (root / ".github" / "PULL_REQUEST_TEMPLATE.md").write_text("## Summary\n", encoding="utf-8")
 
 
 def _audit_json(runner: CliRunner, root: Path, *extra: str) -> Result:
@@ -62,6 +66,7 @@ fail_on = "none"
         + "\n",
         encoding="utf-8",
     )
+    (tmp_path / "CONTRIBUTING.md").unlink(missing_ok=True)
     runner = CliRunner()
 
     result_config = _audit_json(runner, tmp_path)
@@ -74,15 +79,16 @@ fail_on = "none"
 def test_exclude_patterns_disable_rules_and_allowlist_suppress(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs" / "huge.bin").write_bytes(b"x" * (6 * 1024 * 1024))
+    (tmp_path / "CODE_OF_CONDUCT.md").unlink(missing_ok=True)
     (tmp_path / "pyproject.toml").write_text(
         """
 [project]
 name = "x"
 [tool.sdetkit.repo_audit]
 exclude_paths = ["docs/**"]
-disable_rules = ["repo_audit/missing_repo_hygiene_item"]
+disable_rules = ["CORE_MISSING_CODE_OF_CONDUCT_MD"]
 allowlist = [
-  { rule_id = "repo_audit/missing_repo_hygiene_item", path = ".github/**", contains = "required repository hygiene item" }
+  { rule_id = "CORE_MISSING_CODE_OF_CONDUCT_MD", path = "CODE_OF_CONDUCT.md", contains = "missing required file" }
 ]
 """.strip()
         + "\n",
@@ -92,18 +98,18 @@ allowlist = [
     result = _audit_json(runner, tmp_path)
     payload = json.loads(result.stdout)
     assert payload["summary"]["policy"]["suppressed_by_policy"] >= 1
-    assert all(item["code"] != "large_tracked_file" for item in payload["findings"])
+    assert all(item["rule_id"] != "CORE_MISSING_CODE_OF_CONDUCT_MD" for item in payload["findings"])
 
 
 def test_severity_overrides_apply_for_gating(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "LICENSE").unlink(missing_ok=True)
+    (tmp_path / "CONTRIBUTING.md").unlink(missing_ok=True)
     (tmp_path / "pyproject.toml").write_text(
         """
 [project]
 name = "x"
 [tool.sdetkit.repo_audit]
-severity_overrides = { "repo_audit/missing_required_file" = "info" }
+severity_overrides = { "CORE_MISSING_CONTRIBUTING_MD" = "info" }
 """.strip()
         + "\n",
         encoding="utf-8",
@@ -111,10 +117,12 @@ severity_overrides = { "repo_audit/missing_required_file" = "info" }
     runner = CliRunner()
     result = _audit_json(runner, tmp_path, "--fail-on", "warn")
     payload = json.loads(result.stdout)
-    overridden = [item for item in payload["findings"] if item["code"] == "missing_required_file"]
+    overridden = [
+        item for item in payload["findings"] if item["rule_id"] == "CORE_MISSING_CONTRIBUTING_MD"
+    ]
     assert overridden
     assert {item["severity"] for item in overridden} == {"info"}
-    assert result.exit_code == 1
+    assert result.exit_code == 0
 
 
 def test_baseline_create_stable_schema_and_order(tmp_path: Path) -> None:
@@ -145,7 +153,7 @@ def test_baseline_check_new_resolved_unchanged_and_update(tmp_path: Path) -> Non
     assert create.exit_code == 0
 
     (tmp_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
-    (tmp_path / "docs" / "huge.bin").write_bytes(b"x" * (6 * 1024 * 1024))
+    (tmp_path / "CODE_OF_CONDUCT.md").unlink(missing_ok=True)
 
     check = runner.invoke(
         [
@@ -179,6 +187,7 @@ def test_baseline_check_new_resolved_unchanged_and_update(tmp_path: Path) -> Non
 
 def test_repo_audit_baseline_suppression_hides_gating_noise(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
+    (tmp_path / "CONTRIBUTING.md").unlink(missing_ok=True)
     runner = CliRunner()
     create = runner.invoke(["repo", "baseline", "create", str(tmp_path), "--allow-absolute-path"])
     assert create.exit_code == 0

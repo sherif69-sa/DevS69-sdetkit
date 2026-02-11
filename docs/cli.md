@@ -79,8 +79,10 @@ Tool-specific notes:
 
 ## `repo`
 
-- `sdetkit repo audit [PATH] [--profile default|enterprise] [--format text|json|sarif] [--output PATH] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--force]`
+- `sdetkit repo audit [PATH] [--profile default|enterprise] [--pack PACKS] [--format text|json|sarif] [--output PATH] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--force]`
 - `sdetkit repo baseline create [PATH] [--output BASELINE.json] [--profile default|enterprise] [--exclude GLOB ...]`
+- `sdetkit repo rules list [--profile default|enterprise] [--pack PACKS] [--json]`
+- `sdetkit repo fix-audit [PATH] [--profile ...] [--pack PACKS] [--dry-run|--apply] [--diff] [--patch OUT.patch] [--force]`
 - `sdetkit repo baseline check [PATH] [--baseline BASELINE.json] [--fail-on none|warn|error] [--update] [--diff]`
 - `sdetkit repo check [PATH] [--format text|json|md] [--out PATH] [--fail-on LEVEL] [--min-score N]`
 - `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
@@ -100,7 +102,7 @@ Init examples:
 - `sdetkit repo init --diff`
 - `sdetkit repo init --apply --profile enterprise`
 
-See: repo-init.md
+See: repo-init.md and plugins-and-fix.md
 
 GitHub Action integration:
 

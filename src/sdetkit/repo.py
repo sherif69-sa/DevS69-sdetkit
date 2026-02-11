@@ -17,6 +17,16 @@ from pathlib import Path
 from typing import Any
 
 from .atomicio import atomic_write_text
+from .plugins import (
+    Finding as PluginFinding,
+)
+from .plugins import (
+    Fix,
+    RuleMeta,
+    load_rule_catalog,
+    normalize_packs,
+    select_rules,
+)
 from .security import SecurityError, safe_path
 
 SKIP_DIRS: frozenset[str] = frozenset(
@@ -872,12 +882,16 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
     rules: dict[str, dict[str, Any]] = {}
     results: list[dict[str, Any]] = []
     for item in payload["findings"]:
-        rid = f"{item['check']}/{item['code']}"
+        rid = str(
+            item.get("rule_id")
+            or f"{item.get('check', 'repo_audit')}/{item.get('code', 'unknown')}"
+        )
         if rid not in rules:
             rules[rid] = {
                 "id": rid,
-                "name": item["check"],
-                "shortDescription": {"text": item["message"]},
+                "name": rid,
+                "shortDescription": {"text": str(item.get("message", rid))},
+                "help": {"text": str(item.get("remediation", item.get("message", "")))},
             }
         results.append(
             {
@@ -890,11 +904,18 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
                     else "note"
                 ),
                 "message": {"text": item["message"]},
+                "properties": {
+                    "pack": item.get("pack", "core"),
+                    "fixable": bool(item.get("fixable", False)),
+                },
                 "locations": [
                     {
                         "physicalLocation": {
                             "artifactLocation": {"uri": _sarif_uri(str(item.get("path") or "."))},
-                            "region": {"startLine": item["line"], "startColumn": item["column"]},
+                            "region": {
+                                "startLine": item.get("line", 1),
+                                "startColumn": item.get("column", 1),
+                            },
                         }
                     }
                 ],
@@ -1128,6 +1149,157 @@ def _run_repo_init(root: Path, *, profile: str, apply: bool, force: bool, diff: 
     return 0
 
 
+def _plan_repo_fix_audit(
+    root: Path,
+    *,
+    profile: str,
+    packs: tuple[str, ...],
+    policy: RepoAuditPolicy,
+    allow_absolute_path: bool,
+    force: bool,
+) -> tuple[list[Fix], list[str], dict[str, Any]]:
+    payload = run_repo_audit(root, profile=profile, packs=packs)
+    baseline_path = safe_path(root, policy.baseline_path, allow_absolute=allow_absolute_path)
+    baseline_doc = _load_repo_baseline(baseline_path)
+    actionable, suppression = _apply_repo_audit_policy(
+        list(payload.get("findings", [])), policy, baseline_doc.get("entries", [])
+    )
+    by_rule: dict[str, list[PluginFinding]] = {}
+    for item in actionable:
+        rule_id = str(item.get("rule_id") or _repo_rule_id(item))
+        by_rule.setdefault(rule_id, []).append(
+            PluginFinding(
+                rule_id=rule_id,
+                severity=str(item.get("severity", "warn")),
+                message=str(item.get("message", "")),
+                path=str(item.get("path", ".")),
+                line=int(item.get("line", 1)),
+                details={
+                    "pack": item.get("pack", "core"),
+                    "fixable": bool(item.get("fixable", False)),
+                    "fingerprint": item.get("fingerprint", ""),
+                },
+                fingerprint=str(item.get("fingerprint", "")),
+            )
+        )
+
+    catalog = load_rule_catalog()
+    fixer_map = catalog.fixer_map()
+    fixes: list[Fix] = []
+    conflicts: list[str] = []
+    for rule_id in sorted(by_rule):
+        fixer = fixer_map.get(rule_id)
+        if fixer is None:
+            continue
+        generated = fixer.fix(root, by_rule[rule_id], {"profile": profile, "packs": packs})
+        for fix in generated:
+            if not force and not fix.safe:
+                continue
+            approved_changes = []
+            for edit in fix.changes:
+                target = root / edit.path
+                if (
+                    target.exists()
+                    and target.read_text(encoding="utf-8") != edit.old_text
+                    and not force
+                ):
+                    conflicts.append(edit.path)
+                    continue
+                approved_changes.append(edit)
+            if approved_changes:
+                fixes.append(
+                    Fix(
+                        rule_id=fix.rule_id,
+                        description=fix.description,
+                        safe=fix.safe,
+                        changes=tuple(approved_changes),
+                    )
+                )
+
+    fixes.sort(key=lambda item: (item.rule_id, item.description))
+    conflicts = sorted(set(conflicts))
+    return (
+        fixes,
+        conflicts,
+        {"payload": payload, "suppression": suppression, "actionable": actionable},
+    )
+
+
+def _print_fix_plan(fixes: list[Fix], *, apply: bool) -> None:
+    mode = "apply" if apply else "dry-run"
+    if not fixes:
+        print(f"repo fix-audit ({mode}): no changes")
+        return
+    for fix in fixes:
+        for edit in fix.changes:
+            print(f"PLAN  {fix.rule_id:<36} {edit.path}")
+    print(f"repo fix-audit ({mode}): {sum(len(f.changes) for f in fixes)} file change(s)")
+
+
+def _unified_diff_for_edit(path: str, old_text: str, new_text: str) -> str:
+    return "".join(
+        difflib.unified_diff(
+            old_text.splitlines(keepends=True),
+            new_text.splitlines(keepends=True),
+            fromfile=f"a/{path}",
+            tofile=f"b/{path}",
+            lineterm="",
+        )
+    )
+
+
+def _run_repo_fix_audit(
+    root: Path,
+    *,
+    profile: str,
+    packs: tuple[str, ...],
+    policy: RepoAuditPolicy,
+    dry_run: bool,
+    apply: bool,
+    force: bool,
+    show_diff: bool,
+    patch_path: str | None,
+    allow_absolute_path: bool,
+) -> int:
+    fixes, conflicts, _ = _plan_repo_fix_audit(
+        root,
+        profile=profile,
+        packs=packs,
+        policy=policy,
+        allow_absolute_path=allow_absolute_path,
+        force=force,
+    )
+    if conflicts:
+        for rel in conflicts:
+            print(f"refusing to overwrite existing file: {rel} (use --force)", file=sys.stderr)
+        return 2
+
+    _print_fix_plan(fixes, apply=apply)
+    all_edits = sorted([edit for fix in fixes for edit in fix.changes], key=lambda item: item.path)
+    patch_data = "".join(
+        _unified_diff_for_edit(edit.path, edit.old_text, edit.new_text) for edit in all_edits
+    )
+
+    if show_diff and patch_data:
+        sys.stdout.write(patch_data)
+    if patch_path:
+        patch_target = safe_path(root, patch_path, allow_absolute=allow_absolute_path)
+        if patch_target.exists() and not force:
+            print("refusing to overwrite existing patch output (use --force)", file=sys.stderr)
+            return 2
+        atomic_write_text(patch_target, patch_data.replace("\r\n", "\n"))
+
+    if dry_run or not apply:
+        return 0
+
+    for edit in all_edits:
+        target = safe_path(root, edit.path, allow_absolute=False)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(target, edit.new_text.replace("\r\n", "\n"))
+    print(f"repo fix-audit: wrote {len(all_edits)} file(s)")
+    return 0
+
+
 def _audit_oss_readiness(root: Path) -> RepoAuditCheck:
     required = (
         "README.md",
@@ -1318,34 +1490,104 @@ def _audit_repo_hygiene(root: Path) -> RepoAuditCheck:
     )
 
 
-def run_repo_audit(root: Path) -> dict[str, Any]:
-    checks = [
-        _audit_oss_readiness(root),
-        _audit_ci_security_workflows(root),
-        _audit_python_tooling(root),
-        _audit_repo_hygiene(root),
-    ]
-    passed = sum(1 for item in checks if item.passed)
-    failed = len(checks) - passed
-    findings = [f.to_dict() for check in checks for f in check.findings]
-    counts = {"info": 0, "warn": 0, "error": 0}
-    for finding in findings:
-        sev = str(finding.get("severity", "error"))
-        counts[sev] = counts.get(sev, 0) + 1
+def _plugin_finding_to_dict(finding: PluginFinding, meta: RuleMeta) -> dict[str, Any]:
+    normalized = finding.with_fingerprint()
+    path = normalized.path or "."
+    details = dict(normalized.details or {})
+    pack = str(details.get("pack") or "core")
     return {
-        "schema_version": "1.0.0",
+        "check": "repo_audit",
+        "code": normalized.rule_id,
+        "rule_id": normalized.rule_id,
+        "severity": normalized.severity,
+        "path": path,
+        "line": normalized.line or 1,
+        "column": 1,
+        "message": normalized.message,
+        "confidence": "high",
+        "remediation": meta.description,
+        "snippet": "",
+        "fingerprint": normalized.fingerprint,
+        "pack": pack,
+        "fixable": bool(meta.supports_fix),
+    }
+
+
+def run_repo_audit(
+    root: Path, *, profile: str = "default", packs: tuple[str, ...] | None = None
+) -> dict[str, Any]:
+    catalog = load_rule_catalog()
+    selected_packs = packs or normalize_packs(profile, None)
+    selected_rules = select_rules(catalog, selected_packs)
+
+    findings: list[dict[str, Any]] = []
+    checks: list[dict[str, Any]] = []
+    context: dict[str, Any] = {"profile": profile, "packs": selected_packs}
+    for loaded in selected_rules:
+        rule_findings = loaded.plugin.run(root, context)
+        checks.append(
+            {
+                "key": loaded.meta.id,
+                "title": loaded.meta.title,
+                "status": "pass" if not rule_findings else "fail",
+                "details": [loaded.meta.description],
+                "pack": next(
+                    (t.split(":", 1)[1] for t in loaded.meta.tags if t.startswith("pack:")), "core"
+                ),
+                "supports_fix": loaded.meta.supports_fix,
+            }
+        )
+        for finding in rule_findings:
+            findings.append(_plugin_finding_to_dict(finding, loaded.meta))
+
+    counts = {"info": 0, "warn": 0, "error": 0}
+    for finding_item in findings:
+        sev = str(finding_item.get("severity", "error"))
+        counts[sev] = counts.get(sev, 0) + 1
+
+    checks.sort(key=lambda x: str(x["key"]))
+    findings.sort(
+        key=lambda x: (str(x.get("path", "")), str(x.get("rule_id", "")), str(x.get("message", "")))
+    )
+    return {
+        "schema_version": "1.1.0",
         "root": str(root),
         "summary": {
             "checks": len(checks),
-            "passed": passed,
-            "failed": failed,
-            "ok": failed == 0,
+            "passed": sum(1 for item in checks if item["status"] == "pass"),
+            "failed": sum(1 for item in checks if item["status"] == "fail"),
+            "ok": not findings,
             "counts": {k: counts[k] for k in sorted(counts)},
             "findings": len(findings),
+            "packs": list(selected_packs),
         },
-        "checks": [item.to_dict() for item in checks],
+        "checks": checks,
         "findings": findings,
     }
+
+
+def list_repo_rules(
+    *, profile: str = "default", packs: tuple[str, ...] | None = None
+) -> list[dict[str, Any]]:
+    catalog = load_rule_catalog()
+    selected_packs = packs or normalize_packs(profile, None)
+    selected_rules = select_rules(catalog, selected_packs)
+    rules = []
+    for loaded in selected_rules:
+        pack = next((t.split(":", 1)[1] for t in loaded.meta.tags if t.startswith("pack:")), "core")
+        rules.append(
+            {
+                "rule_id": loaded.meta.id,
+                "title": loaded.meta.title,
+                "description": loaded.meta.description,
+                "severity": loaded.meta.default_severity,
+                "pack": pack,
+                "tags": list(loaded.meta.tags),
+                "fixable": loaded.meta.supports_fix,
+            }
+        )
+    rules.sort(key=lambda x: str(x["rule_id"]))
+    return rules
 
 
 def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
@@ -1423,7 +1665,7 @@ def _load_repo_audit_config(root: Path, config_path: Path | None) -> dict[str, A
     if not candidate.exists():
         return {}
     try:
-        data = _tomllib.loads(candidate.read_text(encoding="utf-8"))  # type: ignore[attr-defined]
+        data = _tomllib.loads(candidate.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise RepoAuditConfigError(f"unable to parse repo audit config: {exc}") from exc
     if not isinstance(data, dict):
@@ -1525,6 +1767,9 @@ def _resolve_repo_audit_policy(
 
 
 def _repo_rule_id(item: dict[str, Any]) -> str:
+    explicit = item.get("rule_id")
+    if isinstance(explicit, str) and explicit:
+        return explicit
     return f"{item.get('check', 'repo_audit')}/{item.get('code', 'unknown')}"
 
 
@@ -1555,21 +1800,24 @@ def _apply_repo_audit_policy(
         rule_id = _repo_rule_id(item)
         item["rule_id"] = rule_id
         item["fingerprint"] = _repo_finding_fingerprint(item)
-        if rule_id in policy.severity_overrides:
-            item["severity"] = policy.severity_overrides[rule_id]
+        aliases = {rule_id, str(item.get("code", "")), f"repo_audit/{item.get('code', '')}"}
+        for key in sorted(aliases):
+            if key in policy.severity_overrides:
+                item["severity"] = policy.severity_overrides[key]
+                break
         if any(_finding_matches_glob(str(item.get("path", "")), g) for g in policy.exclude_paths):
             suppressed.append(
                 {"fingerprint": item["fingerprint"], "reason": "policy:exclude_paths"}
             )
             continue
-        if rule_id in policy.disable_rules:
+        if any(alias in policy.disable_rules for alias in aliases):
             suppressed.append(
                 {"fingerprint": item["fingerprint"], "reason": "policy:disable_rules"}
             )
             continue
         allowlisted = False
         for rule in policy.allowlist:
-            if rule.rule_id != rule_id:
+            if rule.rule_id not in aliases:
                 continue
             if not _finding_matches_glob(str(item.get("path", "")), rule.path):
                 continue
@@ -1715,6 +1963,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = sub.add_parser("audit")
     ap.add_argument("path", nargs="?", default=".")
     ap.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    ap.add_argument("--pack", default=None)
     ap.add_argument("--format", choices=["text", "json", "sarif"], default="text")
     ap.add_argument("--output", "--out", dest="output", default=None)
     ap.add_argument("--fail-on", choices=["none", "warn", "error"], default=None)
@@ -1726,7 +1975,49 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--allow-absolute-path", action="store_true")
 
+    rules_parser = sub.add_parser("rules")
+    rules_sub = rules_parser.add_subparsers(dest="rules_cmd", required=True)
+    rules_list = rules_sub.add_parser("list")
+    rules_list.add_argument("--profile", choices=["default", "enterprise"], default="default")
+    rules_list.add_argument("--pack", default=None)
+    rules_list.add_argument("--json", action="store_true")
+
+    fxap = sub.add_parser("fix-audit")
+    fxap.add_argument("path", nargs="?", default=".")
+    fxap.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    fxap.add_argument("--pack", default=None)
+    fxap.add_argument("--config", default=None)
+    fxap.add_argument("--baseline", default=None)
+    fxap.add_argument("--exclude", action="append", default=[])
+    fxap.add_argument("--disable-rule", action="append", default=[])
+    fxap.add_argument("--dry-run", action="store_true")
+    fxap.add_argument("--apply", action="store_true")
+    fxap.add_argument("--force", action="store_true")
+    fxap.add_argument("--diff", action="store_true")
+    fxap.add_argument("--patch", default=None)
+    fxap.add_argument("--allow-absolute-path", action="store_true")
+
     ns = parser.parse_args(argv)
+
+    if ns.repo_cmd == "rules":
+        packs = normalize_packs(ns.profile, ns.pack)
+        rules = list_repo_rules(profile=ns.profile, packs=packs)
+        if ns.json:
+            sys.stdout.write(
+                json.dumps(
+                    {"profile": ns.profile, "packs": list(packs), "rules": rules},
+                    ensure_ascii=True,
+                    sort_keys=True,
+                    indent=2,
+                )
+                + "\n"
+            )
+        else:
+            for rule in rules:
+                print(
+                    f"{rule['rule_id']:<36} [{rule['pack']}] sev={rule['severity']} fixable={'yes' if rule['fixable'] else 'no'}"
+                )
+        return 0
 
     try:
         root = _resolve_root(ns.path, allow_absolute=bool(ns.allow_absolute_path))
@@ -1830,7 +2121,9 @@ def main(argv: list[str] | None = None) -> int:
             print(str(exc), file=sys.stderr)
             return 2
         try:
-            findings_payload = run_repo_audit(root)
+            findings_payload = run_repo_audit(
+                root, profile=policy.profile, packs=normalize_packs(policy.profile, None)
+            )
             actionable_findings, _ = _apply_repo_audit_policy(
                 findings_payload.get("findings", []), policy, []
             )
@@ -1885,7 +2178,8 @@ def main(argv: list[str] | None = None) -> int:
         except RepoAuditConfigError as exc:
             print(str(exc), file=sys.stderr)
             return 2
-        payload = run_repo_audit(root)
+        packs = normalize_packs(policy.profile, ns.pack)
+        payload = run_repo_audit(root, profile=policy.profile, packs=packs)
         original_findings = list(payload.get("findings", []))
         try:
             baseline_path = safe_path(
@@ -1930,6 +2224,46 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stdout.write(rendered)
         return 1 if _needs_fail_repo_audit(payload.get("findings", []), policy.fail_on) else 0
+
+    if ns.repo_cmd == "fix-audit":
+        if ns.dry_run and ns.apply:
+            print("cannot use --dry-run and --apply together", file=sys.stderr)
+            return 2
+        config_file = None
+        if ns.config:
+            try:
+                config_file = safe_path(
+                    root, ns.config, allow_absolute=bool(ns.allow_absolute_path)
+                )
+            except SecurityError as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        try:
+            policy = _resolve_repo_audit_policy(
+                root,
+                cli_profile=ns.profile,
+                cli_fail_on="none",
+                cli_baseline=ns.baseline,
+                cli_excludes=ns.exclude,
+                cli_disable_rules=ns.disable_rule,
+                config_path=config_file,
+            )
+        except RepoAuditConfigError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        packs = normalize_packs(policy.profile, ns.pack)
+        return _run_repo_fix_audit(
+            root,
+            profile=policy.profile,
+            packs=packs,
+            policy=policy,
+            dry_run=bool(ns.dry_run) or not bool(ns.apply),
+            apply=bool(ns.apply),
+            force=bool(ns.force),
+            show_diff=bool(ns.diff),
+            patch_path=ns.patch,
+            allow_absolute_path=bool(ns.allow_absolute_path),
+        )
 
     if ns.repo_cmd == "init":
         if ns.dry_run and ns.apply:

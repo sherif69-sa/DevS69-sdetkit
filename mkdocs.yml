@@ -54,6 +54,7 @@ nav:
       - Doctor: doctor.md
       - Repo audit: repo-audit.md
       - Policy & baselines: policy-and-baselines.md
+      - Plugins & fix-audit: plugins-and-fix.md
       - Repo init: repo-init.md
       - Patch harness: patch-harness.md
   - Integrations:

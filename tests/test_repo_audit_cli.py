@@ -42,6 +42,10 @@ def _seed_min_repo(root: Path) -> None:
     wf = root / ".github" / "workflows"
     wf.mkdir(parents=True)
     (wf / "ci.yml").write_text("name: ci\n", encoding="utf-8")
+    issue = root / ".github" / "ISSUE_TEMPLATE"
+    issue.mkdir(parents=True, exist_ok=True)
+    (issue / "config.yml").write_text("blank_issues_enabled: false\n", encoding="utf-8")
+    (root / ".github" / "PULL_REQUEST_TEMPLATE.md").write_text("## Summary\n", encoding="utf-8")
     (wf / "security.yml").write_text("name: security\n", encoding="utf-8")
 
 
@@ -55,7 +59,7 @@ def test_repo_audit_json_schema_and_stable_keys(tmp_path: Path) -> None:
     assert result.exit_code == 0
 
     payload = json.loads(result.stdout)
-    assert payload["schema_version"] == "1.0.0"
+    assert payload["schema_version"] == "1.1.0"
     assert list(payload.keys()) == [
         "checks",
         "findings",
@@ -68,7 +72,7 @@ def test_repo_audit_json_schema_and_stable_keys(tmp_path: Path) -> None:
 
 def test_repo_audit_sarif_has_required_fields(tmp_path: Path) -> None:
     _seed_min_repo(tmp_path)
-    (tmp_path / "LICENSE").unlink()
+    (tmp_path / "CONTRIBUTING.md").unlink()
 
     runner = CliRunner()
     result = runner.invoke(
@@ -117,8 +121,7 @@ def test_repo_audit_sarif_normalizes_absolute_like_paths_to_relative(tmp_path: P
 def test_repo_audit_fail_on_exit_codes(tmp_path: Path) -> None:
     _seed_min_repo(tmp_path)
 
-    big_file = tmp_path / "huge.bin"
-    big_file.write_bytes(b"x" * (6 * 1024 * 1024))
+    (tmp_path / "CONTRIBUTING.md").unlink()
 
     runner = CliRunner()
     args = ["repo", "audit", str(tmp_path), "--allow-absolute-path", "--format", "json"]
