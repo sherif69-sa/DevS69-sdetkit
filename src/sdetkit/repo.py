@@ -95,6 +95,143 @@ PRIVATE_KEY_FILES: frozenset[str] = frozenset({"id_rsa", "id_dsa"})
 PRIVATE_KEY_SUFFIXES: tuple[str, ...] = (".pem", ".p12", ".pfx", ".key")
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 
+DEFAULT_INIT_TEMPLATES: dict[str, str] = {
+    "SECURITY.md": (
+        "# Security Policy\n\n"
+        "## Reporting a Vulnerability\n\n"
+        "Please report suspected vulnerabilities privately to the maintainers. "
+        "Include reproduction steps, impact, and any proof-of-concept details.\n\n"
+        "## Response Expectations\n\n"
+        "Maintainers acknowledge reports promptly and provide status updates until closure.\n"
+    ),
+    "CONTRIBUTING.md": (
+        "# Contributing\n\n"
+        "Thanks for helping improve this project.\n\n"
+        "## Getting Started\n\n"
+        "- Create a branch from the default branch.\n"
+        "- Keep changes scoped and include tests.\n"
+        "- Run local quality checks before opening a pull request.\n\n"
+        "## Pull Requests\n\n"
+        "- Explain what changed and why.\n"
+        "- Reference related issues where relevant.\n"
+        "- Ensure CI is green before requesting review.\n"
+    ),
+    "CODE_OF_CONDUCT.md": (
+        "# Code of Conduct\n\n"
+        "This project is committed to a respectful, harassment-free experience for everyone.\n\n"
+        "## Expected Behavior\n\n"
+        "- Be respectful and constructive.\n"
+        "- Welcome diverse perspectives.\n"
+        "- Focus on what is best for the community.\n\n"
+        "## Reporting\n\n"
+        "If you experience unacceptable behavior, contact the maintainers privately.\n"
+    ),
+    ".github/ISSUE_TEMPLATE/config.yml": (
+        "blank_issues_enabled: false\n"
+        "contact_links:\n"
+        "  - name: Security report\n"
+        "    url: https://example.invalid/security\n"
+        "    about: Please report vulnerabilities privately and avoid public disclosure.\n"
+    ),
+    ".github/ISSUE_TEMPLATE/bug_report.yml": (
+        "name: Bug report\n"
+        "description: Report a reproducible defect.\n"
+        'title: "bug: "\n'
+        "labels: [bug]\n"
+        "body:\n"
+        "  - type: textarea\n"
+        "    id: summary\n"
+        "    attributes:\n"
+        "      label: Summary\n"
+        "      description: What happened?\n"
+        "    validations:\n"
+        "      required: true\n"
+        "  - type: textarea\n"
+        "    id: steps\n"
+        "    attributes:\n"
+        "      label: Steps to reproduce\n"
+        "      description: Provide a minimal, deterministic reproduction.\n"
+        "    validations:\n"
+        "      required: true\n"
+    ),
+    ".github/ISSUE_TEMPLATE/feature_request.yml": (
+        "name: Feature request\n"
+        "description: Suggest an improvement.\n"
+        'title: "feat: "\n'
+        "labels: [enhancement]\n"
+        "body:\n"
+        "  - type: textarea\n"
+        "    id: problem\n"
+        "    attributes:\n"
+        "      label: Problem statement\n"
+        "      description: What problem are you trying to solve?\n"
+        "    validations:\n"
+        "      required: true\n"
+        "  - type: textarea\n"
+        "    id: proposal\n"
+        "    attributes:\n"
+        "      label: Proposed solution\n"
+        "      description: Describe your preferred approach.\n"
+    ),
+    ".github/PULL_REQUEST_TEMPLATE.md": (
+        "## Summary\n\n"
+        "Describe the change and its motivation.\n\n"
+        "## Validation\n\n"
+        "- [ ] Tests added or updated\n"
+        "- [ ] Local checks passed\n"
+    ),
+}
+
+ENTERPRISE_INIT_TEMPLATES: dict[str, str] = {
+    ".github/dependabot.yml": (
+        "version: 2\n"
+        "updates:\n"
+        "  - package-ecosystem: pip\n"
+        "    directory: /\n"
+        "    schedule:\n"
+        "      interval: weekly\n"
+    ),
+    ".github/workflows/quality.yml": (
+        "name: quality\n"
+        "on:\n"
+        "  pull_request:\n"
+        "  push:\n"
+        "    branches: [main]\n"
+        "jobs:\n"
+        "  quality:\n"
+        "    runs-on: ubuntu-latest\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "      - uses: actions/setup-python@v5\n"
+        "        with:\n"
+        "          python-version: '3.11'\n"
+        "      - name: Install\n"
+        "        run: python -m pip install -e .\n"
+        "      - name: Test\n"
+        "        run: pytest\n"
+    ),
+    ".github/workflows/security.yml": (
+        "name: security\n"
+        "on:\n"
+        "  pull_request:\n"
+        "  push:\n"
+        "    branches: [main]\n"
+        "jobs:\n"
+        "  checks:\n"
+        "    runs-on: ubuntu-latest\n"
+        "    steps:\n"
+        "      - uses: actions/checkout@v4\n"
+        "      - name: Secret-pattern sanity check\n"
+        "        run: |\n"
+        "          if grep -R --line-number --exclude-dir=.git --exclude-dir=.venv 'AKIA[0-9A-Z]\\{16\\}' .; then\n"
+        "            echo 'Potential AWS key pattern detected'\n"
+        "            exit 1\n"
+        "          fi\n"
+        "      - name: Python syntax check\n"
+        "        run: python -m compileall -q src tests\n"
+    ),
+}
+
 
 def _shannon_entropy(s: str) -> float:
     if not s:
@@ -194,6 +331,14 @@ class RepoAuditCheck:
             "status": "pass" if self.passed else "fail",
             "details": list(self.details),
         }
+
+
+@dataclass(frozen=True)
+class RepoInitChange:
+    path: str
+    action: str
+    current: str
+    desired: str
 
 
 def _iter_files(root: Path) -> list[Path]:
@@ -871,6 +1016,79 @@ def _resolve_root(user_path: str, *, allow_absolute: bool) -> Path:
         raise
 
 
+def _init_templates(profile: str) -> dict[str, str]:
+    templates = dict(DEFAULT_INIT_TEMPLATES)
+    if profile == "enterprise":
+        templates.update(ENTERPRISE_INIT_TEMPLATES)
+    return dict(sorted(templates.items()))
+
+
+def _plan_repo_init(
+    root: Path, *, profile: str, force: bool
+) -> tuple[list[RepoInitChange], list[str]]:
+    changes: list[RepoInitChange] = []
+    conflicts: list[str] = []
+    for rel, desired in _init_templates(profile).items():
+        target = safe_path(root, rel, allow_absolute=False)
+        if not target.exists():
+            changes.append(RepoInitChange(path=rel, action="create", current="", desired=desired))
+            continue
+        try:
+            current = target.read_text(encoding="utf-8")
+        except OSError:
+            conflicts.append(rel)
+            continue
+        if current == desired:
+            continue
+        if not force:
+            conflicts.append(rel)
+            continue
+        changes.append(RepoInitChange(path=rel, action="update", current=current, desired=desired))
+    return changes, sorted(conflicts)
+
+
+def _print_repo_init_plan(changes: list[RepoInitChange], *, apply: bool) -> None:
+    mode = "apply" if apply else "dry-run"
+    if not changes:
+        print(f"repo init ({mode}): no changes")
+        return
+    for change in changes:
+        print(f"{change.action.upper():<6} {change.path}")
+    creates = sum(1 for item in changes if item.action == "create")
+    updates = sum(1 for item in changes if item.action == "update")
+    print(f"repo init ({mode}): {len(changes)} planned (create={creates}, update={updates})")
+
+
+def _print_repo_init_diff(changes: list[RepoInitChange]) -> None:
+    for change in changes:
+        diff = difflib.unified_diff(
+            change.current.splitlines(keepends=True),
+            change.desired.splitlines(keepends=True),
+            fromfile=f"a/{change.path}",
+            tofile=f"b/{change.path}",
+        )
+        sys.stdout.write("".join(diff))
+
+
+def _run_repo_init(root: Path, *, profile: str, apply: bool, force: bool, diff: bool) -> int:
+    changes, conflicts = _plan_repo_init(root, profile=profile, force=force)
+    if conflicts:
+        for rel in conflicts:
+            print(f"refusing to overwrite existing file: {rel} (use --force)", file=sys.stderr)
+        return 2
+    _print_repo_init_plan(changes, apply=apply)
+    if diff and changes:
+        _print_repo_init_diff(changes)
+    if not apply:
+        return 0
+    for change in changes:
+        target = safe_path(root, change.path, allow_absolute=False)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(target, change.desired)
+    print(f"repo init: wrote {len(changes)} file(s)")
+    return 0
+
+
 def _audit_oss_readiness(root: Path) -> RepoAuditCheck:
     required = (
         "README.md",
@@ -1165,6 +1383,15 @@ def main(argv: list[str] | None = None) -> int:
     fp.add_argument("--force", action="store_true")
     fp.add_argument("--allow-absolute-path", action="store_true")
 
+    ip = sub.add_parser("init")
+    ip.add_argument("path", nargs="?", default=".")
+    ip.add_argument("--profile", choices=["default", "enterprise"], default="default")
+    ip.add_argument("--dry-run", action="store_true")
+    ip.add_argument("--apply", action="store_true")
+    ip.add_argument("--force", action="store_true")
+    ip.add_argument("--diff", action="store_true")
+    ip.add_argument("--allow-absolute-path", action="store_true")
+
     ap = sub.add_parser("audit")
     ap.add_argument("path", nargs="?", default=".")
     ap.add_argument("--profile", choices=["default", "enterprise"], default="default")
@@ -1256,6 +1483,18 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stdout.write(rendered)
         return 1 if _needs_fail_repo_audit(payload.get("findings", []), ns.fail_on) else 0
+
+    if ns.repo_cmd == "init":
+        if ns.dry_run and ns.apply:
+            print("cannot use --dry-run and --apply together", file=sys.stderr)
+            return 2
+        return _run_repo_init(
+            root,
+            profile=ns.profile,
+            apply=bool(ns.apply),
+            force=bool(ns.force),
+            diff=bool(ns.diff),
+        )
 
     if ns.check and ns.dry_run:
         print("cannot use --check and --dry-run together", file=sys.stderr)

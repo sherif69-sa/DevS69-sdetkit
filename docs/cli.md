@@ -82,9 +82,18 @@ Tool-specific notes:
 - `sdetkit repo audit [PATH] [--format text|json] [--out PATH] [--force]`
 - `sdetkit repo check [PATH] [--format text|json|md] [--out PATH] [--fail-on LEVEL] [--min-score N]`
 - `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
+- `sdetkit repo init [PATH] [--profile default|enterprise] [--dry-run] [--apply] [--force] [--diff]`
 - Security-first defaults: safe paths, deterministic sorted outputs, and atomic writes.
 
 Audit examples:
 
 - `sdetkit repo audit`
 - `sdetkit repo audit --format json --out repo-audit.json --force`
+
+Init examples:
+
+- `sdetkit repo init` (safe dry-run default)
+- `sdetkit repo init --diff`
+- `sdetkit repo init --apply --profile enterprise`
+
+See: repo-init.md
