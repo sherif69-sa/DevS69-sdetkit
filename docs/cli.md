@@ -79,7 +79,9 @@ Tool-specific notes:
 
 ## `repo`
 
-- `sdetkit repo audit [PATH] [--profile default|enterprise] [--format text|json|sarif] [--output PATH] [--fail-on none|warn|error] [--force]`
+- `sdetkit repo audit [PATH] [--profile default|enterprise] [--format text|json|sarif] [--output PATH] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--force]`
+- `sdetkit repo baseline create [PATH] [--output BASELINE.json] [--profile default|enterprise] [--exclude GLOB ...]`
+- `sdetkit repo baseline check [PATH] [--baseline BASELINE.json] [--fail-on none|warn|error] [--update] [--diff]`
 - `sdetkit repo check [PATH] [--format text|json|md] [--out PATH] [--fail-on LEVEL] [--min-score N]`
 - `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
 - `sdetkit repo init [PATH] [--profile default|enterprise] [--dry-run] [--apply] [--force] [--diff]`
@@ -89,6 +91,8 @@ Audit examples:
 
 - `sdetkit repo audit`
 - `sdetkit repo audit --format json --out repo-audit.json --force`
+- `sdetkit repo baseline create .`
+- `sdetkit repo baseline check . --diff`
 
 Init examples:
 
