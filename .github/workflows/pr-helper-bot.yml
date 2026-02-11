@@ -59,7 +59,7 @@ jobs:
       - name: Run check
         if: steps.pr.outputs.cmd == '/check'
         run: |
-          pre-commit run -a
+          python -m pre_commit run -a
           PYTHONPATH=src python -m sdetkit.doctor --ascii
           python -m pytest -q
 

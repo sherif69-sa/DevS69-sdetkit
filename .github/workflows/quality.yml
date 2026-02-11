@@ -38,7 +38,7 @@ jobs:
           PYTHONPATH=src python -m sdetkit.doctor --ascii
       - name: Lint
         run: |
-          pre-commit run -a
+          python -m pre_commit run -a
 
       - name: Tests
         env:
