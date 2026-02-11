@@ -180,6 +180,24 @@ def test_patch_report_json_write_error_returns_exit_code_2(tmp_path: Path, capsy
     assert "error:" in err
 
 
+def test_patch_error_path_still_writes_report_when_requested(tmp_path: Path):
+    report = tmp_path / "report.json"
+    spec = {"files": []}
+    (tmp_path / "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+
+    old = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        rc = patch.main(["spec.json", "--report-json", str(report)])
+    finally:
+        os.chdir(old)
+
+    assert rc == 2
+    data = json.loads(report.read_text(encoding="utf-8"))
+    assert data["status_code"] == 2
+    assert data["files_touched"] == []
+
+
 def test_patch_missing_spec_version_defaults_to_v1(tmp_path: Path):
     (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
     spec = {
