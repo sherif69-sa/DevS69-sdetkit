@@ -1,0 +1,31 @@
+name: SBOM
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  cyclonedx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CycloneDX tool
+        run: |
+          python -m pip install -U pip
+          python -m pip install cyclonedx-bom
+
+      - name: Generate SBOM
+        run: |
+          cyclonedx-py environment -o sbom.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json

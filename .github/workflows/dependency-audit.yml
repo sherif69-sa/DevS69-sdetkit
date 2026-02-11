@@ -1,6 +1,9 @@
 name: Dependency Audit
 
 on:
+  push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -14,13 +17,15 @@ jobs:
           python-version: "3.12"
           cache: "pip"
           cache-dependency-path: |
+            pyproject.toml
             requirements-test.txt
             requirements-docs.txt
 
-      - name: Install pip-audit
+      - name: Install audit tooling
         run: |
+          python -m pip install -U pip
           python -m pip install pip-audit
 
-      - name: Audit (non-blocking)
+      - name: Audit dependencies (blocking)
         run: |
-          pip-audit -r requirements-test.txt -r requirements-docs.txt || true
+          pip-audit -r requirements-test.txt -r requirements-docs.txt

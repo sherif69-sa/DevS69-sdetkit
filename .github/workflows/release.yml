@@ -13,6 +13,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -76,6 +78,29 @@ jobs:
           set -euo pipefail
           python -m build
           python -m twine check dist/*
+
+      - name: Wheel smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --force-reinstall dist/*.whl
+          sdetkit --help
+
+      - name: Publish to PyPI
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m twine upload dist/*
+
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist/*'
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

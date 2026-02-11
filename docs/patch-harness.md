@@ -11,6 +11,8 @@ Preferred (official):
 sdetkit patch spec.json
 sdetkit patch spec.json --dry-run
 sdetkit patch spec.json --check
+sdetkit patch spec.json --root . --report-json patch-report.json
+sdetkit patch spec.json --max-spec-bytes 1048576
 ```
 
 Backward compatibility wrapper (still supported):
@@ -19,12 +21,15 @@ Backward compatibility wrapper (still supported):
 python tools/patch_harness.py spec.json
 ```
 
-## Spec format
+## Spec format (versioned)
 
-A spec is a JSON file with a list of files and operations:
+A spec is a JSON file with `spec_version: 1` and a `files` section. For backward compatibility, omitted `spec_version` is treated as `1`.
+
+List form:
 
 ```json
 {
+  "spec_version": 1,
   "files": [
     {
       "path": "a.txt",
@@ -36,18 +41,41 @@ A spec is a JSON file with a list of files and operations:
 }
 ```
 
-- `path` is relative to the working directory.
-- `pattern` is a regular expression.
-- `text` supports escaped newlines (`\n`) and tabs (`\t`).
+Dict form (also supported):
 
-## Idempotency and --check
+```json
+{
+  "spec_version": 1,
+  "files": {
+    "a.txt": [
+      { "op": "insert_after", "pattern": "^MARK$", "text": "X\n" }
+    ]
+  }
+}
+```
 
-Operations are designed to be safe for repeated runs.
+- `path` is relative to `--root`.
+- absolute paths and `..` are rejected.
+- default symlink policy is deny (`--allow-symlinks` to opt in).
+- unknown keys in the spec or operation objects are rejected.
 
-- `--check` exits `0` if files are already compliant.
-- `--check` exits non-zero if changes would be applied.
-- `--dry-run` prints a unified diff but does not write files.
-- Default mode writes files when changes are needed.
+## Exit code contract
+
+- `0`: no changes needed or changes applied successfully
+- `1`: `--check` detected required changes
+- `2`: invalid spec/runtime error/unsafe path/refused operation
+
+## Determinism and safety
+
+- files are processed in sorted order.
+- unified diffs are emitted with stable headers.
+- writes are atomic (temp file + fsync + replace).
+- resource limits are configurable:
+  - `--max-files`
+  - `--max-bytes-per-file`
+  - `--max-total-bytes-changed`
+  - `--max-op-count`
+  - `--max-spec-bytes`
 
 ## Indentation token
 
@@ -58,6 +86,7 @@ Example:
 
 ```json
 {
+  "spec_version": 1,
   "files": [
     {
       "path": "m.py",

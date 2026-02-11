@@ -42,7 +42,12 @@ Examples:
 
 - `sdetkit patch spec.json --check`
 - `sdetkit patch spec.json --dry-run`
-- `sdetkit patch spec.json`
+- `sdetkit patch spec.json --root .`
+- `sdetkit patch spec.json --report-json patch-report.json`
+
+Exit codes: `0` success/no-op, `1` changes required in `--check`, `2` invalid/unsafe/error.
+
+Safety limits include `--max-files`, `--max-bytes-per-file`, `--max-total-bytes-changed`, `--max-op-count`, and `--max-spec-bytes`.
 
 Backward compatibility wrapper still works:
 
