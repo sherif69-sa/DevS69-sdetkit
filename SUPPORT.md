@@ -13,4 +13,3 @@ For questions, licensing inquiries, or feature requests, please open an issue wi
 For private inquiries (including commercial licensing permissions), use one of the channels below:
 - LinkedIn: https://www.linkedin.com/in/sherif-atef-b1077a124/
 - Email: sherif.atef6300@gmail.com
-
