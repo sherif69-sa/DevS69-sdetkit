@@ -659,7 +659,9 @@ def _default_root() -> Path:
             if out:
                 return Path(out)
     except OSError:
-        pass
+        # If git is not available or the command fails due to an OS error,
+        # fall back to the current working directory.
+        return Path.cwd()
     return Path.cwd()
 
 
