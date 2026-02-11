@@ -131,6 +131,73 @@ def test_patch_check_is_deterministic_for_same_inputs(tmp_path: Path, capsys):
     assert out1 == out2
 
 
+def test_patch_check_diff_output_has_no_extra_blank_lines(tmp_path: Path, capsys):
+    (tmp_path / "a.txt").write_text("MARK\n", encoding="utf-8")
+    spec = {
+        "spec_version": 1,
+        "files": [
+            {
+                "path": "a.txt",
+                "ops": [{"op": "insert_after", "pattern": r"^MARK$", "text": "X\\n"}],
+            }
+        ],
+    }
+    (tmp_path / "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+
+    old = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        rc = patch.main(["spec.json", "--check"])
+    finally:
+        os.chdir(old)
+
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "\n\n+++" not in out
+    assert "\n\n@@" not in out
+    assert "--- a.txt\n+++ a.txt\n@@ -1 +1,2 @@\n MARK\n+X\n" in out
+
+
+def test_patch_report_json_write_error_returns_exit_code_2(tmp_path: Path, capsys):
+    (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
+    spec = {
+        "spec_version": 1,
+        "files": [
+            {"path": "a.txt", "ops": [{"op": "insert_after", "pattern": r"^A$", "text": "B\\n"}]}
+        ],
+    }
+    (tmp_path / "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+
+    old = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        rc = patch.main(["spec.json", "--report-json", "missing/report.json"])
+    finally:
+        os.chdir(old)
+
+    err = capsys.readouterr().err
+    assert rc == 2
+    assert "error:" in err
+
+
+def test_patch_error_path_still_writes_report_when_requested(tmp_path: Path):
+    report = tmp_path / "report.json"
+    spec = {"files": []}
+    (tmp_path / "spec.json").write_text(json.dumps(spec), encoding="utf-8")
+
+    old = Path.cwd()
+    try:
+        os.chdir(tmp_path)
+        rc = patch.main(["spec.json", "--report-json", str(report)])
+    finally:
+        os.chdir(old)
+
+    assert rc == 2
+    data = json.loads(report.read_text(encoding="utf-8"))
+    assert data["status_code"] == 2
+    assert data["files_touched"] == []
+
+
 def test_patch_missing_spec_version_defaults_to_v1(tmp_path: Path):
     (tmp_path / "a.txt").write_text("A\n", encoding="utf-8")
     spec = {
