@@ -39,6 +39,12 @@ def _redact_header_value(name: str, value: str) -> str:
     return value
 
 
+def _validate_header_text(value: str, *, field: str) -> str:
+    if "\r" in value or "\n" in value or "\x00" in value:
+        raise ValueError(f"invalid {field}: contains control characters")
+    return value
+
+
 def _merged_headers(client, extra, debug: bool) -> dict[str, str]:
     out: dict[str, str] = {}
     try:
@@ -252,11 +258,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         if scheme == "bearer":
             if rest == "":
                 raise ValueError("auth bearer token is required")
-            return f"Bearer {rest}"
+            return f"Bearer {_validate_header_text(rest, field='auth bearer token')}"
         if scheme == "basic":
             if ":" not in rest:
                 raise ValueError("auth basic credentials must be USER:PASS")
             user, pwd = rest.split(":", 1)
+            _validate_header_text(user, field="auth basic username")
+            _validate_header_text(pwd, field="auth basic password")
             raw = f"{user}:{pwd}".encode()
             token = base64.b64encode(raw).decode("ascii")
             return f"Basic {token}"
@@ -290,27 +298,34 @@ def main(argv: Sequence[str] | None = None) -> int:
     _req_headers: dict[str, str] = {}
     _hdrs = getattr(ns, "header", None)
     if _hdrs:
-        for _h in _hdrs:
-            _h = str(_h)
-            if _h.startswith("@"):
-                try:
-                    _txt = _read_at_file_text(_h)
-                except _AtFileError as e:
-                    sys.stderr.write(str(e).rstrip() + "\n")
-                    return 1
-                for _ln in _txt.splitlines():
-                    _ln = _ln.strip()
-                    if _ln == "" or _ln.startswith("#"):
-                        continue
-                    if ":" not in _ln:
-                        _die("header must be KEY:VALUE")
-                    _k, _v = _ln.split(":", 1)
-                    _req_headers[_k.strip()] = _v.lstrip()
-                continue
-            if ":" not in _h:
-                _die("header must be KEY:VALUE")
-            _k, _v = _h.split(":", 1)
-            _req_headers[_k.strip()] = _v.lstrip()
+        try:
+            for _h in _hdrs:
+                _h = str(_h)
+                if _h.startswith("@"):
+                    try:
+                        _txt = _read_at_file_text(_h)
+                    except _AtFileError as e:
+                        sys.stderr.write(str(e).rstrip() + "\n")
+                        return 1
+                    for _ln in _txt.splitlines():
+                        _ln = _ln.strip()
+                        if _ln == "" or _ln.startswith("#"):
+                            continue
+                        if ":" not in _ln:
+                            _die("header must be KEY:VALUE")
+                        _k, _v = _ln.split(":", 1)
+                        _req_headers[_validate_header_text(_k.strip(), field="header name")] = (
+                            _validate_header_text(_v.lstrip(), field="header value")
+                        )
+                    continue
+                if ":" not in _h:
+                    _die("header must be KEY:VALUE")
+                _k, _v = _h.split(":", 1)
+                _req_headers[_validate_header_text(_k.strip(), field="header name")] = (
+                    _validate_header_text(_v.lstrip(), field="header value")
+                )
+        except ValueError as err:
+            _die(str(err))
     if _auth_value is not None:
         has_authz = any(k.strip().lower() == "authorization" for k in _req_headers)
         if not has_authz:
@@ -424,7 +439,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     items = list(resp.headers.multi_items())
                     items.sort(key=lambda kv: (kv[0].lower(), kv[0], kv[1]))
                     for k, v in items:
-                        sys.stderr.write(f"http header: {k}: {v}\n")
+                        sys.stderr.write(
+                            f"http header: {k}: {_redact_header_value(str(k), str(v))}\n"
+                        )
 
             def _check_status(resp: httpx.Response) -> None:
                 if resp.status_code < 200 or resp.status_code >= 300:

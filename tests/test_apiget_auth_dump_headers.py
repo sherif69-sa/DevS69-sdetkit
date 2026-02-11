@@ -4,6 +4,7 @@ import base64
 import json
 
 import httpx
+import pytest
 
 from sdetkit import apiget, cli
 
@@ -111,6 +112,45 @@ def test_apiget_dump_headers_writes_to_stderr(monkeypatch, capsys):
     assert "http header:" in out.err.lower()
     assert "x-foo" in out.err.lower()
     assert "traceback" not in out.err.lower()
+
+
+def test_apiget_dump_headers_redacts_sensitive_values(monkeypatch, capsys):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"ok": True},
+            headers={"Set-Cookie": "session=SECRET", "X-Api-Key": "TOPSECRET"},
+        )
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setattr(apiget.httpx, "Client", _client_factory(transport))
+
+    rc = cli.main(["apiget", "https://example.test/", "--dump-headers", "--expect", "dict"])
+    assert rc == 0
+    out = capsys.readouterr()
+    assert json.loads(out.out) == {"ok": True}
+    err_lower = out.err.lower()
+    assert "set-cookie: <redacted>" in err_lower
+    assert "x-api-key: <redacted>" in err_lower
+    assert "secret" not in err_lower
+
+
+def test_apiget_rejects_header_with_control_characters(capsys):
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["apiget", "https://example.test/", "--header", "X-Test: hello\nboom"])
+    assert exc.value.code == 2
+    out = capsys.readouterr()
+    assert out.out == ""
+    assert "invalid header value" in out.err.lower()
+
+
+def test_apiget_rejects_auth_bearer_with_control_characters(capsys):
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["apiget", "https://example.test/", "--auth", "bearer:tok\nboom"])
+    assert exc.value.code == 2
+    out = capsys.readouterr()
+    assert out.out == ""
+    assert "invalid auth bearer token" in out.err.lower()
 
 
 def test_apiget_print_status_for_post_and_non_2xx_is_clean(monkeypatch, capsys):
