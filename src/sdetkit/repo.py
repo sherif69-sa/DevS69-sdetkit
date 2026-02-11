@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+import tomllib as _tomllib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -339,6 +340,28 @@ class RepoInitChange:
     action: str
     current: str
     desired: str
+
+
+@dataclass(frozen=True)
+class AllowlistRule:
+    rule_id: str
+    path: str
+    contains: str | None = None
+
+
+@dataclass(frozen=True)
+class RepoAuditPolicy:
+    profile: str
+    fail_on: str
+    baseline_path: str
+    exclude_paths: tuple[str, ...]
+    disable_rules: frozenset[str]
+    severity_overrides: dict[str, str]
+    allowlist: tuple[AllowlistRule, ...]
+
+
+class RepoAuditConfigError(ValueError):
+    pass
 
 
 def _iter_files(root: Path) -> list[Path]:
@@ -1351,6 +1374,18 @@ def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
         ),
         "",
     ]
+    policy_summary = payload.get("summary", {}).get("policy")
+    if isinstance(policy_summary, dict):
+        lines.extend(
+            [
+                "Suppression summary:",
+                f"  - total findings: {policy_summary.get('total_findings', 0)}",
+                f"  - suppressed by baseline: {policy_summary.get('suppressed_by_baseline', 0)}",
+                f"  - suppressed by policy: {policy_summary.get('suppressed_by_policy', 0)}",
+                f"  - actionable: {policy_summary.get('actionable', payload['summary']['findings'])}",
+                "",
+            ]
+        )
     for item in payload["checks"]:
         icon = "PASS" if item["status"] == "pass" else "FAIL"
         lines.append(f"[{icon}] {item['title']} ({item['key']})")
@@ -1369,6 +1404,254 @@ def _needs_fail_repo_audit(findings: list[dict[str, Any]], fail_on: str) -> bool
         _severity_rank(str(item.get("severity", "error"))) >= _severity_rank("warn")
         for item in findings
     )
+
+
+def _repo_audit_profile_defaults(profile: str) -> RepoAuditPolicy:
+    return RepoAuditPolicy(
+        profile=profile,
+        fail_on="warn",
+        baseline_path=".sdetkit/audit-baseline.json",
+        exclude_paths=(),
+        disable_rules=frozenset(),
+        severity_overrides={},
+        allowlist=(),
+    )
+
+
+def _load_repo_audit_config(root: Path, config_path: Path | None) -> dict[str, Any]:
+    candidate = root / "pyproject.toml" if config_path is None else config_path
+    if not candidate.exists():
+        return {}
+    try:
+        data = _tomllib.loads(candidate.read_text(encoding="utf-8"))  # type: ignore[attr-defined]
+    except (OSError, ValueError) as exc:
+        raise RepoAuditConfigError(f"unable to parse repo audit config: {exc}") from exc
+    if not isinstance(data, dict):
+        return {}
+    tool = data.get("tool")
+    if not isinstance(tool, dict):
+        return {}
+    sdetkit = tool.get("sdetkit")
+    if not isinstance(sdetkit, dict):
+        return {}
+    cfg = sdetkit.get("repo_audit")
+    if cfg is None:
+        return {}
+    if not isinstance(cfg, dict):
+        raise RepoAuditConfigError("[tool.sdetkit.repo_audit] must be a TOML table")
+    return cfg
+
+
+def _as_str_list(value: Any, *, field: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list) or any(not isinstance(x, str) for x in value):
+        raise RepoAuditConfigError(f"config field '{field}' must be a list of strings")
+    return tuple(value)
+
+
+def _resolve_repo_audit_policy(
+    root: Path,
+    *,
+    cli_profile: str | None,
+    cli_fail_on: str | None,
+    cli_baseline: str | None,
+    cli_excludes: list[str] | None,
+    cli_disable_rules: list[str] | None,
+    config_path: Path | None,
+) -> RepoAuditPolicy:
+    raw = _load_repo_audit_config(root, config_path)
+    profile = cli_profile or str(raw.get("profile") or "default")
+    if profile not in {"default", "enterprise"}:
+        raise RepoAuditConfigError("profile must be 'default' or 'enterprise'")
+    base = _repo_audit_profile_defaults(profile)
+
+    fail_on = str(raw.get("fail_on") or base.fail_on)
+    if fail_on not in {"none", "warn", "error"}:
+        raise RepoAuditConfigError("fail_on must be one of: none, warn, error")
+
+    baseline_path = str(raw.get("baseline_path") or base.baseline_path)
+    exclude_paths = tuple(base.exclude_paths) + _as_str_list(
+        raw.get("exclude_paths"), field="exclude_paths"
+    )
+    disable_rules = set(base.disable_rules)
+    disable_rules.update(_as_str_list(raw.get("disable_rules"), field="disable_rules"))
+
+    raw_overrides = raw.get("severity_overrides") or {}
+    if not isinstance(raw_overrides, dict):
+        raise RepoAuditConfigError("severity_overrides must be a map")
+    severity_overrides = dict(base.severity_overrides)
+    for rule_id, level in raw_overrides.items():
+        if not isinstance(rule_id, str) or not isinstance(level, str):
+            raise RepoAuditConfigError("severity_overrides keys and values must be strings")
+        if level not in {"info", "warn", "error"}:
+            raise RepoAuditConfigError("severity_overrides values must be info|warn|error")
+        severity_overrides[rule_id] = level
+
+    raw_allowlist = raw.get("allowlist") or []
+    if not isinstance(raw_allowlist, list):
+        raise RepoAuditConfigError("allowlist must be a list")
+    allowlist: list[AllowlistRule] = []
+    for item in raw_allowlist:
+        if not isinstance(item, dict):
+            raise RepoAuditConfigError("allowlist entries must be tables")
+        rule_id = item.get("rule_id")
+        path = item.get("path")
+        contains = item.get("contains")
+        if not isinstance(rule_id, str) or not isinstance(path, str):
+            raise RepoAuditConfigError("allowlist entries require string rule_id and path")
+        if contains is not None and not isinstance(contains, str):
+            raise RepoAuditConfigError("allowlist contains must be a string when provided")
+        allowlist.append(AllowlistRule(rule_id=rule_id, path=path, contains=contains))
+
+    if cli_fail_on is not None:
+        fail_on = cli_fail_on
+    if cli_baseline is not None:
+        baseline_path = cli_baseline
+    if cli_excludes:
+        exclude_paths = exclude_paths + tuple(cli_excludes)
+    if cli_disable_rules:
+        disable_rules.update(cli_disable_rules)
+
+    return RepoAuditPolicy(
+        profile=profile,
+        fail_on=fail_on,
+        baseline_path=baseline_path,
+        exclude_paths=tuple(exclude_paths),
+        disable_rules=frozenset(disable_rules),
+        severity_overrides=severity_overrides,
+        allowlist=tuple(allowlist),
+    )
+
+
+def _repo_rule_id(item: dict[str, Any]) -> str:
+    return f"{item.get('check', 'repo_audit')}/{item.get('code', 'unknown')}"
+
+
+def _repo_finding_fingerprint(item: dict[str, Any]) -> str:
+    normalized = str(item.get("path", ".")).replace("\\", "/").lstrip("/")
+    payload = "|".join([_repo_rule_id(item), normalized, str(item.get("message", ""))])
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _finding_matches_glob(path: str, pattern: str) -> bool:
+    return Path(path).match(pattern)
+
+
+def _apply_repo_audit_policy(
+    findings: list[dict[str, Any]],
+    policy: RepoAuditPolicy,
+    baseline_entries: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    baseline_fingerprints = {
+        str(item.get("fingerprint"))
+        for item in baseline_entries
+        if isinstance(item, dict) and isinstance(item.get("fingerprint"), str)
+    }
+    actionable: list[dict[str, Any]] = []
+    suppressed: list[dict[str, str]] = []
+    for finding in findings:
+        item = dict(finding)
+        rule_id = _repo_rule_id(item)
+        item["rule_id"] = rule_id
+        item["fingerprint"] = _repo_finding_fingerprint(item)
+        if rule_id in policy.severity_overrides:
+            item["severity"] = policy.severity_overrides[rule_id]
+        if any(_finding_matches_glob(str(item.get("path", "")), g) for g in policy.exclude_paths):
+            suppressed.append(
+                {"fingerprint": item["fingerprint"], "reason": "policy:exclude_paths"}
+            )
+            continue
+        if rule_id in policy.disable_rules:
+            suppressed.append(
+                {"fingerprint": item["fingerprint"], "reason": "policy:disable_rules"}
+            )
+            continue
+        allowlisted = False
+        for rule in policy.allowlist:
+            if rule.rule_id != rule_id:
+                continue
+            if not _finding_matches_glob(str(item.get("path", "")), rule.path):
+                continue
+            if rule.contains and rule.contains not in str(item.get("message", "")):
+                continue
+            allowlisted = True
+            break
+        if allowlisted:
+            suppressed.append({"fingerprint": item["fingerprint"], "reason": "policy:allowlist"})
+            continue
+        if item["fingerprint"] in baseline_fingerprints:
+            suppressed.append({"fingerprint": item["fingerprint"], "reason": "baseline"})
+            continue
+        actionable.append(item)
+    actionable.sort(
+        key=lambda x: (str(x.get("path", "")), str(x.get("rule_id", "")), str(x.get("message", "")))
+    )
+    suppressed.sort(key=lambda x: (x["reason"], x["fingerprint"]))
+    counts = {
+        "baseline": sum(1 for x in suppressed if x["reason"] == "baseline"),
+        "policy": sum(1 for x in suppressed if x["reason"].startswith("policy:")),
+    }
+    return actionable, {"counts": counts, "suppressed": suppressed}
+
+
+def _baseline_entries_from_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    entries = []
+    for item in findings:
+        entries.append(
+            {
+                "rule_id": _repo_rule_id(item),
+                "path": str(item.get("path", ".")),
+                "fingerprint": _repo_finding_fingerprint(item),
+                "severity": str(item.get("severity", "error")),
+                "message_key": str(item.get("message", "")),
+            }
+        )
+    entries.sort(key=lambda x: (x["path"], x["rule_id"], x["fingerprint"]))
+    return entries
+
+
+def _load_repo_baseline(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {"schema_version": "1.0", "entries": []}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise RepoAuditConfigError(f"unable to read baseline: {exc}") from exc
+    if not isinstance(data, dict):
+        raise RepoAuditConfigError("baseline must be a JSON object")
+    entries = data.get("entries", [])
+    if not isinstance(entries, list):
+        raise RepoAuditConfigError("baseline entries must be a list")
+    normalized = [x for x in entries if isinstance(x, dict)]
+    return {
+        "schema_version": str(data.get("schema_version", "1.0")),
+        "created_at": data.get("created_at"),
+        "tool_version": data.get("tool_version"),
+        "entries": normalized,
+    }
+
+
+def _write_repo_baseline(path: Path, entries: list[dict[str, Any]]) -> None:
+    payload = {
+        "schema_version": "1.0",
+        "tool_version": "0.2.8",
+        "entries": entries,
+    }
+    atomic_write_text(path, json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n")
+
+
+def _baseline_diff(old_entries: list[dict[str, Any]], new_entries: list[dict[str, Any]]) -> str:
+    old_lines = [f"{x['rule_id']}|{x['path']}|{x['fingerprint']}" for x in old_entries]
+    new_lines = [f"{x['rule_id']}|{x['path']}|{x['fingerprint']}" for x in new_entries]
+    diff = list(
+        difflib.unified_diff(
+            old_lines, new_lines, fromfile="baseline(old)", tofile="baseline(new)", lineterm=""
+        )
+    )
+    if len(diff) <= 12:
+        return "\n".join(diff)
+    return "\n".join(diff[:12] + [f"... ({len(diff) - 12} more lines)"])
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1408,12 +1691,38 @@ def main(argv: list[str] | None = None) -> int:
     ip.add_argument("--diff", action="store_true")
     ip.add_argument("--allow-absolute-path", action="store_true")
 
+    bp = sub.add_parser("baseline")
+    bsub = bp.add_subparsers(dest="baseline_cmd", required=True)
+
+    bcreate = bsub.add_parser("create")
+    bcreate.add_argument("path", nargs="?", default=".")
+    bcreate.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    bcreate.add_argument("--output", default=None)
+    bcreate.add_argument("--exclude", action="append", default=[])
+    bcreate.add_argument("--config", default=None)
+    bcreate.add_argument("--allow-absolute-path", action="store_true")
+
+    bcheck = bsub.add_parser("check")
+    bcheck.add_argument("path", nargs="?", default=".")
+    bcheck.add_argument("--baseline", default=None)
+    bcheck.add_argument("--fail-on", choices=["none", "warn", "error"], default=None)
+    bcheck.add_argument("--update", action="store_true")
+    bcheck.add_argument("--diff", action="store_true")
+    bcheck.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    bcheck.add_argument("--config", default=None)
+    bcheck.add_argument("--allow-absolute-path", action="store_true")
+
     ap = sub.add_parser("audit")
     ap.add_argument("path", nargs="?", default=".")
-    ap.add_argument("--profile", choices=["default", "enterprise"], default="default")
+    ap.add_argument("--profile", choices=["default", "enterprise"], default=None)
     ap.add_argument("--format", choices=["text", "json", "sarif"], default="text")
     ap.add_argument("--output", "--out", dest="output", default=None)
-    ap.add_argument("--fail-on", choices=["none", "warn", "error"], default="warn")
+    ap.add_argument("--fail-on", choices=["none", "warn", "error"], default=None)
+    ap.add_argument("--config", default=None)
+    ap.add_argument("--baseline", default=None)
+    ap.add_argument("--update-baseline", action="store_true")
+    ap.add_argument("--exclude", action="append", default=[])
+    ap.add_argument("--disable-rule", action="append", default=[])
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--allow-absolute-path", action="store_true")
 
@@ -1483,8 +1792,130 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
         return 1 if _needs_fail(findings, ns.fail_on, ns.min_score) else 0
 
+    if ns.repo_cmd == "baseline":
+        config_file = None
+        if ns.config:
+            try:
+                config_file = safe_path(
+                    root, ns.config, allow_absolute=bool(ns.allow_absolute_path)
+                )
+            except SecurityError as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        try:
+            policy = _resolve_repo_audit_policy(
+                root,
+                cli_profile=ns.profile,
+                cli_fail_on=getattr(ns, "fail_on", None),
+                cli_baseline=ns.baseline
+                if getattr(ns, "baseline", None)
+                else getattr(ns, "output", None),
+                cli_excludes=getattr(ns, "exclude", None),
+                cli_disable_rules=None,
+                config_path=config_file,
+            )
+        except RepoAuditConfigError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+
+        try:
+            baseline_target = safe_path(
+                root,
+                (ns.output or policy.baseline_path)
+                if ns.baseline_cmd == "create"
+                else (ns.baseline or policy.baseline_path),
+                allow_absolute=bool(ns.allow_absolute_path),
+            )
+        except SecurityError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        try:
+            findings_payload = run_repo_audit(root)
+            actionable_findings, _ = _apply_repo_audit_policy(
+                findings_payload.get("findings", []), policy, []
+            )
+            entries = _baseline_entries_from_findings(actionable_findings)
+            previous = _load_repo_baseline(baseline_target)
+        except RepoAuditConfigError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        if ns.baseline_cmd == "create":
+            _write_repo_baseline(baseline_target, entries)
+            print(f"baseline created: {baseline_target.relative_to(root).as_posix()}")
+            return 0
+
+        old_entries = [x for x in previous.get("entries", []) if isinstance(x, dict)]
+        old_fps = {str(x.get("fingerprint")) for x in old_entries}
+        new_fps = {str(x.get("fingerprint")) for x in entries}
+        unchanged = sorted(old_fps & new_fps)
+        new_only = sorted(new_fps - old_fps)
+        resolved = sorted(old_fps - new_fps)
+        print(f"NEW: {len(new_only)} RESOLVED: {len(resolved)} UNCHANGED: {len(unchanged)}")
+        if ns.diff:
+            print(_baseline_diff(old_entries, entries))
+        if ns.update:
+            _write_repo_baseline(baseline_target, entries)
+        if policy.fail_on != "none":
+            threshold = _severity_rank(policy.fail_on)
+            new_items = [x for x in entries if str(x.get("fingerprint")) in set(new_only)]
+            if any(_severity_rank(str(x.get("severity", "error"))) >= threshold for x in new_items):
+                return 1
+        return 0
+
     if ns.repo_cmd == "audit":
+        config_file = None
+        if ns.config:
+            try:
+                config_file = safe_path(
+                    root, ns.config, allow_absolute=bool(ns.allow_absolute_path)
+                )
+            except SecurityError as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        try:
+            policy = _resolve_repo_audit_policy(
+                root,
+                cli_profile=ns.profile,
+                cli_fail_on=getattr(ns, "fail_on", None),
+                cli_baseline=ns.baseline,
+                cli_excludes=ns.exclude,
+                cli_disable_rules=ns.disable_rule,
+                config_path=config_file,
+            )
+        except RepoAuditConfigError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
         payload = run_repo_audit(root)
+        original_findings = list(payload.get("findings", []))
+        try:
+            baseline_path = safe_path(
+                root,
+                policy.baseline_path,
+                allow_absolute=bool(ns.allow_absolute_path),
+            )
+        except SecurityError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        baseline_doc = _load_repo_baseline(baseline_path)
+        actionable, suppression = _apply_repo_audit_policy(
+            original_findings, policy, baseline_doc.get("entries", [])
+        )
+        if ns.update_baseline:
+            _write_repo_baseline(baseline_path, _baseline_entries_from_findings(original_findings))
+        payload["findings"] = actionable
+        counts = {"error": 0, "warn": 0, "info": 0}
+        for finding in actionable:
+            sev = str(finding.get("severity", "error"))
+            counts[sev] = counts.get(sev, 0) + 1
+        payload["summary"]["counts"] = {k: counts[k] for k in sorted(counts)}
+        payload["summary"]["findings"] = len(actionable)
+        payload["summary"]["policy"] = {
+            "total_findings": len(original_findings),
+            "suppressed_by_baseline": suppression["counts"]["baseline"],
+            "suppressed_by_policy": suppression["counts"]["policy"],
+            "actionable": len(actionable),
+        }
+        payload["suppressed"] = suppression["suppressed"]
         rendered = _render_repo_audit(payload, ns.format)
         if ns.output:
             try:
@@ -1498,7 +1929,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
         else:
             sys.stdout.write(rendered)
-        return 1 if _needs_fail_repo_audit(payload.get("findings", []), ns.fail_on) else 0
+        return 1 if _needs_fail_repo_audit(payload.get("findings", []), policy.fail_on) else 0
 
     if ns.repo_cmd == "init":
         if ns.dry_run and ns.apply:

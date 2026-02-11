@@ -56,7 +56,14 @@ def test_repo_audit_json_schema_and_stable_keys(tmp_path: Path) -> None:
 
     payload = json.loads(result.stdout)
     assert payload["schema_version"] == "1.0.0"
-    assert list(payload.keys()) == ["checks", "findings", "root", "schema_version", "summary"]
+    assert list(payload.keys()) == [
+        "checks",
+        "findings",
+        "root",
+        "schema_version",
+        "summary",
+        "suppressed",
+    ]
 
 
 def test_repo_audit_sarif_has_required_fields(tmp_path: Path) -> None:

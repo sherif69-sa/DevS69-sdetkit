@@ -53,6 +53,7 @@ nav:
       - CLI: cli.md
       - Doctor: doctor.md
       - Repo audit: repo-audit.md
+      - Policy & baselines: policy-and-baselines.md
       - Repo init: repo-init.md
       - Patch harness: patch-harness.md
   - Integrations:
