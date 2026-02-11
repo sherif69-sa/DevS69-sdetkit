@@ -1,25 +1,56 @@
 # Project structure
 
-## Top level
+This page is the quickest way to understand **where things are** and **where to start reading**.
 
-- `src/sdetkit/` : library + CLI implementation
-- `tests/` : test suite (includes mutation-test killers)
-- `scripts/` : local developer commands (mirrors CI)
-- `docs/` : mkdocs site pages
-- `.github/` : CI workflows + templates
+## High-level layout
 
-## Key modules
+```text
+.
+├── src/sdetkit/     # application + library code
+├── tests/           # automated tests
+├── docs/            # mkdocs site pages
+├── scripts/         # developer shell/check/bootstrap helpers
+├── tools/           # extra tooling (including patch harness wrapper)
+├── pyproject.toml   # package metadata + tool configuration
+├── quality.sh       # local quality runner
+└── mkdocs.yml       # documentation site config
+```
 
-- `sdetkit/cli.py` : CLI router
-- `sdetkit/_entrypoints.py` : console scripts (`kvcli`, `apigetcli`)
-- `sdetkit/__main__.py` : `python -m sdetkit`
-- `sdetkit/apiclient.py` : high-level request helpers
-- `sdetkit/netclient.py` : advanced client behaviors (hooks/breaker/pagination)
-- `sdetkit/atomicio.py` : safe/atomic file IO helpers
-- `sdetkit/textutil.py` : small text utilities
+## What to read first (by role)
 
-## Scripts
+| If you are... | Start here | Then read |
+|---|---|---|
+| New contributor | `README.md` | `CONTRIBUTING.md`, `docs/project-structure.md` |
+| CLI user | `docs/cli.md` | `docs/doctor.md`, `docs/repo-audit.md` |
+| Maintainer | `scripts/check.sh` | `quality.sh`, `noxfile.py`, `Makefile` |
+| Release owner | `RELEASE.md` | `docs/releasing.md`, `CHANGELOG.md` |
 
-- `scripts/check.sh` : fmt/lint/types/tests/coverage/docs/all
-- `scripts/env.sh` : source this to put `.venv/bin` on PATH
-- `scripts/shell.sh` : open an interactive shell with `.venv/bin` on PATH
+## Key source modules (`src/sdetkit/`)
+
+- `cli.py` — top-level command router
+- `_entrypoints.py` — console script entrypoints (`kvcli`, `apigetcli`)
+- `__main__.py` — `python -m sdetkit` launcher
+- `apiclient.py` — high-level request operations
+- `netclient.py` — network utilities (pagination/retries/breaker behavior)
+- `doctor.py` — diagnostics, scoring, and recommendations
+- `repo.py` — repository audit and policy checks
+- `patch.py` — deterministic patch features
+- `atomicio.py` — safe atomic file IO helpers
+- `textutil.py` — small text helpers
+
+## Supporting directories
+
+- `tests/` — feature tests, CLI tests, module unit tests, mutation-test killer tests
+- `scripts/` — one-command workflows:
+  - `check.sh` (fmt/lint/types/tests/coverage/docs/all)
+  - `bootstrap.sh` (create local environment + install dependencies)
+  - `env.sh` / `shell.sh` (venv PATH convenience)
+- `docs/` — user and maintainer documentation published via MkDocs
+- `tools/` — additional helper scripts for local development
+
+## Repo hygiene rules of thumb
+
+- Keep top-level files focused on project-level workflows and policy.
+- Prefer adding technical detail under `docs/` rather than expanding root-level markdown files indefinitely.
+- Add new runtime code to `src/sdetkit/`; add tests under `tests/` with matching scope.
+- Keep scripts composable and CI-compatible (`scripts/` + `quality.sh`).
