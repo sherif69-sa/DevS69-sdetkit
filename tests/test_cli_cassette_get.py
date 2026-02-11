@@ -33,7 +33,16 @@ def test_cli_cassette_get_replay_ok(tmp_path: Path) -> None:
     _make_cassette(p, url)
 
     r = subprocess.run(
-        [sys.executable, "-m", "sdetkit", "cassette-get", "--replay", str(p), url],
+        [
+            sys.executable,
+            "-m",
+            "sdetkit",
+            "cassette-get",
+            "--replay",
+            str(p),
+            "--allow-absolute-path",
+            url,
+        ],
         check=False,
         capture_output=True,
         text=True,
@@ -56,6 +65,7 @@ def test_cli_cassette_get_replay_mismatch(tmp_path: Path) -> None:
             "cassette-get",
             "--replay",
             str(p),
+            "--allow-absolute-path",
             "https://example.test/other",
         ],
         check=False,

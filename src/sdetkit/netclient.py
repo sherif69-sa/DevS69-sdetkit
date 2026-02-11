@@ -11,6 +11,8 @@ from urllib.parse import urljoin
 
 import httpx
 
+from .security import default_http_timeout, ensure_allowed_scheme
+
 EventType = Literal[
     "attempt_start",
     "attempt_error",
@@ -188,6 +190,7 @@ class SdetHttpClient:
         hook: Hook | None = None,
         clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
+        allowed_schemes: set[str] | None = None,
     ):
         self._client = client
         self._retry = retry or RetryPolicy()
@@ -196,6 +199,7 @@ class SdetHttpClient:
         self._hook = hook
         self._clock = clock
         self._sleep = sleep
+        self._allowed_schemes = allowed_schemes or {"http", "https"}
 
     def request(
         self,
@@ -212,6 +216,7 @@ class SdetHttpClient:
         breaker: CircuitBreaker | None = None,
     ) -> httpx.Response:
         pol = retry or self._retry
+        ensure_allowed_scheme(url, allowed=self._allowed_schemes)
         if pol.retries < 1:
             raise ValueError("retries must be >= 1")
 
@@ -244,7 +249,9 @@ class SdetHttpClient:
                     kwargs["content"] = content
                 if json is not None:
                     kwargs["json"] = json
-                r = self._client.request(method, url, timeout=timeout, **kwargs)
+                r = self._client.request(
+                    method, url, timeout=default_http_timeout(timeout), **kwargs
+                )
             except httpx.TimeoutException as e:
                 if b is not None:
                     b.record_failure(self._clock())
@@ -499,6 +506,7 @@ class SdetHttpClient:
         breaker: CircuitBreaker | None,
     ) -> tuple[httpx.Response, Any, str | None]:
         pol = retry or self._retry
+        ensure_allowed_scheme(url, allowed=self._allowed_schemes)
         if pol.retries < 1:
             raise ValueError("retries must be >= 1")
 
@@ -525,9 +533,9 @@ class SdetHttpClient:
 
             try:
                 if hdrs is None:
-                    r = self._client.get(url, timeout=timeout)
+                    r = self._client.get(url, timeout=default_http_timeout(timeout))
                 else:
-                    r = self._client.get(url, headers=hdrs, timeout=timeout)
+                    r = self._client.get(url, headers=hdrs, timeout=default_http_timeout(timeout))
             except httpx.TimeoutException as e:
                 if b is not None:
                     b.record_failure(self._clock())
@@ -682,6 +690,7 @@ class SdetAsyncHttpClient:
         hook: Hook | AsyncHook | None = None,
         clock: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        allowed_schemes: set[str] | None = None,
     ):
         self._client = client
         self._retry = retry or RetryPolicy()
@@ -690,6 +699,7 @@ class SdetAsyncHttpClient:
         self._hook = hook
         self._clock = clock
         self._sleep = sleep
+        self._allowed_schemes = allowed_schemes or {"http", "https"}
 
     async def get_json_dict(
         self,
@@ -794,6 +804,7 @@ class SdetAsyncHttpClient:
         breaker: CircuitBreaker | None,
     ) -> tuple[httpx.Response, Any, str | None]:
         pol = retry or self._retry
+        ensure_allowed_scheme(url, allowed=self._allowed_schemes)
         if pol.retries < 1:
             raise ValueError("retries must be >= 1")
 
@@ -820,9 +831,11 @@ class SdetAsyncHttpClient:
 
             try:
                 if hdrs is None:
-                    r = await self._client.get(url, timeout=timeout)
+                    r = await self._client.get(url, timeout=default_http_timeout(timeout))
                 else:
-                    r = await self._client.get(url, headers=hdrs, timeout=timeout)
+                    r = await self._client.get(
+                        url, headers=hdrs, timeout=default_http_timeout(timeout)
+                    )
             except httpx.TimeoutException as e:
                 if b is not None:
                     b.record_failure(self._clock())

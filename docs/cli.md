@@ -56,3 +56,22 @@ Backward compatibility wrapper still works:
 - `python tools/patch_harness.py spec.json --check`
 
 See: patch-harness.md
+
+
+## Security defaults
+
+All CLI tools now default to safer behavior:
+
+- Secret redaction is ON by default for printed HTTP request/response metadata (`--redact`, `--no-redact`, `--redact-keys KEY`).
+- HTTP clients enforce explicit timeouts and allow only `http/https` schemes by default (`--allow-scheme`).
+- Redirect behavior is explicit (`--follow-redirects` / `--no-follow-redirects`).
+- TLS verification stays enabled by default; `--insecure` is opt-in and emits a warning.
+- File outputs refuse unsafe paths and existing files unless explicitly forced (`--force`).
+
+Tool-specific notes:
+
+- `apiget`: supports redaction flags, scheme allowlist, secure timeout defaults, explicit redirects, and safe output writes.
+- `cassette-get`: supports scheme allowlist, secure timeout defaults, explicit redirects, safe cassette writes, and `--force` for overwrites.
+- `kv`: input parsing remains backward compatible for stdin, --text, and --path usage.
+- `patch`: report output uses safe paths + atomic writes and requires `--force` to overwrite.
+- `doctor`: returns `1` for failing checks, `0` for pass, while usage/runtime issues map to `2` in shared CLI wrappers.
