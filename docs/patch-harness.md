@@ -1,16 +1,23 @@
-```markdown
 # Patch harness
 
-`tools/patch_harness.py` applies deterministic, spec-driven edits to files.
-It supports a strict check mode for CI and repeated runs.
+`Patch harness` is now an official sdetkit feature via `sdetkit patch`.
+It applies deterministic, spec-driven edits to files and supports strict check mode for CI.
 
-Run it as:
+## Run commands
+
+Preferred (official):
+
+```bash
+sdetkit patch spec.json
+sdetkit patch spec.json --dry-run
+sdetkit patch spec.json --check
+```
+
+Backward compatibility wrapper (still supported):
 
 ```bash
 python tools/patch_harness.py spec.json
-python tools/patch_harness.py spec.json --dry-run
-python tools/patch_harness.py spec.json --check
-````
+```
 
 ## Spec format
 
@@ -29,23 +36,23 @@ A spec is a JSON file with a list of files and operations:
 }
 ```
 
-* `path` is relative to the working directory.
-* `pattern` is a regular expression.
-* `text` supports escaped newlines (`\n`) and tabs (`\t`).
+- `path` is relative to the working directory.
+- `pattern` is a regular expression.
+- `text` supports escaped newlines (`\n`) and tabs (`\t`).
 
 ## Idempotency and --check
 
 Operations are designed to be safe for repeated runs.
 
-* `--check` exits `0` if the repo is already compliant.
-* `--check` exits non-zero if changes would be applied.
-* `--dry-run` prints a unified diff but does not write files.
-* Default mode writes files when changes are needed.
+- `--check` exits `0` if files are already compliant.
+- `--check` exits non-zero if changes would be applied.
+- `--dry-run` prints a unified diff but does not write files.
+- Default mode writes files when changes are needed.
 
 ## Indentation token
 
-For insertion operations, `<<INDENT>>` can be used to reuse the captured indentation
-from the regex pattern group.
+For insertion operations, `<<INDENT>>` can be used to reuse captured indentation
+from a regex group.
 
 Example:
 

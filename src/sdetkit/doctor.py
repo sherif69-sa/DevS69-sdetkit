@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -35,6 +36,26 @@ def _package_info() -> dict[str, str]:
     except Exception:
         ver = "unknown"
     return {"name": name, "version": ver}
+
+
+def _in_virtualenv() -> bool:
+    if os.environ.get("VIRTUAL_ENV"):
+        return True
+    return sys.prefix != getattr(sys, "base_prefix", sys.prefix)
+
+
+def _check_pyproject_toml(root: Path) -> tuple[bool, str]:
+    path = root / "pyproject.toml"
+    if not path.exists():
+        return False, "pyproject.toml is missing"
+
+    try:
+        import tomllib
+
+        tomllib.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:  # pragma: no cover - defensive error path
+        return False, f"pyproject.toml parse failed: {exc}"
+    return True, "pyproject.toml is valid TOML"
 
 
 def _is_ignored_binary(p: Path) -> bool:
@@ -146,9 +167,16 @@ def _calculate_score(checks: list[bool]) -> int:
 def _recommendations(data: dict[str, Any]) -> list[str]:
     recs: list[str] = []
 
+    if data.get("venv_ok") is False:
+        recs.append(
+            "Create/activate a virtual environment before running dev checks: "
+            "python -m venv .venv && source .venv/bin/activate."
+        )
     if data.get("missing"):
         tools = ", ".join(str(x) for x in data["missing"])
         recs.append(f"Install missing developer tools: {tools}.")
+    if data.get("pyproject_ok") is False:
+        recs.append("Fix pyproject.toml syntax and re-run doctor before opening a PR.")
     if data.get("non_ascii"):
         recs.append(
             "Replace non-ASCII artifacts in src/tools with UTF-8 text or move binaries outside scanned paths."
@@ -174,8 +202,7 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
 
 
 def _print_human_report(data: dict[str, Any]) -> None:
-    lines: list[str] = []
-    lines.append(f"doctor score: {data['score']}%")
+    lines: list[str] = [f"doctor score: {data['score']}%"]
 
     checks = data.get("checks", {})
     for key in sorted(checks):
@@ -190,6 +217,24 @@ def _print_human_report(data: dict[str, Any]) -> None:
     sys.stdout.write("\n".join(lines) + "\n")
 
 
+def _print_pr_report(data: dict[str, Any]) -> None:
+    checks = data.get("checks", {})
+    lines = [
+        "### SDET Doctor Report",
+        f"- overall: {'PASS' if data.get('ok') else 'FAIL'}",
+        f"- score: {data.get('score')}%",
+        "- checks:",
+    ]
+    for key in sorted(checks):
+        item = checks[key]
+        marker = "PASS" if item["ok"] else "FAIL"
+        lines.append(f"  - {marker} `{key}`: {item['summary']}")
+    lines.append("- next steps:")
+    for rec in data.get("recommendations", []):
+        lines.append(f"  - {rec}")
+    sys.stdout.write("\n".join(lines) + "\n")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="doctor")
     parser.add_argument("--json", action="store_true")
@@ -200,6 +245,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--deps", action="store_true")
     parser.add_argument("--clean-tree", dest="clean_tree", action="store_true")
     parser.add_argument("--dev", action="store_true")
+    parser.add_argument("--pyproject", action="store_true")
+    parser.add_argument("--pr", action="store_true", help="print a PR-ready markdown summary")
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--release", action="store_true")
 
@@ -213,27 +260,51 @@ def main(argv: list[str] | None = None) -> int:
         ns.deps = True
         ns.clean_tree = True
         ns.dev = True
+        ns.pyproject = True
+
+    if ns.dev and (ns.ci or ns.deps or ns.clean_tree):
+        ns.pyproject = True
 
     data: dict[str, Any] = {"python": _python_info(), "package": _package_info(), "checks": {}}
     ok = True
     score_items: list[bool] = []
 
     if ns.dev:
+        venv_ok = _in_virtualenv()
+        data["venv_ok"] = venv_ok
+        data["checks"]["venv"] = {
+            "ok": venv_ok,
+            "summary": "virtual environment is active"
+            if venv_ok
+            else "virtual environment is not active (recommended for stable tooling/deps)",
+        }
+        score_items.append(venv_ok)
+        if not venv_ok:
+            ok = False
+
         present, missing = _check_tools()
         data["tools"] = present
         data["missing"] = missing
-        check_ok = not bool(missing)
+        tools_ok = not bool(missing)
         data["checks"]["dev_tools"] = {
-            "ok": check_ok,
+            "ok": tools_ok,
             "summary": "all required developer tools are available"
-            if check_ok
+            if tools_ok
             else "some developer tools are missing",
         }
-        score_items.append(check_ok)
-        if not check_ok:
+        score_items.append(tools_ok)
+        if not tools_ok:
             ok = False
     else:
         data.setdefault("missing", [])
+
+    if ns.pyproject:
+        pyproject_ok, pyproject_summary = _check_pyproject_toml(root)
+        data["pyproject_ok"] = pyproject_ok
+        data["checks"]["pyproject"] = {"ok": pyproject_ok, "summary": pyproject_summary}
+        score_items.append(pyproject_ok)
+        if not pyproject_ok:
+            ok = False
 
     if ns.ascii:
         bad, bad_err = _scan_non_ascii(root)
@@ -309,10 +380,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.json:
         sys.stdout.write(json.dumps(data, sort_keys=True) + "\n")
+    elif ns.pr:
+        _print_pr_report(data)
     else:
         _print_human_report(data)
-        if not ok:
-            sys.stderr.write("doctor: problems found\n")
+
+    if not ok and not ns.json:
+        sys.stderr.write("doctor: problems found\n")
 
     return 0 if ok else 1
 

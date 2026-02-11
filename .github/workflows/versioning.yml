@@ -1,0 +1,36 @@
+name: Versioning & Changelog
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Ensure CHANGELOG has current version
+        run: |
+          set -euo pipefail
+          version=$(python - <<'PY'
+import re
+from pathlib import Path
+text = Path('pyproject.toml').read_text(encoding='utf-8')
+m = re.search(r'^version\s*=\s*"([^"]+)"', text, re.M)
+if not m:
+    raise SystemExit('version not found')
+print(m.group(1))
+PY
+)
+          if ! grep -Eq "^##[[:space:]]+\[?v?${version}\]?" CHANGELOG.md; then
+            echo "CHANGELOG.md missing heading for version ${version}"
+            exit 1
+          fi
