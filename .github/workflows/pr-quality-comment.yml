@@ -61,4 +61,7 @@ jobs:
 
       - name: Fail if quality failed
         if: steps.quality.outcome != 'success'
-        run: exit 1
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.setFailed('quality.sh cov failed (see workflow logs for details)')
