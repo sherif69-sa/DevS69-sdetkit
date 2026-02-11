@@ -50,5 +50,5 @@ The repository includes always-on security maintenance so it behaves like an aut
 
 Use the GitHub Security tab to review alerts:
 
-- Code scanning: `https://github.com/sherif69-sa/sdet_bootcamp/security/code-scanning`
-- Dependabot alerts: `https://github.com/sherif69-sa/sdet_bootcamp/security/dependabot`
+- Code scanning: `https://github.com/sherif69-sa/DevS69-sdetkit/security/code-scanning`
+- Dependabot alerts: `https://github.com/sherif69-sa/DevS69-sdetkit/security/dependabot`

@@ -1,47 +1,43 @@
-# Repo Audit and Safe Fixes
+# Repo Audit
 
-`sdetkit repo` provides deterministic repository hygiene checks and safe, idempotent auto-fixes.
+`sdetkit repo audit` provides deterministic, file-system-only repository readiness checks suitable for local development and CI.
 
 ## Quick start
 
 ```bash
-sdetkit repo check --format text
-sdetkit repo check --format json --out report.json --force
-sdetkit repo fix --check --diff
-sdetkit repo fix --eol lf
+sdetkit repo audit
+sdetkit repo audit --format json --out repo-audit.json --force
 ```
 
-## Checks performed (`sdetkit repo check`)
+## Checks performed (`sdetkit repo audit`)
 
-- **UTF-8 decode**: reports files that cannot be decoded as UTF-8.
-- **Trailing whitespace**: reports lines ending in spaces/tabs.
-- **EOF newline**: reports files missing final newline.
-- **Line endings**: reports CRLF, CR, or mixed endings.
-- **Hidden/BiDi Unicode**: reports suspicious control/invisible Unicode.
-- **Secret scan (regex, deterministic)**:
-  - auth/token/api_key/password/cookie style assignments
-  - AWS-like access key/secret patterns
-  - private key headers (`-----BEGIN ... PRIVATE KEY-----`)
+- **OSS readiness files**: checks for `README.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and `CHANGELOG.md`.
+- **CI/Security workflow presence**: verifies `.github/workflows/` includes at least one CI workflow and one security-focused workflow.
+- **Python tooling config**: verifies key Python project files are present (`pyproject.toml`, `noxfile.py`, `quality.sh`, `requirements-test.txt`).
+- **Basic repo hygiene**: checks for `.gitignore`, `tests/`, `docs/`, and flags oversized tracked files (>5 MiB).
+
+All checks are deterministic and local-only (no network calls).
+
+## Output formats
+
+- `--format text` (default): human-readable summary with pass/fail details.
+- `--format json`: machine-readable report suitable for CI artifacts and policy engines.
+
+Example JSON run:
+
+```bash
+sdetkit repo audit --format json
+```
 
 ## Exit codes
 
 - `0`: clean / policy pass
-- `1`: findings exist and policy requires failure
+- `1`: one or more audit checks failed
 - `2`: invalid usage, unsafe path, or internal/runtime error
 
-## Safe fixing (`sdetkit repo fix`)
+## Complementary commands
 
-Default safe fixers:
+- `sdetkit repo check`: deep content scanning and risk-focused findings.
+- `sdetkit repo fix`: safe, idempotent whitespace/EOL normalization.
 
-- strip trailing whitespace
-- ensure EOF newline
-- normalize EOL only when `--eol lf|crlf` is set
-
-Flags:
-
-- `--check`: no writes, prints diff, exits `1` if changes needed
-- `--dry-run`: no writes, prints diff, always exits `0`
-- `--diff`: always print unified diff
-- `--force`: only needed for overwrite-protected outputs
-
-All writes are atomic (`temp + fsync + os.replace`).
+Use `repo audit` for release-readiness snapshots, and `repo check`/`repo fix` for detailed hygiene remediation.

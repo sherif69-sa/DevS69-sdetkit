@@ -30,7 +30,7 @@ Readme -> Setup -> CLI usage -> Diagnostics -> Safe repo checks -> Contribution/
 1. Read [project structure](project-structure.md) to map modules quickly.
 2. Review [design principles](design.md) to understand trade-offs.
 3. Check [doctor](doctor.md) + [repo audit](repo-audit.md) for real quality mechanics.
-4. Scan [ROADMAP](https://github.com/sherif69-sa/sdet_bootcamp/blob/main/ROADMAP.md) for direction and maturity indicators.
+4. Scan [ROADMAP](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/ROADMAP.md) for direction and maturity indicators.
 
 ## Contributor path
 
@@ -70,4 +70,4 @@ Readme -> Setup -> CLI usage -> Diagnostics -> Safe repo checks -> Contribution/
 
 ---
 
-Need a top-level jump list? Return to [docs home](index.md) or [README](https://github.com/sherif69-sa/sdet_bootcamp/blob/main/README.md).
+Need a top-level jump list? Return to [docs home](index.md) or [README](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/README.md).

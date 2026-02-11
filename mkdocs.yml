@@ -1,7 +1,7 @@
-site_name: SDET Bootcamp (sdetkit)
+site_name: DevS69 sdetkit
 site_description: Professional SDET toolkit docs for CLI workflows, diagnostics, API integrations, and repository automation.
-repo_url: https://github.com/sherif69-sa/sdet_bootcamp
-repo_name: sherif69-sa/sdet_bootcamp
+repo_url: https://github.com/sherif69-sa/DevS69-sdetkit
+repo_name: sherif69-sa/DevS69-sdetkit
 
 theme:
   name: material

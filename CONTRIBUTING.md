@@ -20,7 +20,7 @@ Thanks for helping improve **sdetkit**.
 ## 1) Local development setup
 
 ```bash
-cd ~/sdet_bootcamp
+cd ~/DevS69-sdetkit
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip

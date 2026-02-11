@@ -10,8 +10,8 @@ readme = "README.md"
 description = "Developer productivity and QA automation toolkit: CLI utilities, quality gates, and testable modules."
 license = "MIT"
 keywords = ["sdet", "testing", "qa", "automation", "cli", "devtools", "quality-gates"]
-authors = [{ name = "SDET Bootcamp contributors" }]
-maintainers = [{ name = "SDET Bootcamp maintainers" }]
+authors = [{ name = "DevS69 contributors" }]
+maintainers = [{ name = "DevS69 maintainers" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -32,11 +32,11 @@ license-files = ["LICENSE"]
 
 
 [project.urls]
-Homepage = "https://github.com/sherif69-sa/sdet_bootcamp"
-Repository = "https://github.com/sherif69-sa/sdet_bootcamp"
-Documentation = "https://github.com/sherif69-sa/sdet_bootcamp/tree/main/docs"
-Issues = "https://github.com/sherif69-sa/sdet_bootcamp/issues"
-Changelog = "https://github.com/sherif69-sa/sdet_bootcamp/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/sherif69-sa/DevS69-sdetkit"
+Repository = "https://github.com/sherif69-sa/DevS69-sdetkit"
+Documentation = "https://github.com/sherif69-sa/DevS69-sdetkit/tree/main/docs"
+Issues = "https://github.com/sherif69-sa/DevS69-sdetkit/issues"
+Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
