@@ -1,20 +1,66 @@
 site_name: SDET Bootcamp (sdetkit)
+site_description: Professional SDET toolkit docs for CLI workflows, diagnostics, API integrations, and repository automation.
 repo_url: https://github.com/sherif69-sa/sdet_bootcamp
+repo_name: sherif69-sa/sdet_bootcamp
+
 theme:
   name: material
+  logo: assets/logo-mark.svg
+  favicon: assets/logo-mark.svg
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
+
 plugins:
   - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+
 nav:
   - Home: index.md
-  - CLI: cli.md
-  - Doctor: doctor.md
-  - Patch harness: patch-harness.md
-  - n8n integration: n8n.md
-  - Repo audit: repo-audit.md
-  - API: api.md
-  - Design: design.md
-  - Project structure: project-structure.md
-  - Roadmap: roadmap.md
-  - Contributing: contributing.md
-  - Security: security.md
-  - Releasing: releasing.md
+  - Getting started:
+      - CLI: cli.md
+      - Doctor: doctor.md
+      - Repo audit: repo-audit.md
+      - Patch harness: patch-harness.md
+  - Integrations:
+      - n8n integration: n8n.md
+      - API: api.md
+  - Engineering reference:
+      - Design: design.md
+      - Project structure: project-structure.md
+      - Roadmap: roadmap.md
+  - Contribution & governance:
+      - Contributing: contributing.md
+      - Security: security.md
+      - Releasing: releasing.md

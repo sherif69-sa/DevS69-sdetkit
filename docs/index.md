@@ -1,12 +1,25 @@
+<div class="hero-panel" markdown>
+
 # SDET Bootcamp (sdetkit)
 
-Welcome to the documentation hub for `sdetkit`.
+A practical, production-ready toolkit for SDET workflows — with clean CLI ergonomics, diagnostics, API automation, and repository safety checks.
 
-## What this project gives you
+</div>
 
-- Practical CLI tooling for SDET workflows
-- Reproducible quality checks for local and CI usage
-- A clean module layout for learning, extension, and testing
+## Why teams use this project
+
+<div class="grid cards" markdown>
+
+- **Reliable local + CI workflows**  
+  Move from laptop validation to pipeline checks with consistent scripts and quality gates.
+
+- **Focused command-line experience**  
+  Use purpose-built commands for health checks, API calls, cassette workflows, and patch-safe operations.
+
+- **Designed for maintainability**  
+  Organized modules, explicit docs, and test coverage make extension safer and faster.
+
+</div>
 
 ## Fast start
 
@@ -16,34 +29,51 @@ python3 -m venv .venv
 bash scripts/check.sh all
 ```
 
-## Navigation by goal
+!!! tip "Choose your starting point"
+    New to the project? Start with **CLI**, then run **Doctor**, then review **Repo audit** for best-practice checks.
 
-### I want to run commands quickly
-1. [CLI](cli.md)
-2. [Doctor](doctor.md)
-3. [Repo audit](repo-audit.md)
+## Navigate by goal
 
-### I want to understand code layout
-1. [Project structure](project-structure.md)
-2. [Design](design.md)
-3. [API](api.md)
+### Run commands quickly
 
-### I want to contribute safely
-1. [Contributing](contributing.md)
-2. [Security](security.md)
-3. [Releasing](releasing.md)
+<div class="grid cards" markdown>
 
-## All pages
+- [**CLI**](cli.md)  
+  Command reference and practical usage patterns.
 
-- [CLI](cli.md)
-- [Doctor](doctor.md)
-- [Patch harness](patch-harness.md)
-- [n8n integration](n8n.md)
-- [Repo audit and safe fixes](repo-audit.md)
-- [API](api.md)
-- [Design](design.md)
-- [Project structure](project-structure.md)
-- [Roadmap](roadmap.md)
-- [Contributing](contributing.md)
-- [Security](security.md)
-- [Releasing](releasing.md)
+- [**Doctor**](doctor.md)  
+  Environment and repository diagnostics with actionable recommendations.
+
+- [**Repo audit**](repo-audit.md)  
+  Safety-focused checks and guided remediations.
+
+</div>
+
+### Integrate and automate
+
+<div class="grid cards" markdown>
+
+- [**API**](api.md)  
+  Programmatic interfaces and API usage flows.
+
+- [**n8n integration**](n8n.md)  
+  Automation patterns for workflow orchestration.
+
+- [**Patch harness**](patch-harness.md)  
+  Controlled patch application and validation.
+
+</div>
+
+### Understand architecture and contribute
+
+<div class="grid cards" markdown>
+
+- [**Project structure**](project-structure.md)  
+  Repository layout and module roles.
+
+- [**Design**](design.md)  
+  Engineering decisions, principles, and trade-offs.
+
+- [**Contributing**](contributing.md) • [**Security**](security.md) • [**Releasing**](releasing.md)
+
+</div>

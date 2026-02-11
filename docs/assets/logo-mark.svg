@@ -1,0 +1,11 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="sdetkit">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00ACC1"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="224" height="224" rx="48" fill="url(#g)"/>
+  <path d="M76 88c0-13.3 10.7-24 24-24h56c13.3 0 24 10.7 24 24v80c0 13.3-10.7 24-24 24h-56c-13.3 0-24-10.7-24-24V88zm24 0v80h56V88h-56z" fill="white"/>
+  <circle cx="128" cy="128" r="22" fill="#00ACC1"/>
+</svg>

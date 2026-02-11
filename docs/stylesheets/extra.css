@@ -1,0 +1,67 @@
+:root {
+  --sdet-card-radius: 14px;
+}
+
+.md-main__inner {
+  margin-top: 0.8rem;
+}
+
+.hero-panel {
+  border-radius: 18px;
+  padding: 1.3rem 1.4rem;
+  margin: 0.4rem 0 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--md-primary-fg-color) 35%, transparent);
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--md-primary-fg-color) 10%, var(--md-default-bg-color) 90%),
+    color-mix(in srgb, var(--md-accent-fg-color) 8%, var(--md-default-bg-color) 92%));
+  box-shadow: var(--md-shadow-z1);
+}
+
+.hero-panel h1 {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+}
+
+.hero-panel p {
+  margin: 0;
+  opacity: 0.95;
+}
+
+.grid.cards ul {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.grid.cards li {
+  border: 1px solid color-mix(in srgb, var(--md-default-fg-color) 12%, transparent);
+  border-radius: var(--sdet-card-radius);
+  padding: 1rem;
+  background-color: color-mix(in srgb, var(--md-code-bg-color) 65%, var(--md-default-bg-color));
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.grid.cards li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--md-shadow-z2);
+  border-color: color-mix(in srgb, var(--md-accent-fg-color) 40%, transparent);
+}
+
+.grid.cards li > p:first-child {
+  margin-top: 0;
+}
+
+.grid.cards a {
+  font-weight: 600;
+}
+
+.md-typeset .admonition.tip {
+  border-radius: 12px;
+}
+
+.md-header {
+  backdrop-filter: saturate(140%) blur(6px);
+}
