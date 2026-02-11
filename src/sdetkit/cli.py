@@ -4,7 +4,7 @@ import argparse
 import os
 from collections.abc import Sequence
 
-from . import apiget, kvcli, patch
+from . import apiget, kvcli, patch, repo
 
 
 def _add_apiget_args(p: argparse.ArgumentParser) -> None:
@@ -42,6 +42,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "patch":
         return patch.main(list(argv[1:]))
 
+    if argv and argv[0] == "repo":
+        return repo.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -60,6 +63,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     cg = sub.add_parser("cassette-get")
     cg.add_argument("args", nargs=argparse.REMAINDER)
 
+    rp = sub.add_parser("repo")
+    rp.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -67,6 +73,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "patch":
         return patch.main(ns.args)
+
+    if ns.cmd == "repo":
+        return repo.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

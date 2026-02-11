@@ -10,6 +10,7 @@ nav:
   - Doctor: doctor.md
   - Patch harness: patch-harness.md
   - n8n integration: n8n.md
+  - Repo audit: repo-audit.md
   - API: api.md
   - Design: design.md
   - Project structure: project-structure.md

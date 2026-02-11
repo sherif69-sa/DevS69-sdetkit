@@ -75,3 +75,10 @@ Tool-specific notes:
 - `kv`: input parsing remains backward compatible for stdin, --text, and --path usage.
 - `patch`: report output uses safe paths + atomic writes and requires `--force` to overwrite.
 - `doctor`: returns `1` for failing checks, `0` for pass, while usage/runtime issues map to `2` in shared CLI wrappers.
+
+
+## `repo`
+
+- `sdetkit repo check [PATH] [--format text|json|md] [--out PATH] [--fail-on LEVEL] [--min-score N]`
+- `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
+- Security-first defaults: safe paths, deterministic sorted outputs, and atomic writes.

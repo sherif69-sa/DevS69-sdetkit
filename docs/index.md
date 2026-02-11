@@ -23,3 +23,5 @@ bash scripts/check.sh all
 * Project structure: project-structure.md
 * Roadmap: roadmap.md
 * Contributing: contributing.md
+
+- [Repo Audit and Safe Fixes](repo-audit.md)

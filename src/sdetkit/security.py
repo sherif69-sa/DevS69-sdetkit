@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -67,6 +68,30 @@ def redact_json(value: object, *, enabled: bool, keys: set[str]) -> object:
     return value
 
 
+def redact_secrets_text(text: str, *, enabled: bool, keys: set[str]) -> str:
+    if not enabled:
+        return text
+    out = text
+    for key in sorted(keys):
+        token = re.escape(key).replace("\\-", "[-_]").replace("\\_", "[-_]")
+        pattern = rf"(?i)(\b{token}\b\s*[:=]\s*)([^\s,;]+)"
+        out = re.sub(pattern, r"\1<redacted>", out)
+    return out
+
+
+def redact_secrets_headers(
+    headers: dict[str, str], *, enabled: bool, keys: set[str]
+) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for key in sorted(headers):
+        out[key] = redact_header_value(key, str(headers[key]), enabled=enabled, keys=keys)
+    return out
+
+
+def redact_secrets_json(value: object, *, enabled: bool, keys: set[str]) -> object:
+    return redact_json(value, enabled=enabled, keys=keys)
+
+
 def redact_json_text(text: str, *, enabled: bool, keys: set[str]) -> str:
     try:
         raw = json.loads(text)
@@ -102,7 +127,7 @@ def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Pa
     p = Path(user_path)
     if p.is_absolute() and not allow_absolute:
         raise SecurityError("unsafe path rejected: absolute paths require explicit allow")
-    if any(part in ("", ".", "..") for part in p.parts):
+    if any(part == ".." for part in p.parts):
         raise SecurityError("unsafe path rejected: traversal is not allowed")
 
     base = p if p.is_absolute() else (root / p)
