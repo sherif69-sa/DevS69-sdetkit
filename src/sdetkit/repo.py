@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import argparse
 import ast
+import concurrent.futures
 import datetime as dt
 import difflib
 import hashlib
+import importlib.metadata as importlib_metadata
 import json
 import math
 import os
 import re
 import subprocess
 import sys
+import threading
 import tomllib as _tomllib
 import urllib.error
 import urllib.parse
@@ -418,6 +421,109 @@ def _iter_files(root: Path) -> list[Path]:
                 files.append(p)
     files.sort(key=lambda x: x.relative_to(root).as_posix())
     return files
+
+
+def _tool_version() -> str:
+    try:
+        return importlib_metadata.version("sdetkit")
+    except importlib_metadata.PackageNotFoundError:
+        return "0.2.8"
+
+
+def _config_hash(*, profile: str, packs: tuple[str, ...]) -> str:
+    payload = {"packs": list(packs), "profile": profile}
+    doc = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(doc.encode("utf-8")).hexdigest()
+
+
+def _sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+class _FileInventoryCache:
+    def __init__(self, cache_dir: Path) -> None:
+        self._path = cache_dir / "inventory.json"
+        self._lock = threading.Lock()
+        self._entries: dict[str, dict[str, Any]] = {}
+        self._dirty = False
+        self._loaded = False
+
+    def _load(self) -> None:
+        if self._loaded:
+            return
+        self._loaded = True
+        if not self._path.exists():
+            return
+        try:
+            payload = json.loads(self._path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return
+        entries = payload.get("entries") if isinstance(payload, dict) else None
+        if isinstance(entries, dict):
+            self._entries = {str(k): dict(v) for k, v in entries.items() if isinstance(v, dict)}
+
+    def digest_for(self, root: Path, rel_path: str) -> str | None:
+        with self._lock:
+            self._load()
+        target = root / rel_path
+        key = rel_path.replace("\\", "/")
+        if not target.exists():
+            return None
+        try:
+            stat = target.stat()
+            mtime = int(stat.st_mtime_ns)
+            size = int(stat.st_size)
+        except OSError:
+            return None
+        cached = self._entries.get(key)
+        if cached and cached.get("mtime_ns") == mtime and cached.get("size") == size:
+            digest = cached.get("digest")
+            if isinstance(digest, str) and digest:
+                return digest
+        try:
+            digest = _sha256_bytes(target.read_bytes())
+        except OSError:
+            return None
+        self._entries[key] = {"mtime_ns": mtime, "size": size, "digest": digest}
+        self._dirty = True
+        return digest
+
+    def save(self) -> None:
+        with self._lock:
+            if not self._dirty:
+                return
+        self._path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {"entries": {k: self._entries[k] for k in sorted(self._entries)}}
+        atomic_write_text(
+            self._path, json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+        )
+
+
+class RepoRuleExecutionContext:
+    def __init__(
+        self, root: Path, inventory: _FileInventoryCache, changed: set[str] | None = None
+    ) -> None:
+        self._root = root
+        self._inventory = inventory
+        self._deps: set[str] = set()
+        self.changed_files = set(changed or set())
+
+    def track_file(self, path: str | Path) -> None:
+        rel = Path(path).as_posix() if not isinstance(path, Path) else path.as_posix()
+        rel = rel.lstrip("/") or "."
+        self._deps.add(rel)
+
+    def read_text(self, path: str | Path, *, encoding: str = "utf-8") -> str:
+        rel = Path(path).as_posix() if not isinstance(path, Path) else path.as_posix()
+        self.track_file(rel)
+        target = self._root / rel
+        return target.read_text(encoding=encoding)
+
+    def dependency_manifest(self) -> dict[str, str | None]:
+        manifest: dict[str, str | None] = {}
+        for rel in sorted(self._deps):
+            manifest[rel] = self._inventory.digest_for(self._root, rel)
+        return manifest
 
 
 def _line_for_offset(text: str, offset: int) -> tuple[int, int]:
@@ -1187,8 +1293,30 @@ def _plan_repo_fix_audit(
     policy: RepoAuditPolicy,
     allow_absolute_path: bool,
     force: bool,
+    changed_only: bool,
+    since_ref: str,
+    include_untracked: bool,
+    include_staged: bool,
+    require_git: bool,
+    cache_dir: str,
+    no_cache: bool,
+    cache_stats: bool,
+    jobs: int,
 ) -> tuple[list[Fix], list[str], dict[str, Any]]:
-    payload = run_repo_audit(root, profile=profile, packs=packs)
+    payload = run_repo_audit(
+        root,
+        profile=profile,
+        packs=packs,
+        changed_only=changed_only,
+        since_ref=since_ref,
+        include_untracked=include_untracked,
+        include_staged=include_staged,
+        require_git=require_git,
+        cache_dir=cache_dir,
+        no_cache=no_cache,
+        cache_stats=cache_stats,
+        jobs=jobs,
+    )
     baseline_path = safe_path(root, policy.baseline_path, allow_absolute=allow_absolute_path)
     baseline_doc = _load_repo_baseline(baseline_path)
     actionable, suppression = _apply_repo_audit_policy(
@@ -1290,6 +1418,15 @@ def _run_repo_fix_audit(
     show_diff: bool,
     patch_path: str | None,
     allow_absolute_path: bool,
+    changed_only: bool,
+    since_ref: str,
+    include_untracked: bool,
+    include_staged: bool,
+    require_git: bool,
+    cache_dir: str,
+    no_cache: bool,
+    cache_stats: bool,
+    jobs: int,
 ) -> int:
     fixes, conflicts, _ = _plan_repo_fix_audit(
         root,
@@ -1298,6 +1435,15 @@ def _run_repo_fix_audit(
         policy=policy,
         allow_absolute_path=allow_absolute_path,
         force=force,
+        changed_only=changed_only,
+        since_ref=since_ref,
+        include_untracked=include_untracked,
+        include_staged=include_staged,
+        require_git=require_git,
+        cache_dir=cache_dir,
+        no_cache=no_cache,
+        cache_stats=cache_stats,
+        jobs=jobs,
     )
     if conflicts:
         for rel in conflicts:
@@ -1698,32 +1844,221 @@ def _plugin_finding_to_dict(finding: PluginFinding, meta: RuleMeta) -> dict[str,
     }
 
 
+def _git_available(root: Path) -> bool:
+    proc = _git_run(root, ["rev-parse", "--is-inside-work-tree"])
+    return proc.returncode == 0 and proc.stdout.strip() == "true"
+
+
+def _git_name_only(root: Path, args: list[str]) -> set[str]:
+    proc = _git_run(root, args)
+    if proc.returncode != 0:
+        raise ValueError(proc.stderr.strip() or "unable to collect changed files")
+    return {x.strip() for x in proc.stdout.splitlines() if x.strip()}
+
+
+def collect_git_changed_files(
+    root: Path,
+    *,
+    since_ref: str,
+    include_untracked: bool,
+    include_staged: bool,
+) -> set[str]:
+    changed = set(_git_name_only(root, ["diff", "--name-only"]))
+    if include_staged:
+        changed.update(_git_name_only(root, ["diff", "--name-only", "--cached"]))
+    try:
+        changed.update(_git_name_only(root, ["diff", "--name-only", f"{since_ref}...HEAD"]))
+    except ValueError:
+        pass
+    if include_untracked:
+        changed.update(_git_name_only(root, ["ls-files", "--others", "--exclude-standard"]))
+    return {x.replace("\\", "/") for x in changed}
+
+
+def _rule_cache_file(cache_dir: Path, key: str) -> Path:
+    return cache_dir / f"{key}.json"
+
+
+def _rule_cache_key(
+    *,
+    rule_id: str,
+    repo_root: Path,
+    profile: str,
+    packs: tuple[str, ...],
+) -> str:
+    repo_identity = repo_root.resolve(strict=False).as_posix()
+    material = {
+        "tool_version": _tool_version(),
+        "rule_id": rule_id,
+        "repo_root": repo_identity,
+        "config": _config_hash(profile=profile, packs=packs),
+        "packs": list(packs),
+    }
+    payload = json.dumps(material, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _load_cached_rule(cache_dir: Path, key: str) -> dict[str, Any] | None:
+    target = _rule_cache_file(cache_dir, key)
+    if not target.exists():
+        return None
+    try:
+        payload = json.loads(target.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _cache_valid(payload: dict[str, Any], manifest: dict[str, str | None]) -> bool:
+    deps = payload.get("dependencies")
+    if not isinstance(deps, dict):
+        return False
+    normalized = {str(k): (str(v) if isinstance(v, str) else None) for k, v in deps.items()}
+    return normalized == manifest
+
+
+def _store_rule_cache(
+    cache_dir: Path,
+    key: str,
+    *,
+    findings: list[dict[str, Any]],
+    dependencies: dict[str, str | None],
+) -> None:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    doc = {
+        "findings": findings,
+        "dependencies": {k: dependencies[k] for k in sorted(dependencies)},
+    }
+    atomic_write_text(
+        _rule_cache_file(cache_dir, key),
+        json.dumps(doc, ensure_ascii=True, sort_keys=True, indent=2) + "\n",
+    )
+
+
 def run_repo_audit(
-    root: Path, *, profile: str = "default", packs: tuple[str, ...] | None = None
+    root: Path,
+    *,
+    profile: str = "default",
+    packs: tuple[str, ...] | None = None,
+    changed_only: bool = False,
+    since_ref: str = "HEAD~1",
+    include_untracked: bool = True,
+    include_staged: bool = True,
+    require_git: bool = False,
+    cache_dir: str = ".sdetkit/cache",
+    no_cache: bool = False,
+    cache_stats: bool = False,
+    jobs: int = 1,
 ) -> dict[str, Any]:
     catalog = load_rule_catalog()
     selected_packs = packs or normalize_packs(profile, None)
-    selected_rules = select_rules(catalog, selected_packs)
+    selected_rules = sorted(select_rules(catalog, selected_packs), key=lambda item: item.meta.id)
 
-    findings: list[dict[str, Any]] = []
-    checks: list[dict[str, Any]] = []
-    context: dict[str, Any] = {"profile": profile, "packs": selected_packs}
-    for loaded in selected_rules:
-        rule_findings = loaded.plugin.run(root, context)
-        checks.append(
-            {
-                "key": loaded.meta.id,
-                "title": loaded.meta.title,
-                "status": "pass" if not rule_findings else "fail",
-                "details": [loaded.meta.description],
-                "pack": next(
-                    (t.split(":", 1)[1] for t in loaded.meta.tags if t.startswith("pack:")), "core"
-                ),
-                "supports_fix": loaded.meta.supports_fix,
-            }
+    changed_files: set[str] = set()
+    incremental_used = False
+    if changed_only:
+        git_ok = _git_available(root)
+        if not git_ok:
+            if require_git:
+                raise ValueError("git unavailable or current path is not a git repository")
+        else:
+            changed_files = collect_git_changed_files(
+                root,
+                since_ref=since_ref,
+                include_untracked=include_untracked,
+                include_staged=include_staged,
+            )
+            incremental_used = True
+
+    cache_enabled = not no_cache
+    cache_root = root / cache_dir
+    inventory = _FileInventoryCache(cache_root)
+
+    def run_one(loaded: Any) -> tuple[str, dict[str, Any], list[dict[str, Any]], int, int]:
+        rule_id = loaded.meta.id
+        pack_name = next(
+            (t.split(":", 1)[1] for t in loaded.meta.tags if t.startswith("pack:")), "core"
         )
-        for finding in rule_findings:
-            findings.append(_plugin_finding_to_dict(finding, loaded.meta))
+        key = _rule_cache_key(
+            rule_id=rule_id, repo_root=root, profile=profile, packs=selected_packs
+        )
+        cached_doc = _load_cached_rule(cache_root, key) if cache_enabled else None
+
+        if cached_doc is not None and changed_only and incremental_used:
+            deps = cached_doc.get("dependencies")
+            if isinstance(deps, dict):
+                dep_paths = {str(item) for item in deps}
+                if dep_paths and dep_paths.isdisjoint(changed_files):
+                    cached_findings = [
+                        x for x in cached_doc.get("findings", []) if isinstance(x, dict)
+                    ]
+                    check = {
+                        "key": loaded.meta.id,
+                        "title": loaded.meta.title,
+                        "status": "pass" if not cached_findings else "fail",
+                        "details": [loaded.meta.description],
+                        "pack": pack_name,
+                        "supports_fix": loaded.meta.supports_fix,
+                    }
+                    return rule_id, check, cached_findings, 1, 0
+
+        exec_ctx = RepoRuleExecutionContext(root, inventory, changed_files)
+        context: dict[str, Any] = {
+            "profile": profile,
+            "packs": selected_packs,
+            "_exec_ctx": exec_ctx,
+        }
+        rule_findings = loaded.plugin.run(root, context)
+        normalized_findings = [
+            _plugin_finding_to_dict(finding, loaded.meta) for finding in rule_findings
+        ]
+
+        hit_count = 0
+        miss_count = 0
+        deps_manifest = exec_ctx.dependency_manifest()
+        if cache_enabled and deps_manifest:
+            if cached_doc is not None and _cache_valid(cached_doc, deps_manifest):
+                normalized_findings = [
+                    x for x in cached_doc.get("findings", []) if isinstance(x, dict)
+                ]
+                hit_count = 1
+            else:
+                _store_rule_cache(
+                    cache_root, key, findings=normalized_findings, dependencies=deps_manifest
+                )
+                miss_count = 1
+
+        check = {
+            "key": loaded.meta.id,
+            "title": loaded.meta.title,
+            "status": "pass" if not normalized_findings else "fail",
+            "details": [loaded.meta.description],
+            "pack": pack_name,
+            "supports_fix": loaded.meta.supports_fix,
+        }
+        return rule_id, check, normalized_findings, hit_count, miss_count
+
+    max_workers = max(1, int(jobs))
+    if max_workers == 1:
+        results = [run_one(rule) for rule in selected_rules]
+    else:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(run_one, rule) for rule in selected_rules]
+            results = [future.result() for future in futures]
+
+    checks: list[dict[str, Any]] = []
+    findings: list[dict[str, Any]] = []
+    cache_hits: dict[str, int] = {}
+    cache_misses: dict[str, int] = {}
+    for rule_id, check, rule_findings, hit_count, miss_count in sorted(
+        results, key=lambda item: item[0]
+    ):
+        checks.append(check)
+        findings.extend(rule_findings)
+        if hit_count:
+            cache_hits[rule_id] = cache_hits.get(rule_id, 0) + hit_count
+        if miss_count:
+            cache_misses[rule_id] = cache_misses.get(rule_id, 0) + miss_count
 
     counts = {"info": 0, "warn": 0, "error": 0}
     for finding_item in findings:
@@ -1734,18 +2069,27 @@ def run_repo_audit(
     findings.sort(
         key=lambda x: (str(x.get("path", "")), str(x.get("rule_id", "")), str(x.get("message", "")))
     )
+    inventory.save()
+
+    summary: dict[str, Any] = {
+        "checks": len(checks),
+        "passed": sum(1 for item in checks if item["status"] == "pass"),
+        "failed": sum(1 for item in checks if item["status"] == "fail"),
+        "ok": not findings,
+        "counts": {k: counts[k] for k in sorted(counts)},
+        "findings": len(findings),
+        "packs": list(selected_packs),
+        "incremental": {"used": incremental_used, "changed_files": len(changed_files)},
+    }
+    if cache_stats:
+        summary["cache"] = {
+            "hits": {k: cache_hits[k] for k in sorted(cache_hits)},
+            "misses": {k: cache_misses[k] for k in sorted(cache_misses)},
+        }
     return {
         "schema_version": "1.1.0",
         "root": str(root),
-        "summary": {
-            "checks": len(checks),
-            "passed": sum(1 for item in checks if item["status"] == "pass"),
-            "failed": sum(1 for item in checks if item["status"] == "fail"),
-            "ok": not findings,
-            "counts": {k: counts[k] for k in sorted(counts)},
-            "findings": len(findings),
-            "packs": list(selected_packs),
-        },
+        "summary": summary,
         "checks": checks,
         "findings": findings,
     }
@@ -2449,6 +2793,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sort", action="store_true")
     ap.add_argument("--fail-strategy", choices=["overall", "per-project"], default="overall")
 
+    ap.add_argument("--changed-only", action="store_true")
+    ap.add_argument("--since-ref", default="HEAD~1")
+    ap.add_argument("--include-untracked", action=argparse.BooleanOptionalAction, default=True)
+    ap.add_argument("--include-staged", action=argparse.BooleanOptionalAction, default=True)
+    ap.add_argument("--require-git", action="store_true")
+    ap.add_argument("--cache-dir", default=".sdetkit/cache")
+    ap.add_argument("--no-cache", action="store_true")
+    ap.add_argument("--cache-stats", action="store_true")
+    ap.add_argument("--jobs", type=int, default=1)
+
     projp = sub.add_parser("projects")
     projsub = projp.add_subparsers(dest="projects_cmd", required=True)
     projlist = projsub.add_parser("list")
@@ -2482,6 +2836,15 @@ def main(argv: list[str] | None = None) -> int:
     fxap.add_argument("--project", default=None)
     fxap.add_argument("--all-projects", action="store_true")
     fxap.add_argument("--sort", action="store_true")
+    fxap.add_argument("--changed-only", action="store_true")
+    fxap.add_argument("--since-ref", default="HEAD~1")
+    fxap.add_argument("--include-untracked", action=argparse.BooleanOptionalAction, default=True)
+    fxap.add_argument("--include-staged", action=argparse.BooleanOptionalAction, default=True)
+    fxap.add_argument("--require-git", action="store_true")
+    fxap.add_argument("--cache-dir", default=".sdetkit/cache")
+    fxap.add_argument("--no-cache", action="store_true")
+    fxap.add_argument("--cache-stats", action="store_true")
+    fxap.add_argument("--jobs", type=int, default=1)
 
     prp = sub.add_parser("pr-fix")
     prp.add_argument("path", nargs="?", default=".")
@@ -2501,6 +2864,16 @@ def main(argv: list[str] | None = None) -> int:
     prp.add_argument("--project", default=None)
     prp.add_argument("--all-projects", action="store_true")
     prp.add_argument("--sort", action="store_true")
+    prp.add_argument("--changed-only", action="store_true")
+    prp.add_argument("--since-ref", default="HEAD~1")
+    prp.add_argument("--include-untracked", action=argparse.BooleanOptionalAction, default=True)
+    prp.add_argument("--include-staged", action=argparse.BooleanOptionalAction, default=True)
+    prp.add_argument("--require-git", action="store_true")
+    prp.add_argument("--cache-dir", default=".sdetkit/cache")
+    prp.add_argument("--no-cache", action="store_true")
+    prp.add_argument("--cache-stats", action="store_true")
+    prp.add_argument("--jobs", type=int, default=1)
+
     prp.add_argument("--branch", default="sdetkit/fix-audit")
     prp.add_argument("--force-branch", action="store_true")
     prp.add_argument("--commit", dest="commit", action="store_true", default=None)
@@ -2595,6 +2968,17 @@ def main(argv: list[str] | None = None) -> int:
         root = _resolve_root(ns.path, allow_absolute=bool(ns.allow_absolute_path))
     except SecurityError as exc:
         print(str(exc), file=sys.stderr)
+        return 2
+
+    if (
+        getattr(ns, "changed_only", False)
+        and getattr(ns, "require_git", False)
+        and not _git_available(root)
+    ):
+        print(
+            "--require-git requested but git is unavailable or path is not a git repository",
+            file=sys.stderr,
+        )
         return 2
 
     if ns.repo_cmd == "check":
@@ -2813,7 +3197,20 @@ def main(argv: list[str] | None = None) -> int:
                     packs = merge_packs(tuple(resolved.packs), policy.org_packs)
                 else:
                     packs = _effective_packs(policy, None)
-                project_payload = run_repo_audit(resolved.root, profile=policy.profile, packs=packs)
+                project_payload = run_repo_audit(
+                    resolved.root,
+                    profile=policy.profile,
+                    packs=packs,
+                    changed_only=bool(ns.changed_only),
+                    since_ref=str(ns.since_ref),
+                    include_untracked=bool(ns.include_untracked),
+                    include_staged=bool(ns.include_staged),
+                    require_git=bool(ns.require_git),
+                    cache_dir=str(ns.cache_dir),
+                    no_cache=bool(ns.no_cache),
+                    cache_stats=bool(ns.cache_stats),
+                    jobs=int(ns.jobs),
+                )
                 original_findings = [
                     x for x in project_payload.get("findings", []) if isinstance(x, dict)
                 ]
@@ -2850,6 +3247,15 @@ def main(argv: list[str] | None = None) -> int:
                     fail_on=policy.fail_on,
                     repo_root=resolved.root_rel,
                     config_used=resolved.config_rel,
+                    incremental_used=bool(
+                        project_summary.get("incremental", {}).get("used", False)
+                    ),
+                    changed_file_count=int(
+                        project_summary.get("incremental", {}).get("changed_files", 0)
+                    ),
+                    cache_summary=project_summary.get("cache")
+                    if isinstance(project_summary.get("cache"), dict)
+                    else None,
                 )
                 project_failed = _needs_fail_repo_audit(actionable, policy.fail_on)
                 failures += int(project_failed)
@@ -2905,7 +3311,20 @@ def main(argv: list[str] | None = None) -> int:
             print(str(exc), file=sys.stderr)
             return 2
         packs = _effective_packs(policy, ns.pack)
-        audit_payload = run_repo_audit(root, profile=policy.profile, packs=packs)
+        audit_payload = run_repo_audit(
+            root,
+            profile=policy.profile,
+            packs=packs,
+            changed_only=bool(ns.changed_only),
+            since_ref=str(ns.since_ref),
+            include_untracked=bool(ns.include_untracked),
+            include_staged=bool(ns.include_staged),
+            require_git=bool(ns.require_git),
+            cache_dir=str(ns.cache_dir),
+            no_cache=bool(ns.no_cache),
+            cache_stats=bool(ns.cache_stats),
+            jobs=int(ns.jobs),
+        )
         original_findings = [x for x in audit_payload.get("findings", []) if isinstance(x, dict)]
         try:
             baseline_path = safe_path(
@@ -2948,6 +3367,11 @@ def main(argv: list[str] | None = None) -> int:
             fail_on=policy.fail_on,
             repo_root=str(root),
             config_used=ns.config,
+            incremental_used=bool(audit_summary.get("incremental", {}).get("used", False)),
+            changed_file_count=int(audit_summary.get("incremental", {}).get("changed_files", 0)),
+            cache_summary=audit_summary.get("cache")
+            if isinstance(audit_summary.get("cache"), dict)
+            else None,
         )
         if ns.json_schema == "v1" and ns.format == "json":
             audit_payload = run_record
@@ -3087,6 +3511,15 @@ def main(argv: list[str] | None = None) -> int:
                     show_diff=bool(ns.diff),
                     patch_path=ns.patch,
                     allow_absolute_path=bool(ns.allow_absolute_path),
+                    changed_only=bool(ns.changed_only),
+                    since_ref=str(ns.since_ref),
+                    include_untracked=bool(ns.include_untracked),
+                    include_staged=bool(ns.include_staged),
+                    require_git=bool(ns.require_git),
+                    cache_dir=str(ns.cache_dir),
+                    no_cache=bool(ns.no_cache),
+                    cache_stats=bool(ns.cache_stats),
+                    jobs=int(ns.jobs),
                 )
                 exit_code = max(exit_code, rc)
             return exit_code
@@ -3125,6 +3558,15 @@ def main(argv: list[str] | None = None) -> int:
             show_diff=bool(ns.diff),
             patch_path=ns.patch,
             allow_absolute_path=bool(ns.allow_absolute_path),
+            changed_only=bool(ns.changed_only),
+            since_ref=str(ns.since_ref),
+            include_untracked=bool(ns.include_untracked),
+            include_staged=bool(ns.include_staged),
+            require_git=bool(ns.require_git),
+            cache_dir=str(ns.cache_dir),
+            no_cache=bool(ns.no_cache),
+            cache_stats=bool(ns.cache_stats),
+            jobs=int(ns.jobs),
         )
 
     if ns.repo_cmd == "pr-fix":
@@ -3183,6 +3625,15 @@ def main(argv: list[str] | None = None) -> int:
                     policy=policy,
                     allow_absolute_path=bool(ns.allow_absolute_path),
                     force=bool(ns.force),
+                    changed_only=bool(ns.changed_only),
+                    since_ref=str(ns.since_ref),
+                    include_untracked=bool(ns.include_untracked),
+                    include_staged=bool(ns.include_staged),
+                    require_git=bool(ns.require_git),
+                    cache_dir=str(ns.cache_dir),
+                    no_cache=bool(ns.no_cache),
+                    cache_stats=bool(ns.cache_stats),
+                    jobs=int(ns.jobs),
                 )
                 if conflicts:
                     for rel in conflicts:
@@ -3239,6 +3690,15 @@ def main(argv: list[str] | None = None) -> int:
                 policy=policy,
                 allow_absolute_path=bool(ns.allow_absolute_path),
                 force=bool(ns.force),
+                changed_only=bool(ns.changed_only),
+                since_ref=str(ns.since_ref),
+                include_untracked=bool(ns.include_untracked),
+                include_staged=bool(ns.include_staged),
+                require_git=bool(ns.require_git),
+                cache_dir=str(ns.cache_dir),
+                no_cache=bool(ns.no_cache),
+                cache_stats=bool(ns.cache_stats),
+                jobs=int(ns.jobs),
             )
             if conflicts:
                 for rel in conflicts:

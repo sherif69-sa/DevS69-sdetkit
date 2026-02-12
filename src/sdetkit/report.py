@@ -61,6 +61,9 @@ def build_run_record(
     fail_on: str,
     repo_root: str | None,
     config_used: str | None,
+    incremental_used: bool = False,
+    changed_file_count: int = 0,
+    cache_summary: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     suppressed_map: dict[str, str] = {}
     for item in payload.get("suppressed", []):
@@ -138,6 +141,13 @@ def build_run_record(
         run["config_used"] = Path(config_used).name
     if source:
         run["source"] = source
+    execution: dict[str, Any] = {
+        "incremental_used": bool(incremental_used),
+        "changed_file_count": int(changed_file_count),
+    }
+    if isinstance(cache_summary, dict):
+        execution["cache"] = cache_summary
+    run["execution"] = execution
     return run
 
 

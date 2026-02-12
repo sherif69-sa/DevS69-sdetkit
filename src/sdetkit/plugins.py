@@ -181,6 +181,9 @@ class _MissingFileRule:
     rel_path: str
 
     def run(self, repo_root: Path, context: dict[str, Any]) -> list[Finding]:
+        exec_ctx = context.get("_exec_ctx")
+        if exec_ctx is not None and hasattr(exec_ctx, "track_file"):
+            exec_ctx.track_file(self.rel_path)
         target = repo_root / self.rel_path
         if target.exists():
             return []
