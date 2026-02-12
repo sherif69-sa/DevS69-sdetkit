@@ -1878,6 +1878,8 @@ def collect_git_changed_files(
     try:
         changed.update(_git_name_only(root, ["diff", "--name-only", f"{since_ref}...HEAD"]))
     except ValueError:
+        # Ignore failures when diffing from since_ref (e.g., invalid ref or no common base);
+        # we still return files changed in the working tree, staged area, and untracked files.
         pass
     if include_untracked:
         changed.update(_git_name_only(root, ["ls-files", "--others", "--exclude-standard"]))
