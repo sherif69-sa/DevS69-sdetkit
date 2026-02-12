@@ -1,0 +1,11 @@
+name: security
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  security-placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Security policy placeholder
+        run: echo "Run your security checks here"

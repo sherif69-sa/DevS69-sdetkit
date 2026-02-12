@@ -7,6 +7,7 @@ import datetime as dt
 import difflib
 import hashlib
 import importlib.metadata as importlib_metadata
+import importlib.resources as importlib_resources
 import json
 import math
 import os
@@ -118,142 +119,7 @@ PRIVATE_KEY_FILES: frozenset[str] = frozenset({"id_rsa", "id_dsa"})
 PRIVATE_KEY_SUFFIXES: tuple[str, ...] = (".pem", ".p12", ".pfx", ".key")
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 
-DEFAULT_INIT_TEMPLATES: dict[str, str] = {
-    "SECURITY.md": (
-        "# Security Policy\n\n"
-        "## Reporting a Vulnerability\n\n"
-        "Please report suspected vulnerabilities privately to the maintainers. "
-        "Include reproduction steps, impact, and any proof-of-concept details.\n\n"
-        "## Response Expectations\n\n"
-        "Maintainers acknowledge reports promptly and provide status updates until closure.\n"
-    ),
-    "CONTRIBUTING.md": (
-        "# Contributing\n\n"
-        "Thanks for helping improve this project.\n\n"
-        "## Getting Started\n\n"
-        "- Create a branch from the default branch.\n"
-        "- Keep changes scoped and include tests.\n"
-        "- Run local quality checks before opening a pull request.\n\n"
-        "## Pull Requests\n\n"
-        "- Explain what changed and why.\n"
-        "- Reference related issues where relevant.\n"
-        "- Ensure CI is green before requesting review.\n"
-    ),
-    "CODE_OF_CONDUCT.md": (
-        "# Code of Conduct\n\n"
-        "This project is committed to a respectful, harassment-free experience for everyone.\n\n"
-        "## Expected Behavior\n\n"
-        "- Be respectful and constructive.\n"
-        "- Welcome diverse perspectives.\n"
-        "- Focus on what is best for the community.\n\n"
-        "## Reporting\n\n"
-        "If you experience unacceptable behavior, contact the maintainers privately.\n"
-    ),
-    ".github/ISSUE_TEMPLATE/config.yml": (
-        "blank_issues_enabled: false\n"
-        "contact_links:\n"
-        "  - name: Security report\n"
-        "    url: https://example.invalid/security\n"
-        "    about: Please report vulnerabilities privately and avoid public disclosure.\n"
-    ),
-    ".github/ISSUE_TEMPLATE/bug_report.yml": (
-        "name: Bug report\n"
-        "description: Report a reproducible defect.\n"
-        'title: "bug: "\n'
-        "labels: [bug]\n"
-        "body:\n"
-        "  - type: textarea\n"
-        "    id: summary\n"
-        "    attributes:\n"
-        "      label: Summary\n"
-        "      description: What happened?\n"
-        "    validations:\n"
-        "      required: true\n"
-        "  - type: textarea\n"
-        "    id: steps\n"
-        "    attributes:\n"
-        "      label: Steps to reproduce\n"
-        "      description: Provide a minimal, deterministic reproduction.\n"
-        "    validations:\n"
-        "      required: true\n"
-    ),
-    ".github/ISSUE_TEMPLATE/feature_request.yml": (
-        "name: Feature request\n"
-        "description: Suggest an improvement.\n"
-        'title: "feat: "\n'
-        "labels: [enhancement]\n"
-        "body:\n"
-        "  - type: textarea\n"
-        "    id: problem\n"
-        "    attributes:\n"
-        "      label: Problem statement\n"
-        "      description: What problem are you trying to solve?\n"
-        "    validations:\n"
-        "      required: true\n"
-        "  - type: textarea\n"
-        "    id: proposal\n"
-        "    attributes:\n"
-        "      label: Proposed solution\n"
-        "      description: Describe your preferred approach.\n"
-    ),
-    ".github/PULL_REQUEST_TEMPLATE.md": (
-        "## Summary\n\n"
-        "Describe the change and its motivation.\n\n"
-        "## Validation\n\n"
-        "- [ ] Tests added or updated\n"
-        "- [ ] Local checks passed\n"
-    ),
-}
-
-ENTERPRISE_INIT_TEMPLATES: dict[str, str] = {
-    ".github/dependabot.yml": (
-        "version: 2\n"
-        "updates:\n"
-        "  - package-ecosystem: pip\n"
-        "    directory: /\n"
-        "    schedule:\n"
-        "      interval: weekly\n"
-    ),
-    ".github/workflows/quality.yml": (
-        "name: quality\n"
-        "on:\n"
-        "  pull_request:\n"
-        "  push:\n"
-        "    branches: [main]\n"
-        "jobs:\n"
-        "  quality:\n"
-        "    runs-on: ubuntu-latest\n"
-        "    steps:\n"
-        "      - uses: actions/checkout@v4\n"
-        "      - uses: actions/setup-python@v5\n"
-        "        with:\n"
-        "          python-version: '3.11'\n"
-        "      - name: Install\n"
-        "        run: python -m pip install -e .\n"
-        "      - name: Test\n"
-        "        run: pytest\n"
-    ),
-    ".github/workflows/security.yml": (
-        "name: security\n"
-        "on:\n"
-        "  pull_request:\n"
-        "  push:\n"
-        "    branches: [main]\n"
-        "jobs:\n"
-        "  checks:\n"
-        "    runs-on: ubuntu-latest\n"
-        "    steps:\n"
-        "      - uses: actions/checkout@v4\n"
-        "      - name: Secret-pattern sanity check\n"
-        "        run: |\n"
-        "          if grep -R --line-number --exclude-dir=.git --exclude-dir=.venv 'AKIA[0-9A-Z]\\{16\\}' .; then\n"
-        "            echo 'Potential AWS key pattern detected'\n"
-        "            exit 1\n"
-        "          fi\n"
-        "      - name: Python syntax check\n"
-        "        run: python -m compileall -q src tests\n"
-    ),
-}
+REPO_PRESETS: frozenset[str] = frozenset({"enterprise_python"})
 
 
 def _shannon_entropy(s: str) -> float:
@@ -1218,19 +1084,27 @@ def _resolve_root(user_path: str, *, allow_absolute: bool) -> Path:
         raise
 
 
-def _init_templates(profile: str) -> dict[str, str]:
-    templates = dict(DEFAULT_INIT_TEMPLATES)
-    if profile == "enterprise":
-        templates.update(ENTERPRISE_INIT_TEMPLATES)
-    return dict(sorted(templates.items()))
+def _load_repo_preset_templates(preset: str) -> dict[str, str]:
+    if preset not in REPO_PRESETS:
+        raise ValueError(f"unsupported preset: {preset}")
+    base = importlib_resources.files("sdetkit.templates").joinpath(preset)
+    templates: dict[str, str] = {}
+    for entry in sorted(base.rglob("*"), key=lambda item: item.as_posix()):
+        if not entry.is_file():
+            continue
+        if entry.name == "__init__.py":
+            continue
+        rel = entry.relative_to(base).as_posix()
+        templates[rel] = entry.read_text(encoding="utf-8")
+    return templates
 
 
 def _plan_repo_init(
-    root: Path, *, profile: str, force: bool
+    root: Path, *, preset: str, force: bool
 ) -> tuple[list[RepoInitChange], list[str]]:
     changes: list[RepoInitChange] = []
     conflicts: list[str] = []
-    for rel, desired in _init_templates(profile).items():
+    for rel, desired in _load_repo_preset_templates(preset).items():
         target = safe_path(root, rel, allow_absolute=False)
         if not target.exists():
             changes.append(RepoInitChange(path=rel, action="create", current="", desired=desired))
@@ -1249,16 +1123,16 @@ def _plan_repo_init(
     return changes, sorted(conflicts)
 
 
-def _print_repo_init_plan(changes: list[RepoInitChange], *, apply: bool) -> None:
-    mode = "apply" if apply else "dry-run"
+def _print_repo_init_plan(changes: list[RepoInitChange], *, command: str, dry_run: bool) -> None:
+    mode = "dry-run" if dry_run else "write"
     if not changes:
-        print(f"repo init ({mode}): no changes")
+        print(f"repo {command} ({mode}): no changes")
         return
     for change in changes:
         print(f"{change.action.upper():<6} {change.path}")
     creates = sum(1 for item in changes if item.action == "create")
     updates = sum(1 for item in changes if item.action == "update")
-    print(f"repo init ({mode}): {len(changes)} planned (create={creates}, update={updates})")
+    print(f"repo {command} ({mode}): {len(changes)} planned (create={creates}, update={updates})")
 
 
 def _print_repo_init_diff(changes: list[RepoInitChange]) -> None:
@@ -1272,22 +1146,27 @@ def _print_repo_init_diff(changes: list[RepoInitChange]) -> None:
         sys.stdout.write("".join(diff))
 
 
-def _run_repo_init(root: Path, *, profile: str, apply: bool, force: bool, diff: bool) -> int:
-    changes, conflicts = _plan_repo_init(root, profile=profile, force=force)
-    if conflicts:
+def _run_repo_init(
+    root: Path, *, preset: str, command: str, dry_run: bool, force: bool, diff: bool
+) -> int:
+    changes, conflicts = _plan_repo_init(root, preset=preset, force=force)
+    if conflicts and command == "init":
         for rel in conflicts:
             print(f"refusing to overwrite existing file: {rel} (use --force)", file=sys.stderr)
         return 2
-    _print_repo_init_plan(changes, apply=apply)
+    if conflicts and command == "apply":
+        for rel in conflicts:
+            print(f"SKIP   {rel}")
+    _print_repo_init_plan(changes, command=command, dry_run=dry_run)
     if diff and changes:
         _print_repo_init_diff(changes)
-    if not apply:
+    if dry_run:
         return 0
     for change in changes:
         target = safe_path(root, change.path, allow_absolute=False)
         target.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_text(target, change.desired)
-    print(f"repo init: wrote {len(changes)} file(s)")
+    print(f"repo {command}: wrote {len(changes)} file(s)")
     return 0
 
 
@@ -2882,13 +2761,20 @@ def main(argv: list[str] | None = None) -> int:
     fp.add_argument("--allow-absolute-path", action="store_true")
 
     ip = sub.add_parser("init")
-    ip.add_argument("path", nargs="?", default=".")
-    ip.add_argument("--profile", choices=["default", "enterprise"], default="default")
+    ip.add_argument("--preset", choices=sorted(REPO_PRESETS), required=True)
+    ip.add_argument("--root", default=".")
     ip.add_argument("--dry-run", action="store_true")
-    ip.add_argument("--apply", action="store_true")
     ip.add_argument("--force", action="store_true")
     ip.add_argument("--diff", action="store_true")
     ip.add_argument("--allow-absolute-path", action="store_true")
+
+    aply = sub.add_parser("apply")
+    aply.add_argument("--preset", choices=sorted(REPO_PRESETS), required=True)
+    aply.add_argument("--root", default=".")
+    aply.add_argument("--dry-run", action="store_true")
+    aply.add_argument("--force", action="store_true")
+    aply.add_argument("--diff", action="store_true")
+    aply.add_argument("--allow-absolute-path", action="store_true")
 
     bp = sub.add_parser("baseline")
     bsub = bp.add_subparsers(dest="baseline_cmd", required=True)
@@ -3140,8 +3026,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"- {rec['name']}: root={rec['root']} baseline={rec['baseline']}")
         return 0
 
+    target_path = getattr(ns, "path", getattr(ns, "root", "."))
     try:
-        root = _resolve_root(ns.path, allow_absolute=bool(ns.allow_absolute_path))
+        root = _resolve_root(target_path, allow_absolute=bool(ns.allow_absolute_path))
     except SecurityError as exc:
         print(str(exc), file=sys.stderr)
         return 2
@@ -4190,14 +4077,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Opened PR: {pr_resp.get('html_url', '')}")
         return 0
 
-    if ns.repo_cmd == "init":
-        if ns.dry_run and ns.apply:
-            print("cannot use --dry-run and --apply together", file=sys.stderr)
-            return 2
+    if ns.repo_cmd in {"init", "apply"}:
         return _run_repo_init(
             root,
-            profile=ns.profile,
-            apply=bool(ns.apply),
+            preset=ns.preset,
+            command=ns.repo_cmd,
+            dry_run=bool(ns.dry_run),
             force=bool(ns.force),
             diff=bool(ns.diff),
         )

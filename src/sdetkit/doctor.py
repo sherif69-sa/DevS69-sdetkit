@@ -320,6 +320,67 @@ def _print_pr_report(data: dict[str, Any]) -> None:
     sys.stdout.write("\n".join(lines) + "\n")
 
 
+def _format_doctor_markdown(data: dict[str, Any]) -> str:
+    checks = data.get("checks", {})
+    ordered_ids = sorted(checks)
+    lines = [
+        "### SDET Doctor Report",
+        f"- overall: {'PASS' if data.get('ok') else 'FAIL'}",
+        f"- score: {data.get('score')}%",
+        "",
+        "| Check | Severity | Status | Summary |",
+        "| --- | --- | --- | --- |",
+    ]
+    for check_id in ordered_ids:
+        item = checks[check_id]
+        lines.append(
+            f"| `{check_id}` | {item.get('severity', 'medium')} | {'PASS' if item.get('ok') else 'FAIL'} | {item.get('summary') or ''} |"
+        )
+
+    action_rows: list[tuple[int, str, str]] = []
+    for check_id in ordered_ids:
+        item = checks[check_id]
+        if item.get("ok"):
+            continue
+        severity = str(item.get("severity", "medium"))
+        rank = SEVERITY_ORDER.get(severity, SEVERITY_ORDER["medium"])
+        for fix in item.get("fix", []):
+            action_rows.append((rank, check_id, str(fix)))
+
+    lines.append("")
+    lines.append("#### Action items")
+    if action_rows:
+        for _rank, check_id, fix in sorted(
+            action_rows, key=lambda item: (-item[0], item[1], item[2])
+        ):
+            lines.append(f"- `{check_id}`: {fix}")
+    else:
+        lines.append("- None")
+
+    lines.append("")
+    lines.append("#### Evidence")
+    has_evidence = False
+    for check_id in ordered_ids:
+        item = checks[check_id]
+        if item.get("ok"):
+            continue
+        evidence = item.get("evidence", [])
+        if not evidence:
+            continue
+        has_evidence = True
+        lines.append(f"- `{check_id}`")
+        for ev in evidence:
+            message = str(ev.get("message", ""))
+            path = ev.get("path")
+            if path:
+                lines.append(f"  - {message} ({path})")
+            else:
+                lines.append(f"  - {message}")
+    if not has_evidence:
+        lines.append("- None")
+    return "\n".join(lines) + "\n"
+
+
 def _load_policy(root: Path, policy_path: str | None) -> dict[str, Any]:
     path = Path(policy_path) if policy_path else root / "sdetkit.policy.toml"
     if not path.exists():
@@ -401,7 +462,7 @@ def _evaluate_gate(checks: dict[str, dict[str, Any]], threshold: str) -> tuple[b
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="doctor")
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--format", choices=["text", "json"], default="text")
+    parser.add_argument("--format", choices=["text", "json", "md"], default="text")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--ascii", action="store_true")
     parser.add_argument("--ci", action="store_true")
@@ -416,6 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--policy")
     parser.add_argument("--fail-on", choices=["low", "medium", "high"])
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--out", default=None)
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
     if ns.format == "json":
@@ -667,14 +729,31 @@ def main(argv: list[str] | None = None) -> int:
     if failed_checks:
         data["failed_checks"] = failed_checks
 
-    if ns.json:
-        sys.stdout.write(json.dumps(data, sort_keys=True) + "\n")
-    elif ns.pr:
-        _print_pr_report(data)
+    if ns.format == "json" or ns.json:
+        output = json.dumps(data, sort_keys=True) + "\n"
+        is_json = True
+    elif ns.format == "md" or ns.pr:
+        output = _format_doctor_markdown(data)
+        is_json = False
     else:
-        _print_human_report(data)
+        lines = [f"doctor score: {data['score']}%"]
+        checks = data.get("checks", {})
+        for key in sorted(checks):
+            item = checks[key]
+            marker = "OK" if item.get("ok") else "FAIL"
+            lines.append(f"[{marker}] {key}: {item.get('summary') or ''}")
+        lines.append("recommendations:")
+        for rec in data.get("recommendations", []):
+            lines.append(f"- {rec}")
+        output = "\n".join(lines) + "\n"
+        is_json = False
 
-    if not gate_ok and not ns.json:
+    if ns.out:
+        Path(ns.out).write_text(output, encoding="utf-8")
+
+    sys.stdout.write(output)
+
+    if not gate_ok and not is_json:
         sys.stderr.write("doctor: problems found\n")
     return 0 if gate_ok else 2
 
