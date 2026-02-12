@@ -86,3 +86,8 @@ bash scripts/check.sh all
 - [**Contributing**](contributing.md) • [**Security**](security.md) • [**Releasing**](releasing.md)
 
 </div>
+
+
+## License
+
+Free for personal/educational noncommercial use. Commercial use requires a paid license; see [license page](license.md).

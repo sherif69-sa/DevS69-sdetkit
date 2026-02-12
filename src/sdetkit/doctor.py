@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Callable
 from importlib import metadata
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 def _run(cmd: list[str], *, cwd: str | Path | None = None) -> tuple[int, str, str]:
@@ -50,13 +52,11 @@ def _check_pyproject_toml(root: Path) -> tuple[bool, str]:
         return False, "pyproject.toml is missing"
 
     try:
-        import tomllib
-
+        mod = importlib.import_module("tomllib")
+        loads_name = "loads"
+        loads = cast(Callable[[bytes], Any], getattr(mod, loads_name))
         with path.open("rb") as f:
-            parser = getattr(tomllib, "loads", None)
-            if parser is None:
-                raise RuntimeError("tomllib.loads unavailable")
-            parser(f.read().decode("utf-8"))
+            loads(f.read())
     except Exception as exc:  # pragma: no cover - defensive error path
         return False, f"pyproject.toml parse failed: {exc}"
     return True, "pyproject.toml is valid TOML"
