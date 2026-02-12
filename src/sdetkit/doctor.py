@@ -15,6 +15,40 @@ from typing import Any, cast
 from .import_hazards import find_stdlib_shadowing
 
 
+def _doctor_structured_checks() -> dict:
+    import sys
+    from pathlib import Path
+
+    checks: dict = {}
+
+    src = Path("src")
+    shadow = []
+    if src.exists():
+        names = getattr(sys, "stdlib_module_names", ())
+        for name in names:
+            if (src / (name + ".py")).is_file() or (src / name).is_dir():
+                shadow.append(name)
+    shadow = sorted(set(shadow))
+    checks["stdlib_shadowing"] = {"ok": (not bool(shadow)), "shadow": shadow}
+
+    bad = []
+    for base in ("src", "tools"):
+        bp = Path(base)
+        if not bp.exists():
+            continue
+        for f in bp.rglob("*"):
+            if not f.is_file():
+                continue
+            try:
+                f.read_bytes().decode("ascii")
+            except Exception:
+                bad.append(str(f))
+    bad = sorted(set(bad))
+    checks["ascii"] = {"ok": (not bool(bad)), "bad": bad}
+
+    return checks
+
+
 def _run(cmd: list[str], *, cwd: str | Path | None = None) -> tuple[int, str, str]:
     p = subprocess.run(
         cmd,
@@ -216,7 +250,7 @@ def _print_human_report(data: dict[str, Any]) -> None:
     for key in sorted(checks):
         item = checks[key]
         marker = "OK" if item["ok"] else "FAIL"
-        lines.append(f"[{marker}] {key}: {item['summary']}")
+        lines.append(f"[{marker}] {key}: {item.get('summary', '')}")
 
     lines.append("recommendations:")
     for rec in data.get("recommendations", []):
@@ -236,7 +270,7 @@ def _print_pr_report(data: dict[str, Any]) -> None:
     for key in sorted(checks):
         item = checks[key]
         marker = "PASS" if item["ok"] else "FAIL"
-        lines.append(f"  - {marker} `{key}`: {item['summary']}")
+        lines.append(f"  - {marker} `{key}`: {item.get('summary', '')}")
     lines.append("- next steps:")
     for rec in data.get("recommendations", []):
         lines.append(f"  - {rec}")
@@ -276,7 +310,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.dev and (ns.ci or ns.deps or ns.clean_tree):
         ns.pyproject = True
 
-    data: dict[str, Any] = {"python": _python_info(), "package": _package_info(), "checks": {}}
+    data: dict[str, Any] = {
+        "python": _python_info(),
+        "package": _package_info(),
+        "checks": _doctor_structured_checks(),
+    }
     ok = True
     score_items: list[bool] = []
 
@@ -389,7 +427,7 @@ def main(argv: list[str] | None = None) -> int:
     data["recommendations"] = _recommendations(data)
     shadow = find_stdlib_shadowing(Path("."))
     if shadow:
-        print("[WARN] stdlib-shadow: " + ", ".join(shadow))
+        print("[WARN] stdlib-shadow: " + ", ".join(shadow), file=sys.stderr)
         _recs = locals().get("recommendations")
         if isinstance(_recs, list):
             _recs.append(
