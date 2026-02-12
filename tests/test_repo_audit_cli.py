@@ -67,6 +67,7 @@ def test_repo_audit_json_schema_and_stable_keys(tmp_path: Path) -> None:
         "schema_version",
         "summary",
         "suppressed",
+        "suppressed_expired",
     ]
 
 

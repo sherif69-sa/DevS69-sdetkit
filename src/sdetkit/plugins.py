@@ -100,6 +100,14 @@ class RuleCatalog:
         return {item.rule_id: item.plugin for item in self.fixers}
 
 
+@dataclass(frozen=True)
+class LoadedPack:
+    pack_name: str
+    rule_ids: tuple[str, ...]
+    defaults: dict[str, Any]
+    source: str = "builtin"
+
+
 CORE_PACK = "core"
 ENTERPRISE_PACK = "enterprise"
 SECURITY_PACK = "security"
@@ -382,14 +390,93 @@ def normalize_packs(profile: str, packs_csv: str | None) -> tuple[str, ...]:
     return tuple(dedup)
 
 
+def normalize_org_packs(values: list[str] | None) -> tuple[str, ...]:
+    if not values:
+        return ()
+    out: list[str] = []
+    for raw in values:
+        for item in str(raw).split(","):
+            name = item.strip()
+            if name and name not in out:
+                out.append(name)
+    return tuple(out)
+
+
+def load_repo_audit_packs() -> tuple[LoadedPack, ...]:
+    packs: list[LoadedPack] = []
+    for ep in _iter_entry_points("sdetkit.repo_audit_packs"):
+        try:
+            plugin = ep.load()()
+            name = str(getattr(plugin, "pack_name", ep.name)).strip()
+            raw_ids = getattr(plugin, "rule_ids", ())
+            if not name or not isinstance(raw_ids, (list, tuple)):
+                continue
+            defaults = getattr(plugin, "defaults", {})
+            if not isinstance(defaults, dict):
+                defaults = {}
+            packs.append(
+                LoadedPack(
+                    pack_name=name,
+                    rule_ids=tuple(sorted(str(x) for x in raw_ids if str(x))),
+                    defaults={str(k): v for k, v in defaults.items()},
+                    source=f"entrypoint:{ep.name}",
+                )
+            )
+        except Exception:
+            continue
+    packs.sort(key=lambda item: item.pack_name)
+    return tuple(packs)
+
+
+def merge_packs(base: tuple[str, ...], org: tuple[str, ...]) -> tuple[str, ...]:
+    merged = list(base)
+    for item in org:
+        if item not in merged:
+            merged.append(item)
+    return tuple(merged)
+
+
+def apply_pack_defaults(
+    *,
+    selected_org_packs: tuple[str, ...],
+    available: tuple[LoadedPack, ...],
+    base_fail_on: str,
+    base_severity_overrides: dict[str, str],
+    known_rule_ids: set[str],
+) -> tuple[str, dict[str, str], tuple[str, ...]]:
+    fail_on = base_fail_on
+    overrides = dict(base_severity_overrides)
+    by_name = {item.pack_name: item for item in available}
+    unknown = tuple(sorted(name for name in selected_org_packs if name not in by_name))
+    for name in selected_org_packs:
+        loaded = by_name.get(name)
+        if loaded is None:
+            continue
+        packed_fail = loaded.defaults.get("fail_on")
+        if packed_fail in {"none", "warn", "error"}:
+            fail_on = packed_fail
+        raw_overrides = loaded.defaults.get("severity_overrides")
+        if isinstance(raw_overrides, dict):
+            for rule_id, level in sorted(raw_overrides.items(), key=lambda x: str(x[0])):
+                rid = str(rule_id)
+                sev = str(level)
+                if rid in known_rule_ids and sev in {"info", "warn", "error"}:
+                    overrides[rid] = sev
+    return fail_on, overrides, unknown
+
+
 def select_rules(catalog: RuleCatalog, packs: tuple[str, ...]) -> tuple[LoadedRule, ...]:
+    org_rule_map = {item.pack_name: set(item.rule_ids) for item in load_repo_audit_packs()}
+    selected = set(packs)
     chosen: list[LoadedRule] = []
     for rule in catalog.rules:
         tags = set(rule.meta.tags)
         rule_packs = {tag.split(":", 1)[1] for tag in tags if tag.startswith("pack:")}
         if not rule_packs:
             rule_packs = {CORE_PACK}
-        if rule_packs & set(packs):
+        if rule_packs & selected or any(
+            rule.meta.id in org_rule_map.get(pack_name, set()) for pack_name in selected
+        ):
             chosen.append(rule)
     chosen.sort(key=lambda item: item.meta.id)
     return tuple(chosen)
