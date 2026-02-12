@@ -59,6 +59,7 @@ nav:
       - Monorepo projects: monorepo-projects.md
       - Governance & org packs: governance-and-org-packs.md
       - Reporting & trends: reporting-and-trends.md
+      - Performance & incremental mode: performance-and-incremental.md
       - Repo init: repo-init.md
       - Patch harness: patch-harness.md
   - Integrations:
