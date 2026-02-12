@@ -70,7 +70,8 @@ class AuditRule(Protocol):
 
 class Fixer(Protocol):
     @property
-    def rule_id(self) -> str: ...
+    def rule_id(self) -> str:
+        pass
 
     def fix(self, repo_root: Path, findings: list[Finding], context: dict[str, Any]) -> list[Fix]:
         pass
