@@ -57,6 +57,7 @@ nav:
       - Plugins & fix-audit: plugins-and-fix.md
       - Security suite: security-suite.md
       - PR automation: pr-automation.md
+      - IDE & pre-commit: ide-and-precommit.md
       - Monorepo projects: monorepo-projects.md
       - Governance & org packs: governance-and-org-packs.md
       - Reporting & trends: reporting-and-trends.md

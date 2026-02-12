@@ -2723,6 +2723,136 @@ def _baseline_diff(old_entries: list[dict[str, Any]], new_entries: list[dict[str
     return "\n".join(diff[:12] + [f"... ({len(diff) - 12} more lines)"])
 
 
+def _to_posix_relpath(path: str) -> str:
+    normalized = str(path).replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized.lstrip("/") or "."
+
+
+def _to_ide_diagnostics(findings: list[dict[str, Any]]) -> dict[str, Any]:
+    diagnostics: list[dict[str, Any]] = []
+    for item in findings:
+        row: dict[str, Any] = {
+            "path": _to_posix_relpath(str(item.get("path", "."))),
+            "line": int(item.get("line") or 1),
+            "severity": str(item.get("severity", "error")),
+            "code": _repo_rule_id(item),
+            "message": str(item.get("message", "")),
+            "fixable": bool(item.get("fixable", False)),
+        }
+        col = item.get("column")
+        if isinstance(col, int) and col > 0:
+            row["col"] = col
+        diagnostics.append(row)
+    diagnostics.sort(
+        key=lambda x: (
+            str(x.get("path", "")),
+            int(x.get("line", 1)),
+            int(x.get("col", 0)),
+            str(x.get("code", "")),
+            str(x.get("message", "")),
+        )
+    )
+    return {"schema_version": "sdetkit.ide.diagnostics.v1", "diagnostics": diagnostics}
+
+
+def _build_precommit_entry(*, profile: str | None, pack: str, mode: str) -> str:
+    args = ["sdetkit", "repo", "audit", "--pack", pack]
+    if profile:
+        args.extend(["--profile", profile])
+    if mode == "changed-only":
+        args.append("--changed-only")
+    args.extend(["--fail-on", "error"])
+    return " ".join(args)
+
+
+def _precommit_hook_item(*, profile: str | None, pack: str, mode: str, indent: int = 6) -> str:
+    pad = " " * indent
+    entry = _build_precommit_entry(profile=profile, pack=pack, mode=mode)
+    lines = [
+        f"{pad}- id: sdetkit-repo-audit",
+        f"{pad}  name: sdetkit repo audit",
+        f"{pad}  entry: {entry}",
+        f"{pad}  language: system",
+        f"{pad}  pass_filenames: false",
+    ]
+    return "\n".join(lines)
+
+
+def _default_precommit_config(*, profile: str | None, pack: str, mode: str) -> str:
+    hook = _precommit_hook_item(profile=profile, pack=pack, mode=mode, indent=6)
+    return f"repos:\n  - repo: local\n    hooks:\n{hook}\n"
+
+
+def _update_precommit_yaml(
+    existing: str, *, profile: str | None, pack: str, mode: str
+) -> tuple[str, str]:
+    normalized = existing.replace("\r\n", "\n")
+    lines = normalized.split("\n")
+    hook_idx = next(
+        (
+            i
+            for i, line in enumerate(lines)
+            if re.match(r"^\s*-\s+id:\s*sdetkit-repo-audit\s*$", line)
+        ),
+        None,
+    )
+    if hook_idx is not None:
+        start = hook_idx
+        indent = len(lines[hook_idx]) - len(lines[hook_idx].lstrip(" "))
+        end = hook_idx + 1
+        while end < len(lines):
+            cur = lines[end]
+            cur_indent = len(cur) - len(cur.lstrip(" "))
+            if cur.strip() and cur_indent <= indent and cur.lstrip(" ").startswith("-"):
+                break
+            end += 1
+        repl = _precommit_hook_item(profile=profile, pack=pack, mode=mode, indent=indent).split(
+            "\n"
+        )
+        updated = "\n".join(lines[:start] + repl + lines[end:]).rstrip("\n") + "\n"
+        return updated, "updated"
+
+    repo_key_idx = next((i for i, line in enumerate(lines) if line.strip() == "repos:"), None)
+    if repo_key_idx is None:
+        raise ValueError("no top-level repos: section found")
+    insert_at = len(lines)
+    for idx in range(repo_key_idx + 1, len(lines)):
+        line = lines[idx]
+        if not line.strip() or line.lstrip(" ").startswith("#"):
+            continue
+        if not line.startswith(" ") and ":" in line:
+            insert_at = idx
+            break
+    block = [
+        "  - repo: local",
+        "    hooks:",
+        *_precommit_hook_item(profile=profile, pack=pack, mode=mode, indent=6).split("\n"),
+    ]
+    updated_lines = lines[:insert_at]
+    if updated_lines and updated_lines[-1].strip():
+        updated_lines.append("")
+    updated_lines.extend(block)
+    updated_lines.extend(lines[insert_at:])
+    updated = "\n".join(updated_lines).rstrip("\n") + "\n"
+    return updated, "added"
+
+
+def _precommit_diff(before: str, after: str) -> str:
+    if before == after:
+        return ""
+    return "\n".join(
+        difflib.unified_diff(
+            before.splitlines(),
+            after.splitlines(),
+            fromfile=".pre-commit-config.yaml(old)",
+            tofile=".pre-commit-config.yaml(new)",
+            lineterm="",
+        )
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="sdetkit repo")
     sub = parser.add_subparsers(dest="repo_cmd", required=True)
@@ -2813,6 +2943,41 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--cache-stats", action="store_true")
     ap.add_argument("--jobs", type=int, default=1)
+    ap.add_argument("--ide", choices=["vscode", "generic"], default=None)
+    ap.add_argument("--ide-output", default=None)
+    ap.add_argument("--include-suppressed", action="store_true")
+
+    dp = sub.add_parser("dev")
+    dsub = dp.add_subparsers(dest="dev_cmd", required=True)
+
+    da = dsub.add_parser("audit")
+    da.add_argument("path", nargs="?", default=".")
+    da.add_argument("--allow-absolute-path", action="store_true")
+    da.add_argument("--pack", default="core")
+    da.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    da.add_argument("--mode", choices=["changed-only", "full"], default="changed-only")
+
+    df = dsub.add_parser("fix")
+    df.add_argument("path", nargs="?", default=".")
+    df.add_argument("--allow-absolute-path", action="store_true")
+    df.add_argument("--apply", action="store_true")
+    df.add_argument("--diff", action="store_true")
+    df.add_argument("--pack", default="core")
+    df.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    df.add_argument("--mode", choices=["changed-only", "full"], default="changed-only")
+
+    dpc = dsub.add_parser("precommit")
+    dpcsub = dpc.add_subparsers(dest="precommit_cmd", required=True)
+    dpc_install = dpcsub.add_parser("install")
+    dpc_install.add_argument("path", nargs="?", default=".")
+    dpc_install.add_argument("--profile", choices=["default", "enterprise"], default=None)
+    dpc_install.add_argument("--pack", default="core")
+    dpc_install.add_argument("--mode", choices=["changed-only", "full"], default="changed-only")
+    dpc_install.add_argument("--apply", action="store_true")
+    dpc_install.add_argument("--dry-run", action="store_true")
+    dpc_install.add_argument("--force", action="store_true")
+    dpc_install.add_argument("--diff", action="store_true")
+    dpc_install.add_argument("--allow-absolute-path", action="store_true")
 
     projp = sub.add_parser("projects")
     projsub = projp.add_subparsers(dest="projects_cmd", required=True)
@@ -3176,6 +3341,90 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(rendered)
         return 0
 
+    if ns.repo_cmd == "dev":
+        if ns.dev_cmd == "audit":
+            args = [
+                "audit",
+                ns.path,
+                "--pack",
+                ns.pack,
+                "--fail-on",
+                "error",
+                "--allow-absolute-path",
+            ]
+            if ns.profile:
+                args.extend(["--profile", ns.profile])
+            if ns.mode == "changed-only":
+                args.append("--changed-only")
+            return main(args)
+
+        if ns.dev_cmd == "fix":
+            args = [
+                "fix-audit",
+                ns.path,
+                "--pack",
+                ns.pack,
+                "--allow-absolute-path",
+            ]
+            if ns.profile:
+                args.extend(["--profile", ns.profile])
+            if ns.mode == "changed-only":
+                args.append("--changed-only")
+            if ns.diff:
+                args.append("--diff")
+            if ns.apply:
+                args.append("--apply")
+            else:
+                args.append("--dry-run")
+            return main(args)
+
+        if ns.dev_cmd == "precommit" and ns.precommit_cmd == "install":
+            target_root = safe_path(root, ns.path, allow_absolute=bool(ns.allow_absolute_path))
+            if not target_root.exists() or not target_root.is_dir():
+                print(
+                    f"target path does not exist or is not a directory: {ns.path}", file=sys.stderr
+                )
+                return 2
+            target = target_root / ".pre-commit-config.yaml"
+            before = target.read_text(encoding="utf-8") if target.exists() else ""
+            creating = not target.exists()
+            try:
+                after = (
+                    _default_precommit_config(profile=ns.profile, pack=ns.pack, mode=ns.mode)
+                    if creating
+                    else _update_precommit_yaml(
+                        before,
+                        profile=ns.profile,
+                        pack=ns.pack,
+                        mode=ns.mode,
+                    )[0]
+                )
+            except ValueError as exc:
+                if not ns.force:
+                    print(
+                        f"unable to merge existing .pre-commit-config.yaml: {exc}", file=sys.stderr
+                    )
+                    return 2
+                after = _default_precommit_config(profile=ns.profile, pack=ns.pack, mode=ns.mode)
+
+            changed = before.replace("\r\n", "\n") != after
+            if ns.diff:
+                diff = _precommit_diff(before.replace("\r\n", "\n"), after)
+                if diff:
+                    print(diff)
+            print(
+                f"precommit install plan: {'create' if creating else 'update'} {target.as_posix()}"
+            )
+            if not changed:
+                print("precommit install: already up to date")
+                return 0
+            if ns.dry_run or not ns.apply:
+                print("precommit install: dry-run (no changes written)")
+                return 0
+            atomic_write_text(target, after)
+            print("precommit install: wrote .pre-commit-config.yaml")
+            return 0
+
     if ns.repo_cmd == "audit":
         if ns.all_projects:
             try:
@@ -3232,7 +3481,9 @@ def main(argv: list[str] | None = None) -> int:
                 actionable, suppression = _apply_repo_audit_policy(
                     original_findings, policy, baseline_doc.get("entries", [])
                 )
-                project_payload["findings"] = actionable
+                project_payload["findings"] = (
+                    original_findings if ns.include_suppressed else actionable
+                )
                 counts = {"error": 0, "warn": 0, "info": 0}
                 for finding in actionable:
                     sev = str(finding.get("severity", "error"))
@@ -3287,6 +3538,36 @@ def main(argv: list[str] | None = None) -> int:
                 "totals": _aggregate_totals(project_runs),
                 "deltas": {"new": 0, "resolved": 0, "unchanged": 0},
             }
+            if ns.ide_output:
+                diagnostics: list[dict[str, Any]] = []
+                for item in project_runs:
+                    run_record = item.get("run_record", {})
+                    findings = (
+                        run_record.get("findings", []) if isinstance(run_record, dict) else []
+                    )
+                    for finding_item in findings:
+                        if not isinstance(finding_item, dict):
+                            continue
+                        rel_root = str(item.get("root", "")).strip("/")
+                        finding_path = _to_posix_relpath(str(finding_item.get("path", ".")))
+                        prefixed = dict(finding_item)
+                        prefixed["path"] = (
+                            f"{rel_root}/{finding_path}" if rel_root else finding_path
+                        )
+                        diagnostics.append(prefixed)
+                ide_doc = _to_ide_diagnostics(diagnostics)
+                ide_target = safe_path(
+                    root, ns.ide_output, allow_absolute=bool(ns.allow_absolute_path)
+                )
+                if ide_target.exists() and not ns.force:
+                    print(
+                        "refusing to overwrite existing ide output (use --force)", file=sys.stderr
+                    )
+                    return 2
+                atomic_write_text(
+                    ide_target,
+                    json.dumps(ide_doc, ensure_ascii=True, sort_keys=True, indent=2) + "\n",
+                )
             rendered = _render_repo_audit_aggregate(aggregate, ns.format)
             if ns.output:
                 out_path = safe_path(root, ns.output, allow_absolute=bool(ns.allow_absolute_path))
@@ -3352,7 +3633,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         if ns.update_baseline:
             _write_repo_baseline(baseline_path, _baseline_entries_from_findings(original_findings))
-        audit_payload["findings"] = actionable
+        audit_payload["findings"] = original_findings if ns.include_suppressed else actionable
         counts = {"error": 0, "warn": 0, "info": 0}
         for finding in actionable:
             sev = str(finding.get("severity", "error"))
@@ -3455,6 +3736,30 @@ def main(argv: list[str] | None = None) -> int:
                     return 2
 
         rendered = _render_repo_audit(audit_payload, ns.format)
+        if ns.ide_output:
+            try:
+                ide_target = safe_path(
+                    root, ns.ide_output, allow_absolute=bool(ns.allow_absolute_path)
+                )
+                if ide_target.exists() and not ns.force:
+                    print(
+                        "refusing to overwrite existing ide output (use --force)", file=sys.stderr
+                    )
+                    return 2
+                ide_findings = original_findings if ns.include_suppressed else actionable
+                atomic_write_text(
+                    ide_target,
+                    json.dumps(
+                        _to_ide_diagnostics(ide_findings),
+                        ensure_ascii=True,
+                        sort_keys=True,
+                        indent=2,
+                    )
+                    + "\n",
+                )
+            except (SecurityError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
         if ns.output:
             try:
                 out_path = safe_path(root, ns.output, allow_absolute=bool(ns.allow_absolute_path))

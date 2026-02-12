@@ -80,6 +80,7 @@ Tool-specific notes:
 ## `repo`
 
 - `sdetkit repo audit [PATH] [--profile default|enterprise] [--pack PACKS] [--org-pack PACK ...] [--format text|json|sarif] [--json-schema legacy|v1] [--output PATH] [--emit-run-record PATH] [--diff-against RUN.json] [--step-summary] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--all-projects] [--fail-strategy overall|per-project] [--sort] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--jobs N] [--force]`
+- `sdetkit repo audit ... [--ide vscode|generic] [--ide-output PATH] [--include-suppressed]`
 - `sdetkit repo baseline create [PATH] [--output BASELINE.json] [--profile default|enterprise] [--exclude GLOB ...]`
 - `sdetkit repo rules list [--profile default|enterprise] [--pack PACKS] [--org-pack PACK ...] [--json]`
 - `sdetkit repo fix-audit [PATH] [--profile ...] [--pack PACKS] [--org-pack PACK ...] [--project NAME|--all-projects] [--dry-run|--apply] [--diff] [--patch OUT.patch] [--sort] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--jobs N] [--force]`
@@ -126,3 +127,11 @@ GitHub Action integration:
 See: reporting-and-trends.md
 
 - `sdetkit repo projects list [PATH] [--json] [--sort]`
+
+## `dev`
+
+- `sdetkit dev audit [PATH] [--mode changed-only|full] [--pack PACKS] [--profile default|enterprise]`
+- `sdetkit dev fix [PATH] [--mode changed-only|full] [--pack PACKS] [--profile default|enterprise] [--diff] [--apply]`
+- `sdetkit dev precommit install [PATH] [--profile ...] [--pack ...] [--mode changed-only|full] [--apply] [--dry-run] [--force] [--diff]`
+
+See: ide-and-precommit.md

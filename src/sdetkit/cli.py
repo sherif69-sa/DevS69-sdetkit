@@ -45,6 +45,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "repo":
         return repo.main(list(argv[1:]))
 
+    if argv and argv[0] == "dev":
+        return repo.main(["dev", *list(argv[1:])])
+
     if argv and argv[0] == "report":
         return report.main(list(argv[1:]))
 
@@ -69,6 +72,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     rp = sub.add_parser("repo")
     rp.add_argument("args", nargs=argparse.REMAINDER)
 
+    dv = sub.add_parser("dev")
+    dv.add_argument("args", nargs=argparse.REMAINDER)
+
     rpt = sub.add_parser("report")
     rpt.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -82,6 +88,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "repo":
         return repo.main(ns.args)
+
+    if ns.cmd == "dev":
+        return repo.main(["dev", *ns.args])
 
     if ns.cmd == "report":
         return report.main(ns.args)
