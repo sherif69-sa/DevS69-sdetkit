@@ -79,7 +79,7 @@ Tool-specific notes:
 
 ## `repo`
 
-- `sdetkit repo audit [PATH] [--profile default|enterprise] [--pack PACKS] [--format text|json|sarif] [--output PATH] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--force]`
+- `sdetkit repo audit [PATH] [--profile default|enterprise] [--pack PACKS] [--format text|json|sarif] [--json-schema legacy|v1] [--output PATH] [--emit-run-record PATH] [--diff-against RUN.json] [--step-summary] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--force]`
 - `sdetkit repo baseline create [PATH] [--output BASELINE.json] [--profile default|enterprise] [--exclude GLOB ...]`
 - `sdetkit repo rules list [--profile default|enterprise] [--pack PACKS] [--json]`
 - `sdetkit repo fix-audit [PATH] [--profile ...] [--pack PACKS] [--dry-run|--apply] [--diff] [--patch OUT.patch] [--force]`
@@ -108,3 +108,12 @@ GitHub Action integration:
 
 - Use `.github/actions/repo-audit` for CI summary + SARIF + JSON artifact workflows.
 - See: github-action.md
+
+
+## `report`
+
+- `sdetkit report ingest RUN.json [--history-dir .sdetkit/audit-history] [--label LABEL]`
+- `sdetkit report diff --from RUN.json --to RUN.json [--format text|json] [--fail-on none|warn|error]`
+- `sdetkit report build [--history-dir .sdetkit/audit-history] [--output report.html] [--format html|md] [--since N]`
+
+See: reporting-and-trends.md

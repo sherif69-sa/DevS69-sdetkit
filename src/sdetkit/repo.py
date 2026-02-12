@@ -27,6 +27,7 @@ from .plugins import (
     normalize_packs,
     select_rules,
 )
+from .report import build_run_record, diff_runs, load_run_record
 from .security import SecurityError, safe_path
 
 SKIP_DIRS: frozenset[str] = frozenset(
@@ -1965,6 +1966,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--profile", choices=["default", "enterprise"], default=None)
     ap.add_argument("--pack", default=None)
     ap.add_argument("--format", choices=["text", "json", "sarif"], default="text")
+    ap.add_argument("--json-schema", choices=["legacy", "v1"], default="legacy")
     ap.add_argument("--output", "--out", dest="output", default=None)
     ap.add_argument("--fail-on", choices=["none", "warn", "error"], default=None)
     ap.add_argument("--config", default=None)
@@ -1974,6 +1976,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--disable-rule", action="append", default=[])
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--allow-absolute-path", action="store_true")
+    ap.add_argument("--emit-run-record", default=None)
+    ap.add_argument("--diff-against", default=None)
+    ap.add_argument("--step-summary", action="store_true")
 
     rules_parser = sub.add_parser("rules")
     rules_sub = rules_parser.add_subparsers(dest="rules_cmd", required=True)
@@ -2210,6 +2215,84 @@ def main(argv: list[str] | None = None) -> int:
             "actionable": len(actionable),
         }
         payload["suppressed"] = suppression["suppressed"]
+        run_record = build_run_record(
+            payload,
+            profile=policy.profile,
+            packs=packs,
+            fail_on=policy.fail_on,
+            repo_root=str(root),
+            config_used=ns.config,
+        )
+        if ns.json_schema == "v1" and ns.format == "json":
+            payload = run_record
+
+        diff_payload = None
+        if ns.diff_against:
+            try:
+                previous = load_run_record(
+                    safe_path(root, ns.diff_against, allow_absolute=bool(ns.allow_absolute_path))
+                )
+                diff_payload = diff_runs(previous, run_record)
+                print(
+                    "NEW: "
+                    f"{diff_payload['counts']['new']} RESOLVED: {diff_payload['counts']['resolved']} "
+                    f"UNCHANGED: {diff_payload['counts']['unchanged']}"
+                )
+            except (ValueError, OSError, SecurityError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+
+        if ns.emit_run_record:
+            try:
+                run_target = safe_path(
+                    root, ns.emit_run_record, allow_absolute=bool(ns.allow_absolute_path)
+                )
+                if run_target.exists() and not ns.force:
+                    print("refusing to overwrite existing output (use --force)", file=sys.stderr)
+                    return 2
+                atomic_write_text(
+                    run_target,
+                    json.dumps(run_record, ensure_ascii=True, sort_keys=True, indent=2) + "\n",
+                )
+            except (SecurityError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+
+        if ns.step_summary:
+            summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+            if summary_path:
+                actionable = [x for x in run_record.get("findings", []) if not x.get("suppressed")]
+                actionable_sorted = sorted(
+                    actionable,
+                    key=lambda x: (
+                        -_severity_rank(str(x.get("severity", "error"))),
+                        str(x.get("rule_id", "")),
+                        str(x.get("path", "")),
+                    ),
+                )
+                lines = [
+                    "## sdetkit repo audit summary",
+                    "",
+                    f"- total findings: {len(run_record.get('findings', []))}",
+                    f"- suppressed: {run_record.get('aggregates', {}).get('counts_suppressed', 0)}",
+                    f"- actionable: {len(actionable)}",
+                ]
+                if diff_payload is not None:
+                    lines.append(f"- NEW: {diff_payload['counts']['new']}")
+                    lines.append(f"- RESOLVED: {diff_payload['counts']['resolved']}")
+                lines.extend(["", "### Top 10 actionable findings", ""])
+                for item in actionable_sorted[:10]:
+                    lines.append(
+                        f"- [{item.get('severity')}] `{item.get('rule_id')}` `{item.get('path')}`: {item.get('message')}"
+                    )
+                lines.extend(["", "Run: sdetkit repo fix-audit --dry-run", ""])
+                try:
+                    with Path(summary_path).open("a", encoding="utf-8") as handle:
+                        handle.write("\n".join(lines))
+                except OSError as exc:
+                    print(str(exc), file=sys.stderr)
+                    return 2
+
         rendered = _render_repo_audit(payload, ns.format)
         if ns.output:
             try:
