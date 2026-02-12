@@ -28,4 +28,4 @@ def run(ctx: MaintenanceContext) -> CheckResult:
     )
 
 
-run.modes = {"full"}
+CHECK_MODES = {"full"}

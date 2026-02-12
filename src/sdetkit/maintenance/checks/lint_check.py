@@ -82,4 +82,4 @@ def run(ctx: MaintenanceContext) -> CheckResult:
     return CheckResult(ok=ok, summary=summary, details=details, actions=actions)
 
 
-run.modes = {"quick", "full"}
+CHECK_MODES = {"quick", "full"}

@@ -128,7 +128,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         ns = parser.parse_args(argv)
     except SystemExit as exc:
-        return int(exc.code)
+        code = exc.code
+        if isinstance(code, int):
+            return code
+        if code is None:
+            return 0
+        return 2
 
     ctx = MaintenanceContext(
         repo_root=Path.cwd(),

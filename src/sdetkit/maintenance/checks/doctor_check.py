@@ -60,4 +60,4 @@ def run(ctx: MaintenanceContext) -> CheckResult:
     )
 
 
-run.modes = {"quick", "full"}
+CHECK_MODES = {"quick", "full"}
