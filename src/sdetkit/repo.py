@@ -1084,14 +1084,27 @@ def _resolve_root(user_path: str, *, allow_absolute: bool) -> Path:
         raise
 
 
+def _iter_template_files(node: Any) -> list[Any]:
+    stack = [node]
+    files: list[Any] = []
+    while stack:
+        current = stack.pop()
+        if current.is_dir():
+            children = list(current.iterdir())
+            children.sort(key=lambda item: item.as_posix(), reverse=True)
+            stack.extend(children)
+            continue
+        if current.is_file():
+            files.append(current)
+    return files
+
+
 def _load_repo_preset_templates(preset: str) -> dict[str, str]:
     if preset not in REPO_PRESETS:
         raise ValueError(f"unsupported preset: {preset}")
     base = importlib_resources.files("sdetkit.templates").joinpath(preset)
     templates: dict[str, str] = {}
-    for entry in sorted(base.rglob("*"), key=lambda item: item.as_posix()):
-        if not entry.is_file():
-            continue
+    for entry in _iter_template_files(base):
         if entry.name == "__init__.py":
             continue
         rel = entry.relative_to(base).as_posix()
