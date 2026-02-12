@@ -117,6 +117,16 @@ tools/                    # extra developer tooling + patch harness wrapper
 ./.venv/bin/python tools/patch_harness.py spec.json --check
 ```
 
+## Maintenance
+
+```bash
+python -m sdetkit.maintenance --mode quick --format json
+python -m sdetkit maintenance --mode full --fix --format md --out artifacts/maintenance.md
+bash scripts/maintenance_ci.sh full true artifacts/maintenance
+```
+
+The maintenance engine emits a stable, versioned report schema (`ok`, `score`, `checks`, `recommendations`, `meta`) in JSON and Markdown formats so local runs and CI artifacts match.
+
 ## Developer workflow
 
 ```bash
@@ -149,6 +159,9 @@ bash scripts/shell.sh
 - Version consistency guard: [.github/workflows/versioning.yml](.github/workflows/versioning.yml)
 - PR quality feedback: [.github/workflows/pr-quality-comment.yml](.github/workflows/pr-quality-comment.yml)
 - Security automation: CodeQL + scheduled secret scanning workflow (see [docs/security.md](docs/security.md))
+- Weekly maintenance automation: [.github/workflows/weekly-maintenance.yml](.github/workflows/weekly-maintenance.yml)
+- On-demand maintenance workflow: [.github/workflows/maintenance-on-demand.yml](.github/workflows/maintenance-on-demand.yml)
+- Shared CI maintenance runner: [scripts/maintenance_ci.sh](scripts/maintenance_ci.sh)
 - Dependency automation: Dependabot daily updates + safe auto-merge workflow for low-risk updates
 
 ## Contributing and support

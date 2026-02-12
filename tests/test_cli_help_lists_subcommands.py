@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 
-def test_help_lists_doctor_patch_cassette_get_repo_dev_and_report() -> None:
+def test_help_lists_doctor_patch_cassette_get_repo_dev_report_and_maintenance() -> None:
     r = subprocess.run(
         [sys.executable, "-m", "sdetkit", "--help"],
         text=True,
@@ -21,3 +21,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_and_report() -> None:
     assert "dev" in out
 
     assert "report" in out
+    assert "maintenance" in out
