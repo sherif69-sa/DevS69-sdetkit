@@ -246,6 +246,7 @@ def _print_pr_report(data: dict[str, Any]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="doctor")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--verbose", action="store_true")
     parser.add_argument("--ascii", action="store_true")
     parser.add_argument("--ci", action="store_true")
@@ -259,6 +260,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--release", action="store_true")
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
+    if getattr(ns, "format", "text") == "json":
+        ns.json = True
     root = Path.cwd()
 
     if ns.all or ns.release:
