@@ -100,11 +100,11 @@ def test_doctor_json_reports_stdlib_shadowing_from_cwd_src(tmp_path) -> None:
         text=True,
         capture_output=True,
     )
-    assert proc.returncode == 0, proc.stderr
+    assert proc.returncode == 2, proc.stderr
     data = json.loads(proc.stdout)
     checks = data.get("checks") or {}
     std = checks.get("stdlib_shadowing")
     assert isinstance(std, dict)
     assert std.get("ok") is False
     shadow = std.get("shadow") or []
-    assert "tomllib" in shadow
+    assert any("tomllib" in item for item in shadow)

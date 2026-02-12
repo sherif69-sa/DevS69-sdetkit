@@ -15,10 +15,10 @@ def test_doctor_ascii_detects_non_ascii(tmp_path: Path, monkeypatch, capsys):
     (root / "tools" / "bad.bin").write_bytes(b"hi\xff\n")
 
     monkeypatch.chdir(root)
-    rc = doctor.main(["--ascii", "--json"])
+    rc = doctor.main(["--ascii", "--fail-on", "medium", "--json"])
     out = capsys.readouterr()
 
-    assert rc == 1
+    assert rc == 2
     data = json.loads(out.out)
     assert data["non_ascii"] == ["tools/bad.bin"]
     assert "non-ascii: tools/bad.bin" in out.err.replace("\\", "/")

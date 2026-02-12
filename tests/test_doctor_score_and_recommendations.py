@@ -19,10 +19,10 @@ def test_doctor_reports_score_and_recommendations_on_failure(tmp_path: Path, mon
     monkeypatch.setattr(doctor, "_run", fake_run)
     monkeypatch.chdir(root)
 
-    rc = doctor.main(["--clean-tree", "--json"])
+    rc = doctor.main(["--clean-tree", "--fail-on", "low", "--json"])
     data = json.loads(capsys.readouterr().out)
 
-    assert rc == 1
+    assert rc == 2
     assert data["score"] == 0
     assert data["checks"]["clean_tree"]["ok"] is False
     assert any("Commit or stash pending changes" in item for item in data["recommendations"])

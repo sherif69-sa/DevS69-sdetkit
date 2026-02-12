@@ -51,7 +51,7 @@ def test_doctor_pyproject_parse_failure(tmp_path: Path, monkeypatch, capsys):
     rc = doctor.main(["--pyproject", "--json"])
     data = json.loads(capsys.readouterr().out)
 
-    assert rc == 1
+    assert rc == 2
     assert data["pyproject_ok"] is False
     assert data["checks"]["pyproject"]["ok"] is False
     assert any("Fix pyproject.toml syntax" in item for item in data["recommendations"])
