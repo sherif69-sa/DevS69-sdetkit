@@ -27,3 +27,4 @@ site/
 
 /tools/git-pushit
 .ruff_cache/
+doctor.json
