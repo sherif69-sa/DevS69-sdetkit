@@ -23,7 +23,11 @@ from .plugins import (
 from .plugins import (
     Fix,
     RuleMeta,
+    apply_pack_defaults,
+    load_repo_audit_packs,
     load_rule_catalog,
+    merge_packs,
+    normalize_org_packs,
     normalize_packs,
     select_rules,
 )
@@ -359,6 +363,11 @@ class AllowlistRule:
     rule_id: str
     path: str
     contains: str | None = None
+    owner: str = ""
+    justification: str = ""
+    created: str | None = None
+    expires: str | None = None
+    ticket: str | None = None
 
 
 @dataclass(frozen=True)
@@ -369,7 +378,10 @@ class RepoAuditPolicy:
     exclude_paths: tuple[str, ...]
     disable_rules: frozenset[str]
     severity_overrides: dict[str, str]
+    org_packs: tuple[str, ...]
     allowlist: tuple[AllowlistRule, ...]
+    org_pack_unknown: tuple[str, ...]
+    lint_expiry_max_days: int
 
 
 class RepoAuditConfigError(ValueError):
@@ -909,6 +921,8 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
                 "properties": {
                     "pack": item.get("pack", "core"),
                     "fixable": bool(item.get("fixable", False)),
+                    "suppression_status": item.get("suppression_status"),
+                    "suppression_reason": item.get("suppression_reason"),
                 },
                 "locations": [
                     {
@@ -1626,6 +1640,8 @@ def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
                 f"  - total findings: {policy_summary.get('total_findings', 0)}",
                 f"  - suppressed by baseline: {policy_summary.get('suppressed_by_baseline', 0)}",
                 f"  - suppressed by policy: {policy_summary.get('suppressed_by_policy', 0)}",
+                f"  - suppressed active allowlist: {policy_summary.get('suppressed_active', 0)}",
+                f"  - expired allowlist matches: {policy_summary.get('suppressed_expired', 0)}",
                 f"  - actionable: {policy_summary.get('actionable', payload['summary']['findings'])}",
                 "",
             ]
@@ -1731,8 +1747,47 @@ def _repo_audit_profile_defaults(profile: str) -> RepoAuditPolicy:
         exclude_paths=(),
         disable_rules=frozenset(),
         severity_overrides={},
+        org_packs=(),
         allowlist=(),
+        org_pack_unknown=(),
+        lint_expiry_max_days=365,
     )
+
+
+def _parse_iso_date(raw: str, *, field: str) -> dt.date:
+    try:
+        return dt.date.fromisoformat(raw)
+    except ValueError as exc:
+        raise RepoAuditConfigError(f"{field} must be ISO date YYYY-MM-DD") from exc
+
+
+def _today_date() -> dt.date:
+    env_today = os.environ.get("SDETKIT_TODAY")
+    if env_today:
+        return _parse_iso_date(env_today, field="SDETKIT_TODAY")
+    return dt.date.today()
+
+
+def _allowlist_status(rule: AllowlistRule, today: dt.date) -> str:
+    if rule.expires is None:
+        return "active"
+    return (
+        "expired" if _parse_iso_date(rule.expires, field="allowlist expires") < today else "active"
+    )
+
+
+def _normalized_allowlist_entry(rule: AllowlistRule, today: dt.date) -> dict[str, Any]:
+    return {
+        "rule_id": rule.rule_id,
+        "path": rule.path,
+        "contains": rule.contains,
+        "owner": rule.owner,
+        "justification": rule.justification,
+        "created": rule.created,
+        "expires": rule.expires,
+        "ticket": rule.ticket,
+        "status": _allowlist_status(rule, today),
+    }
 
 
 def _load_repo_audit_config(root: Path, config_path: Path | None) -> dict[str, Any]:
@@ -1775,6 +1830,7 @@ def _resolve_repo_audit_policy(
     cli_baseline: str | None,
     cli_excludes: list[str] | None,
     cli_disable_rules: list[str] | None,
+    cli_org_packs: list[str] | None,
     config_path: Path | None,
 ) -> RepoAuditPolicy:
     raw = _load_repo_audit_config(root, config_path)
@@ -1805,6 +1861,15 @@ def _resolve_repo_audit_policy(
             raise RepoAuditConfigError("severity_overrides values must be info|warn|error")
         severity_overrides[rule_id] = level
 
+    raw_org_packs = raw.get("org_packs")
+    if raw_org_packs is not None and not isinstance(raw_org_packs, list):
+        raise RepoAuditConfigError("org_packs must be a list of strings")
+    org_packs = normalize_org_packs(raw_org_packs)
+
+    raw_max_days = raw.get("lint_expiry_max_days", base.lint_expiry_max_days)
+    if not isinstance(raw_max_days, int) or raw_max_days < 1:
+        raise RepoAuditConfigError("lint_expiry_max_days must be a positive integer")
+
     raw_allowlist = raw.get("allowlist") or []
     if not isinstance(raw_allowlist, list):
         raise RepoAuditConfigError("allowlist must be a list")
@@ -1815,11 +1880,40 @@ def _resolve_repo_audit_policy(
         rule_id = item.get("rule_id")
         path = item.get("path")
         contains = item.get("contains")
+        owner = item.get("owner")
+        justification = item.get("justification")
+        created = item.get("created")
+        expires = item.get("expires")
+        ticket = item.get("ticket")
         if not isinstance(rule_id, str) or not isinstance(path, str):
             raise RepoAuditConfigError("allowlist entries require string rule_id and path")
         if contains is not None and not isinstance(contains, str):
             raise RepoAuditConfigError("allowlist contains must be a string when provided")
-        allowlist.append(AllowlistRule(rule_id=rule_id, path=path, contains=contains))
+        for field_name, value in (
+            ("owner", owner),
+            ("justification", justification),
+            ("created", created),
+            ("expires", expires),
+            ("ticket", ticket),
+        ):
+            if value is not None and not isinstance(value, str):
+                raise RepoAuditConfigError(f"allowlist {field_name} must be a string")
+        if isinstance(created, str):
+            _parse_iso_date(created, field="allowlist created")
+        if isinstance(expires, str):
+            _parse_iso_date(expires, field="allowlist expires")
+        allowlist.append(
+            AllowlistRule(
+                rule_id=rule_id,
+                path=path,
+                contains=contains,
+                owner=(owner or "").strip(),
+                justification=(justification or "").strip(),
+                created=created,
+                expires=expires,
+                ticket=ticket,
+            )
+        )
 
     if cli_fail_on is not None:
         fail_on = cli_fail_on
@@ -1829,6 +1923,17 @@ def _resolve_repo_audit_policy(
         exclude_paths = exclude_paths + tuple(cli_excludes)
     if cli_disable_rules:
         disable_rules.update(cli_disable_rules)
+    if cli_org_packs:
+        org_packs = normalize_org_packs(cli_org_packs)
+
+    known_rule_ids = {item.meta.id for item in load_rule_catalog().rules}
+    fail_on, severity_overrides, unknown_org = apply_pack_defaults(
+        selected_org_packs=org_packs,
+        available=load_repo_audit_packs(),
+        base_fail_on=fail_on,
+        base_severity_overrides=severity_overrides,
+        known_rule_ids=known_rule_ids,
+    )
 
     return RepoAuditPolicy(
         profile=profile,
@@ -1837,7 +1942,10 @@ def _resolve_repo_audit_policy(
         exclude_paths=tuple(exclude_paths),
         disable_rules=frozenset(disable_rules),
         severity_overrides=severity_overrides,
+        org_packs=org_packs,
         allowlist=tuple(allowlist),
+        org_pack_unknown=unknown_org,
+        lint_expiry_max_days=raw_max_days,
     )
 
 
@@ -1846,6 +1954,104 @@ def _repo_rule_id(item: dict[str, Any]) -> str:
     if isinstance(explicit, str) and explicit:
         return explicit
     return f"{item.get('check', 'repo_audit')}/{item.get('code', 'unknown')}"
+
+
+def _effective_packs(policy: RepoAuditPolicy, pack_csv: str | None) -> tuple[str, ...]:
+    return merge_packs(normalize_packs(policy.profile, pack_csv), policy.org_packs)
+
+
+def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[int, str]:
+    known_rule_ids = {item.meta.id for item in load_rule_catalog().rules}
+    today = _today_date()
+    warnings: list[dict[str, str]] = []
+    errors: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for idx, item in enumerate(policy.allowlist, start=1):
+        if not item.owner.strip():
+            errors.append({"code": "missing_owner", "message": f"allowlist[{idx}] missing owner"})
+        if not item.justification.strip():
+            errors.append(
+                {
+                    "code": "missing_justification",
+                    "message": f"allowlist[{idx}] missing justification",
+                }
+            )
+        key = (item.rule_id, item.path, item.contains or "")
+        if key in seen:
+            warnings.append(
+                {
+                    "code": "duplicate_allowlist",
+                    "message": f"allowlist[{idx}] duplicates rule/path/contains",
+                }
+            )
+        seen.add(key)
+        if item.expires:
+            expires = _parse_iso_date(item.expires, field="allowlist expires")
+            if expires < today:
+                warnings.append(
+                    {
+                        "code": "expired_allowlist",
+                        "message": f"allowlist[{idx}] expired on {item.expires}",
+                    }
+                )
+            if (expires - today).days > policy.lint_expiry_max_days:
+                warnings.append(
+                    {
+                        "code": "long_expiry",
+                        "message": f"allowlist[{idx}] expires beyond threshold",
+                    }
+                )
+    for rule_id in sorted(policy.disable_rules):
+        if rule_id not in known_rule_ids:
+            warnings.append(
+                {
+                    "code": "unknown_disable_rule",
+                    "message": f"disable_rules contains unknown rule id: {rule_id}",
+                }
+            )
+    for rule_id in sorted(policy.severity_overrides):
+        if rule_id not in known_rule_ids:
+            warnings.append(
+                {
+                    "code": "unknown_severity_override",
+                    "message": f"severity_overrides contains unknown rule id: {rule_id}",
+                }
+            )
+    for name in sorted(policy.org_pack_unknown):
+        warnings.append({"code": "unknown_org_pack", "message": f"unknown org pack: {name}"})
+    warnings.sort(key=lambda x: (x["code"], x["message"]))
+    errors.sort(key=lambda x: (x["code"], x["message"]))
+    payload = {
+        "schema_version": "sdetkit.policy-lint.v1",
+        "counts": {"errors": len(errors), "warnings": len(warnings)},
+        "errors": errors,
+        "warnings": warnings,
+    }
+    rendered = (
+        json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+        if fmt == "json"
+        else "\n".join(["Policy lint", f"errors={len(errors)} warnings={len(warnings)}"]).rstrip()
+        + "\n"
+    )
+    if fail_on == "warn" and (warnings or errors):
+        return 1, rendered
+    if fail_on == "error" and errors:
+        return 1, rendered
+    return 0, rendered
+
+
+def _policy_export(policy: RepoAuditPolicy, *, include_expired: bool) -> dict[str, Any]:
+    today = _today_date()
+    entries = [_normalized_allowlist_entry(item, today) for item in policy.allowlist]
+    if not include_expired:
+        entries = [item for item in entries if item["status"] == "active"]
+    entries.sort(key=lambda x: (x["rule_id"], x["path"], x.get("contains") or ""))
+    return {
+        "schema_version": "sdetkit.policy.v1",
+        "today": today.isoformat(),
+        "org_packs": list(policy.org_packs),
+        "allowlist": entries,
+    }
 
 
 def _repo_finding_fingerprint(item: dict[str, Any]) -> str:
@@ -1870,6 +2076,8 @@ def _apply_repo_audit_policy(
     }
     actionable: list[dict[str, Any]] = []
     suppressed: list[dict[str, str]] = []
+    expired: list[dict[str, str]] = []
+    today = _today_date()
     for finding in findings:
         item = dict(finding)
         rule_id = _repo_rule_id(item)
@@ -1898,6 +2106,18 @@ def _apply_repo_audit_policy(
                 continue
             if rule.contains and rule.contains not in str(item.get("message", "")):
                 continue
+            if _allowlist_status(rule, today) == "expired":
+                expired.append(
+                    {
+                        "fingerprint": item["fingerprint"],
+                        "reason": "policy:allowlist:expired",
+                        "expires": str(rule.expires or ""),
+                    }
+                )
+                item["suppression_status"] = "expired_allowlist"
+                item["suppression_reason"] = f"allowlist expired on {rule.expires}"
+                allowlisted = False
+                break
             allowlisted = True
             break
         if allowlisted:
@@ -1914,8 +2134,10 @@ def _apply_repo_audit_policy(
     counts = {
         "baseline": sum(1 for x in suppressed if x["reason"] == "baseline"),
         "policy": sum(1 for x in suppressed if x["reason"].startswith("policy:")),
+        "suppressed_active": sum(1 for x in suppressed if x["reason"] == "policy:allowlist"),
+        "suppressed_expired": len(expired),
     }
-    return actionable, {"counts": counts, "suppressed": suppressed}
+    return actionable, {"counts": counts, "suppressed": suppressed, "expired": expired}
 
 
 def _baseline_entries_from_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -2039,6 +2261,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("path", nargs="?", default=".")
     ap.add_argument("--profile", choices=["default", "enterprise"], default=None)
     ap.add_argument("--pack", default=None)
+    ap.add_argument("--org-pack", action="append", default=[])
     ap.add_argument("--format", choices=["text", "json", "sarif"], default="text")
     ap.add_argument("--json-schema", choices=["legacy", "v1"], default="legacy")
     ap.add_argument("--output", "--out", dest="output", default=None)
@@ -2076,6 +2299,7 @@ def main(argv: list[str] | None = None) -> int:
     fxap.add_argument("path", nargs="?", default=".")
     fxap.add_argument("--profile", choices=["default", "enterprise"], default=None)
     fxap.add_argument("--pack", default=None)
+    fxap.add_argument("--org-pack", action="append", default=[])
     fxap.add_argument("--config", default=None)
     fxap.add_argument("--baseline", default=None)
     fxap.add_argument("--exclude", action="append", default=[])
@@ -2089,6 +2313,22 @@ def main(argv: list[str] | None = None) -> int:
     fxap.add_argument("--project", default=None)
     fxap.add_argument("--all-projects", action="store_true")
     fxap.add_argument("--sort", action="store_true")
+
+    pp = sub.add_parser("policy")
+    psub = pp.add_subparsers(dest="policy_cmd", required=True)
+    plint = psub.add_parser("lint")
+    plint.add_argument("path", nargs="?", default=".")
+    plint.add_argument("--config", default=None)
+    plint.add_argument("--format", choices=["text", "json"], default="text")
+    plint.add_argument("--fail-on", choices=["none", "warn", "error"], default="warn")
+    plint.add_argument("--allow-absolute-path", action="store_true")
+    pexport = psub.add_parser("export")
+    pexport.add_argument("path", nargs="?", default=".")
+    pexport.add_argument("--config", default=None)
+    pexport.add_argument("--output", default=None)
+    pexport.add_argument("--include-expired", action="store_true")
+    pexport.add_argument("--allow-absolute-path", action="store_true")
+    pexport.add_argument("--force", action="store_true")
 
     ns = parser.parse_args(argv)
 
@@ -2231,6 +2471,7 @@ def main(argv: list[str] | None = None) -> int:
                 else getattr(ns, "output", None),
                 cli_excludes=getattr(ns, "exclude", None),
                 cli_disable_rules=None,
+                cli_org_packs=None,
                 config_path=config_file,
             )
         except RepoAuditConfigError as exc:
@@ -2250,7 +2491,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         try:
             findings_payload = run_repo_audit(
-                root, profile=policy.profile, packs=normalize_packs(policy.profile, None)
+                root, profile=policy.profile, packs=_effective_packs(policy, None)
             )
             actionable_findings, _ = _apply_repo_audit_policy(
                 findings_payload.get("findings", []), policy, []
@@ -2283,6 +2524,59 @@ def main(argv: list[str] | None = None) -> int:
                 return 1
         return 0
 
+    if ns.repo_cmd == "policy":
+        config_file = None
+        if ns.config:
+            try:
+                config_file = safe_path(
+                    root, ns.config, allow_absolute=bool(ns.allow_absolute_path)
+                )
+            except SecurityError as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        try:
+            policy = _resolve_repo_audit_policy(
+                root,
+                cli_profile=None,
+                cli_fail_on=None,
+                cli_baseline=None,
+                cli_excludes=None,
+                cli_disable_rules=None,
+                cli_org_packs=None,
+                config_path=config_file,
+            )
+        except RepoAuditConfigError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+
+        if ns.policy_cmd == "lint":
+            code, rendered = _policy_lint(policy, fail_on=ns.fail_on, fmt=ns.format)
+            sys.stdout.write(rendered)
+            return code
+
+        rendered = (
+            json.dumps(
+                _policy_export(policy, include_expired=bool(ns.include_expired)),
+                ensure_ascii=True,
+                sort_keys=True,
+                indent=2,
+            )
+            + "\n"
+        )
+        if ns.output:
+            try:
+                out_path = safe_path(root, ns.output, allow_absolute=bool(ns.allow_absolute_path))
+                if out_path.exists() and not ns.force:
+                    print("refusing to overwrite existing output (use --force)", file=sys.stderr)
+                    return 2
+                atomic_write_text(out_path, rendered)
+            except (SecurityError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        else:
+            sys.stdout.write(rendered)
+        return 0
+
     if ns.repo_cmd == "audit":
         if ns.all_projects:
             try:
@@ -2303,17 +2597,18 @@ def main(argv: list[str] | None = None) -> int:
                         cli_baseline=ns.baseline or resolved.baseline_rel,
                         cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
                         cli_disable_rules=ns.disable_rule,
+                        cli_org_packs=ns.org_pack,
                         config_path=config_file,
                     )
                 except RepoAuditConfigError as exc:
                     print(str(exc), file=sys.stderr)
                     return 2
                 if ns.pack:
-                    packs = normalize_packs(policy.profile, ns.pack)
+                    packs = _effective_packs(policy, ns.pack)
                 elif resolved.packs:
-                    packs = tuple(resolved.packs)
+                    packs = merge_packs(tuple(resolved.packs), policy.org_packs)
                 else:
-                    packs = normalize_packs(policy.profile, None)
+                    packs = _effective_packs(policy, None)
                 project_payload = run_repo_audit(resolved.root, profile=policy.profile, packs=packs)
                 original_findings = [
                     x for x in project_payload.get("findings", []) if isinstance(x, dict)
@@ -2337,10 +2632,13 @@ def main(argv: list[str] | None = None) -> int:
                     "total_findings": len(original_findings),
                     "suppressed_by_baseline": suppression["counts"]["baseline"],
                     "suppressed_by_policy": suppression["counts"]["policy"],
+                    "suppressed_active": suppression["counts"]["suppressed_active"],
+                    "suppressed_expired": suppression["counts"]["suppressed_expired"],
                     "actionable": len(actionable),
                 }
                 project_payload["summary"] = project_summary
                 project_payload["suppressed"] = suppression["suppressed"]
+                project_payload["suppressed_expired"] = suppression["expired"]
                 run_record = build_run_record(
                     project_payload,
                     profile=policy.profile,
@@ -2396,12 +2694,13 @@ def main(argv: list[str] | None = None) -> int:
                 cli_baseline=ns.baseline,
                 cli_excludes=ns.exclude,
                 cli_disable_rules=ns.disable_rule,
+                cli_org_packs=ns.org_pack,
                 config_path=config_file,
             )
         except RepoAuditConfigError as exc:
             print(str(exc), file=sys.stderr)
             return 2
-        packs = normalize_packs(policy.profile, ns.pack)
+        packs = _effective_packs(policy, ns.pack)
         audit_payload = run_repo_audit(root, profile=policy.profile, packs=packs)
         original_findings = [x for x in audit_payload.get("findings", []) if isinstance(x, dict)]
         try:
@@ -2431,10 +2730,13 @@ def main(argv: list[str] | None = None) -> int:
             "total_findings": len(original_findings),
             "suppressed_by_baseline": suppression["counts"]["baseline"],
             "suppressed_by_policy": suppression["counts"]["policy"],
+            "suppressed_active": suppression["counts"]["suppressed_active"],
+            "suppressed_expired": suppression["counts"]["suppressed_expired"],
             "actionable": len(actionable),
         }
         audit_payload["summary"] = audit_summary
         audit_payload["suppressed"] = suppression["suppressed"]
+        audit_payload["suppressed_expired"] = suppression["expired"]
         run_record = build_run_record(
             audit_payload,
             profile=policy.profile,
@@ -2558,17 +2860,18 @@ def main(argv: list[str] | None = None) -> int:
                         cli_baseline=ns.baseline or resolved.baseline_rel,
                         cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
                         cli_disable_rules=ns.disable_rule,
+                        cli_org_packs=ns.org_pack,
                         config_path=resolved.config_path,
                     )
                 except RepoAuditConfigError as exc:
                     print(str(exc), file=sys.stderr)
                     return 2
                 if ns.pack:
-                    packs = normalize_packs(policy.profile, ns.pack)
+                    packs = _effective_packs(policy, ns.pack)
                 elif resolved.packs:
-                    packs = tuple(resolved.packs)
+                    packs = merge_packs(tuple(resolved.packs), policy.org_packs)
                 else:
-                    packs = normalize_packs(policy.profile, None)
+                    packs = _effective_packs(policy, None)
                 rc = _run_repo_fix_audit(
                     resolved.root,
                     profile=policy.profile,
@@ -2600,12 +2903,13 @@ def main(argv: list[str] | None = None) -> int:
                 cli_baseline=ns.baseline,
                 cli_excludes=ns.exclude,
                 cli_disable_rules=ns.disable_rule,
+                cli_org_packs=ns.org_pack,
                 config_path=config_file,
             )
         except RepoAuditConfigError as exc:
             print(str(exc), file=sys.stderr)
             return 2
-        packs = normalize_packs(policy.profile, ns.pack)
+        packs = _effective_packs(policy, ns.pack)
         return _run_repo_fix_audit(
             root,
             profile=policy.profile,
