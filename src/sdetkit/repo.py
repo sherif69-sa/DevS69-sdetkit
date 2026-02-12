@@ -27,6 +27,7 @@ from .plugins import (
     normalize_packs,
     select_rules,
 )
+from .projects import ProjectsConfigError, discover_projects, resolve_project
 from .report import build_run_record, diff_runs, load_run_record
 from .security import SecurityError, safe_path
 
@@ -1638,6 +1639,52 @@ def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
+def _render_repo_audit_aggregate(payload: dict[str, Any], fmt: str) -> str:
+    if fmt == "json":
+        return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+    if fmt == "sarif":
+        runs: list[dict[str, Any]] = []
+        for item in payload.get("projects", []):
+            if not isinstance(item, dict):
+                continue
+            doc = _to_sarif({"findings": item.get("run_record", {}).get("findings", [])})
+            run = dict(doc["runs"][0])
+            run["automationDetails"] = {"id": str(item.get("name", "unknown"))}
+            runs.append(run)
+        return (
+            json.dumps(
+                {
+                    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+                    "runs": runs,
+                    "version": "2.1.0",
+                },
+                ensure_ascii=True,
+                sort_keys=True,
+                indent=2,
+            )
+            + "\n"
+        )
+
+    lines = [f"Repo aggregate audit: {payload.get('root', '.')}", ""]
+    for item in payload.get("projects", []):
+        if not isinstance(item, dict):
+            continue
+        summary = item.get("summary", {})
+        lines.extend(
+            [
+                f"Project: {item.get('name')} ({item.get('root')})",
+                f"  Findings: {summary.get('findings', 0)}",
+                f"  Counts: warn={summary.get('counts', {}).get('warn', 0)} error={summary.get('counts', {}).get('error', 0)}",
+                "",
+            ]
+        )
+    totals = payload.get("totals", {})
+    lines.append(
+        f"Totals: findings={totals.get('findings', 0)} warn={totals.get('counts', {}).get('warn', 0)} error={totals.get('counts', {}).get('error', 0)}"
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _needs_fail_repo_audit(findings: list[dict[str, Any]], fail_on: str) -> bool:
     if fail_on == "none":
         return False
@@ -1647,6 +1694,33 @@ def _needs_fail_repo_audit(findings: list[dict[str, Any]], fail_on: str) -> bool
         _severity_rank(str(item.get("severity", "error"))) >= _severity_rank("warn")
         for item in findings
     )
+
+
+def _project_root_relative(path: Path, *, repo_root: Path) -> str:
+    try:
+        rel = path.resolve(strict=False).relative_to(repo_root.resolve(strict=True))
+    except ValueError:
+        return path.name
+    return rel.as_posix() or "."
+
+
+def _aggregate_totals(project_runs: list[dict[str, Any]]) -> dict[str, Any]:
+    counts = {"info": 0, "warn": 0, "error": 0}
+    total_findings = 0
+    total_actionable = 0
+    for item in project_runs:
+        summary = item.get("summary", {}) if isinstance(item, dict) else {}
+        total_findings += int(summary.get("findings", 0))
+        policy = summary.get("policy", {}) if isinstance(summary, dict) else {}
+        total_actionable += int(policy.get("actionable", summary.get("findings", 0)))
+        sev = summary.get("counts", {}) if isinstance(summary, dict) else {}
+        for key in counts:
+            counts[key] += int(sev.get(key, 0))
+    return {
+        "counts": {k: counts[k] for k in sorted(counts)},
+        "findings": total_findings,
+        "actionable": total_actionable,
+    }
 
 
 def _repo_audit_profile_defaults(profile: str) -> RepoAuditPolicy:
@@ -1979,6 +2053,17 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--emit-run-record", default=None)
     ap.add_argument("--diff-against", default=None)
     ap.add_argument("--step-summary", action="store_true")
+    ap.add_argument("--all-projects", action="store_true")
+    ap.add_argument("--sort", action="store_true")
+    ap.add_argument("--fail-strategy", choices=["overall", "per-project"], default="overall")
+
+    projp = sub.add_parser("projects")
+    projsub = projp.add_subparsers(dest="projects_cmd", required=True)
+    projlist = projsub.add_parser("list")
+    projlist.add_argument("path", nargs="?", default=".")
+    projlist.add_argument("--json", action="store_true")
+    projlist.add_argument("--sort", action="store_true")
+    projlist.add_argument("--allow-absolute-path", action="store_true")
 
     rules_parser = sub.add_parser("rules")
     rules_sub = rules_parser.add_subparsers(dest="rules_cmd", required=True)
@@ -2001,6 +2086,9 @@ def main(argv: list[str] | None = None) -> int:
     fxap.add_argument("--diff", action="store_true")
     fxap.add_argument("--patch", default=None)
     fxap.add_argument("--allow-absolute-path", action="store_true")
+    fxap.add_argument("--project", default=None)
+    fxap.add_argument("--all-projects", action="store_true")
+    fxap.add_argument("--sort", action="store_true")
 
     ns = parser.parse_args(argv)
 
@@ -2022,6 +2110,41 @@ def main(argv: list[str] | None = None) -> int:
                 print(
                     f"{rule['rule_id']:<36} [{rule['pack']}] sev={rule['severity']} fixable={'yes' if rule['fixable'] else 'no'}"
                 )
+        return 0
+
+    if ns.repo_cmd == "projects":
+        try:
+            projects_root = _resolve_root(ns.path, allow_absolute=bool(ns.allow_absolute_path))
+            source, projects = discover_projects(projects_root, sort=bool(ns.sort))
+        except (SecurityError, ProjectsConfigError, OSError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        records = []
+        for project in projects:
+            resolved = resolve_project(projects_root, project)
+            records.append(
+                {
+                    "name": resolved.name,
+                    "root": resolved.root_rel,
+                    "root_resolved": str(resolved.root),
+                    "config": resolved.config_rel,
+                    "config_resolved": str(resolved.config_path) if resolved.config_path else None,
+                    "profile": resolved.profile,
+                    "packs": list(resolved.packs),
+                    "baseline": resolved.baseline_rel,
+                    "exclude": list(resolved.exclude_paths),
+                }
+            )
+        projects_payload = {"manifest": source, "projects": records}
+        if ns.json:
+            sys.stdout.write(
+                json.dumps(projects_payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+            )
+            return 0
+        if source:
+            print(f"Manifest: {source}")
+        for rec in records:
+            print(f"- {rec['name']}: root={rec['root']} baseline={rec['baseline']}")
         return 0
 
     try:
@@ -2147,8 +2270,8 @@ def main(argv: list[str] | None = None) -> int:
         new_fps = {str(x.get("fingerprint")) for x in entries}
         unchanged = sorted(old_fps & new_fps)
         new_only = sorted(new_fps - old_fps)
-        resolved = sorted(old_fps - new_fps)
-        print(f"NEW: {len(new_only)} RESOLVED: {len(resolved)} UNCHANGED: {len(unchanged)}")
+        resolved_fps = sorted(old_fps - new_fps)
+        print(f"NEW: {len(new_only)} RESOLVED: {len(resolved_fps)} UNCHANGED: {len(unchanged)}")
         if ns.diff:
             print(_baseline_diff(old_entries, entries))
         if ns.update:
@@ -2161,6 +2284,101 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if ns.repo_cmd == "audit":
+        if ns.all_projects:
+            try:
+                source, projects = discover_projects(root, sort=bool(ns.sort))
+            except (ProjectsConfigError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+            project_runs: list[dict[str, Any]] = []
+            failures = 0
+            for project in projects:
+                resolved = resolve_project(root, project)
+                config_file = resolved.config_path
+                try:
+                    policy = _resolve_repo_audit_policy(
+                        resolved.root,
+                        cli_profile=ns.profile or resolved.profile,
+                        cli_fail_on=getattr(ns, "fail_on", None),
+                        cli_baseline=ns.baseline or resolved.baseline_rel,
+                        cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
+                        cli_disable_rules=ns.disable_rule,
+                        config_path=config_file,
+                    )
+                except RepoAuditConfigError as exc:
+                    print(str(exc), file=sys.stderr)
+                    return 2
+                if ns.pack:
+                    packs = normalize_packs(policy.profile, ns.pack)
+                elif resolved.packs:
+                    packs = tuple(resolved.packs)
+                else:
+                    packs = normalize_packs(policy.profile, None)
+                project_payload = run_repo_audit(resolved.root, profile=policy.profile, packs=packs)
+                original_findings = [
+                    x for x in project_payload.get("findings", []) if isinstance(x, dict)
+                ]
+                baseline_path = safe_path(
+                    resolved.root, policy.baseline_path, allow_absolute=bool(ns.allow_absolute_path)
+                )
+                baseline_doc = _load_repo_baseline(baseline_path)
+                actionable, suppression = _apply_repo_audit_policy(
+                    original_findings, policy, baseline_doc.get("entries", [])
+                )
+                project_payload["findings"] = actionable
+                counts = {"error": 0, "warn": 0, "info": 0}
+                for finding in actionable:
+                    sev = str(finding.get("severity", "error"))
+                    counts[sev] = counts.get(sev, 0) + 1
+                project_summary = cast(dict[str, Any], project_payload.get("summary", {}))
+                project_summary["counts"] = {k: counts[k] for k in sorted(counts)}
+                project_summary["findings"] = len(actionable)
+                project_summary["policy"] = {
+                    "total_findings": len(original_findings),
+                    "suppressed_by_baseline": suppression["counts"]["baseline"],
+                    "suppressed_by_policy": suppression["counts"]["policy"],
+                    "actionable": len(actionable),
+                }
+                project_payload["summary"] = project_summary
+                project_payload["suppressed"] = suppression["suppressed"]
+                run_record = build_run_record(
+                    project_payload,
+                    profile=policy.profile,
+                    packs=packs,
+                    fail_on=policy.fail_on,
+                    repo_root=resolved.root_rel,
+                    config_used=resolved.config_rel,
+                )
+                project_failed = _needs_fail_repo_audit(actionable, policy.fail_on)
+                failures += int(project_failed)
+                project_runs.append(
+                    {
+                        "name": resolved.name,
+                        "root": resolved.root_rel,
+                        "summary": project_payload.get("summary", {}),
+                        "run_record": run_record,
+                        "failed": project_failed,
+                    }
+                )
+            aggregate = {
+                "schema_version": "sdetkit.audit.aggregate.v1",
+                "root": str(root),
+                "manifest": source,
+                "projects": project_runs,
+                "totals": _aggregate_totals(project_runs),
+                "deltas": {"new": 0, "resolved": 0, "unchanged": 0},
+            }
+            rendered = _render_repo_audit_aggregate(aggregate, ns.format)
+            if ns.output:
+                out_path = safe_path(root, ns.output, allow_absolute=bool(ns.allow_absolute_path))
+                if out_path.exists() and not ns.force:
+                    print("refusing to overwrite existing output (use --force)", file=sys.stderr)
+                    return 2
+                atomic_write_text(out_path, rendered)
+            else:
+                sys.stdout.write(rendered)
+            return 1 if failures > 0 else 0
+
         config_file = None
         if ns.config:
             try:
@@ -2184,8 +2402,8 @@ def main(argv: list[str] | None = None) -> int:
             print(str(exc), file=sys.stderr)
             return 2
         packs = normalize_packs(policy.profile, ns.pack)
-        payload = run_repo_audit(root, profile=policy.profile, packs=packs)
-        original_findings = list(payload.get("findings", []))
+        audit_payload = run_repo_audit(root, profile=policy.profile, packs=packs)
+        original_findings = [x for x in audit_payload.get("findings", []) if isinstance(x, dict)]
         try:
             baseline_path = safe_path(
                 root,
@@ -2201,22 +2419,24 @@ def main(argv: list[str] | None = None) -> int:
         )
         if ns.update_baseline:
             _write_repo_baseline(baseline_path, _baseline_entries_from_findings(original_findings))
-        payload["findings"] = actionable
+        audit_payload["findings"] = actionable
         counts = {"error": 0, "warn": 0, "info": 0}
         for finding in actionable:
             sev = str(finding.get("severity", "error"))
             counts[sev] = counts.get(sev, 0) + 1
-        payload["summary"]["counts"] = {k: counts[k] for k in sorted(counts)}
-        payload["summary"]["findings"] = len(actionable)
-        payload["summary"]["policy"] = {
+        audit_summary = cast(dict[str, Any], audit_payload.get("summary", {}))
+        audit_summary["counts"] = {k: counts[k] for k in sorted(counts)}
+        audit_summary["findings"] = len(actionable)
+        audit_summary["policy"] = {
             "total_findings": len(original_findings),
             "suppressed_by_baseline": suppression["counts"]["baseline"],
             "suppressed_by_policy": suppression["counts"]["policy"],
             "actionable": len(actionable),
         }
-        payload["suppressed"] = suppression["suppressed"]
+        audit_payload["summary"] = audit_summary
+        audit_payload["suppressed"] = suppression["suppressed"]
         run_record = build_run_record(
-            payload,
+            audit_payload,
             profile=policy.profile,
             packs=packs,
             fail_on=policy.fail_on,
@@ -2224,7 +2444,7 @@ def main(argv: list[str] | None = None) -> int:
             config_used=ns.config,
         )
         if ns.json_schema == "v1" and ns.format == "json":
-            payload = run_record
+            audit_payload = run_record
 
         diff_payload = None
         if ns.diff_against:
@@ -2293,7 +2513,7 @@ def main(argv: list[str] | None = None) -> int:
                     print(str(exc), file=sys.stderr)
                     return 2
 
-        rendered = _render_repo_audit(payload, ns.format)
+        rendered = _render_repo_audit(audit_payload, ns.format)
         if ns.output:
             try:
                 out_path = safe_path(root, ns.output, allow_absolute=bool(ns.allow_absolute_path))
@@ -2306,12 +2526,63 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
         else:
             sys.stdout.write(rendered)
-        return 1 if _needs_fail_repo_audit(payload.get("findings", []), policy.fail_on) else 0
+        return 1 if _needs_fail_repo_audit(actionable, policy.fail_on) else 0
 
     if ns.repo_cmd == "fix-audit":
         if ns.dry_run and ns.apply:
             print("cannot use --dry-run and --apply together", file=sys.stderr)
             return 2
+        if ns.project and ns.all_projects:
+            print("cannot use --project with --all-projects", file=sys.stderr)
+            return 2
+        if ns.project or ns.all_projects:
+            try:
+                _, projects = discover_projects(root, sort=bool(ns.sort))
+            except (ProjectsConfigError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+            selected = projects
+            if ns.project:
+                selected = [p for p in projects if p.name == ns.project]
+                if not selected:
+                    print(f"unknown project: {ns.project}", file=sys.stderr)
+                    return 2
+            exit_code = 0
+            for project in selected:
+                resolved = resolve_project(root, project)
+                try:
+                    policy = _resolve_repo_audit_policy(
+                        resolved.root,
+                        cli_profile=ns.profile or resolved.profile,
+                        cli_fail_on="none",
+                        cli_baseline=ns.baseline or resolved.baseline_rel,
+                        cli_excludes=list(resolved.exclude_paths) + list(ns.exclude or []),
+                        cli_disable_rules=ns.disable_rule,
+                        config_path=resolved.config_path,
+                    )
+                except RepoAuditConfigError as exc:
+                    print(str(exc), file=sys.stderr)
+                    return 2
+                if ns.pack:
+                    packs = normalize_packs(policy.profile, ns.pack)
+                elif resolved.packs:
+                    packs = tuple(resolved.packs)
+                else:
+                    packs = normalize_packs(policy.profile, None)
+                rc = _run_repo_fix_audit(
+                    resolved.root,
+                    profile=policy.profile,
+                    packs=packs,
+                    policy=policy,
+                    dry_run=bool(ns.dry_run) or not bool(ns.apply),
+                    apply=bool(ns.apply),
+                    force=bool(ns.force),
+                    show_diff=bool(ns.diff),
+                    patch_path=ns.patch,
+                    allow_absolute_path=bool(ns.allow_absolute_path),
+                )
+                exit_code = max(exit_code, rc)
+            return exit_code
         config_file = None
         if ns.config:
             try:
