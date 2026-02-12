@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """Validate repository community standards baseline files."""
 
-from __future__ import annotations
-
 from pathlib import Path
-import sys
-
 
 REQUIRED_FILES = [
     "README.md",
