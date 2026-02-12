@@ -11,14 +11,14 @@ mode=${1:-quick}
 
 case "$mode" in
   quick)
-    PYTHONPATH=src pytest -q
+    python -m pytest -q
     ;;
   docker)
     docker build -t sdet-bootcamp:ci .
     docker run --rm sdet-bootcamp:ci
     ;;
   all)
-    PYTHONPATH=src pytest -q
+    python -m pytest -q
     docker build -t sdet-bootcamp:ci .
     docker run --rm sdet-bootcamp:ci
     ;;

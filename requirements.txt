@@ -1,0 +1,30 @@
+# Consolidated local development requirements.
+# Installs the package and common tooling used across CI/local workflows.
+-e .
+
+# Runtime dependency
+httpx>=0.27,<1
+
+# Dev + QA tooling
+ruff
+mypy
+pre-commit
+pytest
+pytest-cov
+pytest-asyncio
+hypothesis
+mutmut
+build
+twine
+
+# Security/compliance tooling used in workflows
+pip-audit
+cyclonedx-bom
+
+# Docs
+mkdocs==1.6.1
+mkdocs-material==9.7.1
+
+# Backport for environments below Python 3.11
+# (kept for compatibility in ad-hoc environments)
+tomli; python_version < "3.11"

@@ -117,5 +117,6 @@ testpaths = ["tests"]
 
 [project.scripts]
 sdetkit = "sdetkit.cli:main"
+sdkit = "sdetkit.cli:main"
 kvcli = "sdetkit._entrypoints:kvcli"
 apigetcli = "sdetkit._entrypoints:apigetcli"

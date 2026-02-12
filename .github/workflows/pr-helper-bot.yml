@@ -64,13 +64,13 @@ jobs:
       - name: Run doctor
         if: steps.pr.outputs.cmd == '/doctor'
         run: |
-          PYTHONPATH=src python -m sdetkit.doctor --ascii --json > doctor.json
+          python -m sdetkit.doctor --ascii --json > doctor.json
 
       - name: Run check
         if: steps.pr.outputs.cmd == '/check'
         run: |
           python -m pre_commit run -a
-          PYTHONPATH=src python -m sdetkit.doctor --ascii
+          python -m sdetkit.doctor --ascii
           python -m pytest -q
 
       - name: Run quality gate

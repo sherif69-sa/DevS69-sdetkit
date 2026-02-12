@@ -35,7 +35,7 @@ jobs:
 
       - name: Doctor (ASCII)
         run: |
-          PYTHONPATH=src python -m sdetkit.doctor --ascii
+          python -m sdetkit.doctor --ascii
       - name: Lint
         run: |
           python -m pre_commit run -a
