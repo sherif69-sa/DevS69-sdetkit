@@ -72,9 +72,7 @@ class Fixer(Protocol):
     @property
     def rule_id(self) -> str: ...
 
-    def fix(
-        self, repo_root: Path, findings: list[Finding], context: dict[str, Any]
-    ) -> list[Fix]:
+    def fix(self, repo_root: Path, findings: list[Finding], context: dict[str, Any]) -> list[Fix]:
         pass
 
 
