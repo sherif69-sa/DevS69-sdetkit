@@ -107,8 +107,8 @@ jobs:
         if: inputs.pr && steps.diff.outputs.has_diff == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          commit-message: "chore: weekly maintenance"
-          title: "chore: weekly maintenance"
+          commit-message: 'chore: weekly maintenance'
+          title: 'chore: weekly maintenance'
           body-path: artifacts/pr_body.md
           branch: automation/maintenance-on-demand
           base: main
