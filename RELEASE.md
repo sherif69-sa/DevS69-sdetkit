@@ -2,6 +2,8 @@
 
 This project follows semantic versioning and a reproducible release flow.
 
+Current target: **v1.0.0 (stable)**.
+
 ## Versioning Policy
 
 - `0.x`: fast iteration is allowed, but the patch-spec schema stays versioned (`spec_version`).
@@ -9,7 +11,10 @@ This project follows semantic versioning and a reproducible release flow.
 
 ## Checklist
 
-1. Update version in `pyproject.toml` and `CHANGELOG.md`.
+1. Ensure release metadata is finalized for `v1.0.0` (or next target):
+   - `pyproject.toml` version
+   - matching heading in `CHANGELOG.md`
+   - any embedded fallback `tool_version` values used in reports/templates
 2. Create a release tag `vX.Y.Z`.
 3. Run release validation locally:
    - `python -m build`

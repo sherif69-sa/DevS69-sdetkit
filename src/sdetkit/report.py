@@ -26,7 +26,7 @@ def _tool_version() -> str:
 
         return metadata.version("sdetkit")
     except Exception:
-        return "0.2.8"
+        return "1.0.0"
 
 
 def _captured_at() -> str | None:

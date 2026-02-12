@@ -293,7 +293,7 @@ def _tool_version() -> str:
     try:
         return importlib_metadata.version("sdetkit")
     except importlib_metadata.PackageNotFoundError:
-        return "0.2.8"
+        return "1.0.0"
 
 
 def _config_hash(*, profile: str, packs: tuple[str, ...]) -> str:
@@ -850,7 +850,7 @@ def _report_payload(
         "root": str(root),
         "metadata": {
             "tool": "sdetkit",
-            "version": "0.2.8",
+            "version": "1.0.0",
             "profile": profile,
             "git_commit": _git_commit_sha(root),
             "generated_at_utc": dt.datetime.now(_UTC).isoformat()
@@ -2596,7 +2596,7 @@ def _load_repo_baseline(path: Path) -> dict[str, Any]:
 def _write_repo_baseline(path: Path, entries: list[dict[str, Any]]) -> None:
     payload = {
         "schema_version": "1.0",
-        "tool_version": "0.2.8",
+        "tool_version": "1.0.0",
         "entries": entries,
     }
     atomic_write_text(path, json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n")

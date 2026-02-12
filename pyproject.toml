@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sdetkit"
-version = "0.2.8"
+version = "1.0.0"
 requires-python = ">=3.11"
 readme = "README.md"
 description = "Developer productivity and QA automation toolkit: CLI utilities, quality gates, and testable modules."
@@ -13,7 +13,7 @@ keywords = ["sdet", "testing", "qa", "automation", "cli", "devtools", "quality-g
 authors = [{ name = "DevS69 contributors" }]
 maintainers = [{ name = "DevS69 maintainers" }]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "License :: Other/Proprietary License",
   "Operating System :: OS Independent",
