@@ -83,6 +83,7 @@ Tool-specific notes:
 - `sdetkit repo baseline create [PATH] [--output BASELINE.json] [--profile default|enterprise] [--exclude GLOB ...]`
 - `sdetkit repo rules list [--profile default|enterprise] [--pack PACKS] [--org-pack PACK ...] [--json]`
 - `sdetkit repo fix-audit [PATH] [--profile ...] [--pack PACKS] [--org-pack PACK ...] [--project NAME|--all-projects] [--dry-run|--apply] [--diff] [--patch OUT.patch] [--sort] [--force]`
+- `sdetkit repo pr-fix [PATH] [--profile ...] [--pack PACKS] [--project NAME|--all-projects] [--dry-run|--apply] [--branch BRANCH] [--force-branch] [--commit|--no-commit] [--base-ref REF] [--open-pr] [--repo OWNER/NAME] [--token-env GITHUB_TOKEN] [--title TITLE] [--body BODY|--body-file PATH] [--draft] [--labels a,b,c]`
 - `sdetkit repo baseline check [PATH] [--baseline BASELINE.json] [--fail-on none|warn|error] [--update] [--diff]`
 - `sdetkit repo policy lint [PATH] [--config PATH] [--format text|json] [--fail-on none|warn|error]`
 - `sdetkit repo policy export [PATH] [--config PATH] [--output FILE.json] [--include-expired]`
@@ -105,6 +106,8 @@ Init examples:
 - `sdetkit repo init --apply --profile enterprise`
 
 See: repo-init.md and plugins-and-fix.md
+
+See also: pr-automation.md
 
 GitHub Action integration:
 
