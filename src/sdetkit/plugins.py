@@ -795,7 +795,7 @@ def load_repo_audit_packs() -> tuple[LoadedPack, ...]:
             plugin = ep.load()()
             name = str(getattr(plugin, "pack_name", ep.name)).strip()
             raw_ids = getattr(plugin, "rule_ids", ())
-            if not name or not isinstance(raw_ids, (list, tuple)):
+            if not name or not isinstance(raw_ids, list | tuple):
                 continue
             defaults = getattr(plugin, "defaults", {})
             if not isinstance(defaults, dict):

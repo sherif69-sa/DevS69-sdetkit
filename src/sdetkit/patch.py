@@ -288,7 +288,7 @@ def _op_ensure_import(text: str, op: dict[str, Any]) -> str:
         i = 1 if insert_line != 1 else 0
         while i < len(body):
             n = body[i]
-            if isinstance(n, (ast.Import, ast.ImportFrom)):
+            if isinstance(n, ast.Import | ast.ImportFrom):
                 insert_line = int(getattr(n, "end_lineno", n.lineno) or n.lineno) + 1
                 i += 1
                 continue
@@ -330,7 +330,7 @@ def _op_upsert_def(text: str, op: dict[str, Any]) -> str:
 
     hits: list[ast.AST] = []
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.name == name:
             hits.append(node)
 
     if len(hits) > 1:
@@ -390,7 +390,7 @@ def _op_upsert_def(text: str, op: dict[str, Any]) -> str:
         i = 1 if insert_line != 1 else 0
         while i < len(body):
             n = body[i]
-            if isinstance(n, (ast.Import, ast.ImportFrom)):
+            if isinstance(n, ast.Import | ast.ImportFrom):
                 insert_line = int(getattr(n, "end_lineno", n.lineno) or n.lineno) + 1
                 i += 1
                 continue
@@ -487,7 +487,7 @@ def _op_upsert_class(text: str, op: dict[str, Any]) -> str:
         i = 1 if insert_line != 1 else 0
         while i < len(body):
             n = body[i]
-            if isinstance(n, (ast.Import, ast.ImportFrom)):
+            if isinstance(n, ast.Import | ast.ImportFrom):
                 insert_line = int(getattr(n, "end_lineno", n.lineno) or n.lineno) + 1
                 i += 1
                 continue
@@ -544,7 +544,7 @@ def _op_upsert_method(text: str, op: dict[str, Any]) -> str:
 
     meths: list[ast.AST] = []
     for node in getattr(cls, "body", []):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == meth_name:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and node.name == meth_name:
             meths.append(node)
 
     if len(meths) > 1:

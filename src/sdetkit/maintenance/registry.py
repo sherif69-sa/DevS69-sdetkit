@@ -24,7 +24,7 @@ def discover_checks() -> list[tuple[str, CheckRunner, set[str]]]:
         raw_modes: Any = getattr(module, "CHECK_MODES", {"quick", "full"})
         check_modes = (
             {str(item) for item in raw_modes}
-            if isinstance(raw_modes, (set, list, tuple))
+            if isinstance(raw_modes, set | list | tuple)
             else {"quick", "full"}
         )
         if isinstance(check_name, str) and callable(runner):

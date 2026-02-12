@@ -74,7 +74,7 @@ class Cassette:
         return cls(out)
 
     def _key_for_request(self, req: httpx.Request) -> _Key:
-        body = req.content if isinstance(req.content, (bytes, bytearray)) else b""
+        body = req.content if isinstance(req.content, bytes | bytearray) else b""
         return _Key(req.method.upper(), str(req.url), _b64e(bytes(body)))
 
     def append(self, req: httpx.Request, resp: httpx.Response, body: bytes) -> None:
@@ -85,7 +85,7 @@ class Cassette:
                     "url": str(req.url),
                     "headers": _headers_to_list(req.headers),
                     "body_b64": _b64e(
-                        req.content if isinstance(req.content, (bytes, bytearray)) else b""
+                        req.content if isinstance(req.content, bytes | bytearray) else b""
                     ),
                 },
                 "response": {

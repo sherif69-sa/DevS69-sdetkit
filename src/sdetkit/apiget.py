@@ -278,7 +278,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if path == "-":
             try:
                 b = sys.stdin.buffer.read()
-                if isinstance(b, (bytes, bytearray)):
+                if isinstance(b, bytes | bytearray):
                     return bytes(b)
             except Exception:
                 pass
@@ -417,7 +417,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if _data is not None and _json_data is not None:
         _die("use only one of: --data, --json")
     if _data is not None:
-        if isinstance(_data, (bytes, bytearray)):
+        if isinstance(_data, bytes | bytearray):
             _req_content = bytes(_data)
         else:
             _req_content = str(_data).encode("utf-8")
@@ -614,7 +614,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         raise ValueError("expected dict")
                     if ns.expect == "list" and not isinstance(data, list):
                         raise ValueError("expected list")
-                    if ns.expect == "any" and not isinstance(data, (dict, list)):
+                    if ns.expect == "any" and not isinstance(data, dict | list):
                         raise ValueError("expected dict or list")
 
                 else:

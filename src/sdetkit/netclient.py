@@ -490,7 +490,7 @@ class SdetHttpClient:
             hook=hook,
             breaker=breaker,
         )
-        if not isinstance(data, (dict, list)):
+        if not isinstance(data, dict | list):
             raise ValueError("expected json object or array")
         return data
 
