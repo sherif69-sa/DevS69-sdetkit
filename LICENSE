@@ -1,26 +1,55 @@
-DevS69 Proprietary License (All Rights Reserved)
-Copyright (c) 2026 DevS69 contributors
+DevS69 Noncommercial License v1.0
 
-This repository and all associated source code, documentation, and assets
-(the "Software") are proprietary and confidential.
+Copyright (c) DevS69 contributors
 
-No permission is granted to use, copy, modify, merge, publish, distribute,
-sublicense, sell, or create derivative works of the Software without prior
-written permission from the copyright holder.
+1. Grant of License (Noncommercial Personal and Educational Use)
+Subject to the terms of this License, DevS69 grants individuals a limited,
+non-exclusive, non-transferable, revocable license to use, copy, and modify
+this software and its documentation (the "Software") solely for personal,
+self-learning, academic, research, and other noncommercial educational
+purposes.
 
-Any unauthorized use is strictly prohibited.
+2. Commercial Use Prohibited Without Paid License
+Any commercial use of the Software is prohibited unless you obtain a separate,
+paid commercial license agreement from DevS69.
 
-Commercial use, resale, relicensing, and redistribution are forbidden unless
-an explicit written commercial license is granted by the copyright holder.
+For clarity, commercial use includes, without limitation:
+- use by or for a company, business, government entity, or other organization;
+- internal business use (including evaluation, operations, or development);
+- offering the Software as a hosted service or SaaS;
+- embedding, integrating, bundling, or redistributing the Software in a
+  commercial product or service;
+- providing paid services, consulting, or deliverables that include or rely on
+  the Software;
+- reselling, sublicensing, or otherwise monetizing the Software.
 
-To request permission (including commercial licensing), contact the owner via:
-- GitHub repository contact channels (Issues/Discussions)
-- Maintainer support channels listed in SUPPORT.md
+Commercial licensing is available. See COMMERCIAL_LICENSE.md.
 
+3. Notices
+You must retain all copyright, attribution, and license notices in source and
+binary distributions of the Software and in substantial portions of the
+Software. You may not remove or obscure such notices.
+
+4. No Trademark License
+This License does not grant any right to use DevS69 names, logos, or marks,
+except as required for reasonable attribution.
+
+5. Warranty Disclaimer
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.
+
+6. Limitation of Liability
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING
-FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-IN THE SOFTWARE.
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+7. Termination
+Any use of the Software in violation of this License automatically terminates
+all rights granted under this License.
+
+8. Entire Agreement
+This License governs noncommercial use of the Software unless superseded by a
+separate written agreement signed by DevS69.

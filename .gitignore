@@ -26,3 +26,4 @@ site/
 .mypy_cache/
 
 /tools/git-pushit
+.ruff_cache/

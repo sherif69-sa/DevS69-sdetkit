@@ -25,7 +25,7 @@
 
   <p>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/releases"><img src="https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?sort=semver" alt="Latest Release"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/github/license/sherif69-sa/DevS69-sdetkit" alt="License"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-Noncommercial%20%2B%20Commercial%20Required-blue" alt="License"></a>
     <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/security/code-scanning"><img src="https://img.shields.io/badge/security-code%20scanning-success" alt="Code Scanning"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/security/dependabot"><img src="https://img.shields.io/badge/dependencies-auto%20update-success" alt="Dependabot"></a>
@@ -56,7 +56,8 @@
 - [Contributing](CONTRIBUTING.md)
 - [Security Policy](SECURITY.md)
 - [Support](SUPPORT.md)
-- [Proprietary License](LICENSE)
+- [License](LICENSE)
+- [Commercial Licensing](COMMERCIAL_LICENSE.md)
 
 ### Engineering standards
 - [Quality Playbook](QUALITY_PLAYBOOK.md)
@@ -159,4 +160,4 @@ bash scripts/shell.sh
 
 ## License
 
-Proprietary (All Rights Reserved). See [LICENSE](LICENSE).
+Free for personal/educational noncommercial use. Commercial use requires a paid license (see [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md)).
