@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -37,6 +39,34 @@ class ResolvedRepoProject:
     baseline_path: str | None
     baseline_rel: str
     exclude_paths: tuple[str, ...]
+
+
+_SCAN_SKIP_DIRS: frozenset[str] = frozenset(
+    {
+        ".git",
+        ".hg",
+        ".svn",
+        "__pycache__",
+        ".mypy_cache",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".hypothesis",
+        ".nox",
+        ".tox",
+        ".venv",
+        "venv",
+        "node_modules",
+        "dist",
+        "build",
+    }
+)
+
+
+@dataclass(frozen=True)
+class _DiscoveredProject:
+    language: str
+    root_rel: str
+    manifests: tuple[str, ...]
 
 
 def _as_str(value: Any, *, field: str) -> str | None:
@@ -100,12 +130,145 @@ def _load_manifest_doc(repo_root: Path) -> tuple[dict[str, Any], str] | None:
     return projects, "pyproject.toml"
 
 
+def _root_rel(repo_root: Path, path: Path) -> str:
+    rel = path.relative_to(repo_root).as_posix().strip("/")
+    return rel or "."
+
+
+def _iter_manifest_paths(repo_root: Path) -> list[Path]:
+    manifests: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(repo_root):
+        dirnames[:] = sorted(
+            d
+            for d in dirnames
+            if d not in _SCAN_SKIP_DIRS
+            and not d.endswith(".egg-info")
+            and not d.startswith(".venv")
+        )
+        for filename in sorted(filenames):
+            if filename in {"pyproject.toml", "setup.cfg", "package.json", "go.mod", "Cargo.toml"}:
+                manifests.append(Path(dirpath) / filename)
+                continue
+            if filename.startswith("requirements") and filename.endswith(".txt"):
+                manifests.append(Path(dirpath) / filename)
+    manifests.sort(key=lambda p: p.relative_to(repo_root).as_posix())
+    return manifests
+
+
+def _node_workspace_members(manifest_path: Path, repo_root: Path) -> tuple[str, ...]:
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return ()
+    if not isinstance(payload, dict):
+        return ()
+    workspaces = payload.get("workspaces")
+    patterns: list[str] = []
+    if isinstance(workspaces, list):
+        patterns = [item for item in workspaces if isinstance(item, str)]
+    elif isinstance(workspaces, dict):
+        packages = workspaces.get("packages")
+        if isinstance(packages, list):
+            patterns = [item for item in packages if isinstance(item, str)]
+
+    members: set[str] = set()
+    for pattern in patterns:
+        for path in sorted(manifest_path.parent.glob(pattern)):
+            pkg = path / "package.json"
+            if pkg.is_file() and repo_root in pkg.resolve(strict=False).parents:
+                members.add(_root_rel(repo_root, pkg.parent))
+    return tuple(sorted(members))
+
+
+def _rust_workspace_members(manifest_path: Path, repo_root: Path) -> tuple[str, ...]:
+    try:
+        data = cast(Any, _tomllib).loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ()
+    if not isinstance(data, dict):
+        return ()
+    workspace = data.get("workspace")
+    if not isinstance(workspace, dict):
+        return ()
+    members = workspace.get("members")
+    if not isinstance(members, list):
+        return ()
+    out: set[str] = set()
+    for item in members:
+        if not isinstance(item, str):
+            continue
+        for path in sorted(manifest_path.parent.glob(item)):
+            cargo = path / "Cargo.toml"
+            if cargo.is_file() and repo_root in cargo.resolve(strict=False).parents:
+                out.add(_root_rel(repo_root, cargo.parent))
+    return tuple(sorted(out))
+
+
+def _autodiscover_projects(repo_root: Path) -> list[RepoProject]:
+    by_key: dict[tuple[str, str], set[str]] = {}
+
+    for manifest in _iter_manifest_paths(repo_root):
+        parent_rel = _root_rel(repo_root, manifest.parent)
+        filename = manifest.name
+        language: str | None = None
+        workspace_members: tuple[str, ...] = ()
+        if filename in {"pyproject.toml", "setup.cfg"} or (
+            filename.startswith("requirements") and filename.endswith(".txt")
+        ):
+            language = "python"
+        elif filename == "package.json":
+            language = "node"
+            workspace_members = _node_workspace_members(manifest, repo_root)
+        elif filename == "go.mod":
+            language = "go"
+        elif filename == "Cargo.toml":
+            language = "rust"
+            workspace_members = _rust_workspace_members(manifest, repo_root)
+        if language is None:
+            continue
+
+        rel_manifest = _root_rel(repo_root, manifest)
+        by_key.setdefault((language, parent_rel), set()).add(rel_manifest)
+        for member_root in workspace_members:
+            member_manifest = (
+                f"{member_root}/package.json" if language == "node" else f"{member_root}/Cargo.toml"
+            )
+            by_key.setdefault((language, member_root), set()).add(member_manifest)
+
+    discovered: list[_DiscoveredProject] = []
+    for (language, root_rel), manifests in by_key.items():
+        discovered.append(
+            _DiscoveredProject(
+                language=language,
+                root_rel=root_rel,
+                manifests=tuple(sorted(manifests)),
+            )
+        )
+
+    discovered.sort(key=lambda p: (p.root_rel, p.language, p.manifests))
+    projects: list[RepoProject] = []
+    for item in discovered:
+        name = item.language if item.root_rel == "." else f"{item.language}:{item.root_rel}"
+        projects.append(
+            RepoProject(
+                name=name,
+                root=item.root_rel,
+                config_path=item.manifests[0],
+                profile=None,
+                packs=(),
+                baseline_path=None,
+                exclude_paths=(),
+            )
+        )
+    return projects
+
+
 def discover_projects(
     repo_root: Path, *, sort: bool = False
 ) -> tuple[str | None, list[RepoProject]]:
     loaded = _load_manifest_doc(repo_root)
     if loaded is None:
-        return None, []
+        return "auto-discovered", _autodiscover_projects(repo_root)
     data, source = loaded
 
     raw_items = data.get("project")
