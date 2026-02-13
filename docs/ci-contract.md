@@ -2,7 +2,7 @@
 
 ## Blocking workflows
 - **CI** (`.github/workflows/ci.yml`) is the primary PR blocking gate.
-- It validates lint, types, tests, package build/smoke install, repo check, coverage, and docs build.
+- It validates fast post checks on PRs (`tools/post_checks_fast.sh`) plus package build/smoke install, repo check, coverage, and docs build.
 
 ## Informational workflows
 - **Quality** is schedule/manual for extended visibility and trend checks.
@@ -18,6 +18,9 @@
 - Network tests must opt in with `@pytest.mark.network`.
 
 ## Local parity commands
-- `python -m pre_commit run -a`
-- `pytest -q`
-- `bash quality.sh cov`
+- Fast lane: `bash tools/post_checks_fast.sh`
+- Full strength: `bash tools/post_checks.sh`
+- Coverage/docs gate: `bash quality.sh cov`
+
+## Release strength checks
+- Release workflow invokes `tools/post_checks.sh --release-tag <tag>` to include build/twine and tag/version verification.
