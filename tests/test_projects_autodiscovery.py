@@ -85,13 +85,13 @@ def test_autodiscover_tooling_folder_without_manifest_is_ignored(tmp_path: Path)
     assert projects == []
 
 
-def test_autodiscover_tooling_folder_with_real_manifest_is_counted(tmp_path: Path) -> None:
-    _write(tmp_path / "tools" / "pkg" / "package.json", '{"name":"toolpkg"}\n')
+def test_autodiscover_tooling_folder_with_real_package_is_counted(tmp_path: Path) -> None:
+    _write(tmp_path / "tooling" / "pkg" / "package.json", '{"name":"toolpkg"}\n')
 
     _, projects = discover_projects(tmp_path)
 
-    assert [p.name for p in projects] == ["node:tools/pkg"]
-    assert [p.root for p in projects] == ["tools/pkg"]
+    assert [p.name for p in projects] == ["node:tooling/pkg"]
+    assert [p.root for p in projects] == ["tooling/pkg"]
 
 
 def test_autodiscover_nested_workspace_and_standalone_manifest(tmp_path: Path) -> None:
@@ -106,3 +106,23 @@ def test_autodiscover_nested_workspace_and_standalone_manifest(tmp_path: Path) -
         ("node:packages/pkg1", "packages/pkg1"),
         ("python:packages/pkg1", "packages/pkg1"),
     ]
+
+
+def test_autodiscover_tooling_folder_with_go_module_is_counted(tmp_path: Path) -> None:
+    _write(tmp_path / "tooling" / "mod" / "go.mod", "module example/tooling/mod\n")
+
+    _, projects = discover_projects(tmp_path)
+
+    assert [p.name for p in projects] == ["go:tooling/mod"]
+    assert [p.root for p in projects] == ["tooling/mod"]
+
+
+def test_autodiscover_tooling_filter_conflict_resolution(tmp_path: Path) -> None:
+    _write(tmp_path / "scripts" / "package.json", '{"private":true}\n')
+    _write(tmp_path / ".github" / "go.mod", "module example/ci\n")
+    _write(tmp_path / "tooling" / "mod" / "go.mod", "module example/tooling/mod\n")
+
+    _, projects = discover_projects(tmp_path)
+
+    assert [p.name for p in projects] == ["go:tooling/mod"]
+    assert [p.root for p in projects] == ["tooling/mod"]
