@@ -6,6 +6,7 @@ import concurrent.futures
 import datetime as dt
 import difflib
 import hashlib
+import html
 import importlib.metadata as importlib_metadata
 import importlib.resources as importlib_resources
 import json
@@ -971,6 +972,85 @@ def _generate_sbom(root: Path) -> dict[str, Any]:
     }
 
 
+def _stable_finding_sort_key(item: dict) -> tuple:
+    sev = str(item.get("severity") or item.get("level") or item.get("status") or "").lower()
+    rank = {"error": 3, "warn": 2, "warning": 2, "info": 1, "ok": 0}.get(sev, -1)
+
+    path = str(item.get("path") or "")
+    check = str(item.get("check") or "")
+    code = str(item.get("code") or "")
+    msg = str(item.get("message") or "")
+    fp = str(item.get("fingerprint") or "")
+
+    line = item.get("line")
+    col = item.get("column") or item.get("col")
+
+    def as_int(x) -> int:
+        if isinstance(x, int):
+            return x
+        try:
+            return int(str(x))
+        except Exception:
+            return 0
+
+    return (-rank, path, as_int(line), as_int(col), check, code, msg, fp)
+
+
+def _stable_sorted_findings(findings: list[dict]) -> list[dict]:
+    return sorted(findings, key=_stable_finding_sort_key)
+
+
+def _stable_sorted_details(details) -> list[dict]:
+    if not isinstance(details, list):
+        return []
+    only = [d for d in details if isinstance(d, dict)]
+    return sorted(only, key=_stable_finding_sort_key)
+
+
+def _html_escape(x) -> str:
+    import html as _html
+
+    return _html.escape("" if x is None else str(x), quote=True)
+
+
+def _render_findings_html(title: str, findings: list[dict]) -> str:
+    rows = []
+    for f in findings:
+        rows.append(
+            "<tr>"
+            f"<td>{_html_escape(f.get('severity') or '')}</td>"
+            f"<td>{_html_escape(f.get('check') or '')}</td>"
+            f"<td>{_html_escape(f.get('path') or '')}</td>"
+            f"<td>{_html_escape(f.get('line') or '')}</td>"
+            f"<td>{_html_escape(f.get('column') or f.get('col') or '')}</td>"
+            f"<td>{_html_escape(f.get('code') or '')}</td>"
+            f"<td>{_html_escape(f.get('message') or '')}</td>"
+            "</tr>"
+        )
+
+    return (
+        "<!doctype html>"
+        "<html><head><meta charset='utf-8'/>"
+        f"<title>{_html_escape(title)}</title>"
+        "<style>"
+        "body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:16px;}"
+        "table{border-collapse:collapse;width:100%;}"
+        "th,td{border:1px solid #ddd;padding:6px;vertical-align:top;}"
+        "th{background:#f5f5f5;text-align:left;}"
+        "code{white-space:pre-wrap;}"
+        "</style>"
+        "</head><body>"
+        f"<h1>{_html_escape(title)}</h1>"
+        f"<p>Findings: {len(findings)}</p>"
+        "<table>"
+        "<thead><tr>"
+        "<th>severity</th><th>check</th><th>path</th><th>line</th><th>col</th><th>code</th><th>message</th>"
+        "</tr></thead>"
+        "<tbody>" + "".join(rows) + "</tbody></table>"
+        "</body></html>"
+    )
+
+
 def _render(payload: dict[str, Any], fmt: str) -> str:
     if fmt == "json":
         return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
@@ -991,6 +1071,11 @@ def _render(payload: dict[str, Any], fmt: str) -> str:
                 f"- `{item['severity']}` `{item['check']}` `{item['path']}:{item['line']}:{item['column']}` - {item['message']}"
             )
         return "\n".join(lines) + "\n"
+
+    if fmt == "html":
+        stable = dict(payload)
+        stable["findings"] = _stable_sorted_findings(list(payload.get("findings") or []))
+        return _render_findings_html("sdetkit repo check", stable["findings"])
 
     lines = [
         f"repo: {payload['root']}",
@@ -2033,6 +2118,22 @@ def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
             json.dumps(_to_sarif(sarif_payload), ensure_ascii=True, sort_keys=True, indent=2) + "\n"
         )
 
+    if fmt == "md":
+        body = _render_repo_audit(payload, "text").rstrip("\n")
+        return "```\n" + body + "\n```\n"
+
+    if fmt == "html":
+        body = _render_repo_audit(payload, "text").rstrip("\n")
+        esc = html.escape(body)
+        return (
+            "<!doctype html>\n"
+            '<html><head><meta charset="utf-8" />'
+            "<title>sdetkit repo audit report</title></head>"
+            "<body><pre>" + esc + "</pre></body></html>\n"
+        )
+
+    # AUDIT_MD_HTML_RENDER
+
     lines = [
         f"Repo audit: {payload['root']}",
         (
@@ -2096,6 +2197,22 @@ def _render_repo_audit_aggregate(payload: dict[str, Any], fmt: str) -> str:
             )
             + "\n"
         )
+
+    if fmt == "md":
+        body = _render_repo_audit_aggregate(payload, "text").rstrip("\n")
+        return "```\n" + body + "\n```\n"
+
+    if fmt == "html":
+        body = _render_repo_audit_aggregate(payload, "text").rstrip("\n")
+        esc = html.escape(body)
+        return (
+            "<!doctype html>\n"
+            '<html><head><meta charset="utf-8" />'
+            "<title>sdetkit repo aggregate audit report</title></head>"
+            "<body><pre>" + esc + "</pre></body></html>\n"
+        )
+
+    # AUDIT_AGG_MD_HTML_RENDER
 
     lines = [f"Repo aggregate audit: {payload.get('root', '.')}", ""]
     for item in payload.get("projects", []):
@@ -2751,7 +2868,7 @@ def main(argv: list[str] | None = None) -> int:
 
     cp = sub.add_parser("check")
     cp.add_argument("path", nargs="?", default=".")
-    cp.add_argument("--format", choices=["text", "json", "md", "sarif"], default="text")
+    cp.add_argument("--format", choices=["text", "json", "md", "sarif", "html"], default="text")
     cp.add_argument("--out", default=None)
     cp.add_argument("--force", action="store_true")
     cp.add_argument("--allow-absolute-path", action="store_true")
@@ -2815,7 +2932,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--profile", choices=["default", "enterprise"], default=None)
     ap.add_argument("--pack", default=None)
     ap.add_argument("--org-pack", action="append", default=[])
-    ap.add_argument("--format", choices=["text", "json", "sarif"], default="text")
+    ap.add_argument("--format", choices=["text", "json", "sarif", "md", "html"], default="text")
     ap.add_argument("--json-schema", choices=["legacy", "v1"], default="legacy")
     ap.add_argument("--output", "--out", dest="output", default=None)
     ap.add_argument("--fail-on", choices=["none", "warn", "error"], default=None)
