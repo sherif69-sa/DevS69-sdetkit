@@ -146,7 +146,14 @@ def _iter_manifest_paths(repo_root: Path) -> list[Path]:
             and not d.startswith(".venv")
         )
         for filename in sorted(filenames):
-            if filename in {"pyproject.toml", "setup.cfg", "package.json", "go.mod", "Cargo.toml"}:
+            if filename in {
+                "pyproject.toml",
+                "setup.cfg",
+                "setup.py",
+                "package.json",
+                "go.mod",
+                "Cargo.toml",
+            }:
                 manifests.append(Path(dirpath) / filename)
                 continue
             if filename.startswith("requirements") and filename.endswith(".txt"):
@@ -275,7 +282,7 @@ def _autodiscover_projects(repo_root: Path) -> list[RepoProject]:
         filename = manifest.name
         language: str | None = None
         workspace_members: tuple[str, ...] = ()
-        if filename in {"pyproject.toml", "setup.cfg"} or (
+        if filename in {"pyproject.toml", "setup.cfg", "setup.py"} or (
             filename.startswith("requirements") and filename.endswith(".txt")
         ):
             language = "python"

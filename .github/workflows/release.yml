@@ -57,12 +57,7 @@ jobs:
             requirements-docs.txt
 
 
-      - name: Verify tag matches package version
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/check_release_tag_version.py "${{ steps.resolved.outputs.tag }}"
-      - name: Install + quality gates
+      - name: Install + post checks (release strength)
         shell: bash
         env:
           COV_FAIL_UNDER: "70"
@@ -70,14 +65,7 @@ jobs:
           set -euo pipefail
           python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
           python -m pip install build==1.2.2.post1 twine==6.1.0
-          bash quality.sh cov
-
-      - name: Build dist
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m build
-          python -m twine check dist/*
+          bash tools/post_checks.sh --release-tag "${{ steps.resolved.outputs.tag }}"
 
       - name: Wheel smoke test
         shell: bash
