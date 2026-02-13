@@ -1,0 +1,44 @@
+name: Dependency submission
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  dependency-graph: write
+
+jobs:
+  submit-python-deps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f03e7ca02169e157e7832c775a3e84e3691ec5ff # v4.2.2
+
+      - name: Submit dependency snapshot (attempt 1)
+        id: submit_deps_1
+        continue-on-error: true
+        uses: actions/component-detection-dependency-submission-action@374343effede691df3a5ffaf36b4e7acab919590
+        with:
+          detectorsCategories: Python
+          detectorsFilter: PipReport
+          detector-name: Automatic Dependency Submission
+
+      - name: Submit dependency snapshot (attempt 2)
+        id: submit_deps_2
+        if: steps.submit_deps_1.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/component-detection-dependency-submission-action@374343effede691df3a5ffaf36b4e7acab919590
+        with:
+          detectorsCategories: Python
+          detectorsFilter: PipReport
+          detector-name: Automatic Dependency Submission (retry)
+
+      - name: Warn when submission fails repeatedly
+        if: steps.submit_deps_1.outcome == 'failure' && steps.submit_deps_2.outcome == 'failure'
+        run: |
+          echo "::warning::Dependency snapshot submission failed twice (likely transient GitHub API issue)."
+          echo "::warning::Continuing without failing the workflow to avoid blocking CI."

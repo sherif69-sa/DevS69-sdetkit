@@ -4,11 +4,17 @@
 
 A practical, production-ready toolkit for SDET workflows — with clean CLI ergonomics, diagnostics, API automation, and repository safety checks.
 
+<div class="hero-badges" markdown>
+
+[![Release](https://img.shields.io/badge/release-v1.0.1-0ea5e9?logo=github)](https://github.com/sherif69-sa/DevS69-sdetkit/releases) [![Python](https://img.shields.io/badge/python-3.11%2B-2563eb?logo=python)](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/pyproject.toml) [![Docs](https://img.shields.io/badge/docs-material-success?logo=materialformkdocs)](https://sherif69-sa.github.io/DevS69-sdetkit/)
+
+</div>
+
 </div>
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🆕 What's new](#whats-new-in-v101) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -25,7 +31,28 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - **Designed for maintainability**
   Organized modules, explicit docs, and test coverage make extension safer and faster.
 
+- **Enterprise-friendly safety baseline**
+  Hardened defaults for policy checks, governance, and release hygiene reduce operational risk.
+
 </div>
+
+## What's new in v1.0.1
+
+<div class="grid cards release-cards" markdown>
+
+- **Stronger PR quality gate**
+  CI now runs `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every pull request.
+
+- **Security and dependency discipline**
+  Dependency lockfiles and pinned automation actions improve repeatability and supply-chain posture.
+
+- **Safer template/bootstrap behavior**
+  `repo init`/`repo apply` flow is more robust against non-UTF-8 preset template content.
+
+</div>
+
+!!! info "Need the full release history?"
+    See [CHANGELOG.md](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.md) for version-by-version details.
 
 ## Fast start
 
@@ -87,6 +114,20 @@ bash scripts/check.sh all
 
 </div>
 
+## Recommended journeys
+
+<div class="grid cards" markdown>
+
+- **For new contributors**
+  Read [Repo tour](repo-tour.md) → [Contributing](contributing.md) → [Policy & baselines](policy-and-baselines.md).
+
+- **For release managers**
+  Start with [Releasing](releasing.md) → [CI contract](ci-contract.md) → [Premium quality gate](premium-quality-gate.md).
+
+- **For automation engineers**
+  Follow [CLI](cli.md) → [API](api.md) → [GitHub Action](github-action.md) → [n8n](n8n.md).
+
+</div>
 
 ## License
 

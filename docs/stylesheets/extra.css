@@ -74,3 +74,29 @@
 .md-header {
   backdrop-filter: saturate(140%) blur(6px);
 }
+
+
+.hero-badges {
+  margin-top: 0.85rem;
+}
+
+.hero-badges img {
+  vertical-align: middle;
+}
+
+.release-cards li {
+  border-left: 4px solid color-mix(in srgb, var(--md-accent-fg-color) 65%, transparent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--md-accent-fg-color) 10%, var(--md-default-bg-color) 90%),
+    color-mix(in srgb, var(--md-code-bg-color) 55%, var(--md-default-bg-color) 45%));
+}
+
+@media (min-width: 900px) {
+  .hero-panel {
+    padding: 1.6rem 1.8rem;
+  }
+
+  .quick-jump {
+    padding: 0.8rem 1rem;
+  }
+}
