@@ -1,13 +1,16 @@
 <div align="center">
-  <img src="docs/assets/devs69-hero.svg" alt="DevS69 Hero" width="100%" />
+  <a href="https://sherif69-sa.github.io/DevS69-sdetkit/">
+    <img src="docs/assets/devs69-hero.svg" alt="DevS69 Hero" width="100%" />
+  </a>
 
-  <h1>DevS69 (sdetkit)</h1>
-  <p>
+  <h1 style="margin: 14px 0 6px; text-align: center;">DevS69 (sdetkit)</h1>
+
+  <p style="max-width: 920px; margin: 0 auto 10px;">
     <strong>Production-ready SDET toolkit</strong> with enterprise-grade quality gates,
     security-first workflows, and testable-by-design engineering standards.
   </p>
 
-  <p>
+  <p style="margin: 10px 0 16px;">
     <a href="https://sherif69-sa.github.io/DevS69-sdetkit/"><strong>🌐 Live Experience Portal</strong></a>
     ·
     <a href="docs/index.md"><strong>📚 Documentation</strong></a>
@@ -15,7 +18,47 @@
     <a href="CONTRIBUTING.md"><strong>🤝 Contribute</strong></a>
   </p>
 
-  <p>
+  <table>
+    <tr>
+      <td align="center">
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/">
+          <img src="docs/assets/devs69-card-portal.svg" width="360" alt="Live Portal" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="docs/index.md">
+          <img src="docs/assets/devs69-card-docs.svg" width="360" alt="Documentation" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="CONTRIBUTING.md">
+          <img src="docs/assets/devs69-card-contribute.svg" width="360" alt="Contribute" />
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <table>
+    <tr>
+      <td align="center">
+        <a href="docs/repo-tour.md">
+          <img src="docs/assets/devs69-card-monorepo.svg" width="360" alt="Monorepo Projects" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="docs/repo-audit.md">
+          <img src="docs/assets/devs69-card-cache.svg" width="360" alt="Incremental + Cache" />
+        </a>
+      </td>
+      <td align="center">
+        <a href="docs/repo-audit.md">
+          <img src="docs/assets/devs69-card-exporters.svg" width="360" alt="Exporters" />
+        </a>
+      </td>
+    </tr>
+  </table>
+
+  <p style="margin: 14px 0 8px;">
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main" alt="Quality"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml/badge.svg?branch=main" alt="Mutation Tests"></a>
@@ -23,7 +66,7 @@
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main" alt="Pages"></a>
   </p>
 
-  <p>
+  <p style="margin: 0 0 10px;">
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/releases"><img src="https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?sort=semver" alt="Latest Release"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-Noncommercial%20%2B%20Commercial%20Required-blue" alt="License"></a>
     <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
