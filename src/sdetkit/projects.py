@@ -204,6 +204,78 @@ def _rust_workspace_members(manifest_path: Path, repo_root: Path) -> tuple[str, 
     return tuple(sorted(out))
 
 
+def _tooling_path_bucket(manifest_path: Path) -> str | None:
+    parts = [part for part in manifest_path.parts if part not in {manifest_path.anchor, ""}]
+    for part in parts:
+        if part in {".github", "scripts", "tooling"}:
+            return part
+    return None
+
+
+def _has_python_package_structure(project_root: Path) -> bool:
+    if any(project_root.glob("*.py")):
+        return True
+    if any(project_root.glob("*/__init__.py")):
+        return True
+    if any((project_root / "src").glob("*/__init__.py")):
+        return True
+    return False
+
+
+def _is_tooling_only_project(
+    manifest_path: Path,
+    language: str,
+    *,
+    is_workspace_member: bool = False,
+) -> bool:
+    tooling_bucket = _tooling_path_bucket(manifest_path)
+    if tooling_bucket is None:
+        return False
+
+    if language == "node":
+        try:
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return True
+        if not isinstance(payload, dict):
+            return True
+        has_name = isinstance(payload.get("name"), str) and bool(payload.get("name").strip())
+        has_workspaces = "workspaces" in payload
+        return not (has_name or has_workspaces or is_workspace_member)
+
+    if language == "python":
+        has_name = False
+        if manifest_path.name == "pyproject.toml":
+            try:
+                data = cast(Any, _tomllib).loads(manifest_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return True
+            if isinstance(data, dict):
+                project = data.get("project")
+                if isinstance(project, dict) and isinstance(project.get("name"), str):
+                    has_name = bool(project.get("name").strip())
+                poetry = (
+                    data.get("tool", {}).get("poetry")
+                    if isinstance(data.get("tool"), dict)
+                    else None
+                )
+                if isinstance(poetry, dict) and isinstance(poetry.get("name"), str):
+                    has_name = has_name or bool(poetry.get("name").strip())
+        elif manifest_path.name == "setup.cfg":
+            try:
+                text = manifest_path.read_text(encoding="utf-8")
+            except OSError:
+                return True
+            has_name = "\nname" in f"\n{text.lower()}"
+
+        return not (has_name and _has_python_package_structure(manifest_path.parent))
+
+    if language in {"go", "rust"}:
+        return tooling_bucket in {".github", "scripts"}
+
+    return False
+
+
 def _autodiscover_projects(repo_root: Path) -> list[RepoProject]:
     by_key: dict[tuple[str, str], set[str]] = {}
 
@@ -228,11 +300,23 @@ def _autodiscover_projects(repo_root: Path) -> list[RepoProject]:
             continue
 
         rel_manifest = _root_rel(repo_root, manifest)
+        if _is_tooling_only_project(manifest, language):
+            continue
+
         by_key.setdefault((language, parent_rel), set()).add(rel_manifest)
         for member_root in workspace_members:
-            member_manifest = (
-                f"{member_root}/package.json" if language == "node" else f"{member_root}/Cargo.toml"
+            member_manifest_path = (
+                repo_root / member_root / "package.json"
+                if language == "node"
+                else repo_root / member_root / "Cargo.toml"
             )
+            if _is_tooling_only_project(
+                member_manifest_path,
+                language,
+                is_workspace_member=True,
+            ):
+                continue
+            member_manifest = _root_rel(repo_root, member_manifest_path)
             by_key.setdefault((language, member_root), set()).add(member_manifest)
 
     discovered: list[_DiscoveredProject] = []
