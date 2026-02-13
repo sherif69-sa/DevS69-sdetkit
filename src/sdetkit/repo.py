@@ -396,6 +396,8 @@ def _run_cache_key(
     repo_fingerprint: str,
     changed_only: bool,
     since_ref: str,
+    include_untracked: bool,
+    include_staged: bool,
 ) -> str:
     material = {
         "profile": profile,
@@ -404,6 +406,8 @@ def _run_cache_key(
         "ruleset_version": REPO_AUDIT_RULESET_VERSION,
         "changed_only": changed_only,
         "since_ref": since_ref,
+        "include_untracked": include_untracked,
+        "include_staged": include_staged,
     }
     payload = json.dumps(material, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
@@ -2102,6 +2106,8 @@ def run_repo_audit(
         repo_fingerprint=repo_fingerprint,
         changed_only=changed_only,
         since_ref=since_ref,
+        include_untracked=include_untracked,
+        include_staged=include_staged,
     )
     if cache_enabled:
         cached_run = _load_run_cache(cache_root, run_cache_key)

@@ -112,3 +112,34 @@ def test_incremental_run_cache_hit_invalidation_and_correctness(tmp_path: Path) 
         )
     )
     assert _normalize(full, repo) == _normalize(third, repo)
+
+
+def test_incremental_run_cache_key_includes_changed_only_flags(tmp_path: Path) -> None:
+    tool_root = Path(__file__).resolve().parents[1]
+    repo = _mk_repo(tmp_path)
+
+    base_args = [
+        "audit",
+        ".",
+        "--profile",
+        "enterprise",
+        "--format",
+        "json",
+        "--changed-only",
+        "--cache-stats",
+        "--fail-on",
+        "none",
+    ]
+
+    without_untracked = _json(_run(tool_root, repo, *base_args, "--no-include-untracked"))
+    assert without_untracked["summary"]["cache"]["hit"] is False
+
+    without_untracked_again = _json(_run(tool_root, repo, *base_args, "--no-include-untracked"))
+    assert without_untracked_again["summary"]["cache"]["hit"] is True
+
+    with_untracked = _json(_run(tool_root, repo, *base_args, "--include-untracked"))
+    assert with_untracked["summary"]["cache"]["hit"] is False
+
+    cache_root = repo / ".sdetkit" / "cache" / "runs"
+    run_cache_files = sorted(cache_root.glob("*.json"))
+    assert len(run_cache_files) == 2
