@@ -1108,7 +1108,7 @@ def _load_repo_preset_templates(preset: str) -> dict[str, str]:
         if entry.name == "__init__.py":
             continue
         rel = entry.relative_to(base).as_posix()
-        templates[rel] = entry.read_text(encoding="utf-8")
+        templates[rel] = entry.read_bytes().decode("utf-8", errors="replace")
     return templates
 
 
