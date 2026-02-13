@@ -8,14 +8,14 @@ version = "1.0.1"
 requires-python = ">=3.11"
 readme = "README.md"
 description = "Developer productivity and QA automation toolkit: CLI utilities, quality gates, and testable modules."
-license = { file = "LICENSE" }
+license = "LicenseRef-DevS69"
+license-files = ["LICENSE", "COMMERCIAL_LICENSE.md"]
 keywords = ["sdet", "testing", "qa", "automation", "cli", "devtools", "quality-gates"]
 authors = [{ name = "DevS69 contributors" }]
 maintainers = [{ name = "DevS69 maintainers" }]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
-  "License :: Other/Proprietary License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
