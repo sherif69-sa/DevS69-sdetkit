@@ -337,6 +337,140 @@ def _sparkline(values: list[int]) -> str:
     )
 
 
+BUSINESS_SCENARIOS: dict[str, dict[str, Any]] = {
+    "engineering": {
+        "keywords": ("test", "lint", "repo", "import", "security"),
+        "dashboard": "quality_overview",
+        "helpers": (
+            "Enable incremental scans to reduce CI time while preserving coverage.",
+            "Prioritize recurring rule IDs in sprint hygiene goals.",
+        ),
+    },
+    "api-operations": {
+        "keywords": ("api", "http", "request", "response", "network", "timeout"),
+        "dashboard": "reliability_scorecard",
+        "helpers": (
+            "Track error/warn split per endpoint to catch reliability regressions.",
+            "Use diff-based fail gates for high-severity API findings.",
+        ),
+    },
+    "compliance": {
+        "keywords": ("secret", "auth", "token", "policy", "license", "privacy"),
+        "dashboard": "compliance_posture",
+        "helpers": (
+            "Review suppressed findings weekly and enforce expiration windows.",
+            "Map recurring policy failures to control IDs in governance reports.",
+        ),
+    },
+}
+
+
+def _tokenize_workflow_text(text: str) -> list[str]:
+    lowered = text.lower()
+    out: list[str] = []
+    token = []
+    for ch in lowered:
+        if ch.isalnum() or ch in {"-", "_"}:
+            token.append(ch)
+        elif token:
+            out.append("".join(token))
+            token = []
+    if token:
+        out.append("".join(token))
+    return out
+
+
+def _detect_business_scenario(runs: list[dict[str, Any]]) -> str:
+    scenario_scores = {name: 0 for name in BUSINESS_SCENARIOS}
+    corpus: list[str] = []
+    for run in runs:
+        for finding in run.get("findings", []):
+            if not isinstance(finding, dict):
+                continue
+            corpus.extend(
+                [
+                    str(finding.get("rule_id", "")),
+                    str(finding.get("message", "")),
+                    str(finding.get("path", "")),
+                    " ".join(str(x) for x in (finding.get("tags") or [])),
+                ]
+            )
+
+    tokens = _tokenize_workflow_text(" ".join(corpus))
+    for scenario, config in BUSINESS_SCENARIOS.items():
+        keywords = set(str(x) for x in config.get("keywords", ()))
+        scenario_scores[scenario] = sum(1 for token in tokens if token in keywords)
+
+    best = max(scenario_scores.items(), key=lambda x: (x[1], x[0]))
+    return str(best[0]) if best[1] > 0 else "engineering"
+
+
+def _top_recurring(findings: list[dict[str, Any]], key: str, limit: int = 5) -> list[tuple[str, int]]:
+    counts: dict[str, int] = {}
+    for finding in findings:
+        value = str(finding.get(key, "unknown"))
+        counts[value] = counts.get(value, 0) + 1
+    return sorted(counts.items(), key=lambda x: (-x[1], x[0]))[:limit]
+
+
+def suggest_optimizations(
+    history_dir: Path, requested_scenario: str, limit: int = 5
+) -> dict[str, Any]:
+    runs = _history_runs(history_dir)
+    expanded_runs: list[dict[str, Any]] = []
+    for item in runs:
+        file_name = item.get("file")
+        if not isinstance(file_name, str):
+            continue
+        run_path = history_dir / file_name
+        if run_path.exists():
+            expanded_runs.append(load_run_record(run_path))
+
+    detected = _detect_business_scenario(expanded_runs)
+    scenario = detected if requested_scenario == "auto" else requested_scenario
+    config = BUSINESS_SCENARIOS.get(scenario, BUSINESS_SCENARIOS["engineering"])
+
+    all_findings: list[dict[str, Any]] = []
+    for run in expanded_runs:
+        all_findings.extend(x for x in run.get("findings", []) if isinstance(x, dict))
+
+    top_rules = _top_recurring(all_findings, "rule_id", limit=limit)
+    top_paths = _top_recurring(all_findings, "path", limit=limit)
+
+    return {
+        "detected_scenario": detected,
+        "active_scenario": scenario,
+        "dashboard_template": config["dashboard"],
+        "recommendations": list(config["helpers"]),
+        "top_rules": [{"rule_id": rule, "count": count} for rule, count in top_rules],
+        "top_paths": [{"path": path, "count": count} for path, count in top_paths],
+        "runs_analyzed": len(expanded_runs),
+    }
+
+
+def _render_recommend_text(payload: dict[str, Any]) -> str:
+    lines = [
+        "# sdetkit workflow recommendations",
+        "",
+        f"- runs analyzed: {payload['runs_analyzed']}",
+        f"- detected scenario: {payload['detected_scenario']}",
+        f"- active scenario: {payload['active_scenario']}",
+        f"- dashboard template: {payload['dashboard_template']}",
+        "",
+        "## Recommended helpers",
+    ]
+    for item in payload.get("recommendations", []):
+        lines.append(f"- {item}")
+    lines.extend(["", "## Top recurring rules"])
+    for item in payload.get("top_rules", []):
+        lines.append(f"- {item['rule_id']}: {item['count']}")
+    lines.extend(["", "## Top recurring paths"])
+    for item in payload.get("top_paths", []):
+        lines.append(f"- {item['path']}: {item['count']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None) -> None:
     runs = _history_runs(history_dir)
     if since is not None:
@@ -433,6 +567,12 @@ def main(argv: list[str] | None = None) -> int:
     bp.add_argument("--format", choices=["html", "md"], default="html")
     bp.add_argument("--since", type=int, default=None)
 
+    rp = sub.add_parser("recommend")
+    rp.add_argument("--history-dir", default=".sdetkit/audit-history")
+    rp.add_argument("--scenario", choices=["auto", *sorted(BUSINESS_SCENARIOS)], default="auto")
+    rp.add_argument("--format", choices=["text", "json"], default="text")
+    rp.add_argument("--limit", type=int, default=5)
+
     ns = parser.parse_args(argv)
 
     try:
@@ -475,6 +615,17 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 sys.stdout.write(_render_diff_text(payload))
             return 1 if _new_count_at_or_above(payload, ns.fail_on) > 0 else 0
+
+        if ns.report_cmd == "recommend":
+            history_dir = safe_path(Path.cwd(), ns.history_dir, allow_absolute=True)
+            payload = suggest_optimizations(history_dir, ns.scenario, limit=max(ns.limit, 1))
+            if ns.format == "json":
+                sys.stdout.write(
+                    json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+                )
+            else:
+                sys.stdout.write(_render_recommend_text(payload))
+            return 0
 
         history_dir = safe_path(Path.cwd(), ns.history_dir, allow_absolute=True)
         output = safe_path(Path.cwd(), ns.output, allow_absolute=True)

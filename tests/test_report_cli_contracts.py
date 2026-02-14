@@ -321,3 +321,70 @@ def test_report_build_md_and_html_are_stable(tmp_path: Path, monkeypatch) -> Non
     assert second_html.exit_code == 0
     html2 = out_html.read_text(encoding="utf-8")
     assert html1 == html2
+
+
+def test_report_recommend_supports_auto_detection_and_override(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+    history.mkdir(parents=True, exist_ok=True)
+
+    run1 = tmp_path / "run1.json"
+    _write_run(
+        run1,
+        captured_at="2020-01-01T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "a",
+                "rule_id": "api-timeout",
+                "severity": "warn",
+                "message": "API request timeout exceeds target",
+                "path": "services/http_client.py",
+                "tags": ["network"],
+            },
+        ],
+    )
+    assert (
+        runner.invoke(["report", "ingest", str(run1), "--history-dir", str(history)]).exit_code == 0
+    )
+
+    run2 = tmp_path / "run2.json"
+    _write_run(
+        run2,
+        captured_at="2020-01-02T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "b",
+                "rule_id": "api-retry",
+                "severity": "error",
+                "message": "HTTP response handling is missing retry policy",
+                "path": "services/request_pipeline.py",
+                "tags": ["api", "response"],
+            },
+        ],
+    )
+    assert (
+        runner.invoke(["report", "ingest", str(run2), "--history-dir", str(history)]).exit_code == 0
+    )
+
+    text = runner.invoke(["report", "recommend", "--history-dir", str(history)])
+    assert text.exit_code == 0
+    assert "detected scenario: api-operations" in text.stdout
+    assert "dashboard template: reliability_scorecard" in text.stdout
+
+    js = runner.invoke(
+        [
+            "report",
+            "recommend",
+            "--history-dir",
+            str(history),
+            "--scenario",
+            "compliance",
+            "--format",
+            "json",
+        ]
+    )
+    assert js.exit_code == 0
+    payload = json.loads(js.stdout)
+    assert payload["detected_scenario"] == "api-operations"
+    assert payload["active_scenario"] == "compliance"
+    assert payload["dashboard_template"] == "compliance_posture"
