@@ -9,12 +9,13 @@ import hashlib
 import importlib.metadata as importlib_metadata
 import importlib.resources as importlib_resources
 import json
+import logging
 import math
 import os
 import re
 import subprocess
 import sys
-import threading
+import tempfile
 import tomllib as _tomllib
 import urllib.error
 import urllib.parse
@@ -306,63 +307,267 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-class _FileInventoryCache:
-    def __init__(self, cache_dir: Path) -> None:
-        self._path = cache_dir / "inventory.json"
-        self._lock = threading.Lock()
-        self._entries: dict[str, dict[str, Any]] = {}
-        self._dirty = False
-        self._loaded = False
+@dataclass(frozen=True)
+class FileInfo:
+    path: str
+    mtime_ns: int
+    size: int
 
-    def _load(self) -> None:
-        if self._loaded:
-            return
-        self._loaded = True
-        if not self._path.exists():
-            return
-        try:
-            payload = json.loads(self._path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return
-        entries = payload.get("entries") if isinstance(payload, dict) else None
-        if isinstance(entries, dict):
-            self._entries = {str(k): dict(v) for k, v in entries.items() if isinstance(v, dict)}
+    @property
+    def rel_path(self) -> str:
+        return self.path
 
-    def digest_for(self, root: Path, rel_path: str) -> str | None:
-        with self._lock:
-            self._load()
-        target = root / rel_path
-        key = rel_path.replace("\\", "/")
-        if not target.exists():
-            return None
-        try:
-            stat = target.stat()
-            mtime = int(stat.st_mtime_ns)
-            size = int(stat.st_size)
-        except OSError:
-            return None
-        cached = self._entries.get(key)
-        if cached and cached.get("mtime_ns") == mtime and cached.get("size") == size:
-            digest = cached.get("digest")
-            if isinstance(digest, str) and digest:
-                return digest
-        try:
-            digest = _sha256_bytes(target.read_bytes())
-        except OSError:
-            return None
-        self._entries[key] = {"mtime_ns": mtime, "size": size, "digest": digest}
-        self._dirty = True
-        return digest
+    def to_dict(self) -> dict[str, int | str]:
+        return {"path": self.path, "mtime_ns": self.mtime_ns, "size": self.size}
 
-    def save(self) -> None:
-        with self._lock:
-            if not self._dirty:
-                return
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"entries": {k: self._entries[k] for k in sorted(self._entries)}}
-        atomic_write_text(
-            self._path, json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+    @classmethod
+    def from_dict(cls, d: dict[str, object]) -> FileInfo:
+        path = d.get("path")
+        mtime_ns = d.get("mtime_ns")
+        size = d.get("size")
+        if not isinstance(path, str):
+            raise TypeError("path must be str")
+        if not isinstance(mtime_ns, int):
+            raise TypeError("mtime_ns must be int")
+        if not isinstance(size, int):
+            raise TypeError("size must be int")
+        return cls(path=path, mtime_ns=mtime_ns, size=size)
+
+
+def _inventory_for_root(repo_root: Path) -> list[FileInfo]:
+    out: list[FileInfo] = []
+    for fp in _iter_files(repo_root):
+        st = fp.stat()
+        out.append(
+            FileInfo(
+                path=fp.relative_to(repo_root).as_posix(),
+                mtime_ns=st.st_mtime_ns,
+                size=st.st_size,
+            )
         )
+    return out
+
+
+class _FileInventoryCache:
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        self._stats: dict[str, int] = {"hits": 0, "misses": 0, "writes": 0, "invalidations": 0}
+
+    def stats(self) -> dict[str, int]:
+        return dict(self._stats)
+
+    def _path_for_root(self, repo_root: Path) -> Path:
+        h = hashlib.sha256(str(repo_root.resolve()).encode("utf-8")).hexdigest()
+        return self.root / h[:2] / f"{h}.json"
+
+    def _load_cache(self, cache_path: Path) -> tuple[dict[str, int], list[FileInfo]] | None:
+        raw = json.loads(cache_path.read_text(encoding="utf-8"))
+        if isinstance(raw, list):
+            return None
+        if not isinstance(raw, dict):
+            return None
+        if raw.get("schema_version") != 1:
+            return None
+        dirs_raw = raw.get("dirs")
+        files_raw = raw.get("files")
+        if not isinstance(dirs_raw, list) or not isinstance(files_raw, list):
+            return None
+
+        dirs: dict[str, int] = {}
+        for d in dirs_raw:
+            if not isinstance(d, dict):
+                return None
+            p = d.get("path")
+            m = d.get("mtime_ns")
+            if not isinstance(p, str) or not isinstance(m, int):
+                return None
+            dirs[p] = m
+
+        files: list[FileInfo] = []
+        for f in files_raw:
+            if not isinstance(f, dict):
+                return None
+            files.append(FileInfo.from_dict(f))
+
+        return dirs, files
+
+    def _validate_dirs(self, repo_root: Path, dirs: dict[str, int]) -> bool:
+        for rel, expected in dirs.items():
+            p = repo_root if rel == "." else (repo_root / rel)
+            try:
+                st = p.stat()
+            except FileNotFoundError:
+                return False
+            if st.st_mtime_ns != expected:
+                return False
+        return True
+
+    def _validate_files(self, repo_root: Path, files: list[FileInfo]) -> bool:
+        for f in files:
+            p = repo_root / f.path
+            try:
+                st = p.stat()
+            except FileNotFoundError:
+                return False
+            if st.st_mtime_ns != f.mtime_ns:
+                return False
+            if st.st_size != f.size:
+                return False
+        return True
+
+    def _dirs_for_inventory(self, inventory: list[FileInfo]) -> list[str]:
+        seen: set[str] = {"."}
+        for f in inventory:
+            parents = Path(f.path).parents
+            for parent in parents:
+                s = parent.as_posix()
+                if s == ".":
+                    break
+                seen.add(s)
+        return sorted(seen)
+
+    def _atomic_write_json(self, path: Path, payload: object) -> None:
+        b = (
+            json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\n"
+        ).encode("utf-8")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = None
+        f = None
+        try:
+            f = tempfile.NamedTemporaryFile(
+                dir=path.parent, prefix=path.name + ".", suffix=".tmp", delete=False
+            )
+            tmp = f.name
+            f.write(b)
+            f.flush()
+            os.fsync(f.fileno())
+            f.close()
+            f = None
+            os.replace(tmp, path)
+            try:
+                dfd = os.open(str(path.parent), getattr(os, "O_DIRECTORY", 0) | os.O_RDONLY)
+            except Exception:
+                return
+            try:
+                os.fsync(dfd)
+            finally:
+                os.close(dfd)
+        finally:
+            if f is not None:
+                try:
+                    f.close()
+                    # Ignore errors while closing temporary file in best-effort cleanup.
+                except Exception as exc:
+                    logging.debug(
+                        "Failed to close temporary file %r in _atomic_write_json: %s",
+                        getattr(f, "name", None),
+                        exc,
+                        # Ignore errors while removing temporary file in best-effort cleanup.
+                        exc_info=True,
+                    )
+            if tmp is not None and os.path.exists(tmp):
+                try:
+                    os.unlink(tmp)
+                except Exception as exc:
+                    logging.debug(
+                        "Failed to remove temporary file %r in _atomic_write_json: %s",
+                        tmp,
+                        exc,
+                        exc_info=True,
+                    )
+
+    def save(self, repo_root: Path | None = None, inventory: list[FileInfo] | None = None) -> None:
+        if repo_root is None or inventory is None:
+            return
+
+        cache_path = self._path_for_root(repo_root)
+        inv = sorted(inventory, key=lambda f: f.path)
+
+        dirs_list = self._dirs_for_inventory(inv)
+        dirs_payload: list[dict[str, int | str]] = []
+        for d in dirs_list:
+            rp = repo_root if d == "." else (repo_root / d)
+            dirs_payload.append({"path": d, "mtime_ns": rp.stat().st_mtime_ns})
+
+        payload = {
+            "schema_version": 1,
+            "dirs": dirs_payload,
+            "files": [f.to_dict() for f in inv],
+        }
+
+        try:
+            self._atomic_write_json(cache_path, payload)
+            self._stats["writes"] = int(self._stats.get("writes", 0)) + 1
+        except Exception:
+            return
+
+    def get_inventory(self, repo_root: Path) -> list[FileInfo]:
+        cache_path = self._path_for_root(repo_root)
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+        loaded: tuple[dict[str, int], list[FileInfo]] | None = None
+        try:
+            loaded = self._load_cache(cache_path)
+        except FileNotFoundError:
+            self._stats["misses"] = int(self._stats.get("misses", 0)) + 1
+        except Exception:
+            self._stats["misses"] = int(self._stats.get("misses", 0)) + 1
+            loaded = None
+
+        if loaded is not None:
+            dirs, files = loaded
+            ok = False
+            try:
+                ok = self._validate_dirs(repo_root, dirs) and self._validate_files(repo_root, files)
+            except Exception:
+                ok = False
+
+            if ok:
+                self._stats["hits"] = int(self._stats.get("hits", 0)) + 1
+                return files
+
+            self._stats["invalidations"] = int(self._stats.get("invalidations", 0)) + 1
+            self._stats["misses"] = int(self._stats.get("misses", 0)) + 1
+
+        inventory = _inventory_for_root(repo_root)
+        inventory = sorted(inventory, key=lambda f: f.path)
+        self.save(repo_root, inventory)
+        return inventory
+
+    def digest_for(self, repo_root: Path, rel: str | Path | None = None) -> str:
+        if rel is None:
+            files = self.get_inventory(repo_root)
+            items = [f.to_dict() for f in sorted(files, key=lambda f: f.path)]
+            b = json.dumps(items, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode(
+                "utf-8"
+            )
+            return hashlib.sha256(b).hexdigest()
+
+        rel_s = str(rel).replace("\\", "/")
+        try:
+            files = self.get_inventory(repo_root)
+        except Exception:
+            files = []
+
+        mtime_ns = None
+        size = None
+        for f in files:
+            fp = getattr(f, "path", None) or getattr(f, "rel_path", None)
+            if fp == rel_s:
+                mtime_ns = int(getattr(f, "mtime_ns", 0))
+                size = int(getattr(f, "size", 0))
+                break
+
+        payload: dict[str, object]
+        if mtime_ns is None:
+            payload = {"path": rel_s, "missing": True}
+        else:
+            payload = {"path": rel_s, "mtime_ns": mtime_ns, "size": size}
+
+        b = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
+        return hashlib.sha256(b).hexdigest()
 
 
 class RepoRuleExecutionContext:
