@@ -1074,7 +1074,63 @@ def _report_payload(
     }
 
 
+def _audit_finding_sort_key(item: dict[str, Any]) -> tuple[object, ...]:
+    rule = item.get("rule_id") or item.get("rule") or ""
+    path = item.get("path") or ""
+    line = item.get("line")
+    col = item.get("col") or item.get("column")
+    sev = item.get("severity") or ""
+    msg = item.get("message") or item.get("title") or ""
+    return (
+        str(rule),
+        str(path),
+        int(line) if isinstance(line, int) else 0,
+        int(col) if isinstance(col, int) else 0,
+        str(sev),
+        str(msg),
+    )
+
+
+def _audit_check_sort_key(item: dict[str, Any]) -> tuple[object, ...]:
+    pack = item.get("pack") or ""
+    key = item.get("key") or item.get("id") or ""
+    title = item.get("title") or ""
+    status = item.get("status") or ""
+    return (str(pack), str(key), str(status), str(title))
+
+
+def _sorted_dict_items(items: object, key_fn) -> list[dict[str, Any]]:
+    if not isinstance(items, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for x in items:
+        if isinstance(x, dict):
+            out.append(x)
+    out.sort(key=key_fn)
+    return out
+
+
+def _audit_sorted_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    out = dict(payload)
+
+    if "findings" in out:
+        out["findings"] = _sorted_dict_items(out.get("findings"), _audit_finding_sort_key)
+
+    if "checks" in out:
+        out["checks"] = _sorted_dict_items(out.get("checks"), _audit_check_sort_key)
+
+    projects = out.get("projects")
+    if isinstance(projects, list):
+        proj_dicts: list[dict[str, Any]] = [x for x in projects if isinstance(x, dict)]
+        proj_dicts.sort(key=lambda d: (str(d.get("name") or ""), str(d.get("root") or "")))
+        out["projects"] = proj_dicts
+
+    return out
+
+
 def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
+    payload = _audit_sorted_payload(payload)
+
     def _sarif_uri(path: str) -> str:
         normalized = path.replace("\\", "/")
         while normalized.startswith("./"):
@@ -2257,6 +2313,7 @@ def list_repo_rules(
 
 
 def _render_repo_audit(payload: dict[str, Any], fmt: str) -> str:
+    payload = _audit_sorted_payload(payload)
     if fmt == "json":
         return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
     if fmt == "sarif":
