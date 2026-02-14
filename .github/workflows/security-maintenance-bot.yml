@@ -6,9 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: "30 3 * * *"
+    # Weekly run every Monday at 03:30 UTC.
+    - cron: "30 3 * * 1"
 
 permissions:
+  actions: read
   contents: read
   issues: write
   security-events: write
@@ -49,18 +51,38 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - name: Create or update weekly maintenance issue
+      - name: Create or update weekly maintenance issues
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7
         with:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const title = `🔐 Weekly security + maintenance checklist`;
+            const weekOf = new Date().toISOString().slice(0, 10);
+
             const maintenanceLabel = 'maintenance';
             const enhancementLabel = 'enhancement';
+            const weakSpotLabel = 'maintenance:weak-spot';
             const priorityLabel = 'priority:medium';
 
-            const body = [
+            const labels = [
+              { name: maintenanceLabel, color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: enhancementLabel, color: 'a2eeef', description: 'Feature work and product improvements' },
+              { name: weakSpotLabel, color: '5319e7', description: 'Auto-detected maintenance weak spots and follow-up suggestions' },
+              { name: 'priority:high', color: 'd93f0b', description: 'High-priority work item' },
+              { name: priorityLabel, color: 'fbca04', description: 'Medium-priority work item' },
+              { name: 'priority:low', color: '0e8a16', description: 'Low-priority work item' },
+            ];
+
+            for (const lbl of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: lbl.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...lbl });
+              }
+            }
+
+            const mainTitle = `🔐 Weekly security + maintenance checklist (${weekOf})`;
+            const mainBody = [
               'This issue is auto-generated to keep the repository secure and continuously updated.',
               '',
               '## Security auto-update checklist',
@@ -80,22 +102,6 @@ jobs:
               `- Actions: https://github.com/${owner}/${repo}/actions`,
             ].join('\n');
 
-            const labels = [
-              { name: maintenanceLabel, color: '0E8A16', description: 'Automated maintenance tracking' },
-              { name: enhancementLabel, color: 'a2eeef', description: 'Feature work and product improvements' },
-              { name: 'priority:high', color: 'd93f0b', description: 'High-priority work item' },
-              { name: priorityLabel, color: 'fbca04', description: 'Medium-priority work item' },
-              { name: 'priority:low', color: '0e8a16', description: 'Low-priority work item' },
-            ];
-
-            for (const lbl of labels) {
-              try {
-                await github.rest.issues.getLabel({ owner, repo, name: lbl.name });
-              } catch {
-                await github.rest.issues.createLabel({ owner, repo, ...lbl });
-              }
-            }
-
             const maintenanceIssues = await github.rest.issues.listForRepo({
               owner,
               repo,
@@ -104,11 +110,18 @@ jobs:
               per_page: 100,
             });
 
-            const existingMaintenance = maintenanceIssues.data.find(i => i.title === title);
-            if (existingMaintenance) {
-              await github.rest.issues.update({ owner, repo, issue_number: existingMaintenance.number, body });
+            const previousMaintenance = maintenanceIssues.data.filter((i) => i.title.startsWith('🔐 Weekly security + maintenance checklist'));
+            for (const oldIssue of previousMaintenance) {
+              if (oldIssue.title !== mainTitle) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existingMain = previousMaintenance.find((i) => i.title === mainTitle);
+            if (existingMain) {
+              await github.rest.issues.update({ owner, repo, issue_number: existingMain.number, body: mainBody });
             } else {
-              await github.rest.issues.create({ owner, repo, title, body, labels: [maintenanceLabel] });
+              await github.rest.issues.create({ owner, repo, title: mainTitle, body: mainBody, labels: [maintenanceLabel] });
             }
 
             const enhancementTitle = '🧩 Monthly enhancement intake from user feedback';
@@ -119,6 +132,11 @@ jobs:
               '- [ ] Capture one concrete user pain point from support, issues, or docs feedback.',
               '- [ ] Define acceptance criteria and expected impact.',
               '- [ ] Add/update roadmap context in `docs/roadmap.md`.',
+              '',
+              '## Candidate details (fill in)',
+              '- **User pain point:**',
+              '- **Acceptance criteria:**',
+              '- **Expected impact:**',
               '',
               '## Suggested metadata',
               `- Labels: \`${enhancementLabel}\`, \`${priorityLabel}\``,
@@ -132,8 +150,7 @@ jobs:
               labels: enhancementLabel,
               per_page: 100,
             });
-
-            const existingEnhancement = enhancementIssues.data.find(i => i.title === enhancementTitle);
+            const existingEnhancement = enhancementIssues.data.find((i) => i.title === enhancementTitle);
             if (!existingEnhancement) {
               await github.rest.issues.create({
                 owner,
@@ -141,5 +158,125 @@ jobs:
                 title: enhancementTitle,
                 body: enhancementBody,
                 labels: [enhancementLabel, priorityLabel],
+              });
+            }
+
+            const trackedWorkflows = [
+              'security.yml',
+              'osv-scanner.yml',
+              'security-maintenance-bot.yml',
+              'ci.yml',
+              'quality.yml',
+            ];
+            const now = Date.now();
+            const staleMs = 14 * 24 * 60 * 60 * 1000;
+            const weakSpots = [];
+
+            for (const workflowFile of trackedWorkflows) {
+              try {
+                const runs = await github.rest.actions.listWorkflowRuns({
+                  owner,
+                  repo,
+                  workflow_id: workflowFile,
+                  per_page: 5,
+                });
+                const latest = runs.data.workflow_runs?.[0];
+                if (!latest) {
+                  weakSpots.push({
+                    area: `Workflow: ${workflowFile}`,
+                    observation: 'No workflow runs found.',
+                    suggestion: `Trigger \`${workflowFile}\` manually and verify the workflow is enabled.`,
+                  });
+                  continue;
+                }
+
+                const updatedAt = new Date(latest.updated_at).getTime();
+                if (Number.isFinite(updatedAt) && now - updatedAt > staleMs) {
+                  weakSpots.push({
+                    area: `Workflow freshness: ${workflowFile}`,
+                    observation: `Latest run is stale (${latest.updated_at}).`,
+                    suggestion: 'Review schedule/event triggers to ensure regular execution.',
+                  });
+                }
+
+                const conclusion = latest.conclusion || latest.status || 'unknown';
+                if (!['success', 'neutral', 'skipped'].includes(conclusion)) {
+                  weakSpots.push({
+                    area: `Workflow health: ${workflowFile}`,
+                    observation: `Latest run ended with \`${conclusion}\` (run ${latest.html_url}).`,
+                    suggestion: 'Triage failing jobs and convert recurring incidents into maintenance backlog items.',
+                  });
+                }
+              } catch (error) {
+                weakSpots.push({
+                  area: `Workflow inspection: ${workflowFile}`,
+                  observation: `Unable to inspect workflow runs (${error.message}).`,
+                  suggestion: 'Check workflow file name/permissions and re-run this automation.',
+                });
+              }
+            }
+
+            const staleOpenIssues = (await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: maintenanceLabel,
+              per_page: 100,
+            })).data.filter((issue) => {
+              if (issue.pull_request) return false;
+              const updatedAt = new Date(issue.updated_at).getTime();
+              return Number.isFinite(updatedAt) && now - updatedAt > staleMs;
+            });
+
+            if (staleOpenIssues.length > 0) {
+              weakSpots.push({
+                area: 'Maintenance issue hygiene',
+                observation: `${staleOpenIssues.length} maintenance issue(s) have been open with no recent updates for 14+ days.`,
+                suggestion: 'Close outdated trackers or convert them into actionable implementation issues with owners.',
+              });
+            }
+
+            const weakTitle = `🛠️ Weekly maintenance weak-spot report (${weekOf})`;
+            const weakBody = [
+              'This issue is auto-generated to identify weaker spots in maintenance operations and propose concrete follow-up actions.',
+              '',
+              `Detected weak spots: **${weakSpots.length}**`,
+              '',
+              '| Area | Observation | Suggested action |',
+              '| --- | --- | --- |',
+              ...(weakSpots.length
+                ? weakSpots.map((spot) => `| ${spot.area} | ${spot.observation} | ${spot.suggestion} |`)
+                : ['| Baseline | No weak spots detected this week. | Keep current maintenance cadence and continue monitoring. |']),
+              '',
+              '## Suggested follow-up workflow',
+              '- [ ] Convert high-impact weak spots into `enhancement` or `maintenance` issues.',
+              '- [ ] Add acceptance criteria and expected impact to each follow-up issue.',
+              '- [ ] Link implemented fixes back to this report and `docs/roadmap.md`.',
+            ].join('\n');
+
+            const weakOpen = (await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: `${maintenanceLabel},${weakSpotLabel}`,
+              per_page: 100,
+            })).data.filter((i) => i.title.startsWith('🛠️ Weekly maintenance weak-spot report'));
+
+            for (const oldIssue of weakOpen) {
+              if (oldIssue.title !== weakTitle) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existingWeak = weakOpen.find((i) => i.title === weakTitle);
+            if (existingWeak) {
+              await github.rest.issues.update({ owner, repo, issue_number: existingWeak.number, body: weakBody });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title: weakTitle,
+                body: weakBody,
+                labels: [maintenanceLabel, weakSpotLabel, priorityLabel],
               });
             }
