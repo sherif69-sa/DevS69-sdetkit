@@ -89,6 +89,7 @@ Tool-specific notes:
 - `sdetkit repo policy lint [PATH] [--config PATH] [--format text|json] [--fail-on none|warn|error]`
 - `sdetkit repo policy export [PATH] [--config PATH] [--output FILE.json] [--include-expired]`
 - `sdetkit repo check [PATH] [--format text|json|md] [--out PATH] [--fail-on LEVEL] [--min-score N]`
+- `sdetkit repo ops [PATH] [--format text|json] [--output PATH] [--min-score N]`
 - `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
 - `sdetkit repo init [PATH] [--profile default|enterprise] [--dry-run] [--apply] [--force] [--diff]`
 - Security-first defaults: safe paths, deterministic sorted outputs, and atomic writes.
@@ -97,6 +98,7 @@ Audit examples:
 
 - `sdetkit repo audit`
 - `sdetkit repo audit --format json --out repo-audit.json --force`
+- `sdetkit repo ops --format json --output ops-report.json --force`
 - `sdetkit repo baseline create .`
 - `sdetkit repo baseline check . --diff`
 

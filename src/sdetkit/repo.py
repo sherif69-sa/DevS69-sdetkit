@@ -2675,6 +2675,150 @@ def _policy_export(policy: RepoAuditPolicy, *, include_expired: bool) -> dict[st
     }
 
 
+def _repo_ops_capabilities(root: Path) -> list[dict[str, Any]]:
+    checks = [
+        (
+            "incident_response",
+            "Incident response playbook",
+            ["docs/incident-response.md", "runbooks/incident-response.md", "INCIDENT_RESPONSE.md"],
+            12,
+            "Add an incident response guide with severity levels, comms owners, and escalation paths.",
+        ),
+        (
+            "service_runbooks",
+            "Service runbooks",
+            ["runbooks", "docs/runbooks"],
+            12,
+            "Create runbooks per critical service with troubleshooting steps and rollback guidance.",
+        ),
+        (
+            "slo_management",
+            "SLO/SLI definitions",
+            ["docs/slo.md", "ops/slo.yaml", "slo.yaml"],
+            12,
+            "Track service-level objectives and error budgets in version control.",
+        ),
+        (
+            "oncall_docs",
+            "On-call ownership docs",
+            ["docs/oncall.md", "ONCALL.md", ".github/CODEOWNERS"],
+            10,
+            "Define support rotations, ownership, and team handoff procedures.",
+        ),
+        (
+            "observability_config",
+            "Observability as code",
+            ["monitoring", "observability", "grafana", "prometheus.yml", "datadog"],
+            12,
+            "Store dashboards, alerts, and monitoring rules in repository-managed config.",
+        ),
+        (
+            "release_controls",
+            "Release controls",
+            ["docs/releasing.md", "RELEASE.md", ".github/workflows/release.yml"],
+            10,
+            "Document release strategy with rollback, canary, and hotfix procedures.",
+        ),
+        (
+            "business_continuity",
+            "Business continuity & disaster recovery",
+            ["docs/disaster-recovery.md", "docs/business-continuity.md", "DISASTER_RECOVERY.md"],
+            10,
+            "Define RTO/RPO and backup/restore verification workflows.",
+        ),
+        (
+            "security_response",
+            "Security response workflow",
+            ["SECURITY.md", "docs/security.md", "docs/threat-model.md"],
+            10,
+            "Maintain a security reporting + triage workflow with SLA expectations.",
+        ),
+        (
+            "platform_automation",
+            "Platform automation workflows",
+            [".github/workflows", ".gitlab-ci.yml", "Jenkinsfile"],
+            12,
+            "Automate build/test/audit/report pipelines for deterministic operations.",
+        ),
+    ]
+    items: list[dict[str, Any]] = []
+    for key, title, candidates, weight, recommendation in checks:
+        matched = ""
+        for candidate in candidates:
+            probe = root / candidate
+            if probe.exists():
+                matched = candidate
+                break
+        items.append(
+            {
+                "key": key,
+                "title": title,
+                "weight": weight,
+                "passed": bool(matched),
+                "matched_path": matched,
+                "recommendation": recommendation,
+            }
+        )
+    return items
+
+
+def build_repo_ops_report(root: Path) -> dict[str, Any]:
+    capabilities = _repo_ops_capabilities(root)
+    total_weight = sum(int(item["weight"]) for item in capabilities)
+    earned_weight = sum(int(item["weight"]) for item in capabilities if bool(item["passed"]))
+    score = int(round((earned_weight / total_weight) * 100)) if total_weight else 0
+    status = "production-ready" if score >= 80 else "improving" if score >= 60 else "foundation"
+    recommendations = [
+        {
+            "key": item["key"],
+            "title": item["title"],
+            "recommendation": item["recommendation"],
+        }
+        for item in capabilities
+        if not bool(item["passed"])
+    ]
+    return {
+        "schema_version": "sdetkit.ops.v1",
+        "root": str(root),
+        "status": status,
+        "score": score,
+        "summary": {
+            "checks": len(capabilities),
+            "passed": sum(1 for item in capabilities if bool(item["passed"])),
+            "failed": sum(1 for item in capabilities if not bool(item["passed"])),
+        },
+        "capabilities": capabilities,
+        "prioritized_recommendations": recommendations[:5],
+    }
+
+
+def _render_repo_ops(payload: dict[str, Any], fmt: str) -> str:
+    if fmt == "json":
+        return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+    lines = [
+        f"Repository operations report: {payload['root']}",
+        f"Status: {payload['status']}",
+        f"Score: {payload['score']}",
+        (f"Checks: {payload['summary']['passed']}/{payload['summary']['checks']} passed"),
+        "",
+    ]
+    for item in payload.get("capabilities", []):
+        if not isinstance(item, dict):
+            continue
+        tag = "PASS" if item.get("passed") else "FAIL"
+        detail = f" ({item['matched_path']})" if item.get("matched_path") else ""
+        lines.append(f"[{tag}] {item.get('title')}{detail}")
+    lines.append("")
+    recs = payload.get("prioritized_recommendations", [])
+    if recs:
+        lines.append("Top recommendations:")
+        for rec in recs:
+            if not isinstance(rec, dict):
+                continue
+            lines.append(f"- {rec.get('title')}: {rec.get('recommendation')}")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _repo_finding_fingerprint(item: dict[str, Any]) -> str:
     normalized = str(item.get("path", ".")).replace("\\", "/").lstrip("/")
     payload = "|".join([_repo_rule_id(item), normalized, str(item.get("message", ""))])
@@ -3187,6 +3331,14 @@ def main(argv: list[str] | None = None) -> int:
     pexport.add_argument("--allow-absolute-path", action="store_true")
     pexport.add_argument("--force", action="store_true")
 
+    op = sub.add_parser("ops")
+    op.add_argument("path", nargs="?", default=".")
+    op.add_argument("--format", choices=["text", "json"], default="text")
+    op.add_argument("--output", "--out", dest="output", default=None)
+    op.add_argument("--min-score", type=int, default=70)
+    op.add_argument("--allow-absolute-path", action="store_true")
+    op.add_argument("--force", action="store_true")
+
     ns = parser.parse_args(argv)
 
     if ns.repo_cmd == "rules":
@@ -3445,6 +3597,23 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stdout.write(rendered)
         return 0
+
+    if ns.repo_cmd == "ops":
+        payload = build_repo_ops_report(root)
+        rendered = _render_repo_ops(payload, ns.format)
+        if ns.output:
+            try:
+                out_path = safe_path(root, ns.output, allow_absolute=bool(ns.allow_absolute_path))
+                if out_path.exists() and not ns.force:
+                    print("refusing to overwrite existing output (use --force)", file=sys.stderr)
+                    return 2
+                atomic_write_text(out_path, rendered)
+            except (SecurityError, OSError, ValueError) as exc:
+                print(str(exc), file=sys.stderr)
+                return 2
+        else:
+            sys.stdout.write(rendered)
+        return 0 if int(payload.get("score", 0)) >= int(ns.min_score) else 1
 
     if ns.repo_cmd == "dev":
         if ns.dev_cmd == "audit":
