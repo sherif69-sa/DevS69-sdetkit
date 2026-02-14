@@ -35,4 +35,3 @@ The maintenance bot now produces two weekly artifacts:
 - A date-scoped weak-spot report issue that auto-detects workflow failures/staleness and maintenance hygiene drift, then proposes concrete follow-up actions.
 
 This creates a repeatable maintenance loop: **detect weak spots → suggest fixes → track implementation in issues/PRs → repeat weekly**.
-
