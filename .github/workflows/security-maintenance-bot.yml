@@ -56,14 +56,16 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const title = `🔐 Weekly security + maintenance checklist`;
-            const label = 'maintenance';
+            const maintenanceLabel = 'maintenance';
+            const enhancementLabel = 'enhancement';
+            const priorityLabel = 'priority:medium';
 
             const body = [
               'This issue is auto-generated to keep the repository secure and continuously updated.',
               '',
               '## Security auto-update checklist',
               '- [ ] Review Dependabot PRs and approve any major upgrades.',
-              '- [ ] Confirm all security workflows are green in Actions.',
+              '- [ ] Confirm all security workflows are green in Actions (security.yml, osv-scanner.yml, security-maintenance-bot.yml).',
               '- [ ] Review GitHub code scanning alerts and close/resolution as needed.',
               '- [ ] Review open vulnerabilities in Dependency graph.',
               '',
@@ -78,24 +80,66 @@ jobs:
               `- Actions: https://github.com/${owner}/${repo}/actions`,
             ].join('\n');
 
-            // Ensure label exists
-            try {
-              await github.rest.issues.getLabel({ owner, repo, name: label });
-            } catch {
-              await github.rest.issues.createLabel({ owner, repo, name: label, color: '0E8A16', description: 'Automated maintenance tracking' });
+            const labels = [
+              { name: maintenanceLabel, color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: enhancementLabel, color: 'a2eeef', description: 'Feature work and product improvements' },
+              { name: 'priority:high', color: 'd93f0b', description: 'High-priority work item' },
+              { name: priorityLabel, color: 'fbca04', description: 'Medium-priority work item' },
+              { name: 'priority:low', color: '0e8a16', description: 'Low-priority work item' },
+            ];
+
+            for (const lbl of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: lbl.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...lbl });
+              }
             }
 
-            const issues = await github.rest.issues.listForRepo({
+            const maintenanceIssues = await github.rest.issues.listForRepo({
               owner,
               repo,
               state: 'open',
-              labels: label,
+              labels: maintenanceLabel,
               per_page: 100,
             });
 
-            const existing = issues.data.find(i => i.title === title);
-            if (existing) {
-              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            const existingMaintenance = maintenanceIssues.data.find(i => i.title === title);
+            if (existingMaintenance) {
+              await github.rest.issues.update({ owner, repo, issue_number: existingMaintenance.number, body });
             } else {
-              await github.rest.issues.create({ owner, repo, title, body, labels: [label] });
+              await github.rest.issues.create({ owner, repo, title, body, labels: [maintenanceLabel] });
+            }
+
+            const enhancementTitle = '🧩 Monthly enhancement intake from user feedback';
+            const enhancementBody = [
+              'This issue is auto-generated to ensure at least one enhancement candidate is always tracked.',
+              '',
+              '## Enhancement backlog starter',
+              '- [ ] Capture one concrete user pain point from support, issues, or docs feedback.',
+              '- [ ] Define acceptance criteria and expected impact.',
+              '- [ ] Add/update roadmap context in `docs/roadmap.md`.',
+              '',
+              '## Suggested metadata',
+              `- Labels: \`${enhancementLabel}\`, \`${priorityLabel}\``,
+              '- Link the final implementation PR back to this issue.',
+            ].join('\n');
+
+            const enhancementIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: enhancementLabel,
+              per_page: 100,
+            });
+
+            const existingEnhancement = enhancementIssues.data.find(i => i.title === enhancementTitle);
+            if (!existingEnhancement) {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title: enhancementTitle,
+                body: enhancementBody,
+                labels: [enhancementLabel, priorityLabel],
+              });
             }
