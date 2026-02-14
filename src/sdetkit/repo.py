@@ -456,11 +456,13 @@ class _FileInventoryCache:
             if f is not None:
                 try:
                     f.close()
+                    # Ignore errors while closing temporary file in best-effort cleanup.
                 except Exception as exc:
                     logging.debug(
                         "Failed to close temporary file %r in _atomic_write_json: %s",
                         getattr(f, "name", None),
                         exc,
+                    # Ignore errors while removing temporary file in best-effort cleanup.
                         exc_info=True,
                     )
             if tmp is not None and os.path.exists(tmp):
