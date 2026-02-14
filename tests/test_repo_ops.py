@@ -21,7 +21,9 @@ def test_repo_ops_json_payload(tmp_path: Path) -> None:
     (tmp_path / "docs" / "releasing.md").write_text("# release\n", encoding="utf-8")
     (tmp_path / "SECURITY.md").write_text("# security\n", encoding="utf-8")
 
-    code, out, _ = _invoke(["repo", "ops", str(tmp_path), "--allow-absolute-path", "--format", "json"])
+    code, out, _ = _invoke(
+        ["repo", "ops", str(tmp_path), "--allow-absolute-path", "--format", "json"]
+    )
     payload = json.loads(out)
 
     assert code == 1
@@ -43,7 +45,9 @@ def test_repo_ops_min_score_pass(tmp_path: Path) -> None:
     (tmp_path / ".github" / "workflows").mkdir(parents=True)
     (tmp_path / ".github" / "CODEOWNERS").write_text("* @acme/team\n", encoding="utf-8")
 
-    code, out, _ = _invoke(["repo", "ops", str(tmp_path), "--allow-absolute-path", "--min-score", "90"])
+    code, out, _ = _invoke(
+        ["repo", "ops", str(tmp_path), "--allow-absolute-path", "--min-score", "90"]
+    )
 
     assert code == 0
     assert "Status:" in out

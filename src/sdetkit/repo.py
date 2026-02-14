@@ -2799,10 +2799,7 @@ def _render_repo_ops(payload: dict[str, Any], fmt: str) -> str:
         f"Repository operations report: {payload['root']}",
         f"Status: {payload['status']}",
         f"Score: {payload['score']}",
-        (
-            "Checks: "
-            f"{payload['summary']['passed']}/{payload['summary']['checks']} passed"
-        ),
+        (f"Checks: {payload['summary']['passed']}/{payload['summary']['checks']} passed"),
         "",
     ]
     for item in payload.get("capabilities", []):
