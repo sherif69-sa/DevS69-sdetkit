@@ -195,7 +195,9 @@ def _findings_map(run: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return out
 
 
-def diff_runs(from_run: dict[str, Any], to_run: dict[str, Any]) -> dict[str, Any]:
+def diff_runs(
+    from_run: dict[str, Any], to_run: dict[str, Any], *, new_limit: int | None = None
+) -> dict[str, Any]:
     old_map = _findings_map(from_run)
     new_map = _findings_map(to_run)
     old_fps = set(old_map)
@@ -219,6 +221,9 @@ def diff_runs(from_run: dict[str, Any], to_run: dict[str, Any]) -> dict[str, Any
         )
     )
 
+    if new_limit is not None:
+        top_new = top_new[: max(new_limit, 0)]
+
     return {
         "from": from_run.get("source", {}),
         "to": to_run.get("source", {}),
@@ -233,7 +238,7 @@ def diff_runs(from_run: dict[str, Any], to_run: dict[str, Any]) -> dict[str, Any
     }
 
 
-def _render_diff_text(payload: dict[str, Any], limit: int = 10) -> str:
+def _render_diff_text(payload: dict[str, Any], limit: int | None = 10) -> str:
     lines = [
         (
             "NEW: "
@@ -247,7 +252,8 @@ def _render_diff_text(payload: dict[str, Any], limit: int = 10) -> str:
             f"info={payload['counts']['new_by_severity']['info']}"
         ),
     ]
-    for item in payload.get("new", [])[:limit]:
+    items = payload.get("new", []) if limit is None else payload.get("new", [])[:limit]
+    for item in items:
         lines.append(
             f"- [{item.get('severity')}] {item.get('rule_id')} {item.get('path')}#{item.get('fingerprint')}"
         )
@@ -626,6 +632,7 @@ def main(argv: list[str] | None = None) -> int:
     dp.add_argument("--to", dest="to_run", required=True)
     dp.add_argument("--format", choices=["text", "json"], default="text")
     dp.add_argument("--fail-on", choices=["none", "warn", "error"], default="none")
+    dp.add_argument("--limit-new", type=int, default=None)
 
     bp = sub.add_parser("build")
     bp.add_argument("--history-dir", default=".sdetkit/audit-history")
@@ -673,13 +680,14 @@ def main(argv: list[str] | None = None) -> int:
         if ns.report_cmd == "diff":
             from_run = load_run_record(safe_path(Path.cwd(), ns.from_run, allow_absolute=True))
             to_run = load_run_record(safe_path(Path.cwd(), ns.to_run, allow_absolute=True))
-            payload = diff_runs(from_run, to_run)
+            payload = diff_runs(from_run, to_run, new_limit=ns.limit_new)
             if ns.format == "json":
                 sys.stdout.write(
                     json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
                 )
             else:
-                sys.stdout.write(_render_diff_text(payload))
+                text_limit = ns.limit_new if ns.limit_new is not None else 10
+                sys.stdout.write(_render_diff_text(payload, limit=text_limit))
             return 1 if _new_count_at_or_above(payload, ns.fail_on) > 0 else 0
 
         if ns.report_cmd == "recommend":

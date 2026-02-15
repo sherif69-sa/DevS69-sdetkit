@@ -207,6 +207,80 @@ def test_report_diff_text_and_json_match_and_exit_codes(tmp_path: Path) -> None:
     assert payload["counts"]["unchanged"] == 1
 
 
+def test_report_diff_limit_new_applies_deterministically_to_text_and_json(tmp_path: Path) -> None:
+    runner = CliRunner()
+    a = tmp_path / "a.json"
+    b = tmp_path / "b.json"
+
+    _write_run(a, captured_at="2020-01-01T00:00:00Z", findings=[])
+    _write_run(
+        b,
+        captured_at="2020-01-02T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "warn-rule",
+                "rule_id": "r-warn",
+                "severity": "warn",
+                "message": "warn",
+                "path": "warn.py",
+            },
+            {
+                "fingerprint": "error-rule",
+                "rule_id": "r-error",
+                "severity": "error",
+                "message": "error",
+                "path": "error.py",
+            },
+            {
+                "fingerprint": "info-rule",
+                "rule_id": "r-info",
+                "severity": "info",
+                "message": "info",
+                "path": "info.py",
+            },
+        ],
+    )
+
+    text = runner.invoke(
+        [
+            "report",
+            "diff",
+            "--from",
+            str(a),
+            "--to",
+            str(b),
+            "--format",
+            "text",
+            "--limit-new",
+            "2",
+        ]
+    )
+    assert text.exit_code == 0
+    lines = [line for line in text.stdout.splitlines() if line.startswith("- [")]
+    assert len(lines) == 2
+    assert lines[0].startswith("- [error] r-error")
+    assert lines[1].startswith("- [warn] r-warn")
+
+    js = runner.invoke(
+        [
+            "report",
+            "diff",
+            "--from",
+            str(a),
+            "--to",
+            str(b),
+            "--format",
+            "json",
+            "--limit-new",
+            "2",
+        ]
+    )
+    assert js.exit_code == 0
+    payload = json.loads(js.stdout)
+    assert payload["counts"]["new"] == 3
+    assert [item["fingerprint"] for item in payload["new"]] == ["error-rule", "warn-rule"]
+
+
 def test_report_build_md_and_html_are_stable(tmp_path: Path, monkeypatch) -> None:
     runner = CliRunner()
     history = tmp_path / "history"
