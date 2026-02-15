@@ -178,6 +178,24 @@ def _changed_files(root: Path, base: str) -> set[str]:
     return {x.strip() for x in proc.stdout.splitlines() if x.strip()}
 
 
+def _changed_tree(changed: set[str]) -> set[str]:
+    out: set[str] = set()
+    for item in changed:
+        rel = str(item).replace("\\", "/").lstrip("/")
+        p = Path(rel) if rel else Path(".")
+        while True:
+            s = p.as_posix()
+            out.add(s)
+            if s == ".":
+                break
+            parent = p.parent
+            if parent == p:
+                out.add(".")
+                break
+            p = parent
+    return out
+
+
 @dataclass(frozen=True)
 class Finding:
     check: str
@@ -2071,18 +2089,53 @@ def _repo_audit_tree_sig(repo_root: Path, ignore_dir: Path | None = None) -> str
             rel = ""
         if rel:
             ignore_prefixes.append(rel)
-    items: list[tuple[str, int, int, int]] = []
-    for fp in _iter_files(repo_root):
-        relp = fp.relative_to(repo_root).as_posix()
-        skip = False
+
+    def _skip(relp: str) -> bool:
         for pref in ignore_prefixes:
             if relp == pref or relp.startswith(pref + "/"):
-                skip = True
-                break
-        if skip:
-            continue
-        st = fp.stat()
-        items.append((relp, st.st_mtime_ns, st.st_size, getattr(st, "st_ctime_ns", 0)))
+                return True
+        return False
+
+    items: list[tuple[str, int, int, int]] = []
+    tracked: list[str] | None = None
+
+    if (repo_root / ".git").exists():
+        try:
+            proc = subprocess.run(
+                ["git", "-C", str(repo_root), "ls-files", "-z"],
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            )
+            if proc.returncode == 0:
+                parts = proc.stdout.split(b"\x00")
+                tracked = [p.decode("utf-8", errors="surrogateescape") for p in parts if p]
+        except OSError:
+            tracked = None
+
+    if tracked is not None:
+        for relp in tracked:
+            relp = relp.replace("\\\\", "/").lstrip("/")
+            if not relp or _skip(relp):
+                continue
+            fp = repo_root / relp
+            try:
+                st = fp.stat()
+            except OSError:
+                continue
+            items.append(
+                (relp, int(st.st_mtime_ns), int(st.st_size), int(getattr(st, "st_ctime_ns", 0)))
+            )
+    else:
+        for fp in _iter_files(repo_root):
+            relp = fp.relative_to(repo_root).as_posix()
+            if _skip(relp):
+                continue
+            st = fp.stat()
+            items.append(
+                (relp, int(st.st_mtime_ns), int(st.st_size), int(getattr(st, "st_ctime_ns", 0)))
+            )
+
     items.sort()
     b = json.dumps(items, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(b).hexdigest()
@@ -2163,6 +2216,9 @@ def run_repo_audit(
     cache_enabled = not no_cache
     cache_root = root / cache_dir
     inventory = _FileInventoryCache(cache_root)
+    changed_tree = (
+        _changed_tree(changed_files) if changed_only and incremental_used else changed_files
+    )
 
     def run_one(loaded: Any) -> tuple[str, dict[str, Any], list[dict[str, Any]], int, int]:
         rule_id = loaded.meta.id
@@ -2181,7 +2237,7 @@ def run_repo_audit(
             deps = cached_doc.get("dependencies")
             if isinstance(deps, dict):
                 dep_paths = {str(item) for item in deps}
-                if dep_paths and dep_paths.isdisjoint(changed_files):
+                if dep_paths and dep_paths.isdisjoint(changed_tree):
                     cached_findings = [
                         x for x in cached_doc.get("findings", []) if isinstance(x, dict)
                     ]
