@@ -128,13 +128,44 @@ def _pyproject_project_name(pyproject: Path) -> str | None:
     if not isinstance(data, dict):
         return None
     proj = data.get("project")
-    if not isinstance(proj, dict):
+    if isinstance(proj, dict):
+        name = proj.get("name")
+        if isinstance(name, str):
+            stripped = name.strip()
+            if stripped:
+                return stripped
+
+    tool = data.get("tool")
+    if not isinstance(tool, dict):
         return None
-    name = proj.get("name")
-    if not isinstance(name, str):
-        return None
-    name = name.strip()
-    return name or None
+
+    poetry = tool.get("poetry")
+    if isinstance(poetry, dict):
+        poetry_name = poetry.get("name")
+        if isinstance(poetry_name, str):
+            stripped = poetry_name.strip()
+            if stripped:
+                return stripped
+
+    pdm = tool.get("pdm")
+    if isinstance(pdm, dict):
+        pdm_name = pdm.get("name")
+        if isinstance(pdm_name, str):
+            stripped = pdm_name.strip()
+            if stripped:
+                return stripped
+
+    hatch = tool.get("hatch")
+    if isinstance(hatch, dict):
+        metadata = hatch.get("metadata")
+        if isinstance(metadata, dict):
+            hatch_name = metadata.get("name")
+            if isinstance(hatch_name, str):
+                stripped = hatch_name.strip()
+                if stripped:
+                    return stripped
+
+    return None
 
 
 def _autodiscover_roots(*, data: dict[str, Any] | None, field_prefix: str) -> tuple[str, ...]:
