@@ -411,6 +411,76 @@ def test_report_diff_fail_on_ignores_non_severity_changes(tmp_path: Path) -> Non
     assert "CHANGED: 1" in diff.stdout
 
 
+def test_report_diff_markdown_format_is_deterministic_and_honors_limit(tmp_path: Path) -> None:
+    runner = CliRunner()
+    a = tmp_path / "a.json"
+    b = tmp_path / "b.json"
+
+    _write_run(
+        a,
+        captured_at="2020-01-01T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "same",
+                "rule_id": "r1",
+                "severity": "warn",
+                "message": "before",
+                "path": "a.py",
+            }
+        ],
+    )
+    _write_run(
+        b,
+        captured_at="2020-01-02T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "same",
+                "rule_id": "r1",
+                "severity": "error",
+                "message": "after",
+                "path": "a.py",
+            },
+            {
+                "fingerprint": "new-error",
+                "rule_id": "r2",
+                "severity": "error",
+                "message": "first",
+                "path": "z.py",
+            },
+            {
+                "fingerprint": "new-warn",
+                "rule_id": "r3",
+                "severity": "warn",
+                "message": "second",
+                "path": "b.py",
+            },
+        ],
+    )
+
+    result = runner.invoke(
+        [
+            "report",
+            "diff",
+            "--from",
+            str(a),
+            "--to",
+            str(b),
+            "--format",
+            "md",
+            "--limit-new",
+            "1",
+        ]
+    )
+    assert result.exit_code == 0
+    assert result.stdout.startswith("# sdetkit audit diff\n")
+    assert "## New findings" in result.stdout
+    assert "new-error" in result.stdout
+    assert "new-warn" not in result.stdout
+    assert "## Changed findings" in result.stdout
+    assert "warn→error" in result.stdout
+    assert result.stdout.endswith("\n")
+
+
 def test_report_build_md_and_html_are_stable(tmp_path: Path, monkeypatch) -> None:
     runner = CliRunner()
     history = tmp_path / "history"
@@ -592,6 +662,50 @@ def test_report_recommend_supports_auto_detection_and_override(tmp_path: Path) -
     assert payload["detected_scenario"] == "api-operations"
     assert payload["active_scenario"] == "compliance"
     assert payload["dashboard_template"] == "compliance_posture"
+
+
+def test_report_recommend_markdown_format_outputs_structured_sections(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+    run_path = tmp_path / "run.json"
+
+    _write_run(
+        run_path,
+        captured_at="2020-01-03T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "one",
+                "rule_id": "ci-alert",
+                "severity": "warn",
+                "message": "pipeline timeout in deployment stage",
+                "path": "ops/deploy.yml",
+                "tags": ["ops"],
+            }
+        ],
+    )
+    ingest = runner.invoke(["report", "ingest", str(run_path), "--history-dir", str(history)])
+    assert ingest.exit_code == 0
+
+    result = runner.invoke(
+        [
+            "report",
+            "recommend",
+            "--history-dir",
+            str(history),
+            "--scenario",
+            "engineering",
+            "--format",
+            "md",
+        ]
+    )
+    assert result.exit_code == 0
+    assert result.stdout.startswith("# sdetkit workflow recommendations\n")
+    assert "## Recommended helpers" in result.stdout
+    assert "## Top recurring rules" in result.stdout
+    assert "- ci-alert: 1" in result.stdout
+    assert "## Top recurring paths" in result.stdout
+    assert "- ops/deploy.yml: 1" in result.stdout
+    assert result.stdout.endswith("\n")
 
 
 def test_report_build_and_recommend_skip_unreadable_history_runs(tmp_path: Path) -> None:

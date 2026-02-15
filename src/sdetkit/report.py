@@ -329,6 +329,58 @@ def _render_diff_text(payload: dict[str, Any], limit: int | None = 10) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _render_diff_markdown(payload: dict[str, Any], limit: int | None = 10) -> str:
+    lines = [
+        "# sdetkit audit diff",
+        "",
+        (
+            f"- NEW: {payload['counts']['new']}"
+            f" | RESOLVED: {payload['counts']['resolved']}"
+            f" | UNCHANGED: {payload['counts']['unchanged']}"
+            f" | CHANGED: {payload['counts']['changed']}"
+        ),
+        (
+            "- NEW by severity: "
+            f"error={payload['counts']['new_by_severity']['error']} "
+            f"warn={payload['counts']['new_by_severity']['warn']} "
+            f"info={payload['counts']['new_by_severity']['info']}"
+        ),
+    ]
+
+    new_items = payload.get("new", []) if limit is None else payload.get("new", [])[:limit]
+    lines.extend(["", "## New findings"])
+    if not new_items:
+        lines.append("- none")
+    else:
+        for item in new_items:
+            lines.append(
+                "- "
+                f"**[{item.get('severity')}] {item.get('rule_id')}** "
+                f"`{item.get('path')}#{item.get('fingerprint')}`"
+            )
+
+    changed_items = (
+        payload.get("changed", []) if limit is None else payload.get("changed", [])[:limit]
+    )
+    lines.extend(["", "## Changed findings"])
+    if not changed_items:
+        lines.append("- none")
+    else:
+        for item in changed_items:
+            from_meta = item.get("from", {})
+            to_meta = item.get("to", {})
+            changed_fields = ",".join(str(x) for x in item.get("changed_fields", []))
+            lines.append(
+                "- "
+                f"`{item.get('fingerprint')}` "
+                f"**{to_meta.get('rule_id')}** "
+                f"{from_meta.get('severity')}→{to_meta.get('severity')} "
+                f"({changed_fields})"
+            )
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _threshold_rank(level: str) -> int:
     if level == "none":
         return 9
@@ -640,6 +692,43 @@ def _render_recommend_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _render_recommend_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# sdetkit workflow recommendations",
+        "",
+        f"- runs analyzed: {payload['runs_analyzed']}",
+        f"- detected scenario: {payload['detected_scenario']}",
+        f"- active scenario: {payload['active_scenario']}",
+        f"- dashboard template: {payload['dashboard_template']}",
+        "",
+        "## Recommended helpers",
+    ]
+    recommendations = payload.get("recommendations", [])
+    if not recommendations:
+        lines.append("- none")
+    else:
+        for item in recommendations:
+            lines.append(f"- {item}")
+
+    lines.extend(["", "## Top recurring rules"])
+    top_rules = payload.get("top_rules", [])
+    if not top_rules:
+        lines.append("- none")
+    else:
+        for item in top_rules:
+            lines.append(f"- {item['rule_id']}: {item['count']}")
+
+    lines.extend(["", "## Top recurring paths"])
+    top_paths = payload.get("top_paths", [])
+    if not top_paths:
+        lines.append("- none")
+    else:
+        for item in top_paths:
+            lines.append(f"- {item['path']}: {item['count']}")
+    lines.append("")
+    return "\n".join(lines)
+
+
 def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None) -> None:
     runs = _load_history_run_records(history_dir)
     if since is not None:
@@ -732,7 +821,7 @@ def main(argv: list[str] | None = None) -> int:
     dp = sub.add_parser("diff")
     dp.add_argument("--from", dest="from_run", required=True)
     dp.add_argument("--to", dest="to_run", required=True)
-    dp.add_argument("--format", choices=["text", "json"], default="text")
+    dp.add_argument("--format", choices=["text", "json", "md"], default="text")
     dp.add_argument("--fail-on", choices=["none", "warn", "error"], default="none")
     dp.add_argument("--limit-new", type=int, default=None)
 
@@ -745,7 +834,7 @@ def main(argv: list[str] | None = None) -> int:
     rp = sub.add_parser("recommend")
     rp.add_argument("--history-dir", default=".sdetkit/audit-history")
     rp.add_argument("--scenario", choices=["auto", *sorted(BUSINESS_SCENARIOS)], default="auto")
-    rp.add_argument("--format", choices=["text", "json"], default="text")
+    rp.add_argument("--format", choices=["text", "json", "md"], default="text")
     rp.add_argument("--limit", type=int, default=5)
 
     ns = parser.parse_args(argv)
@@ -787,6 +876,9 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stdout.write(
                     json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
                 )
+            elif ns.format == "md":
+                markdown_limit = ns.limit_new if ns.limit_new is not None else 10
+                sys.stdout.write(_render_diff_markdown(payload, limit=markdown_limit))
             else:
                 text_limit = ns.limit_new if ns.limit_new is not None else 10
                 sys.stdout.write(_render_diff_text(payload, limit=text_limit))
@@ -799,6 +891,8 @@ def main(argv: list[str] | None = None) -> int:
                 sys.stdout.write(
                     json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
                 )
+            elif ns.format == "md":
+                sys.stdout.write(_render_recommend_markdown(payload))
             else:
                 sys.stdout.write(_render_recommend_text(payload))
             return 0
