@@ -192,3 +192,68 @@ def test_autodiscover_prefers_pyproject_name_when_package_json_is_also_present(
 
     _, projects = discover_projects(repo)
     assert [(p.name, p.root) for p in projects] == [("python-name", "packages/svc")]
+
+
+def test_autodiscover_detects_rust_and_go_projects(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    rust = repo / "packages" / "worker"
+    rust.mkdir(parents=True)
+    (rust / "Cargo.toml").write_text(
+        """
+[package]
+name = "acme-worker"
+version = "0.1.0"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    gomod = repo / "apps" / "gateway"
+    gomod.mkdir(parents=True)
+    (gomod / "go.mod").write_text(
+        "module github.com/acme/gateway\n\ngo 1.22\n",
+        encoding="utf-8",
+    )
+
+    source, projects = discover_projects(repo, sort=True)
+    assert source == "autodiscover"
+    assert [(p.name, p.root) for p in projects] == [
+        ("acme-worker", "packages/worker"),
+        ("github.com/acme/gateway", "apps/gateway"),
+    ]
+
+
+def test_autodiscover_prefers_pyproject_before_cargo_and_go_before_package_json(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    hybrid = repo / "packages" / "hybrid"
+    hybrid.mkdir(parents=True)
+    (hybrid / "pyproject.toml").write_text(
+        '[project]\nname = "py-name"\nversion = "0.0.0"\n',
+        encoding="utf-8",
+    )
+    (hybrid / "Cargo.toml").write_text(
+        """
+[package]
+name = "cargo-name"
+version = "0.1.0"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    edge = repo / "apps" / "edge"
+    edge.mkdir(parents=True)
+    (edge / "go.mod").write_text("module github.com/acme/edge\n", encoding="utf-8")
+    (edge / "package.json").write_text('{"name": "node-edge"}', encoding="utf-8")
+
+    _, projects = discover_projects(repo, sort=True)
+    assert [(p.name, p.root) for p in projects] == [
+        ("github.com/acme/edge", "apps/edge"),
+        ("py-name", "packages/hybrid"),
+    ]

@@ -183,6 +183,39 @@ def _package_json_project_name(package_json: Path) -> str | None:
     return stripped or None
 
 
+def _cargo_project_name(cargo_toml: Path) -> str | None:
+    try:
+        data = cast(Any, _tomllib).loads(cargo_toml.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if not isinstance(data, dict):
+        return None
+    package = data.get("package")
+    if not isinstance(package, dict):
+        return None
+    name = package.get("name")
+    if not isinstance(name, str):
+        return None
+    stripped = name.strip()
+    return stripped or None
+
+
+def _go_module_name(go_mod: Path) -> str | None:
+    try:
+        content = go_mod.read_text(encoding="utf-8")
+    except Exception:
+        return None
+    for raw in content.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("//"):
+            continue
+        if line.startswith("module "):
+            module = line[7:].strip()
+            return module or None
+        break
+    return None
+
+
 def _autodiscover_roots(*, data: dict[str, Any] | None, field_prefix: str) -> tuple[str, ...]:
     if data is None:
         return _AUTODISCOVER_BASES
@@ -230,13 +263,19 @@ def _autodiscover_projects(
         for dirpath, dirnames, filenames in os.walk(base):
             dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS and not d.startswith(".")]
             has_pyproject = "pyproject.toml" in filenames
+            has_cargo_toml = "Cargo.toml" in filenames
+            has_go_mod = "go.mod" in filenames
             has_package_json = "package.json" in filenames
-            if not has_pyproject and not has_package_json:
+            if not any((has_pyproject, has_cargo_toml, has_go_mod, has_package_json)):
                 continue
             project_dir = Path(dirpath)
             name: str | None = None
             if has_pyproject:
                 name = _pyproject_project_name(project_dir / "pyproject.toml")
+            if not name and has_cargo_toml:
+                name = _cargo_project_name(project_dir / "Cargo.toml")
+            if not name and has_go_mod:
+                name = _go_module_name(project_dir / "go.mod")
             if not name and has_package_json:
                 name = _package_json_project_name(project_dir / "package.json")
             if not name:
