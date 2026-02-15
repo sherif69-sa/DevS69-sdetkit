@@ -337,20 +337,25 @@ def discover_projects(
         raise ProjectsConfigError("projects manifest must define [[project]] entries")
 
     projects: list[RepoProject] = []
-    seen: set[str] = set()
+    seen_names: set[str] = set()
+    seen_roots: set[str] = set()
     for item in raw_items:
         entry = cast(dict[str, Any], item)
         name = _as_str(entry.get("name"), field="name")
         root = _as_str(entry.get("root"), field="root")
         if not name or not root:
             raise ProjectsConfigError("project entries require 'name' and 'root'")
-        if name in seen:
+        if name in seen_names:
             raise ProjectsConfigError(f"duplicate project name: {name}")
-        seen.add(name)
+        normalized_root = _normalize_rel(root, field="root")
+        if normalized_root in seen_roots:
+            raise ProjectsConfigError(f"duplicate project root: {normalized_root}")
+        seen_names.add(name)
+        seen_roots.add(normalized_root)
         projects.append(
             RepoProject(
                 name=name,
-                root=_normalize_rel(root, field="root"),
+                root=normalized_root,
                 config_path=(
                     _normalize_rel(cfg, field="config")
                     if (cfg := _as_str(entry.get("config"), field="config"))
@@ -366,6 +371,14 @@ def discover_projects(
                 exclude_paths=_as_str_list_or_csv(entry.get("exclude"), field="exclude"),
             )
         )
+
+    if autodiscover_enabled:
+        for detected in _autodiscover_projects(repo_root, base_roots=autodiscover_roots):
+            if detected.name in seen_names or detected.root in seen_roots:
+                continue
+            seen_names.add(detected.name)
+            seen_roots.add(detected.root)
+            projects.append(detected)
 
     if sort:
         projects.sort(key=lambda p: p.name)

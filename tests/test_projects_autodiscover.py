@@ -86,6 +86,82 @@ autodiscover_roots = 12
         discover_projects(repo)
 
 
+def test_pyproject_merges_manifest_projects_with_autodiscovered_entries(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _write_pyproject(repo / "services" / "api", "svc-api")
+    _write_pyproject(repo / "libs" / "core", "lib-core")
+    (repo / "pyproject.toml").write_text(
+        """
+[tool.sdetkit.projects]
+autodiscover = true
+autodiscover_roots = ["services", "libs"]
+
+[[tool.sdetkit.projects.project]]
+name = "ops"
+root = "ops/tools"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    source, projects = discover_projects(repo, sort=False)
+    assert source == "pyproject.toml"
+    assert [(p.name, p.root) for p in projects] == [
+        ("ops", "ops/tools"),
+        ("lib-core", "libs/core"),
+        ("svc-api", "services/api"),
+    ]
+
+
+def test_pyproject_manifest_entries_override_autodiscovered_duplicates(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _write_pyproject(repo / "services" / "api", "svc-api")
+    (repo / "pyproject.toml").write_text(
+        """
+[tool.sdetkit.projects]
+autodiscover = true
+autodiscover_roots = ["services"]
+
+[[tool.sdetkit.projects.project]]
+name = "svc-api"
+root = "services/api"
+packs = ["security"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    _, projects = discover_projects(repo)
+    assert [(p.name, p.root, p.packs) for p in projects] == [
+        ("svc-api", "services/api", ("security",)),
+    ]
+
+
+def test_pyproject_manifest_rejects_duplicate_normalized_roots(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text(
+        """
+[tool.sdetkit.projects]
+
+[[tool.sdetkit.projects.project]]
+name = "api"
+root = "services/api"
+
+[[tool.sdetkit.projects.project]]
+name = "api-dup"
+root = "./services/api"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="duplicate project root: services/api"):
+        discover_projects(repo)
+
+
 def test_autodiscover_supports_poetry_and_pdm_names(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()

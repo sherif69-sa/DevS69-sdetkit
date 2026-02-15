@@ -21,6 +21,9 @@ autodiscover_roots = ["services", "libs"]
 ```
 
 `autodiscover_roots` accepts a string list or comma-separated string.
+When `autodiscover = true` is combined with explicit `[[project]]` entries,
+manifest projects are kept first and autodiscovered projects are appended.
+Duplicate names/roots are deduplicated in favor of the explicit manifest entry.
 
 ```toml
 [[project]]
