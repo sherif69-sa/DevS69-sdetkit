@@ -654,3 +654,79 @@ def test_report_build_and_recommend_skip_unreadable_history_runs(tmp_path: Path)
     assert recommend.exit_code == 0
     assert "warning: skipping unreadable history run broken.json" in recommend.stderr
     assert "runs analyzed: 1" in recommend.stdout
+
+
+def test_report_handles_corrupt_history_index_across_commands(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+    history.mkdir(parents=True, exist_ok=True)
+
+    run1 = tmp_path / "run1.json"
+    _write_run(
+        run1,
+        captured_at="2020-01-01T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "a",
+                "rule_id": "api-timeout",
+                "severity": "warn",
+                "message": "API request timeout exceeds target",
+                "path": "services/http_client.py",
+                "tags": ["network"],
+            },
+        ],
+    )
+
+    assert (
+        runner.invoke(["report", "ingest", str(run1), "--history-dir", str(history)]).exit_code == 0
+    )
+
+    index_path = history / "index.json"
+    index_path.write_text("{not-json", encoding="utf-8")
+
+    out_md = tmp_path / "report.md"
+    build = runner.invoke(
+        [
+            "report",
+            "build",
+            "--history-dir",
+            str(history),
+            "--format",
+            "md",
+            "--output",
+            str(out_md),
+        ]
+    )
+    assert build.exit_code == 0
+    assert "warning: ignoring unreadable history index index.json" in build.stderr
+    assert "No audit history found." in out_md.read_text(encoding="utf-8")
+
+    recommend = runner.invoke(["report", "recommend", "--history-dir", str(history)])
+    assert recommend.exit_code == 0
+    assert "warning: ignoring unreadable history index index.json" in recommend.stderr
+    assert "runs analyzed: 0" in recommend.stdout
+
+    run2 = tmp_path / "run2.json"
+    _write_run(
+        run2,
+        captured_at="2020-01-02T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "b",
+                "rule_id": "api-retry",
+                "severity": "error",
+                "message": "HTTP response handling is missing retry policy",
+                "path": "services/request_pipeline.py",
+                "tags": ["api"],
+            },
+        ],
+    )
+
+    ingest = runner.invoke(["report", "ingest", str(run2), "--history-dir", str(history)])
+    assert ingest.exit_code == 0
+    assert "warning: ignoring unreadable history index index.json" in ingest.stderr
+
+    rewritten_index = json.loads(index_path.read_text(encoding="utf-8"))
+    assert rewritten_index["schema_version"] == "sdetkit.audit.history.v1"
+    assert len(rewritten_index["runs"]) == 1
+    assert rewritten_index["runs"][0]["captured_at"] == "2020-01-02T00:00:00Z"

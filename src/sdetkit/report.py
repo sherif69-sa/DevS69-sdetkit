@@ -402,7 +402,14 @@ def _history_runs(history_dir: Path) -> list[dict[str, Any]]:
     index_path = history_dir / "index.json"
     if not index_path.exists():
         return []
-    data = json.loads(index_path.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(index_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        print(
+            f"warning: ignoring unreadable history index {index_path.name}: {exc}",
+            file=sys.stderr,
+        )
+        return []
     if not isinstance(data, dict):
         return []
     items = data.get("runs", [])
