@@ -103,6 +103,34 @@ def test_non_git_fallback_and_require_git(tmp_path: Path) -> None:
     assert rc2 == 2
 
 
+def test_cache_hit_survives_unrelated_file_change(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+
+    first_rc, first = _run_capture(tmp_path, "--cache-stats")
+    assert first_rc in {0, 1}
+    assert first["summary"]["cache"]["misses"]
+
+    second_rc, second = _run_capture(tmp_path, "--cache-stats")
+    assert second_rc in {0, 1}
+    assert second["summary"]["cache"]["hits"]
+    assert not second["summary"]["cache"]["misses"]
+
+    untracked = tmp_path / "untracked.txt"
+    untracked.write_text("hi\n", encoding="utf-8")
+
+    third_rc, third = _run_capture(tmp_path, "--cache-stats")
+    assert third_rc in {0, 1}
+    assert third["summary"]["cache"]["hits"]
+    assert not third["summary"]["cache"]["misses"]
+
+    untracked.write_text("bye\n", encoding="utf-8")
+
+    fourth_rc, fourth = _run_capture(tmp_path, "--cache-stats")
+    assert fourth_rc in {0, 1}
+    assert fourth["summary"]["cache"]["hits"]
+    assert not fourth["summary"]["cache"]["misses"]
+
+
 def test_cache_invalidates_on_content_change_even_when_mtime_restored(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
 
