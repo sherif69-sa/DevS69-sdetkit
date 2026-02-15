@@ -414,7 +414,14 @@ def _load_history_run_records(history_dir: Path) -> list[dict[str, Any]]:
         if not run_path.exists():
             continue
 
-        loaded = load_run_record(run_path)
+        try:
+            loaded = load_run_record(run_path)
+        except (OSError, ValueError) as exc:
+            print(
+                f"warning: skipping unreadable history run {file_name}: {exc}",
+                file=sys.stderr,
+            )
+            continue
         run: dict[str, Any] | None = None
         if isinstance(loaded, dict) and isinstance(loaded.get("run_record"), dict):
             rr = loaded["run_record"]

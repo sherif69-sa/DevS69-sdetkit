@@ -462,3 +462,65 @@ def test_report_recommend_supports_auto_detection_and_override(tmp_path: Path) -
     assert payload["detected_scenario"] == "api-operations"
     assert payload["active_scenario"] == "compliance"
     assert payload["dashboard_template"] == "compliance_posture"
+
+
+def test_report_build_and_recommend_skip_unreadable_history_runs(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+    history.mkdir(parents=True, exist_ok=True)
+
+    run1 = tmp_path / "run1.json"
+    _write_run(
+        run1,
+        captured_at="2020-01-01T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "a",
+                "rule_id": "api-timeout",
+                "severity": "warn",
+                "message": "API request timeout exceeds target",
+                "path": "services/http_client.py",
+                "tags": ["network"],
+            },
+        ],
+    )
+    assert (
+        runner.invoke(["report", "ingest", str(run1), "--history-dir", str(history)]).exit_code == 0
+    )
+
+    index_path = history / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index["runs"].append(
+        {
+            "captured_at": "2020-01-02T00:00:00Z",
+            "file": "broken.json",
+            "label": "broken",
+            "sha256": "f" * 64,
+        }
+    )
+    index_path.write_text(
+        json.dumps(index, ensure_ascii=True, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+    )
+    (history / "broken.json").write_text("{not-json", encoding="utf-8")
+
+    out_md = tmp_path / "report.md"
+    build = runner.invoke(
+        [
+            "report",
+            "build",
+            "--history-dir",
+            str(history),
+            "--format",
+            "md",
+            "--output",
+            str(out_md),
+        ]
+    )
+    assert build.exit_code == 0
+    assert "warning: skipping unreadable history run broken.json" in build.stderr
+    assert "runs: 1" in out_md.read_text(encoding="utf-8")
+
+    recommend = runner.invoke(["report", "recommend", "--history-dir", str(history)])
+    assert recommend.exit_code == 0
+    assert "warning: skipping unreadable history run broken.json" in recommend.stderr
+    assert "runs analyzed: 1" in recommend.stdout

@@ -421,6 +421,7 @@ class _FileInventoryCache:
         return True
 
     def _validate_files(self, repo_root: Path, files: list[FileInfo]) -> bool:
+        expected_paths = {f.path for f in files}
         for f in files:
             p = repo_root / f.path
             try:
@@ -431,6 +432,10 @@ class _FileInventoryCache:
                 return False
             if st.st_size != f.size:
                 return False
+
+        current_paths = {fp.relative_to(repo_root).as_posix() for fp in _iter_files(repo_root)}
+        if current_paths != expected_paths:
+            return False
         return True
 
     def _dirs_for_inventory(self, inventory: list[FileInfo]) -> list[str]:

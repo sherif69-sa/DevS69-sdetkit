@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from sdetkit.repo import _FileInventoryCache
@@ -153,3 +154,22 @@ def test_file_inventory_cache_remove_file_invalidates_and_updates(tmp_path: Path
 
     assert "pkg/b.py" not in _inv_paths(inv3)
     assert st3.get("invalidations", 0) >= st2.get("invalidations", 0) + 1
+
+
+def test_file_inventory_cache_add_file_detected_when_dir_mtime_is_unchanged(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _write(repo / "pkg" / "a.py", "print('a')\n")
+
+    cache_root = tmp_path / "cache"
+    c = _FileInventoryCache(cache_root)
+
+    c.get_inventory(repo)
+    pkg = repo / "pkg"
+    original = pkg.stat()
+
+    _write(repo / "pkg" / "new.py", "print('new')\n")
+    os.utime(pkg, ns=(original.st_atime_ns, original.st_mtime_ns))
+
+    updated = c.get_inventory(repo)
+    assert "pkg/new.py" in _inv_paths(updated)
