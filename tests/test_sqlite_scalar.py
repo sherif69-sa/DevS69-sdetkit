@@ -11,7 +11,9 @@ class FakeConnection:
     def __init__(self) -> None:
         self.calls: list[tuple[str, int, object, bool]] = []
 
-    def create_function(self, name: str, num_args: int, func: object, *, deterministic: bool) -> None:
+    def create_function(
+        self, name: str, num_args: int, func: object, *, deterministic: bool
+    ) -> None:
         self.calls.append((name, num_args, func, deterministic))
 
 
