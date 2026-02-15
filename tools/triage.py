@@ -236,8 +236,9 @@ def _run_pytest(args: argparse.Namespace, root: Path) -> tuple[int, str]:
     if args.tee:
         try:
             Path(args.tee).write_text(out, encoding="utf-8")
-        except OSError:
-            pass
+        except OSError as exc:
+            # Best-effort: failing to tee output should not be fatal, but log for visibility.
+            print(f"triage: failed to write tee output to {args.tee!r}: {exc}", file=sys.stderr)
     return int(proc.returncode), out
 
 
