@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import html
 import json
 import os
 import sys
@@ -14,6 +15,12 @@ from .security import SecurityError, safe_path
 
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 RUN_SCHEMA = "sdetkit.audit.run.v1"
+
+
+def _history_run_sort_key(r: dict[str, Any]) -> tuple[str, str]:
+    src = r.get("source")
+    cap = src.get("captured_at") if isinstance(src, dict) else ""
+    return (str(cap), str(r.get("_sha256") or ""))
 
 
 def _severity_rank(level: str) -> int:
@@ -380,6 +387,66 @@ def _tokenize_workflow_text(text: str) -> list[str]:
     return out
 
 
+def _findings(run: dict[str, Any]) -> list[dict[str, Any]]:
+    raw = run.get("findings")
+    if not isinstance(raw, list):
+        return []
+    return [x for x in raw if isinstance(x, dict)]
+
+
+def _load_history_run_records(history_dir: Path) -> list[dict[str, Any]]:
+    items = _history_runs(history_dir)
+    runs: list[dict[str, Any]] = []
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        file_name = item.get("file")
+        if not isinstance(file_name, str) or not file_name:
+            continue
+        run_path = history_dir / file_name
+        if not run_path.exists():
+            continue
+
+        loaded = load_run_record(run_path)
+        run: dict[str, Any] | None = None
+        if isinstance(loaded, dict) and isinstance(loaded.get("run_record"), dict):
+            rr = loaded["run_record"]
+            run = rr if isinstance(rr, dict) else None
+        elif isinstance(loaded, dict):
+            run = loaded
+
+        if run is None:
+            continue
+
+        sha = item.get("sha256")
+        if isinstance(sha, str) and sha:
+            run["_sha256"] = sha
+        run["_file"] = file_name
+
+        src = run.get("source")
+        cap = src.get("captured_at") if isinstance(src, dict) else None
+        if not cap:
+            cap2 = item.get("captured_at")
+            if isinstance(cap2, str) and cap2:
+                if isinstance(src, dict):
+                    src["captured_at"] = cap2
+                else:
+                    run["source"] = {"captured_at": cap2}
+
+        runs.append(run)
+
+    runs.sort(
+        key=lambda r: (
+            str((r.get("source") or {}).get("captured_at", ""))
+            if isinstance(r.get("source"), dict)
+            else "",
+            str(r.get("_sha256") or ""),
+        ),
+    )
+    return runs
+
+
 def _detect_business_scenario(runs: list[dict[str, Any]]) -> str:
     scenario_scores = {name: 0 for name in BUSINESS_SCENARIOS}
     corpus: list[str] = []
@@ -418,23 +485,15 @@ def _top_recurring(
 def suggest_optimizations(
     history_dir: Path, requested_scenario: str, limit: int = 5
 ) -> dict[str, Any]:
-    runs = _history_runs(history_dir)
-    expanded_runs: list[dict[str, Any]] = []
-    for item in runs:
-        file_name = item.get("file")
-        if not isinstance(file_name, str):
-            continue
-        run_path = history_dir / file_name
-        if run_path.exists():
-            expanded_runs.append(load_run_record(run_path))
+    runs = _load_history_run_records(history_dir)
 
-    detected = _detect_business_scenario(expanded_runs)
+    detected = _detect_business_scenario(runs)
     scenario = detected if requested_scenario == "auto" else requested_scenario
     config = BUSINESS_SCENARIOS.get(scenario, BUSINESS_SCENARIOS["engineering"])
 
     all_findings: list[dict[str, Any]] = []
-    for run in expanded_runs:
-        all_findings.extend(x for x in run.get("findings", []) if isinstance(x, dict))
+    for run in runs:
+        all_findings.extend(_findings(run))
 
     top_rules = _top_recurring(all_findings, "rule_id", limit=limit)
     top_paths = _top_recurring(all_findings, "path", limit=limit)
@@ -446,7 +505,7 @@ def suggest_optimizations(
         "recommendations": list(config["helpers"]),
         "top_rules": [{"rule_id": rule, "count": count} for rule, count in top_rules],
         "top_paths": [{"path": path, "count": count} for path, count in top_paths],
-        "runs_analyzed": len(expanded_runs),
+        "runs_analyzed": len(runs),
     }
 
 
@@ -474,19 +533,23 @@ def _render_recommend_text(payload: dict[str, Any]) -> str:
 
 
 def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None) -> None:
-    runs = _history_runs(history_dir)
+    runs = _load_history_run_records(history_dir)
     if since is not None:
         runs = runs[-since:]
+
     if not runs:
         content = "# sdetkit audit trends\n\nNo audit history found.\n"
         atomic_write_text(output, content)
         return
 
-    totals = [
-        int(item.get("aggregates", {}).get("counts_by_severity", {}).get("error", 0))
-        + int(item.get("aggregates", {}).get("counts_by_severity", {}).get("warn", 0))
-        for item in runs
-    ]
+    totals: list[int] = []
+    for r in runs:
+        agg = r.get("aggregates")
+        sev = agg.get("counts_by_severity") if isinstance(agg, dict) else None
+        err = int(sev.get("error", 0)) if isinstance(sev, dict) else 0
+        warn = int(sev.get("warn", 0)) if isinstance(sev, dict) else 0
+        totals.append(err + warn)
+
     last = runs[-1]
     previous = runs[-2] if len(runs) > 1 else None
     delta = diff_runs(previous, last) if previous else None
@@ -494,9 +557,7 @@ def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None
     recurring_rules: dict[str, int] = {}
     recurring_paths: dict[str, int] = {}
     for run in runs:
-        for finding in run.get("findings", []):
-            if not isinstance(finding, dict):
-                continue
+        for finding in _findings(run):
             recurring_rules[str(finding.get("rule_id", "unknown"))] = (
                 recurring_rules.get(str(finding.get("rule_id", "unknown")), 0) + 1
             )
@@ -507,12 +568,14 @@ def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None
     top_rules = sorted(recurring_rules.items(), key=lambda x: (-x[1], x[0]))[:10]
     top_paths = sorted(recurring_paths.items(), key=lambda x: (-x[1], x[0]))[:10]
 
+    latest_count = len(_findings(last))
+
     if fmt == "md":
         lines = [
             "# sdetkit audit trends",
             "",
             f"- runs: {len(runs)}",
-            f"- latest actionable findings: {len(last.get('findings', []))}",
+            f"- latest actionable findings: {latest_count}",
         ]
         if delta is not None:
             lines.append(
@@ -531,19 +594,20 @@ def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None
         "<html><head><meta charset='utf-8'><title>sdetkit audit trends</title></head><body>",
         "<h1>sdetkit audit trends</h1>",
         f"<p>Runs: {len(runs)}</p>",
-        f"<p>Latest actionable findings: {len(last.get('findings', []))}</p>",
+        f"<p>Latest actionable findings: {latest_count}</p>",
         f"<div>{_sparkline(totals)}</div>",
     ]
     if delta is not None:
         lines.append(
             f"<p>Delta vs previous: NEW={delta['counts']['new']} RESOLVED={delta['counts']['resolved']}</p>"
         )
+
     lines.append("<h2>Top recurring rules</h2><table><tr><th>Rule</th><th>Count</th></tr>")
     for rule, count in top_rules:
-        lines.append(f"<tr><td>{rule}</td><td>{count}</td></tr>")
+        lines.append(f"<tr><td>{html.escape(str(rule))}</td><td>{count}</td></tr>")
     lines.append("</table><h2>Top paths</h2><table><tr><th>Path</th><th>Count</th></tr>")
     for path, count in top_paths:
-        lines.append(f"<tr><td>{path}</td><td>{count}</td></tr>")
+        lines.append(f"<tr><td>{html.escape(str(path))}</td><td>{count}</td></tr>")
     lines.append("</table></body></html>\n")
     atomic_write_text(output, "".join(lines))
 
