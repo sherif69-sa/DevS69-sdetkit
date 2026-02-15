@@ -84,3 +84,65 @@ autodiscover_roots = 12
     )
     with pytest.raises(ValueError, match="autodiscover_roots"):
         discover_projects(repo)
+
+
+def test_autodiscover_supports_poetry_and_pdm_names(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    poetry = repo / "packages" / "poetry-lib"
+    poetry.mkdir(parents=True)
+    (poetry / "pyproject.toml").write_text(
+        """
+[tool.poetry]
+name = "poetry-lib"
+version = "0.1.0"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    pdm = repo / "packages" / "pdm-svc"
+    pdm.mkdir(parents=True)
+    (pdm / "pyproject.toml").write_text(
+        """
+[tool.pdm]
+name = "pdm-svc"
+version = "0.2.0"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    source, projects = discover_projects(repo, sort=True)
+    assert source == "autodiscover"
+    assert [(p.name, p.root) for p in projects] == [
+        ("pdm-svc", "packages/pdm-svc"),
+        ("poetry-lib", "packages/poetry-lib"),
+    ]
+
+
+def test_autodiscover_prefers_pep621_name_when_multiple_metadata_sections_exist(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    pkg = repo / "packages" / "mixed"
+    pkg.mkdir(parents=True)
+    (pkg / "pyproject.toml").write_text(
+        """
+[project]
+name = "pep621-name"
+version = "1.0.0"
+
+[tool.poetry]
+name = "poetry-name"
+version = "1.0.0"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    _, projects = discover_projects(repo)
+    assert [(p.name, p.root) for p in projects] == [("pep621-name", "packages/mixed")]

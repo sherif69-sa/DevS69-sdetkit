@@ -9,6 +9,10 @@ Fallback: `pyproject.toml` with `[tool.sdetkit.projects]`.
 
 If you prefer not to maintain explicit `[[project]]` entries, you can enable autodiscovery
 from `pyproject.toml`:
+Autodiscovery reads project names from `[project].name` (PEP 621) and also supports
+`[tool.poetry].name`, `[tool.pdm].name`, and `[tool.hatch.metadata].name` for
+legacy or non-PEP-621 projects.
+
 
 ```toml
 [tool.sdetkit.projects]
