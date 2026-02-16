@@ -4,6 +4,7 @@ import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+import logging
 
 
 def atomic_write_text(
@@ -39,8 +40,9 @@ def atomic_write_text(
         try:
             if tmp_path.exists():
                 tmp_path.unlink()
-        except Exception:
-            pass
+        except Exception as exc:
+            # Best-effort cleanup: failure to remove temporary file is non-fatal.
+            logging.debug("Failed to remove temporary file %s: %s", tmp_path, exc)
 
 
 def atomic_write_bytes(
@@ -76,8 +78,9 @@ def atomic_write_bytes(
         try:
             if tmp_path.exists():
                 tmp_path.unlink()
-        except Exception:
-            pass
+        except Exception as exc:
+            # Best-effort cleanup: failure to remove temporary file is non-fatal.
+            logging.debug("Failed to remove temporary file %s: %s", tmp_path, exc)
 
 
 def canonical_json_dumps(payload: Any, *, indent: int | None = 2) -> str:
