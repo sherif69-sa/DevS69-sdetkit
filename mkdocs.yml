@@ -65,6 +65,7 @@ nav:
       - Repo init: repo-init.md
       - Patch harness: patch-harness.md
       - AgentOS foundation: agentos-foundation.md
+      - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
       - Automation templates engine: automation-templates-engine.md
       - CI Contract: ci-contract.md
   - Integrations:

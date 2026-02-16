@@ -229,7 +229,7 @@ def load_config(path: Path) -> AgentConfig:
 def init_agent(root: Path, config_path: Path) -> list[str]:
     created: list[str] = []
     agent_root = root / ".sdetkit" / "agent"
-    for rel in ["", "history", "workdir", "cache"]:
+    for rel in ["", "history", "workdir", "cache", "conversations", "rate_limits"]:
         path = agent_root / rel
         path.mkdir(parents=True, exist_ok=True)
         created.append(path.relative_to(root).as_posix())
