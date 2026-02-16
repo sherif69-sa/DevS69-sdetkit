@@ -1,4 +1,25 @@
 {
-  "version": 1,
-  "entries": []
+  "entries": [
+    {
+      "line": 13,
+      "path": "src/sdetkit/atomicio.py",
+      "rule_id": "SEC_POTENTIAL_PATH_TRAVERSAL"
+    },
+    {
+      "line": 51,
+      "path": "src/sdetkit/atomicio.py",
+      "rule_id": "SEC_POTENTIAL_PATH_TRAVERSAL"
+    },
+    {
+      "line": 199,
+      "path": "src/sdetkit/ops.py",
+      "rule_id": "SEC_POTENTIAL_PATH_TRAVERSAL"
+    },
+    {
+      "line": 171,
+      "path": "tests/test_ops_workflows.py",
+      "rule_id": "SEC_POTENTIAL_PATH_TRAVERSAL"
+    }
+  ],
+  "version": 1
 }

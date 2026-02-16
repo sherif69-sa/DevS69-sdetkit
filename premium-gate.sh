@@ -22,8 +22,14 @@ run_step() {
 run_step "Quality" bash quality.sh
 run_step "CI" bash ci.sh
 run_step "Doctor ASCII" python3 -m sdetkit doctor --ascii
-run_step "Repository audit" python3 -m sdetkit repo audit . --format text --fail-on medium
+
+# `ci.sh` writes runtime cache/artifacts under .sdetkit; clear ephemeral state
+# before enterprise repo policy checks so local/CI runs stay deterministic.
+section "Cleanup ephemeral gate artifacts"
+rm -rf .sdetkit/cache .sdetkit/ops-artifacts sdet_check.json
+
+run_step "Repository audit" python3 -m sdetkit repo audit . --format text --fail-on warn
 run_step "Security scan (offline default + SARIF)" \
-  python3 -m sdetkit security scan --fail-on medium --format sarif --output security.sarif
+  python3 -m sdetkit security scan --fail-on warn --format sarif --output security.sarif
 
 echo "\nPremium gate passed. SARIF written to security.sarif"
