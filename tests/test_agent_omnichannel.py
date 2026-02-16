@@ -26,7 +26,7 @@ def test_webhook_generic_persists_and_routes_without_network(tmp_path: Path) -> 
     router = AgentRouter(
         root=tmp_path,
         config_path=tmp_path / ".sdetkit/agent/config.yaml",
-        rate_limiter=DeterministicRateLimiter(tmp_path, max_tokens=5, refill_per_second=0.0),
+        rate_limiter=DeterministicRateLimiter(tmp_path, capacity=5, refill_per_second=0.0),
         conversation_store=ConversationStore(tmp_path),
         task_runner=fake_runner,
     )
@@ -78,7 +78,7 @@ def test_telegram_adapter_normalizes_payload() -> None:
 
 def test_rate_limiter_denies_and_persists_counters(tmp_path: Path) -> None:
     limiter = DeterministicRateLimiter(
-        tmp_path, max_tokens=2, refill_per_second=0.0, time_fn=lambda: 10.0
+        tmp_path, capacity=2, refill_per_second=0.0, time_fn=lambda: 10.0
     )
 
     first_allowed, _ = limiter.allow(channel="generic", user_id="u1")
@@ -107,7 +107,7 @@ def test_router_rate_limit_short_circuits_task_runner(tmp_path: Path) -> None:
         root=tmp_path,
         config_path=tmp_path / ".sdetkit/agent/config.yaml",
         rate_limiter=DeterministicRateLimiter(
-            tmp_path, max_tokens=1, refill_per_second=0.0, time_fn=lambda: 1.0
+            tmp_path, capacity=1, refill_per_second=0.0, time_fn=lambda: 1.0
         ),
         conversation_store=ConversationStore(tmp_path),
         task_runner=fake_runner,

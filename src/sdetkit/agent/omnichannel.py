@@ -76,9 +76,18 @@ class ConversationStore:
     def _conversation_path(self, *, channel: str, user_id: str) -> Path:
         safe_channel = channel.replace("/", "_")
         safe_user_id = user_id.replace("/", "_")
-        return self.root / ".sdetkit" / "agent" / "conversations" / safe_channel / f"{safe_user_id}.jsonl"
+        return (
+            self.root
+            / ".sdetkit"
+            / "agent"
+            / "conversations"
+            / safe_channel
+            / f"{safe_user_id}.jsonl"
+        )
 
-    def append(self, event: InboundEvent, route_result: dict[str, Any], *, captured_at: float) -> Path:
+    def append(
+        self, event: InboundEvent, route_result: dict[str, Any], *, captured_at: float
+    ) -> Path:
         target = self._conversation_path(channel=event.channel, user_id=event.user_id)
         target.parent.mkdir(parents=True, exist_ok=True)
         row = {
@@ -99,12 +108,12 @@ class DeterministicRateLimiter:
         self,
         root: Path,
         *,
-        max_tokens: int = 5,
+        capacity: int = 5,
         refill_per_second: float = 1.0,
         time_fn: Callable[[], float] | None = None,
     ) -> None:
         self.root = root
-        self.max_tokens = max(1, max_tokens)
+        self.capacity = max(1, capacity)
         self.refill_per_second = max(0.0, refill_per_second)
         self.time_fn = time_fn or time.time
         self._in_memory: dict[str, dict[str, Any]] = {}
@@ -113,7 +122,9 @@ class DeterministicRateLimiter:
     def _counter_path(self, *, channel: str, user_id: str) -> Path:
         safe_channel = channel.replace("/", "_")
         safe_user_id = user_id.replace("/", "_")
-        return self.root / ".sdetkit" / "agent" / "rate_limits" / safe_channel / f"{safe_user_id}.json"
+        return (
+            self.root / ".sdetkit" / "agent" / "rate_limits" / safe_channel / f"{safe_user_id}.json"
+        )
 
     def _load(self, *, channel: str, user_id: str, now: float) -> dict[str, Any]:
         key = f"{channel}:{user_id}"
@@ -128,7 +139,12 @@ class DeterministicRateLimiter:
                     return dict(payload)
             except ValueError:
                 pass
-        seed = {"tokens": float(self.max_tokens), "last_refill": float(now), "allowed": 0, "denied": 0}
+        seed = {
+            "tokens": float(self.capacity),
+            "last_refill": float(now),
+            "allowed": 0,
+            "denied": 0,
+        }
         self._in_memory[key] = seed
         return dict(seed)
 
@@ -137,14 +153,19 @@ class DeterministicRateLimiter:
         self._in_memory[key] = dict(state)
         path = self._counter_path(channel=channel, user_id=user_id)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(state, ensure_ascii=True, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(state, ensure_ascii=True, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
 
     def allow(self, *, channel: str, user_id: str) -> tuple[bool, dict[str, Any]]:
         with self._lock:
             now = self.time_fn()
             state = self._load(channel=channel, user_id=user_id, now=now)
             elapsed = max(0.0, float(now) - float(state.get("last_refill", now)))
-            tokens = min(float(self.max_tokens), float(state.get("tokens", 0.0)) + elapsed * self.refill_per_second)
+            tokens = min(
+                float(self.capacity),
+                float(state.get("tokens", 0.0)) + elapsed * self.refill_per_second,
+            )
             allowed = bool(tokens >= 1.0)
             if allowed:
                 tokens -= 1.0
@@ -231,18 +252,15 @@ class AgentRouter:
         self.task_runner = task_runner
 
     def _wrapped_task(self, event: InboundEvent) -> str:
-        return (
-            "omnichannel-event "
-            + json.dumps(
-                {
-                    "channel": event.channel,
-                    "user_id": event.user_id,
-                    "text": event.text,
-                    "metadata": event.metadata,
-                },
-                ensure_ascii=True,
-                sort_keys=True,
-            )
+        return "omnichannel-event " + json.dumps(
+            {
+                "channel": event.channel,
+                "user_id": event.user_id,
+                "text": event.text,
+                "metadata": event.metadata,
+            },
+            ensure_ascii=True,
+            sort_keys=True,
         )
 
     def route(self, event: InboundEvent) -> dict[str, Any]:
@@ -267,8 +285,6 @@ class AgentRouter:
         }
         self.conversation_store.append(event, result, captured_at=self.rate_limiter.time_fn())
         return result
-
-
 
 
 def process_webhook(
@@ -365,7 +381,7 @@ class AgentServeApp:
         port: int = 8787,
         telegram_simulation_mode: bool = False,
         telegram_enable_outgoing: bool = False,
-        max_tokens: int = 5,
+        capacity: int = 5,
         refill_per_second: float = 1.0,
         tool_bridge_enabled: bool = False,
         tool_bridge_allowlist: tuple[str, ...] = (),
@@ -383,7 +399,7 @@ class AgentServeApp:
             root=root,
             config_path=config_path,
             rate_limiter=DeterministicRateLimiter(
-                root, max_tokens=max_tokens, refill_per_second=refill_per_second
+                root, capacity=capacity, refill_per_second=refill_per_second
             ),
             conversation_store=ConversationStore(root),
             tool_bridge=bridge,

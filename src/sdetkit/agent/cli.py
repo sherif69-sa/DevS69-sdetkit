@@ -103,7 +103,7 @@ def main(argv: list[str]) -> int:
             port=ns.port,
             telegram_simulation_mode=bool(ns.telegram_simulation_mode),
             telegram_enable_outgoing=bool(ns.telegram_enable_outgoing),
-            max_tokens=int(ns.rate_limit_max_tokens),
+            capacity=int(ns.rate_limit_max_tokens),
             refill_per_second=float(ns.rate_limit_refill_per_second),
             tool_bridge_enabled=bool(ns.tool_bridge_enabled),
             tool_bridge_allowlist=tuple(str(x) for x in ns.tool_bridge_allow),
