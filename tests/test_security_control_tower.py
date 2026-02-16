@@ -77,6 +77,26 @@ def test_security_fix_dry_run_and_apply(tmp_path: Path, capsys) -> None:
     assert "yaml.safe_load" in target.read_text(encoding="utf-8")
 
 
+def test_security_fix_adds_timeout_and_preserves_inline_comment(tmp_path: Path, capsys) -> None:
+    target = tmp_path / "net.py"
+    target.write_text(
+        "import requests\n"
+        "resp = requests.get('https://example.com')  # keep\n"
+        "ok = requests.get('https://example.com', timeout=5)\n",
+        encoding="utf-8",
+    )
+
+    assert _run(["fix", "--root", str(tmp_path)]) == 0
+    dry = capsys.readouterr().out
+    assert "timeout=10" in dry
+    assert target.read_text(encoding="utf-8").count("timeout=") == 1
+
+    assert _run(["fix", "--root", str(tmp_path), "--apply", "--timeout", "9"]) == 0
+    updated = target.read_text(encoding="utf-8")
+    assert "requests.get('https://example.com', timeout=9)  # keep" in updated
+    assert "requests.get('https://example.com', timeout=5)" in updated
+
+
 def test_premium_gate_script_smoke_contains_commands() -> None:
     text = Path("premium-gate.sh").read_text(encoding="utf-8")
     assert "bash quality.sh" in text
