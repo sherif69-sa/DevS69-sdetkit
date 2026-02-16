@@ -19,6 +19,15 @@ def test_quick_mode_returns_stable_schema() -> None:
     payload = json.loads(proc.stdout)
     assert set(payload) == {"ok", "score", "checks", "recommendations", "meta"}
     assert payload["meta"]["schema_version"] == "1.0"
+    assert set(payload["meta"]) >= {
+        "schema_version",
+        "generated_at",
+        "mode",
+        "fix",
+        "python",
+        "duration_seconds",
+        "had_crash",
+    }
     for value in payload["checks"].values():
         assert set(value) >= {"ok", "summary", "details", "actions"}
 
@@ -30,6 +39,25 @@ def test_json_output_contains_only_json_stdout() -> None:
         text=True,
     )
     json.loads(proc.stdout)
+
+
+def test_deterministic_mode_is_byte_identical_across_runs() -> None:
+    cmd = [
+        sys.executable,
+        "-m",
+        "sdetkit.maintenance",
+        "--format",
+        "json",
+        "--mode",
+        "quick",
+        "--deterministic",
+    ]
+    proc_a = subprocess.run(cmd, capture_output=True, text=True)
+    proc_b = subprocess.run(cmd, capture_output=True, text=True)
+
+    assert proc_a.returncode in {0, 1}
+    assert proc_b.returncode in {0, 1}
+    assert proc_a.stdout == proc_b.stdout
 
 
 def test_missing_tool_is_graceful(monkeypatch) -> None:

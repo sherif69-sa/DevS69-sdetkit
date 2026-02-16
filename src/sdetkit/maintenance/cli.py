@@ -13,6 +13,7 @@ from .registry import checks_for_mode
 from .types import CheckResult, MaintenanceContext
 
 SCHEMA_VERSION = "1.0"
+DETERMINISTIC_GENERATED_AT = "1970-01-01T00:00:00+00:00"
 
 
 class StderrLogger:
@@ -26,6 +27,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", default=None)
     parser.add_argument("--mode", choices=["quick", "full"], default="quick")
     parser.add_argument("--fix", action="store_true")
+    parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--quiet", action="store_true")
     return parser
 
@@ -73,7 +75,17 @@ def _write_output(path: str | None, content: str) -> None:
     out_path.write_text(content, encoding="utf-8")
 
 
-def _build_report(ctx: MaintenanceContext) -> dict[str, Any]:
+def _deterministic_generated_at(env: dict[str, str]) -> str:
+    epoch = env.get("SOURCE_DATE_EPOCH")
+    if epoch is None:
+        return DETERMINISTIC_GENERATED_AT
+    try:
+        return datetime.fromtimestamp(int(epoch), UTC).isoformat()
+    except (TypeError, ValueError, OSError, OverflowError):
+        return DETERMINISTIC_GENERATED_AT
+
+
+def _build_report(ctx: MaintenanceContext, *, deterministic: bool = False) -> dict[str, Any]:
     started = time.monotonic()
     checks: dict[str, dict[str, Any]] = {}
     crashes = False
@@ -104,11 +116,13 @@ def _build_report(ctx: MaintenanceContext) -> dict[str, Any]:
         "recommendations": recommendations,
         "meta": {
             "schema_version": SCHEMA_VERSION,
-            "generated_at": datetime.now(UTC).isoformat(),
+            "generated_at": _deterministic_generated_at(ctx.env)
+            if deterministic
+            else datetime.now(UTC).isoformat(),
             "mode": ctx.mode,
             "fix": ctx.fix,
             "python": ctx.python_exe,
-            "duration_seconds": round(time.monotonic() - started, 3),
+            "duration_seconds": 0.0 if deterministic else round(time.monotonic() - started, 3),
             "had_crash": crashes,
         },
     }
@@ -145,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     try:
-        report = _build_report(ctx)
+        report = _build_report(ctx, deterministic=bool(ns.deterministic))
         rendered = {
             "json": json.dumps(report, sort_keys=True),
             "text": _render_text(report),
