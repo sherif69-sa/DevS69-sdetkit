@@ -42,11 +42,11 @@ Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.m
 
 [project.optional-dependencies]
 dev = [
-  "build==1.2.2.post1",
-  "mypy==1.17.1",
-  "pre-commit==4.3.0",
-  "ruff==0.12.10",
-  "twine==6.1.0"
+  "build==1.4.0",
+  "mypy==1.19.1",
+  "pre-commit==4.5.1",
+  "ruff==0.15.1",
+  "twine==6.2.0"
 ]
 test = [
   "hypothesis",
@@ -59,7 +59,7 @@ docs = [
   "mkdocs-material==9.7.1"
 ]
 telegram = [
-  "python-telegram-bot>=21,<22"
+  "python-telegram-bot>=21,<23"
 ]
 whatsapp = [
   "twilio>=9,<10"
