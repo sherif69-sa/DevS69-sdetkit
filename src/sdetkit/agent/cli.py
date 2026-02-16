@@ -85,7 +85,7 @@ def main(argv: list[str]) -> int:
     if ns.agent_cmd == "templates":
         try:
             if ns.templates_cmd == "list":
-                payload = [
+                list_payload = [
                     {
                         "id": item.metadata["id"],
                         "title": item.metadata["title"],
@@ -95,13 +95,13 @@ def main(argv: list[str]) -> int:
                     for item in discover_templates(root)
                 ]
                 sys.stdout.write(
-                    json.dumps({"templates": payload}, ensure_ascii=True, sort_keys=True) + "\n"
+                    json.dumps({"templates": list_payload}, ensure_ascii=True, sort_keys=True) + "\n"
                 )
                 return 0
 
             if ns.templates_cmd == "show":
                 item = template_by_id(root, ns.id)
-                payload = {
+                show_payload = {
                     "metadata": item.metadata,
                     "inputs": {
                         name: {"default": spec.default, "description": spec.description}
@@ -113,7 +113,7 @@ def main(argv: list[str]) -> int:
                     ],
                     "source": item.source.relative_to(root).as_posix(),
                 }
-                sys.stdout.write(json.dumps(payload, ensure_ascii=True, sort_keys=True) + "\n")
+                sys.stdout.write(json.dumps(show_payload, ensure_ascii=True, sort_keys=True) + "\n")
                 return 0
 
             if ns.templates_cmd == "run":
@@ -132,8 +132,8 @@ def main(argv: list[str]) -> int:
                 return 0 if record.get("status") == "ok" else 1
 
             if ns.templates_cmd == "pack":
-                payload = pack_templates(root, output=root / ns.output)
-                sys.stdout.write(json.dumps(payload, ensure_ascii=True, sort_keys=True) + "\n")
+                pack_payload = pack_templates(root, output=root / ns.output)
+                sys.stdout.write(json.dumps(pack_payload, ensure_ascii=True, sort_keys=True) + "\n")
                 return 0
         except TemplateValidationError as exc:
             sys.stdout.write(
