@@ -9,6 +9,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from sdetkit.security import safe_path
+
 from .registry import checks_for_mode
 from .types import CheckResult, MaintenanceContext
 
@@ -83,7 +85,7 @@ def _render_markdown(report: dict[str, Any]) -> str:
 def _write_output(path: str | None, content: str) -> None:
     if not path:
         return
-    out_path = Path(path)
+    out_path = safe_path(Path.cwd(), path, allow_absolute=True)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(content, encoding="utf-8")
 
