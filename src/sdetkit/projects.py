@@ -257,11 +257,13 @@ def _autodiscover_projects(
         return []
 
     found: list[RepoProject] = []
-    seen: set[str] = set()
+    seen: dict[str, str] = {}
 
     for base in bases:
         for dirpath, dirnames, filenames in os.walk(base):
-            dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS and not d.startswith(".")]
+            dirnames[:] = sorted(
+                d for d in dirnames if d not in _SKIP_DIRS and not d.startswith(".")
+            )
             has_pyproject = "pyproject.toml" in filenames
             has_cargo_toml = "Cargo.toml" in filenames
             has_go_mod = "go.mod" in filenames
@@ -282,8 +284,11 @@ def _autodiscover_projects(
                 continue
             root_rel = project_dir.relative_to(repo_root).as_posix()
             if name in seen:
-                raise ProjectsConfigError(f"duplicate project name: {name}")
-            seen.add(name)
+                first_root = seen[name]
+                raise ProjectsConfigError(
+                    f"duplicate project name: {name} (roots: {first_root} and {root_rel})"
+                )
+            seen[name] = root_rel
             found.append(
                 RepoProject(
                     name=name,

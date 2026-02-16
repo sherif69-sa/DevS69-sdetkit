@@ -333,3 +333,19 @@ version = "0.1.0"
         ("github.com/acme/edge", "apps/edge"),
         ("py-name", "packages/hybrid"),
     ]
+
+
+def test_autodiscover_duplicate_name_error_includes_both_roots_in_stable_order(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    _write_pyproject(repo / "packages" / "zeta", "shared-name")
+    _write_pyproject(repo / "packages" / "alpha", "shared-name")
+
+    with pytest.raises(
+        ValueError,
+        match=r"duplicate project name: shared-name \(roots: packages/alpha and packages/zeta\)",
+    ):
+        discover_projects(repo)
