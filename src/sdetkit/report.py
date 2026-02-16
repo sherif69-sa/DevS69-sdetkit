@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from .atomicio import atomic_write_text
+from .atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
 from .security import SecurityError, safe_path
 
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
@@ -52,12 +52,6 @@ def _normalize_path(path: str) -> str:
     while clean.startswith("/"):
         clean = clean[1:]
     return clean or "."
-
-
-def _canonical_json_bytes(payload: dict[str, Any]) -> bytes:
-    return json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode(
-        "utf-8"
-    )
 
 
 def build_run_record(
@@ -810,28 +804,34 @@ def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="sdetkit report")
+    parser = argparse.ArgumentParser(
+        prog="sdetkit report",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="Ingest, diff, and build deterministic report artifacts.",
+    )
     sub = parser.add_subparsers(dest="report_cmd", required=True)
 
-    ip = sub.add_parser("ingest")
+    ip = sub.add_parser("ingest", help="Ingest a run record into deterministic history index.")
     ip.add_argument("run_json")
     ip.add_argument("--history-dir", default=".sdetkit/audit-history")
     ip.add_argument("--label", default=None)
 
-    dp = sub.add_parser("diff")
+    dp = sub.add_parser(
+        "diff", help="Diff two run records and optionally fail by severity threshold."
+    )
     dp.add_argument("--from", dest="from_run", required=True)
     dp.add_argument("--to", dest="to_run", required=True)
     dp.add_argument("--format", choices=["text", "json", "md"], default="text")
     dp.add_argument("--fail-on", choices=["none", "warn", "error"], default="none")
     dp.add_argument("--limit-new", type=int, default=None)
 
-    bp = sub.add_parser("build")
+    bp = sub.add_parser("build", help="Build HTML/Markdown trends dashboard from history.")
     bp.add_argument("--history-dir", default=".sdetkit/audit-history")
     bp.add_argument("--output", default="report.html")
     bp.add_argument("--format", choices=["html", "md"], default="html")
     bp.add_argument("--since", type=int, default=None)
 
-    rp = sub.add_parser("recommend")
+    rp = sub.add_parser("recommend", help="Generate workflow recommendations from report history.")
     rp.add_argument("--history-dir", default=".sdetkit/audit-history")
     rp.add_argument("--scenario", choices=["auto", *sorted(BUSINESS_SCENARIOS)], default="auto")
     rp.add_argument("--format", choices=["text", "json", "md"], default="text")
@@ -845,12 +845,10 @@ def main(argv: list[str] | None = None) -> int:
             history_dir = safe_path(Path.cwd(), ns.history_dir, allow_absolute=True)
             history_dir.mkdir(parents=True, exist_ok=True)
             run = load_run_record(src)
-            digest = hashlib.sha256(_canonical_json_bytes(run)).hexdigest()
+            digest = hashlib.sha256(canonical_json_bytes(run)).hexdigest()
             target = history_dir / f"{digest}.json"
             if not target.exists():
-                atomic_write_text(
-                    target, json.dumps(run, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
-                )
+                atomic_write_text(target, canonical_json_dumps(run))
 
             index_items = _history_runs(history_dir)
             rows = {(str(x.get("sha256")), str(x.get("file"))): x for x in index_items}
@@ -873,9 +871,7 @@ def main(argv: list[str] | None = None) -> int:
             to_run = load_run_record(safe_path(Path.cwd(), ns.to_run, allow_absolute=True))
             payload = diff_runs(from_run, to_run, new_limit=ns.limit_new)
             if ns.format == "json":
-                sys.stdout.write(
-                    json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
-                )
+                sys.stdout.write(canonical_json_dumps(payload))
             elif ns.format == "md":
                 markdown_limit = ns.limit_new if ns.limit_new is not None else 10
                 sys.stdout.write(_render_diff_markdown(payload, limit=markdown_limit))
@@ -888,9 +884,7 @@ def main(argv: list[str] | None = None) -> int:
             history_dir = safe_path(Path.cwd(), ns.history_dir, allow_absolute=True)
             payload = suggest_optimizations(history_dir, ns.scenario, limit=max(ns.limit, 1))
             if ns.format == "json":
-                sys.stdout.write(
-                    json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
-                )
+                sys.stdout.write(canonical_json_dumps(payload))
             elif ns.format == "md":
                 sys.stdout.write(_render_recommend_markdown(payload))
             else:
@@ -902,5 +896,6 @@ def main(argv: list[str] | None = None) -> int:
         build_dashboard(history_dir, output, ns.format, ns.since)
         return 0
     except (ValueError, OSError, SecurityError) as exc:
-        print(str(exc), file=sys.stderr)
+        message = str(exc).replace("\n", " ")
+        print(f"report error: {message}", file=sys.stderr)
         return 2

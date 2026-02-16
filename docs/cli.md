@@ -123,7 +123,7 @@ GitHub Action integration:
 ## `report`
 
 - `sdetkit report ingest RUN.json [--history-dir .sdetkit/audit-history] [--label LABEL]`
-- `sdetkit report diff --from RUN.json --to RUN.json [--format text|json] [--fail-on none|warn|error]`
+- `sdetkit report diff --from RUN.json --to RUN.json [--format text|json|md] [--fail-on none|warn|error] [--limit-new N]`
 - `sdetkit report build [--history-dir .sdetkit/audit-history] [--output report.html] [--format html|md] [--since N]`
 
 See: reporting-and-trends.md
@@ -151,3 +151,10 @@ See: ide-and-precommit.md
 - `sdetkit agent templates pack [--output FILE.tar]`
 
 See: agentos-foundation.md, omnichannel-mcp-bridge.md, and automation-templates-engine.md
+
+
+## CLI consistency notes
+
+- Agent/report commands use shared option names where applicable: `--history-dir`, `--output`, `--format`, `--config`, `--cache-dir`, `--no-cache`, `--approve`, `--output-dir`, and `--set`.
+- `--help` output includes default values for faster operator onboarding.
+- Normal user errors are emitted as single-line messages (`agent error: ...`, `report error: ...`) without stack traces.

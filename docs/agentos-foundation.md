@@ -86,8 +86,7 @@ provider:
 safety:
   write_allowlist:
     - .sdetkit/agent/workdir
-  shell_allowlist:
-    - python
+  shell_allowlist: []
 ```
 
 Provider modes:
@@ -99,3 +98,5 @@ Provider modes:
 ## Productization blueprint
 
 See `docs/enterprise-productization-blueprint.md` for deployment modes, governance controls, adoption plans, and packaging deliverables.
+
+See also: [AgentOS cookbook](agentos-cookbook.md), [Determinism contract](determinism-contract.md), and [Security model](security-model.md).

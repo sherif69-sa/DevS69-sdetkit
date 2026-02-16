@@ -1,7 +1,9 @@
+import json
 import os
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 
 def atomic_write_text(
@@ -76,3 +78,13 @@ def atomic_write_bytes(
                 tmp_path.unlink()
         except Exception:
             pass
+
+
+def canonical_json_dumps(payload: Any, *, indent: int | None = 2) -> str:
+    return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=indent) + "\n"
+
+
+def canonical_json_bytes(payload: Any) -> bytes:
+    return json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )

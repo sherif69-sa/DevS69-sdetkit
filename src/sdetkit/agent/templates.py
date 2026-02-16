@@ -3,17 +3,18 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import io
-import json
 import os
 import re
 import shlex
 import subprocess
 import tarfile
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from sdetkit import repo
+from sdetkit.atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
 from sdetkit.report import build_dashboard
 
 
@@ -304,10 +305,20 @@ def _as_bool(value: Any) -> bool:
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-    )
+    atomic_write_text(path, canonical_json_dumps(payload))
+
+
+def _atomic_tar_write(target: Path, write_cb: Any) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(prefix=target.name + ".", dir=str(target.parent))
+    os.close(fd)
+    tmp_path = Path(tmp_name)
+    try:
+        write_cb(tmp_path)
+        os.replace(tmp_path, target)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
 
 
 def run_template(
@@ -367,8 +378,7 @@ def run_template(
         elif step.action == "fs.write":
             target = Path(str(params.get("path")))
             content = str(params.get("content", ""))
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(content, encoding="utf-8")
+            atomic_write_text(target, content)
             payload = {"path": target.as_posix(), "bytes": len(content.encode("utf-8"))}
             artifacts.append(target.as_posix())
         elif step.action == "shell.run":
@@ -378,28 +388,32 @@ def run_template(
             ok = bool(shell_res.get("ok"))
             if isinstance(params.get("save_stdout"), str):
                 stdout_path = Path(str(params["save_stdout"]))
-                stdout_path.parent.mkdir(parents=True, exist_ok=True)
-                stdout_path.write_text(str(shell_res.get("stdout", "")), encoding="utf-8")
+                atomic_write_text(stdout_path, str(shell_res.get("stdout", "")))
                 artifacts.append(stdout_path.as_posix())
         elif step.action == "artifacts.bundle":
             source_dir = Path(str(params.get("source_dir", output_dir)))
             target = Path(str(params.get("output", output_dir / "bundle.tar")))
-            target.parent.mkdir(parents=True, exist_ok=True)
-            with tarfile.open(target, mode="w") as tf:
-                for path in sorted(source_dir.rglob("*")):
-                    if path.is_dir() or path == target:
-                        continue
-                    rel = path.relative_to(source_dir).as_posix()
-                    info = tarfile.TarInfo(name=rel)
-                    data = path.read_bytes()
-                    info.size = len(data)
-                    info.uid = 0
-                    info.gid = 0
-                    info.uname = ""
-                    info.gname = ""
-                    info.mtime = 0
-                    info.mode = 0o644
-                    tf.addfile(info, io.BytesIO(data))
+
+            def _write_bundle(
+                tmp_target: Path, *, source_dir: Path = source_dir, target: Path = target
+            ) -> None:
+                with tarfile.open(tmp_target, mode="w") as tf:
+                    for path in sorted(source_dir.rglob("*")):
+                        if path.is_dir() or path == target:
+                            continue
+                        rel = path.relative_to(source_dir).as_posix()
+                        info = tarfile.TarInfo(name=rel)
+                        data = path.read_bytes()
+                        info.size = len(data)
+                        info.uid = 0
+                        info.gid = 0
+                        info.uname = ""
+                        info.gname = ""
+                        info.mtime = 0
+                        info.mode = 0o644
+                        tf.addfile(info, io.BytesIO(data))
+
+            _atomic_tar_write(target, _write_bundle)
             payload = {"output": target.as_posix()}
             artifacts.append(target.as_posix())
         else:
@@ -428,9 +442,7 @@ def run_template(
         "steps": step_records,
         "artifacts": sorted(set(artifacts)),
     }
-    digest = hashlib.sha256(
-        json.dumps(record, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    ).hexdigest()
+    digest = hashlib.sha256(canonical_json_bytes(record)).hexdigest()
     record["hash"] = digest
     record_path = output_dir / "run-record.json"
     _write_json(record_path, record)
@@ -453,20 +465,23 @@ def parse_set_values(values: list[str]) -> dict[str, str]:
 def pack_templates(root: Path, *, output: Path) -> dict[str, Any]:
     templates_dir = root / "templates" / "automations"
     files = sorted(path for path in templates_dir.glob("*.yaml") if path.is_file())
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(output, mode="w") as tf:
-        for path in files:
-            rel = path.relative_to(root).as_posix()
-            payload = path.read_bytes()
-            info = tarfile.TarInfo(name=rel)
-            info.size = len(payload)
-            info.mtime = 0
-            info.uid = 0
-            info.gid = 0
-            info.mode = 0o644
-            info.uname = ""
-            info.gname = ""
-            tf.addfile(info, io.BytesIO(payload))
+
+    def _write_pack(tmp_output: Path) -> None:
+        with tarfile.open(tmp_output, mode="w") as tf:
+            for path in files:
+                rel = path.relative_to(root).as_posix()
+                payload = path.read_bytes()
+                info = tarfile.TarInfo(name=rel)
+                info.size = len(payload)
+                info.mtime = 0
+                info.uid = 0
+                info.gid = 0
+                info.mode = 0o644
+                info.uname = ""
+                info.gname = ""
+                tf.addfile(info, io.BytesIO(payload))
+
+    _atomic_tar_write(output, _write_pack)
     return {
         "output": output.as_posix(),
         "count": len(files),

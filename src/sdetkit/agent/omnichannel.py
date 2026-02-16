@@ -12,6 +12,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, cast
 
+from sdetkit.atomicio import atomic_write_text, canonical_json_dumps
+
 from .core import run_agent
 
 
@@ -90,7 +92,6 @@ class ConversationStore:
         self, event: InboundEvent, route_result: dict[str, Any], *, captured_at: float
     ) -> Path:
         target = self._conversation_path(channel=event.channel, user_id=event.user_id)
-        target.parent.mkdir(parents=True, exist_ok=True)
         row = {
             "captured_at": int(captured_at),
             "channel": event.channel,
@@ -99,8 +100,12 @@ class ConversationStore:
             "metadata": event.metadata,
             "route": route_result,
         }
-        with target.open("a", encoding="utf-8") as fh:
-            fh.write(json.dumps(row, ensure_ascii=True, sort_keys=True) + "\n")
+        existing = ""
+        if target.exists():
+            existing = target.read_text(encoding="utf-8")
+        atomic_write_text(
+            target, existing + json.dumps(row, ensure_ascii=True, sort_keys=True) + "\n"
+        )
         return target
 
 
@@ -157,10 +162,7 @@ class DeterministicRateLimiter:
         key = f"{channel}:{user_id}"
         self._in_memory[key] = dict(state)
         path = self._counter_path(channel=channel, user_id=user_id)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps(state, ensure_ascii=True, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-        )
+        atomic_write_text(path, canonical_json_dumps(state))
 
     def allow(self, *, channel: str, user_id: str) -> tuple[bool, dict[str, Any]]:
         with self._lock:

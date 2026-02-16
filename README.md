@@ -184,6 +184,50 @@
 3. Use [docs/cli.md](docs/cli.md) + [docs/doctor.md](docs/doctor.md) for daily operations.
 4. Follow [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
 
+
+## AgentOS overview
+
+AgentOS is the deterministic orchestration layer behind `sdetkit agent`.
+
+```text
+User/CI
+  |
+  v
+sdetkit agent CLI
+  |
+  +--> Manager (plan)
+  +--> Workers (actions: repo/report/fs/shell)
+  +--> Reviewer (accept/reject)
+  |
+  +--> Safety gates (approval, allowlists, restricted shell)
+  +--> Stable artifacts (history, conversations, dashboards, exports)
+```
+
+Core docs: [AgentOS foundation](docs/agentos-foundation.md), [Omnichannel + MCP bridge](docs/omnichannel-mcp-bridge.md), [Automation templates engine](docs/automation-templates-engine.md).
+
+## Quickstart (clean checkout, provider=none)
+
+```bash
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
+./.venv/bin/sdetkit agent init
+./.venv/bin/sdetkit agent run 'action repo.audit {"profile":"default"}' --approve
+./.venv/bin/sdetkit agent dashboard build --format html
+./.venv/bin/sdetkit report build --history-dir .sdetkit/audit-history --output report.html
+```
+
+This path is offline-friendly and deterministic when `provider.type=none` and inputs are unchanged.
+
+## Production and enterprise notes
+
+- Safety gates are explicit: dangerous writes/shell actions require approval and allowlists.
+- Run records provide durable evidence for what executed and why.
+- Exports are deterministic by default (sorted keys/lists + canonical JSON).
+- Data ownership remains local to your repository workspace unless you explicitly route data elsewhere.
+- MCP/tool bridge is disabled by default and must be explicitly allowlisted.
+
+Additional references: [AgentOS cookbook](docs/agentos-cookbook.md), [Determinism contract](docs/determinism-contract.md), [Security model](docs/security-model.md).
+
 ## 🧩 Why this repository exists
 
 This project is designed for fast onboarding and high-confidence delivery:

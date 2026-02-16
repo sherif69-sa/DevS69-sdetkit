@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from sdetkit import repo
+from sdetkit.atomicio import atomic_write_text
 from sdetkit.report import build_dashboard
 
 
@@ -89,8 +90,7 @@ class ActionRegistry:
             )
         try:
             path = self._safe_rel(rel)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding="utf-8")
+            atomic_write_text(path, content)
         except (OSError, ValueError) as exc:
             return ActionResult("fs.write", False, {"error": str(exc), "path": rel})
         return ActionResult("fs.write", True, {"path": rel, "bytes": len(content.encode("utf-8"))})

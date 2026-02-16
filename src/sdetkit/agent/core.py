@@ -9,6 +9,14 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, cast
 
+from sdetkit.atomicio import (
+    atomic_write_text,
+    canonical_json_bytes,
+)
+from sdetkit.atomicio import (
+    canonical_json_dumps as _canonical_json_dumps,
+)
+
 from .actions import ActionRegistry, ActionResult, maybe_parse_action_task
 from .providers import CachedProvider, FakeProvider, LocalHTTPProvider, NoneProvider, Provider
 
@@ -29,8 +37,7 @@ provider:
 safety:
   write_allowlist:
     - .sdetkit/agent/workdir
-  shell_allowlist:
-    - python
+  shell_allowlist: []
 """
 
 
@@ -116,13 +123,11 @@ def _captured_at() -> str:
 
 
 def canonical_json_dumps(payload: dict[str, Any]) -> str:
-    return json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+    return _canonical_json_dumps(payload)
 
 
 def _canonical_bytes(payload: dict[str, Any]) -> bytes:
-    return json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode(
-        "utf-8"
-    )
+    return canonical_json_bytes(payload)
 
 
 def _sha(payload: dict[str, Any]) -> str:
@@ -234,8 +239,7 @@ def init_agent(root: Path, config_path: Path) -> list[str]:
         path.mkdir(parents=True, exist_ok=True)
         created.append(path.relative_to(root).as_posix())
     if not config_path.exists():
-        config_path.parent.mkdir(parents=True, exist_ok=True)
-        config_path.write_text(DEFAULT_CONFIG, encoding="utf-8")
+        atomic_write_text(config_path, DEFAULT_CONFIG)
         created.append(config_path.relative_to(root).as_posix())
     return created
 
@@ -420,8 +424,7 @@ def run_agent(
     digest = _sha(base_record)
     base_record["hash"] = digest
     history_path = root / ".sdetkit" / "agent" / "history" / f"{digest}.json"
-    history_path.parent.mkdir(parents=True, exist_ok=True)
-    history_path.write_text(canonical_json_dumps(base_record), encoding="utf-8")
+    atomic_write_text(history_path, canonical_json_dumps(base_record))
     return base_record
 
 

@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -91,3 +91,22 @@ bash scripts/check.sh all
 ## License
 
 Free for personal/educational noncommercial use. Commercial use requires a paid license; see [license page](license.md).
+
+
+### AgentOS operations
+
+<div class="grid cards" markdown>
+
+- [**AgentOS foundation**](agentos-foundation.md)
+  Deterministic orchestrator, safety gates, and provider modes.
+
+- [**AgentOS cookbook**](agentos-cookbook.md)
+  End-to-end recipes with commands, expected outputs, and artifact paths.
+
+- [**Determinism contract**](determinism-contract.md)
+  What is guaranteed stable and what is intentionally variable.
+
+- [**Security model**](security-model.md)
+  Approval gates, allowlists, shell restrictions, and MCP bridge defaults.
+
+</div>
