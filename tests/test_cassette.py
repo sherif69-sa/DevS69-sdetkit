@@ -13,6 +13,7 @@ from sdetkit.cassette import (
     CassetteReplayTransport,
 )
 from sdetkit.netclient import SdetAsyncHttpClient, SdetHttpClient
+from sdetkit.security import SecurityError
 
 
 def test_cassette_record_then_replay_sync(tmp_path: Path) -> None:
@@ -122,3 +123,18 @@ async def test_cassette_record_then_replay_async(tmp_path: Path) -> None:
         c3 = SdetAsyncHttpClient(raw3)
         with pytest.raises(RuntimeError):
             await c3.get_json_dict("https://example.test/other")
+
+
+def test_cassette_save_and_load_block_traversal(tmp_path: Path, monkeypatch) -> None:
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.chdir(work)
+
+    cassette = Cassette()
+    with pytest.raises(SecurityError):
+        cassette.save("../escape.json")
+
+    escaped = tmp_path / "escape.json"
+    escaped.write_text('{"version": 1, "interactions": []}', encoding="utf-8")
+    with pytest.raises(SecurityError):
+        Cassette.load("../escape.json")

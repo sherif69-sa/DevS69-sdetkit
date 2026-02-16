@@ -8,6 +8,8 @@ from typing import Any
 
 import httpx
 
+from .security import safe_path
+
 
 def _b64e(b: bytes) -> str:
     if not b:
@@ -51,7 +53,7 @@ class Cassette:
         return {"version": 1, "interactions": self.interactions}
 
     def save(self, path: str | Path) -> None:
-        p = Path(path)
+        p = safe_path(Path.cwd(), str(path), allow_absolute=True)
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(
             json.dumps(self.to_json(), ensure_ascii=True, sort_keys=True, indent=2) + "\n",
@@ -60,7 +62,7 @@ class Cassette:
 
     @classmethod
     def load(cls, path: str | Path) -> Cassette:
-        p = Path(path)
+        p = safe_path(Path.cwd(), str(path), allow_absolute=True)
         data = json.loads(p.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             raise ValueError("invalid cassette: expected object")
@@ -162,7 +164,9 @@ class CassetteRecordTransport(httpx.BaseTransport):
     ) -> None:
         self._cassette = cassette
         self._inner = inner
-        self._path = Path(path) if path is not None else None
+        self._path = (
+            safe_path(Path.cwd(), str(path), allow_absolute=True) if path is not None else None
+        )
 
     def handle_request(self, request: httpx.Request) -> httpx.Response:
         resp = self._inner.handle_request(request)
@@ -243,7 +247,9 @@ class AsyncCassetteRecordTransport(httpx.AsyncBaseTransport):
     ) -> None:
         self._cassette = cassette
         self._inner = inner
-        self._path = Path(path) if path is not None else None
+        self._path = (
+            safe_path(Path.cwd(), str(path), allow_absolute=True) if path is not None else None
+        )
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
         resp = await self._inner.handle_async_request(request)
@@ -265,7 +271,7 @@ def open_transport(
     *,
     upstream: httpx.BaseTransport | None = None,
 ) -> httpx.BaseTransport:
-    p = Path(path)
+    p = safe_path(Path.cwd(), str(path), allow_absolute=True)
     m = mode.lower().strip()
 
     if m == "auto":

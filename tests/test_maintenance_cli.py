@@ -3,10 +3,14 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from pathlib import Path
+
+import pytest
 
 from sdetkit.maintenance import cli
 from sdetkit.maintenance.checks import lint_check
 from sdetkit.maintenance.types import MaintenanceContext
+from sdetkit.security import SecurityError
 
 
 def test_quick_mode_returns_stable_schema() -> None:
@@ -150,3 +154,12 @@ def test_render_markdown_escapes_exception_derived_summary(monkeypatch) -> None:
     assert len(check_rows) == 1
     assert "crash\\|check" in check_rows[0]
     assert "check crashed: boom \\| &lt;bad&gt;\\`" in check_rows[0]
+
+
+def test_write_output_blocks_parent_traversal(tmp_path: Path, monkeypatch) -> None:
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.chdir(work)
+
+    with pytest.raises(SecurityError, match="unsafe path rejected"):
+        cli._write_output("../escape.json", "content")

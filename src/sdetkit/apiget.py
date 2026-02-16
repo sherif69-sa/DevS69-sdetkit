@@ -263,8 +263,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if path == "":
             raise _AtFileError("apiget: cannot read file: <empty path>")
         try:
-            return Path(path).read_text(encoding="utf-8")
-        except FileNotFoundError:
+            safe_file = safe_path(Path.cwd(), path, allow_absolute=True)
+            return safe_file.read_text(encoding="utf-8")
+        except (SecurityError, FileNotFoundError):
             raise _AtFileError("apiget: file not found: " + path) from None
         except (OSError, UnicodeError):
             raise _AtFileError("apiget: cannot read file: " + path) from None
@@ -286,8 +287,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if path == "":
             raise _AtFileError("apiget: cannot read file: <empty path>")
         try:
-            return Path(path).read_bytes()
-        except FileNotFoundError:
+            safe_file = safe_path(Path.cwd(), path, allow_absolute=True)
+            return safe_file.read_bytes()
+        except (SecurityError, FileNotFoundError):
             raise _AtFileError("apiget: file not found: " + path) from None
         except OSError:
             raise _AtFileError("apiget: cannot read file: " + path) from None
