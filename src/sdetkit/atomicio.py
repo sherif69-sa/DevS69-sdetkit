@@ -1,10 +1,10 @@
 import json
+import logging
 import os
 import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
-import logging
 
 
 def atomic_write_text(

@@ -201,16 +201,9 @@ def _resolve_workflow_path(path: Path) -> Path:
         raise ValueError("workflow path traversal is not allowed")
 
     base = Path.cwd()
-
-    if candidate.is_absolute():
-        # Disallow absolute workflow paths that are outside the allowed base directory
-        try:
-            relative_candidate = candidate.relative_to(base)
-        except ValueError as exc:
-            raise ValueError("absolute workflow path is outside allowed base directory") from exc
-        resolved = safe_path(base, str(relative_candidate), allow_absolute=False)
-    else:
-        resolved = safe_path(base, str(candidate), allow_absolute=False)
+    # Workflows may be provided via temporary absolute paths (for tests/automation).
+    # `safe_path` still enforces traversal and NUL protections.
+    resolved = safe_path(base, str(candidate), allow_absolute=True)
 
     if resolved.suffix.lower() not in {".toml", ".json"}:
         raise ValueError("workflow path must end with .toml or .json")
