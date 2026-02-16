@@ -379,9 +379,16 @@ def _should_scan_file(path: Path) -> bool:
 
 
 def _iter_files(root: Path) -> list[Path]:
+    resolved_root = root.resolve(strict=True)
     files: list[Path] = []
     for p in root.rglob("*"):
         if not p.is_file():
+            continue
+        try:
+            resolved = p.resolve(strict=False)
+        except OSError:
+            continue
+        if resolved != resolved_root and resolved_root not in resolved.parents:
             continue
         if any(part in SKIP_DIRS for part in p.parts):
             continue

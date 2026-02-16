@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from sdetkit import cli
@@ -154,3 +155,28 @@ def test_security_check_json_reports_only_regressions_in_new_findings(
     assert "SEC_OS_SYSTEM" in all_rules
     assert "SEC_OS_SYSTEM" not in new_rules
     assert new_rules == {"SEC_NETWORK_TIMEOUT"}
+
+
+def test_security_scan_ignores_symlink_that_escapes_root(tmp_path: Path, capsys) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+
+    outside = tmp_path.parent / "outside_security_scan.py"
+    outside.write_text("import os\nos.system('escaped')\n", encoding="utf-8")
+    try:
+        os.symlink(outside, src / "escaped_link.py")
+        assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
+        payload = json.loads(capsys.readouterr().out)
+        assert payload["findings"] == []
+    finally:
+        outside.unlink(missing_ok=True)
+
+
+def test_security_scan_skips_broken_symlink_without_failing(tmp_path: Path, capsys) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+
+    os.symlink(tmp_path / "missing.py", src / "missing_link.py")
+    assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["findings"] == []
