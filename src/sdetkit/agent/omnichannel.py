@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import subprocess
 import threading
 import time
@@ -137,8 +138,12 @@ class DeterministicRateLimiter:
                 if isinstance(payload, dict):
                     self._in_memory[key] = payload
                     return dict(payload)
-            except ValueError:
-                pass
+            except ValueError as exc:
+                logging.getLogger(__name__).warning(
+                    "Failed to load rate limiter state from %s: %s",
+                    path,
+                    exc,
+                )
         seed = {
             "tokens": float(self.capacity),
             "last_refill": float(now),

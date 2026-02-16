@@ -4,7 +4,10 @@ useDefault = true
 [[allowlists]]
 description = "Ignore known false positive in historical omnichannel rate limiter line"
 regexes = [
-  '''root, max_tokens=max_tokens,''',
+  '''max_tokens=max_tokens''',
+]
+commits = [
+  '''2a124408cce1fd03bfa3cabe0557ea7784a7800d''',
 ]
 paths = [
   '''src/sdetkit/agent/omnichannel\.py''',
