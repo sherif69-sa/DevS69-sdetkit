@@ -6,7 +6,6 @@ from .core import init_agent, run_agent
 from .dashboard import build_dashboard
 from .templates import run_template, template_by_id
 
-
 _DEMO_SCENARIOS: dict[str, tuple[str, ...]] = {
     "repo-enterprise-audit": (
         "repo-health-audit",
