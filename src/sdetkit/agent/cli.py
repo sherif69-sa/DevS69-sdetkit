@@ -18,6 +18,9 @@ def main(argv: list[str]) -> int:
     run_p = sub.add_parser("run")
     run_p.add_argument("task")
     run_p.add_argument("--config", default=".sdetkit/agent/config.yaml")
+    run_p.add_argument("--approve", action="store_true", help="Auto-approve dangerous actions.")
+    run_p.add_argument("--cache-dir", default=".sdetkit/agent/cache")
+    run_p.add_argument("--no-cache", action="store_true")
 
     doctor_p = sub.add_parser("doctor")
     doctor_p.add_argument("--config", default=".sdetkit/agent/config.yaml")
@@ -34,7 +37,14 @@ def main(argv: list[str]) -> int:
         return 0
 
     if ns.agent_cmd == "run":
-        record = run_agent(root, config_path=root / ns.config, task=ns.task)
+        record = run_agent(
+            root,
+            config_path=root / ns.config,
+            task=ns.task,
+            auto_approve=bool(ns.approve),
+            cache_dir=root / ns.cache_dir,
+            no_cache=bool(ns.no_cache),
+        )
         sys.stdout.write(json.dumps(record, ensure_ascii=True, sort_keys=True) + "\n")
         return 0 if record.get("status") == "ok" else 1
 

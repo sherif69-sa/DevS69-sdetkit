@@ -4,12 +4,13 @@ import datetime as dt
 import hashlib
 import json
 import os
-from dataclasses import dataclass
+import sys
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, cast
 
-from .actions import ActionRegistry, maybe_parse_action_task
-from .providers import FakeProvider, LocalHTTPProvider, NoneProvider, Provider
+from .actions import ActionRegistry, ActionResult, maybe_parse_action_task
+from .providers import CachedProvider, FakeProvider, LocalHTTPProvider, NoneProvider, Provider
 
 _UTC = dt.UTC
 
@@ -39,6 +40,72 @@ class AgentConfig:
     budgets: dict[str, int]
     provider: dict[str, str]
     safety: dict[str, tuple[str, ...]]
+
+
+@dataclass(frozen=True)
+class ActionSpec:
+    action: str
+    params: dict[str, Any]
+    worker_id: str
+
+
+@dataclass(frozen=True)
+class OrchestratorStep:
+    step_id: int
+    role: str
+    kind: str
+    message: str
+    status: str
+    action: str | None = None
+
+
+@dataclass(frozen=True)
+class ActionRecord:
+    action: str
+    worker_id: str
+    ok: bool
+    payload: dict[str, Any]
+    approved: bool
+    denied: bool
+
+
+@dataclass(frozen=True)
+class RunRecord:
+    captured_at: str
+    task: str
+    status: str
+    steps: list[dict[str, Any]]
+    actions: list[dict[str, Any]]
+    outputs: list[dict[str, Any]]
+    cache: dict[str, Any]
+
+
+class ApprovalGate:
+    def __init__(self, *, auto_approve: bool = False) -> None:
+        self.auto_approve = auto_approve
+
+    def requires_approval(self, action: str, params: dict[str, Any]) -> bool:
+        if action == "shell.run":
+            return True
+        if action == "fs.write":
+            rel = str(params.get("path", "")).replace("\\", "/").lstrip("/")
+            return not (
+                rel == ".sdetkit/agent/workdir" or rel.startswith(".sdetkit/agent/workdir/")
+            )
+        return False
+
+    def approve(self, action: str, params: dict[str, Any]) -> tuple[bool, str]:
+        if not self.requires_approval(action, params):
+            return True, "not-dangerous"
+        if self.auto_approve:
+            return True, "auto-approved"
+        if not sys.stdin.isatty():
+            return False, "approval required (non-interactive)"
+        prompt = f"approve dangerous action '{action}' with params={json.dumps(params, sort_keys=True)}? [y/N]: "
+        answer = input(prompt).strip().lower()
+        if answer in {"y", "yes"}:
+            return True, "approved"
+        return False, "denied"
 
 
 def _captured_at() -> str:
@@ -162,7 +229,7 @@ def load_config(path: Path) -> AgentConfig:
 def init_agent(root: Path, config_path: Path) -> list[str]:
     created: list[str] = []
     agent_root = root / ".sdetkit" / "agent"
-    for rel in ["", "history", "workdir"]:
+    for rel in ["", "history", "workdir", "cache"]:
         path = agent_root / rel
         path.mkdir(parents=True, exist_ok=True)
         created.append(path.relative_to(root).as_posix())
@@ -184,48 +251,172 @@ def _provider_for(config: AgentConfig, *, fake: bool = False) -> Provider:
     return NoneProvider()
 
 
+def _rule_based_plan(task: str, *, max_actions: int) -> list[tuple[str, dict[str, Any]]]:
+    parsed = maybe_parse_action_task(task)
+    if parsed is not None:
+        return [parsed][:max_actions]
+    normalized = task.lower()
+    if "audit" in normalized:
+        return [("repo.audit", {"profile": "default"})][:max_actions]
+    if "report" in normalized:
+        return [
+            ("report.build", {"output": ".sdetkit/agent/workdir/dashboard.html", "format": "html"})
+        ][:max_actions]
+    return []
+
+
+def _manager_plan(
+    *,
+    task: str,
+    config: AgentConfig,
+    provider: Provider,
+    worker_ids: list[str],
+) -> tuple[str, list[ActionSpec]]:
+    provider_type = config.provider.get("type", "none")
+    if provider_type == "none":
+        note = f"deterministic-plan:{task}"
+        raw_plan = _rule_based_plan(task, max_actions=config.budgets["max_actions"])
+    else:
+        note = provider.complete(role="manager", task=task, context={"budgets": config.budgets})
+        parsed = maybe_parse_action_task(task)
+        raw_plan = (
+            [parsed]
+            if parsed is not None
+            else _rule_based_plan(task, max_actions=config.budgets["max_actions"])
+        )
+    specs: list[ActionSpec] = []
+    for idx, (action, params) in enumerate(raw_plan):
+        specs.append(
+            ActionSpec(action=action, params=params, worker_id=worker_ids[idx % len(worker_ids)])
+        )
+    return note, specs
+
+
+def _review_actions(
+    task: str, actions: list[ActionRecord], provider: Provider, config: AgentConfig
+) -> tuple[str, bool]:
+    failures = [item for item in actions if not item.ok]
+    if failures:
+        return f"rejected:{len(failures)} failures", False
+    note = provider.complete(
+        role="reviewer",
+        task=task,
+        context={"action_count": len(actions), "max_actions": config.budgets["max_actions"]},
+    )
+    return note, True
+
+
 def run_agent(
-    root: Path, *, config_path: Path, task: str, force_fake_provider: bool = False
+    root: Path,
+    *,
+    config_path: Path,
+    task: str,
+    force_fake_provider: bool = False,
+    auto_approve: bool = False,
+    cache_dir: Path | None = None,
+    no_cache: bool = False,
 ) -> dict[str, Any]:
     config = load_config(config_path)
-    provider = _provider_for(config, fake=force_fake_provider)
+    worker_ids = ["worker-1", "worker-2"]
+    gate = ApprovalGate(auto_approve=auto_approve)
+
+    base_provider = _provider_for(config, fake=force_fake_provider)
+    cache_root = cache_dir or (root / ".sdetkit" / "agent" / "cache")
+    provider = CachedProvider(base_provider, cache_dir=cache_root, enabled=not no_cache)
+
     registry = ActionRegistry(
         root=root,
         write_allowlist=config.safety.get("write_allowlist", tuple()),
         shell_allowlist=config.safety.get("shell_allowlist", tuple()),
     )
-    steps: list[dict[str, Any]] = []
-    actions: list[dict[str, Any]] = []
+    steps: list[OrchestratorStep] = []
+    actions: list[ActionRecord] = []
     outputs: list[dict[str, Any]] = []
 
-    manager_note = provider.complete(role="manager", task=task, context={"budgets": config.budgets})
-    steps.append({"role": "manager", "message": manager_note})
-
-    parsed = maybe_parse_action_task(task)
-    if parsed is not None and len(actions) < config.budgets["max_actions"]:
-        name, params = parsed
-        result = registry.run(name, params)
-        actions.append(result.to_dict())
-
-    reviewer_note = provider.complete(
-        role="reviewer",
-        task=task,
-        context={"action_count": len(actions), "max_actions": config.budgets["max_actions"]},
+    manager_note, plan = _manager_plan(
+        task=task, config=config, provider=provider, worker_ids=worker_ids
     )
-    steps.append({"role": "reviewer", "message": reviewer_note})
+    steps.append(
+        OrchestratorStep(step_id=1, role="manager", kind="plan", message=manager_note, status="ok")
+    )
+
+    max_steps = max(1, int(config.budgets.get("max_steps", 8)))
+    for idx, spec in enumerate(plan, start=2):
+        if idx > max_steps:
+            break
+        approved, reason = gate.approve(spec.action, spec.params)
+        if not approved:
+            denied = ActionRecord(
+                action=spec.action,
+                worker_id=spec.worker_id,
+                ok=False,
+                payload={
+                    "error": "denied by approval gate",
+                    "reason": reason,
+                    "params": spec.params,
+                },
+                approved=False,
+                denied=True,
+            )
+            actions.append(denied)
+            steps.append(
+                OrchestratorStep(
+                    step_id=idx,
+                    role=spec.worker_id,
+                    kind="action",
+                    action=spec.action,
+                    message=f"denied:{reason}",
+                    status="denied",
+                )
+            )
+            continue
+
+        result: ActionResult = registry.run(spec.action, spec.params)
+        action_row = ActionRecord(
+            action=spec.action,
+            worker_id=spec.worker_id,
+            ok=result.ok,
+            payload=result.payload,
+            approved=True,
+            denied=False,
+        )
+        actions.append(action_row)
+        steps.append(
+            OrchestratorStep(
+                step_id=idx,
+                role=spec.worker_id,
+                kind="action",
+                action=spec.action,
+                message=reason,
+                status="ok" if result.ok else "error",
+            )
+        )
+
+    reviewer_note, accepted = _review_actions(task, actions, provider, config)
+    steps.append(
+        OrchestratorStep(
+            step_id=len(steps) + 1,
+            role="reviewer",
+            kind="review",
+            message=reviewer_note,
+            status="ok" if accepted else "rejected",
+        )
+    )
 
     for action in actions:
-        outputs.append({"kind": "action", "value": action})
+        outputs.append({"kind": "action", "value": asdict(action)})
     outputs.append({"kind": "summary", "value": f"completed task: {task}"})
 
-    base_record: dict[str, Any] = {
-        "captured_at": _captured_at(),
-        "task": task,
-        "steps": steps,
-        "actions": actions,
-        "outputs": outputs,
-        "status": "ok" if all(item.get("ok") for item in actions or [{"ok": True}]) else "error",
-    }
+    record = RunRecord(
+        captured_at=_captured_at(),
+        task=task,
+        steps=[asdict(step) for step in steps],
+        actions=[asdict(action) for action in actions],
+        outputs=outputs,
+        status="ok" if accepted else "error",
+        cache={"enabled": not no_cache, "dir": cache_root.as_posix()},
+    )
+    base_record = asdict(record)
     digest = _sha(base_record)
     base_record["hash"] = digest
     history_path = root / ".sdetkit" / "agent" / "history" / f"{digest}.json"

@@ -374,7 +374,7 @@ def _render_diff_markdown(payload: dict[str, Any], limit: int | None = 10) -> st
                 "- "
                 f"`{item.get('fingerprint')}` "
                 f"**{to_meta.get('rule_id')}** "
-                f"{from_meta.get('severity')}→{to_meta.get('severity')} "
+                f"{from_meta.get('severity')}\u2192{to_meta.get('severity')} "
                 f"({changed_fields})"
             )
     lines.append("")
