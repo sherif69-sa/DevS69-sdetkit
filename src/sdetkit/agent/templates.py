@@ -292,7 +292,7 @@ def _run_shell(cmd: str, cwd: Path) -> dict[str, Any]:
 def _as_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return bool(value)
     if isinstance(value, str):
         normalized = value.strip().lower()
