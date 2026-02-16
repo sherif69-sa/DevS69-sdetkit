@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .core import doctor_agent, history_agent, init_agent, run_agent
+from .omnichannel import AgentServeApp
 from .templates import (
     TemplateValidationError,
     discover_templates,
@@ -35,6 +36,18 @@ def main(argv: list[str]) -> int:
 
     hist_p = sub.add_parser("history")
     hist_p.add_argument("--limit", type=int, default=10)
+
+    serve_p = sub.add_parser("serve")
+    serve_p.add_argument("--config", default=".sdetkit/agent/config.yaml")
+    serve_p.add_argument("--host", default="127.0.0.1")
+    serve_p.add_argument("--port", type=int, default=8787)
+    serve_p.add_argument("--telegram-simulation-mode", action="store_true")
+    serve_p.add_argument("--telegram-enable-outgoing", action="store_true")
+    serve_p.add_argument("--rate-limit-max-tokens", type=int, default=5)
+    serve_p.add_argument("--rate-limit-refill-per-second", type=float, default=1.0)
+    serve_p.add_argument("--tool-bridge-enabled", action="store_true")
+    serve_p.add_argument("--tool-bridge-allow", action="append", default=[])
+    serve_p.add_argument("--tool-bridge-command", action="append", default=[])
 
     tpl = sub.add_parser("templates")
     tpl_sub = tpl.add_subparsers(dest="templates_cmd", required=True)
@@ -80,6 +93,36 @@ def main(argv: list[str]) -> int:
     if ns.agent_cmd == "history":
         history_payload = history_agent(root, limit=ns.limit)
         sys.stdout.write(json.dumps(history_payload, ensure_ascii=True, sort_keys=True) + "\n")
+        return 0
+
+    if ns.agent_cmd == "serve":
+        app = AgentServeApp(
+            root=root,
+            config_path=root / ns.config,
+            host=ns.host,
+            port=ns.port,
+            telegram_simulation_mode=bool(ns.telegram_simulation_mode),
+            telegram_enable_outgoing=bool(ns.telegram_enable_outgoing),
+            max_tokens=int(ns.rate_limit_max_tokens),
+            refill_per_second=float(ns.rate_limit_refill_per_second),
+            tool_bridge_enabled=bool(ns.tool_bridge_enabled),
+            tool_bridge_allowlist=tuple(str(x) for x in ns.tool_bridge_allow),
+            tool_bridge_command=[str(x) for x in ns.tool_bridge_command],
+        )
+        sys.stdout.write(
+            json.dumps(
+                {
+                    "status": "serving",
+                    "host": ns.host,
+                    "port": ns.port,
+                    "tool_bridge_enabled": bool(ns.tool_bridge_enabled),
+                },
+                ensure_ascii=True,
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        app.serve_forever()
         return 0
 
     if ns.agent_cmd == "templates":

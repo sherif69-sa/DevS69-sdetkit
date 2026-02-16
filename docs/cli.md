@@ -144,9 +144,10 @@ See: ide-and-precommit.md
 - `sdetkit agent run <task> [--config PATH] [--approve] [--cache-dir PATH] [--no-cache]`
 - `sdetkit agent doctor [--config PATH]`
 - `sdetkit agent history [--limit N]`
+- `sdetkit agent serve [--config PATH] [--host HOST] [--port N] [--telegram-simulation-mode] [--telegram-enable-outgoing] [--rate-limit-max-tokens N] [--rate-limit-refill-per-second N] [--tool-bridge-enabled] [--tool-bridge-allow TOOL ...] [--tool-bridge-command ARG ...]`
 - `sdetkit agent templates list`
 - `sdetkit agent templates show <id>`
 - `sdetkit agent templates run <id> [--set key=value ...] [--output-dir DIR]`
 - `sdetkit agent templates pack [--output FILE.tar]`
 
-See: agentos-foundation.md and automation-templates-engine.md
+See: agentos-foundation.md, omnichannel-mcp-bridge.md, and automation-templates-engine.md
