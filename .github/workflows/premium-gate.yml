@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Setup Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
         with:
           python-version: '3.12'
           cache: 'pip'
@@ -32,13 +32,13 @@ jobs:
 
       - name: Upload SARIF
         if: always() && hashFiles('.sdetkit/out/security.sarif') != ''
-        uses: github/codeql-action/upload-sarif@45cbd0c69e560cd9e7cd7f8c32362050c9b7ded2  # v4
+        uses: github/codeql-action/upload-sarif@9e907b5e64f6b83e7804b09294d44122997950d6  # v4
         with:
           sarif_file: .sdetkit/out/security.sarif
 
       - name: Upload evidence pack
         if: always() && hashFiles('.sdetkit/out/evidence.zip') != ''
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808  # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v4
         with:
           name: evidence-pack
           path: .sdetkit/out/evidence.zip
