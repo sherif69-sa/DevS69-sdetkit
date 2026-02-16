@@ -47,6 +47,17 @@ def _render_text(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _md_escape_cell(value: Any) -> str:
+    text = str(value).replace("\r\n", "\n").replace("\r", "\n").replace("\n", " ")
+    return (
+        text.replace("\\", "\\\\")
+        .replace("|", "\\|")
+        .replace("`", "\\`")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
 def _render_markdown(report: dict[str, Any]) -> str:
     lines = [
         "## Maintenance Report",
@@ -59,11 +70,13 @@ def _render_markdown(report: dict[str, Any]) -> str:
     ]
     for name in sorted(report["checks"]):
         check = report["checks"][name]
-        lines.append(f"| `{name}` | {'PASS' if check['ok'] else 'FAIL'} | {check['summary']} |")
+        lines.append(
+            f"| {_md_escape_cell(name)} | {'PASS' if check['ok'] else 'FAIL'} | {_md_escape_cell(check['summary'])} |"
+        )
     lines.append("")
     lines.append("### Recommendations")
     for rec in report["recommendations"]:
-        lines.append(f"- {rec}")
+        lines.append(f"- {_md_escape_cell(rec)}")
     return "\n".join(lines) + "\n"
 
 
