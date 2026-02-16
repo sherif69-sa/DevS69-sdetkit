@@ -91,3 +91,25 @@ Built-in safe fixers create only missing governance/config templates:
 - `.github/PULL_REQUEST_TEMPLATE.md`
 - `.github/dependabot.yml`
 - `.github/workflows/repo-audit.yml`
+
+## Notification adapters (optional plugins)
+
+`sdetkit notify` supports adapter plugins via entry points group `sdetkit.notify_adapters`.
+
+- discovery is lazy (import/load only when selected)
+- no hard dependency in core package
+- missing adapter returns friendly guidance (no test breakage)
+
+Example usage:
+
+```bash
+sdetkit notify --list
+sdetkit notify telegram --message "Build done" --dry-run
+```
+
+Optional extras:
+
+```bash
+pip install sdetkit[telegram]
+pip install sdetkit[whatsapp]
+```

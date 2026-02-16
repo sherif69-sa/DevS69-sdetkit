@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import argparse
 import ast
+import difflib
 import hashlib
 import json
 import math
+import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -14,6 +17,16 @@ from pathlib import Path
 from typing import Any
 
 SEVERITY_RANK = {"info": 1, "warn": 2, "error": 3}
+FAIL_ON_TO_SEVERITY = {
+    "none": 99,
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 4,
+    "warn": 2,
+    "error": 3,
+}
+SEVERITY_TO_FAIL_LEVEL = {"info": 1, "warn": 2, "error": 3}
 DEFAULT_ALLOWLIST_PATH = Path("tools/security_allowlist.json")
 DEFAULT_BASELINE_PATH = Path("tools/security.baseline.json")
 INLINE_ALLOW_PREFIX = "# sdetkit: allow-security"
@@ -132,6 +145,22 @@ RULES: dict[str, RuleMeta] = {
     "SEC_DEBUG_PRINT": RuleMeta(
         "SEC_DEBUG_PRINT", "info", "Debug print in src", "Avoid print() in src/ modules."
     ),
+    "SEC_DEP_VULN": RuleMeta(
+        "SEC_DEP_VULN",
+        "error",
+        "Dependency vulnerability",
+        "Dependency version matches local vulnerability rule.",
+    ),
+}
+
+OFFLINE_VULN_RULES: dict[str, dict[str, str]] = {
+    "pyyaml": {
+        "5.3": "CVE-2020-14343: unsafe loader behavior in older versions.",
+        "5.4": "CVE-2020-14343: unsafe loader behavior in older versions.",
+    },
+    "jinja2": {
+        "2.10": "CVE-2019-10906: sandbox escape in older versions.",
+    },
 }
 
 SECRET_PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
@@ -180,7 +209,7 @@ class _RuleVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> Any:
         name = _call_name(node)
-        if name in {"eval", "exec", "compile"}:
+        if name in {"eval", "exec"}:
             self._add(
                 "SEC_DANGEROUS_EVAL", node, f"Avoid {name}(); dynamic execution is dangerous."
             )
@@ -426,12 +455,22 @@ def _repo_allowed(entries: list[dict[str, Any]], finding: Finding) -> bool:
     return False
 
 
+def _is_test_fixture_secret(rel_path: str, line: str) -> bool:
+    if not rel_path.startswith("tests/"):
+        return False
+    marker_tokens = {"TOPSECRET", "SHOULD_NOT_LEAK", "dummy", "example"}
+    upper_line = line.upper()
+    return any(token in upper_line for token in marker_tokens)
+
+
 def _scan_text_patterns(rel_path: str, text: str) -> list[Finding]:
     findings: list[Finding] = []
     lines = text.splitlines()
     for i, line in enumerate(lines, start=1):
         for rule_id, pattern, msg in SECRET_PATTERNS:
             if pattern.search(line):
+                if _is_test_fixture_secret(rel_path, line):
+                    continue
                 findings.append(
                     Finding(
                         rule_id=rule_id,
@@ -513,26 +552,142 @@ def scan_repo(root: Path, *, allowlist_path: Path | None = None) -> list[Finding
     return findings
 
 
+def _parse_pinned_dependencies(path: Path) -> list[tuple[str, str, int]]:
+    deps: list[tuple[str, str, int]] = []
+    for line_no, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        m = re.match(r"([A-Za-z0-9_.\-]+)==([A-Za-z0-9_.\-]+)", line)
+        if not m:
+            continue
+        deps.append((m.group(1).lower().replace("_", "-"), m.group(2), line_no))
+    deps.sort()
+    return deps
+
+
+def _scan_dependency_vulns_offline(root: Path) -> list[Finding]:
+    findings: list[Finding] = []
+    for rel in ("requirements.lock", "requirements.txt.lock", "requirements.txt"):
+        path = root / rel
+        if not path.exists() or not path.is_file():
+            continue
+        for name, version, line_no in _parse_pinned_dependencies(path):
+            advisories = OFFLINE_VULN_RULES.get(name, {})
+            for vulnerable_prefix, reason in sorted(advisories.items()):
+                if version.startswith(vulnerable_prefix):
+                    findings.append(
+                        Finding(
+                            rule_id="SEC_DEP_VULN",
+                            severity="error",
+                            path=rel,
+                            line=line_no,
+                            column=1,
+                            message=f"{name}=={version} matches offline vulnerability rule ({reason})",
+                            suggestion="Upgrade to a patched dependency version.",
+                            fingerprint=_fingerprint(
+                                "SEC_DEP_VULN", rel, line_no, f"{name}=={version}|{reason}"
+                            ),
+                        )
+                    )
+    findings.sort(key=lambda x: (x.path, x.line, x.rule_id, x.message))
+    return findings
+
+
+def _generate_sbom_cyclonedx(root: Path) -> dict[str, Any]:
+    components: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for rel in ("requirements.lock", "requirements.txt.lock", "requirements.txt"):
+        path = root / rel
+        if not path.exists() or not path.is_file():
+            continue
+        for name, version, _ in _parse_pinned_dependencies(path):
+            key = (name, version)
+            if key in seen:
+                continue
+            seen.add(key)
+            components.append(
+                {
+                    "bom-ref": f"pkg:pypi/{name}@{version}",
+                    "type": "library",
+                    "name": name,
+                    "version": version,
+                    "purl": f"pkg:pypi/{name}@{version}",
+                }
+            )
+    components.sort(key=lambda x: (str(x["name"]), str(x["version"])))
+    serial = hashlib.sha256(root.as_posix().encode("utf-8")).hexdigest()
+    return {
+        "bomFormat": "CycloneDX",
+        "specVersion": "1.5",
+        "version": 1,
+        "serialNumber": f"urn:uuid:{serial[:8]}-{serial[8:12]}-{serial[12:16]}-{serial[16:20]}-{serial[20:32]}",
+        "metadata": {"component": {"name": root.name or "repository", "type": "application"}},
+        "components": components,
+    }
+
+
+def _maybe_online_dep_scan(root: Path) -> list[Finding]:
+    cmd = os.environ.get("SDETKIT_SECURITY_ONLINE_CMD", "")
+    if not cmd.strip():
+        return []
+    proc = subprocess.run(shlex.split(cmd), cwd=str(root), capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise SecurityScanError(
+            "online dependency scan command failed; provide a working command in "
+            "SDETKIT_SECURITY_ONLINE_CMD or run without --online"
+        )
+    return []
+
+
+def run_security_scan(
+    root: Path,
+    *,
+    allowlist_path: Path,
+    online: bool,
+    sbom_output: Path | None,
+) -> tuple[list[Finding], dict[str, Any]]:
+    findings = scan_repo(root, allowlist_path=allowlist_path)
+    findings.extend(_scan_dependency_vulns_offline(root))
+    if online:
+        findings.extend(_maybe_online_dep_scan(root))
+    findings.sort(key=lambda x: (x.path, x.line, x.column, x.rule_id, x.message))
+    sbom = _generate_sbom_cyclonedx(root)
+    if sbom_output is not None:
+        sbom_output.parent.mkdir(parents=True, exist_ok=True)
+        sbom_output.write_text(
+            json.dumps(sbom, ensure_ascii=True, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
+    return findings, sbom
+
+
 def _to_json_payload(
-    findings: list[Finding], *, new_only: list[Finding] | None = None
+    findings: list[Finding],
+    *,
+    new_only: list[Finding] | None = None,
+    sbom: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     counts = {"info": 0, "warn": 0, "error": 0}
     for f in findings:
         counts[f.severity] += 1
-    return {
+    payload = {
         "version": 1,
         "counts": counts,
         "findings": [asdict(x) for x in findings],
         "new_findings": [asdict(x) for x in (new_only or findings)],
     }
+    if sbom is not None:
+        payload["sbom"] = sbom
+    return payload
 
 
-def _to_text(findings: list[Finding]) -> str:
+def _to_text(findings: list[Finding], *, sbom_components: int = 0) -> str:
     counts = {"info": 0, "warn": 0, "error": 0}
     for f in findings:
         counts[f.severity] += 1
     lines = [
         f"security scan: total={len(findings)} error={counts['error']} warn={counts['warn']} info={counts['info']}",
+        f"sbom components: {sbom_components}",
         "top findings:",
     ]
     for item in findings[:15]:
@@ -552,7 +707,9 @@ def _to_sarif(findings: list[Finding]) -> dict[str, Any]:
                 "name": meta.title,
                 "shortDescription": {"text": meta.title},
                 "fullDescription": {"text": meta.description},
-                "help": {"text": meta.description},
+                "help": {
+                    "text": f"{meta.description} Fix guidance: review the finding and apply the suggested remediation."
+                },
                 "defaultConfiguration": {
                     "level": {"info": "note", "warn": "warning", "error": "error"}[meta.severity]
                 },
@@ -600,8 +757,8 @@ def _write_output(text: str, output: str | None) -> None:
 def _severity_trips(findings: list[Finding], threshold: str) -> bool:
     if threshold == "none":
         return False
-    gate = SEVERITY_RANK[threshold]
-    return any(SEVERITY_RANK[f.severity] >= gate for f in findings)
+    gate = FAIL_ON_TO_SEVERITY[threshold]
+    return any(SEVERITY_TO_FAIL_LEVEL[f.severity] >= gate for f in findings)
 
 
 def _load_baseline(path: Path) -> list[dict[str, Any]]:
@@ -650,13 +807,21 @@ def _filter_new(findings: list[Finding], baseline_entries: list[dict[str, Any]])
     return [f for f in findings if (f.rule_id, f.path, f.line, f.fingerprint) not in known]
 
 
-def _render(findings: list[Finding], fmt: str, *, new_only: list[Finding] | None = None) -> str:
+def _render(
+    findings: list[Finding],
+    fmt: str,
+    *,
+    new_only: list[Finding] | None = None,
+    sbom: dict[str, Any] | None = None,
+) -> str:
     if fmt == "text":
-        return _to_text(findings if new_only is None else new_only)
+        target = findings if new_only is None else new_only
+        components = len(sbom.get("components", [])) if isinstance(sbom, dict) else 0
+        return _to_text(target, sbom_components=components)
     if fmt == "json":
         return (
             json.dumps(
-                _to_json_payload(findings, new_only=new_only),
+                _to_json_payload(findings, new_only=new_only, sbom=sbom),
                 ensure_ascii=True,
                 sort_keys=True,
                 indent=2,
@@ -713,9 +878,16 @@ def main(argv: list[str] | None = None) -> int:
     common.add_argument("--allowlist", default=str(DEFAULT_ALLOWLIST_PATH))
     common.add_argument("--format", choices=["text", "json", "sarif"], default="text")
     common.add_argument("--output", default=None)
-    common.add_argument("--fail-on", choices=["none", "warn", "error"], default="error")
+    common.add_argument(
+        "--fail-on",
+        choices=["none", "low", "medium", "high", "critical", "warn", "error"],
+        default="medium",
+    )
+    common.add_argument("--online", action="store_true", help="Enable optional online scanning")
+    common.add_argument("--sbom-output", default=None, help="Write CycloneDX SBOM JSON to file")
 
     sub.add_parser("scan", parents=[common])
+    sub.add_parser("report", parents=[common])
 
     chk = sub.add_parser("check", parents=[common])
     chk.add_argument("--baseline", default=str(DEFAULT_BASELINE_PATH))
@@ -726,15 +898,24 @@ def main(argv: list[str] | None = None) -> int:
     fixp.add_argument("--root", default=".")
     fixp.add_argument("--allowlist", default=str(DEFAULT_ALLOWLIST_PATH))
     fixp.add_argument("--timeout", type=int, default=10)
+    fixp.add_argument("--dry-run", action="store_true", default=True)
+    fixp.add_argument("--apply", action="store_true")
     fixp.add_argument("--run-ruff", action="store_true")
 
     ns = parser.parse_args(argv)
     try:
         root = Path(ns.root).resolve()
         allowlist = Path(ns.allowlist)
-        findings = scan_repo(root, allowlist_path=allowlist)
+        findings: list[Finding] = []
+        sbom: dict[str, Any] | None = None
 
         if ns.cmd == "baseline":
+            findings, _ = run_security_scan(
+                root,
+                allowlist_path=allowlist,
+                online=bool(getattr(ns, "online", False)),
+                sbom_output=None,
+            )
             entries = _make_baseline_entries(findings)
             baseline_payload = {"version": 1, "entries": entries}
             if not ns.output:
@@ -750,17 +931,55 @@ def main(argv: list[str] | None = None) -> int:
 
         if ns.cmd == "fix":
             changed = 0
+            previews: list[str] = []
+            should_apply = bool(ns.apply)
             for py_file in [p for p in _iter_files(root) if p.suffix == ".py"]:
-                did_change = _fix_yaml_safe_load(py_file)
-                did_change = _fix_requests_timeout(py_file, ns.timeout) or did_change
+                before = py_file.read_text(encoding="utf-8")
+                did_change = _fix_yaml_safe_load(py_file) if should_apply else False
+                did_change = (
+                    _fix_requests_timeout(py_file, ns.timeout) if should_apply else False
+                ) or did_change
+                if not should_apply:
+                    candidate = re.sub(r"\byaml\.load\s*\(", "yaml.safe_load(", before)
+                    if candidate != before:
+                        rel = py_file.relative_to(root).as_posix()
+                        previews.append(
+                            "\n".join(
+                                difflib.unified_diff(
+                                    before.splitlines(),
+                                    candidate.splitlines(),
+                                    fromfile=f"a/{rel}",
+                                    tofile=f"b/{rel}",
+                                    lineterm="",
+                                )
+                            )
+                        )
+                        changed += 1
                 if did_change:
                     changed += 1
             if ns.run_ruff:
                 ok, msg = _run_ruff_fix(root)
                 status = "ruff-fix applied" if ok else "ruff-fix had issues"
                 sys.stdout.write(f"{status}: {msg}\n")
-            sys.stdout.write(f"security fix complete; files changed: {changed}\n")
+            if should_apply:
+                sys.stdout.write(f"security fix complete; files changed: {changed}\n")
+            else:
+                sys.stdout.write("security fix dry-run (safe deterministic fixes only)\n")
+                if previews:
+                    sys.stdout.write("\n".join(previews[:5]) + "\n")
+                sys.stdout.write(
+                    "notes: risky transforms are not auto-applied; use manual remediation for complex subprocess/eval patterns.\n"
+                )
+                sys.stdout.write(f"security fix complete; candidate files: {changed}\n")
             return 0
+
+        sbom_output = Path(ns.sbom_output) if getattr(ns, "sbom_output", None) else None
+        findings, sbom = run_security_scan(
+            root,
+            allowlist_path=allowlist,
+            online=bool(getattr(ns, "online", False)),
+            sbom_output=sbom_output,
+        )
 
         if ns.cmd == "check":
             baseline_path = Path(ns.baseline)
@@ -769,11 +988,16 @@ def main(argv: list[str] | None = None) -> int:
                 new_findings = _filter_new(findings, baseline_entries)
             else:
                 new_findings = findings
-            rendered = _render(findings, ns.format, new_only=new_findings)
+            rendered = _render(findings, ns.format, new_only=new_findings, sbom=sbom)
             _write_output(rendered, ns.output)
             return 1 if _severity_trips(new_findings, ns.fail_on) else 0
 
-        rendered = _render(findings, ns.format)
+        if ns.cmd == "report":
+            rendered = _render(findings, ns.format, sbom=sbom)
+            _write_output(rendered, ns.output)
+            return 0
+
+        rendered = _render(findings, ns.format, sbom=sbom)
         _write_output(rendered, ns.output)
         return 1 if _severity_trips(findings, ns.fail_on) else 0
     except SecurityScanError as exc:

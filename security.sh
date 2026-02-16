@@ -7,5 +7,5 @@ if [ -f .venv/bin/activate ]; then
 fi
 
 mkdir -p build
-python -m sdetkit security check --baseline tools/security.baseline.json --format text
-python -m sdetkit security check --baseline tools/security.baseline.json --format sarif --output build/security.sarif
+python -m sdetkit security check --baseline tools/security.baseline.json --fail-on high --format text
+python -m sdetkit security check --baseline tools/security.baseline.json --fail-on high --format sarif --output build/security.sarif

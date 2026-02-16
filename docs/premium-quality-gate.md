@@ -49,3 +49,7 @@ The repository supports helper comment commands on PRs:
 - `/hint` — post premium guideline hints and high-impact next actions.
 
 Use these commands to quickly diagnose PR quality issues and unblock reviews.
+
+## One-command premium gate
+
+Use `bash premium-gate.sh` locally and in CI. It runs quality, CI, doctor, repo audit, and security SARIF export in deterministic offline defaults.

@@ -235,9 +235,12 @@ Additional references: [AgentOS cookbook](docs/agentos-cookbook.md), [Determinis
 Run the top-level security gate locally and in CI:
 
 ```bash
-python -m sdetkit security check --baseline tools/security.baseline.json --format text
-python -m sdetkit security check --baseline tools/security.baseline.json --format sarif --output build/security.sarif
-python -m sdetkit security fix
+python -m sdetkit security scan --fail-on medium --format text
+python -m sdetkit security report --format sarif --output build/security.sarif
+python -m sdetkit security fix --dry-run
+python -m sdetkit security fix --apply
+python -m sdetkit notify --list
+bash premium-gate.sh
 ```
 
 More details:

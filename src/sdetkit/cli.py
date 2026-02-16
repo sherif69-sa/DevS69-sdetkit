@@ -5,7 +5,7 @@ import os
 from collections.abc import Sequence
 from importlib import metadata
 
-from . import apiget, kvcli, ops, patch, repo, report
+from . import apiget, kvcli, notify, ops, patch, repo, report
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .security_gate import main as security_main
@@ -74,6 +74,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "ops":
         return ops.main(list(argv[1:]))
 
+    if argv and argv[0] == "notify":
+        return notify.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -114,6 +117,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     osp = sub.add_parser("ops")
     osp.add_argument("args", nargs=argparse.REMAINDER)
 
+    ntf = sub.add_parser("notify")
+    ntf.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -142,6 +148,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "ops":
         return ops.main(ns.args)
+
+    if ns.cmd == "notify":
+        return notify.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

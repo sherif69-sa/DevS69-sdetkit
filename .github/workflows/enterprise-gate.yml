@@ -30,6 +30,7 @@ jobs:
 
       - name: Repo check (enterprise)
         run: |
+          rm -rf .sdetkit/cache .sdetkit/ops-artifacts sdet_check.json
           sdetkit repo check . --profile enterprise --format json > sdet_check.json
           python -c "import json; d=json.load(open('sdet_check.json','r',encoding='utf-8')); f=d.get('findings', []); (_ for _ in ()).throw(SystemExit(f'enterprise gate failed: findings={len(f)}')) if f else print('enterprise gate ok: findings=0')"
 

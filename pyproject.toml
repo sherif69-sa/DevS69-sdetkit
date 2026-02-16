@@ -58,6 +58,12 @@ docs = [
   "mkdocs==1.6.1",
   "mkdocs-material==9.7.1"
 ]
+telegram = [
+  "python-telegram-bot>=21,<22"
+]
+whatsapp = [
+  "twilio>=9,<10"
+]
 
 [tool.setuptools]
 
@@ -125,3 +131,5 @@ sdetkit = "sdetkit.cli:main"
 sdkit = "sdetkit.cli:main"
 kvcli = "sdetkit._entrypoints:kvcli"
 apigetcli = "sdetkit._entrypoints:apigetcli"
+
+[project.entry-points."sdetkit.notify_adapters"]

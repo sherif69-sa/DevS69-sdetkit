@@ -52,3 +52,7 @@ Use the GitHub Security tab to review alerts:
 
 - Code scanning: `https://github.com/sherif69-sa/DevS69-sdetkit/security/code-scanning`
 - Dependabot alerts: `https://github.com/sherif69-sa/DevS69-sdetkit/security/dependabot`
+
+## Security Control Tower modes
+
+See [security-gate.md](security-gate.md) for offline-first scan/report/fix behavior, optional online scanning, and SARIF output.
