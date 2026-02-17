@@ -8,7 +8,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from .atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
 from .security import SecurityError, safe_path
@@ -640,10 +640,57 @@ def _top_recurring(
     return sorted(counts.items(), key=lambda x: (-x[1], x[0]))[:limit]
 
 
+def _severity_weight(level: str) -> int:
+    return {"info": 1, "warn": 3, "error": 5}.get(level, 5)
+
+
+class RiskHotspotRow(TypedDict):
+    name: str
+    count: int
+    risk_score: int
+
+
+def _top_risk_hotspots(
+    findings: list[dict[str, Any]], key: str, *, limit: int = 5, min_occurrences: int = 1
+) -> list[RiskHotspotRow]:
+    stats: dict[str, dict[str, int]] = {}
+    for finding in findings:
+        entity = str(finding.get(key, "unknown"))
+        severity = str(finding.get("severity", "error"))
+        slot = stats.setdefault(entity, {"count": 0, "risk_score": 0})
+        slot["count"] += 1
+        slot["risk_score"] += _severity_weight(severity)
+
+    rows: list[RiskHotspotRow] = [
+        {"name": entity, "count": values["count"], "risk_score": values["risk_score"]}
+        for entity, values in stats.items()
+        if values["count"] >= max(min_occurrences, 1)
+    ]
+    rows.sort(key=lambda item: (-item["risk_score"], -item["count"], item["name"]))
+    return rows[:limit]
+
+
+def _trend_direction(series: list[int]) -> str:
+    if len(series) < 2:
+        return "stable"
+    if series[-1] > series[0]:
+        return "regressing"
+    if series[-1] < series[0]:
+        return "improving"
+    return "stable"
+
+
 def suggest_optimizations(
-    history_dir: Path, requested_scenario: str, limit: int = 5
+    history_dir: Path,
+    requested_scenario: str,
+    *,
+    limit: int = 5,
+    since: int | None = None,
+    min_occurrences: int = 1,
 ) -> dict[str, Any]:
     runs = _load_history_run_records(history_dir)
+    if since is not None:
+        runs = runs[-max(since, 0) :]
 
     detected = _detect_business_scenario(runs)
     scenario = detected if requested_scenario == "auto" else requested_scenario
@@ -655,6 +702,25 @@ def suggest_optimizations(
 
     top_rules = _top_recurring(all_findings, "rule_id", limit=limit)
     top_paths = _top_recurring(all_findings, "path", limit=limit)
+    severity_series = []
+    for run in runs:
+        counts = (run.get("aggregates") or {}).get("counts_by_severity") or {}
+        error_count = int(counts.get("error", 0)) if isinstance(counts, dict) else 0
+        warn_count = int(counts.get("warn", 0)) if isinstance(counts, dict) else 0
+        severity_series.append(error_count + warn_count)
+
+    risky_rules = _top_risk_hotspots(
+        all_findings,
+        "rule_id",
+        limit=limit,
+        min_occurrences=min_occurrences,
+    )
+    risky_paths = _top_risk_hotspots(
+        all_findings,
+        "path",
+        limit=limit,
+        min_occurrences=min_occurrences,
+    )
 
     return {
         "detected_scenario": detected,
@@ -663,6 +729,29 @@ def suggest_optimizations(
         "recommendations": list(config["helpers"]),
         "top_rules": [{"rule_id": rule, "count": count} for rule, count in top_rules],
         "top_paths": [{"path": path, "count": count} for path, count in top_paths],
+        "risk_hotspots": {
+            "rules": [
+                {
+                    "rule_id": row["name"],
+                    "count": row["count"],
+                    "risk_score": row["risk_score"],
+                }
+                for row in risky_rules
+            ],
+            "paths": [
+                {
+                    "path": row["name"],
+                    "count": row["count"],
+                    "risk_score": row["risk_score"],
+                }
+                for row in risky_paths
+            ],
+        },
+        "run_window": {"requested_since": since, "effective_runs": len(runs)},
+        "trend": {
+            "actionable_series": severity_series,
+            "direction": _trend_direction(severity_series),
+        },
         "runs_analyzed": len(runs),
     }
 
@@ -675,6 +764,7 @@ def _render_recommend_text(payload: dict[str, Any]) -> str:
         f"- detected scenario: {payload['detected_scenario']}",
         f"- active scenario: {payload['active_scenario']}",
         f"- dashboard template: {payload['dashboard_template']}",
+        f"- trend direction: {payload.get('trend', {}).get('direction', 'stable')}",
         "",
         "## Recommended helpers",
     ]
@@ -686,6 +776,9 @@ def _render_recommend_text(payload: dict[str, Any]) -> str:
     lines.extend(["", "## Top recurring paths"])
     for item in payload.get("top_paths", []):
         lines.append(f"- {item['path']}: {item['count']}")
+    lines.extend(["", "## Risk hotspots (weighted)"])
+    for item in payload.get("risk_hotspots", {}).get("rules", []):
+        lines.append(f"- rule {item['rule_id']}: score={item['risk_score']} count={item['count']}")
     lines.append("")
     return "\n".join(lines)
 
@@ -698,6 +791,7 @@ def _render_recommend_markdown(payload: dict[str, Any]) -> str:
         f"- detected scenario: {payload['detected_scenario']}",
         f"- active scenario: {payload['active_scenario']}",
         f"- dashboard template: {payload['dashboard_template']}",
+        f"- trend direction: {payload.get('trend', {}).get('direction', 'stable')}",
         "",
         "## Recommended helpers",
     ]
@@ -723,6 +817,22 @@ def _render_recommend_markdown(payload: dict[str, Any]) -> str:
     else:
         for item in top_paths:
             lines.append(f"- {item['path']}: {item['count']}")
+
+    lines.extend(["", "## Risk hotspots (weighted rules)"])
+    risky_rules = payload.get("risk_hotspots", {}).get("rules", [])
+    if not risky_rules:
+        lines.append("- none")
+    else:
+        for item in risky_rules:
+            lines.append(f"- {item['rule_id']}: score={item['risk_score']} count={item['count']}")
+
+    lines.extend(["", "## Risk hotspots (weighted paths)"])
+    risky_paths = payload.get("risk_hotspots", {}).get("paths", [])
+    if not risky_paths:
+        lines.append("- none")
+    else:
+        for item in risky_paths:
+            lines.append(f"- {item['path']}: score={item['risk_score']} count={item['count']}")
     lines.append("")
     return "\n".join(lines)
 
@@ -840,6 +950,8 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--scenario", choices=["auto", *sorted(BUSINESS_SCENARIOS)], default="auto")
     rp.add_argument("--format", choices=["text", "json", "md"], default="text")
     rp.add_argument("--limit", type=int, default=5)
+    rp.add_argument("--since", type=int, default=None)
+    rp.add_argument("--min-occurrences", type=int, default=1)
 
     ns = parser.parse_args(argv)
 
@@ -886,7 +998,13 @@ def main(argv: list[str] | None = None) -> int:
 
         if ns.report_cmd == "recommend":
             history_dir = safe_path(Path.cwd(), ns.history_dir, allow_absolute=True)
-            payload = suggest_optimizations(history_dir, ns.scenario, limit=max(ns.limit, 1))
+            payload = suggest_optimizations(
+                history_dir,
+                ns.scenario,
+                limit=max(ns.limit, 1),
+                since=ns.since,
+                min_occurrences=max(ns.min_occurrences, 1),
+            )
             if ns.format == "json":
                 sys.stdout.write(canonical_json_dumps(payload))
             elif ns.format == "md":

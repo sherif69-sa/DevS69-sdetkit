@@ -750,7 +750,90 @@ def test_report_recommend_markdown_format_outputs_structured_sections(tmp_path: 
     assert "- ci-alert: 1" in result.stdout
     assert "## Top recurring paths" in result.stdout
     assert "- ops/deploy.yml: 1" in result.stdout
+    assert "## Risk hotspots (weighted rules)" in result.stdout
+    assert "- ci-alert: score=3 count=1" in result.stdout
     assert result.stdout.endswith("\n")
+
+
+def test_report_recommend_supports_since_window_and_weighted_hotspots(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+
+    run1 = tmp_path / "run1.json"
+    _write_run(
+        run1,
+        captured_at="2020-01-01T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "legacy-error",
+                "rule_id": "legacy-rule",
+                "severity": "error",
+                "message": "old severe incident",
+                "path": "legacy/module.py",
+            }
+        ],
+    )
+    run2 = tmp_path / "run2.json"
+    _write_run(
+        run2,
+        captured_at="2020-01-02T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "api-warn",
+                "rule_id": "api-rule",
+                "severity": "warn",
+                "message": "api timeout",
+                "path": "services/client.py",
+            }
+        ],
+    )
+    run3 = tmp_path / "run3.json"
+    _write_run(
+        run3,
+        captured_at="2020-01-03T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "api-error",
+                "rule_id": "api-rule",
+                "severity": "error",
+                "message": "api retry missing",
+                "path": "services/client.py",
+            }
+        ],
+    )
+
+    for path in (run1, run2, run3):
+        assert (
+            runner.invoke(["report", "ingest", str(path), "--history-dir", str(history)]).exit_code
+            == 0
+        )
+
+    result = runner.invoke(
+        [
+            "report",
+            "recommend",
+            "--history-dir",
+            str(history),
+            "--format",
+            "json",
+            "--since",
+            "2",
+            "--min-occurrences",
+            "2",
+        ]
+    )
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["run_window"] == {"requested_since": 2, "effective_runs": 2}
+    assert payload["runs_analyzed"] == 2
+    assert payload["top_rules"] == [{"rule_id": "api-rule", "count": 2}]
+    assert payload["risk_hotspots"]["rules"] == [
+        {"rule_id": "api-rule", "count": 2, "risk_score": 8}
+    ]
+    assert payload["risk_hotspots"]["paths"] == [
+        {"path": "services/client.py", "count": 2, "risk_score": 8}
+    ]
+    assert payload["trend"] == {"actionable_series": [0, 0], "direction": "stable"}
 
 
 def test_report_build_and_recommend_skip_unreadable_history_runs(tmp_path: Path) -> None:
