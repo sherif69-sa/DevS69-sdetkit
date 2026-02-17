@@ -23,6 +23,63 @@ def _history_run_sort_key(r: dict[str, Any]) -> tuple[str, str]:
     return (str(cap), str(r.get("_sha256") or ""))
 
 
+def _parse_captured_at(value: str) -> dt.datetime | None:
+    raw = value.strip()
+    if not raw:
+        return None
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    try:
+        parsed = dt.datetime.fromisoformat(raw)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=_UTC)
+    return parsed.astimezone(_UTC)
+
+
+def _select_runs_window(
+    runs: list[dict[str, Any]],
+    *,
+    since: int | None,
+    since_ts: str | None,
+    until_ts: str | None,
+) -> list[dict[str, Any]]:
+    selected = list(runs)
+
+    if since is not None:
+        count = max(since, 0)
+        selected = selected[-count:] if count else []
+
+    since_bound = _parse_captured_at(since_ts or "") if since_ts else None
+    if since_ts and since_bound is None:
+        raise ValueError(f"invalid --since-ts value: {since_ts}")
+
+    until_bound = _parse_captured_at(until_ts or "") if until_ts else None
+    if until_ts and until_bound is None:
+        raise ValueError(f"invalid --until-ts value: {until_ts}")
+
+    if since_bound is not None and until_bound is not None and since_bound > until_bound:
+        raise ValueError("--since-ts must be <= --until-ts")
+
+    if since_bound is None and until_bound is None:
+        return selected
+
+    bounded: list[dict[str, Any]] = []
+    for run in selected:
+        src = run.get("source")
+        cap_raw = src.get("captured_at") if isinstance(src, dict) else None
+        cap = _parse_captured_at(str(cap_raw)) if isinstance(cap_raw, str) else None
+        if cap is None:
+            continue
+        if since_bound is not None and cap < since_bound:
+            continue
+        if until_bound is not None and cap > until_bound:
+            continue
+        bounded.append(run)
+    return bounded
+
+
 def _severity_rank(level: str) -> int:
     return {"info": 0, "warn": 1, "error": 2}.get(level, 2)
 
@@ -687,10 +744,11 @@ def suggest_optimizations(
     limit: int = 5,
     since: int | None = None,
     min_occurrences: int = 1,
+    since_ts: str | None = None,
+    until_ts: str | None = None,
 ) -> dict[str, Any]:
     runs = _load_history_run_records(history_dir)
-    if since is not None:
-        runs = runs[-max(since, 0) :]
+    runs = _select_runs_window(runs, since=since, since_ts=since_ts, until_ts=until_ts)
 
     detected = _detect_business_scenario(runs)
     scenario = detected if requested_scenario == "auto" else requested_scenario
@@ -837,10 +895,16 @@ def _render_recommend_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def build_dashboard(history_dir: Path, output: Path, fmt: str, since: int | None) -> None:
+def build_dashboard(
+    history_dir: Path,
+    output: Path,
+    fmt: str,
+    since: int | None,
+    since_ts: str | None = None,
+    until_ts: str | None = None,
+) -> None:
     runs = _load_history_run_records(history_dir)
-    if since is not None:
-        runs = runs[-since:]
+    runs = _select_runs_window(runs, since=since, since_ts=since_ts, until_ts=until_ts)
 
     if not runs:
         content = "# sdetkit audit trends\n\nNo audit history found.\n"
@@ -944,6 +1008,8 @@ def main(argv: list[str] | None = None) -> int:
     bp.add_argument("--output", default="report.html")
     bp.add_argument("--format", choices=["html", "md"], default="html")
     bp.add_argument("--since", type=int, default=None)
+    bp.add_argument("--since-ts", default=None)
+    bp.add_argument("--until-ts", default=None)
 
     rp = sub.add_parser("recommend", help="Generate workflow recommendations from report history.")
     rp.add_argument("--history-dir", default=".sdetkit/audit-history")
@@ -951,6 +1017,8 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--format", choices=["text", "json", "md"], default="text")
     rp.add_argument("--limit", type=int, default=5)
     rp.add_argument("--since", type=int, default=None)
+    rp.add_argument("--since-ts", default=None)
+    rp.add_argument("--until-ts", default=None)
     rp.add_argument("--min-occurrences", type=int, default=1)
 
     ns = parser.parse_args(argv)
@@ -1004,6 +1072,8 @@ def main(argv: list[str] | None = None) -> int:
                 limit=max(ns.limit, 1),
                 since=ns.since,
                 min_occurrences=max(ns.min_occurrences, 1),
+                since_ts=ns.since_ts,
+                until_ts=ns.until_ts,
             )
             if ns.format == "json":
                 sys.stdout.write(canonical_json_dumps(payload))
@@ -1015,7 +1085,14 @@ def main(argv: list[str] | None = None) -> int:
 
         history_dir = safe_path(Path.cwd(), ns.history_dir, allow_absolute=True)
         output = safe_path(Path.cwd(), ns.output, allow_absolute=True)
-        build_dashboard(history_dir, output, ns.format, ns.since)
+        build_dashboard(
+            history_dir,
+            output,
+            ns.format,
+            ns.since,
+            since_ts=ns.since_ts,
+            until_ts=ns.until_ts,
+        )
         return 0
     except (ValueError, OSError, SecurityError) as exc:
         message = str(exc).replace("\n", " ")

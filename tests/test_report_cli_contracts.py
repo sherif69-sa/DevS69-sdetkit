@@ -836,6 +836,148 @@ def test_report_recommend_supports_since_window_and_weighted_hotspots(tmp_path: 
     assert payload["trend"] == {"actionable_series": [0, 0], "direction": "stable"}
 
 
+def test_report_recommend_supports_timestamp_window_and_empty_since(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+
+    run1 = tmp_path / "run1.json"
+    _write_run(
+        run1,
+        captured_at="2020-01-01T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "f-1",
+                "rule_id": "legacy-rule",
+                "severity": "error",
+                "message": "legacy",
+                "path": "legacy/a.py",
+            }
+        ],
+    )
+    run2 = tmp_path / "run2.json"
+    _write_run(
+        run2,
+        captured_at="2020-01-02T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "f-2",
+                "rule_id": "mid-rule",
+                "severity": "warn",
+                "message": "mid",
+                "path": "mid/b.py",
+            }
+        ],
+    )
+    run3 = tmp_path / "run3.json"
+    _write_run(
+        run3,
+        captured_at="2020-01-03T00:00:00Z",
+        findings=[
+            {
+                "fingerprint": "f-3",
+                "rule_id": "new-rule",
+                "severity": "error",
+                "message": "new",
+                "path": "new/c.py",
+            }
+        ],
+    )
+    for path in (run1, run2, run3):
+        assert (
+            runner.invoke(["report", "ingest", str(path), "--history-dir", str(history)]).exit_code
+            == 0
+        )
+
+    since_zero = runner.invoke(
+        ["report", "recommend", "--history-dir", str(history), "--format", "json", "--since", "0"]
+    )
+    assert since_zero.exit_code == 0
+    payload_zero = json.loads(since_zero.stdout)
+    assert payload_zero["run_window"] == {"requested_since": 0, "effective_runs": 0}
+    assert payload_zero["runs_analyzed"] == 0
+
+    result = runner.invoke(
+        [
+            "report",
+            "recommend",
+            "--history-dir",
+            str(history),
+            "--format",
+            "json",
+            "--since-ts",
+            "2020-01-02T00:00:00Z",
+            "--until-ts",
+            "2020-01-02T23:59:59Z",
+        ]
+    )
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["runs_analyzed"] == 1
+    assert payload["top_rules"] == [{"rule_id": "mid-rule", "count": 1}]
+
+
+def test_report_build_supports_timestamp_window_and_validation(tmp_path: Path) -> None:
+    runner = CliRunner()
+    history = tmp_path / "history"
+
+    for idx, captured_at in enumerate(
+        ["2020-01-01T00:00:00Z", "2020-01-02T00:00:00Z", "2020-01-03T00:00:00Z"], start=1
+    ):
+        run = tmp_path / f"run{idx}.json"
+        _write_run(
+            run,
+            captured_at=captured_at,
+            findings=[
+                {
+                    "fingerprint": f"f-{idx}",
+                    "rule_id": f"rule-{idx}",
+                    "severity": "warn",
+                    "message": "m",
+                    "path": f"src/{idx}.py",
+                }
+            ],
+        )
+        assert (
+            runner.invoke(["report", "ingest", str(run), "--history-dir", str(history)]).exit_code
+            == 0
+        )
+
+    out = tmp_path / "report.md"
+    build = runner.invoke(
+        [
+            "report",
+            "build",
+            "--history-dir",
+            str(history),
+            "--format",
+            "md",
+            "--output",
+            str(out),
+            "--since-ts",
+            "2020-01-02T00:00:00Z",
+            "--until-ts",
+            "2020-01-03T00:00:00Z",
+        ]
+    )
+    assert build.exit_code == 0
+    assert "runs: 2" in out.read_text(encoding="utf-8")
+
+    invalid = runner.invoke(
+        [
+            "report",
+            "build",
+            "--history-dir",
+            str(history),
+            "--since-ts",
+            "invalid",
+            "--output",
+            str(tmp_path / "x.md"),
+        ]
+    )
+    assert invalid.exit_code == 2
+    assert "report error: invalid --since-ts value" in invalid.stderr
+
+
 def test_report_build_and_recommend_skip_unreadable_history_runs(tmp_path: Path) -> None:
     runner = CliRunner()
     history = tmp_path / "history"
