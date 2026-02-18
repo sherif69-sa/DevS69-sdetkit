@@ -11,7 +11,7 @@ import shutil
 import subprocess
 import threading
 import time
-import tomllib
+from . import _toml
 import urllib.parse
 from collections.abc import Callable, Mapping
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
@@ -26,7 +26,7 @@ from .report import build_run_record
 from .security import safe_path
 from .security_gate import scan_repo
 
-_UTC = dt.UTC
+_UTC = getattr(dt, "UTC", dt.timezone.utc)
 _VAR_RE = re.compile(r"\$\{([^}]+)\}")
 
 
@@ -222,7 +222,7 @@ def _load_workflow(path: Path) -> WorkflowDef:
     if path.suffix.lower() == ".json":
         doc = json.loads(path.read_text(encoding="utf-8"))
     else:
-        doc = tomllib.loads(path.read_text(encoding="utf-8"))
+        doc = _toml.loads(path.read_text(encoding="utf-8"))
     if not isinstance(doc, dict) or not isinstance(doc.get("workflow"), dict):
         raise ValueError("workflow document must include [workflow]")
     w = dict(doc["workflow"])

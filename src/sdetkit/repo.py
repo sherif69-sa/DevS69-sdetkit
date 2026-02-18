@@ -16,7 +16,7 @@ import re
 import subprocess
 import sys
 import tempfile
-import tomllib as _tomllib
+from . import _toml as _tomllib
 import urllib.error
 import urllib.parse
 import urllib.request

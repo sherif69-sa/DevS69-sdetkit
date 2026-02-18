@@ -20,7 +20,7 @@ from sdetkit.atomicio import (
 from .actions import ActionRegistry, ActionResult, maybe_parse_action_task
 from .providers import CachedProvider, FakeProvider, LocalHTTPProvider, NoneProvider, Provider
 
-_UTC = dt.UTC
+_UTC = getattr(dt, "UTC", dt.timezone.utc)
 
 DEFAULT_CONFIG = """roles:
   manager: planner

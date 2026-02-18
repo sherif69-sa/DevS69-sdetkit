@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
-import tomllib
+from . import _toml
 from importlib import metadata
 from pathlib import Path
 from typing import Any
@@ -134,7 +134,7 @@ def _check_pyproject_toml(root: Path) -> tuple[bool, str]:
         return False, "pyproject.toml is missing"
     try:
         with path.open("rb") as f:
-            tomllib.loads(f.read().decode("utf-8"))
+            _toml.loads(f.read().decode("utf-8"))
     except Exception as exc:
         return False, f"pyproject.toml parse failed: {exc}"
     return True, "pyproject.toml is valid TOML"
@@ -386,7 +386,7 @@ def _load_policy(root: Path, policy_path: str | None) -> dict[str, Any]:
     if not path.exists():
         return {}
     try:
-        return tomllib.loads(path.read_text(encoding="utf-8"))
+        return _toml.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
         return {"_error": f"policy parse failed: {exc}", "_path": str(path)}
 

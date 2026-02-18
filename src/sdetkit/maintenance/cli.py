@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import time
-from datetime import UTC, datetime
+import datetime as dt
 from pathlib import Path
 from typing import Any
 
@@ -95,7 +95,7 @@ def _deterministic_generated_at(env: dict[str, str]) -> str:
     if epoch is None:
         return DETERMINISTIC_GENERATED_AT
     try:
-        return datetime.fromtimestamp(int(epoch), UTC).isoformat()
+        return dt.datetime.fromtimestamp(int(epoch), getattr(dt, "UTC", dt.timezone.utc)).isoformat()
     except (TypeError, ValueError, OSError, OverflowError):
         return DETERMINISTIC_GENERATED_AT
 
@@ -133,7 +133,7 @@ def _build_report(ctx: MaintenanceContext, *, deterministic: bool = False) -> di
             "schema_version": SCHEMA_VERSION,
             "generated_at": _deterministic_generated_at(ctx.env)
             if deterministic
-            else datetime.now(UTC).isoformat(),
+            else dt.datetime.now(getattr(dt, "UTC", dt.timezone.utc)).isoformat(),
             "mode": ctx.mode,
             "fix": ctx.fix,
             "python": ctx.python_exe,

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import tomllib
+from . import _toml
 from collections.abc import Callable
 from dataclasses import dataclass
 from importlib import import_module, metadata
@@ -34,7 +34,7 @@ def _registry_entries(root: Path, section: str) -> list[PluginRecord]:
     path = root / ".sdetkit" / "plugins.toml"
     if not path.is_file():
         return []
-    doc = tomllib.loads(path.read_text(encoding="utf-8"))
+    doc = _toml.loads(path.read_text(encoding="utf-8"))
     block = doc.get(section, {})
     if not isinstance(block, dict):
         return []

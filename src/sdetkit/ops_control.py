@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 import subprocess
-import tomllib
+from . import _toml
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from pathlib import Path
@@ -129,7 +129,7 @@ def _load_config() -> dict[str, Any]:
     cfg = _sdetkit_dir() / "config.toml"
     if not cfg.is_file():
         return {}
-    return tomllib.loads(cfg.read_text(encoding="utf-8"))
+    return _toml.loads(cfg.read_text(encoding="utf-8"))
 
 
 def _task_catalog() -> dict[str, TaskDef]:

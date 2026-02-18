@@ -275,8 +275,8 @@ def template_by_id(root: Path, template_id: str) -> AutomationTemplate:
 def _captured_at() -> str:
     epoch = os.environ.get("SOURCE_DATE_EPOCH")
     if epoch:
-        return dt.datetime.fromtimestamp(int(epoch), tz=dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-    return dt.datetime.now(tz=dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        return dt.datetime.fromtimestamp(int(epoch), tz=getattr(dt, "UTC", dt.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return dt.datetime.now(tz=getattr(dt, "UTC", dt.timezone.utc)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _run_shell(cmd: str, cwd: Path) -> dict[str, Any]:
