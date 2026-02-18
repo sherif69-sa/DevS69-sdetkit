@@ -3,13 +3,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
-import tomllib
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from . import _toml
 from .atomicio import atomic_write_text
 from .plugin_system import discover
 
@@ -129,7 +130,8 @@ def _load_config() -> dict[str, Any]:
     cfg = _sdetkit_dir() / "config.toml"
     if not cfg.is_file():
         return {}
-    return tomllib.loads(cfg.read_text(encoding="utf-8"))
+    payload = _toml.loads(cfg.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, dict) else {}
 
 
 def _task_catalog() -> dict[str, TaskDef]:
@@ -251,7 +253,11 @@ def run(
         cmd = list(task.command)
         if name == "security-fix" and apply:
             cmd = ["python3", "-m", "sdetkit", "security", "fix", "--apply"]
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        env = dict(os.environ)
+        src_dir = Path(__file__).resolve().parents[1]
+        py_path = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{py_path}" if py_path else str(src_dir)
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False, env=env)
         out_text = (proc.stdout or "") + (proc.stderr or "")
         return name, ("PASS" if proc.returncode == 0 else "FAIL"), out_text
 

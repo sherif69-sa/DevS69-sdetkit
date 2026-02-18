@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import sys
 import time
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,7 @@ from .types import CheckResult, MaintenanceContext
 
 SCHEMA_VERSION = "1.0"
 DETERMINISTIC_GENERATED_AT = "1970-01-01T00:00:00+00:00"
+_UTC = getattr(dt, "UTC", dt.timezone(dt.timedelta(0)))
 
 
 class StderrLogger:
@@ -95,7 +96,7 @@ def _deterministic_generated_at(env: dict[str, str]) -> str:
     if epoch is None:
         return DETERMINISTIC_GENERATED_AT
     try:
-        return datetime.fromtimestamp(int(epoch), UTC).isoformat()
+        return dt.datetime.fromtimestamp(int(epoch), _UTC).isoformat()
     except (TypeError, ValueError, OSError, OverflowError):
         return DETERMINISTIC_GENERATED_AT
 
@@ -133,7 +134,7 @@ def _build_report(ctx: MaintenanceContext, *, deterministic: bool = False) -> di
             "schema_version": SCHEMA_VERSION,
             "generated_at": _deterministic_generated_at(ctx.env)
             if deterministic
-            else datetime.now(UTC).isoformat(),
+            else dt.datetime.now(_UTC).isoformat(),
             "mode": ctx.mode,
             "fix": ctx.fix,
             "python": ctx.python_exe,

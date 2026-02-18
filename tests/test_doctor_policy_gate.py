@@ -132,3 +132,9 @@ def test_security_files_pass(tmp_path: Path, monkeypatch, capsys):
 
     assert rc == 2
     assert data["checks"]["security_files"]["ok"] is True
+
+
+def test_policy_path_traversal_is_rejected(tmp_path: Path) -> None:
+    payload = doctor._load_policy(tmp_path, "../escape.toml")
+
+    assert "policy path rejected" in payload.get("_error", "")

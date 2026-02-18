@@ -6,12 +6,13 @@ import os
 import shutil
 import subprocess
 import sys
-import tomllib
 from importlib import metadata
 from pathlib import Path
 from typing import Any
 
+from . import _toml
 from .import_hazards import find_stdlib_shadowing
+from .security import SecurityError, safe_path
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}
 SUPPORTED_POLICY_CHECKS = {
@@ -134,7 +135,7 @@ def _check_pyproject_toml(root: Path) -> tuple[bool, str]:
         return False, "pyproject.toml is missing"
     try:
         with path.open("rb") as f:
-            tomllib.loads(f.read().decode("utf-8"))
+            _toml.loads(f.read().decode("utf-8"))
     except Exception as exc:
         return False, f"pyproject.toml parse failed: {exc}"
     return True, "pyproject.toml is valid TOML"
@@ -381,14 +382,24 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _resolve_policy_path(root: Path, policy_path: str | None) -> Path:
+    if policy_path:
+        return safe_path(root, policy_path, allow_absolute=True)
+    return root / "sdetkit.policy.toml"
+
+
 def _load_policy(root: Path, policy_path: str | None) -> dict[str, Any]:
-    path = Path(policy_path) if policy_path else root / "sdetkit.policy.toml"
+    try:
+        path = _resolve_policy_path(root, policy_path)
+    except SecurityError as exc:
+        return {"_error": f"policy path rejected: {exc}", "_path": str(policy_path or "")}
     if not path.exists():
         return {}
     try:
-        return tomllib.loads(path.read_text(encoding="utf-8"))
+        payload = _toml.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
         return {"_error": f"policy parse failed: {exc}", "_path": str(path)}
+    return payload if isinstance(payload, dict) else {}
 
 
 def _apply_policy(
@@ -718,8 +729,14 @@ def main(argv: list[str] | None = None) -> int:
     threshold = _resolve_threshold(ns, policy)
     gate_ok, failed_checks = _evaluate_gate(data["checks"], threshold)
 
+    try:
+        policy_resolved = _resolve_policy_path(root, ns.policy)
+        policy_path_text = str(policy_resolved)
+    except SecurityError:
+        policy_path_text = str(ns.policy) if ns.policy else str(root / "sdetkit.policy.toml")
+
     data["policy"] = {
-        "path": str(Path(ns.policy) if ns.policy else root / "sdetkit.policy.toml"),
+        "path": policy_path_text,
         "strict": bool(ns.strict),
         "fail_on": threshold,
     }

@@ -7,8 +7,9 @@ import pytest
 from sdetkit.ops import run_workflow
 
 
-def test_shell_blocked_by_default(tmp_path: Path) -> None:
-    wf = tmp_path / "wf.toml"
+def test_shell_blocked_by_default(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    wf = Path("wf.toml")
     wf.write_text(
         """
 [workflow]
@@ -25,8 +26,8 @@ inputs = { cmd = ["echo", "ok"], shell = true }
         run_workflow(
             wf,
             inputs={},
-            artifacts_dir=tmp_path / "a",
-            history_dir=tmp_path / "h",
+            artifacts_dir=Path("a"),
+            history_dir=Path("h"),
             workers=1,
             dry_run=False,
             fail_fast=False,

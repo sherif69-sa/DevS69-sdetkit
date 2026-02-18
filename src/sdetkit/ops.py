@@ -11,7 +11,6 @@ import shutil
 import subprocess
 import threading
 import time
-import tomllib
 import urllib.parse
 from collections.abc import Callable, Mapping
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
@@ -19,6 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from . import _toml
 from .atomicio import atomic_write_text
 from .doctor import _scan_non_ascii
 from .repo import run_repo_audit
@@ -26,8 +26,25 @@ from .report import build_run_record
 from .security import safe_path
 from .security_gate import scan_repo
 
-_UTC = dt.UTC
+_UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 _VAR_RE = re.compile(r"\$\{([^}]+)\}")
+_HTTP_WORKFLOW_RE = re.compile(r"[A-Za-z0-9._-]+\.(?:toml|json)", re.IGNORECASE)
+
+_WORKFLOW_FILE_RE = re.compile(r"[A-Za-z0-9._-]+\.(?:toml|json)", re.IGNORECASE)
+
+
+def _sanitize_workflow_filename(path: Path) -> str:
+    raw = str(path)
+    if "\x00" in raw:
+        raise ValueError("workflow path contains NUL byte")
+    candidate = Path(raw)
+    if candidate.is_absolute():
+        raise ValueError("workflow path must be relative to the current working directory")
+    if candidate.name != raw:
+        raise ValueError("workflow path must be a filename without directories")
+    if not _WORKFLOW_FILE_RE.fullmatch(raw):
+        raise ValueError("workflow filename must match [A-Za-z0-9._-]+.(toml|json)")
+    return raw
 
 
 @dataclasses.dataclass(frozen=True)
@@ -195,15 +212,32 @@ def build_registry() -> ActionRegistry:
     return reg
 
 
+def _sanitize_http_workflow_path(value: object) -> Path:
+    raw = str(value or "")
+    if "\x00" in raw:
+        raise ValueError("workflow path contains NUL byte")
+    if not _HTTP_WORKFLOW_RE.fullmatch(raw):
+        raise ValueError("workflow path must be a simple filename ending with .toml or .json")
+    return Path(raw)
+
+
 def _resolve_workflow_path(path: Path) -> Path:
-    candidate = Path(path)
+    raw = str(path)
+    if "\x00" in raw:
+        raise ValueError("workflow path contains NUL byte")
+
+    candidate = Path(raw)
+    if candidate.is_absolute():
+        raise ValueError("workflow path must be relative to the current working directory")
     if any(part == ".." for part in candidate.parts):
         raise ValueError("workflow path traversal is not allowed")
 
-    base = Path.cwd()
-    # Workflows may be provided via temporary absolute paths (for tests/automation).
-    # `safe_path` still enforces traversal and NUL protections.
-    resolved = safe_path(base, str(candidate), allow_absolute=True)
+    base = Path.cwd().resolve(strict=True)
+    resolved = (base / candidate).resolve(strict=False)
+    try:
+        resolved.relative_to(base)
+    except ValueError as exc:
+        raise ValueError("workflow path escapes the current working directory") from exc
 
     if resolved.suffix.lower() not in {".toml", ".json"}:
         raise ValueError("workflow path must end with .toml or .json")
@@ -219,10 +253,14 @@ def _validate_run_id(run_id: str) -> str:
 
 
 def _load_workflow(path: Path) -> WorkflowDef:
-    if path.suffix.lower() == ".json":
-        doc = json.loads(path.read_text(encoding="utf-8"))
+    return _load_workflow_resolved(_resolve_workflow_path(path))
+
+
+def _load_workflow_resolved(resolved_path: Path) -> WorkflowDef:
+    if resolved_path.suffix.lower() == ".json":
+        doc = json.loads(resolved_path.read_text(encoding="utf-8"))
     else:
-        doc = tomllib.loads(path.read_text(encoding="utf-8"))
+        doc = _toml.loads(resolved_path.read_text(encoding="utf-8"))
     if not isinstance(doc, dict) or not isinstance(doc.get("workflow"), dict):
         raise ValueError("workflow document must include [workflow]")
     w = dict(doc["workflow"])
@@ -268,7 +306,7 @@ def _load_workflow(path: Path) -> WorkflowDef:
         else False,
     )
     wf = WorkflowDef(
-        name=str(w.get("name", path.stem)),
+        name=str(w.get("name", resolved_path.stem)),
         version=str(w.get("version", "1")),
         steps=tuple(steps),
         policy=policy,
@@ -454,7 +492,7 @@ def run_workflow(
     registry = registry or build_registry()
     resolved_workflow_path = _resolve_workflow_path(workflow_path)
     workflow_text = resolved_workflow_path.read_text(encoding="utf-8")
-    wf = _load_workflow(resolved_workflow_path)
+    wf = _load_workflow_resolved(resolved_workflow_path)
     run_id = _run_id(workflow_text, inputs)
     run_root = history_dir / ".sdetkit" / "ops-history" / run_id
     run_root.mkdir(parents=True, exist_ok=True)
@@ -746,7 +784,7 @@ class _OpsHandler(BaseHTTPRequestHandler):
             return
         if path == "/run-workflow":
             try:
-                workflow_path = Path(str(payload.get("workflow_path", "")))
+                workflow_path = _sanitize_http_workflow_path(payload.get("workflow_path", ""))
                 inputs = (
                     dict(payload.get("inputs", {}))
                     if isinstance(payload.get("inputs"), dict)

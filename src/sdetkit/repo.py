@@ -16,7 +16,6 @@ import re
 import subprocess
 import sys
 import tempfile
-import tomllib as _tomllib
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -24,6 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
+from . import _toml as _tomllib
 from .atomicio import atomic_write_text
 from .plugins import (
     Finding as PluginFinding,
