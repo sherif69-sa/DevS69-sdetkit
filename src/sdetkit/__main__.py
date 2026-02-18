@@ -48,8 +48,13 @@ def _cassette_get(argv: list[str]) -> int:
 
     if ns.replay:
         try:
-            replay_path = safe_path(Path.cwd(), ns.replay, allow_absolute=True)
-            cass = Cassette.load(replay_path)
+            replay_path = safe_path(
+                Path.cwd(), ns.replay, allow_absolute=bool(ns.allow_absolute_path)
+            )
+            if ns.allow_absolute_path:
+                cass = Cassette.load(replay_path, allow_absolute=True)
+            else:
+                cass = Cassette.load(replay_path)
         except (SecurityError, ValueError, OSError) as exc:
             print(str(exc), file=sys.stderr)
             return 2

@@ -37,7 +37,7 @@ def _make_cassette(path: Path, url: str) -> None:
         r = client.get(url)
         r.raise_for_status()
 
-    cass.save(path)
+    cass.save(path, allow_absolute=True)
 
 
 def test_entrypoints_cassette_get_replay_ok(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -45,7 +45,7 @@ def test_entrypoints_cassette_get_replay_ok(tmp_path: Path, monkeypatch, capsys)
     p = tmp_path / "cassette.json"
     _make_cassette(p, url)
 
-    monkeypatch.setattr(sys, "argv", ["sdetkit", "cassette-get", "--replay", str(p), url])
+    monkeypatch.setattr(sys, "argv", ["sdetkit", "cassette-get", "--replay", str(p), "--allow-absolute-path", url])
     fn = _entry_callable()
 
     try:

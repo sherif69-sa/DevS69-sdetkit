@@ -52,8 +52,8 @@ class Cassette:
     def to_json(self) -> dict[str, Any]:
         return {"version": 1, "interactions": self.interactions}
 
-    def save(self, path: str | Path) -> None:
-        p = safe_path(Path.cwd(), str(path), allow_absolute=True)
+    def save(self, path: str | Path, *, allow_absolute: bool = False) -> None:
+        p = safe_path(Path.cwd(), str(path), allow_absolute=allow_absolute)
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(
             json.dumps(self.to_json(), ensure_ascii=True, sort_keys=True, indent=2) + "\n",
@@ -61,8 +61,8 @@ class Cassette:
         )
 
     @classmethod
-    def load(cls, path: str | Path) -> Cassette:
-        p = safe_path(Path.cwd(), str(path), allow_absolute=True)
+    def load(cls, path: str | Path, *, allow_absolute: bool = False) -> Cassette:
+        p = safe_path(Path.cwd(), str(path), allow_absolute=allow_absolute)
         data = json.loads(p.read_text(encoding="utf-8"))
         if not isinstance(data, dict):
             raise ValueError("invalid cassette: expected object")
@@ -161,12 +161,12 @@ class CassetteRecordTransport(httpx.BaseTransport):
         inner: httpx.BaseTransport,
         *,
         path: str | Path | None = None,
+        allow_absolute: bool = False,
     ) -> None:
         self._cassette = cassette
         self._inner = inner
-        self._path = (
-            safe_path(Path.cwd(), str(path), allow_absolute=True) if path is not None else None
-        )
+        self._path = str(path) if path is not None else None
+        self._allow_absolute = allow_absolute
 
     def handle_request(self, request: httpx.Request) -> httpx.Response:
         resp = self._inner.handle_request(request)
@@ -177,7 +177,7 @@ class CassetteRecordTransport(httpx.BaseTransport):
     def close(self) -> None:
         try:
             if self._path is not None and self._cassette.interactions:
-                self._cassette.save(self._path)
+                self._cassette.save(self._path, allow_absolute=self._allow_absolute)
         finally:
             self._inner.close()
 
@@ -244,12 +244,12 @@ class AsyncCassetteRecordTransport(httpx.AsyncBaseTransport):
         inner: httpx.AsyncBaseTransport,
         *,
         path: str | Path | None = None,
+        allow_absolute: bool = False,
     ) -> None:
         self._cassette = cassette
         self._inner = inner
-        self._path = (
-            safe_path(Path.cwd(), str(path), allow_absolute=True) if path is not None else None
-        )
+        self._path = str(path) if path is not None else None
+        self._allow_absolute = allow_absolute
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
         resp = await self._inner.handle_async_request(request)
@@ -260,7 +260,7 @@ class AsyncCassetteRecordTransport(httpx.AsyncBaseTransport):
     async def aclose(self) -> None:
         try:
             if self._path is not None and self._cassette.interactions:
-                self._cassette.save(self._path)
+                self._cassette.save(self._path, allow_absolute=self._allow_absolute)
         finally:
             await self._inner.aclose()
 
@@ -270,8 +270,9 @@ def open_transport(
     mode: str = "auto",
     *,
     upstream: httpx.BaseTransport | None = None,
+    allow_absolute: bool = False,
 ) -> httpx.BaseTransport:
-    p = safe_path(Path.cwd(), str(path), allow_absolute=True)
+    p = safe_path(Path.cwd(), str(path), allow_absolute=allow_absolute)
     m = mode.lower().strip()
 
     if m == "auto":
@@ -282,9 +283,9 @@ def open_transport(
     if m == "replay":
         if not p.exists():
             raise RuntimeError("cassette not found")
-        cassette = Cassette.load(p)
+        cassette = Cassette.load(p, allow_absolute=True)
         return CassetteReplayTransport(cassette)
 
     cassette = Cassette([])
     inner = upstream if upstream is not None else httpx.HTTPTransport()
-    return CassetteRecordTransport(cassette, inner, path=p)
+    return CassetteRecordTransport(cassette, inner, path=p, allow_absolute=True)

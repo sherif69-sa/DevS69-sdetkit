@@ -7,6 +7,7 @@ from sdetkit import apiget, cli
 
 def test_apiget_cassette_record_then_replay(tmp_path, capsys, monkeypatch):
     cassette = tmp_path / "apiget.cassette"
+    monkeypatch.chdir(tmp_path)
     url = "https://example.test/x"
 
     def ok_handler(request: httpx.Request) -> httpx.Response:
@@ -27,7 +28,7 @@ def test_apiget_cassette_record_then_replay(tmp_path, capsys, monkeypatch):
             "--expect",
             "dict",
             "--cassette",
-            str(cassette),
+            "apiget.cassette",
             "--cassette-mode",
             "record",
         ]
@@ -52,7 +53,7 @@ def test_apiget_cassette_record_then_replay(tmp_path, capsys, monkeypatch):
             "--expect",
             "dict",
             "--cassette",
-            str(cassette),
+            "apiget.cassette",
             "--cassette-mode",
             "replay",
         ]
@@ -64,6 +65,7 @@ def test_apiget_cassette_record_then_replay(tmp_path, capsys, monkeypatch):
 
 def test_apiget_record_failure_does_not_write_empty_cassette(tmp_path, capsys, monkeypatch):
     cassette = tmp_path / "apiget.cassette"
+    monkeypatch.chdir(tmp_path)
     url = "https://example.test/x"
 
     def fail_handler(request: httpx.Request) -> httpx.Response:
@@ -80,7 +82,7 @@ def test_apiget_record_failure_does_not_write_empty_cassette(tmp_path, capsys, m
             "--expect",
             "dict",
             "--cassette",
-            str(cassette),
+            "apiget.cassette",
             "--cassette-mode",
             "record",
         ]
@@ -91,8 +93,8 @@ def test_apiget_record_failure_does_not_write_empty_cassette(tmp_path, capsys, m
     assert not cassette.exists()
 
 
-def test_apiget_replay_missing_cassette_is_error(tmp_path, capsys):
-    cassette = tmp_path / "missing.cassette"
+def test_apiget_replay_missing_cassette_is_error(tmp_path, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
 
     rc = cli.main(
         [
@@ -101,7 +103,7 @@ def test_apiget_replay_missing_cassette_is_error(tmp_path, capsys):
             "--expect",
             "dict",
             "--cassette",
-            str(cassette),
+            "missing.cassette",
             "--cassette-mode",
             "replay",
         ]
@@ -111,14 +113,11 @@ def test_apiget_replay_missing_cassette_is_error(tmp_path, capsys):
     assert "cassette not found" in captured.err
 
 
-def test_apiget_replay_requires_exhausted_cassette(tmp_path, capsys):
-    import httpx
-
-    from sdetkit import cli
+def test_apiget_replay_requires_exhausted_cassette(tmp_path, capsys, monkeypatch):
     from sdetkit.cassette import Cassette
 
     url = "https://example.test/x"
-    cassette_path = tmp_path / "apiget.cassette"
+    monkeypatch.chdir(tmp_path)
 
     req = httpx.Request("GET", url)
     body = b'{"ok": true}'
@@ -127,7 +126,7 @@ def test_apiget_replay_requires_exhausted_cassette(tmp_path, capsys):
     c = Cassette([])
     c.append(req, resp, body)
     c.append(req, resp, body)
-    c.save(cassette_path)
+    c.save("apiget.cassette")
 
     rc = cli.main(
         [
@@ -136,7 +135,7 @@ def test_apiget_replay_requires_exhausted_cassette(tmp_path, capsys):
             "--expect",
             "dict",
             "--cassette",
-            str(cassette_path),
+            "apiget.cassette",
             "--cassette-mode",
             "replay",
         ]

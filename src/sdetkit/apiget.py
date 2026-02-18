@@ -248,6 +248,11 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--force", action="store_true", help="Allow overwriting an existing output file."
     )
+    p.add_argument(
+        "--allow-absolute-path",
+        action="store_true",
+        help="Allow absolute paths for @file and cassette path inputs.",
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -282,7 +287,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if path == "":
             raise _AtFileError("apiget: cannot read file: <empty path>")
         try:
-            safe_file = safe_path(Path.cwd(), path, allow_absolute=True)
+            safe_file = safe_path(Path.cwd(), path, allow_absolute=bool(ns.allow_absolute_path))
             return safe_file.read_text(encoding="utf-8")
         except (SecurityError, FileNotFoundError):
             raise _AtFileError("apiget: file not found: " + path) from None
@@ -306,7 +311,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if path == "":
             raise _AtFileError("apiget: cannot read file: <empty path>")
         try:
-            safe_file = safe_path(Path.cwd(), path, allow_absolute=True)
+            safe_file = safe_path(Path.cwd(), path, allow_absolute=bool(ns.allow_absolute_path))
             return safe_file.read_bytes()
         except (SecurityError, FileNotFoundError):
             raise _AtFileError("apiget: file not found: " + path) from None
@@ -478,7 +483,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             from .cassette import open_transport
 
             upstream_transport = httpx.HTTPTransport() if cassette_mode == "record" else None
-            transport = open_transport(cassette_path, cassette_mode, upstream=upstream_transport)
+            transport = open_transport(
+                cassette_path,
+                cassette_mode,
+                upstream=upstream_transport,
+                allow_absolute=bool(ns.allow_absolute_path),
+            )
         _client_kwargs: dict[str, object] = {
             "timeout": default_http_timeout(ns.timeout),
             "follow_redirects": bool(ns.follow_redirects),

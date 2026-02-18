@@ -24,7 +24,7 @@ def _make_cassette(path: Path, url: str) -> None:
         r = client.get(url)
         r.raise_for_status()
 
-    cass.save(path)
+    cass.save(path, allow_absolute=True)
 
 
 def test_cli_cassette_get_replay_ok(tmp_path: Path) -> None:

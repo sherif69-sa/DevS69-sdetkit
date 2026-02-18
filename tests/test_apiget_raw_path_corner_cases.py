@@ -94,6 +94,8 @@ def test_data_at_file_binary_safe(monkeypatch, capsys, tmp_path: Path):
     p = tmp_path / "body.bin"
     p.write_bytes(payload)
 
+    monkeypatch.chdir(tmp_path)
+
     seen = {"content": None}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -109,7 +111,7 @@ def test_data_at_file_binary_safe(monkeypatch, capsys, tmp_path: Path):
             "--method",
             "POST",
             "--data",
-            f"@{p}",
+            "@body.bin",
             "--expect",
             "dict",
         ]

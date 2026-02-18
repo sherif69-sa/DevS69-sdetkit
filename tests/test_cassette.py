@@ -16,7 +16,8 @@ from sdetkit.netclient import SdetAsyncHttpClient, SdetHttpClient
 from sdetkit.security import SecurityError
 
 
-def test_cassette_record_then_replay_sync(tmp_path: Path) -> None:
+def test_cassette_record_then_replay_sync(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
     calls: list[str] = []
 
     def handler(req: httpx.Request) -> httpx.Response:
@@ -33,11 +34,10 @@ def test_cassette_record_then_replay_sync(tmp_path: Path) -> None:
         assert got["ok"] is True
         assert got["url"] == "https://example.test/api"
 
-    p = tmp_path / "sync.json"
-    cassette.save(p)
+    cassette.save("sync.json")
     assert calls == ["https://example.test/api"]
 
-    loaded = Cassette.load(p)
+    loaded = Cassette.load("sync.json")
     replay_transport = CassetteReplayTransport(loaded)
 
     with httpx.Client(transport=replay_transport) as raw2:
@@ -53,7 +53,11 @@ def test_cassette_record_then_replay_sync(tmp_path: Path) -> None:
             c3.get_json_dict("https://example.test/other")
 
 
-def test_cassette_replay_ignores_dynamic_trace_header(tmp_path: Path) -> None:
+def test_cassette_replay_ignores_dynamic_trace_header(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
     def handler(req: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"trace": req.headers.get("X-Trace")})
 
@@ -69,10 +73,9 @@ def test_cassette_replay_ignores_dynamic_trace_header(tmp_path: Path) -> None:
         assert isinstance(v2["trace"], str)
         assert v1["trace"] != v2["trace"]
 
-    p = tmp_path / "trace.json"
-    cassette.save(p)
+    cassette.save("trace.json")
 
-    loaded = Cassette.load(p)
+    loaded = Cassette.load("trace.json")
     rep = CassetteReplayTransport(loaded)
 
     with httpx.Client(transport=rep) as raw2:
@@ -95,7 +98,10 @@ class _AsyncInner(httpx.AsyncBaseTransport):
 
 
 @pytest.mark.asyncio
-async def test_cassette_record_then_replay_async(tmp_path: Path) -> None:
+async def test_cassette_record_then_replay_async(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
     inner = _AsyncInner()
     cassette = Cassette()
     rec_transport = AsyncCassetteRecordTransport(cassette, inner)
@@ -105,11 +111,10 @@ async def test_cassette_record_then_replay_async(tmp_path: Path) -> None:
         got = await c.get_json_dict("https://example.test/a")
         assert got == {"ok": True, "url": "https://example.test/a"}
 
-    p = tmp_path / "async.json"
-    cassette.save(p)
+    cassette.save("async.json")
     assert inner.calls == ["https://example.test/a"]
 
-    loaded = Cassette.load(p)
+    loaded = Cassette.load("async.json")
     replay_transport = AsyncCassetteReplayTransport(loaded)
 
     async with httpx.AsyncClient(transport=replay_transport) as raw2:
