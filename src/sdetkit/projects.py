@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -118,7 +120,7 @@ _SKIP_DIRS: set[str] = {
     "build",
 }
 
-_AUTODISCOVER_BASES: tuple[str, ...] = ("packages", "apps")
+_AUTODISCOVER_BASES: tuple[str, ...] = ("packages", "apps", "services", "libs", "crates")
 
 
 def _pyproject_project_name(pyproject: Path) -> str | None:
@@ -216,6 +218,61 @@ def _go_module_name(go_mod: Path) -> str | None:
     return None
 
 
+def _maven_project_name(pom_xml: Path) -> str | None:
+    try:
+        root = ET.fromstring(pom_xml.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+    for child in root:
+        tag = child.tag.rsplit("}", 1)[-1]
+        if tag != "artifactId":
+            continue
+        if child.text is None:
+            continue
+        stripped = child.text.strip()
+        if stripped:
+            return stripped
+    return None
+
+
+def _gradle_project_name(settings_file: Path) -> str | None:
+    try:
+        content = settings_file.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+    pattern = re.compile(r'rootProject\.name\s*=\s*[\'"]([^\'"]+)[\'"]')
+    for raw in content.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("//"):
+            continue
+        match = pattern.search(line)
+        if not match:
+            continue
+        stripped = match.group(1).strip()
+        if stripped:
+            return stripped
+    return None
+
+
+def _csproj_project_name(csproj: Path) -> str | None:
+    try:
+        root = ET.fromstring(csproj.read_text(encoding="utf-8"))
+    except Exception:
+        return csproj.stem or None
+
+    for element in root.iter():
+        tag = element.tag.rsplit("}", 1)[-1]
+        if tag != "AssemblyName" or element.text is None:
+            continue
+        stripped = element.text.strip()
+        if stripped:
+            return stripped
+
+    return csproj.stem or None
+
+
 def _autodiscover_roots(*, data: dict[str, Any] | None, field_prefix: str) -> tuple[str, ...]:
     if data is None:
         return _AUTODISCOVER_BASES
@@ -268,7 +325,22 @@ def _autodiscover_projects(
             has_cargo_toml = "Cargo.toml" in filenames
             has_go_mod = "go.mod" in filenames
             has_package_json = "package.json" in filenames
-            if not any((has_pyproject, has_cargo_toml, has_go_mod, has_package_json)):
+            has_pom_xml = "pom.xml" in filenames
+            has_gradle_settings = (
+                "settings.gradle" in filenames or "settings.gradle.kts" in filenames
+            )
+            csproj_files = sorted(name for name in filenames if name.endswith(".csproj"))
+            if not any(
+                (
+                    has_pyproject,
+                    has_cargo_toml,
+                    has_go_mod,
+                    has_package_json,
+                    has_pom_xml,
+                    has_gradle_settings,
+                    csproj_files,
+                )
+            ):
                 continue
             project_dir = Path(dirpath)
             name: str | None = None
@@ -280,6 +352,15 @@ def _autodiscover_projects(
                 name = _go_module_name(project_dir / "go.mod")
             if not name and has_package_json:
                 name = _package_json_project_name(project_dir / "package.json")
+            if not name and has_pom_xml:
+                name = _maven_project_name(project_dir / "pom.xml")
+            if not name and has_gradle_settings:
+                settings_name = (
+                    "settings.gradle" if "settings.gradle" in filenames else "settings.gradle.kts"
+                )
+                name = _gradle_project_name(project_dir / settings_name)
+            if not name and csproj_files:
+                name = _csproj_project_name(project_dir / csproj_files[0])
             if not name:
                 continue
             root_rel = project_dir.relative_to(repo_root).as_posix()

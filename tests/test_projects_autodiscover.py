@@ -35,6 +35,23 @@ def test_autodiscover_packages_ignores_node_modules(tmp_path: Path) -> None:
     assert resolved[0].baseline_rel == "packages/a/.sdetkit/audit-baseline.json"
 
 
+def test_autodiscover_detects_common_monorepo_roots_by_default(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    _write_pyproject(repo / "services" / "api", "svc-api")
+    _write_pyproject(repo / "libs" / "core", "lib-core")
+    _write_pyproject(repo / "crates" / "engine", "crate-engine")
+
+    source, projects = discover_projects(repo, sort=True)
+    assert source == "autodiscover"
+    assert [(p.name, p.root) for p in projects] == [
+        ("crate-engine", "crates/engine"),
+        ("lib-core", "libs/core"),
+        ("svc-api", "services/api"),
+    ]
+
+
 def test_pyproject_autodiscover_with_custom_roots_and_stable_order(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -349,3 +366,95 @@ def test_autodiscover_duplicate_name_error_includes_both_roots_in_stable_order(
         match=r"duplicate project name: shared-name \(roots: packages/alpha and packages/zeta\)",
     ):
         discover_projects(repo)
+
+
+def test_autodiscover_detects_maven_gradle_and_dotnet_projects(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    maven = repo / "services" / "billing"
+    maven.mkdir(parents=True)
+    (maven / "pom.xml").write_text(
+        """
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.acme</groupId>
+  <artifactId>billing-service</artifactId>
+  <version>1.0.0</version>
+</project>
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    gradle = repo / "apps" / "checkout"
+    gradle.mkdir(parents=True)
+    (gradle / "settings.gradle.kts").write_text(
+        'rootProject.name = "checkout-app"\n',
+        encoding="utf-8",
+    )
+
+    dotnet = repo / "libs" / "payments"
+    dotnet.mkdir(parents=True)
+    (dotnet / "Payments.csproj").write_text(
+        """
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Acme.Payments</AssemblyName>
+  </PropertyGroup>
+</Project>
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    source, projects = discover_projects(repo, sort=True)
+    assert source == "autodiscover"
+    assert [(p.name, p.root) for p in projects] == [
+        ("Acme.Payments", "libs/payments"),
+        ("billing-service", "services/billing"),
+        ("checkout-app", "apps/checkout"),
+    ]
+
+
+def test_autodiscover_csproj_falls_back_to_file_stem(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    dotnet = repo / "libs" / "gateway"
+    dotnet.mkdir(parents=True)
+    (dotnet / "Gateway.Worker.csproj").write_text(
+        '<Project Sdk="Microsoft.NET.Sdk"></Project>\n',
+        encoding="utf-8",
+    )
+
+    _, projects = discover_projects(repo)
+    assert [(p.name, p.root) for p in projects] == [
+        ("Gateway.Worker", "libs/gateway"),
+    ]
+
+
+def test_autodiscover_prefers_existing_detectors_over_new_project_types(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    hybrid = repo / "services" / "hybrid"
+    hybrid.mkdir(parents=True)
+    (hybrid / "pyproject.toml").write_text(
+        '[project]\nname = "python-priority"\nversion = "0.0.0"\n',
+        encoding="utf-8",
+    )
+    (hybrid / "pom.xml").write_text(
+        "<project><artifactId>maven-fallback</artifactId></project>\n",
+        encoding="utf-8",
+    )
+    (hybrid / "settings.gradle").write_text(
+        "rootProject.name = 'gradle-fallback'\n",
+        encoding="utf-8",
+    )
+
+    _, projects = discover_projects(repo)
+    assert [(p.name, p.root) for p in projects] == [
+        ("python-priority", "services/hybrid"),
+    ]
