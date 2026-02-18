@@ -11,7 +11,6 @@ import shutil
 import subprocess
 import threading
 import time
-from . import _toml
 import urllib.parse
 from collections.abc import Callable, Mapping
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
@@ -19,6 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from . import _toml
 from .atomicio import atomic_write_text
 from .doctor import _scan_non_ascii
 from .repo import run_repo_audit
@@ -26,7 +26,7 @@ from .report import build_run_record
 from .security import safe_path
 from .security_gate import scan_repo
 
-_UTC = getattr(dt, "UTC", dt.timezone.utc)
+_UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 _VAR_RE = re.compile(r"\$\{([^}]+)\}")
 
 

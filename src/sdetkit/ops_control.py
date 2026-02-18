@@ -4,12 +4,12 @@ import argparse
 import hashlib
 import json
 import subprocess
-from . import _toml
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from . import _toml
 from .atomicio import atomic_write_text
 from .plugin_system import discover
 

@@ -6,11 +6,11 @@ import os
 import shutil
 import subprocess
 import sys
-from . import _toml
 from importlib import metadata
 from pathlib import Path
 from typing import Any
 
+from . import _toml
 from .import_hazards import find_stdlib_shadowing
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}
