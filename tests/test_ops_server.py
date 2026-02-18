@@ -40,3 +40,21 @@ def test_server_rejects_invalid_run_id(tmp_path: Path) -> None:
         assert "HTTP Error 400" in str(exc)
     else:
         raise AssertionError("expected 400")
+
+
+@pytest.mark.network
+def test_server_rejects_run_workflow_path_with_directories(tmp_path: Path) -> None:
+    port = 8879
+    thread = threading.Thread(target=serve, args=("127.0.0.1", port, tmp_path), daemon=True)
+    thread.start()
+    time.sleep(0.1)
+
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{port}/run-workflow",
+        data=json.dumps({"workflow_path": "nested/wf.toml", "inputs": {}}).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with pytest.raises(Exception) as exc:  # noqa: BLE001
+        urllib.request.urlopen(req, timeout=2).read()
+    assert "HTTP Error 400" in str(exc.value)
