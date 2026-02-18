@@ -14,6 +14,8 @@ def find_stdlib_shadowing(repo_root: Path, src_dir: str = "src") -> list[str]:
         return []
 
     stdlib = set(names)
+    # Guard against runtime/version skew (e.g. checking for tomllib shadowing on py<3.11).
+    stdlib.update({"tomllib"})
     out: list[str] = []
 
     for p in src.iterdir():

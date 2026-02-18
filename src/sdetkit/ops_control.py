@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
@@ -252,7 +253,11 @@ def run(
         cmd = list(task.command)
         if name == "security-fix" and apply:
             cmd = ["python3", "-m", "sdetkit", "security", "fix", "--apply"]
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        env = dict(os.environ)
+        src_dir = Path(__file__).resolve().parents[1]
+        py_path = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = f"{src_dir}{os.pathsep}{py_path}" if py_path else str(src_dir)
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False, env=env)
         out_text = (proc.stdout or "") + (proc.stderr or "")
         return name, ("PASS" if proc.returncode == 0 else "FAIL"), out_text
 
