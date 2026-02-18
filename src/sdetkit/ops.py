@@ -196,14 +196,22 @@ def build_registry() -> ActionRegistry:
 
 
 def _resolve_workflow_path(path: Path) -> Path:
-    candidate = Path(path)
+    raw = str(path)
+    if "\x00" in raw:
+        raise ValueError("workflow path contains NUL byte")
+
+    candidate = Path(raw)
     if candidate.is_absolute():
         raise ValueError("workflow path must be relative to the current working directory")
     if any(part == ".." for part in candidate.parts):
         raise ValueError("workflow path traversal is not allowed")
 
-    base = Path.cwd()
-    resolved = safe_path(base, str(candidate), allow_absolute=False)
+    base = Path.cwd().resolve(strict=True)
+    resolved = (base / candidate).resolve(strict=False)
+    try:
+        resolved.relative_to(base)
+    except ValueError as exc:
+        raise ValueError("workflow path escapes the current working directory") from exc
 
     if resolved.suffix.lower() not in {".toml", ".json"}:
         raise ValueError("workflow path must end with .toml or .json")
@@ -219,7 +227,10 @@ def _validate_run_id(run_id: str) -> str:
 
 
 def _load_workflow(path: Path) -> WorkflowDef:
-    resolved_path = _resolve_workflow_path(path)
+    return _load_workflow_resolved(_resolve_workflow_path(path))
+
+
+def _load_workflow_resolved(resolved_path: Path) -> WorkflowDef:
     if resolved_path.suffix.lower() == ".json":
         doc = json.loads(resolved_path.read_text(encoding="utf-8"))
     else:
@@ -269,7 +280,7 @@ def _load_workflow(path: Path) -> WorkflowDef:
         else False,
     )
     wf = WorkflowDef(
-        name=str(w.get("name", path.stem)),
+        name=str(w.get("name", resolved_path.stem)),
         version=str(w.get("version", "1")),
         steps=tuple(steps),
         policy=policy,
@@ -455,7 +466,7 @@ def run_workflow(
     registry = registry or build_registry()
     resolved_workflow_path = _resolve_workflow_path(workflow_path)
     workflow_text = resolved_workflow_path.read_text(encoding="utf-8")
-    wf = _load_workflow(workflow_path)
+    wf = _load_workflow_resolved(resolved_workflow_path)
     run_id = _run_id(workflow_text, inputs)
     run_root = history_dir / ".sdetkit" / "ops-history" / run_id
     run_root.mkdir(parents=True, exist_ok=True)
