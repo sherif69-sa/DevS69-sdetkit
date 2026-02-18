@@ -139,6 +139,25 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
         action="store_true",
         help="Follow Link: rel=next and concatenate pages.",
     )
+    p.add_argument(
+        "--paginate-mode",
+        choices=["link", "envelope"],
+        default="link",
+        help=(
+            "Pagination strategy: link follows RFC5988 Link rel=next; envelope reads items/next "
+            "keys from a JSON object response."
+        ),
+    )
+    p.add_argument(
+        "--paginate-items-key",
+        default="items",
+        help="Envelope mode only: key containing page list items (default: items).",
+    )
+    p.add_argument(
+        "--paginate-next-key",
+        default="next",
+        help="Envelope mode only: key containing next URL or null (default: next).",
+    )
     p.add_argument("--max-pages", type=int, default=100, help="Pagination page limit (>= 1).")
     p.add_argument(
         "--retries", type=int, default=1, help="Retry attempts for transient errors (>= 1)."
@@ -437,6 +456,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         _die("max_pages must be >= 1")
     if ns.paginate and ns.expect == "dict":
         _die("paginate requires --expect list (or any)")
+    if ns.paginate and ns.paginate_mode == "envelope":
+        if not str(ns.paginate_items_key).strip():
+            _die("paginate-items-key must not be empty")
+        if not str(ns.paginate_next_key).strip():
+            _die("paginate-next-key must not be empty")
 
     pol = RetryPolicy(
         retries=ns.retries,
@@ -563,13 +587,24 @@ def main(argv: Sequence[str] | None = None) -> int:
 
                     data = out
                 else:
-                    data = c.get_json_list_paginated(
-                        ns.url,
-                        max_pages=ns.max_pages,
-                        headers=_req_headers or None,
-                        request_id=ns.request_id,
-                        timeout=ns.timeout,
-                    )
+                    if ns.paginate_mode == "envelope":
+                        data = c.get_json_list_paginated_envelope(
+                            ns.url,
+                            items_key=ns.paginate_items_key,
+                            next_key=ns.paginate_next_key,
+                            max_pages=ns.max_pages,
+                            headers=_req_headers or None,
+                            request_id=ns.request_id,
+                            timeout=ns.timeout,
+                        )
+                    else:
+                        data = c.get_json_list_paginated(
+                            ns.url,
+                            max_pages=ns.max_pages,
+                            headers=_req_headers or None,
+                            request_id=ns.request_id,
+                            timeout=ns.timeout,
+                        )
 
             else:
                 needs_raw = (

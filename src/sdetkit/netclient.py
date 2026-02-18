@@ -470,6 +470,62 @@ class SdetHttpClient:
 
         raise RuntimeError("pagination limit exceeded")
 
+    def get_json_list_paginated_envelope(
+        self,
+        url: str,
+        *,
+        items_key: str = "items",
+        next_key: str = "next",
+        max_pages: int = 100,
+        headers: dict[str, str] | None = None,
+        request_id: str | None = None,
+        timeout: float | httpx.Timeout | None = None,
+        retry: RetryPolicy | None = None,
+        hook: Hook | None = None,
+        breaker: CircuitBreaker | None = None,
+    ) -> list:
+        if max_pages < 1:
+            raise ValueError("max_pages must be >= 1")
+        if not str(items_key).strip():
+            raise ValueError("items_key must not be empty")
+        if not str(next_key).strip():
+            raise ValueError("next_key must not be empty")
+
+        out: list = []
+        seen: set[str] = {str(url)}
+        cur = str(url)
+
+        for _ in range(max_pages):
+            r, data, rid = self._request_json(
+                cur,
+                headers=headers,
+                request_id=request_id,
+                timeout=timeout,
+                retry=retry,
+                hook=hook,
+                breaker=breaker,
+            )
+            if not isinstance(data, dict):
+                raise ValueError("expected json object")
+
+            page_items = data.get(items_key)
+            if not isinstance(page_items, list):
+                raise ValueError(f"expected json array at key '{items_key}'")
+            out.extend(page_items)
+
+            nxt_raw = data.get(next_key)
+            if nxt_raw is None or str(nxt_raw).strip() == "":
+                return out
+            if not isinstance(nxt_raw, str):
+                raise ValueError(f"expected string or null at key '{next_key}'")
+            nxt = str(urljoin(str(r.url), nxt_raw))
+            if nxt in seen:
+                raise RuntimeError("pagination cycle")
+            seen.add(nxt)
+            cur = nxt
+
+        raise RuntimeError("pagination limit exceeded")
+
     def get_json_any(
         self,
         url: str,
