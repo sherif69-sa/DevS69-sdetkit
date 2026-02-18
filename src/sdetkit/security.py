@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-import httpx
+if TYPE_CHECKING:
+    import httpx
 
 DEFAULT_REDACT_KEYS: frozenset[str] = frozenset(
     {
@@ -140,6 +142,8 @@ def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Pa
 
 
 def default_http_timeout(timeout_seconds: float | None = None) -> httpx.Timeout:
+    import httpx
+
     if timeout_seconds is not None:
         return httpx.Timeout(timeout_seconds)
     return httpx.Timeout(connect=5.0, read=10.0, write=10.0, pool=5.0)
