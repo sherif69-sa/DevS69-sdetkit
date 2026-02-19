@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -105,6 +105,9 @@ bash scripts/check.sh all
 
 - [**Repo tour**](repo-tour.md)
   Visual orientation map and role-based pathways.
+
+- [**Top-10 GitHub strategy**](top-10-github-strategy.md)
+  Growth plan, KPIs, and execution roadmap for category leadership.
 
 - [**Project structure**](project-structure.md)
   Repository layout and module roles.

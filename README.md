@@ -148,6 +148,7 @@
 | Run safe checks and targeted fixes | [Repo audit](docs/repo-audit.md) | Enterprise-focused guardrails |
 | Run deterministic automation workflows | [Automation OS](docs/automation-os.md) | Manager/worker workflows, replay, diff, artifacts |
 | Contribute with confidence | [Contributing guide](CONTRIBUTING.md) | Quality gates + PR expectations |
+| Grow adoption and reach | [Top-10 GitHub strategy](docs/top-10-github-strategy.md) | 90-day execution plan + measurable KPIs |
 
 ## 🎨 Visual + clickable experience map
 
@@ -200,6 +201,7 @@
 - [Quality Playbook](QUALITY_PLAYBOOK.md)
 - [Release Guide](RELEASE.md)
 - [Roadmap](ROADMAP.md)
+- [Top-10 GitHub Strategy](docs/top-10-github-strategy.md)
 - [Changelog](CHANGELOG.md)
 
 ### Documentation hub
