@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -135,6 +135,21 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Auto-recover missing checklist content: `sdetkit first-contribution --write-defaults --format json --strict`.
 - Export markdown checklist artifact: `sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md`.
 - Review the generated artifact: [day10 first contribution checklist sample](artifacts/day10-first-contribution-checklist-sample.md).
+
+
+## Day 11 ultra upgrades (docs navigation tune-up)
+
+- Read the implementation report: [Day 11 ultra upgrade report](day-11-ultra-upgrade-report.md).
+- Run `sdetkit docs-nav --format text --strict` to validate one-click docs journeys from docs home.
+- Auto-recover the quick-jump nav block: `sdetkit docs-nav --write-defaults --format json --strict`.
+- Export markdown docs-nav artifact: `sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md`.
+- Review the generated artifact: [day11 docs navigation sample](artifacts/day11-docs-navigation-sample.md).
+
+### Day 11 top journeys
+
+- Run first command in under 60 seconds
+- Validate docs links and anchors before publishing
+- Ship a first contribution with deterministic quality gates
 
 ## Fast start
 

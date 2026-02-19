@@ -572,6 +572,32 @@ python scripts/check_day10_first_contribution_contract.py
 python -m sdetkit first-contribution --format json --strict
 ```
 
+
+## 🧭 Day 11 ultra: docs navigation tune-up
+
+Day 11 makes top user journeys one-click from docs home so users can jump straight to fast start, core CLI guidance, and contribution paths.
+
+```bash
+python -m sdetkit docs-nav --format text --strict
+python -m sdetkit docs-nav --write-defaults --format json --strict
+```
+
+Export a markdown artifact for docs handoff:
+
+```bash
+python -m sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md
+```
+
+See implementation details: [Day 11 ultra upgrade report](docs/day-11-ultra-upgrade-report.md).
+
+Day 11 closeout checks:
+
+```bash
+python -m pytest -q tests/test_docs_navigation.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day11_docs_navigation_contract.py
+python -m sdetkit docs-nav --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
