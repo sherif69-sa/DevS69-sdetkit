@@ -147,6 +147,25 @@ Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
 
 See: day-9-ultra-upgrade-report.md
 
+## first-contribution
+
+Builds Day 10 first-contribution checklist output and validates that `CONTRIBUTING.md` contains the guided path from fork to PR.
+
+Examples:
+
+- `sdetkit first-contribution --format text --strict`
+- `sdetkit first-contribution --format json`
+- `sdetkit first-contribution --write-defaults --format json --strict`
+- `sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
+
+`--strict` returns non-zero if required Day 10 checklist content or required command snippets are missing from `CONTRIBUTING.md`.
+
+`--write-defaults` writes a default Day 10 checklist block to `CONTRIBUTING.md` if missing, then re-validates in the same run.
+
+See: day-10-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).

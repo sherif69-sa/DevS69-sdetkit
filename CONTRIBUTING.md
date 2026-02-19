@@ -10,6 +10,29 @@ Thanks for helping improve **sdetkit**.
 
 ---
 
+## 0) Day 10 first-contribution checklist
+
+Use this guided path from local clone to first merged PR:
+
+- [ ] Fork the repository and clone your fork locally.
+- [ ] Create and activate a virtual environment.
+- [ ] Install editable dependencies for dev/test/docs.
+- [ ] Create a branch named `feat/<topic>` or `fix/<topic>`.
+- [ ] Run focused tests for changed modules before committing.
+- [ ] Run full quality gates (`pre-commit`, `quality.sh`, docs build) before opening a PR.
+- [ ] Open a PR using the repository template and include test evidence.
+
+Recommended shell sequence:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .[dev,test,docs]
+pre-commit run -a
+bash quality.sh cov
+mkdocs build
+```
+
 ## Contribution flow
 
 1. Fork and create a focused branch.
