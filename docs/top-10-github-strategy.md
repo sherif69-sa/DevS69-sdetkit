@@ -83,16 +83,58 @@ This phase now runs as a **day-by-day operating plan**. When we say "work Day 1,
 - At least one external contributor PR by Day 30.
 - Measurable increase in stars/week and discussions/week by end of phase.
 
-### Phase 2 (Days 31-60): Adoption loops
+### Phase 2 (Days 31-60): Adoption loops (daily execution)
 
-- Create weekly release cadence with visible changelog highlights.
-- Publish 4 short demo videos/GIFs (doctor, repo audit, security gate, cassette replay).
-- Add "production templates" bundle and announce on social channels.
-- Start a "Repo Reliability Playbook" series (4 posts) linking back to docs.
+Phase 2 converts early traction into repeatable growth loops. Each day ships one concrete asset that increases discoverability, trust, or reuse.
 
-**Target metrics:**
-- Increased recurring traffic and stars/week.
-- More issue discussions from real users.
+#### Day 31–60 sprint plan
+
+- **Day 31 — Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets.
+- **Day 32 — Release cadence setup:** lock weekly release rhythm and changelog publication checklist.
+- **Day 33 — Demo asset #1:** produce/publish `doctor` workflow short video or GIF.
+- **Day 34 — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.
+- **Day 35 — Weekly review #5:** report growth deltas and tighten next-week actions.
+
+- **Day 36 — Demo asset #3:** produce/publish `security gate` workflow short video or GIF.
+- **Day 37 — Demo asset #4:** produce/publish `cassette replay` workflow short video or GIF.
+- **Day 38 — Distribution batch #1:** publish coordinated posts linking demo assets to docs.
+- **Day 39 — Playbook post #1:** publish Repo Reliability Playbook article #1.
+- **Day 40 — Playbook post #2:** publish Repo Reliability Playbook article #2.
+- **Day 41 — Playbook post #3:** publish Repo Reliability Playbook article #3.
+- **Day 42 — Weekly review #6:** measure referral traffic, asset engagement, and stars/week trend.
+
+- **Day 43 — Production templates bundle v1:** package and document first template set.
+- **Day 44 — Integration spotlight #1:** announce template usage with example CI scenario.
+- **Day 45 — Integration spotlight #2:** add second real-world workflow example.
+- **Day 46 — Distribution batch #2:** run second wave of promotion for templates and playbooks.
+- **Day 47 — Community feedback capture:** collect issues/discussions and group by adoption blockers.
+- **Day 48 — Objection handling update:** improve docs for top 3 recurring questions.
+- **Day 49 — Weekly review #7:** evaluate conversion and reuse rates for templates.
+
+- **Day 50 — Release storytelling uplift:** improve changelog with outcome-focused highlights.
+- **Day 51 — Case snippet #1:** publish mini-case on reliability or quality gate value.
+- **Day 52 — Case snippet #2:** publish mini-case on security/ops workflow value.
+- **Day 53 — Docs loop optimization:** add stronger cross-links between demos, playbooks, and CLI docs.
+- **Day 54 — Re-engagement campaign:** promote best-performing assets from Days 33–53.
+- **Day 55 — Contributor activation #2:** highlight advanced issues for repeat contributors.
+- **Day 56 — Weekly review #8:** compare week-over-week growth, identify loop bottlenecks.
+
+- **Day 57 — KPI deep audit:** validate 30-day trendlines (stars, CTR, discussions, PRs, returning users).
+- **Day 58 — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.
+- **Day 59 — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.
+- **Day 60 — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.
+
+#### Phase-2 weekly deliverables (must ship)
+
+- 1 growth asset (video/GIF/post/template release).
+- 1 distribution action across selected channels/communities.
+- 1 docs optimization based on engagement data.
+- 1 KPI snapshot and actions log.
+
+**Phase-2 target metrics:**
+- Consistent increase in stars/week and returning docs traffic.
+- Higher discussion volume from real users and integrators.
+- Reuse signals from templates/playbooks in downstream workflows.
 
 ### Phase 3 (Days 61-90): Ecosystem + trust
 
