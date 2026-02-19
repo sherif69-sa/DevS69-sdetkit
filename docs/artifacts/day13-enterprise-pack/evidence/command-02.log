@@ -1,0 +1,25 @@
+command: python -m sdetkit security report --format text
+returncode: 0
+ok: True
+--- stdout ---
+security scan: total=21 error=1 warn=5 info=15
+sbom components: 118
+top findings:
+- [info] SEC_DEBUG_PRINT src/sdetkit/contributor_funnel.py:261 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/contributor_funnel.py:265 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/demo.py:255 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/docs_navigation.py:252 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/docs_qa.py:202 print(...) found in src/.
+- [error] SEC_SUBPROCESS_SHELL_TRUE src/sdetkit/enterprise_use_case.py:231 subprocess call uses shell=True.
+- [info] SEC_DEBUG_PRINT src/sdetkit/enterprise_use_case.py:442 print(...) found in src/.
+- [warn] SEC_HIGH_ENTROPY_STRING src/sdetkit/first_contribution.py:109 High-entropy string literal detected.
+- [info] SEC_DEBUG_PRINT src/sdetkit/first_contribution.py:203 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/onboarding.py:167 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/premium_gate_engine.py:1062 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/premium_gate_engine.py:1064 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/premium_gate_engine.py:1066 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/proof.py:196 print(...) found in src/.
+- [info] SEC_DEBUG_PRINT src/sdetkit/startup_use_case.py:312 print(...) found in src/.
+
+--- stderr ---
+

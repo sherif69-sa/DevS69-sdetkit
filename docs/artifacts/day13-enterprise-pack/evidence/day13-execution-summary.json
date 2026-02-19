@@ -1,0 +1,48 @@
+{
+  "name": "day13-enterprise-execution",
+  "total_commands": 5,
+  "passed_commands": 5,
+  "failed_commands": 0,
+  "results": [
+    {
+      "index": 1,
+      "command": "python -m sdetkit repo audit . --profile enterprise --format json",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "{\n  \"checks\": [\n    {\n      \"details\": [\n        \"Repository should define contributor conduct expectations.\"\n      ],\n      \"key\": \"CORE_MISSING_CODE_OF_CONDUCT_MD\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"CODE_OF_CONDUCT.md exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should explain how to contribute.\"\n      ],\n      \"key\": \"CORE_MISSING_CONTRIBUTING_MD\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"CONTRIBUTING.md exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should define issue template defaults.\"\n      ],\n      \"key\": \"CORE_MISSING_ISSUE_TEMPLATE_CONFIG\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"Issue template config exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should provide a pull request template.\"\n      ],\n      \"key\": \"CORE_MISSING_PR_TEMPLATE\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"PR template exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should publish a security reporting policy.\"\n      ],\n      \"key\": \"CORE_MISSING_SECURITY_MD\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"SECURITY.md exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should run sdetkit repo audit in CI.\"\n      ],\n      \"key\": \"ENT_REPO_AUDIT_WORKFLOW_MISSING\",\n      \"pack\": \"enterprise\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"Repo audit workflow exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should configure dependency update automation.\"\n      ],\n      \"key\": \"SEC_GH_DEPENDABOT_MISSING\",\n      \"pack\": \"enterprise\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"Dependabot config exists\"\n    }\n  ],\n  \"findings\": [],\n  \"root\": \"/workspace/DevS69-sdetkit\",\n  \"schema_version\": \"1.1.0\",\n  \"summary\": {\n    \"checks\": 7,\n    \"counts\": {\n      \"error\": 0,\n      \"info\": 0,\n      \"warn\": 0\n    },\n    \"failed\": 0,\n    \"findings\": 0,\n    \"incremental\": {\n      \"changed_files\": 0,\n      \"used\": false\n    },\n    \"ok\": true,\n    \"packs\": [\n      \"core\",\n      \"enterprise\"\n    ],\n    \"passed\": 7,\n    \"policy\": {\n      \"actionable\": 0,\n      \"suppressed_active\": 0,\n      \"suppressed_by_baseline\": 0,\n      \"suppressed_by_policy\": 0,\n      \"suppressed_expired\": 0,\n      \"total_findings\": 0\n    }\n  },\n  \"suppressed\": [],\n  \"suppressed_expired\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "index": 2,
+      "command": "python -m sdetkit security report --format text",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "security scan: total=21 error=1 warn=5 info=15\nsbom components: 118\ntop findings:\n- [info] SEC_DEBUG_PRINT src/sdetkit/contributor_funnel.py:261 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/contributor_funnel.py:265 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/demo.py:255 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/docs_navigation.py:252 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/docs_qa.py:202 print(...) found in src/.\n- [error] SEC_SUBPROCESS_SHELL_TRUE src/sdetkit/enterprise_use_case.py:231 subprocess call uses shell=True.\n- [info] SEC_DEBUG_PRINT src/sdetkit/enterprise_use_case.py:442 print(...) found in src/.\n- [warn] SEC_HIGH_ENTROPY_STRING src/sdetkit/first_contribution.py:109 High-entropy string literal detected.\n- [info] SEC_DEBUG_PRINT src/sdetkit/first_contribution.py:203 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/onboarding.py:167 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/premium_gate_engine.py:1062 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/premium_gate_engine.py:1064 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/premium_gate_engine.py:1066 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/proof.py:196 print(...) found in src/.\n- [info] SEC_DEBUG_PRINT src/sdetkit/startup_use_case.py:312 print(...) found in src/.\n",
+      "stderr": ""
+    },
+    {
+      "index": 3,
+      "command": "python -m sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json",
+      "returncode": 0,
+      "ok": true,
+      "stdout": ".sdetkit/day13-policy-snapshot.json\n",
+      "stderr": ""
+    },
+    {
+      "index": 4,
+      "command": "python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py",
+      "returncode": 0,
+      "ok": true,
+      "stdout": ".........                                                                [100%]\n9 passed in 1.28s\n",
+      "stderr": ""
+    },
+    {
+      "index": 5,
+      "command": "python scripts/check_day13_enterprise_use_case_contract.py",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "day13-enterprise-use-case-contract check passed\n",
+      "stderr": ""
+    }
+  ]
+}

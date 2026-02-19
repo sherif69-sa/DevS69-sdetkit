@@ -624,6 +624,34 @@ python scripts/check_day12_startup_use_case_contract.py
 python -m sdetkit startup-use-case --format json --strict
 ```
 
+## 🏢 Day 13 ultra: enterprise/regulated use-case page
+
+Day 13 ships a dedicated enterprise/regulated workflow landing page with governance cadence, compliance evidence controls, and rollout guidance for multi-repo organizations.
+
+```bash
+python -m sdetkit enterprise-use-case --format text --strict
+python -m sdetkit enterprise-use-case --write-defaults --format json --strict
+python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict
+python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for compliance handoff:
+
+```bash
+python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md
+```
+
+See implementation details: [Day 13 ultra upgrade report](docs/day-13-ultra-upgrade-report.md).
+
+Day 13 closeout checks:
+
+```bash
+python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day13_enterprise_use_case_contract.py
+python -m sdetkit enterprise-use-case --format json --strict
+python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
