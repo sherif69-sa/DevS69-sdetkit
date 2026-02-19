@@ -5,7 +5,7 @@ import os
 from collections.abc import Sequence
 from importlib import metadata
 
-from . import apiget, contributor_funnel, demo, docs_navigation, docs_qa, evidence, first_contribution, kvcli, notify, onboarding, ops, patch, policy, proof, repo, report, triage_templates, weekly_review
+from . import apiget, contributor_funnel, demo, docs_navigation, docs_qa, evidence, first_contribution, kvcli, notify, onboarding, ops, patch, policy, proof, repo, report, startup_use_case, triage_templates, weekly_review
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .security_gate import main as security_main
@@ -110,6 +110,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "docs-nav":
         return docs_navigation.main(list(argv[1:]))
 
+    if argv and argv[0] == "startup-use-case":
+        return startup_use_case.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -186,6 +189,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     dnv = sub.add_parser("docs-nav")
     dnv.add_argument("args", nargs=argparse.REMAINDER)
 
+    suc = sub.add_parser("startup-use-case")
+    suc.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -250,6 +256,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "docs-nav":
         return docs_navigation.main(ns.args)
+
+    if ns.cmd == "startup-use-case":
+        return startup_use_case.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

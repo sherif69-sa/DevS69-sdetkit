@@ -598,6 +598,32 @@ python scripts/check_day11_docs_navigation_contract.py
 python -m sdetkit docs-nav --format json --strict
 ```
 
+## 🚀 Day 12 ultra: startup/small-team use-case page
+
+Day 12 ships a dedicated startup/small-team workflow landing page with a runnable 10-minute path, weekly operating rhythm, and quality guardrails.
+
+```bash
+python -m sdetkit startup-use-case --format text --strict
+python -m sdetkit startup-use-case --write-defaults --format json --strict
+python -m sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict
+```
+
+Export a markdown artifact for adoption handoff:
+
+```bash
+python -m sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md
+```
+
+See implementation details: [Day 12 ultra upgrade report](docs/day-12-ultra-upgrade-report.md).
+
+Day 12 closeout checks:
+
+```bash
+python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day12_startup_use_case_contract.py
+python -m sdetkit startup-use-case --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash

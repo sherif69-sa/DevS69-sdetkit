@@ -71,6 +71,7 @@ nav:
       - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
       - Automation templates engine: automation-templates-engine.md
       - CI Contract: ci-contract.md
+      - Startup + small-team workflow: use-cases-startup-small-team.md
   - Integrations:
       - GitHub Action: github-action.md
       - n8n integration: n8n.md

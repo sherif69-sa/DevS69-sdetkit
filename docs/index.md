@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -150,6 +150,16 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Run first command in under 60 seconds
 - Validate docs links and anchors before publishing
 - Ship a first contribution with deterministic quality gates
+
+## Day 12 ultra upgrades (startup/small-team use-case page)
+
+- Read the implementation report: [Day 12 ultra upgrade report](day-12-ultra-upgrade-report.md).
+- Open the landing page: [startup + small-team workflow](use-cases-startup-small-team.md).
+- Run `sdetkit startup-use-case --format text --strict` to validate required sections and command sequence.
+- Auto-recover missing/incomplete landing-page content: `sdetkit startup-use-case --write-defaults --format json --strict`.
+- Export markdown use-case artifact: `sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md`.
+- Emit startup operating pack (checklist + CI + risk register): `sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`.
+- Review the generated artifact: [day12 startup use-case sample](artifacts/day12-startup-use-case-sample.md).
 
 ## Fast start
 

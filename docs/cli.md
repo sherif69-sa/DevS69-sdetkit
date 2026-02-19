@@ -139,7 +139,7 @@ Examples:
 - `sdetkit triage-templates --write-defaults --format json --strict`
 - `sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
 
 `--strict` returns non-zero if required Day 9 triage checks are missing from bug/feature/PR templates or `.github/ISSUE_TEMPLATE/config.yml`.
 
@@ -158,7 +158,7 @@ Examples:
 - `sdetkit first-contribution --write-defaults --format json --strict`
 - `sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
 
 `--strict` returns non-zero if required Day 10 checklist content or required command snippets are missing from `CONTRIBUTING.md`.
 
@@ -177,13 +177,35 @@ Examples:
 - `sdetkit docs-nav --write-defaults --format json --strict`
 - `sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
 
 `--strict` returns non-zero if required Day 11 journey links/content are missing from `docs/index.md`.
 
 `--write-defaults` repairs the quick-jump nav block, restores the Day 11 top-journey section when missing, and then validates again.
 
 See: day-11-ultra-upgrade-report.md
+
+## startup-use-case
+
+Builds Day 12 startup/small-team landing-page status and validates required workflow sections and runnable command sequence.
+
+Examples:
+
+- `sdetkit startup-use-case --format text --strict`
+- `sdetkit startup-use-case --format json`
+- `sdetkit startup-use-case --write-defaults --format json --strict`
+- `sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md`
+- `sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
+
+`--strict` returns non-zero if required Day 12 use-case sections or command snippets are missing from `docs/use-cases-startup-small-team.md`.
+
+`--write-defaults` writes a hardened Day 12 startup workflow page if missing/incomplete, then validates again.
+
+`--emit-pack-dir` writes a startup operating-pack bundle containing checklist, CI fast-lane recipe, and risk register files.
+
+See: day-12-ultra-upgrade-report.md
 
 ## patch
 
