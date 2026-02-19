@@ -149,7 +149,7 @@
 | Run deterministic automation workflows | [Automation OS](docs/automation-os.md) | Manager/worker workflows, replay, diff, artifacts |
 | Contribute with confidence | [Contributing guide](CONTRIBUTING.md) | Quality gates + PR expectations |
 | Grow adoption and reach | [Top-10 GitHub strategy](docs/top-10-github-strategy.md) | 90-day execution plan + measurable KPIs |
-| Start immediately (Day-1 sprint) | [Day-1 full boost plan](docs/top-10-github-strategy.md#day-1-full-boost-execution-plan-start-now) | High-impact actions for same-day momentum |
+| Start immediately (Phase 1 days 1–30) | [Phase-1 daily execution plan](docs/top-10-github-strategy.md#phase-1-days-1-30-positioning--conversion-daily-execution) | High-impact actions for same-day momentum |
 
 ## 🎨 Visual + clickable experience map
 

@@ -30,19 +30,58 @@ These strengths are the right base for growth; the next step is packaging, disco
 
 ## 90-day execution plan
 
-### Phase 1 (Days 1-30): Positioning + conversion
+### Phase 1 (Days 1-30): Positioning + conversion (daily execution)
 
-- Tighten the GitHub profile message:
-  - One-line value proposition in README opening.
-  - "Who is this for" section (SDET lead, platform engineer, security engineer).
-  - Fast proof section with 60-second reproducible demo.
-- Add comparison page: "sdetkit vs ad-hoc scripts" and "vs generic linters-only pipelines."
-- Add copy-paste onboarding blocks for Linux/macOS/Windows.
-- Publish `good first issue` and `help wanted` labels with curated starter tasks.
+This phase now runs as a **day-by-day operating plan**. When we say "work Day 1," we execute that day’s checklist in full and publish the artifacts before moving on.
 
-**Target metrics:**
-- README-to-first-command conversion up.
-- First external contributor PR in this cycle.
+#### Day 1–30 sprint plan
+
+- **Day 1 — Core positioning refresh:** finalize one-line value proposition, role-based audience block, and top CTA in README.
+- **Day 2 — 60-second demo path:** add a copy-paste command flow with expected output snippets.
+- **Day 3 — Proof artifacts:** capture and publish 3 command screenshots/GIFs (`doctor`, `repo audit`, `security`).
+- **Day 4 — Comparison clarity:** publish "sdetkit vs ad-hoc scripts" and "vs lint-only pipelines" guidance.
+- **Day 5 — Platform onboarding:** add Linux/macOS/Windows setup snippets.
+- **Day 6 — Conversion QA:** test README links/anchors and remove friction points.
+- **Day 7 — Weekly review #1:** publish what shipped, what moved KPIs, and next-week focus.
+
+- **Day 8 — Contributor funnel start:** create 10 curated `good first issue` tasks.
+- **Day 9 — Contribution templates:** improve issue/PR templates for fast triage.
+- **Day 10 — First-contribution checklist:** add guided path in contributing docs.
+- **Day 11 — Docs navigation tune-up:** make top user journeys one-click from docs home.
+- **Day 12 — Use-case page #1:** startup/small-team workflow landing page.
+- **Day 13 — Use-case page #2:** enterprise/regulated workflow landing page.
+- **Day 14 — Weekly review #2:** report traffic, stars, discussions, and blocker fixes.
+
+- **Day 15 — Integration recipe #1:** GitHub Actions quickstart with minimal config.
+- **Day 16 — Integration recipe #2:** GitLab CI quickstart.
+- **Day 17 — Integration recipe #3:** Jenkins quickstart.
+- **Day 18 — Reliability evidence pack:** publish sample outputs/artifacts bundle.
+- **Day 19 — Social launch kit:** prepare short post templates + visuals for recurring promotion.
+- **Day 20 — Release narrative:** produce clear changelog storytelling for non-maintainers.
+- **Day 21 — Weekly review #3:** track conversion improvements and external contributor response.
+
+- **Day 22 — Trust signal upgrade:** tighten security/reliability badge and policy visibility.
+- **Day 23 — FAQ and objections:** answer adoption blockers ("when to use", "when not to use").
+- **Day 24 — Onboarding time reduction:** optimize path to first successful command under 3 minutes.
+- **Day 25 — Community activation:** open roadmap-voting discussion and collect feedback.
+- **Day 26 — External contribution push:** spotlight open starter tasks publicly.
+- **Day 27 — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).
+- **Day 28 — Weekly review #4:** document wins, misses, and corrective actions.
+
+- **Day 29 — Phase-1 hardening:** close stale docs gaps and polish top entry pages.
+- **Day 30 — Phase-1 wrap + handoff:** publish a full report and lock Phase-2 backlog.
+
+#### Phase-1 weekly deliverables (must ship)
+
+- 1 visible documentation or onboarding improvement.
+- 1 distribution artifact (post/video/GIF/release highlight).
+- 1 contributor-funnel improvement (issues/templates/checklists).
+- 1 KPI snapshot update shared with the team.
+
+**Phase-1 target metrics:**
+- README-to-first-command conversion improves week-over-week.
+- At least one external contributor PR by Day 30.
+- Measurable increase in stars/week and discussions/week by end of phase.
 
 ### Phase 2 (Days 31-60): Adoption loops
 
@@ -101,69 +140,6 @@ Track progress with a simple monthly score (0-5 each):
 - Release cadence consistency.
 
 A score of **28+/35 for 3 consecutive months** indicates strong category leadership momentum.
-
-## Day 1: Full-Boost execution plan (start now)
-
-If we want strong momentum immediately, run this **single-day sprint** and ship visible outcomes before the day ends.
-
-### 1) Conversion upgrade (README + docs)
-
-- Add a clear "Who should use sdetkit" section for:
-  - SDET lead,
-  - Platform/DevEx engineer,
-  - Security/compliance owner.
-- Add a copy-paste **60-second demo** with expected output snippets.
-- Add a concise comparison panel: "sdetkit vs ad-hoc scripts."
-
-**Definition of done:** a first-time visitor can decide fit and run one meaningful command in under 3 minutes.
-
-### 2) Social proof package
-
-- Capture 3 demo artifacts (GIF or screenshots):
-  - `sdetkit doctor`
-  - `sdetkit repo audit`
-  - `sdetkit security check`
-- Publish one short release note with "before/after" value.
-
-**Definition of done:** README/docs show concrete proof, not only claims.
-
-### 3) Contributor funnel activation
-
-- Open and label 10 curated starter issues (`good first issue`, `help wanted`).
-- Add issue templates for bug report, feature request, and integration recipe.
-- Add "first contribution path" checklist in contributing docs.
-
-**Definition of done:** external contributor can pick a task in <5 minutes.
-
-### 4) Distribution and announcement
-
-- Publish a Day-1 update post (LinkedIn/X/Dev.to) with:
-  - one problem statement,
-  - one CLI demo,
-  - one CTA to docs.
-- Share in relevant communities (QA automation, DevOps, Python tooling).
-
-**Definition of done:** measurable referral traffic to README/docs within 24 hours.
-
-### Day-1 KPI target (aggressive but realistic)
-
-- +50 to +150 stars (depending on distribution reach).
-- 3+ new discussions/issues from external users.
-- 1+ external PR or integration question.
-- README click-through to docs above current baseline.
-
-### Day-1 command checklist (operator runbook)
-
-```bash
-python3 -m venv .venv
-./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
-./.venv/bin/sdetkit --help
-./.venv/bin/sdetkit doctor --help
-./.venv/bin/sdetkit repo --help
-bash scripts/check.sh all
-```
-
-Use command outputs/screenshots as same-day proof artifacts for release notes and social launch posts.
 
 ## Immediate next 7 actions
 
