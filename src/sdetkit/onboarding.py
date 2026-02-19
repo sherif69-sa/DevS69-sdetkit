@@ -32,6 +32,36 @@ _ROLE_PLAYBOOK = {
     },
 }
 
+_PLATFORM_SETUP = {
+    "linux": {
+        "label": "Linux (bash)",
+        "commands": [
+            "python3 -m venv .venv",
+            "source .venv/bin/activate",
+            "python -m pip install -r requirements-test.txt -e .",
+            "python -m sdetkit doctor --format text",
+        ],
+    },
+    "macos": {
+        "label": "macOS (zsh/bash)",
+        "commands": [
+            "python3 -m venv .venv",
+            "source .venv/bin/activate",
+            "python -m pip install -r requirements-test.txt -e .",
+            "python -m sdetkit doctor --format text",
+        ],
+    },
+    "windows": {
+        "label": "Windows (PowerShell)",
+        "commands": [
+            "py -3 -m venv .venv",
+            ".\\.venv\\Scripts\\Activate.ps1",
+            "python -m pip install -r requirements-test.txt -e .",
+            "python -m sdetkit doctor --format text",
+        ],
+    },
+}
+
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="sdetkit onboarding")
@@ -48,6 +78,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output format.",
     )
     p.add_argument(
+        "--platform",
+        choices=["all", *_PLATFORM_SETUP.keys()],
+        default="all",
+        help="Platform-specific setup snippets for Day 5 onboarding.",
+    )
+    p.add_argument(
         "--output",
         default="",
         help="Optional file path to also write the rendered onboarding output.",
@@ -55,15 +91,22 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _as_json(role: str) -> str:
+def _platform_payload(platform: str) -> dict[str, dict[str, object]]:
+    if platform == "all":
+        return {name: details for name, details in _PLATFORM_SETUP.items()}
+    return {platform: _PLATFORM_SETUP[platform]}
+
+
+def _as_json(role: str, platform: str) -> str:
     if role == "all":
         payload = {name: details for name, details in _ROLE_PLAYBOOK.items()}
     else:
         payload = {role: _ROLE_PLAYBOOK[role]}
+    payload["day5_platform_setup"] = _platform_payload(platform)
     return json.dumps(payload, indent=2, sort_keys=True)
 
 
-def _as_markdown(role: str) -> str:
+def _as_markdown(role: str, platform: str) -> str:
     rows: list[str] = ["| Role | First command | Next action |", "|---|---|---|"]
     for key, details in _ROLE_PLAYBOOK.items():
         if role != "all" and role != key:
@@ -72,11 +115,22 @@ def _as_markdown(role: str) -> str:
             f"| {details['label']} | `{details['first_command']}` | {details['next_action']} |"
         )
     rows.append("")
+    rows.append("## Day 5 platform onboarding snippets")
+    rows.append("")
+    for key, details in _PLATFORM_SETUP.items():
+        if platform != "all" and platform != key:
+            continue
+        rows.append(f"### {details['label']}")
+        rows.append("")
+        rows.append("```bash")
+        rows.extend(details["commands"])
+        rows.append("```")
+        rows.append("")
     rows.append("Quick start: [README quick start](../README.md#quick-start)")
     return "\n".join(rows)
 
 
-def _as_text(role: str) -> str:
+def _as_text(role: str, platform: str) -> str:
     lines = ["Day 1 onboarding paths", ""]
     for key, details in _ROLE_PLAYBOOK.items():
         if role != "all" and role != key:
@@ -86,22 +140,30 @@ def _as_text(role: str) -> str:
         lines.append(f"  next : {details['next_action']}")
         lines.append(f"  docs : {', '.join(details['docs'])}")
         lines.append("")
+    lines.extend(["Day 5 platform onboarding snippets", ""])
+    for key, details in _PLATFORM_SETUP.items():
+        if platform != "all" and platform != key:
+            continue
+        lines.append(f"[{details['label']}]")
+        for cmd in details["commands"]:
+            lines.append(f"  {cmd}")
+        lines.append("")
     lines.append("Start here: README quick start -> #quick-start")
     return "\n".join(lines)
 
 
-def _render(role: str, fmt: str) -> str:
+def _render(role: str, platform: str, fmt: str) -> str:
     if fmt == "json":
-        return _as_json(role)
+        return _as_json(role, platform)
     if fmt == "markdown":
-        return _as_markdown(role)
-    return _as_text(role)
+        return _as_markdown(role, platform)
+    return _as_text(role, platform)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     ns = _build_parser().parse_args(argv)
 
-    rendered = _render(ns.role, ns.format)
+    rendered = _render(ns.role, ns.platform, ns.format)
     print(rendered)
 
     if ns.output:

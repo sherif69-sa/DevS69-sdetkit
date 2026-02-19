@@ -34,6 +34,22 @@ Examples:
 
 See: doctor.md
 
+## onboarding
+
+Renders Day 1 role-based paths plus Day 5 platform setup snippets.
+
+Examples:
+
+- `sdetkit onboarding --format text`
+- `sdetkit onboarding --role platform --format markdown`
+- `sdetkit onboarding --platform all --format markdown --output docs/artifacts/day5-platform-onboarding-sample.md`
+- `sdetkit onboarding --platform windows --format text`
+
+Useful flags: `--role`, `--platform`, `--format`, `--output`. JSON output preserves role keys and adds `day5_platform_setup` for platform snippets.
+
+See: day-1-ultra-upgrade-report.md and day-5-ultra-upgrade-report.md
+
+
 ## demo
 
 Renders a Day 2 copy/paste walkthrough for fast product demos.
