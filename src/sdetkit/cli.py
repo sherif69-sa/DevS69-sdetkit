@@ -5,7 +5,7 @@ import os
 from collections.abc import Sequence
 from importlib import metadata
 
-from . import apiget, demo, evidence, kvcli, notify, onboarding, ops, patch, policy, proof, repo, report
+from . import apiget, demo, docs_qa, evidence, kvcli, notify, onboarding, ops, patch, policy, proof, repo, report
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .security_gate import main as security_main
@@ -92,6 +92,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "proof":
         return proof.main(list(argv[1:]))
 
+    if argv and argv[0] == "docs-qa":
+        return docs_qa.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -150,6 +153,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     prf = sub.add_parser("proof")
     prf.add_argument("args", nargs=argparse.REMAINDER)
 
+    dqa = sub.add_parser("docs-qa")
+    dqa.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -196,6 +202,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "proof":
         return proof.main(ns.args)
+
+    if ns.cmd == "docs-qa":
+        return docs_qa.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

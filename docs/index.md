@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning--conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -63,7 +63,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Use `sdetkit onboarding --format markdown --output docs/artifacts/day1-onboarding-sample.md` to print and save role-based first commands instantly.
 - Use the README role-based paths to select your first command in under 60 seconds.
 - Review the generated sample artifact: [day1 onboarding sample](artifacts/day1-onboarding-sample.md).
-- Track this workstream in the [Top-10 strategy day-by-day plan](top-10-github-strategy.md#day-1-30-sprint-plan).
+- Track this workstream in the [Top-10 strategy day-by-day plan](top-10-github-strategy.md#day-130-sprint-plan).
 
 ## Day 2 ultra upgrades (60-second demo path)
 
@@ -71,7 +71,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Run `sdetkit demo --execute --format text` for a copy-paste 3-step live walkthrough with expected output snippets and pass/fail checks.
 - Generate a shareable markdown artifact: `sdetkit demo --execute --format markdown --output docs/artifacts/day2-demo-sample.md`.
 - Review the generated artifact: [day2 demo sample](artifacts/day2-demo-sample.md).
-- Track this workstream in the [Top-10 strategy day-by-day plan](top-10-github-strategy.md#day-1-30-sprint-plan).
+- Track this workstream in the [Top-10 strategy day-by-day plan](top-10-github-strategy.md#day-130-sprint-plan).
 
 
 ## Day 3 ultra upgrades (proof pack + evidence)
@@ -88,6 +88,20 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Run `sdetkit agent templates list` to discover all built-in skills/templates.
 - Run `sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs` to execute all skills in one pass and persist deterministic artifacts per template id.
 - Review the generated artifact: [day4 skills sample](artifacts/day4-skills-sample.md).
+
+## Day 5 ultra upgrades (cross-platform onboarding)
+
+- Read the implementation report: [Day 5 ultra upgrade report](day-5-ultra-upgrade-report.md).
+- Run `sdetkit onboarding --format text --platform all` to get Linux/macOS/Windows setup instructions in one place.
+- Generate shareable onboarding output: `sdetkit onboarding --format markdown --platform all --output docs/artifacts/day5-platform-onboarding-sample.md`.
+- Review the generated artifact: [day5 platform onboarding sample](artifacts/day5-platform-onboarding-sample.md).
+
+## Day 6 ultra upgrades (conversion QA gate)
+
+- Read the implementation report: [Day 6 ultra upgrade report](day-6-ultra-upgrade-report.md).
+- Run `sdetkit docs-qa --format text` to validate README/docs internal links and heading anchors.
+- Export markdown QA report for PR handoff: `sdetkit docs-qa --format markdown --output docs/artifacts/day6-conversion-qa-sample.md`.
+- Review the generated artifact: [day6 conversion QA sample](artifacts/day6-conversion-qa-sample.md).
 
 ## Fast start
 

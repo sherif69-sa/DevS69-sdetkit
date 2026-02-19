@@ -197,7 +197,7 @@ Sample runnable artifact: [`docs/artifacts/day1-onboarding-sample.md`](docs/arti
 | Run deterministic automation workflows | [Automation OS](docs/automation-os.md) | Manager/worker workflows, replay, diff, artifacts |
 | Contribute with confidence | [Contributing guide](CONTRIBUTING.md) | Quality gates + PR expectations |
 | Grow adoption and reach | [Top-10 GitHub strategy](docs/top-10-github-strategy.md) | 90-day execution plan + measurable KPIs |
-| Start immediately (Phase 1 days 1–30) | [Phase-1 daily execution plan](docs/top-10-github-strategy.md#phase-1-days-1-30-positioning--conversion-daily-execution) | High-impact actions for same-day momentum |
+| Start immediately (Phase 1 days 1–30) | [Phase-1 daily execution plan](docs/top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) | High-impact actions for same-day momentum |
 
 ## 🎨 Visual + clickable experience map
 
@@ -430,6 +430,47 @@ python scripts/check_day4_skills_contract.py
 ```
 
 - Keep generated markdown artifacts under `docs/artifacts/` for traceability.
+
+## 🖥️ Day 5 ultra: platform onboarding boost
+
+Day 5 removed setup friction for mixed-OS teams with platform-specific onboarding steps.
+
+```bash
+python -m sdetkit onboarding --format text --platform all
+```
+
+Generate a shareable onboarding artifact:
+
+```bash
+python -m sdetkit onboarding --format markdown --platform all --output docs/artifacts/day5-platform-onboarding-sample.md
+```
+
+See implementation details: [Day 5 ultra upgrade report](docs/day-5-ultra-upgrade-report.md).
+
+Review sample artifact: [Day 5 platform onboarding sample](docs/artifacts/day5-platform-onboarding-sample.md).
+
+## 🔗 Day 6 ultra: conversion QA hardening
+
+Day 6 adds a runnable docs conversion QA gate that validates README/docs links and anchors so first-time users do not hit dead paths.
+
+```bash
+python -m sdetkit docs-qa --format text
+```
+
+Export a Day 6 QA artifact for reviews and handoffs:
+
+```bash
+python -m sdetkit docs-qa --format markdown --output docs/artifacts/day6-conversion-qa-sample.md
+```
+
+See implementation details: [Day 6 ultra upgrade report](docs/day-6-ultra-upgrade-report.md).
+
+Day 6 closeout checks:
+
+```bash
+python -m pytest -q tests/test_docs_qa.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day6_conversion_contract.py
+```
 
 ## ⚡ Quick start
 

@@ -34,4 +34,4 @@ python -m pip install -r requirements-test.txt -e .
 python -m sdetkit doctor --format text
 ```
 
-Quick start: [README quick start](../README.md#quick-start)
+Quick start: [README quick start](../../README.md#quick-start)

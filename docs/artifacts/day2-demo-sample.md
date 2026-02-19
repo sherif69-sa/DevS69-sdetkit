@@ -26,4 +26,4 @@
 - Use --format markdown --output docs/artifacts/day2-demo-closeout.md to save a shareable run artifact.
 - If a snippet check fails, rerun a single command manually and compare output with the expected markers.
 
-Related docs: [README quick start](../README.md#quick-start), [repo audit](repo-audit.md).
+Related docs: [README quick start](../../README.md#quick-start), [repo audit](../repo-audit.md).

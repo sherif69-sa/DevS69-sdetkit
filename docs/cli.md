@@ -79,6 +79,22 @@ Useful flags: `--execute`, `--timeout-seconds`, `--strict`.
 
 See: day-3-ultra-upgrade-report.md
 
+
+## docs-qa
+
+Runs Day 6 conversion QA against markdown links and heading anchors in `README.md` and `docs/`.
+
+Examples:
+
+- `sdetkit docs-qa --format text`
+- `sdetkit docs-qa --format json`
+- `sdetkit docs-qa --format markdown --output docs/artifacts/day6-conversion-qa-sample.md`
+
+Useful flags: `--root`, `--format`, `--output`.
+
+See: day-6-ultra-upgrade-report.md
+
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).
