@@ -28,9 +28,8 @@ def test_onboarding_json_is_machine_readable(capsys):
     rc = onboarding.main(["--role", "security", "--format", "json"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert list(data.keys()) == ["day1_roles", "day5_platform_setup"]
-    assert list(data["day1_roles"].keys()) == ["security"]
-    assert data["day1_roles"]["security"]["first_command"] == "sdetkit security --format markdown"
+    assert "security" in data
+    assert data["security"]["first_command"] == "sdetkit security --format markdown"
     assert "windows" in data["day5_platform_setup"]
 
 

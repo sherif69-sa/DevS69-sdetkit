@@ -45,7 +45,7 @@ Examples:
 - `sdetkit onboarding --platform all --format markdown --output docs/artifacts/day5-platform-onboarding-sample.md`
 - `sdetkit onboarding --platform windows --format text`
 
-Useful flags: `--role`, `--platform`, `--format`, `--output`.
+Useful flags: `--role`, `--platform`, `--format`, `--output`. JSON output preserves role keys and adds `day5_platform_setup` for platform snippets.
 
 See: day-1-ultra-upgrade-report.md and day-5-ultra-upgrade-report.md
 

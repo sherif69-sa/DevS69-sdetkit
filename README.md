@@ -420,6 +420,12 @@ python -m sdetkit onboarding --format markdown --platform all --output docs/arti
 
 See implementation details: [Day 5 ultra upgrade report](docs/day-5-ultra-upgrade-report.md).
 
+Day 5 closeout gate:
+
+```bash
+python scripts/check_day5_platform_contract.py
+```
+
 ## ⚡ Quick start
 
 ```bash

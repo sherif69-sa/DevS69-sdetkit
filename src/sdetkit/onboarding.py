@@ -99,13 +99,10 @@ def _platform_payload(platform: str) -> dict[str, dict[str, object]]:
 
 def _as_json(role: str, platform: str) -> str:
     if role == "all":
-        role_payload = {name: details for name, details in _ROLE_PLAYBOOK.items()}
+        payload = {name: details for name, details in _ROLE_PLAYBOOK.items()}
     else:
-        role_payload = {role: _ROLE_PLAYBOOK[role]}
-    payload = {
-        "day1_roles": role_payload,
-        "day5_platform_setup": _platform_payload(platform),
-    }
+        payload = {role: _ROLE_PLAYBOOK[role]}
+    payload["day5_platform_setup"] = _platform_payload(platform)
     return json.dumps(payload, indent=2, sort_keys=True)
 
 

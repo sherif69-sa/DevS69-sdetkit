@@ -34,7 +34,8 @@ Without platform-specific snippets, onboarding depended on tribal knowledge and 
 ## Validation checklist
 
 - `python -m sdetkit onboarding --format markdown --platform all --output docs/artifacts/day5-platform-onboarding-sample.md`
-- `python -m pytest -q tests/test_onboarding_cli.py`
+- `python -m pytest -q tests/test_onboarding_cli.py tests/test_cli_help_lists_subcommands.py`
+- `python scripts/check_day5_platform_contract.py`
 
 ## Artifact
 
