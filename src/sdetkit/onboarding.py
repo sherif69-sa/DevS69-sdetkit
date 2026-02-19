@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections.abc import Sequence
+from pathlib import Path
 
 _ROLE_PLAYBOOK = {
     "sdet": {
@@ -46,6 +47,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default="text",
         help="Output format.",
     )
+    p.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered onboarding output.",
+    )
     return p
 
 
@@ -66,7 +72,7 @@ def _as_markdown(role: str) -> str:
             f"| {details['label']} | `{details['first_command']}` | {details['next_action']} |"
         )
     rows.append("")
-    rows.append("Quick start: [README quick start](../README.md#-quick-start)")
+    rows.append("Quick start: [README quick start](../README.md#quick-start)")
     return "\n".join(rows)
 
 
@@ -84,13 +90,23 @@ def _as_text(role: str) -> str:
     return "\n".join(lines)
 
 
+def _render(role: str, fmt: str) -> str:
+    if fmt == "json":
+        return _as_json(role)
+    if fmt == "markdown":
+        return _as_markdown(role)
+    return _as_text(role)
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     ns = _build_parser().parse_args(argv)
 
-    if ns.format == "json":
-        print(_as_json(ns.role))
-    elif ns.format == "markdown":
-        print(_as_markdown(ns.role))
-    else:
-        print(_as_text(ns.role))
+    rendered = _render(ns.role, ns.format)
+    print(rendered)
+
+    if ns.output:
+        out_path = Path(ns.output)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        trailing = "" if rendered.endswith("\n") else "\n"
+        out_path.write_text(rendered + trailing, encoding="utf-8")
     return 0

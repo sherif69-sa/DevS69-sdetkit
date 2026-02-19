@@ -19,7 +19,7 @@ Without those answers above-the-fold, conversion from visit → first command ru
 ### Files changed
 
 - `src/sdetkit/onboarding.py`
-  - Added new runnable `sdetkit onboarding` command with role-based Day 1 paths in text/markdown/json formats.
+  - Added new runnable `sdetkit onboarding` command with role-based Day 1 paths in text/markdown/json formats plus optional `--output` artifact export.
 - `src/sdetkit/cli.py`
   - Registered `onboarding` as a first-class CLI command.
 - `tests/test_onboarding_cli.py`
@@ -29,7 +29,7 @@ Without those answers above-the-fold, conversion from visit → first command ru
 - `scripts/check.sh`
   - Added `onboarding` check mode and included onboarding contract check in `all`.
 - `docs/artifacts/day1-onboarding-sample.md`
-  - Added generated sample artifact from `python -m sdetkit onboarding --format markdown`.
+  - Added generated sample artifact from `python -m sdetkit onboarding --format markdown --output docs/artifacts/day1-onboarding-sample.md`.
 - `README.md`
   - Added role-driven Day 1 ultra conversion section with command-level entry points.
   - Added explicit Day 1 success criteria checklist.
@@ -42,6 +42,7 @@ Without those answers above-the-fold, conversion from visit → first command ru
 
 ## Validation checklist
 
+- `python -m sdetkit onboarding --format markdown --output docs/artifacts/day1-onboarding-sample.md`
 - `python -m pytest -q`
 - `python scripts/check_onboarding_contract.py`
 

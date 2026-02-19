@@ -37,3 +37,13 @@ def test_main_cli_dispatches_onboarding(capsys):
     out = capsys.readouterr().out
     assert "Engineering manager / tech lead" in out
     assert "docs/automation-os.md" in out
+
+
+def test_onboarding_writes_output_file(tmp_path, capsys):
+    out_file = tmp_path / "onboarding.md"
+    rc = onboarding.main(["--format", "markdown", "--output", str(out_file)])
+    assert rc == 0
+    stdout = capsys.readouterr().out
+    written = out_file.read_text(encoding="utf-8")
+    assert "| Role | First command | Next action |" in written
+    assert written.rstrip("\n") == stdout.rstrip("\n")
