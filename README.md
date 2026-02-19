@@ -106,6 +106,37 @@
 
 > **Big visual boost + aligned UX:** every major surface (hero, cards, quick links, launch map) now points clearly to the same experience center — **[sherif69-sa.github.io/DevS69-sdetkit](https://sherif69-sa.github.io/DevS69-sdetkit/)**.
 
+## 🧠 Premium Engine Control Center (new)
+
+<div align="center">
+  <a href="https://sherif69-sa.github.io/DevS69-sdetkit/">
+    <p><strong>Unified visual control center now aligned with the live site</strong></p>
+  </a>
+
+  <table>
+    <tr>
+      <td align="center"><strong>Data source</strong></td>
+      <td align="center"><strong>Engine action</strong></td>
+      <td align="center"><strong>Artifact / visualization</strong></td>
+    </tr>
+    <tr>
+      <td>doctor.json / maintenance.json / security-check.json</td>
+      <td>Normalize + score + rank warnings/recommendations</td>
+      <td><code>.sdetkit/out/premium-summary.json</code></td>
+    </tr>
+    <tr>
+      <td>premium-insights.db (guidelines + commit learning)</td>
+      <td>Apply learned guidance to active warnings</td>
+      <td>Runtime recommendation + manual fix plan</td>
+    </tr>
+    <tr>
+      <td>Local API (<code>/guidelines</code>, <code>/analyze</code>, <code>/learn-commit</code>)</td>
+      <td>Editable knowledge base + continuous learning loop</td>
+      <td><a href="https://sherif69-sa.github.io/DevS69-sdetkit/">Live docs & visual portal</a></td>
+    </tr>
+  </table>
+</div>
+
 ## 🧭 Fast entry paths
 
 | What you need | Start here | Outcome |

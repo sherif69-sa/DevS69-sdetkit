@@ -137,6 +137,47 @@ def test_kvcli_text_and_stdin_produce_identical_output():
     assert p1.stdout == p2.stdout
 
 
+def test_kvcli_supports_hash_comments_in_input():
+    p = run_kvcli(input_text="# leading comment\na=1 b=2 # trailing\n")
+    assert p.returncode == 0
+    assert p.stderr == ""
+    assert json.loads(p.stdout) == {"a": "1", "b": "2"}
+
+
+def test_kvcli_strict_rejects_any_invalid_line():
+    p = run_kvcli("--strict", input_text="a=1\nbadline\n")
+    assert p.returncode == 2
+    assert p.stdout == ""
+    assert p.stderr.strip() != ""
+
+
+def test_kvcli_strict_accepts_comments_and_valid_lines_only():
+    p = run_kvcli("--strict", input_text="# comment\na=1\nb=2 # trailing\n")
+    assert p.returncode == 0
+    assert p.stderr == ""
+    assert json.loads(p.stdout) == {"a": "1", "b": "2"}
+
+
+def test_kvcli_strict_error_mentions_line_number_for_invalid_line():
+    p = run_kvcli("--strict", input_text="ok=1\nnotkv\n")
+    assert p.returncode == 2
+    assert "line 2" in p.stderr.lower()
+
+
+def test_build_comment_aware_parser_supports_legacy_parser_signature():
+    import sdetkit.kvcli as kvcli
+
+    parser = kvcli._build_comment_aware_parser(lambda line: {"line": line})
+    assert parser("x") == {"line": "x"}
+
+
+def test_build_comment_aware_parser_enables_comments_for_modern_parser():
+    import sdetkit.kvcli as kvcli
+
+    parser = kvcli._build_comment_aware_parser(kvcli.parse_kv_line)
+    assert parser("a=1 # trailing") == {"a": "1"}
+
+
 def test_kvcli_runner_supports_timeout(tmp_path):
     p = run_kvcli("--text", "a=1", timeout=0.2)
     assert p.returncode == 0

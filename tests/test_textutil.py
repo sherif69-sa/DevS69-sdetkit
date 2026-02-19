@@ -58,6 +58,18 @@ def test_parse_kv_line_allows_equals_inside_double_quotes():
     assert parse_kv_line('a="x=y" b=2') == {"a": "x=y", "b": "2"}
 
 
+def test_parse_kv_line_allow_comments_ignores_comment_suffix():
+    assert parse_kv_line("a=1 b=2 # trailing", allow_comments=True) == {
+        "a": "1",
+        "b": "2",
+    }
+
+
+def test_parse_kv_line_default_keeps_comment_tokens_and_fails():
+    with pytest.raises(ValueError):
+        parse_kv_line("a=1 # trailing")
+
+
 _key = st.text(
     alphabet=st.sampled_from(list(string.ascii_letters + string.digits + "_-")),
     min_size=1,

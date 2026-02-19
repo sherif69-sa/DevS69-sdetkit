@@ -97,7 +97,14 @@ def test_premium_gate_script_smoke_contains_commands() -> None:
     assert "bash quality.sh" in text
     assert "bash ci.sh" in text
     assert "python3 -m sdetkit doctor --ascii" in text
+    assert "python3 -m sdetkit doctor --json --out" in text
     assert "python3 -m sdetkit security scan" in text
+    assert "Real-time warnings and recommendations summary" in text
+    assert "python3 -m sdetkit.premium_gate_engine" in text
+    assert "--min-score 70" in text
+    assert "--auto-fix" in text
+    assert "premium-summary.json" in text
+    assert 'tee "$step_log"' in text
 
 
 def test_scan_online_mode_without_cmd_falls_back(tmp_path: Path, capsys) -> None:

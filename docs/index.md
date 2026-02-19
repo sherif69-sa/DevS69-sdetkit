@@ -27,6 +27,35 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 </div>
 
+## Premium engine visualization map
+
+<div align="center">
+  <a href="https://sherif69-sa.github.io/DevS69-sdetkit/"><p><strong>Open the live visual portal</strong></p></a>
+</div>
+
+<table>
+  <tr>
+    <td><strong>Layer</strong></td>
+    <td><strong>What it does</strong></td>
+    <td><strong>Where to see it</strong></td>
+  </tr>
+  <tr>
+    <td>Premium Gate Engine</td>
+    <td>Unifies checks, scores risk, emits recommendations and fix plans.</td>
+    <td><a href="premium-quality-gate.md">Premium quality gate guide</a></td>
+  </tr>
+  <tr>
+    <td>Insights API</td>
+    <td>Stores editable guidelines and commit-learning history.</td>
+    <td><a href="premium-quality-gate.md#local-insights-api-editable-guideline-reference--commit-learning">API section</a></td>
+  </tr>
+  <tr>
+    <td>Visualization Portal</td>
+    <td>Central UX for onboarding and capability navigation.</td>
+    <td><a href="https://sherif69-sa.github.io/DevS69-sdetkit/">Live website</a></td>
+  </tr>
+</table>
+
 ## Fast start
 
 ```bash
