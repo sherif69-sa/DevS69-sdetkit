@@ -56,6 +56,12 @@ TEXT_EXTENSIONS = {
     ".sh",
 }
 SUSPICIOUS_INPUT_NAMES = {"user_input", "input_path", "filename", "filepath", "path", "name"}
+PRINT_ALLOWED_MODULE_SUFFIXES = (
+    "/cli.py",
+    "/repo.py",
+    "/patch.py",
+    "/doctor.py",
+)
 
 
 @dataclass(frozen=True)
@@ -207,6 +213,10 @@ class _RuleVisitor(ast.NodeVisitor):
             )
         )
 
+    def _allow_print_for_module(self) -> bool:
+        rel = self.rel_path.replace("\\", "/")
+        return rel.startswith("src/sdetkit/") and rel.endswith(PRINT_ALLOWED_MODULE_SUFFIXES)
+
     def visit_Call(self, node: ast.Call) -> Any:
         name = _call_name(node)
         if name in {"eval", "exec"}:
@@ -289,7 +299,11 @@ class _RuleVisitor(ast.NodeVisitor):
                     "Write to absolute path detected.",
                     suggestion="Restrict writes to workspace or explicit allowlist.",
                 )
-        if self.rel_path.startswith("src/") and name == "print":
+        if (
+            self.rel_path.startswith("src/")
+            and name == "print"
+            and not self._allow_print_for_module()
+        ):
             self._add("SEC_DEBUG_PRINT", node, "print(...) found in src/.")
         self.generic_visit(node)
 

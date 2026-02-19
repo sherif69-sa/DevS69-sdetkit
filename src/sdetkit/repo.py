@@ -20,7 +20,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, cast
 
 from . import _toml as _tomllib
@@ -41,7 +41,7 @@ from .plugins import (
 )
 from .projects import ProjectsConfigError, discover_projects, resolve_project
 from .report import build_run_record, diff_runs, load_run_record
-from .security import SecurityError, safe_path
+from .security import SecurityError, ensure_allowed_scheme, safe_path
 
 SKIP_DIRS: frozenset[str] = frozenset(
     {
@@ -1795,8 +1795,10 @@ def _github_create_pr(
     body: str,
     draft: bool,
 ) -> dict[str, Any]:
+    api_url = f"https://api.github.com/repos/{repo_slug}/pulls"
+    ensure_allowed_scheme(api_url, allowed={"https"})
     req = urllib.request.Request(
-        f"https://api.github.com/repos/{repo_slug}/pulls",
+        api_url,
         data=json.dumps(
             {"title": title, "body": body, "head": head, "base": base, "draft": draft}
         ).encode("utf-8"),
@@ -1809,7 +1811,7 @@ def _github_create_pr(
         },
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=20) as resp:
+    with urllib.request.urlopen(req, timeout=20) as resp:  # nosec B310
         return cast(dict[str, Any], json.loads(resp.read().decode("utf-8")))
 
 
@@ -2973,7 +2975,8 @@ def _repo_finding_fingerprint(item: dict[str, Any]) -> str:
 
 
 def _finding_matches_glob(path: str, pattern: str) -> bool:
-    return Path(path).match(pattern)
+    normalized = str(path).replace("\\", "/").lstrip("/") or "."
+    return PurePosixPath(normalized).match(pattern)
 
 
 def _apply_repo_audit_policy(
@@ -4594,6 +4597,7 @@ def main(argv: list[str] | None = None) -> int:
                 issue_url = (
                     f"https://api.github.com/repos/{repo_slug}/issues/{pr_resp.get('number')}"
                 )
+                ensure_allowed_scheme(issue_url, allowed={"https"})
                 req = urllib.request.Request(
                     issue_url,
                     data=json.dumps({"labels": labels}).encode("utf-8"),
@@ -4606,7 +4610,7 @@ def main(argv: list[str] | None = None) -> int:
                     },
                     method="PATCH",
                 )
-                with urllib.request.urlopen(req, timeout=20):
+                with urllib.request.urlopen(req, timeout=20):  # nosec B310
                     pass
         print(f"Opened PR: {pr_resp.get('html_url', '')}")
         return 0

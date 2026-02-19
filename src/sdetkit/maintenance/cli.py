@@ -165,12 +165,16 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         return 2
 
+    env = dict(os.environ)
+    if bool(ns.deterministic):
+        env["SDETKIT_DETERMINISTIC"] = "1"
+
     ctx = MaintenanceContext(
         repo_root=Path.cwd(),
         python_exe=sys.executable,
         mode=ns.mode,
         fix=bool(ns.fix),
-        env=dict(os.environ),
+        env=env,
         logger=StderrLogger(),
     )
 

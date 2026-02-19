@@ -52,4 +52,4 @@ Use these commands to quickly diagnose PR quality issues and unblock reviews.
 
 ## One-command premium gate
 
-Use `bash premium-gate.sh` locally and in CI. It runs quality, CI, doctor, repo audit, and security SARIF export in deterministic offline defaults.
+Use `bash premium-gate.sh` locally and in CI. It runs quality, explicit ruff checks, CI, doctor, full maintenance checks, baseline-aware security triage, security SARIF export, control-plane ops, and evidence pack generation.

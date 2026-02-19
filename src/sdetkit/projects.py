@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import re
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -12,6 +11,11 @@ try:
     import tomllib as _tomllib
 except Exception:  # pragma: no cover
     import tomli as _tomllib  # type: ignore
+
+try:
+    from defusedxml import ElementTree as _safe_et
+except Exception:  # pragma: no cover
+    _safe_et = None
 
 
 class ProjectsConfigError(ValueError):
@@ -220,17 +224,29 @@ def _go_module_name(go_mod: Path) -> str | None:
 
 def _maven_project_name(pom_xml: Path) -> str | None:
     try:
-        root = ET.fromstring(pom_xml.read_text(encoding="utf-8"))
+        content = pom_xml.read_text(encoding="utf-8")
     except Exception:
         return None
 
-    for child in root:
-        tag = child.tag.rsplit("}", 1)[-1]
-        if tag != "artifactId":
-            continue
-        if child.text is None:
-            continue
-        stripped = child.text.strip()
+    if _safe_et is not None:
+        try:
+            root = _safe_et.fromstring(content)
+            for child in list(root):
+                tag = str(child.tag).rsplit("}", 1)[-1]
+                if tag != "artifactId" or child.text is None:
+                    continue
+                text = child.text
+                if not isinstance(text, str):
+                    continue
+                stripped = text.strip()
+                if stripped:
+                    return stripped
+        except Exception:
+            pass
+
+    match = re.search(r"<artifactId>\s*([^<]+?)\s*</artifactId>", content)
+    if match:
+        stripped = match.group(1).strip()
         if stripped:
             return stripped
     return None
@@ -258,15 +274,29 @@ def _gradle_project_name(settings_file: Path) -> str | None:
 
 def _csproj_project_name(csproj: Path) -> str | None:
     try:
-        root = ET.fromstring(csproj.read_text(encoding="utf-8"))
+        content = csproj.read_text(encoding="utf-8")
     except Exception:
         return csproj.stem or None
 
-    for element in root.iter():
-        tag = element.tag.rsplit("}", 1)[-1]
-        if tag != "AssemblyName" or element.text is None:
-            continue
-        stripped = element.text.strip()
+    if _safe_et is not None:
+        try:
+            root = _safe_et.fromstring(content)
+            for element in root.iter():
+                tag = str(element.tag).rsplit("}", 1)[-1]
+                if tag != "AssemblyName" or element.text is None:
+                    continue
+                text = element.text
+                if not isinstance(text, str):
+                    continue
+                stripped = text.strip()
+                if stripped:
+                    return stripped
+        except Exception:
+            pass
+
+    match = re.search(r"<AssemblyName>\s*([^<]+?)\s*</AssemblyName>", content)
+    if match:
+        stripped = match.group(1).strip()
         if stripped:
             return stripped
 

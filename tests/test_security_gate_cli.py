@@ -50,6 +50,18 @@ resp = requests.get('https://example.com')
     }.issubset(rules)
 
 
+def test_security_scan_ignores_print_in_cli_modules(tmp_path: Path, capsys) -> None:
+    src = tmp_path / "src" / "sdetkit"
+    src.mkdir(parents=True)
+    (src / "cli.py").write_text("print('user output')\n", encoding="utf-8")
+
+    rc = _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    payload = json.loads(out)
+    assert payload["findings"] == []
+
+
 def test_security_baseline_regression_only(tmp_path: Path) -> None:
     src = tmp_path / "src"
     src.mkdir()

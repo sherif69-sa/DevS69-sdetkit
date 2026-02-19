@@ -8,16 +8,27 @@ CHECK_NAME = "deps_check"
 
 def run(ctx: MaintenanceContext) -> CheckResult:
     pip_check = run_cmd([ctx.python_exe, "-m", "pip", "check"], cwd=ctx.repo_root)
-    outdated = run_cmd(
-        [ctx.python_exe, "-m", "pip", "list", "--outdated", "--format=json"], cwd=ctx.repo_root
+    deterministic_mode = str(ctx.env.get("SDETKIT_DETERMINISTIC", "")).strip() == "1"
+    outdated = (
+        run_cmd(
+            [ctx.python_exe, "-m", "pip", "list", "--outdated", "--format=json"], cwd=ctx.repo_root
+        )
+        if not deterministic_mode
+        else None
     )
     outdated_info: dict[str, object]
-    if outdated.returncode == 0:
+    if deterministic_mode:
+        outdated_info = {
+            "ok": True,
+            "data": "[]",
+            "note": "skipped in deterministic mode",
+        }
+    elif outdated is not None and outdated.returncode == 0:
         outdated_info = {"ok": True, "data": outdated.stdout}
     else:
         outdated_info = {
             "ok": False,
-            "error": outdated.stderr or outdated.stdout,
+            "error": (outdated.stderr or outdated.stdout) if outdated is not None else "",
             "note": "outdated package listing is informational",
         }
     ok = pip_check.returncode == 0

@@ -1,4 +1,5 @@
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -221,6 +222,118 @@ def _grep_repo(root: Path, targets: list[str], terms: list[str], limit: int) -> 
         print("triage: grep found no matches")
 
 
+def _parse_security_text_log(text: str) -> tuple[list[Issue], dict[str, int]]:
+    issues: list[Issue] = []
+    counts = {"error": 0, "warn": 0, "info": 0}
+    for line in text.splitlines():
+        m = re.match(r"^- \[(error|warn|info)\]\s+(\S+)\s+(\S+):(\d+)\s+(.*)$", line.strip())
+        if not m:
+            continue
+        sev, rule_id, path, line_no, msg = m.groups()
+        counts[sev] = counts.get(sev, 0) + 1
+        issues.append(
+            Issue(kind=f"security:{sev}:{rule_id}", path=path, line=int(line_no), message=msg)
+        )
+    return issues, counts
+
+
+def _parse_security_json_log(
+    text: str, *, prefer_new_findings: bool = False
+) -> tuple[list[Issue], dict[str, int]]:
+    try:
+        payload = json.loads(text)
+    except ValueError:
+        return [], {"error": 0, "warn": 0, "info": 0}
+    if not isinstance(payload, dict):
+        return [], {"error": 0, "warn": 0, "info": 0}
+    findings = payload.get("findings", [])
+    if prefer_new_findings and isinstance(payload.get("new_findings"), list):
+        findings = payload.get("new_findings", [])
+    issues: list[Issue] = []
+    counts = {"error": 0, "warn": 0, "info": 0}
+    if not isinstance(findings, list):
+        return issues, counts
+    for item in findings:
+        if not isinstance(item, dict):
+            continue
+        sev = str(item.get("severity", "info")).lower()
+        if sev not in counts:
+            sev = "info"
+        counts[sev] += 1
+        issues.append(
+            Issue(
+                kind=f"security:{sev}:{item.get('rule_id', '')}",
+                path=str(item.get("path", "")),
+                line=int(item.get("line", 0) or 0) or None,
+                col=int(item.get("column", 0) or 0) or None,
+                message=str(item.get("message", "")),
+            )
+        )
+    return issues, counts
+
+
+def _print_security_summary(issues: list[Issue], counts: dict[str, int], max_items: int) -> int:
+    if not issues:
+        print("triage: no security findings found in log")
+        return 0
+    print("triage: security summary")
+    print(
+        f"counts: error={counts.get('error', 0)} warn={counts.get('warn', 0)} info={counts.get('info', 0)} total={len(issues)}"
+    )
+    by_rule: dict[str, int] = {}
+    for item in issues:
+        parts = item.kind.split(":", 2)
+        rule = parts[2] if len(parts) == 3 else item.kind
+        by_rule[rule] = by_rule.get(rule, 0) + 1
+    top_rules = sorted(by_rule.items(), key=lambda x: (-x[1], x[0]))
+    if top_rules:
+        print("top rules:")
+        for rule, count in top_rules[:max_items]:
+            print(f"- {rule}: {count}")
+    print("top findings:")
+    for item in issues[:max_items]:
+        where = item.path
+        if item.line is not None:
+            where += f":{item.line}"
+        print(f"- {item.kind} {where}: {item.message}")
+    return 1 if counts.get("error", 0) or counts.get("warn", 0) else 0
+
+
+def _run_security_check(args: argparse.Namespace, root: Path) -> tuple[int, str]:
+    cmd = [
+        sys.executable,
+        "-m",
+        "sdetkit",
+        "security",
+        "check",
+        "--root",
+        str(root),
+        "--format",
+        "json",
+        "--fail-on",
+        "none",
+    ]
+    if args.security_baseline:
+        cmd.extend(["--baseline", str(args.security_baseline)])
+    if args.security_fail_on:
+        cmd.extend(["--fail-on", str(args.security_fail_on)])
+    proc = subprocess.run(
+        cmd,
+        check=False,
+        cwd=str(root),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    out = proc.stdout or ""
+    if args.tee:
+        try:
+            Path(args.tee).write_text(out, encoding="utf-8")
+        except OSError as exc:
+            print(f"triage: failed to write tee output to {args.tee!r}: {exc}", file=sys.stderr)
+    return int(proc.returncode), out
+
+
 def _run_pytest(args: argparse.Namespace, root: Path) -> tuple[int, str]:
     extra = list(args.pytest_args) if args.pytest_args else ["-q"]
     cmd = ["pytest"] + extra
@@ -246,13 +359,17 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="triage")
     parser.add_argument("--path", default="")
     parser.add_argument("--targets", nargs="*", dest="targets_opt", default=None)
-    parser.add_argument("--mode", choices=["compile", "pytest", "both"], default="both")
+    parser.add_argument("--mode", choices=["compile", "pytest", "security", "both"], default="both")
     parser.add_argument("--radius", type=int, default=3)
     parser.add_argument("--fix-nul", action="store_true")
     parser.add_argument("--tee", default="")
     parser.add_argument("--max-items", type=int, default=25)
     parser.add_argument("--parse-pytest-log", default="")
+    parser.add_argument("--parse-security-log", default="")
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--run-security", action="store_true")
+    parser.add_argument("--security-baseline", default="")
+    parser.add_argument("--security-fail-on", default="")
     parser.add_argument("--rerun", action="store_true")
     parser.add_argument("--grep", action="store_true")
     parser.add_argument("--grep-term", action="append", dest="grep_terms", default=[])
@@ -276,6 +393,18 @@ def main(argv: list[str] | None = None) -> int:
             print("triage: compile ok")
         else:
             return rc_compile
+
+    if args.parse_security_log:
+        logp = Path(args.parse_security_log)
+        try:
+            text = logp.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            print(f"triage: security log file not found: {logp}")
+            return 2
+        issues, counts = _parse_security_json_log(text)
+        if not issues:
+            issues, counts = _parse_security_text_log(text)
+        return _print_security_summary(issues, counts, max_items)
 
     if args.mode in {"pytest", "both"}:
         text = ""
@@ -326,6 +455,15 @@ def main(argv: list[str] | None = None) -> int:
             return int(proc.returncode)
 
         return 1
+
+    if args.mode in {"security", "both"} and args.run_security:
+        _rc, out = _run_security_check(args, root)
+        issues, counts = _parse_security_json_log(
+            out, prefer_new_findings=bool(args.security_baseline)
+        )
+        if not issues:
+            issues, counts = _parse_security_text_log(out)
+        return _print_security_summary(issues, counts, max_items)
 
     return 0
 
