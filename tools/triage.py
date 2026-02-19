@@ -231,11 +231,15 @@ def _parse_security_text_log(text: str) -> tuple[list[Issue], dict[str, int]]:
             continue
         sev, rule_id, path, line_no, msg = m.groups()
         counts[sev] = counts.get(sev, 0) + 1
-        issues.append(Issue(kind=f"security:{sev}:{rule_id}", path=path, line=int(line_no), message=msg))
+        issues.append(
+            Issue(kind=f"security:{sev}:{rule_id}", path=path, line=int(line_no), message=msg)
+        )
     return issues, counts
 
 
-def _parse_security_json_log(text: str) -> tuple[list[Issue], dict[str, int]]:
+def _parse_security_json_log(
+    text: str, *, prefer_new_findings: bool = False
+) -> tuple[list[Issue], dict[str, int]]:
     try:
         payload = json.loads(text)
     except ValueError:
@@ -243,6 +247,8 @@ def _parse_security_json_log(text: str) -> tuple[list[Issue], dict[str, int]]:
     if not isinstance(payload, dict):
         return [], {"error": 0, "warn": 0, "info": 0}
     findings = payload.get("findings", [])
+    if prefer_new_findings and isinstance(payload.get("new_findings"), list):
+        findings = payload.get("new_findings", [])
     issues: list[Issue] = []
     counts = {"error": 0, "warn": 0, "info": 0}
     if not isinstance(findings, list):
@@ -307,6 +313,10 @@ def _run_security_check(args: argparse.Namespace, root: Path) -> tuple[int, str]
         "--fail-on",
         "none",
     ]
+    if args.security_baseline:
+        cmd.extend(["--baseline", str(args.security_baseline)])
+    if args.security_fail_on:
+        cmd.extend(["--fail-on", str(args.security_fail_on)])
     proc = subprocess.run(
         cmd,
         check=False,
@@ -349,9 +359,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="triage")
     parser.add_argument("--path", default="")
     parser.add_argument("--targets", nargs="*", dest="targets_opt", default=None)
-    parser.add_argument(
-        "--mode", choices=["compile", "pytest", "security", "both"], default="both"
-    )
+    parser.add_argument("--mode", choices=["compile", "pytest", "security", "both"], default="both")
     parser.add_argument("--radius", type=int, default=3)
     parser.add_argument("--fix-nul", action="store_true")
     parser.add_argument("--tee", default="")
@@ -360,6 +368,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--parse-security-log", default="")
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--run-security", action="store_true")
+    parser.add_argument("--security-baseline", default="")
+    parser.add_argument("--security-fail-on", default="")
     parser.add_argument("--rerun", action="store_true")
     parser.add_argument("--grep", action="store_true")
     parser.add_argument("--grep-term", action="append", dest="grep_terms", default=[])
@@ -448,7 +458,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.mode in {"security", "both"} and args.run_security:
         _rc, out = _run_security_check(args, root)
-        issues, counts = _parse_security_json_log(out)
+        issues, counts = _parse_security_json_log(
+            out, prefer_new_findings=bool(args.security_baseline)
+        )
         if not issues:
             issues, counts = _parse_security_text_log(out)
         return _print_security_summary(issues, counts, max_items)

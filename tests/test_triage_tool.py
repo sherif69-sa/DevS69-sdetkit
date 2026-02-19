@@ -98,7 +98,7 @@ def test_parse_pytest_log_pass_only_returns_ok(tmp_path: Path) -> None:
     assert "no failures found in log" in out
 
 
-def test_run_pytest_success_writes_tee(tmp_path: Path) -> None:
+def test_run_pytest_success_writes_tee(tmp_path: Path, monkeypatch) -> None:
     triage = _load_triage()
 
     class R:
@@ -108,7 +108,7 @@ def test_run_pytest_success_writes_tee(tmp_path: Path) -> None:
     def fake_run(*a, **k):
         return R()
 
-    triage.subprocess.run = fake_run
+    monkeypatch.setattr(triage.subprocess, "run", fake_run)
     log = tmp_path / "pytest.log"
     rc, out = _run(
         triage, ["--path", str(tmp_path), "--mode", "pytest", "--run", "--tee", str(log)], tmp_path
@@ -118,7 +118,7 @@ def test_run_pytest_success_writes_tee(tmp_path: Path) -> None:
     assert log.read_text(encoding="utf-8") == R.stdout
 
 
-def test_run_pytest_failure_prints_summary_and_commands(tmp_path: Path) -> None:
+def test_run_pytest_failure_prints_summary_and_commands(tmp_path: Path, monkeypatch) -> None:
     triage = _load_triage()
 
     class R:
@@ -137,7 +137,7 @@ def test_run_pytest_failure_prints_summary_and_commands(tmp_path: Path) -> None:
     def fake_run(*a, **k):
         return R()
 
-    triage.subprocess.run = fake_run
+    monkeypatch.setattr(triage.subprocess, "run", fake_run)
     log = tmp_path / "pytest.log"
     rc, out = _run(
         triage,
@@ -160,7 +160,7 @@ def test_run_pytest_failure_prints_summary_and_commands(tmp_path: Path) -> None:
     assert log.read_text(encoding="utf-8") == R.stdout
 
 
-def test_run_pytest_failure_emits_targeted_grep_hits(tmp_path: Path) -> None:
+def test_run_pytest_failure_emits_targeted_grep_hits(tmp_path: Path, monkeypatch) -> None:
     triage = _load_triage()
     (tmp_path / "tests").mkdir()
     (tmp_path / "src").mkdir()
@@ -180,7 +180,7 @@ def test_run_pytest_failure_emits_targeted_grep_hits(tmp_path: Path) -> None:
     def fake_run(*a, **k):
         return R()
 
-    triage.subprocess.run = fake_run
+    monkeypatch.setattr(triage.subprocess, "run", fake_run)
     log = tmp_path / "pytest.log"
     rc, out = _run(
         triage,
@@ -239,3 +239,59 @@ def test_parse_security_log_text_summarizes_findings(tmp_path: Path) -> None:
     assert rc == 1
     assert "triage: security summary" in out
     assert "SEC_WEAK_HASH" in out
+
+
+def test_run_security_check_includes_baseline_flag(tmp_path: Path, monkeypatch) -> None:
+    triage = _load_triage()
+    captured: dict[str, object] = {}
+
+    class R:
+        returncode = 0
+        stdout = '{"findings": []}\n'
+
+    def fake_run(cmd, **kwargs):
+        captured["cmd"] = list(cmd)
+        return R()
+
+    monkeypatch.setattr(triage.subprocess, "run", fake_run)
+    rc, _out = _run(
+        triage,
+        [
+            "--mode",
+            "security",
+            "--run-security",
+            "--security-baseline",
+            "tools/security.baseline.json",
+        ],
+        tmp_path,
+    )
+    assert rc == 0
+    cmd = captured.get("cmd")
+    assert isinstance(cmd, list)
+    assert "--baseline" in cmd
+
+
+def test_run_security_with_baseline_uses_new_findings(tmp_path: Path, monkeypatch) -> None:
+    triage = _load_triage()
+
+    class R:
+        returncode = 0
+        stdout = (
+            '{"findings":[{"rule_id":"SEC_WEAK_HASH","severity":"warn","path":"src/a.py","line":1,"message":"x"}],'
+            '"new_findings":[]}\n'
+        )
+
+    monkeypatch.setattr(triage.subprocess, "run", lambda *a, **k: R())
+    rc, out = _run(
+        triage,
+        [
+            "--mode",
+            "security",
+            "--run-security",
+            "--security-baseline",
+            "tools/security.baseline.json",
+        ],
+        tmp_path,
+    )
+    assert rc == 0
+    assert "no security findings" in out.lower()

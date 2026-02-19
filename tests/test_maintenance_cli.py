@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from sdetkit.maintenance import cli
-from sdetkit.maintenance.checks import lint_check
+from sdetkit.maintenance.checks import lint_check, security_check
 from sdetkit.maintenance.types import MaintenanceContext
 from sdetkit.security import SecurityError
 
@@ -163,3 +163,32 @@ def test_write_output_blocks_parent_traversal(tmp_path: Path, monkeypatch) -> No
 
     with pytest.raises(SecurityError, match="unsafe path rejected"):
         cli._write_output("../escape.json", "content")
+
+
+def test_security_check_uses_new_findings_when_baseline_exists(tmp_path: Path, monkeypatch) -> None:
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    (tools / "security.baseline.json").write_text('{"findings": []}\n', encoding="utf-8")
+
+    class Result:
+        returncode = 0
+        stdout = json.dumps(
+            {
+                "findings": [{"severity": "warn", "rule_id": "SEC_X"}],
+                "new_findings": [],
+            }
+        )
+        stderr = ""
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: Result())
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is True
