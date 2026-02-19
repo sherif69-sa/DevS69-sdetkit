@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol, cast
 
+from ..security import ensure_allowed_scheme
+
 
 class Provider(Protocol):
     def complete(self, *, role: str, task: str, context: dict[str, object]) -> str:
@@ -26,6 +28,7 @@ class LocalHTTPProvider:
     timeout_s: float = 20.0
 
     def complete(self, *, role: str, task: str, context: dict[str, object]) -> str:
+        ensure_allowed_scheme(self.endpoint, allowed={"http", "https"})
         payload = {"model": self.model, "prompt": f"[{role}] {task}", "context": context}
         body = json.dumps(payload, ensure_ascii=True).encode("utf-8")
         req = urllib.request.Request(
@@ -34,7 +37,7 @@ class LocalHTTPProvider:
             headers={"content-type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=self.timeout_s) as response:  # noqa: S310
+        with urllib.request.urlopen(req, timeout=self.timeout_s) as response:  # noqa: S310  # nosec B310
             raw = cast(str, response.read().decode("utf-8"))
         try:
             data = json.loads(raw)

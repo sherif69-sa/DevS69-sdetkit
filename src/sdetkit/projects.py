@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import re
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -220,17 +219,16 @@ def _go_module_name(go_mod: Path) -> str | None:
 
 def _maven_project_name(pom_xml: Path) -> str | None:
     try:
-        root = ET.fromstring(pom_xml.read_text(encoding="utf-8"))
+        content = pom_xml.read_text(encoding="utf-8")
     except Exception:
         return None
 
-    for child in root:
-        tag = child.tag.rsplit("}", 1)[-1]
-        if tag != "artifactId":
-            continue
-        if child.text is None:
-            continue
-        stripped = child.text.strip()
+    # Prefer the direct child artifactId of <project> and ignore parent/dependency blocks.
+    project_block = re.search(r"<project(?:\s[^>]*)?>(.*?)</project>", content, re.DOTALL)
+    scope = project_block.group(1) if project_block else content
+    match = re.search(r"<artifactId>\s*([^<]+?)\s*</artifactId>", scope)
+    if match:
+        stripped = match.group(1).strip()
         if stripped:
             return stripped
     return None
@@ -258,15 +256,13 @@ def _gradle_project_name(settings_file: Path) -> str | None:
 
 def _csproj_project_name(csproj: Path) -> str | None:
     try:
-        root = ET.fromstring(csproj.read_text(encoding="utf-8"))
+        content = csproj.read_text(encoding="utf-8")
     except Exception:
         return csproj.stem or None
 
-    for element in root.iter():
-        tag = element.tag.rsplit("}", 1)[-1]
-        if tag != "AssemblyName" or element.text is None:
-            continue
-        stripped = element.text.strip()
+    match = re.search(r"<AssemblyName>\s*([^<]+?)\s*</AssemblyName>", content)
+    if match:
+        stripped = match.group(1).strip()
         if stripped:
             return stripped
 
