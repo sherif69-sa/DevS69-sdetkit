@@ -30,6 +30,66 @@ These strengths are the right base for growth; the next step is packaging, disco
 
 ## 90-day execution plan
 
+## Day 1–90 execution contract: real upgrades only
+
+To enforce your requirement, every day in this plan is now governed by a **non-trivial delivery contract**.
+
+### Daily minimum bar (must all pass)
+
+1. **Scope size:** each day ships a meaningful implementation with a target patch size of **+2000 to +5000 lines diff** (code + tests + docs + CI updates).
+2. **Production relevance:** changes must solve a real workflow problem (reliability, security, automation, integration, governance, or scale).
+3. **Multi-surface impact:** each day must touch at least **3 of 5 surfaces**:
+   - product code,
+   - automated tests,
+   - docs/runbooks,
+   - CI/automation,
+   - developer/operator UX.
+4. **Validation depth:** each day must include passing checks (unit/integration/contract tests as applicable) and a short risk note.
+5. **Adoption proof:** each day must publish at least one concrete artifact (report, dashboard, benchmark, case snapshot, or demo output).
+
+### Hard rejection rules
+
+A day is **rejected** and does not count if it is primarily:
+
+- refactor-only without user-visible capability gain,
+- docs-only without shipped capability,
+- tiny fixes bundled as "major upgrade,"
+- speculative work without measurable output.
+
+### Daily deliverable template (required)
+
+For each day `N` (Day 1…Day 90), execution must produce:
+
+- **Upgrade title** (clear business/engineering outcome).
+- **Problem statement** (what real-world pain it solves).
+- **Implementation scope** (modules, tests, workflows, infra touched).
+- **Diff target** (`+2000` to `+5000` lines).
+- **Validation checklist** (commands, test classes, quality/security checks).
+- **Artifacts** (e.g., report files, screenshots, benchmark outputs).
+- **Rollback plan** (how to disable/revert safely if needed).
+
+### Weekly quality gate
+
+Every 7 days, publish a weekly gate report with:
+
+- total diff shipped,
+- production outcomes unlocked,
+- reliability/security impact,
+- adoption signals,
+- carry-over risk list.
+
+If any day fails the contract, the next day starts with remediation before new scope.
+
+### Operator command for day execution
+
+Use this run protocol when you say "start day X":
+
+1. Confirm day scope and target outcome from this strategy.
+2. Implement full non-trivial scope (`+2000` to `+5000` diff target).
+3. Run tests/checks and collect artifacts.
+4. Publish daily report + open follow-up risks.
+5. Only then mark day complete and move to day X+1.
+
 ### Phase 1 (Days 1-30): Positioning + conversion (daily execution)
 
 This phase now runs as a **day-by-day operating plan**. When we say "work Day 1," we execute that day’s checklist in full and publish the artifacts before moving on.
