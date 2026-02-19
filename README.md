@@ -350,6 +350,35 @@ This project is designed for fast onboarding and high-confidence delivery:
 - **Modular internals** that are easy to import, test, and extend
 - **Docs-first architecture** for fast navigation and contributor productivity
 
+## 🚀 Day 2 ultra: 60-second demo path
+
+Use this copy-paste demo flow to show value in under a minute.
+
+```bash
+python -m sdetkit demo --execute --format text
+```
+
+Expected snippets you should see:
+
+- `doctor score:` and `recommendations:`
+- `Repo audit:` and `Result:`
+- `security scan:` and `top findings:`
+
+Need a shareable artifact?
+
+```bash
+python -m sdetkit demo --execute --format markdown --output docs/artifacts/day2-demo-sample.md
+```
+
+See implementation details: [Day 2 ultra upgrade report](docs/day-2-ultra-upgrade-report.md).
+
+Day 2 closeout hints:
+
+- Use `--fail-fast` during live demos to stop on first blocker.
+- Use `--timeout-seconds 30` on slower CI machines.
+- Use `--target-seconds 60` to enforce a strict Day 2 demo SLA.
+- Keep generated markdown artifacts under `docs/artifacts/` for traceability.
+
 ## ⚡ Quick start
 
 ```bash

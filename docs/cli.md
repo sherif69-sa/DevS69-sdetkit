@@ -34,6 +34,20 @@ Examples:
 
 See: doctor.md
 
+## demo
+
+Renders a Day 2 copy/paste walkthrough for fast product demos.
+
+Examples:
+
+- `sdetkit demo --execute --format text`
+- `sdetkit demo --execute --format markdown --output docs/artifacts/day2-demo-sample.md`
+- `sdetkit demo --format json`
+
+Useful flags: `--execute`, `--timeout-seconds`, `--fail-fast`, `--target-seconds`.
+
+See: day-2-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).
