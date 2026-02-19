@@ -16,7 +16,9 @@ This made first-command onboarding brittle and slowed trust-building during repo
 
 - `src/sdetkit/docs_qa.py`
   - Added a Day 6 docs QA engine that scans `README.md` and all `docs/**/*.md` files.
-  - Validates local anchors (`#...`), relative markdown links, and markdown target anchors.
+  - Validates local anchors (`#...`), inline/reference markdown links, and markdown target anchors.
+  - Ignores fenced code blocks to prevent false positives from command examples.
+  - Supports duplicate heading anchors (`-1`, `-2`, ...) for GitHub-compatible slug matching.
   - Added JSON/text/markdown report output with deterministic pass/fail exit codes.
 - `src/sdetkit/cli.py`
   - Added top-level `docs-qa` command wiring: `python -m sdetkit docs-qa ...`.

@@ -82,7 +82,7 @@ See: day-3-ultra-upgrade-report.md
 
 ## docs-qa
 
-Runs Day 6 conversion QA against markdown links and heading anchors in `README.md` and `docs/`.
+Runs Day 6 conversion QA against markdown links and heading anchors in `README.md` and `docs/`, including reference-style links and duplicate-heading anchors.
 
 Examples:
 
