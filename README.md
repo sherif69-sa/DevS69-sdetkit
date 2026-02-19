@@ -402,6 +402,34 @@ python scripts/check_day3_proof_contract.py
 
 - Keep generated markdown artifacts under `docs/artifacts/` for traceability.
 
+## 🧠 Day 4 ultra: skills expansion
+
+Day 4 focuses on automation skill coverage: discover every built-in AgentOS template (skill), run all skills in one command, and keep deterministic artifacts per skill.
+
+```bash
+python -m sdetkit agent templates list
+python -m sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs
+```
+
+Inspect a specific skill/template contract:
+
+```bash
+python -m sdetkit agent templates show repo-health-audit
+```
+
+See implementation details: [Day 4 ultra upgrade report](docs/day-4-ultra-upgrade-report.md).
+
+Review sample artifact: [Day 4 skills sample](docs/artifacts/day4-skills-sample.md).
+
+Day 4 closeout checks:
+
+```bash
+python -m pytest -q tests/test_agent_templates_cli.py
+python scripts/check_day4_skills_contract.py
+```
+
+- Keep generated markdown artifacts under `docs/artifacts/` for traceability.
+
 ## ⚡ Quick start
 
 ```bash

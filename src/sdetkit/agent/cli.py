@@ -264,6 +264,17 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Output tar path.",
     )
 
+    tpl_run_all = tpl_sub.add_parser(
+        "run-all",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help="Run every discovered template and write per-template artifacts.",
+    )
+    tpl_run_all.add_argument(
+        "--output-dir",
+        default=".sdetkit/agent/template-runs",
+        help="Base directory for per-template run artifacts.",
+    )
+
     return parser
 
 
@@ -399,6 +410,24 @@ def main(argv: list[str]) -> int:
                 pack_payload = pack_templates(root, output=root / ns.output)
                 _json_out(pack_payload)
                 return 0
+
+            if ns.templates_cmd == "run-all":
+                templates = discover_templates(root)
+                output_root = root / Path(ns.output_dir)
+                runs: list[dict[str, object]] = []
+                exit_code = 0
+                for item in templates:
+                    record = run_template(
+                        root,
+                        template=item,
+                        set_values={},
+                        output_dir=output_root / item.metadata["id"],
+                    )
+                    runs.append(record)
+                    if record.get("status") != "ok":
+                        exit_code = 1
+                _json_out({"status": "ok" if exit_code == 0 else "error", "runs": runs})
+                return exit_code
     except (TemplateValidationError, ValueError, OSError) as exc:
         return _fail(f"agent error: {exc}")
 
