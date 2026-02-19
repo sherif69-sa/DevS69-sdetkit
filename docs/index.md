@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -110,6 +110,15 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Run `sdetkit weekly-review --format text` to summarize shipped days, KPI movement, and next-week focus.
 - Export markdown review artifact: `sdetkit weekly-review --format markdown --output docs/artifacts/day7-weekly-review-sample.md`.
 - Review the generated artifact: [day7 weekly review sample](artifacts/day7-weekly-review-sample.md).
+
+
+## Day 8 ultra upgrades (contributor funnel start)
+
+- Read the implementation report: [Day 8 ultra upgrade report](day-8-ultra-upgrade-report.md).
+- Run `sdetkit contributor-funnel --format text --strict` to print and validate 10 curated good-first-issue tasks with acceptance criteria.
+- Export markdown backlog artifact: `sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md`.
+- Export one-file-per-issue handoff pack: `sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/day8-issue-pack`.
+- Review the generated artifact: [day8 good-first-issues sample](artifacts/day8-good-first-issues-sample.md).
 
 ## Fast start
 

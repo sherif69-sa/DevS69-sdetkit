@@ -496,6 +496,32 @@ python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcom
 python scripts/check_day7_weekly_review_contract.py
 ```
 
+
+## 🧲 Day 8 ultra: contributor funnel backlog
+
+Day 8 starts week two with a curated `good first issue` backlog so new contributors can pick scoped tasks with clear acceptance criteria.
+
+```bash
+python -m sdetkit contributor-funnel --format text --strict
+```
+
+Export a markdown artifact for triage and community channels:
+
+```bash
+python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md
+python -m sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/day8-issue-pack
+```
+
+See implementation details: [Day 8 ultra upgrade report](docs/day-8-ultra-upgrade-report.md).
+
+Day 8 closeout checks:
+
+```bash
+python -m pytest -q tests/test_contributor_funnel.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day8_contributor_funnel_contract.py
+python -m sdetkit contributor-funnel --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
