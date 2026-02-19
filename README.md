@@ -547,6 +547,31 @@ python scripts/check_day9_contribution_templates_contract.py
 python -m sdetkit triage-templates --format json --strict
 ```
 
+## ✅ Day 10 ultra: first-contribution checklist
+
+Day 10 adds a guided first-contribution checklist so new contributors can move from fork/clone to PR with deterministic quality gates.
+
+```bash
+python -m sdetkit first-contribution --format text --strict
+python -m sdetkit first-contribution --write-defaults --format json --strict
+```
+
+Export a markdown artifact for mentor/reviewer handoff:
+
+```bash
+python -m sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md
+```
+
+See implementation details: [Day 10 ultra upgrade report](docs/day-10-ultra-upgrade-report.md).
+
+Day 10 closeout checks:
+
+```bash
+python -m pytest -q tests/test_first_contribution.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day10_first_contribution_contract.py
+python -m sdetkit first-contribution --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
