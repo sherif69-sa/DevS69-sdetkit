@@ -522,6 +522,30 @@ python scripts/check_day8_contributor_funnel_contract.py
 python -m sdetkit contributor-funnel --format json --strict
 ```
 
+## 🧩 Day 9 ultra: contribution templates
+
+Day 9 upgrades issue and PR templates for faster triage with explicit severity, acceptance criteria, risk, and rollback prompts.
+
+```bash
+python -m sdetkit triage-templates --format text --strict
+```
+
+Export a markdown artifact for maintainer handoff:
+
+```bash
+python -m sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md
+```
+
+See implementation details: [Day 9 ultra upgrade report](docs/day-9-ultra-upgrade-report.md).
+
+Day 9 closeout checks:
+
+```bash
+python -m pytest -q tests/test_triage_templates.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day9_contribution_templates_contract.py
+python -m sdetkit triage-templates --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash

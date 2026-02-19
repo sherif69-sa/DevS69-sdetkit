@@ -5,7 +5,7 @@ import os
 from collections.abc import Sequence
 from importlib import metadata
 
-from . import apiget, contributor_funnel, demo, docs_qa, evidence, kvcli, notify, onboarding, ops, patch, policy, proof, repo, report, weekly_review
+from . import apiget, contributor_funnel, demo, docs_qa, evidence, kvcli, notify, onboarding, ops, patch, policy, proof, repo, report, triage_templates, weekly_review
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .security_gate import main as security_main
@@ -95,6 +95,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "proof":
         return proof.main(list(argv[1:]))
 
+    if argv and argv[0] == "triage-templates":
+        return triage_templates.main(list(argv[1:]))
+
     if argv and argv[0] == "docs-qa":
         return docs_qa.main(list(argv[1:]))
 
@@ -162,6 +165,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     prf = sub.add_parser("proof")
     prf.add_argument("args", nargs=argparse.REMAINDER)
 
+    ttp = sub.add_parser("triage-templates")
+    ttp.add_argument("args", nargs=argparse.REMAINDER)
+
     dqa = sub.add_parser("docs-qa")
     dqa.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -217,6 +223,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "proof":
         return proof.main(ns.args)
+
+    if ns.cmd == "triage-templates":
+        return triage_templates.main(ns.args)
 
     if ns.cmd == "docs-qa":
         return docs_qa.main(ns.args)

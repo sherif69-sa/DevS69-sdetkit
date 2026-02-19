@@ -128,6 +128,22 @@ Useful flags: `--format`, `--output`, `--area`, `--issue-pack-dir`, `--strict`.
 
 See: day-8-ultra-upgrade-report.md
 
+## triage-templates
+
+Builds Day 9 contribution-template health output to harden issue/PR intake and speed maintainer triage.
+
+Examples:
+
+- `sdetkit triage-templates --format text --strict`
+- `sdetkit triage-templates --format json`
+- `sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md`
+
+Useful flags: `--format`, `--output`, `--strict`.
+
+`--strict` returns non-zero if required Day 9 triage tokens are missing from bug/feature/PR templates.
+
+See: day-9-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).
