@@ -194,7 +194,9 @@ def test_security_scan_skips_broken_symlink_without_failing(tmp_path: Path, caps
     assert payload["findings"] == []
 
 
-def test_security_scan_detects_empty_except_and_uncontrolled_path_read(tmp_path: Path, capsys) -> None:
+def test_security_scan_detects_empty_except_and_uncontrolled_path_read(
+    tmp_path: Path, capsys
+) -> None:
     src = tmp_path / "src"
     src.mkdir()
     (src / "app.py").write_text(

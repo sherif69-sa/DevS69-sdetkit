@@ -226,27 +226,33 @@ def _go_module_name(go_mod: Path) -> str | None:
     return None
 
 
+def _parse_xml_root(content: str):
+    if _safe_et is None:
+        return None
+    try:
+        return _safe_et.fromstring(content)
+    except _XML_PARSE_ERRORS:
+        return None
+
+
 def _maven_project_name(pom_xml: Path) -> str | None:
     try:
         content = pom_xml.read_text(encoding="utf-8")
     except Exception:
         return None
 
-    if _safe_et is not None:
-        try:
-            root = _safe_et.fromstring(content)
-            for child in list(root):
-                tag = str(child.tag).rsplit("}", 1)[-1]
-                if tag != "artifactId" or child.text is None:
-                    continue
-                text = child.text
-                if not isinstance(text, str):
-                    continue
-                stripped = text.strip()
-                if stripped:
-                    return stripped
-        except _XML_PARSE_ERRORS as exc:
-            _ = exc
+    root = _parse_xml_root(content)
+    if root is not None:
+        for child in list(root):
+            tag = str(child.tag).rsplit("}", 1)[-1]
+            if tag != "artifactId" or child.text is None:
+                continue
+            text = child.text
+            if not isinstance(text, str):
+                continue
+            stripped = text.strip()
+            if stripped:
+                return stripped
 
     match = re.search(r"<artifactId>\s*([^<]+?)\s*</artifactId>", content)
     if match:
@@ -282,21 +288,18 @@ def _csproj_project_name(csproj: Path) -> str | None:
     except Exception:
         return csproj.stem or None
 
-    if _safe_et is not None:
-        try:
-            root = _safe_et.fromstring(content)
-            for element in root.iter():
-                tag = str(element.tag).rsplit("}", 1)[-1]
-                if tag != "AssemblyName" or element.text is None:
-                    continue
-                text = element.text
-                if not isinstance(text, str):
-                    continue
-                stripped = text.strip()
-                if stripped:
-                    return stripped
-        except _XML_PARSE_ERRORS as exc:
-            _ = exc
+    root = _parse_xml_root(content)
+    if root is not None:
+        for element in root.iter():
+            tag = str(element.tag).rsplit("}", 1)[-1]
+            if tag != "AssemblyName" or element.text is None:
+                continue
+            text = element.text
+            if not isinstance(text, str):
+                continue
+            stripped = text.strip()
+            if stripped:
+                return stripped
 
     match = re.search(r"<AssemblyName>\s*([^<]+?)\s*</AssemblyName>", content)
     if match:

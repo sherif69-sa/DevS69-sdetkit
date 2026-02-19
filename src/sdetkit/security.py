@@ -126,6 +126,7 @@ def ensure_allowed_scheme(url: str, *, allowed: set[str]) -> None:
 def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Path:
     if "\x00" in user_path:
         raise SecurityError("unsafe path rejected: contains NUL byte")
+
     resolved_root = root.resolve(strict=True)
     normalized = user_path.replace("\\", "/")
     is_absolute_input = normalized.startswith("/") or bool(re.match(r"^[A-Za-z]:/", normalized))
@@ -133,18 +134,38 @@ def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Pa
     if is_absolute_input and not allow_absolute:
         raise SecurityError("unsafe path rejected: absolute paths require explicit allow")
 
-    parts = [part for part in normalized.split("/") if part and part != "."]
-    if any(part == ".." for part in parts):
-        raise SecurityError("unsafe path rejected: traversal is not allowed")
+    if is_absolute_input and allow_absolute:
+        if not normalized.startswith("/"):
+            raise SecurityError("unsafe path rejected: unsupported absolute path format")
+        abs_parts = [part for part in normalized.split("/") if part and part != "."]
+        if any(part == ".." for part in abs_parts):
+            raise SecurityError("unsafe path rejected: traversal is not allowed")
+        for part in abs_parts:
+            if not re.fullmatch(r"[A-Za-z0-9._-]{1,255}", part):
+                raise SecurityError("unsafe path rejected: invalid path segment")
+        absolute_target = Path("/")
+        for part in abs_parts:
+            absolute_target = absolute_target / part
+        return absolute_target.resolve(strict=False)
 
-    if is_absolute_input:
-        resolved_target = Path(normalized).resolve(strict=False)
-    else:
-        resolved_target = resolved_root.joinpath(*parts).resolve(strict=False)
+    raw_parts = normalized.split("/")
+    parts: list[str] = []
+    for part in raw_parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise SecurityError("unsafe path rejected: traversal is not allowed")
+        if not re.fullmatch(r"[A-Za-z0-9._-]{1,255}", part):
+            raise SecurityError("unsafe path rejected: invalid path segment")
+        parts.append(part)
 
-    if not is_absolute_input or not allow_absolute:
-        if resolved_target != resolved_root and resolved_root not in resolved_target.parents:
-            raise SecurityError("unsafe path rejected: escapes root")
+    candidate = resolved_root
+    for part in parts:
+        candidate = candidate / part
+    resolved_target = candidate.resolve(strict=False)
+
+    if resolved_target != resolved_root and resolved_root not in resolved_target.parents:
+        raise SecurityError("unsafe path rejected: escapes root")
     return resolved_target
 
 

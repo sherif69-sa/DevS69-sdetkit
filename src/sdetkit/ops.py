@@ -258,12 +258,14 @@ def _resolve_workflow_path(path: Path) -> Path:
 def _safe_read_text(path: Path) -> str:
     root = Path.cwd().resolve(strict=True)
     target = path.resolve(strict=True)
-    try:
-        rel = target.relative_to(root)
-    except ValueError as exc:
-        raise ValueError("path escapes the current working directory") from exc
+    target_text = target.as_posix()
+    root_text = root.as_posix()
+    if target_text != root_text and not target_text.startswith(root_text + "/"):
+        raise ValueError("path escapes the current working directory")
+    rel = target.relative_to(root)
     safe_resolved = safe_path(root, rel.as_posix(), allow_absolute=False)
-    return safe_resolved.read_text(encoding="utf-8")
+    with safe_resolved.open("r", encoding="utf-8") as handle:
+        return handle.read()
 
 
 def _validate_run_id(run_id: str) -> str:
