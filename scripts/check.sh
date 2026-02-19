@@ -32,6 +32,10 @@ case "$mode" in
     ;;
   docs)
     mkdocs build
+    python scripts/check_onboarding_contract.py
+    ;;
+  onboarding)
+    python scripts/check_onboarding_contract.py
     ;;
   all)
     ruff format --check .
@@ -40,9 +44,10 @@ case "$mode" in
     pytest
     pytest --cov=src/sdetkit --cov-report=term-missing --cov-report=xml
     mkdocs build
+    python scripts/check_onboarding_contract.py
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|all}" >&2
     exit 2
     ;;
 esac

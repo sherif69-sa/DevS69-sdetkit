@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning--conversion-daily-execution) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning--conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -55,6 +55,15 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
     <td><a href="https://sherif69-sa.github.io/DevS69-sdetkit/">Live website</a></td>
   </tr>
 </table>
+
+
+## Day 1 ultra upgrades (positioning + conversion)
+
+- Read the implementation report: [Day 1 ultra upgrade report](day-1-ultra-upgrade-report.md).
+- Use `sdetkit onboarding --format markdown --output docs/artifacts/day1-onboarding-sample.md` to print and save role-based first commands instantly.
+- Use the README role-based paths to select your first command in under 60 seconds.
+- Review the generated sample artifact: [day1 onboarding sample](artifacts/day1-onboarding-sample.md).
+- Track this workstream in the [Top-10 strategy day-by-day plan](top-10-github-strategy.md#day-1-30-sprint-plan).
 
 ## Fast start
 
