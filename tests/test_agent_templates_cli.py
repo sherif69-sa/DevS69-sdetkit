@@ -64,3 +64,16 @@ def test_templates_cli_list_show_run_and_pack(tmp_path: Path, monkeypatch, capsy
     packed = json.loads(capsys.readouterr().out)
     assert packed["count"] == 1
     assert (tmp_path / "bundle.tar").exists()
+
+
+def test_templates_cli_run_all(tmp_path: Path, monkeypatch, capsys) -> None:
+    _seed_template(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    assert cli.main(["templates", "run-all", "--output-dir", "runs"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["status"] == "ok"
+    assert len(payload["runs"]) == 1
+    assert payload["runs"][0]["template"]["id"] == "demo"
+    assert payload["runs"][0]["status"] == "ok"
+    assert (tmp_path / "runs" / "demo" / "out.txt").read_text(encoding="utf-8") == "ok"

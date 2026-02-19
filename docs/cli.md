@@ -178,6 +178,7 @@ See: ide-and-precommit.md
 - `sdetkit agent templates show <id>`
 - `sdetkit agent templates run <id> [--set key=value ...] [--output-dir DIR]`
 - `sdetkit agent templates pack [--output FILE.tar]`
+- `sdetkit agent templates run-all [--output-dir DIR]`
 
 See: agentos-foundation.md, omnichannel-mcp-bridge.md, and automation-templates-engine.md
 
