@@ -245,8 +245,8 @@ def _maven_project_name(pom_xml: Path) -> str | None:
                 stripped = text.strip()
                 if stripped:
                     return stripped
-        except _XML_PARSE_ERRORS:
-            pass
+        except _XML_PARSE_ERRORS as exc:
+            _ = exc
 
     match = re.search(r"<artifactId>\s*([^<]+?)\s*</artifactId>", content)
     if match:
@@ -295,8 +295,8 @@ def _csproj_project_name(csproj: Path) -> str | None:
                 stripped = text.strip()
                 if stripped:
                     return stripped
-        except _XML_PARSE_ERRORS:
-            pass
+        except _XML_PARSE_ERRORS as exc:
+            _ = exc
 
     match = re.search(r"<AssemblyName>\s*([^<]+?)\s*</AssemblyName>", content)
     if match:

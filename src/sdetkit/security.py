@@ -126,17 +126,23 @@ def ensure_allowed_scheme(url: str, *, allowed: set[str]) -> None:
 def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Path:
     if "\x00" in user_path:
         raise SecurityError("unsafe path rejected: contains NUL byte")
-    # sdetkit: allow-security SEC_UNCONTROLLED_PATH_EXPRESSION
-    p = Path(user_path)  # sdetkit: allow-security SEC_POTENTIAL_PATH_TRAVERSAL
-    if p.is_absolute() and not allow_absolute:
+    resolved_root = root.resolve(strict=True)
+    normalized = user_path.replace("\\", "/")
+    is_absolute_input = normalized.startswith("/") or bool(re.match(r"^[A-Za-z]:/", normalized))
+
+    if is_absolute_input and not allow_absolute:
         raise SecurityError("unsafe path rejected: absolute paths require explicit allow")
-    if any(part == ".." for part in p.parts):
+
+    parts = [part for part in normalized.split("/") if part and part != "."]
+    if any(part == ".." for part in parts):
         raise SecurityError("unsafe path rejected: traversal is not allowed")
 
-    base = p if p.is_absolute() else (root / p)
-    resolved_target = base.resolve(strict=False)
-    if not p.is_absolute() or not allow_absolute:
-        resolved_root = root.resolve(strict=True)
+    if is_absolute_input:
+        resolved_target = Path(normalized).resolve(strict=False)
+    else:
+        resolved_target = resolved_root.joinpath(*parts).resolve(strict=False)
+
+    if not is_absolute_input or not allow_absolute:
         if resolved_target != resolved_root and resolved_root not in resolved_target.parents:
             raise SecurityError("unsafe path rejected: escapes root")
     return resolved_target

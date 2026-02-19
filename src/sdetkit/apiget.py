@@ -307,7 +307,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if isinstance(b, bytes | bytearray):
                     return bytes(b)
             except (AttributeError, OSError):
-                pass
+                return sys.stdin.read()
             return sys.stdin.read()
         if path == "":
             raise _AtFileError("apiget: cannot read file: <empty path>")

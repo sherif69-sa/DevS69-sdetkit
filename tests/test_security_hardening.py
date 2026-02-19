@@ -76,3 +76,12 @@ def test_atomic_write_text_never_partial(tmp_path):
         pass
 
     assert target.read_text(encoding="utf-8") == "old"
+
+
+def test_safe_path_rejects_windows_absolute_without_allow(tmp_path):
+    try:
+        safe_path(tmp_path, "C:/windows/system32")
+    except SecurityError:
+        pass
+    else:
+        raise AssertionError("expected absolute windows path to be rejected")

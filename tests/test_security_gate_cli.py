@@ -192,3 +192,28 @@ def test_security_scan_skips_broken_symlink_without_failing(tmp_path: Path, caps
     assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["findings"] == []
+
+
+def test_security_scan_detects_empty_except_and_uncontrolled_path_read(tmp_path: Path, capsys) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "app.py").write_text(
+        """
+def read_user(user_path):
+    return Path(user_path).read_text(encoding='utf-8')
+
+try:
+    read_user(input_path)
+except Exception:
+    pass
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    rc = _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    rules = {item["rule_id"] for item in payload["findings"]}
+    assert "SEC_UNCONTROLLED_PATH_EXPRESSION" in rules
+    assert "SEC_EMPTY_EXCEPT" in rules
