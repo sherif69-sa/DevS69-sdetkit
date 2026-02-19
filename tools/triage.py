@@ -22,7 +22,9 @@ def _safe_user_path(root: Path, value: str) -> Path:
     raw = Path(value)
     if any(part == ".." for part in raw.parts):
         raise ValueError("path traversal is not allowed")
-    candidate = raw.resolve(strict=False) if raw.is_absolute() else (root / raw).resolve(strict=False)
+    candidate = (
+        raw.resolve(strict=False) if raw.is_absolute() else (root / raw).resolve(strict=False)
+    )
     resolved_root = root.resolve(strict=True)
     if candidate != resolved_root and resolved_root not in candidate.parents:
         raise ValueError("path must stay under --path root")
