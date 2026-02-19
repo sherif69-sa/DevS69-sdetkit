@@ -257,13 +257,15 @@ def _resolve_workflow_path(path: Path) -> Path:
 
 def _safe_read_text(path: Path) -> str:
     root = Path.cwd().resolve(strict=True)
-    target = path.resolve(strict=True)
-    target_text = target.as_posix()
+    raw = path.as_posix()
     root_text = root.as_posix()
-    if target_text != root_text and not target_text.startswith(root_text + "/"):
-        raise ValueError("path escapes the current working directory")
-    rel = target.relative_to(root)
-    safe_resolved = safe_path(root, rel.as_posix(), allow_absolute=False)
+    if raw == root_text:
+        rel = "."
+    elif raw.startswith(root_text + "/"):
+        rel = raw[len(root_text) + 1 :]
+    else:
+        rel = raw
+    safe_resolved = safe_path(root, rel, allow_absolute=False)
     with safe_resolved.open("r", encoding="utf-8") as handle:
         return handle.read()
 
@@ -657,7 +659,7 @@ def list_runs(history_dir: Path) -> list[dict[str, Any]]:
         results_path = run_dir / "results.json"
         if not results_path.exists():
             continue
-        doc = json.loads(results_path.read_text(encoding="utf-8"))
+        doc = json.loads(_safe_read_text(results_path))
         out.append(
             {
                 "run_id": run_dir.name,
