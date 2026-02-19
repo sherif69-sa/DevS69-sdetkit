@@ -139,7 +139,7 @@ Examples:
 - `sdetkit triage-templates --write-defaults --format json --strict`
 - `sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
 
 `--strict` returns non-zero if required Day 9 triage checks are missing from bug/feature/PR templates or `.github/ISSUE_TEMPLATE/config.yml`.
 
@@ -158,7 +158,7 @@ Examples:
 - `sdetkit first-contribution --write-defaults --format json --strict`
 - `sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
 
 `--strict` returns non-zero if required Day 10 checklist content or required command snippets are missing from `CONTRIBUTING.md`.
 
@@ -177,7 +177,7 @@ Examples:
 - `sdetkit docs-nav --write-defaults --format json --strict`
 - `sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
 
 `--strict` returns non-zero if required Day 11 journey links/content are missing from `docs/index.md`.
 
@@ -197,7 +197,7 @@ Examples:
 - `sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md`
 - `sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
 
 `--strict` returns non-zero if required Day 12 use-case sections or command snippets are missing from `docs/use-cases-startup-small-team.md`.
 
@@ -206,6 +206,33 @@ Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, 
 `--emit-pack-dir` writes a startup operating-pack bundle containing checklist, CI fast-lane recipe, and risk register files.
 
 See: day-12-ultra-upgrade-report.md
+
+## enterprise-use-case
+
+Builds Day 13 enterprise/regulated landing-page status and validates required governance sections and compliance command sequence.
+
+Examples:
+
+- `sdetkit enterprise-use-case --format text --strict`
+- `sdetkit enterprise-use-case --format json`
+- `sdetkit enterprise-use-case --write-defaults --format json --strict`
+- `sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md`
+- `sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict`
+- `sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
+
+`--strict` returns non-zero if required Day 13 use-case sections or command snippets are missing from `docs/use-cases-enterprise-regulated.md`.
+
+`--write-defaults` writes a hardened Day 13 enterprise workflow page if missing/incomplete, then validates again.
+
+`--emit-pack-dir` writes an enterprise operating-pack bundle containing checklist, CI compliance-lane recipe, and controls register files.
+
+`--execute` runs the required Day 13 command chain and adds execution pass/fail details to output.
+
+`--evidence-dir` writes `day13-execution-summary.json` plus per-command log files for audit handoff.
+
+See: day-13-ultra-upgrade-report.md
 
 ## patch
 

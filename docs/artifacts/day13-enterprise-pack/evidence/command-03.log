@@ -1,0 +1,8 @@
+command: python -m sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json
+returncode: 0
+ok: True
+--- stdout ---
+.sdetkit/day13-policy-snapshot.json
+
+--- stderr ---
+
