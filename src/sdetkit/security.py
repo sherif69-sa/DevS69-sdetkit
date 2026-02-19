@@ -143,26 +143,19 @@ def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Pa
     resolved_root = root.resolve(strict=True)
     normalized = user_path.replace("\\", "/")
     is_absolute_input = normalized.startswith("/") or bool(re.match(r"^[A-Za-z]:/", normalized))
-
-    if is_absolute_input and not allow_absolute:
-        raise SecurityError("unsafe path rejected: absolute paths require explicit allow")
-
     segments = _validated_path_segments(normalized)
 
-    if is_absolute_input and allow_absolute:
+    if is_absolute_input:
         if not normalized.startswith("/"):
             raise SecurityError("unsafe path rejected: unsupported absolute path format")
-        absolute_target = Path("/")
-        for part in segments:
-            absolute_target = absolute_target / part
-        resolved_target = absolute_target.resolve(strict=False)
+        resolved_target = Path("/").joinpath(*segments).resolve(strict=False)
+        if allow_absolute:
+            return resolved_target
     else:
-        target = resolved_root
-        for part in segments:
-            target = target / part
-        resolved_target = target.resolve(strict=False)
+        resolved_target = resolved_root.joinpath(*segments).resolve(strict=False)
         if resolved_target == resolved_root:
             return resolved_target
+
     # Ensure the resolved target is strictly within the resolved_root directory
     if hasattr(resolved_target, "is_relative_to"):
         if not resolved_target.is_relative_to(resolved_root):
@@ -170,8 +163,8 @@ def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Pa
     else:
         try:
             resolved_target.relative_to(resolved_root)
-        except ValueError:
-            raise SecurityError("unsafe path rejected: escapes root")
+        except ValueError as err:
+            raise SecurityError("unsafe path rejected: escapes root") from err
     return resolved_target
 
 
