@@ -34,12 +34,16 @@ case "$mode" in
     mkdocs build
     python scripts/check_onboarding_contract.py
     python scripts/check_day3_proof_contract.py
+    python scripts/check_day4_skills_contract.py
     ;;
   onboarding)
     python scripts/check_onboarding_contract.py
     ;;
   day3)
     python scripts/check_day3_proof_contract.py
+    ;;
+  day4)
+    python scripts/check_day4_skills_contract.py
     ;;
   all)
     ruff format --check .
@@ -50,9 +54,10 @@ case "$mode" in
     mkdocs build
     python scripts/check_onboarding_contract.py
     python scripts/check_day3_proof_contract.py
+    python scripts/check_day4_skills_contract.py
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|all}" >&2
     exit 2
     ;;
 esac
