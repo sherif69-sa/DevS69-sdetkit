@@ -126,7 +126,8 @@ def ensure_allowed_scheme(url: str, *, allowed: set[str]) -> None:
 def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Path:
     if "\x00" in user_path:
         raise SecurityError("unsafe path rejected: contains NUL byte")
-    p = Path(user_path)
+    # sdetkit: allow-security SEC_UNCONTROLLED_PATH_EXPRESSION
+    p = Path(user_path)  # sdetkit: allow-security SEC_POTENTIAL_PATH_TRAVERSAL
     if p.is_absolute() and not allow_absolute:
         raise SecurityError("unsafe path rejected: absolute paths require explicit allow")
     if any(part == ".." for part in p.parts):

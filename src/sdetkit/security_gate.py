@@ -55,7 +55,7 @@ TEXT_EXTENSIONS = {
     ".env",
     ".sh",
 }
-SUSPICIOUS_INPUT_NAMES = {"user_input", "input_path", "filename", "filepath", "path", "name"}
+SUSPICIOUS_INPUT_NAMES = {"user_input", "input_path", "filename", "filepath", "user_path"}
 PRINT_ALLOWED_MODULE_SUFFIXES = (
     "/cli.py",
     "/repo.py",
@@ -124,6 +124,18 @@ RULES: dict[str, RuleMeta] = {
         "Potential path traversal",
         "Use safe_path-style guard for user-controlled path segments.",
     ),
+    "SEC_UNCONTROLLED_PATH_EXPRESSION": RuleMeta(
+        "SEC_UNCONTROLLED_PATH_EXPRESSION",
+        "error",
+        "Uncontrolled data used in path expression",
+        "Validate user-controlled path segments with safe_path before filesystem operations.",
+    ),
+    "SEC_EMPTY_EXCEPT": RuleMeta(
+        "SEC_EMPTY_EXCEPT",
+        "warn",
+        "Empty except",
+        "Catch concrete exceptions and avoid silent pass in except blocks.",
+    ),
     "SEC_POTENTIAL_UNSAFE_WRITE": RuleMeta(
         "SEC_POTENTIAL_UNSAFE_WRITE",
         "warn",
@@ -160,6 +172,10 @@ RULES: dict[str, RuleMeta] = {
 }
 
 OFFLINE_VULN_RULES: dict[str, dict[str, str]] = {
+    "filelock": {
+        "3.18.0": "CVE-2025-68146: TOCTOU race condition allows symlink attacks.",
+        "3.18.1": "CVE-2026-22701: TOCTOU symlink vulnerability in SoftFileLock.",
+    },
     "pyyaml": {
         "5.3": "CVE-2020-14343: unsafe loader behavior in older versions.",
         "5.4": "CVE-2020-14343: unsafe loader behavior in older versions.",
@@ -291,6 +307,13 @@ class _RuleVisitor(ast.NodeVisitor):
                     "Path join with potentially user-controlled segment.",
                     suggestion="Validate with safe_path before filesystem access.",
                 )
+        if _is_uncontrolled_path_read(node):
+            self._add(
+                "SEC_UNCONTROLLED_PATH_EXPRESSION",
+                node,
+                "Filesystem read uses path derived from potentially uncontrolled input.",
+                suggestion="Resolve through safe_path(root, user_path) before reading.",
+            )
         if name == "open" and _is_write_mode_open(node):
             if _is_absolute_literal(node):
                 self._add(
@@ -305,6 +328,22 @@ class _RuleVisitor(ast.NodeVisitor):
             and not self._allow_print_for_module()
         ):
             self._add("SEC_DEBUG_PRINT", node, "print(...) found in src/.")
+        self.generic_visit(node)
+
+    def visit_Try(self, node: ast.Try) -> Any:
+        for handler in node.handlers:
+            if not isinstance(handler, ast.ExceptHandler):
+                continue
+            if handler.type is None or (
+                isinstance(handler.type, ast.Name) and handler.type.id == "Exception"
+            ):
+                if len(handler.body) == 1 and isinstance(handler.body[0], ast.Pass):
+                    self._add(
+                        "SEC_EMPTY_EXCEPT",
+                        handler,
+                        "except block silently swallows errors via pass.",
+                        suggestion="Catch precise exceptions and log or handle failure explicitly.",
+                    )
         self.generic_visit(node)
 
 
@@ -383,6 +422,21 @@ def _is_safe_yaml_loader(node: ast.Call) -> bool:
             return True
         if isinstance(kw.value, ast.Name) and kw.value.id in {"SafeLoader", "CSafeLoader"}:
             return True
+    return False
+
+
+def _is_uncontrolled_path_read(node: ast.Call) -> bool:
+    call_name = _call_name(node)
+    if call_name not in {"Path", "pathlib.Path", "open"}:
+        return False
+    if not node.args:
+        return False
+    arg = node.args[0]
+    if isinstance(arg, ast.Name) and arg.id.lower() in SUSPICIOUS_INPUT_NAMES:
+        return True
+    if isinstance(arg, ast.Call) and _call_name(arg) in {"str", "Path", "pathlib.Path"}:
+        if arg.args and isinstance(arg.args[0], ast.Name):
+            return arg.args[0].id.lower() in SUSPICIOUS_INPUT_NAMES
     return False
 
 

@@ -16,7 +16,7 @@ disable_rules = ["repo_audit/missing_repo_hygiene_item"]
 severity_overrides = { "repo_audit/large_tracked_file" = "error" }
 allowlist = [
   { rule_id = "repo_audit/missing_repo_hygiene_item", path = "examples/**" },
-  { rule_id = "repo_audit/missing_codeql", path = "legacy/**", contains = "accepted for legacy" }
+  { rule_id = "repo_audit/missing_ci_policy", path = "legacy/**", contains = "accepted for legacy" }
 ]
 ```
 

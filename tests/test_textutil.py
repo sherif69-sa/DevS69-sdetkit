@@ -1,3 +1,5 @@
+import string
+
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -57,17 +59,13 @@ def test_parse_kv_line_allows_equals_inside_double_quotes():
 
 
 _key = st.text(
-    alphabet=st.sampled_from(
-        list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-")
-    ),
+    alphabet=st.sampled_from(list(string.ascii_letters + string.digits + "_-")),
     min_size=1,
     max_size=12,
 )
 
 _val = st.text(
-    alphabet=st.sampled_from(
-        list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-=.")
-    ),
+    alphabet=st.sampled_from(list(string.ascii_letters + string.digits + " _-=.")),
     min_size=1,
     max_size=20,
 )

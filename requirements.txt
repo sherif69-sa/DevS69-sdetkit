@@ -4,6 +4,7 @@
 
 # Runtime dependency
 httpx==0.28.1
+filelock==3.19.1
 
 # Dev + QA tooling
 ruff==0.15.1

@@ -17,6 +17,10 @@ try:
 except Exception:  # pragma: no cover
     _safe_et = None
 
+_XML_PARSE_ERRORS: tuple[type[BaseException], ...] = (AttributeError, ValueError)
+if _safe_et is not None and hasattr(_safe_et, "ParseError"):
+    _XML_PARSE_ERRORS = (_safe_et.ParseError, *_XML_PARSE_ERRORS)
+
 
 class ProjectsConfigError(ValueError):
     pass
@@ -241,7 +245,7 @@ def _maven_project_name(pom_xml: Path) -> str | None:
                 stripped = text.strip()
                 if stripped:
                     return stripped
-        except Exception:
+        except _XML_PARSE_ERRORS:
             pass
 
     match = re.search(r"<artifactId>\s*([^<]+?)\s*</artifactId>", content)
@@ -258,7 +262,7 @@ def _gradle_project_name(settings_file: Path) -> str | None:
     except Exception:
         return None
 
-    pattern = re.compile(r'rootProject\.name\s*=\s*[\'"]([^\'"]+)[\'"]')
+    pattern = re.compile(r'rootProject\.name\s*=\s*[\'"]([^\'"\r\n]+)[\'"]')
     for raw in content.splitlines():
         line = raw.strip()
         if not line or line.startswith("//"):
@@ -291,7 +295,7 @@ def _csproj_project_name(csproj: Path) -> str | None:
                 stripped = text.strip()
                 if stripped:
                     return stripped
-        except Exception:
+        except _XML_PARSE_ERRORS:
             pass
 
     match = re.search(r"<AssemblyName>\s*([^<]+?)\s*</AssemblyName>", content)

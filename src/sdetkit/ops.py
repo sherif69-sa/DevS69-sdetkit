@@ -29,9 +29,9 @@ from .security_gate import scan_repo
 
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
 _VAR_RE = re.compile(r"\$\{([^}]+)\}")
-_HTTP_WORKFLOW_RE = re.compile(r"[A-Za-z0-9._-]+\.(?:toml|json)", re.IGNORECASE)
-
-_WORKFLOW_FILE_RE = re.compile(r"[A-Za-z0-9._-]+\.(?:toml|json)", re.IGNORECASE)
+_WORKFLOW_ALLOWED_CHARS = frozenset(
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
+)
 
 
 def _sanitize_workflow_filename(path: Path) -> str:
@@ -43,9 +43,18 @@ def _sanitize_workflow_filename(path: Path) -> str:
         raise ValueError("workflow path must be relative to the current working directory")
     if candidate.name != raw:
         raise ValueError("workflow path must be a filename without directories")
-    if not _WORKFLOW_FILE_RE.fullmatch(raw):
+    if not _is_valid_workflow_filename(raw):
         raise ValueError("workflow filename must match [A-Za-z0-9._-]+.(toml|json)")
     return raw
+
+
+def _is_valid_workflow_filename(raw: str) -> bool:
+    if not raw or "." not in raw:
+        return False
+    if any(ch not in _WORKFLOW_ALLOWED_CHARS for ch in raw):
+        return False
+    suffix = Path(raw).suffix.lower()
+    return suffix in {".toml", ".json"}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -217,7 +226,7 @@ def _sanitize_http_workflow_path(value: object) -> Path:
     raw = str(value or "")
     if "\x00" in raw:
         raise ValueError("workflow path contains NUL byte")
-    if not _HTTP_WORKFLOW_RE.fullmatch(raw):
+    if not _is_valid_workflow_filename(raw):
         raise ValueError("workflow path must be a simple filename ending with .toml or .json")
     return Path(raw)
 
@@ -234,10 +243,9 @@ def _resolve_workflow_path(path: Path) -> Path:
         raise ValueError("workflow path traversal is not allowed")
 
     base = Path.cwd().resolve(strict=True)
-    resolved = (base / candidate).resolve(strict=False)
     try:
-        resolved.relative_to(base)
-    except ValueError as exc:
+        resolved = safe_path(base, raw, allow_absolute=False)
+    except Exception as exc:
         raise ValueError("workflow path escapes the current working directory") from exc
 
     if resolved.suffix.lower() not in {".toml", ".json"}:
@@ -651,8 +659,10 @@ def load_run(history_dir: Path, run_id: str) -> tuple[dict[str, Any], dict[str, 
     valid_run_id = _validate_run_id(run_id)
     history_root = _history_root(history_dir)
     run_dir = safe_path(history_root, valid_run_id, allow_absolute=False)
-    run_doc = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
-    results_doc = json.loads((run_dir / "results.json").read_text(encoding="utf-8"))
+    run_doc_path = safe_path(run_dir, "run.json", allow_absolute=False)
+    results_doc_path = safe_path(run_dir, "results.json", allow_absolute=False)
+    run_doc = json.loads(run_doc_path.read_text(encoding="utf-8"))
+    results_doc = json.loads(results_doc_path.read_text(encoding="utf-8"))
     return run_doc, results_doc
 
 

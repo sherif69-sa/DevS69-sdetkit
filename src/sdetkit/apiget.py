@@ -55,7 +55,8 @@ def _merged_headers(client, extra, debug: bool) -> dict[str, str]:
         for k, v in client.headers.items():
             out[str(k)] = str(v)
     except Exception:
-        pass
+        if debug:
+            traceback.print_exc()
     if extra:
         try:
             for k, v in dict(extra).items():
@@ -305,7 +306,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 b = sys.stdin.buffer.read()
                 if isinstance(b, bytes | bytearray):
                     return bytes(b)
-            except Exception:
+            except (AttributeError, OSError):
                 pass
             return sys.stdin.read()
         if path == "":
@@ -526,11 +527,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                             )
                         _printed_req["v"] = True
                     except Exception:
-                        pass
+                        if ns.debug:
+                            traceback.print_exc()
                     try:
                         _verbose_response(resp, redact=ns.redact, redact_keyset=redaction_keys)
                     except Exception:
-                        pass
+                        if ns.debug:
+                            traceback.print_exc()
                     return resp
 
                 raw.request = _wrapped_request

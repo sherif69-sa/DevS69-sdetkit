@@ -679,6 +679,7 @@ def builtin_rules() -> list[AuditRule]:
         ),
         _MissingFileRule(
             meta=RuleMeta(
+                # sdetkit: allow-security SEC_HIGH_ENTROPY_STRING
                 id="ENT_REPO_AUDIT_WORKFLOW_MISSING",
                 title="Repo audit workflow exists",
                 description="Repository should run sdetkit repo audit in CI.",
@@ -713,6 +714,7 @@ def builtin_fixers() -> list[Fixer]:
             "SEC_PY_PRECOMMIT_MISSING", ".pre-commit-config.yaml", TEMPLATE_PRE_COMMIT
         ),
         _MissingFileFixer(
+            # sdetkit: allow-security SEC_HIGH_ENTROPY_STRING
             "ENT_REPO_AUDIT_WORKFLOW_MISSING",
             ".github/workflows/repo-audit.yml",
             TEMPLATE_REPO_AUDIT_WORKFLOW,

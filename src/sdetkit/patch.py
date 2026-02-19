@@ -59,7 +59,9 @@ def _load_json(path: str) -> tuple[Any, int]:
     if path == "-":
         raw = sys.stdin.read()
         return json.loads(raw), len(raw.encode("utf-8"))
-    raw = Path(path).read_text(encoding="utf-8")
+    root = Path.cwd().resolve(strict=True)
+    safe_json_path = safe_path(root, path, allow_absolute=True)
+    raw = safe_json_path.read_text(encoding="utf-8")
     return json.loads(raw), len(raw.encode("utf-8"))
 
 

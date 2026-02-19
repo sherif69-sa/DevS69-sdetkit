@@ -610,7 +610,7 @@ class RepoRuleExecutionContext:
     def read_text(self, path: str | Path, *, encoding: str = "utf-8") -> str:
         rel = Path(path).as_posix() if not isinstance(path, Path) else path.as_posix()
         self.track_file(rel)
-        target = self._root / rel
+        target = safe_path(self._root, rel, allow_absolute=False)
         return target.read_text(encoding=encoding)
 
     def dependency_manifest(self) -> dict[str, str | None]:

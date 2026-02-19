@@ -8,6 +8,9 @@ from pathlib import Path
 
 from sdetkit import cli
 
+# sdetkit: allow-security SEC_HIGH_ENTROPY_STRING
+_RULE_REPO_AUDIT_WORKFLOW_MISSING = "ENT_REPO_AUDIT_WORKFLOW_MISSING"
+
 
 @dataclass
 class Result:
@@ -55,7 +58,7 @@ def test_profile_pack_mapping_enterprise_includes_enterprise_rules(tmp_path: Pat
     payload = json.loads(result.stdout)
     assert result.exit_code == 0
     assert payload["summary"]["packs"] == ["core", "enterprise"]
-    assert any(item["rule_id"] == "ENT_REPO_AUDIT_WORKFLOW_MISSING" for item in payload["findings"])
+    assert any(item["rule_id"] == _RULE_REPO_AUDIT_WORKFLOW_MISSING for item in payload["findings"])
 
 
 def test_fix_audit_dry_run_apply_and_idempotent(tmp_path: Path) -> None:
