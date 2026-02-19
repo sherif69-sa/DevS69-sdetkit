@@ -136,7 +136,8 @@ def safe_path(root: Path, user_path: str, *, allow_absolute: bool = False) -> Pa
     base = p if p.is_absolute() else (root / p)
     resolved_target = base.resolve(strict=False)
     if not p.is_absolute() or not allow_absolute:
-        resolved_root = root.resolve(strict=True)
+        # Use non-strict resolution for root to avoid filesystem access on tainted input
+        resolved_root = root.resolve(strict=False)
         if resolved_target != resolved_root and resolved_root not in resolved_target.parents:
             raise SecurityError("unsafe path rejected: escapes root")
     return resolved_target
