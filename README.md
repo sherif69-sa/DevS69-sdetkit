@@ -472,6 +472,30 @@ python -m pytest -q tests/test_docs_qa.py tests/test_cli_help_lists_subcommands.
 python scripts/check_day6_conversion_contract.py
 ```
 
+
+## 📊 Day 7 ultra: weekly review #1
+
+Day 7 closes week one with an objective review of what shipped, KPI movement, and next-week priorities.
+
+```bash
+python -m sdetkit weekly-review --format text
+```
+
+Export a markdown artifact for stakeholder handoff:
+
+```bash
+python -m sdetkit weekly-review --format markdown --output docs/artifacts/day7-weekly-review-sample.md
+```
+
+See implementation details: [Day 7 ultra upgrade report](docs/day-7-ultra-upgrade-report.md).
+
+Day 7 closeout checks:
+
+```bash
+python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day7_weekly_review_contract.py
+```
+
 ## ⚡ Quick start
 
 ```bash

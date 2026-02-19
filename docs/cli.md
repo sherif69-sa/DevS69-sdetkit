@@ -95,6 +95,21 @@ Useful flags: `--root`, `--format`, `--output`.
 See: day-6-ultra-upgrade-report.md
 
 
+
+## weekly-review
+
+Builds Day 7 weekly review #1 output with shipped upgrades, KPI movement, and next-week focus.
+
+Examples:
+
+- `sdetkit weekly-review --format text`
+- `sdetkit weekly-review --format json`
+- `sdetkit weekly-review --format markdown --output docs/artifacts/day7-weekly-review-sample.md`
+
+Useful flags: `--root`, `--format`, `--output`.
+
+See: day-7-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).
