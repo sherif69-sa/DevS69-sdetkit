@@ -4,6 +4,7 @@ import argparse
 import json
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 _CHECKLIST_SECTION_HEADER = "## 0) Day 10 first-contribution checklist"
 
@@ -60,7 +61,11 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     p.add_argument("--root", default=".", help="Repository root where CONTRIBUTING.md lives.")
     p.add_argument("--output", default="", help="Optional output file path.")
-    p.add_argument("--strict", action="store_true", help="Return non-zero if required checklist content is missing.")
+    p.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero if required checklist content is missing.",
+    )
     p.add_argument(
         "--write-defaults",
         action="store_true",
@@ -95,7 +100,7 @@ def _write_defaults(base: Path) -> list[str]:
     return ["CONTRIBUTING.md"]
 
 
-def build_first_contribution_status(root: str = ".") -> dict[str, object]:
+def build_first_contribution_status(root: str = ".") -> dict[str, Any]:
     base = Path(root)
     guide = base / "CONTRIBUTING.md"
     guide_text = _read(guide)
@@ -123,7 +128,7 @@ def build_first_contribution_status(root: str = ".") -> dict[str, object]:
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 10 first-contribution checklist",
         f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
@@ -150,7 +155,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Day 10 first-contribution checklist",
         "",

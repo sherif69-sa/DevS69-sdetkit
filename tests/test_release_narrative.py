@@ -32,7 +32,16 @@ def test_day20_release_narrative_json(tmp_path: Path, capsys) -> None:
     summary = _write_day19_summary(tmp_path)
     _write_day20_page(tmp_path)
 
-    rc = rn.main(["--root", str(tmp_path), "--day19-summary", str(summary.relative_to(tmp_path)), "--format", "json"])
+    rc = rn.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--day19-summary",
+            str(summary.relative_to(tmp_path)),
+            "--format",
+            "json",
+        ]
+    )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "day20-release-narrative"
@@ -73,19 +82,37 @@ def test_day20_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path
     _write_day20_page(tmp_path)
 
     rc = rn.main(
-        ["--root", str(tmp_path), "--day19-summary", str(summary.relative_to(tmp_path)), "--format", "json", "--strict"]
+        [
+            "--root",
+            str(tmp_path),
+            "--day19-summary",
+            str(summary.relative_to(tmp_path)),
+            "--format",
+            "json",
+            "--strict",
+        ]
     )
     assert rc == 1
 
 
-def test_day20_release_narrative_strict_gate_fails_when_docs_contract_missing(tmp_path: Path) -> None:
+def test_day20_release_narrative_strict_gate_fails_when_docs_contract_missing(
+    tmp_path: Path,
+) -> None:
     summary = _write_day19_summary(tmp_path)
     path = tmp_path / "docs/integrations-release-narrative.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("# Release narrative (Day 20)\n", encoding="utf-8")
 
     rc = rn.main(
-        ["--root", str(tmp_path), "--day19-summary", str(summary.relative_to(tmp_path)), "--format", "json", "--strict"]
+        [
+            "--root",
+            str(tmp_path),
+            "--day19-summary",
+            str(summary.relative_to(tmp_path)),
+            "--format",
+            "json",
+            "--strict",
+        ]
     )
     assert rc == 1
 

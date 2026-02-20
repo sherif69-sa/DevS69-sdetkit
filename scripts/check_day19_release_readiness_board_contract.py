@@ -10,12 +10,22 @@ DOCS_CLI = Path("docs/cli.md")
 DAY19_PAGE = Path("docs/integrations-release-readiness-board.md")
 DAY19_REPORT = Path("docs/day-19-ultra-upgrade-report.md")
 DAY19_ARTIFACT = Path("docs/artifacts/day19-release-readiness-board-sample.md")
-DAY19_PACK_SUMMARY = Path("docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json")
-DAY19_PACK_SCORECARD = Path("docs/artifacts/day19-release-readiness-pack/day19-release-readiness-scorecard.md")
-DAY19_PACK_CHECKLIST = Path("docs/artifacts/day19-release-readiness-pack/day19-release-readiness-checklist.md")
-DAY19_PACK_VALIDATION = Path("docs/artifacts/day19-release-readiness-pack/day19-validation-commands.md")
+DAY19_PACK_SUMMARY = Path(
+    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json"
+)
+DAY19_PACK_SCORECARD = Path(
+    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-scorecard.md"
+)
+DAY19_PACK_CHECKLIST = Path(
+    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-checklist.md"
+)
+DAY19_PACK_VALIDATION = Path(
+    "docs/artifacts/day19-release-readiness-pack/day19-validation-commands.md"
+)
 DAY19_PACK_DECISION = Path("docs/artifacts/day19-release-readiness-pack/day19-release-decision.md")
-DAY19_EVIDENCE = Path("docs/artifacts/day19-release-readiness-pack/evidence/day19-execution-summary.json")
+DAY19_EVIDENCE = Path(
+    "docs/artifacts/day19-release-readiness-pack/evidence/day19-execution-summary.json"
+)
 MODULE = Path("src/sdetkit/release_readiness_board.py")
 
 README_EXPECTED = [
@@ -98,10 +108,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
         errors.extend(f"{DAY19_PAGE}: missing '{m}'" for m in _missing(DAY19_PAGE, PAGE_EXPECTED))
-        errors.extend(f"{DAY19_REPORT}: missing '{m}'" for m in _missing(DAY19_REPORT, REPORT_EXPECTED))
-        errors.extend(f"{DAY19_PACK_SUMMARY}: missing '{m}'" for m in _missing(DAY19_PACK_SUMMARY, SUMMARY_EXPECTED))
+        errors.extend(
+            f"{DAY19_REPORT}: missing '{m}'" for m in _missing(DAY19_REPORT, REPORT_EXPECTED)
+        )
+        errors.extend(
+            f"{DAY19_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(DAY19_PACK_SUMMARY, SUMMARY_EXPECTED)
+        )
         if not ns.skip_evidence:
-            errors.extend(f"{DAY19_EVIDENCE}: missing '{m}'" for m in _missing(DAY19_EVIDENCE, EVIDENCE_EXPECTED))
+            errors.extend(
+                f"{DAY19_EVIDENCE}: missing '{m}'"
+                for m in _missing(DAY19_EVIDENCE, EVIDENCE_EXPECTED)
+            )
 
     if errors:
         print("day19-release-readiness-board-contract check failed:", file=sys.stderr)

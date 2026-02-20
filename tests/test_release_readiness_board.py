@@ -104,21 +104,26 @@ def test_day19_cli_dispatch(tmp_path: Path, capsys) -> None:
 def test_day19_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
     day18 = tmp_path / "day18.json"
     day14 = tmp_path / "day14.json"
-    day18.write_text(json.dumps({"summary": {"reliability_score": 92.0, "gate_status": "pass"}}) + "\n", encoding="utf-8")
+    day18.write_text(
+        json.dumps({"summary": {"reliability_score": 92.0, "gate_status": "pass"}}) + "\n",
+        encoding="utf-8",
+    )
     day14.write_text(json.dumps({"kpis": {"completion_rate_percent": 95}}) + "\n", encoding="utf-8")
     _write_page(tmp_path)
 
-    rc = rrb.main([
-        "--root",
-        str(tmp_path),
-        "--day18-summary",
-        str(day18.relative_to(tmp_path)),
-        "--day14-summary",
-        str(day14.relative_to(tmp_path)),
-        "--format",
-        "json",
-        "--strict",
-    ])
+    rc = rrb.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--day18-summary",
+            str(day18.relative_to(tmp_path)),
+            "--day14-summary",
+            str(day14.relative_to(tmp_path)),
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
     assert out["inputs"]["day14"]["status"] == "pass"

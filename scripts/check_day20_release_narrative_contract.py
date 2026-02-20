@@ -10,12 +10,18 @@ DOCS_CLI = Path("docs/cli.md")
 DAY20_PAGE = Path("docs/integrations-release-narrative.md")
 DAY20_REPORT = Path("docs/day-20-ultra-upgrade-report.md")
 DAY20_ARTIFACT = Path("docs/artifacts/day20-release-narrative-sample.md")
-DAY20_PACK_SUMMARY = Path("docs/artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json")
+DAY20_PACK_SUMMARY = Path(
+    "docs/artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json"
+)
 DAY20_PACK_MD = Path("docs/artifacts/day20-release-narrative-pack/day20-release-narrative.md")
 DAY20_PACK_BLURBS = Path("docs/artifacts/day20-release-narrative-pack/day20-audience-blurbs.md")
 DAY20_PACK_CHANNELS = Path("docs/artifacts/day20-release-narrative-pack/day20-channel-posts.md")
-DAY20_PACK_VALIDATION = Path("docs/artifacts/day20-release-narrative-pack/day20-validation-commands.md")
-DAY20_EVIDENCE = Path("docs/artifacts/day20-release-narrative-pack/evidence/day20-execution-summary.json")
+DAY20_PACK_VALIDATION = Path(
+    "docs/artifacts/day20-release-narrative-pack/day20-validation-commands.md"
+)
+DAY20_EVIDENCE = Path(
+    "docs/artifacts/day20-release-narrative-pack/evidence/day20-execution-summary.json"
+)
 MODULE = Path("src/sdetkit/release_narrative.py")
 
 README_EXPECTED = [
@@ -47,7 +53,11 @@ PAGE_EXPECTED = [
     "## Narrative channels",
 ]
 REPORT_EXPECTED = ["Day 20 big upgrade", "strict", "--execute", "validation commands"]
-SUMMARY_EXPECTED = ['"name": "day20-release-narrative"', '"readiness_label":', '"narrative_channels":']
+SUMMARY_EXPECTED = [
+    '"name": "day20-release-narrative"',
+    '"readiness_label":',
+    '"narrative_channels":',
+]
 EVIDENCE_EXPECTED = ['"name": "day20-release-narrative-execution"', '"total_commands": 3']
 
 
@@ -88,10 +98,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
         errors.extend(f"{DAY20_PAGE}: missing '{m}'" for m in _missing(DAY20_PAGE, PAGE_EXPECTED))
-        errors.extend(f"{DAY20_REPORT}: missing '{m}'" for m in _missing(DAY20_REPORT, REPORT_EXPECTED))
-        errors.extend(f"{DAY20_PACK_SUMMARY}: missing '{m}'" for m in _missing(DAY20_PACK_SUMMARY, SUMMARY_EXPECTED))
+        errors.extend(
+            f"{DAY20_REPORT}: missing '{m}'" for m in _missing(DAY20_REPORT, REPORT_EXPECTED)
+        )
+        errors.extend(
+            f"{DAY20_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(DAY20_PACK_SUMMARY, SUMMARY_EXPECTED)
+        )
         if not ns.skip_evidence:
-            errors.extend(f"{DAY20_EVIDENCE}: missing '{m}'" for m in _missing(DAY20_EVIDENCE, EVIDENCE_EXPECTED))
+            errors.extend(
+                f"{DAY20_EVIDENCE}: missing '{m}'"
+                for m in _missing(DAY20_EVIDENCE, EVIDENCE_EXPECTED)
+            )
 
     if errors:
         print("day20-release-narrative-contract check failed:", file=sys.stderr)

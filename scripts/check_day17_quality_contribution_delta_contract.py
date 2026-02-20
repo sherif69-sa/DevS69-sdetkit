@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
@@ -77,8 +77,13 @@ def main() -> int:
         errors.extend(f"{README}: missing '{m}'" for m in _missing(README, README_EXPECTED))
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
-        errors.extend(f"{DAY17_REPORT}: missing '{m}'" for m in _missing(DAY17_REPORT, REPORT_EXPECTED))
-        errors.extend(f"{DAY17_PACK_SUMMARY}: missing '{m}'" for m in _missing(DAY17_PACK_SUMMARY, SUMMARY_EXPECTED))
+        errors.extend(
+            f"{DAY17_REPORT}: missing '{m}'" for m in _missing(DAY17_REPORT, REPORT_EXPECTED)
+        )
+        errors.extend(
+            f"{DAY17_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(DAY17_PACK_SUMMARY, SUMMARY_EXPECTED)
+        )
 
     if errors:
         print("day17-quality-contribution-delta-contract check failed:", file=sys.stderr)

@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 
 _PAGE_PATH = "docs/integrations-trust-signal-upgrade.md"
 
@@ -80,7 +81,11 @@ Day 22 computes a weighted trust score (0-100):
 _BADGE_SIGNALS = [
     {"key": "ci_badge", "marker": "actions/workflows/ci.yml/badge.svg", "weight": 10},
     {"key": "quality_badge", "marker": "actions/workflows/quality.yml/badge.svg", "weight": 10},
-    {"key": "mutation_badge", "marker": "actions/workflows/mutation-tests.yml/badge.svg", "weight": 10},
+    {
+        "key": "mutation_badge",
+        "marker": "actions/workflows/mutation-tests.yml/badge.svg",
+        "weight": 10,
+    },
     {"key": "security_badge", "marker": "actions/workflows/security.yml/badge.svg", "weight": 10},
     {"key": "pages_badge", "marker": "actions/workflows/pages.yml/badge.svg", "weight": 10},
 ]
@@ -120,24 +125,30 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
 
     for signal in _BADGE_SIGNALS:
-        passed = signal["marker"] in readme_text
+        marker = signal.get("marker")
+        marker_str = marker if isinstance(marker, str) else ""
+        passed = bool(marker_str) and marker_str in readme_text
         rows.append(
             {
                 "key": signal["key"],
                 "category": "badges",
                 "weight": signal["weight"],
                 "passed": passed,
-                "evidence": signal["marker"],
+                "evidence": marker_str,
             }
         )
 
     for signal in _POLICY_SIGNALS:
-        exists = (root / signal["path"]).exists()
-        linked = signal["readme_marker"] in readme_text
+        rel_path = signal.get("path")
+        rel_path_str = rel_path if isinstance(rel_path, str) else ""
+        exists = (root / rel_path_str).exists() if rel_path_str else False
+        readme_marker = signal.get("readme_marker")
+        readme_marker_str = readme_marker if isinstance(readme_marker, str) else ""
+        linked = bool(readme_marker_str) and readme_marker_str in readme_text
         passed = exists and linked
         rows.append(
             {
@@ -145,17 +156,21 @@ def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> lis
                 "category": "policy",
                 "weight": signal["weight"],
                 "passed": passed,
-                "evidence": {"path": signal["path"], "exists": exists, "readme_link": linked},
+                "evidence": {"path": rel_path_str, "exists": exists, "readme_link": linked},
             }
         )
 
     for signal in _GOVERNANCE_SIGNALS:
         if "path" in signal:
-            passed = (root / signal["path"]).exists()
-            evidence: object = signal["path"]
+            rel_path = signal.get("path")
+            rel_path_str = rel_path if isinstance(rel_path, str) else ""
+            passed = (root / rel_path_str).exists() if rel_path_str else False
+            evidence: Any = rel_path_str
         else:
-            passed = signal["marker"] in docs_index_text
-            evidence = signal["marker"]
+            marker = signal.get("marker")
+            marker_str = marker if isinstance(marker, str) else ""
+            passed = bool(marker_str) and marker_str in docs_index_text
+            evidence = marker_str
         rows.append(
             {
                 "key": signal["key"],
@@ -169,7 +184,9 @@ def _evaluate_signals(root: Path, readme_text: str, docs_index_text: str) -> lis
     return rows
 
 
-def build_trust_signal_summary(root: Path, *, readme_path: str = "README.md", docs_index_path: str = "docs/index.md") -> dict[str, object]:
+def build_trust_signal_summary(
+    root: Path, *, readme_path: str = "README.md", docs_index_path: str = "docs/index.md"
+) -> dict[str, Any]:
     readme_text = _read(root / readme_path)
     docs_index_text = _read(root / docs_index_path)
     checks = _evaluate_signals(root, readme_text, docs_index_text)
@@ -191,13 +208,21 @@ def build_trust_signal_summary(root: Path, *, readme_path: str = "README.md", do
 
     recommendations: list[str] = []
     if any(item["category"] == "badges" for item in failed):
-        recommendations.append("Restore missing trust badges in README so reliability status is visible at a glance.")
+        recommendations.append(
+            "Restore missing trust badges in README so reliability status is visible at a glance."
+        )
     if any(item["category"] == "policy" for item in failed):
-        recommendations.append("Ensure policy documents exist and are linked from README governance references.")
+        recommendations.append(
+            "Ensure policy documents exist and are linked from README governance references."
+        )
     if any(item["category"] == "governance" for item in failed):
-        recommendations.append("Keep CI/security/pages workflows and docs index trust references present for reviewers.")
+        recommendations.append(
+            "Keep CI/security/pages workflows and docs index trust references present for reviewers."
+        )
     if not recommendations:
-        recommendations.append("Trust signals are complete; keep trust badges, policy links, and workflows current each release.")
+        recommendations.append(
+            "Trust signals are complete; keep trust badges, policy links, and workflows current each release."
+        )
 
     return {
         "name": "day22-trust-signal-upgrade",
@@ -211,14 +236,20 @@ def build_trust_signal_summary(root: Path, *, readme_path: str = "README.md", do
             "critical_failures": critical_failures,
         },
         "checks": checks,
-        "badge_checks": {item["key"]: item["passed"] for item in checks if item["category"] == "badges"},
-        "policy_checks": {item["key"]: item["passed"] for item in checks if item["category"] == "policy"},
-        "governance_checks": {item["key"]: item["passed"] for item in checks if item["category"] == "governance"},
+        "badge_checks": {
+            item["key"]: item["passed"] for item in checks if item["category"] == "badges"
+        },
+        "policy_checks": {
+            item["key"]: item["passed"] for item in checks if item["category"] == "policy"
+        },
+        "governance_checks": {
+            item["key"]: item["passed"] for item in checks if item["category"] == "governance"
+        },
         "recommendations": recommendations,
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
@@ -236,7 +267,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
@@ -262,7 +293,7 @@ def _render_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _emit_pack(root: Path, out_dir: Path, payload: dict[str, object]) -> list[str]:
+def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
     summary = out_dir / "day22-trust-summary.json"
     markdown = out_dir / "day22-trust-scorecard.md"
@@ -287,21 +318,38 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, object]) -> list[st
         encoding="utf-8",
     )
     action_plan.write_text(
-        "\n".join(["# Day 22 trust action plan", "", *[f"- {item}" for item in payload["recommendations"]], ""]),
+        "\n".join(
+            [
+                "# Day 22 trust action plan",
+                "",
+                *[f"- {item}" for item in payload["recommendations"]],
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
     validation.write_text(
         "\n".join(["# Day 22 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
         encoding="utf-8",
     )
-    return [str(path.relative_to(root)) for path in (summary, markdown, checklist, action_plan, validation)]
+    return [
+        str(path.relative_to(root))
+        for path in (summary, markdown, checklist, action_plan, validation)
+    ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
-            proc = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout_sec, check=False)
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout_sec,
+                check=False,
+            )
             rows.append(
                 {
                     "index": idx,
@@ -327,7 +375,9 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, o
     return rows
 
 
-def _write_execution_evidence(root: Path, evidence_dir: str, rows: list[dict[str, object]]) -> list[str]:
+def _write_execution_evidence(
+    root: Path, evidence_dir: str, rows: list[dict[str, Any]]
+) -> list[str]:
     out = root / evidence_dir
     out.mkdir(parents=True, exist_ok=True)
     summary = out / "day22-execution-summary.json"
@@ -369,19 +419,39 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--root", default=".", help="Repository root path.")
     p.add_argument("--readme", default="README.md", help="README path used for trust checks.")
-    p.add_argument("--docs-index", default="docs/index.md", help="Docs index path used for visibility checks.")
-    p.add_argument("--min-trust-score", type=float, default=90.0, help="Minimum trust score for strict pass.")
-    p.add_argument("--write-defaults", action="store_true", help="Create default Day 22 integration page if missing.")
-    p.add_argument("--emit-pack-dir", default="", help="Optional output directory for generated Day 22 files.")
-    p.add_argument("--execute", action="store_true", help="Run Day 22 command chain and emit evidence logs.")
+    p.add_argument(
+        "--docs-index", default="docs/index.md", help="Docs index path used for visibility checks."
+    )
+    p.add_argument(
+        "--min-trust-score", type=float, default=90.0, help="Minimum trust score for strict pass."
+    )
+    p.add_argument(
+        "--write-defaults",
+        action="store_true",
+        help="Create default Day 22 integration page if missing.",
+    )
+    p.add_argument(
+        "--emit-pack-dir", default="", help="Optional output directory for generated Day 22 files."
+    )
+    p.add_argument(
+        "--execute", action="store_true", help="Run Day 22 command chain and emit evidence logs."
+    )
     p.add_argument(
         "--evidence-dir",
         default="docs/artifacts/day22-trust-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
-    p.add_argument("--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute.")
-    p.add_argument("--strict", action="store_true", help="Fail when trust score/docs contract/critical checks are not ready.")
-    p.add_argument("--format", choices=["text", "json", "markdown"], default="text", help="Output format.")
+    p.add_argument(
+        "--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute."
+    )
+    p.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail when trust score/docs contract/critical checks are not ready.",
+    )
+    p.add_argument(
+        "--format", choices=["text", "json", "markdown"], default="text", help="Output format."
+    )
     p.add_argument("--output", default="", help="Optional file to write primary output.")
     return p
 
@@ -396,7 +466,9 @@ def main(argv: list[str] | None = None) -> int:
         page.write_text(_DAY22_DEFAULT_PAGE, encoding="utf-8")
 
     page_text = _read(page)
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 
     payload = build_trust_signal_summary(root, readme_path=ns.readme, docs_index_path=ns.docs_index)

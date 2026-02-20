@@ -76,7 +76,12 @@ top findings:
 
 def test_demo_execute_sla_can_fail(monkeypatch, capsys):
     def fake_run(_command: str, _timeout: float):
-        return 0, "doctor score:\nrecommendations:\nRepo audit:\nResult:\nsecurity scan:\ntop findings:\n", "", 30.0
+        return (
+            0,
+            "doctor score:\nrecommendations:\nRepo audit:\nResult:\nsecurity scan:\ntop findings:\n",
+            "",
+            30.0,
+        )
 
     monkeypatch.setattr(demo, "_run_command", fake_run)
     rc = demo.main(["--execute", "--target-seconds", "60", "--format", "json"])

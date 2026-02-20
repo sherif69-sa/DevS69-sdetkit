@@ -8,8 +8,8 @@ from pathlib import Path
 from urllib.parse import unquote
 
 _INLINE_LINK_PATTERN = re.compile(r'\[[^\]]+\]\(([^)\s]+)(?:\s+"[^"]*")?\)')
-_REFERENCE_DEF_PATTERN = re.compile(r'^\s*\[([^\]]+)\]:\s*(\S+)\s*$', re.MULTILINE)
-_REFERENCE_USE_PATTERN = re.compile(r'\[(?P<text>[^\]]+)\]\[(?P<label>[^\]]*)\]')
+_REFERENCE_DEF_PATTERN = re.compile(r"^\s*\[([^\]]+)\]:\s*(\S+)\s*$", re.MULTILINE)
+_REFERENCE_USE_PATTERN = re.compile(r"\[(?P<text>[^\]]+)\]\[(?P<label>[^\]]*)\]")
 _HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 _FENCE_PATTERN = re.compile(r"^```", re.MULTILINE)
 
@@ -102,7 +102,7 @@ def run_docs_qa(root: Path) -> Report:
         content = path.read_text(encoding="utf-8")
         refs = _collect_reference_targets(content)
 
-        def check_target(target: str, line_no: int) -> None:
+        def check_target(target: str, line_no: int, path: Path = path) -> None:
             nonlocal links_checked
             target = target.strip()
             if not target or target.startswith(("http://", "https://", "mailto:")):
@@ -111,13 +111,23 @@ def run_docs_qa(root: Path) -> Report:
             if target.startswith("#"):
                 frag = _normalize_fragment(target[1:])
                 if frag and frag not in anchors_cache[path]:
-                    issues.append(Issue(str(path.relative_to(root)), line_no, f"missing local anchor: {target}"))
+                    issues.append(
+                        Issue(
+                            str(path.relative_to(root)), line_no, f"missing local anchor: {target}"
+                        )
+                    )
                 return
 
             target_path_str, _, frag = target.partition("#")
             resolved = (path.parent / target_path_str).resolve()
             if not resolved.exists():
-                issues.append(Issue(str(path.relative_to(root)), line_no, f"missing link target: {target_path_str}"))
+                issues.append(
+                    Issue(
+                        str(path.relative_to(root)),
+                        line_no,
+                        f"missing link target: {target_path_str}",
+                    )
+                )
                 return
             if resolved.suffix.lower() == ".md" and frag:
                 anchors = anchors_cache.get(resolved)
@@ -175,7 +185,9 @@ def _render_text(report: Report) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="sdetkit docs-qa", description="Validate README/docs markdown links and anchors.")
+    parser = argparse.ArgumentParser(
+        prog="sdetkit docs-qa", description="Validate README/docs markdown links and anchors."
+    )
     parser.add_argument("--root", default=".", help="Repository root path.")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output", default=None, help="Optional output path for generated report.")

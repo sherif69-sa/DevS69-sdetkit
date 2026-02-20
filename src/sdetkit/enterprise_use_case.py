@@ -5,6 +5,7 @@ import json
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 _PAGE_PATH = "docs/use-cases-enterprise-regulated.md"
 
@@ -124,7 +125,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     parser.add_argument("--root", default=".", help="Repository root where docs live.")
     parser.add_argument("--output", default="", help="Optional output file path.")
-    parser.add_argument("--strict", action="store_true", help="Return non-zero when required use-case content is missing.")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero when required use-case content is missing.",
+    )
     parser.add_argument(
         "--write-defaults",
         action="store_true",
@@ -161,7 +166,12 @@ def _read(path: Path) -> str:
 
 
 def _missing_checks(page_text: str) -> list[str]:
-    checks = [_SECTION_HEADER, *_REQUIRED_SECTIONS, *_REQUIRED_COMMANDS, "name: enterprise-compliance-lane"]
+    checks = [
+        _SECTION_HEADER,
+        *_REQUIRED_SECTIONS,
+        *_REQUIRED_COMMANDS,
+        "name: enterprise-compliance-lane",
+    ]
     return [item for item in checks if item not in page_text]
 
 
@@ -224,11 +234,18 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
 def _execute_commands(
     commands: list[str],
     timeout_sec: int,
-) -> list[dict[str, object]]:
-    results: list[dict[str, object]] = []
+) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
-            proc = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout_sec, check=False)
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout_sec,
+                check=False,
+            )
             results.append(
                 {
                     "index": idx,
@@ -254,7 +271,7 @@ def _execute_commands(
     return results
 
 
-def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, object]]) -> list[str]:
+def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, Any]]) -> list[str]:
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
@@ -291,13 +308,20 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
     return [str(path.relative_to(base)) for path in emitted]
 
 
-def build_enterprise_use_case_status(root: str = ".") -> dict[str, object]:
+def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
     base = Path(root)
     page = base / _PAGE_PATH
     page_text = _read(page)
     missing = _missing_checks(page_text)
 
-    total_checks = len([_SECTION_HEADER, *_REQUIRED_SECTIONS, *_REQUIRED_COMMANDS, "name: enterprise-compliance-lane"])
+    total_checks = len(
+        [
+            _SECTION_HEADER,
+            *_REQUIRED_SECTIONS,
+            *_REQUIRED_COMMANDS,
+            "name: enterprise-compliance-lane",
+        ]
+    )
     passed_checks = total_checks - len(missing)
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
@@ -321,7 +345,7 @@ def build_enterprise_use_case_status(root: str = ".") -> dict[str, object]:
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 13 enterprise use-case page",
         f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
@@ -358,7 +382,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Day 13 enterprise use-case page",
         "",
@@ -376,7 +400,9 @@ def _render_markdown(payload: dict[str, object]) -> str:
     if payload.get("execution"):
         exec_data = payload["execution"]
         lines.extend(["", "## Execution summary", ""])
-        lines.append(f"- Passed commands: **{exec_data['passed_commands']}**/{exec_data['total_commands']}")
+        lines.append(
+            f"- Passed commands: **{exec_data['passed_commands']}**/{exec_data['total_commands']}"
+        )
         lines.append(f"- Failed commands: **{exec_data['failed_commands']}**")
     if payload.get("evidence_files"):
         lines.extend(["", "## Evidence files", ""])
@@ -425,7 +451,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         payload["execution"] = execution
         payload["execution_results"] = results
         if args.evidence_dir:
-            payload["evidence_files"] = _write_execution_evidence(Path(args.root), args.evidence_dir, results)
+            payload["evidence_files"] = _write_execution_evidence(
+                Path(args.root), args.evidence_dir, results
+            )
 
     if args.format == "json":
         rendered = json.dumps(payload, indent=2) + "\n"

@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 
 _PAGE_PATH = "docs/integrations-reliability-evidence-pack.md"
 
@@ -73,20 +74,20 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_json(path: str) -> dict[str, object]:
+def _load_json(path: str) -> dict[str, Any]:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return payload
 
 
-def _require_keys(payload: dict[str, object], keys: tuple[str, ...], source: str) -> None:
+def _require_keys(payload: dict[str, Any], keys: tuple[str, ...], source: str) -> None:
     for key in keys:
         if key not in payload:
             raise ValueError(f"{source} missing required key: {key}")
 
 
-def _normalize_execution_summary(summary: dict[str, object], label: str) -> dict[str, float | bool]:
+def _normalize_execution_summary(summary: dict[str, Any], label: str) -> dict[str, float | bool]:
     if {"score", "strict", "checks_passed", "checks_total"}.issubset(summary):
         checks_passed = float(summary["checks_passed"])
         checks_total = float(summary["checks_total"])
@@ -101,14 +102,19 @@ def _normalize_execution_summary(summary: dict[str, object], label: str) -> dict
         raise ValueError(
             f"{label} summary must include score/strict/checks_* keys or passed_commands/total_commands/failed_commands keys"
         )
-    return {"score": score, "strict": strict, "checks_passed": checks_passed, "checks_total": checks_total}
+    return {
+        "score": score,
+        "strict": strict,
+        "checks_passed": checks_passed,
+        "checks_total": checks_total,
+    }
 
 
 def build_reliability_pack(
-    day15_summary: dict[str, object],
-    day16_summary: dict[str, object],
-    day17_summary: dict[str, object],
-) -> dict[str, object]:
+    day15_summary: dict[str, Any],
+    day16_summary: dict[str, Any],
+    day17_summary: dict[str, Any],
+) -> dict[str, Any]:
     day15 = _normalize_execution_summary(day15_summary, "day15")
     day16 = _normalize_execution_summary(day16_summary, "day16")
     _require_keys(day17_summary, _REQUIRED_DAY17_KEYS, "day17 summary")
@@ -128,18 +134,28 @@ def build_reliability_pack(
         2,
     )
 
-    strict_all_green = bool(day15["strict"]) and bool(day16["strict"]) and not bool(
-        day17_summary.get("strict_failures")
+    strict_all_green = (
+        bool(day15["strict"])
+        and bool(day16["strict"])
+        and not bool(day17_summary.get("strict_failures"))
     )
     recommendations: list[str] = []
     if not strict_all_green:
-        recommendations.append("Resolve strict-gate failures before publishing the weekly reliability update.")
+        recommendations.append(
+            "Resolve strict-gate failures before publishing the weekly reliability update."
+        )
     if day17_velocity < 70:
-        recommendations.append("Raise contribution velocity with targeted docs and release distribution this week.")
+        recommendations.append(
+            "Raise contribution velocity with targeted docs and release distribution this week."
+        )
     if day17_stability < 95:
-        recommendations.append("Recover quality stability by re-running quality deltas and closing artifact gaps.")
+        recommendations.append(
+            "Recover quality stability by re-running quality deltas and closing artifact gaps."
+        )
     if reliability_score >= 95 and strict_all_green:
-        recommendations.append("Reliability posture is strong; keep current CI and closeout operating cadence.")
+        recommendations.append(
+            "Reliability posture is strong; keep current CI and closeout operating cadence."
+        )
 
     return {
         "name": "day18-reliability-evidence-pack",
@@ -169,7 +185,7 @@ def build_reliability_pack(
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 18 reliability evidence pack",
         "",
@@ -183,7 +199,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(
         [
             "# Day 18 reliability evidence pack",
@@ -199,7 +215,7 @@ def _render_markdown(payload: dict[str, object]) -> str:
     )
 
 
-def _emit_pack(path: str, payload: dict[str, object], base: Path) -> list[str]:
+def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
     out_dir = base / path
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -240,11 +256,18 @@ def _emit_pack(path: str, payload: dict[str, object], base: Path) -> list[str]:
     ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, object]]:
-    results: list[dict[str, object]] = []
+def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
-            proc = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout_sec, check=False)
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout_sec,
+                check=False,
+            )
             results.append(
                 {
                     "index": idx,
@@ -270,7 +293,7 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, o
     return results
 
 
-def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, object]]) -> list[str]:
+def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, Any]]) -> list[str]:
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
@@ -319,16 +342,34 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="sdetkit reliability-evidence-pack",
         description="Build Day 18 reliability evidence by combining Day 15/16/17 outputs.",
     )
-    parser.add_argument("--root", default=".", help="Repository root where docs and artifacts live.")
-    parser.add_argument("--day15-summary", default="docs/artifacts/day15-github-pack/evidence/day15-execution-summary.json")
-    parser.add_argument("--day16-summary", default="docs/artifacts/day16-gitlab-pack/evidence/day16-execution-summary.json")
-    parser.add_argument("--day17-summary", default="docs/artifacts/day17-delta-pack/day17-delta-summary.json")
+    parser.add_argument(
+        "--root", default=".", help="Repository root where docs and artifacts live."
+    )
+    parser.add_argument(
+        "--day15-summary",
+        default="docs/artifacts/day15-github-pack/evidence/day15-execution-summary.json",
+    )
+    parser.add_argument(
+        "--day16-summary",
+        default="docs/artifacts/day16-gitlab-pack/evidence/day16-execution-summary.json",
+    )
+    parser.add_argument(
+        "--day17-summary", default="docs/artifacts/day17-delta-pack/day17-delta-summary.json"
+    )
     parser.add_argument("--min-reliability-score", type=float, default=90.0)
     parser.add_argument("--strict", action="store_true")
-    parser.add_argument("--write-defaults", action="store_true", help="Write default Day 18 reliability docs page.")
+    parser.add_argument(
+        "--write-defaults", action="store_true", help="Write default Day 18 reliability docs page."
+    )
     parser.add_argument("--emit-pack-dir", default="")
-    parser.add_argument("--execute", action="store_true", help="Execute Day 18 validation commands and capture evidence.")
-    parser.add_argument("--evidence-dir", default="", help="Output directory for Day 18 command execution logs.")
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Execute Day 18 validation commands and capture evidence.",
+    )
+    parser.add_argument(
+        "--evidence-dir", default="", help="Output directory for Day 18 command execution logs."
+    )
     parser.add_argument("--timeout-sec", type=int, default=120)
     parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     parser.add_argument("--output", default="")
@@ -359,7 +400,14 @@ def main(argv: list[str] | None = None) -> int:
 
     payload["page"] = _PAGE_PATH
     payload["missing"] = missing
-    payload["score"] = round(((len(_REQUIRED_SECTIONS) + len(_REQUIRED_COMMANDS) + 1 - len(missing)) / (len(_REQUIRED_SECTIONS) + len(_REQUIRED_COMMANDS) + 1)) * 100, 2)
+    payload["score"] = round(
+        (
+            (len(_REQUIRED_SECTIONS) + len(_REQUIRED_COMMANDS) + 1 - len(missing))
+            / (len(_REQUIRED_SECTIONS) + len(_REQUIRED_COMMANDS) + 1)
+        )
+        * 100,
+        2,
+    )
     payload["touched_files"] = touched
 
     strict_failures: list[str] = []
@@ -383,7 +431,9 @@ def main(argv: list[str] | None = None) -> int:
             "python -m pytest -q tests/test_cli_help_lists_subcommands.py",
         ]
         results = _execute_commands(commands, timeout_sec=ns.timeout_sec)
-        evidence_dir = ns.evidence_dir or (ns.emit_pack_dir + "/evidence" if ns.emit_pack_dir else "")
+        evidence_dir = ns.evidence_dir or (
+            ns.emit_pack_dir + "/evidence" if ns.emit_pack_dir else ""
+        )
         payload["executed_commands"] = results
         if evidence_dir:
             emitted.extend(_write_execution_evidence(base, evidence_dir, results))

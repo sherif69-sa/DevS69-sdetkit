@@ -22,7 +22,9 @@ def test_startup_use_case_json_and_strict_success(capsys):
 
 def test_startup_use_case_strict_fails_when_content_missing(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
-    (tmp_path / "docs/use-cases-startup-small-team.md").write_text("# Placeholder\n", encoding="utf-8")
+    (tmp_path / "docs/use-cases-startup-small-team.md").write_text(
+        "# Placeholder\n", encoding="utf-8"
+    )
     rc = startup_use_case.main(["--root", str(tmp_path), "--strict"])
     assert rc == 1
     out = capsys.readouterr().out
@@ -30,7 +32,9 @@ def test_startup_use_case_strict_fails_when_content_missing(tmp_path, capsys):
 
 
 def test_startup_use_case_write_defaults_recovers_missing_file(tmp_path, capsys):
-    rc = startup_use_case.main(["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"])
+    rc = startup_use_case.main(
+        ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
+    )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["passed_checks"] == data["total_checks"]
@@ -40,7 +44,9 @@ def test_startup_use_case_write_defaults_recovers_missing_file(tmp_path, capsys)
 
 def test_startup_use_case_emit_pack(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
-    (tmp_path / "docs/use-cases-startup-small-team.md").write_text("# Startup + small-team workflow\n", encoding="utf-8")
+    (tmp_path / "docs/use-cases-startup-small-team.md").write_text(
+        "# Startup + small-team workflow\n", encoding="utf-8"
+    )
     rc = startup_use_case.main(
         [
             "--root",

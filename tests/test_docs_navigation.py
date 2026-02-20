@@ -33,10 +33,12 @@ def test_docs_navigation_strict_fails_when_content_missing(tmp_path, capsys):
 def test_docs_navigation_write_defaults_recovers_missing_quick_jump(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/index.md").write_text(
-        "## Day 11 ultra upgrades (docs navigation tune-up)\n\n<div class=\"quick-jump\" markdown>\nold\n</div>\n",
+        '## Day 11 ultra upgrades (docs navigation tune-up)\n\n<div class="quick-jump" markdown>\nold\n</div>\n',
         encoding="utf-8",
     )
-    rc = docs_navigation.main(["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"])
+    rc = docs_navigation.main(
+        ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
+    )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["touched_files"] == ["docs/index.md"]
@@ -47,7 +49,9 @@ def test_docs_navigation_write_defaults_recovers_missing_quick_jump(tmp_path, ca
 
 
 def test_docs_navigation_write_defaults_bootstraps_missing_docs_index(tmp_path, capsys):
-    rc = docs_navigation.main(["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"])
+    rc = docs_navigation.main(
+        ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
+    )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["touched_files"] == ["docs/index.md"]

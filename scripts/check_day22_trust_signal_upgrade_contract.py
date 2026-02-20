@@ -48,7 +48,12 @@ PAGE_EXPECTED = [
     "## Visibility checklist",
 ]
 REPORT_EXPECTED = ["Day 22 big upgrade", "strict", "--execute", "validation commands"]
-SUMMARY_EXPECTED = ['"name": "day22-trust-signal-upgrade"', '"trust_score":', '"governance_checks":', '"critical_failures":']
+SUMMARY_EXPECTED = [
+    '"name": "day22-trust-signal-upgrade"',
+    '"trust_score":',
+    '"governance_checks":',
+    '"critical_failures":',
+]
 EVIDENCE_EXPECTED = ['"name": "day22-trust-signal-upgrade-execution"', '"total_commands": 3']
 
 
@@ -89,10 +94,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
         errors.extend(f"{DAY22_PAGE}: missing '{m}'" for m in _missing(DAY22_PAGE, PAGE_EXPECTED))
-        errors.extend(f"{DAY22_REPORT}: missing '{m}'" for m in _missing(DAY22_REPORT, REPORT_EXPECTED))
-        errors.extend(f"{DAY22_PACK_SUMMARY}: missing '{m}'" for m in _missing(DAY22_PACK_SUMMARY, SUMMARY_EXPECTED))
+        errors.extend(
+            f"{DAY22_REPORT}: missing '{m}'" for m in _missing(DAY22_REPORT, REPORT_EXPECTED)
+        )
+        errors.extend(
+            f"{DAY22_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(DAY22_PACK_SUMMARY, SUMMARY_EXPECTED)
+        )
         if not ns.skip_evidence:
-            errors.extend(f"{DAY22_EVIDENCE}: missing '{m}'" for m in _missing(DAY22_EVIDENCE, EVIDENCE_EXPECTED))
+            errors.extend(
+                f"{DAY22_EVIDENCE}: missing '{m}'"
+                for m in _missing(DAY22_EVIDENCE, EVIDENCE_EXPECTED)
+            )
 
     if errors:
         print("day22-trust-signal-upgrade-contract check failed:", file=sys.stderr)

@@ -30,7 +30,9 @@ def test_first_contribution_strict_fails_when_content_missing(tmp_path, capsys):
 
 
 def test_first_contribution_write_defaults_recovers_missing_file(tmp_path, capsys):
-    rc = first_contribution.main(["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"])
+    rc = first_contribution.main(
+        ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
+    )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["passed_checks"] == data["total_checks"]

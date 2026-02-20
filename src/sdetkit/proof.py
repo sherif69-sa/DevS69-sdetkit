@@ -7,6 +7,7 @@ import subprocess
 import time
 from collections.abc import Sequence
 from pathlib import Path
+from typing import cast
 
 _DAY3_PROOF_FLOW = [
     {
@@ -62,10 +63,16 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _run_command(command: str, timeout_seconds: float) -> tuple[int, str, str, float]:
+def _run_command(
+    command: str | Sequence[str], timeout_seconds: float
+) -> tuple[int, str, str, float]:
     start = time.perf_counter()
     proc = subprocess.run(
-        shlex.split(command), capture_output=True, text=True, check=False, timeout=timeout_seconds
+        shlex.split(command) if isinstance(command, str) else list(command),
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=timeout_seconds,
     )
     duration = time.perf_counter() - start
     return proc.returncode, proc.stdout, proc.stderr, duration
@@ -119,7 +126,7 @@ def _as_text(execution: list[dict[str, object]]) -> str:
             lines.append(
                 f"- {result['artifact']}: {result['status']} (exit={result['exit_code']}, duration={result['duration_seconds']}s)"
             )
-            missing = result.get("missing_snippets") or []
+            missing = cast(list[object], result.get("missing_snippets") or [])
             if missing:
                 lines.append(f"  missing snippets: {', '.join(str(x) for x in missing)}")
             err = str(result.get("error") or "")
@@ -155,7 +162,10 @@ def _as_markdown(execution: list[dict[str, object]]) -> str:
             ]
         )
         for result in execution:
-            missing = ", ".join(str(x) for x in (result.get("missing_snippets") or [])) or "-"
+            missing = (
+                ", ".join(str(x) for x in cast(list[object], result.get("missing_snippets") or []))
+                or "-"
+            )
             error = str(result.get("error") or "-").replace("|", "\\|")
             lines.append(
                 f"| `{result['artifact']}` | {result['status']} | {result['exit_code']} | {result['duration_seconds']} | {missing} | {error} |"

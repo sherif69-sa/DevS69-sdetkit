@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+from typing import Any, cast
 
 _PAGE_PATH = "docs/integrations-github-actions-quickstart.md"
 
@@ -109,19 +110,19 @@ A production-ready integration recipe to run `sdetkit` quality checks in GitHub 
 ## Minimal workflow
 
 ```yaml
-{_workflow_content('minimal').rstrip()}
+{_workflow_content("minimal").rstrip()}
 ```
 
 ## Strict workflow variant
 
 ```yaml
-{_workflow_content('strict').rstrip()}
+{_workflow_content("strict").rstrip()}
 ```
 
 ## Nightly reliability variant
 
 ```yaml
-{_workflow_content('nightly').rstrip()}
+{_workflow_content("nightly").rstrip()}
 ```
 
 ## Fast verification commands
@@ -166,13 +167,41 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     parser.add_argument("--root", default=".", help="Repository root where docs live.")
     parser.add_argument("--output", default="", help="Optional output file path.")
-    parser.add_argument("--strict", action="store_true", help="Return non-zero when required quickstart content is missing.")
-    parser.add_argument("--write-defaults", action="store_true", help="Write or repair the Day 15 quickstart page before validation.")
-    parser.add_argument("--emit-pack-dir", default="", help="Optional path to emit a Day 15 quickstart pack.")
-    parser.add_argument("--variant", choices=["minimal", "strict", "nightly"], default="minimal", help="Workflow variant for markdown/text snippets.")
-    parser.add_argument("--execute", action="store_true", help="Run Day 15 command sequence and capture pass/fail details.")
-    parser.add_argument("--evidence-dir", default="", help="Optional output directory for execution summary JSON and command logs.")
-    parser.add_argument("--timeout-sec", type=int, default=300, help="Per-command timeout in seconds for --execute mode.")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero when required quickstart content is missing.",
+    )
+    parser.add_argument(
+        "--write-defaults",
+        action="store_true",
+        help="Write or repair the Day 15 quickstart page before validation.",
+    )
+    parser.add_argument(
+        "--emit-pack-dir", default="", help="Optional path to emit a Day 15 quickstart pack."
+    )
+    parser.add_argument(
+        "--variant",
+        choices=["minimal", "strict", "nightly"],
+        default="minimal",
+        help="Workflow variant for markdown/text snippets.",
+    )
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Run Day 15 command sequence and capture pass/fail details.",
+    )
+    parser.add_argument(
+        "--evidence-dir",
+        default="",
+        help="Optional output directory for execution summary JSON and command logs.",
+    )
+    parser.add_argument(
+        "--timeout-sec",
+        type=int,
+        default=300,
+        help="Per-command timeout in seconds for --execute mode.",
+    )
     return parser
 
 
@@ -181,7 +210,14 @@ def _read(path: Path) -> str:
 
 
 def _missing_checks(page_text: str) -> list[str]:
-    checks = [_SECTION_HEADER, *_REQUIRED_SECTIONS, *_REQUIRED_COMMANDS, "name: sdetkit-github-quickstart", "name: sdetkit-github-strict", "name: sdetkit-github-nightly"]
+    checks = [
+        _SECTION_HEADER,
+        *_REQUIRED_SECTIONS,
+        *_REQUIRED_COMMANDS,
+        "name: sdetkit-github-quickstart",
+        "name: sdetkit-github-strict",
+        "name: sdetkit-github-nightly",
+    ]
     return [item for item in checks if item not in page_text]
 
 
@@ -245,21 +281,36 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
 
     validation = root / "day15-validation-commands.md"
     validation.write_text(
-        "\n".join(["# Day 15 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]) + "\n",
+        "\n".join(["# Day 15 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""])
+        + "\n",
         encoding="utf-8",
     )
 
     return [
         str(path.relative_to(base))
-        for path in (checklist, minimal_workflow, strict_workflow, nightly_workflow, distribution_plan, validation)
+        for path in (
+            checklist,
+            minimal_workflow,
+            strict_workflow,
+            nightly_workflow,
+            distribution_plan,
+            validation,
+        )
     ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, object]]:
-    results: list[dict[str, object]] = []
+def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+    results: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
-            proc = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=timeout_sec, check=False)
+            proc = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                timeout=timeout_sec,
+                check=False,
+            )
             results.append(
                 {
                     "index": idx,
@@ -285,7 +336,7 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, o
     return results
 
 
-def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, object]]) -> list[str]:
+def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, Any]]) -> list[str]:
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
@@ -331,11 +382,20 @@ def main(argv: list[str] | None = None) -> int:
     text = _read(page)
 
     missing = _missing_checks(text)
-    total = len([_SECTION_HEADER, *_REQUIRED_SECTIONS, *_REQUIRED_COMMANDS, "name: sdetkit-github-quickstart", "name: sdetkit-github-strict", "name: sdetkit-github-nightly"])
+    total = len(
+        [
+            _SECTION_HEADER,
+            *_REQUIRED_SECTIONS,
+            *_REQUIRED_COMMANDS,
+            "name: sdetkit-github-quickstart",
+            "name: sdetkit-github-strict",
+            "name: sdetkit-github-nightly",
+        ]
+    )
     passed = total - len(missing)
     score = round((passed / total) * 100, 1)
 
-    payload: dict[str, object] = {
+    payload: dict[str, Any] = {
         "name": "day15-github-actions-quickstart",
         "page": _PAGE_PATH,
         "variant": args.variant,
@@ -366,7 +426,7 @@ def main(argv: list[str] | None = None) -> int:
             "results": results,
         }
         payload["execution"] = execution
-        execution_failed = execution["failed_commands"] > 0
+        execution_failed = int(cast(Any, execution["failed_commands"])) > 0
 
         evidence_dir = args.evidence_dir or "docs/artifacts/day15-github-pack/evidence"
         payload["evidence_files"] = _write_execution_evidence(base, evidence_dir, results)

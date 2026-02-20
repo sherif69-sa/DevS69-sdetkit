@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 
 _PAGE_PATH = "docs/integrations-release-readiness-board.md"
 
@@ -74,20 +75,20 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_json(path: Path) -> dict[str, object]:
+def _load_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return payload
 
 
-def _require_keys(payload: dict[str, object], keys: tuple[str, ...], label: str) -> None:
+def _require_keys(payload: dict[str, Any], keys: tuple[str, ...], label: str) -> None:
     for key in keys:
         if key not in payload:
             raise ValueError(f"{label} missing required key: {key}")
 
 
-def _normalize_day14_summary(day14_summary: dict[str, object]) -> tuple[float, str]:
+def _normalize_day14_summary(day14_summary: dict[str, Any]) -> tuple[float, str]:
     summary = day14_summary.get("summary")
     if isinstance(summary, dict):
         return float(summary.get("score", 0.0)), str(summary.get("status", "unknown"))
@@ -97,13 +98,15 @@ def _normalize_day14_summary(day14_summary: dict[str, object]) -> tuple[float, s
         score = float(kpis.get("completion_rate_percent", 0.0))
         return score, "pass" if score >= 90 else "warn"
 
-    raise ValueError("day14 summary must include either summary.score or kpis.completion_rate_percent")
+    raise ValueError(
+        "day14 summary must include either summary.score or kpis.completion_rate_percent"
+    )
 
 
 def build_release_board(
-    day18_summary: dict[str, object],
-    day14_summary: dict[str, object],
-) -> dict[str, object]:
+    day18_summary: dict[str, Any],
+    day14_summary: dict[str, Any],
+) -> dict[str, Any]:
     _require_keys(day18_summary, _REQUIRED_DAY18_KEYS, "day18 summary")
     if not isinstance(day18_summary["summary"], dict):
         raise ValueError("day18 summary.summary must be an object")
@@ -153,7 +156,7 @@ def build_release_board(
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 19 release readiness board",
         "",
@@ -167,7 +170,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(
         [
             "# Day 19 release readiness board",
@@ -183,7 +186,7 @@ def _render_markdown(payload: dict[str, object]) -> str:
     )
 
 
-def _emit_pack(path: str, payload: dict[str, object], root: Path) -> list[str]:
+def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
     out_dir = root / path
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -238,8 +241,8 @@ def _emit_pack(path: str, payload: dict[str, object], root: Path) -> list[str]:
     ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
             proc = subprocess.run(
@@ -278,7 +281,7 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, o
 def _write_execution_evidence(
     root: Path,
     evidence_dir: str,
-    rows: list[dict[str, object]],
+    rows: list[dict[str, Any]],
 ) -> list[str]:
     out = root / evidence_dir
     out.mkdir(parents=True, exist_ok=True)
@@ -355,9 +358,7 @@ def main(argv: list[str] | None = None) -> int:
 
     page_text = _read(root / _PAGE_PATH)
     missing_sections = [
-        section
-        for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS]
-        if section not in page_text
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
     ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 

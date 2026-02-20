@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 
 _PAGE_PATH = "docs/integrations-release-narrative.md"
 
@@ -77,7 +78,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _read_json(path: Path) -> dict[str, object]:
+def _read_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
@@ -126,7 +127,9 @@ def _extract_changelog_bullets(path: Path, limit: int = 6) -> list[str]:
     return ["CHANGELOG currently has no bullet highlights; add outcome-focused release notes."]
 
 
-def build_release_narrative(day19_summary: Path, changelog: Path, *, day19_label: str = "", changelog_label: str = "") -> dict[str, object]:
+def build_release_narrative(
+    day19_summary: Path, changelog: Path, *, day19_label: str = "", changelog_label: str = ""
+) -> dict[str, Any]:
     release_score, gate_status, recommendations = _load_day19_summary(day19_summary)
     highlights = _extract_changelog_bullets(changelog)
 
@@ -137,7 +140,11 @@ def build_release_narrative(day19_summary: Path, changelog: Path, *, day19_label
         else "This release needs focused follow-up before broad promotion."
     )
 
-    risks = recommendations if recommendations else ["No explicit Day 19 recommendations were provided."]
+    risks = (
+        recommendations
+        if recommendations
+        else ["No explicit Day 19 recommendations were provided."]
+    )
 
     channels = {
         "release_notes": f"{headline} Key highlights: {highlights[0]}",
@@ -169,7 +176,7 @@ def build_release_narrative(day19_summary: Path, changelog: Path, *, day19_label
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 20 release narrative",
         "",
@@ -191,7 +198,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Day 20 release narrative",
         "",
@@ -210,14 +217,19 @@ def _render_markdown(payload: dict[str, object]) -> str:
     lines.extend(["", "## Risks and follow-ups", ""])
     lines.extend(f"- {item}" for item in payload["risks"])
     lines.extend(["", "## Audience blurbs", ""])
-    lines.extend(f"- **{k.replace('_', ' ').title()}:** {v}" for k, v in payload["audience_blurbs"].items())
+    lines.extend(
+        f"- **{k.replace('_', ' ').title()}:** {v}" for k, v in payload["audience_blurbs"].items()
+    )
     lines.extend(["", "## Narrative channels", ""])
-    lines.extend(f"- **{k.replace('_', ' ').title()}:** {v}" for k, v in payload["narrative_channels"].items())
+    lines.extend(
+        f"- **{k.replace('_', ' ').title()}:** {v}"
+        for k, v in payload["narrative_channels"].items()
+    )
     lines.extend(["", f"**Call to action:** {payload['call_to_action']}"])
     return "\n".join(lines) + "\n"
 
 
-def _emit_pack(root: Path, out_dir: Path, payload: dict[str, object]) -> list[str]:
+def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
     summary = out_dir / "day20-release-narrative-summary.json"
     markdown = out_dir / "day20-release-narrative.md"
@@ -232,7 +244,10 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, object]) -> list[st
             [
                 "# Day 20 audience blurbs",
                 "",
-                *[f"- **{k.replace('_', ' ').title()}:** {v}" for k, v in payload["audience_blurbs"].items()],
+                *[
+                    f"- **{k.replace('_', ' ').title()}:** {v}"
+                    for k, v in payload["audience_blurbs"].items()
+                ],
             ]
         )
         + "\n",
@@ -243,7 +258,10 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, object]) -> list[st
             [
                 "# Day 20 narrative channels",
                 "",
-                *[f"- **{k.replace('_', ' ').title()}:** {v}" for k, v in payload["narrative_channels"].items()],
+                *[
+                    f"- **{k.replace('_', ' ').title()}:** {v}"
+                    for k, v in payload["narrative_channels"].items()
+                ],
             ]
         )
         + "\n",
@@ -254,11 +272,13 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, object]) -> list[st
         encoding="utf-8",
     )
 
-    return [str(path.relative_to(root)) for path in (summary, markdown, blurbs, channels, validation)]
+    return [
+        str(path.relative_to(root)) for path in (summary, markdown, blurbs, channels, validation)
+    ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
             proc = subprocess.run(
@@ -294,7 +314,9 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, o
     return rows
 
 
-def _write_execution_evidence(root: Path, evidence_dir: str, rows: list[dict[str, object]]) -> list[str]:
+def _write_execution_evidence(
+    root: Path, evidence_dir: str, rows: list[dict[str, Any]]
+) -> list[str]:
     out = root / evidence_dir
     out.mkdir(parents=True, exist_ok=True)
     summary = out / "day20-execution-summary.json"
@@ -342,18 +364,39 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Path to Day 19 release summary JSON.",
     )
     p.add_argument("--changelog", default="CHANGELOG.md", help="Path to changelog markdown file.")
-    p.add_argument("--min-release-score", type=float, default=90.0, help="Minimum release score for strict pass.")
-    p.add_argument("--write-defaults", action="store_true", help="Create default Day 20 integration page if missing.")
-    p.add_argument("--emit-pack-dir", default="", help="Optional output directory for generated Day 20 files.")
-    p.add_argument("--execute", action="store_true", help="Run Day 20 command chain and emit evidence logs.")
+    p.add_argument(
+        "--min-release-score",
+        type=float,
+        default=90.0,
+        help="Minimum release score for strict pass.",
+    )
+    p.add_argument(
+        "--write-defaults",
+        action="store_true",
+        help="Create default Day 20 integration page if missing.",
+    )
+    p.add_argument(
+        "--emit-pack-dir", default="", help="Optional output directory for generated Day 20 files."
+    )
+    p.add_argument(
+        "--execute", action="store_true", help="Run Day 20 command chain and emit evidence logs."
+    )
     p.add_argument(
         "--evidence-dir",
         default="docs/artifacts/day20-release-narrative-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
-    p.add_argument("--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute.")
-    p.add_argument("--strict", action="store_true", help="Fail when release posture or docs contract checks are not ready.")
-    p.add_argument("--format", choices=["text", "json", "markdown"], default="text", help="Output format.")
+    p.add_argument(
+        "--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute."
+    )
+    p.add_argument(
+        "--strict",
+        action="store_true",
+        help="Fail when release posture or docs contract checks are not ready.",
+    )
+    p.add_argument(
+        "--format", choices=["text", "json", "markdown"], default="text", help="Output format."
+    )
     p.add_argument("--output", default="", help="Optional file to write primary output.")
     return p
 
@@ -368,7 +411,9 @@ def main(argv: list[str] | None = None) -> int:
         page.write_text(_DAY20_DEFAULT_PAGE, encoding="utf-8")
 
     page_text = _read(page)
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 
     payload = build_release_narrative(

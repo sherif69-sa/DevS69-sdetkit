@@ -30,8 +30,8 @@ from . import (
     repo,
     report,
     startup_use_case,
-    trust_signal_upgrade,
     triage_templates,
+    trust_signal_upgrade,
     weekly_review,
 )
 from .agent.cli import main as agent_main

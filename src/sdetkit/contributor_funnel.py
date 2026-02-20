@@ -5,6 +5,7 @@ import json
 from collections import Counter
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 _DAY8_ISSUES = [
     {
@@ -120,13 +121,13 @@ _DAY8_ISSUES = [
 ]
 
 
-def build_backlog(area: str = "all") -> list[dict[str, object]]:
+def build_backlog(area: str = "all") -> list[dict[str, Any]]:
     if area == "all":
         return list(_DAY8_ISSUES)
     return [item for item in _DAY8_ISSUES if item["area"] == area]
 
 
-def validate_backlog(backlog: list[dict[str, object]]) -> list[str]:
+def validate_backlog(backlog: list[dict[str, Any]]) -> list[str]:
     errors: list[str] = []
     if len(backlog) != 10:
         errors.append(f"expected 10 issues, got {len(backlog)}")
@@ -164,7 +165,7 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _render_text(backlog: list[dict[str, object]]) -> str:
+def _render_text(backlog: list[dict[str, Any]]) -> str:
     lines = ["Day 8 contributor funnel backlog", ""]
     for issue in backlog:
         lines.append(f"[{issue['id']}] {issue['title']}")
@@ -176,7 +177,7 @@ def _render_text(backlog: list[dict[str, object]]) -> str:
     return "\n".join(lines)
 
 
-def _render_markdown(backlog: list[dict[str, object]]) -> str:
+def _render_markdown(backlog: list[dict[str, Any]]) -> str:
     lines = [
         "# Day 8 contributor funnel backlog",
         "",
@@ -202,7 +203,7 @@ def _render_markdown(backlog: list[dict[str, object]]) -> str:
     return "\n".join(lines)
 
 
-def _render_json(backlog: list[dict[str, object]]) -> str:
+def _render_json(backlog: list[dict[str, Any]]) -> str:
     area_counts = Counter(str(i["area"]) for i in backlog)
     payload = {
         "name": "day8-contributor-funnel",
@@ -216,7 +217,7 @@ def _render_json(backlog: list[dict[str, object]]) -> str:
     return json.dumps(payload, indent=2) + "\n"
 
 
-def _write_issue_pack(backlog: list[dict[str, object]], issue_pack_dir: str) -> None:
+def _write_issue_pack(backlog: list[dict[str, Any]], issue_pack_dir: str) -> None:
     out_dir = Path(issue_pack_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     for issue in backlog:

@@ -29,14 +29,18 @@ def test_day16_quickstart_variant_switches_pipeline(capsys):
 
 def test_day16_quickstart_strict_fails_when_content_missing(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
-    (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text("# Placeholder\n", encoding="utf-8")
+    (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
+        "# Placeholder\n", encoding="utf-8"
+    )
     rc = gitlab_ci_quickstart.main(["--root", str(tmp_path), "--strict"])
     assert rc == 1
     assert "missing checks:" in capsys.readouterr().out
 
 
 def test_day16_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys):
-    rc = gitlab_ci_quickstart.main(["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"])
+    rc = gitlab_ci_quickstart.main(
+        ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
+    )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["passed_checks"] == data["total_checks"]
@@ -111,7 +115,9 @@ def test_day16_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp
 
     monkeypatch.setattr(gitlab_ci_quickstart.subprocess, "run", lambda *a, **k: _Proc())
 
-    rc = gitlab_ci_quickstart.main(["--root", str(tmp_path), "--execute", "--format", "json", "--strict"])
+    rc = gitlab_ci_quickstart.main(
+        ["--root", str(tmp_path), "--execute", "--format", "json", "--strict"]
+    )
     assert rc == 1
     data = json.loads(capsys.readouterr().out)
     assert data["execution"]["failed_commands"] == 4

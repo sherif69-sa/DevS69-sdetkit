@@ -7,6 +7,7 @@ import subprocess
 import time
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any, cast
 
 _DEMO_FLOW = [
     {
@@ -83,10 +84,12 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _run_command(command: str, timeout_seconds: float) -> tuple[int, str, str, float]:
+def _run_command(
+    command: str | Sequence[str], timeout_seconds: float
+) -> tuple[int, str, str, float]:
     start = time.perf_counter()
     proc = subprocess.run(
-        shlex.split(command),
+        shlex.split(command) if isinstance(command, str) else list(command),
         capture_output=True,
         text=True,
         check=False,
@@ -138,10 +141,10 @@ def _execution_summary(
 ) -> dict[str, object]:
     if not execution_results:
         return {}
-    total = round(
-        sum(float(result.get("duration_seconds") or 0.0) for result in execution_results),
-        3,
-    )
+    total_seconds = 0.0
+    for result in execution_results:
+        total_seconds += float(cast(Any, result.get("duration_seconds") or 0.0))
+    total = round(total_seconds, 3)
     return {
         "total_duration_seconds": total,
         "target_seconds": float(target_seconds),
@@ -165,7 +168,7 @@ def _as_text(execution_results: list[dict[str, object]], target_seconds: float) 
             lines.append(
                 f"- {result['step']}: {result['status']} (exit={result['exit_code']}, duration={result['duration_seconds']}s)"
             )
-            missing = result.get("missing_snippets") or []
+            missing = cast(list[object], result.get("missing_snippets") or [])
             if missing:
                 lines.append(f"  missing snippets: {', '.join(str(x) for x in missing)}")
             err = str(result.get("error") or "")
@@ -192,15 +195,21 @@ def _as_markdown(execution_results: list[dict[str, object]], target_seconds: flo
     ]
     for item in _DEMO_FLOW:
         expected = "<br>".join(f"`{snippet}`" for snippet in item["expected"])
-        rows.append(
-            f"| {item['step']} | `{item['command']}` | {expected} | {item['why']} |"
-        )
+        rows.append(f"| {item['step']} | `{item['command']}` | {expected} | {item['why']} |")
 
     if execution_results:
         summary = _execution_summary(execution_results, target_seconds)
-        rows.extend(["", "## Execution results", "", "| Step | Status | Exit code | Duration (s) | Missing snippets |", "|---|---|---:|---:|---|"])
+        rows.extend(
+            [
+                "",
+                "## Execution results",
+                "",
+                "| Step | Status | Exit code | Duration (s) | Missing snippets |",
+                "|---|---|---:|---:|---|",
+            ]
+        )
         for result in execution_results:
-            missing = result.get("missing_snippets") or []
+            missing = cast(list[object], result.get("missing_snippets") or [])
             missing_text = "<br>".join(f"`{snippet}`" for snippet in missing) if missing else "-"
             rows.append(
                 f"| {result['step']} | {result['status']} | {result['exit_code']} | {result['duration_seconds']} | {missing_text} |"
@@ -219,7 +228,9 @@ def _as_markdown(execution_results: list[dict[str, object]], target_seconds: flo
     rows.extend(["", "## Closeout hints", ""])
     rows.extend(f"- {hint}" for hint in _HINTS)
     rows.append("")
-    rows.append("Related docs: [README quick start](../README.md#quick-start), [repo audit](repo-audit.md).")
+    rows.append(
+        "Related docs: [README quick start](../README.md#quick-start), [repo audit](repo-audit.md)."
+    )
     return "\n".join(rows)
 
 

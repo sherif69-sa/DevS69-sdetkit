@@ -16,30 +16,138 @@ class DayShipped:
 
 
 DAY1_TO_6: tuple[DayShipped, ...] = (
-    DayShipped(1, "Core positioning + role onboarding", "docs/day-1-ultra-upgrade-report.md", "docs/artifacts/day1-onboarding-sample.md", "python -m sdetkit onboarding --format text"),
-    DayShipped(2, "60-second demo workflow", "docs/day-2-ultra-upgrade-report.md", "docs/artifacts/day2-demo-sample.md", "python -m sdetkit demo --execute --format text"),
-    DayShipped(3, "Proof pack with runnable checks", "docs/day-3-ultra-upgrade-report.md", "docs/artifacts/day3-proof-sample.md", "python -m sdetkit proof --execute --strict --format text"),
-    DayShipped(4, "Template/skill expansion run-all", "docs/day-4-ultra-upgrade-report.md", "docs/artifacts/day4-skills-sample.md", "python -m sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs"),
-    DayShipped(5, "Cross-platform onboarding snippets", "docs/day-5-ultra-upgrade-report.md", "docs/artifacts/day5-platform-onboarding-sample.md", "python -m sdetkit onboarding --format text --platform all"),
-    DayShipped(6, "Docs conversion QA gate", "docs/day-6-ultra-upgrade-report.md", "docs/artifacts/day6-conversion-qa-sample.md", "python -m sdetkit docs-qa --format text"),
+    DayShipped(
+        1,
+        "Core positioning + role onboarding",
+        "docs/day-1-ultra-upgrade-report.md",
+        "docs/artifacts/day1-onboarding-sample.md",
+        "python -m sdetkit onboarding --format text",
+    ),
+    DayShipped(
+        2,
+        "60-second demo workflow",
+        "docs/day-2-ultra-upgrade-report.md",
+        "docs/artifacts/day2-demo-sample.md",
+        "python -m sdetkit demo --execute --format text",
+    ),
+    DayShipped(
+        3,
+        "Proof pack with runnable checks",
+        "docs/day-3-ultra-upgrade-report.md",
+        "docs/artifacts/day3-proof-sample.md",
+        "python -m sdetkit proof --execute --strict --format text",
+    ),
+    DayShipped(
+        4,
+        "Template/skill expansion run-all",
+        "docs/day-4-ultra-upgrade-report.md",
+        "docs/artifacts/day4-skills-sample.md",
+        "python -m sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs",
+    ),
+    DayShipped(
+        5,
+        "Cross-platform onboarding snippets",
+        "docs/day-5-ultra-upgrade-report.md",
+        "docs/artifacts/day5-platform-onboarding-sample.md",
+        "python -m sdetkit onboarding --format text --platform all",
+    ),
+    DayShipped(
+        6,
+        "Docs conversion QA gate",
+        "docs/day-6-ultra-upgrade-report.md",
+        "docs/artifacts/day6-conversion-qa-sample.md",
+        "python -m sdetkit docs-qa --format text",
+    ),
 )
 
 DAY8_TO_13: tuple[DayShipped, ...] = (
-    DayShipped(8, "Good-first-issue accelerator pack", "docs/day-8-ultra-upgrade-report.md", "docs/artifacts/day8-good-first-issues-sample.md", "python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md --strict"),
-    DayShipped(9, "Triage-ready issue + PR templates", "docs/day-9-ultra-upgrade-report.md", "docs/artifacts/day9-triage-templates-sample.md", "python -m sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md --strict"),
-    DayShipped(10, "First-contribution checklist", "docs/day-10-ultra-upgrade-report.md", "docs/artifacts/day10-first-contribution-checklist-sample.md", "python -m sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md --strict"),
-    DayShipped(11, "Docs navigation tune-up", "docs/day-11-ultra-upgrade-report.md", "docs/artifacts/day11-docs-navigation-sample.md", "python -m sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md --strict"),
-    DayShipped(12, "Startup/small-team workflow", "docs/day-12-ultra-upgrade-report.md", "docs/artifacts/day12-startup-use-case-sample.md", "python -m sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md --strict"),
-    DayShipped(13, "Enterprise/regulated workflow", "docs/day-13-ultra-upgrade-report.md", "docs/artifacts/day13-enterprise-use-case-sample.md", "python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict"),
+    DayShipped(
+        8,
+        "Good-first-issue accelerator pack",
+        "docs/day-8-ultra-upgrade-report.md",
+        "docs/artifacts/day8-good-first-issues-sample.md",
+        "python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md --strict",
+    ),
+    DayShipped(
+        9,
+        "Triage-ready issue + PR templates",
+        "docs/day-9-ultra-upgrade-report.md",
+        "docs/artifacts/day9-triage-templates-sample.md",
+        "python -m sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md --strict",
+    ),
+    DayShipped(
+        10,
+        "First-contribution checklist",
+        "docs/day-10-ultra-upgrade-report.md",
+        "docs/artifacts/day10-first-contribution-checklist-sample.md",
+        "python -m sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md --strict",
+    ),
+    DayShipped(
+        11,
+        "Docs navigation tune-up",
+        "docs/day-11-ultra-upgrade-report.md",
+        "docs/artifacts/day11-docs-navigation-sample.md",
+        "python -m sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md --strict",
+    ),
+    DayShipped(
+        12,
+        "Startup/small-team workflow",
+        "docs/day-12-ultra-upgrade-report.md",
+        "docs/artifacts/day12-startup-use-case-sample.md",
+        "python -m sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md --strict",
+    ),
+    DayShipped(
+        13,
+        "Enterprise/regulated workflow",
+        "docs/day-13-ultra-upgrade-report.md",
+        "docs/artifacts/day13-enterprise-use-case-sample.md",
+        "python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict",
+    ),
 )
 
 DAY15_TO_20: tuple[DayShipped, ...] = (
-    DayShipped(15, "GitHub Actions integration quickstart", "docs/day-15-ultra-upgrade-report.md", "docs/artifacts/day15-github-actions-quickstart-sample.md", "python -m sdetkit github-actions-quickstart --format json --strict"),
-    DayShipped(16, "GitLab CI integration quickstart", "docs/day-16-ultra-upgrade-report.md", "docs/artifacts/day16-gitlab-ci-quickstart-sample.md", "python -m sdetkit gitlab-ci-quickstart --format json --strict"),
-    DayShipped(17, "Quality + contribution delta evidence", "docs/day-17-ultra-upgrade-report.md", "docs/artifacts/day17-quality-contribution-delta-sample.md", "python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict"),
-    DayShipped(18, "Reliability evidence operating pack", "docs/day-18-ultra-upgrade-report.md", "docs/artifacts/day18-reliability-evidence-pack-sample.md", "python -m sdetkit reliability-evidence-pack --format json --strict"),
-    DayShipped(19, "Release readiness board", "docs/day-19-ultra-upgrade-report.md", "docs/artifacts/day19-release-readiness-board-sample.md", "python -m sdetkit release-readiness-board --format json --strict"),
-    DayShipped(20, "Release narrative storytelling pack", "docs/day-20-ultra-upgrade-report.md", "docs/artifacts/day20-release-narrative-sample.md", "python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md"),
+    DayShipped(
+        15,
+        "GitHub Actions integration quickstart",
+        "docs/day-15-ultra-upgrade-report.md",
+        "docs/artifacts/day15-github-actions-quickstart-sample.md",
+        "python -m sdetkit github-actions-quickstart --format json --strict",
+    ),
+    DayShipped(
+        16,
+        "GitLab CI integration quickstart",
+        "docs/day-16-ultra-upgrade-report.md",
+        "docs/artifacts/day16-gitlab-ci-quickstart-sample.md",
+        "python -m sdetkit gitlab-ci-quickstart --format json --strict",
+    ),
+    DayShipped(
+        17,
+        "Quality + contribution delta evidence",
+        "docs/day-17-ultra-upgrade-report.md",
+        "docs/artifacts/day17-quality-contribution-delta-sample.md",
+        "python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict",
+    ),
+    DayShipped(
+        18,
+        "Reliability evidence operating pack",
+        "docs/day-18-ultra-upgrade-report.md",
+        "docs/artifacts/day18-reliability-evidence-pack-sample.md",
+        "python -m sdetkit reliability-evidence-pack --format json --strict",
+    ),
+    DayShipped(
+        19,
+        "Release readiness board",
+        "docs/day-19-ultra-upgrade-report.md",
+        "docs/artifacts/day19-release-readiness-board-sample.md",
+        "python -m sdetkit release-readiness-board --format json --strict",
+    ),
+    DayShipped(
+        20,
+        "Release narrative storytelling pack",
+        "docs/day-20-ultra-upgrade-report.md",
+        "docs/artifacts/day20-release-narrative-sample.md",
+        "python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md",
+    ),
 )
 
 _GROWTH_KEYS = ("traffic", "stars", "discussions", "blocker_fixes")
@@ -146,7 +254,9 @@ def build_weekly_review(
 
 def _render_text(review: WeeklyReview) -> str:
     review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
-    shipped_window = "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
+    shipped_window = (
+        "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
+    )
     lines = [
         f"Day {review_day} weekly review #{review.week}",
         "",
@@ -198,7 +308,9 @@ def _render_text(review: WeeklyReview) -> str:
 
 def _render_markdown(review: WeeklyReview) -> str:
     review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
-    shipped_window = "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
+    shipped_window = (
+        "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
+    )
     lines = [
         f"# Day {review_day} Weekly Review #{review.week}",
         "",
@@ -371,7 +483,9 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
     )
 
     traffic_delta = f"{review.growth_deltas['traffic']:+d}" if review.growth_deltas else "n/a"
-    discussions_delta_fmt = f"{review.growth_deltas['discussions']:+d}" if review.growth_deltas else "n/a"
+    discussions_delta_fmt = (
+        f"{review.growth_deltas['discussions']:+d}" if review.growth_deltas else "n/a"
+    )
 
     narrative_brief = root / "day21-release-narrative-brief.md"
     narrative_brief.write_text(
@@ -400,7 +514,10 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
         encoding="utf-8",
     )
 
-    return [str(path.relative_to(base)) for path in (checklist, scorecard, contributor_plan, narrative_brief)]
+    return [
+        str(path.relative_to(base))
+        for path in (checklist, scorecard, contributor_plan, narrative_brief)
+    ]
 
 
 def _emit_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str]:
@@ -412,13 +529,37 @@ def _emit_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str]:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="sdetkit weekly-review", description="Generate day-based weekly review summaries.")
+    p = argparse.ArgumentParser(
+        prog="sdetkit weekly-review", description="Generate day-based weekly review summaries."
+    )
     p.add_argument("--root", default=".", help="Repository root path.")
-    p.add_argument("--week", type=int, choices=[1, 2, 3], default=1, help="Weekly review window (1=Day 1-6, 2=Day 8-13, 3=Day 15-20).")
-    p.add_argument("--signals-file", default="", help="Optional JSON file with week growth signals: traffic, stars, discussions, blocker_fixes.")
-    p.add_argument("--previous-signals-file", default="", help="Optional previous-week JSON signal file to compute week-over-week deltas.")
-    p.add_argument("--emit-pack-dir", default="", help="Optional output directory to emit week closeout pack files (week 2 and week 3).")
-    p.add_argument("--strict", action="store_true", help="Return non-zero if shipped coverage is incomplete (or growth signals are missing for week 2/3).")
+    p.add_argument(
+        "--week",
+        type=int,
+        choices=[1, 2, 3],
+        default=1,
+        help="Weekly review window (1=Day 1-6, 2=Day 8-13, 3=Day 15-20).",
+    )
+    p.add_argument(
+        "--signals-file",
+        default="",
+        help="Optional JSON file with week growth signals: traffic, stars, discussions, blocker_fixes.",
+    )
+    p.add_argument(
+        "--previous-signals-file",
+        default="",
+        help="Optional previous-week JSON signal file to compute week-over-week deltas.",
+    )
+    p.add_argument(
+        "--emit-pack-dir",
+        default="",
+        help="Optional output directory to emit week closeout pack files (week 2 and week 3).",
+    )
+    p.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero if shipped coverage is incomplete (or growth signals are missing for week 2/3).",
+    )
     p.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     p.add_argument("--output", default=None, help="Optional output path for the report.")
     return p
@@ -428,7 +569,9 @@ def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
 
     signals = _load_signals(args.signals_file) if args.signals_file else None
-    previous_signals = _load_signals(args.previous_signals_file) if args.previous_signals_file else None
+    previous_signals = (
+        _load_signals(args.previous_signals_file) if args.previous_signals_file else None
+    )
 
     review = build_weekly_review(
         Path(args.root).resolve(),

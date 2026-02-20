@@ -4,6 +4,7 @@ import argparse
 import json
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 _PAGE_PATH = "docs/use-cases-startup-small-team.md"
 
@@ -113,7 +114,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     parser.add_argument("--root", default=".", help="Repository root where docs live.")
     parser.add_argument("--output", default="", help="Optional output file path.")
-    parser.add_argument("--strict", action="store_true", help="Return non-zero when required use-case content is missing.")
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Return non-zero when required use-case content is missing.",
+    )
     parser.add_argument(
         "--write-defaults",
         action="store_true",
@@ -134,7 +139,12 @@ def _read(path: Path) -> str:
 
 
 def _missing_checks(page_text: str) -> list[str]:
-    checks = [_SECTION_HEADER, *_REQUIRED_SECTIONS, *_REQUIRED_COMMANDS, "name: startup-quality-fast-lane"]
+    checks = [
+        _SECTION_HEADER,
+        *_REQUIRED_SECTIONS,
+        *_REQUIRED_COMMANDS,
+        "name: startup-quality-fast-lane",
+    ]
     return [item for item in checks if item not in page_text]
 
 
@@ -193,13 +203,20 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     return [str(path.relative_to(base)) for path in [checklist, ci_recipe, risk_register]]
 
 
-def build_startup_use_case_status(root: str = ".") -> dict[str, object]:
+def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
     base = Path(root)
     page = base / _PAGE_PATH
     page_text = _read(page)
     missing = _missing_checks(page_text)
 
-    total_checks = len([_SECTION_HEADER, *_REQUIRED_SECTIONS, *_REQUIRED_COMMANDS, "name: startup-quality-fast-lane"])
+    total_checks = len(
+        [
+            _SECTION_HEADER,
+            *_REQUIRED_SECTIONS,
+            *_REQUIRED_COMMANDS,
+            "name: startup-quality-fast-lane",
+        ]
+    )
     passed_checks = total_checks - len(missing)
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
@@ -222,7 +239,7 @@ def build_startup_use_case_status(root: str = ".") -> dict[str, object]:
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 12 startup use-case page",
         f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
@@ -250,7 +267,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Day 12 startup use-case page",
         "",

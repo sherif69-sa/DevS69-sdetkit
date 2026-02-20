@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from . import weekly_review
 
@@ -46,26 +47,38 @@ def _clamp(value: float, lo: float = 0.0, hi: float = 100.0) -> float:
     return max(lo, min(hi, value))
 
 
-def _build_recommendations(quality_deltas: dict[str, int], contribution_deltas: dict[str, int]) -> list[str]:
+def _build_recommendations(
+    quality_deltas: dict[str, int], contribution_deltas: dict[str, int]
+) -> list[str]:
     notes: list[str] = []
     if quality_deltas["completion_rate_percent"] < 0:
-        notes.append("Recover week-two completion rate by rerunning missing Day 8-13 closeout checks.")
+        notes.append(
+            "Recover week-two completion rate by rerunning missing Day 8-13 closeout checks."
+        )
     if quality_deltas["artifact_coverage"] < 0:
-        notes.append("Regenerate missing artifacts and attach pack evidence before sprint closeout.")
+        notes.append(
+            "Regenerate missing artifacts and attach pack evidence before sprint closeout."
+        )
     if contribution_deltas["traffic"] < 0:
-        notes.append("Increase release-note and docs distribution cadence to recover traffic trend.")
+        notes.append(
+            "Increase release-note and docs distribution cadence to recover traffic trend."
+        )
     if contribution_deltas["stars"] < 0:
         notes.append("Refresh README CTA blocks and promote newcomer issues in community channels.")
     if contribution_deltas["discussions"] < 0:
-        notes.append("Run weekly office hours and prompt issue discussions with maintainer responses.")
+        notes.append(
+            "Run weekly office hours and prompt issue discussions with maintainer responses."
+        )
     if contribution_deltas["blocker_fixes"] < 0:
         notes.append("Escalate blocker-fix SLA ownership and add a daily remediation checkpoint.")
     if not notes:
-        notes.append("All tracked deltas are stable or improving; preserve current operating cadence.")
+        notes.append(
+            "All tracked deltas are stable or improving; preserve current operating cadence."
+        )
     return notes
 
 
-def _evaluate_gates(payload: dict[str, object], thresholds: dict[str, int]) -> list[str]:
+def _evaluate_gates(payload: dict[str, Any], thresholds: dict[str, int]) -> list[str]:
     failures: list[str] = []
     contribution_deltas = payload["contributions"]["deltas"]
     for key, minimum in thresholds.items():
@@ -81,18 +94,24 @@ def _evaluate_gates(payload: dict[str, object], thresholds: dict[str, int]) -> l
     return failures
 
 
-def build_delta_report(repo_root: Path, current_signals: dict[str, int], previous_signals: dict[str, int]) -> dict[str, object]:
+def build_delta_report(
+    repo_root: Path, current_signals: dict[str, int], previous_signals: dict[str, int]
+) -> dict[str, Any]:
     week1 = weekly_review.build_weekly_review(repo_root, week=1)
     week2 = weekly_review.build_weekly_review(repo_root, week=2)
 
     quality_deltas = {
-        "completion_rate_percent": week2.kpis["completion_rate_percent"] - week1.kpis["completion_rate_percent"],
+        "completion_rate_percent": week2.kpis["completion_rate_percent"]
+        - week1.kpis["completion_rate_percent"],
         "artifact_coverage": week2.kpis["artifact_coverage"] - week1.kpis["artifact_coverage"],
         "runnable_commands": week2.kpis["runnable_commands"] - week1.kpis["runnable_commands"],
     }
-    contribution_deltas = {key: current_signals[key] - previous_signals[key] for key in _REQUIRED_SIGNAL_KEYS}
+    contribution_deltas = {
+        key: current_signals[key] - previous_signals[key] for key in _REQUIRED_SIGNAL_KEYS
+    }
     contribution_pct_deltas = {
-        key: _safe_pct_delta(current_signals[key], previous_signals[key]) for key in _REQUIRED_SIGNAL_KEYS
+        key: _safe_pct_delta(current_signals[key], previous_signals[key])
+        for key in _REQUIRED_SIGNAL_KEYS
     }
 
     quality_stability_score = round(
@@ -107,7 +126,9 @@ def build_delta_report(repo_root: Path, current_signals: dict[str, int], previou
 
     contribution_velocity_score = 0.0
     for key, weight in _CONTRIBUTION_WEIGHTS.items():
-        contribution_velocity_score += _clamp(50 + contribution_pct_deltas[key], 0.0, 100.0) * weight
+        contribution_velocity_score += (
+            _clamp(50 + contribution_pct_deltas[key], 0.0, 100.0) * weight
+        )
     contribution_velocity_score = round(contribution_velocity_score, 2)
 
     recommendations = _build_recommendations(quality_deltas, contribution_deltas)
@@ -126,14 +147,16 @@ def build_delta_report(repo_root: Path, current_signals: dict[str, int], previou
             "previous": previous_signals,
             "deltas": contribution_deltas,
             "delta_percent": contribution_pct_deltas,
-            "delta_status": {key: _delta_status(value) for key, value in contribution_deltas.items()},
+            "delta_status": {
+                key: _delta_status(value) for key, value in contribution_deltas.items()
+            },
             "velocity_score": contribution_velocity_score,
         },
         "recommendations": recommendations,
     }
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     qd = payload["quality"]["deltas"]
     cd = payload["contributions"]["deltas"]
     cp = payload["contributions"]["delta_percent"]
@@ -159,7 +182,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     qd = payload["quality"]["deltas"]
     cd = payload["contributions"]["deltas"]
     cp = payload["contributions"]["delta_percent"]
@@ -188,7 +211,7 @@ def _render_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, object]) -> list[str]:
+def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[str]:
     root = repo_root / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
@@ -245,7 +268,9 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, object]) -> lis
         encoding="utf-8",
     )
 
-    return [str(path.relative_to(repo_root)) for path in (summary, quality_md, action_plan, checklist)]
+    return [
+        str(path.relative_to(repo_root)) for path in (summary, quality_md, action_plan, checklist)
+    ]
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -254,14 +279,38 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Build Day 17 week-over-week quality and contribution delta evidence.",
     )
     p.add_argument("--root", default=".", help="Repository root path.")
-    p.add_argument("--current-signals-file", required=True, help="Current-week growth signal JSON file.")
-    p.add_argument("--previous-signals-file", required=True, help="Previous-week growth signal JSON file.")
-    p.add_argument("--emit-pack-dir", default="", help="Optional output directory for Day 17 evidence pack files.")
-    p.add_argument("--strict", action="store_true", help="Return non-zero when strict delta gates fail.")
-    p.add_argument("--min-traffic-delta", type=int, default=0, help="Strict gate minimum for traffic delta.")
-    p.add_argument("--min-stars-delta", type=int, default=0, help="Strict gate minimum for stars delta.")
-    p.add_argument("--min-discussions-delta", type=int, default=0, help="Strict gate minimum for discussions delta.")
-    p.add_argument("--min-blocker-fixes-delta", type=int, default=0, help="Strict gate minimum for blocker_fixes delta.")
+    p.add_argument(
+        "--current-signals-file", required=True, help="Current-week growth signal JSON file."
+    )
+    p.add_argument(
+        "--previous-signals-file", required=True, help="Previous-week growth signal JSON file."
+    )
+    p.add_argument(
+        "--emit-pack-dir",
+        default="",
+        help="Optional output directory for Day 17 evidence pack files.",
+    )
+    p.add_argument(
+        "--strict", action="store_true", help="Return non-zero when strict delta gates fail."
+    )
+    p.add_argument(
+        "--min-traffic-delta", type=int, default=0, help="Strict gate minimum for traffic delta."
+    )
+    p.add_argument(
+        "--min-stars-delta", type=int, default=0, help="Strict gate minimum for stars delta."
+    )
+    p.add_argument(
+        "--min-discussions-delta",
+        type=int,
+        default=0,
+        help="Strict gate minimum for discussions delta.",
+    )
+    p.add_argument(
+        "--min-blocker-fixes-delta",
+        type=int,
+        default=0,
+        help="Strict gate minimum for blocker_fixes delta.",
+    )
     p.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     p.add_argument("--output", default=None, help="Optional output path for rendered report.")
     return p

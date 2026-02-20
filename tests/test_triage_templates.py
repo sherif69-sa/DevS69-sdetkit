@@ -8,7 +8,9 @@ from sdetkit import triage_templates
 def _seed_templates(root: Path) -> None:
     issue_dir = root / ".github" / "ISSUE_TEMPLATE"
     issue_dir.mkdir(parents=True)
-    (issue_dir / "bug_report.yml").write_text(triage_templates._DEFAULT_BUG_TEMPLATE, encoding="utf-8")
+    (issue_dir / "bug_report.yml").write_text(
+        triage_templates._DEFAULT_BUG_TEMPLATE, encoding="utf-8"
+    )
     (issue_dir / "feature_request.yml").write_text(
         triage_templates._DEFAULT_FEATURE_TEMPLATE,
         encoding="utf-8",
@@ -50,7 +52,9 @@ def test_markdown_export_writes_day9_artifact(tmp_path: Path) -> None:
 
 
 def test_write_defaults_repairs_missing_files(tmp_path: Path) -> None:
-    rc = triage_templates.main(["--root", str(tmp_path), "--write-defaults", "--strict", "--format", "json"])
+    rc = triage_templates.main(
+        ["--root", str(tmp_path), "--write-defaults", "--strict", "--format", "json"]
+    )
     assert rc == 0
     assert (tmp_path / ".github" / "ISSUE_TEMPLATE" / "bug_report.yml").exists()
     assert (tmp_path / ".github" / "ISSUE_TEMPLATE" / "feature_request.yml").exists()

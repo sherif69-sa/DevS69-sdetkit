@@ -4,6 +4,7 @@ import argparse
 import json
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 _TEMPLATE_PATHS = {
     "bug": Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
@@ -246,7 +247,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def _template_result(name: str, path: Path, missing: list[str], total: int) -> dict[str, object]:
+def _template_result(name: str, path: Path, missing: list[str], total: int) -> dict[str, Any]:
     passed = total - len(missing)
     return {
         "name": name,
@@ -257,7 +258,7 @@ def _template_result(name: str, path: Path, missing: list[str], total: int) -> d
     }
 
 
-def build_template_health(root: str = ".") -> dict[str, object]:
+def build_template_health(root: str = ".") -> dict[str, Any]:
     base = Path(root)
 
     bug_text = _read(base / _TEMPLATE_PATHS["bug"])
@@ -276,9 +277,13 @@ def build_template_health(root: str = ".") -> dict[str, object]:
 
     templates = [
         _template_result("bug", _TEMPLATE_PATHS["bug"], bug_missing, len(_BUG_REQUIRED_IDS)),
-        _template_result("feature", _TEMPLATE_PATHS["feature"], feature_missing, len(_FEATURE_REQUIRED_IDS)),
+        _template_result(
+            "feature", _TEMPLATE_PATHS["feature"], feature_missing, len(_FEATURE_REQUIRED_IDS)
+        ),
         _template_result("pr", _TEMPLATE_PATHS["pr"], pr_missing, len(_PR_REQUIRED_HEADINGS)),
-        _template_result("config", _TEMPLATE_PATHS["config"], cfg_missing, len(_CONFIG_REQUIRED_TOKENS)),
+        _template_result(
+            "config", _TEMPLATE_PATHS["config"], cfg_missing, len(_CONFIG_REQUIRED_TOKENS)
+        ),
     ]
 
     total_checks = sum(int(item["coverage"].split("/")[1]) for item in templates)
@@ -320,7 +325,7 @@ def write_default_templates(root: str = ".") -> list[str]:
     return touched
 
 
-def _render_text(payload: dict[str, object]) -> str:
+def _render_text(payload: dict[str, Any]) -> str:
     lines = [
         "Day 9 contribution templates health",
         f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
@@ -349,7 +354,7 @@ def _render_text(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _render_markdown(payload: dict[str, object]) -> str:
+def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# Day 9 contribution templates health",
         "",
@@ -391,7 +396,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     p.add_argument("--root", default=".", help="Repository root to inspect.")
     p.add_argument("--output", default="", help="Optional output file path.")
-    p.add_argument("--strict", action="store_true", help="Return non-zero if any requirement is missing.")
+    p.add_argument(
+        "--strict", action="store_true", help="Return non-zero if any requirement is missing."
+    )
     p.add_argument(
         "--write-defaults",
         action="store_true",

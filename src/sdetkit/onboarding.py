@@ -4,6 +4,7 @@ import argparse
 import json
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 _ROLE_PLAYBOOK = {
     "sdet": {
@@ -91,13 +92,14 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _platform_payload(platform: str) -> dict[str, dict[str, object]]:
+def _platform_payload(platform: str) -> dict[str, dict[str, Any]]:
     if platform == "all":
         return {name: details for name, details in _PLATFORM_SETUP.items()}
     return {platform: _PLATFORM_SETUP[platform]}
 
 
 def _as_json(role: str, platform: str) -> str:
+    payload: dict[str, Any]
     if role == "all":
         payload = {name: details for name, details in _ROLE_PLAYBOOK.items()}
     else:

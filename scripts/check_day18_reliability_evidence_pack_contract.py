@@ -107,10 +107,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
         errors.extend(f"{DAY18_PAGE}: missing '{m}'" for m in _missing(DAY18_PAGE, PAGE_EXPECTED))
-        errors.extend(f"{DAY18_REPORT}: missing '{m}'" for m in _missing(DAY18_REPORT, REPORT_EXPECTED))
-        errors.extend(f"{DAY18_PACK_SUMMARY}: missing '{m}'" for m in _missing(DAY18_PACK_SUMMARY, SUMMARY_EXPECTED))
+        errors.extend(
+            f"{DAY18_REPORT}: missing '{m}'" for m in _missing(DAY18_REPORT, REPORT_EXPECTED)
+        )
+        errors.extend(
+            f"{DAY18_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(DAY18_PACK_SUMMARY, SUMMARY_EXPECTED)
+        )
         if not ns.skip_evidence:
-            errors.extend(f"{DAY18_EVIDENCE}: missing '{m}'" for m in _missing(DAY18_EVIDENCE, EVIDENCE_EXPECTED))
+            errors.extend(
+                f"{DAY18_EVIDENCE}: missing '{m}'"
+                for m in _missing(DAY18_EVIDENCE, EVIDENCE_EXPECTED)
+            )
 
     if errors:
         print("day18-reliability-evidence-pack-contract check failed:", file=sys.stderr)

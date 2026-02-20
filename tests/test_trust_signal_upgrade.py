@@ -15,7 +15,11 @@ def _write_day22_page(root: Path) -> None:
 
 def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:
     readme = root / "README.md"
-    policy_link = "[policy baselines](docs/policy-and-baselines.md)" if include_policy_link else "policy baselines"
+    policy_link = (
+        "[policy baselines](docs/policy-and-baselines.md)"
+        if include_policy_link
+        else "policy baselines"
+    )
     readme.write_text(
         "\n".join(
             [
