@@ -33,6 +33,15 @@ DAY8_TO_13: tuple[DayShipped, ...] = (
     DayShipped(13, "Enterprise/regulated workflow", "docs/day-13-ultra-upgrade-report.md", "docs/artifacts/day13-enterprise-use-case-sample.md", "python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict"),
 )
 
+DAY15_TO_20: tuple[DayShipped, ...] = (
+    DayShipped(15, "GitHub Actions integration quickstart", "docs/day-15-ultra-upgrade-report.md", "docs/artifacts/day15-github-actions-quickstart-sample.md", "python -m sdetkit github-actions-quickstart --format json --strict"),
+    DayShipped(16, "GitLab CI integration quickstart", "docs/day-16-ultra-upgrade-report.md", "docs/artifacts/day16-gitlab-ci-quickstart-sample.md", "python -m sdetkit gitlab-ci-quickstart --format json --strict"),
+    DayShipped(17, "Quality + contribution delta evidence", "docs/day-17-ultra-upgrade-report.md", "docs/artifacts/day17-quality-contribution-delta-sample.md", "python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict"),
+    DayShipped(18, "Reliability evidence operating pack", "docs/day-18-ultra-upgrade-report.md", "docs/artifacts/day18-reliability-evidence-pack-sample.md", "python -m sdetkit reliability-evidence-pack --format json --strict"),
+    DayShipped(19, "Release readiness board", "docs/day-19-ultra-upgrade-report.md", "docs/artifacts/day19-release-readiness-board-sample.md", "python -m sdetkit release-readiness-board --format json --strict"),
+    DayShipped(20, "Release narrative storytelling pack", "docs/day-20-ultra-upgrade-report.md", "docs/artifacts/day20-release-narrative-sample.md", "python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md"),
+)
+
 _GROWTH_KEYS = ("traffic", "stars", "discussions", "blocker_fixes")
 
 
@@ -71,7 +80,14 @@ def build_weekly_review(
     signals: dict[str, int] | None = None,
     previous_signals: dict[str, int] | None = None,
 ) -> WeeklyReview:
-    if week == 2:
+    if week == 3:
+        shipped_days = DAY15_TO_20
+        next_week_focus = (
+            "Day 22: strengthen trust signals across security and reliability entry points.",
+            "Day 23: publish FAQ responses for recurring adoption objections.",
+            "Day 24: cut onboarding time-to-first-success below three minutes.",
+        )
+    elif week == 2:
         shipped_days = DAY8_TO_13
         next_week_focus = (
             "Day 15: refine multi-channel distribution loop for documentation and demos.",
@@ -129,10 +145,12 @@ def build_weekly_review(
 
 
 def _render_text(review: WeeklyReview) -> str:
+    review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
+    shipped_window = "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
     lines = [
-        f"Day {7 if review.week == 1 else 14} weekly review #{review.week}",
+        f"Day {review_day} weekly review #{review.week}",
         "",
-        f"What shipped ({'Day 1-6' if review.week == 1 else 'Day 8-13'}):",
+        f"What shipped ({shipped_window}):",
     ]
     for item in review.shipped:
         mark = "✅" if item["status"] == "shipped" else "⚠️"
@@ -154,7 +172,7 @@ def _render_text(review: WeeklyReview) -> str:
         lines.extend(
             [
                 "",
-                "Week-two growth signals:",
+                f"Week-{review.week} growth signals:",
                 f"- Traffic: {review.growth_signals['traffic']}",
                 f"- Stars: {review.growth_signals['stars']}",
                 f"- Discussions: {review.growth_signals['discussions']}",
@@ -179,10 +197,12 @@ def _render_text(review: WeeklyReview) -> str:
 
 
 def _render_markdown(review: WeeklyReview) -> str:
+    review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
+    shipped_window = "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
     lines = [
-        f"# Day {7 if review.week == 1 else 14} Weekly Review #{review.week}",
+        f"# Day {review_day} Weekly Review #{review.week}",
         "",
-        f"## What shipped ({'Day 1-6' if review.week == 1 else 'Day 8-13'})",
+        f"## What shipped ({shipped_window})",
         "",
         "| Day | Upgrade | Report | Artifact | Status |",
         "| --- | --- | --- | --- | --- |",
@@ -209,7 +229,7 @@ def _render_markdown(review: WeeklyReview) -> str:
         lines.extend(
             [
                 "",
-                "## Week-two growth signals",
+                f"## Week-{review.week} growth signals",
                 "",
                 f"- Traffic: **{review.growth_signals['traffic']}**",
                 f"- Stars: **{review.growth_signals['stars']}**",
@@ -291,14 +311,114 @@ def _emit_week2_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
     return [str(path.relative_to(base)) for path in (checklist, scorecard, action_plan)]
 
 
+def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str]:
+    root = base / out_dir
+    root.mkdir(parents=True, exist_ok=True)
+
+    checklist = root / "day21-closeout-checklist.md"
+    checklist.write_text(
+        "\n".join(
+            [
+                "# Day 21 closeout checklist",
+                "",
+                "- [ ] Run `sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json` and verify all Day 15-20 items are shipped.",
+                "- [ ] Refresh markdown artifact and attach it to sprint closeout notes.",
+                "- [ ] Publish external contributor response summary with owners and SLA.",
+                "- [ ] Confirm Day 22 trust-signal backlog priorities are assigned.",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    scorecard = root / "day21-kpi-scorecard.json"
+    scorecard.write_text(
+        json.dumps(
+            {
+                "week": review.week,
+                "kpis": review.kpis,
+                "growth_signals": review.growth_signals,
+                "growth_deltas": review.growth_deltas,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    discussions = review.growth_signals["discussions"] if review.growth_signals else "n/a"
+    stars = review.growth_signals["stars"] if review.growth_signals else "n/a"
+    blocker_fixes = review.growth_signals["blocker_fixes"] if review.growth_signals else "n/a"
+    discussions_delta = review.growth_deltas["discussions"] if review.growth_deltas else "n/a"
+    stars_delta = review.growth_deltas["stars"] if review.growth_deltas else "n/a"
+    blocker_fixes_delta = review.growth_deltas["blocker_fixes"] if review.growth_deltas else "n/a"
+
+    contributor_plan = root / "day21-contributor-response-plan.md"
+    contributor_plan.write_text(
+        "\n".join(
+            [
+                "# Day 21 contributor response plan",
+                "",
+                "| Signal | Current | Delta vs week 2 | Owner | Next action |",
+                "| --- | --- | --- | --- | --- |",
+                f"| Discussions | {discussions} | {discussions_delta} | Community manager | answer open threads and tag good-first-issue candidates |",
+                f"| Stars | {stars} | {stars_delta} | Maintainer on-call | post release highlights and triage incoming watchers |",
+                f"| Blocker fixes | {blocker_fixes} | {blocker_fixes_delta} | QE lead | prioritize unresolved failures before Day 22 hardening |",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    traffic_delta = f"{review.growth_deltas['traffic']:+d}" if review.growth_deltas else "n/a"
+    discussions_delta_fmt = f"{review.growth_deltas['discussions']:+d}" if review.growth_deltas else "n/a"
+
+    narrative_brief = root / "day21-release-narrative-brief.md"
+    narrative_brief.write_text(
+        "\n".join(
+            [
+                "# Day 21 release narrative brief",
+                "",
+                "## Storyline",
+                "",
+                "Week 3 converts integration work into a measurable release lane with deterministic evidence and contributor-response visibility.",
+                "",
+                "## KPI highlights",
+                "",
+                f"- Completion: {review.kpis['days_completed']}/{review.kpis['days_planned']} ({review.kpis['completion_rate_percent']}%)",
+                f"- Traffic delta: {traffic_delta}",
+                f"- Discussions delta: {discussions_delta_fmt}",
+                "",
+                "## Messaging channels",
+                "",
+                "- Engineering sync: share week-3 scorecard + next-week trust-signal focus.",
+                "- OSS community post: publish contributor-response plan and open Day 22-24 asks.",
+                "- Release notes: link Day 18/19/21 artifacts for non-maintainer context.",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    return [str(path.relative_to(base)) for path in (checklist, scorecard, contributor_plan, narrative_brief)]
+
+
+def _emit_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str]:
+    if review.week == 2:
+        return _emit_week2_pack(base, out_dir, review)
+    if review.week == 3:
+        return _emit_week3_pack(base, out_dir, review)
+    return []
+
+
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="sdetkit weekly-review", description="Generate day-based weekly review summaries.")
     p.add_argument("--root", default=".", help="Repository root path.")
-    p.add_argument("--week", type=int, choices=[1, 2], default=1, help="Weekly review window (1=Day 1-6, 2=Day 8-13).")
+    p.add_argument("--week", type=int, choices=[1, 2, 3], default=1, help="Weekly review window (1=Day 1-6, 2=Day 8-13, 3=Day 15-20).")
     p.add_argument("--signals-file", default="", help="Optional JSON file with week growth signals: traffic, stars, discussions, blocker_fixes.")
     p.add_argument("--previous-signals-file", default="", help="Optional previous-week JSON signal file to compute week-over-week deltas.")
-    p.add_argument("--emit-pack-dir", default="", help="Optional output directory to emit Day 14 closeout pack files.")
-    p.add_argument("--strict", action="store_true", help="Return non-zero if shipped coverage is incomplete (or week-2 growth signals are missing).")
+    p.add_argument("--emit-pack-dir", default="", help="Optional output directory to emit week closeout pack files (week 2 and week 3).")
+    p.add_argument("--strict", action="store_true", help="Return non-zero if shipped coverage is incomplete (or growth signals are missing for week 2/3).")
     p.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     p.add_argument("--output", default=None, help="Optional output path for the report.")
     return p
@@ -330,7 +450,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["growth_deltas"] = review.growth_deltas
 
     if args.emit_pack_dir:
-        payload["pack_files"] = _emit_week2_pack(Path(args.root).resolve(), args.emit_pack_dir, review)
+        payload["pack_files"] = _emit_pack(Path(args.root).resolve(), args.emit_pack_dir, review)
 
     if args.format == "json":
         rendered = json.dumps(payload, indent=2) + "\n"
@@ -346,7 +466,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.strict:
         has_incomplete = any(item["status"] != "shipped" for item in review.shipped)
-        missing_signals = args.week == 2 and review.growth_signals is None
+        missing_signals = args.week in (2, 3) and review.growth_signals is None
         if has_incomplete or missing_signals:
             return 1
 

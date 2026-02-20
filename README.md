@@ -828,6 +828,40 @@ python -m sdetkit release-readiness-board --format json --strict
 python -m sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict
 ```
 
+
+## 🗞️ Day 20 ultra: release narrative
+
+Day 20 adds a stakeholder-ready **release narrative pack** that translates week-3 technical upgrades into clear outcomes, rollout guidance, and rollback notes.
+
+```bash
+python -m sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json
+```
+
+Review sample artifact: [Day 20 release narrative sample](docs/artifacts/day20-release-narrative-sample.md).
+
+See implementation details: [Day 20 ultra upgrade report](docs/day-20-ultra-upgrade-report.md).
+
+## 📊 Day 21 ultra: weekly review #3
+
+Day 21 closes week three with a deterministic review lane that measures shipped coverage plus conversion/contributor response trends.
+
+```bash
+python -m sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json
+python -m sdetkit weekly-review --week 3 --format json --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --strict
+python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md
+python -m sdetkit weekly-review --week 3 --emit-pack-dir docs/artifacts/day21-weekly-pack --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict
+```
+
+See implementation details: [Day 21 ultra upgrade report](docs/day-21-ultra-upgrade-report.md).
+
+Day 21 closeout checks:
+
+```bash
+python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day21_weekly_review_contract.py
+python -m sdetkit weekly-review --week 3 --format json --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash

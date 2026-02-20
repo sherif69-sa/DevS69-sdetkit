@@ -98,7 +98,7 @@ See: day-6-ultra-upgrade-report.md
 
 ## weekly-review
 
-Builds weekly review output (Day 7/week 1 and Day 14/week 2) with shipped upgrades, KPI movement, growth signals, and blocker-fix closeout data.
+Builds weekly review output (Day 7/week 1, Day 14/week 2, and Day 21/week 3) with shipped upgrades, KPI movement, growth signals, and blocker-fix closeout data.
 
 Examples:
 
@@ -107,10 +107,15 @@ Examples:
 - `sdetkit weekly-review --week 1 --format markdown --output docs/artifacts/day7-weekly-review-sample.md`
 - `sdetkit weekly-review --week 2 --format markdown --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json --output docs/artifacts/day14-weekly-review-sample.md`
 - `sdetkit weekly-review --week 2 --emit-pack-dir docs/artifacts/day14-weekly-pack --format json --strict`
+- `sdetkit weekly-review --week 3 --format json --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --strict`
+- `sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md`
+- `sdetkit weekly-review --week 3 --emit-pack-dir docs/artifacts/day21-weekly-pack --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict`
 
 Useful flags: `--root`, `--week`, `--signals-file`, `--previous-signals-file`, `--emit-pack-dir`, `--strict`, `--format`, `--output`.
 
-See: day-7-ultra-upgrade-report.md
+`--emit-pack-dir` writes week-specific closeout files: Day 14 checklist/action plan for week 2, and Day 21 checklist/scorecard/contributor-response/narrative brief for week 3.
+
+See: day-7-ultra-upgrade-report.md and day-21-ultra-upgrade-report.md
 
 
 ## contributor-funnel
