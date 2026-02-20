@@ -24,6 +24,7 @@ from . import (
     policy,
     proof,
     quality_contribution_delta,
+    release_narrative,
     release_readiness_board,
     reliability_evidence_pack,
     repo,
@@ -157,6 +158,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "release-readiness-board":
         return release_readiness_board.main(list(argv[1:]))
 
+    if argv and argv[0] == "release-narrative":
+        return release_narrative.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -254,6 +258,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     rrb = sub.add_parser("release-readiness-board")
     rrb.add_argument("args", nargs=argparse.REMAINDER)
 
+    rn = sub.add_parser("release-narrative")
+    rn.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -339,6 +346,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "release-readiness-board":
         return release_readiness_board.main(ns.args)
+
+    if ns.cmd == "release-narrative":
+        return release_narrative.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

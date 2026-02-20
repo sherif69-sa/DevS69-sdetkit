@@ -1,0 +1,32 @@
+{
+  "name": "day20-release-narrative-execution",
+  "total_commands": 3,
+  "passed_commands": 3,
+  "failed_commands": 0,
+  "results": [
+    {
+      "index": 1,
+      "command": "python -m sdetkit release-narrative --format json --strict",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "{\n  \"audience_blurbs\": {\n    \"engineering\": \"Ship with confidence by tying Day 19 release score to concrete checklist and evidence artifacts.\",\n    \"non_maintainers\": \"What changed: clearer quality gates, faster release confidence, and traceable evidence for audits.\",\n    \"support\": \"Use highlights + risks sections to pre-brief known changes and probable user questions.\"\n  },\n  \"call_to_action\": \"Share this narrative in release notes, weekly updates, and community announcements.\",\n  \"highlights\": [\n    \"Packaging: modernize license metadata.\",\n    \"CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.\",\n    \"Enterprise hardening: GitHub Actions pinned to commit SHAs.\",\n    \"Dependency hygiene: requirements pinned and lockfiles added.\",\n    \"Repo init/apply reliability: tolerate non-UTF-8 preset template files.\",\n    \"Repo cleanliness: ignore local SDETKit workspace and docs build output.\"\n  ],\n  \"inputs\": {\n    \"changelog\": \"CHANGELOG.md\",\n    \"day19_summary\": \"docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json\"\n  },\n  \"name\": \"day20-release-narrative\",\n  \"narrative_channels\": {\n    \"community_post\": \"Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.\",\n    \"internal_update\": \"Day 20 narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.\",\n    \"release_notes\": \"This release is ready to communicate broadly with a stable quality posture. Key highlights: Packaging: modernize license metadata.\"\n  },\n  \"risks\": [\n    \"Release posture is strong; proceed with release candidate tagging and notes preparation.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"headline\": \"This release is ready to communicate broadly with a stable quality posture.\",\n    \"readiness_label\": \"ready\",\n    \"release_score\": 96.56\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "index": 2,
+      "command": "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "{\n  \"audience_blurbs\": {\n    \"engineering\": \"Ship with confidence by tying Day 19 release score to concrete checklist and evidence artifacts.\",\n    \"non_maintainers\": \"What changed: clearer quality gates, faster release confidence, and traceable evidence for audits.\",\n    \"support\": \"Use highlights + risks sections to pre-brief known changes and probable user questions.\"\n  },\n  \"call_to_action\": \"Share this narrative in release notes, weekly updates, and community announcements.\",\n  \"emitted_pack_files\": [\n    \"docs/artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json\",\n    \"docs/artifacts/day20-release-narrative-pack/day20-release-narrative.md\",\n    \"docs/artifacts/day20-release-narrative-pack/day20-audience-blurbs.md\",\n    \"docs/artifacts/day20-release-narrative-pack/day20-channel-posts.md\",\n    \"docs/artifacts/day20-release-narrative-pack/day20-validation-commands.md\"\n  ],\n  \"highlights\": [\n    \"Packaging: modernize license metadata.\",\n    \"CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.\",\n    \"Enterprise hardening: GitHub Actions pinned to commit SHAs.\",\n    \"Dependency hygiene: requirements pinned and lockfiles added.\",\n    \"Repo init/apply reliability: tolerate non-UTF-8 preset template files.\",\n    \"Repo cleanliness: ignore local SDETKit workspace and docs build output.\"\n  ],\n  \"inputs\": {\n    \"changelog\": \"CHANGELOG.md\",\n    \"day19_summary\": \"docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json\"\n  },\n  \"name\": \"day20-release-narrative\",\n  \"narrative_channels\": {\n    \"community_post\": \"Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.\",\n    \"internal_update\": \"Day 20 narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.\",\n    \"release_notes\": \"This release is ready to communicate broadly with a stable quality posture. Key highlights: Packaging: modernize license metadata.\"\n  },\n  \"risks\": [\n    \"Release posture is strong; proceed with release candidate tagging and notes preparation.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"headline\": \"This release is ready to communicate broadly with a stable quality posture.\",\n    \"readiness_label\": \"ready\",\n    \"release_score\": 96.56\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "index": 3,
+      "command": "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "day20-release-narrative-contract check passed\n",
+      "stderr": ""
+    }
+  ]
+}

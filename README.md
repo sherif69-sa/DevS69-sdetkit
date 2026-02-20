@@ -828,6 +828,35 @@ python -m sdetkit release-readiness-board --format json --strict
 python -m sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict
 ```
 
+## ✍️ Day 20 ultra: release narrative
+
+Day 20 now ships a deterministic **release narrative operating lane** that converts Day 19 readiness posture and changelog highlights into multi-channel, non-maintainer storytelling.
+
+```bash
+python -m sdetkit release-narrative --format text
+python -m sdetkit release-narrative --format json --strict
+python -m sdetkit release-narrative --write-defaults --format json --strict
+python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict
+python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit release-narrative --format markdown --output docs/artifacts/day20-release-narrative-sample.md
+```
+
+See implementation details: [Day 20 ultra upgrade report](docs/day-20-ultra-upgrade-report.md).
+
+Day 20 closeout checks:
+
+```bash
+python -m pytest -q tests/test_release_narrative.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day20_release_narrative_contract.py
+python -m sdetkit release-narrative --format json --strict
+python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash

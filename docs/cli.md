@@ -488,3 +488,26 @@ Useful flags: `--root`, `--day18-summary`, `--day14-summary`, `--min-release-sco
 `--execute` runs the Day 19 command chain and emits an execution summary plus per-command logs for closeout evidence.
 
 `--strict` returns non-zero if Day 19 required docs sections/commands are missing, strict gates are not green, or release score falls below `--min-release-score`.
+
+## release-narrative
+
+Builds Day 20 release storytelling from Day 19 release-readiness summary and changelog highlights.
+
+Examples:
+
+- `sdetkit release-narrative --format text`
+- `sdetkit release-narrative --format json --strict`
+- `sdetkit release-narrative --write-defaults --format json --strict`
+- `sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict`
+- `sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict`
+- `sdetkit release-narrative --format markdown --output docs/artifacts/day20-release-narrative-sample.md`
+
+Useful flags: `--root`, `--day19-summary`, `--changelog`, `--min-release-score`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--strict`, `--format`, `--output`.
+
+`--write-defaults` writes a hardened Day 20 integration page if missing/incomplete, then validates it.
+
+`--emit-pack-dir` writes a Day 20 pack containing summary JSON, narrative markdown, audience blurbs, narrative channels, and validation commands.
+
+`--execute` runs the Day 20 command chain and emits an execution summary plus per-command logs for closeout evidence.
+
+`--strict` returns non-zero if Day 20 required docs sections/commands are missing, release posture is not ready, or release score falls below `--min-release-score`.

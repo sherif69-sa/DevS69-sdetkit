@@ -323,3 +323,15 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 19 release-readiness pack: `sdetkit release-readiness-board --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict`.
 - Capture deterministic execution logs: `sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict`.
 - Review generated artifacts: [day19 release readiness sample](artifacts/day19-release-readiness-board-sample.md), [day19 release summary](artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json), [day19 release decision](artifacts/day19-release-readiness-pack/day19-release-decision.md), [day19 validation commands](artifacts/day19-release-readiness-pack/day19-validation-commands.md), and [day19 execution summary](artifacts/day19-release-readiness-pack/evidence/day19-execution-summary.json).
+
+
+## Day 20 ultra upgrades (release narrative)
+
+- Read the implementation report: [Day 20 ultra upgrade report](day-20-ultra-upgrade-report.md).
+- Run `sdetkit release-narrative --format json --strict` to translate Day 19 posture into a strict narrative summary.
+- Auto-recover missing Day 20 integration docs: `sdetkit release-narrative --write-defaults --format json --strict`.
+- Export markdown artifact: `sdetkit release-narrative --format markdown --output docs/artifacts/day20-release-narrative-sample.md`.
+- Emit Day 20 release narrative pack: `sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict`.
+- Capture deterministic execution logs: `sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict`.
+- Review generated artifacts: [day20 release narrative sample](artifacts/day20-release-narrative-sample.md), [day20 narrative summary](artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json), [day20 channel posts](artifacts/day20-release-narrative-pack/day20-channel-posts.md), [day20 validation commands](artifacts/day20-release-narrative-pack/day20-validation-commands.md), and [day20 execution summary](artifacts/day20-release-narrative-pack/evidence/day20-execution-summary.json).
+
