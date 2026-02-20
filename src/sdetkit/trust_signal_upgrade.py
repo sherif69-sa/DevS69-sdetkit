@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -343,8 +344,8 @@ def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, A
     for idx, command in enumerate(commands, start=1):
         try:
             proc = subprocess.run(
-                command,
-                shell=True,
+                shlex.split(command),
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=timeout_sec,

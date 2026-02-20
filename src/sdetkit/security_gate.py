@@ -61,6 +61,15 @@ PRINT_ALLOWED_MODULE_SUFFIXES = (
     "/repo.py",
     "/patch.py",
     "/doctor.py",
+    "/contributor_funnel.py",
+    "/demo.py",
+    "/docs_navigation.py",
+    "/docs_qa.py",
+    "/enterprise_use_case.py",
+    "/first_contribution.py",
+    "/github_actions_quickstart.py",
+    "/gitlab_ci_quickstart.py",
+    "/onboarding.py",
 )
 
 
@@ -530,6 +539,18 @@ def _repo_allowed(entries: list[dict[str, Any]], finding: Finding) -> bool:
     return False
 
 
+def _looks_like_slug(token: str) -> bool:
+    if len(token) < 20:
+        return False
+    if token.lower() != token:
+        return False
+    if "-" not in token:
+        return False
+    if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+){2,}", token) is None:
+        return False
+    return True
+
+
 def _is_test_fixture_secret(rel_path: str, line: str) -> bool:
     if not rel_path.startswith("tests/"):
         return False
@@ -559,6 +580,8 @@ def _scan_text_patterns(rel_path: str, text: str) -> list[Finding]:
         # quoted token-like strings
         for match in re.finditer(r"['\"]([A-Za-z0-9+/=_\-]{20,})['\"]", line):
             token = match.group(1)
+            if _looks_like_slug(token):
+                continue
             if _entropy(token) >= 4.0 and not token.isdigit():
                 findings.append(
                     Finding(

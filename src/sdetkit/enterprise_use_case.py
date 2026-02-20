@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
@@ -239,8 +240,8 @@ def _execute_commands(
     for idx, command in enumerate(commands, start=1):
         try:
             proc = subprocess.run(
-                command,
-                shell=True,
+                shlex.split(command),
+                shell=False,
                 capture_output=True,
                 text=True,
                 timeout=timeout_sec,

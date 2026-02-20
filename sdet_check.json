@@ -1,0 +1,23 @@
+{
+  "findings": [],
+  "metadata": {
+    "generated_at_utc": "2026-02-20T21:28:35.517169+00:00",
+    "git_commit": "07c1710114aa64d65c29661e10ad819cf6ca7011",
+    "policy_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profile": "enterprise",
+    "tool": "sdetkit",
+    "version": "1.0.0"
+  },
+  "root": "/home/sherif/sdet_bootcamp",
+  "summary": {
+    "by_check": {},
+    "counts": {
+      "error": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "findings": 0,
+    "ok": true,
+    "score": 100
+  }
+}
