@@ -37,6 +37,7 @@ case "$mode" in
     python scripts/check_day4_skills_contract.py
     python scripts/check_day15_github_actions_quickstart_contract.py
     python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    python scripts/check_day18_reliability_evidence_pack_contract.py
     ;;
   onboarding)
     python scripts/check_onboarding_contract.py
@@ -52,6 +53,7 @@ case "$mode" in
     ;;
   day16)
     python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    python scripts/check_day18_reliability_evidence_pack_contract.py
     ;;
   all)
     ruff format --check .
@@ -65,6 +67,7 @@ case "$mode" in
     python scripts/check_day4_skills_contract.py
     python scripts/check_day15_github_actions_quickstart_contract.py
     python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    python scripts/check_day18_reliability_evidence_pack_contract.py
     ;;
   *)
     echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|day15|day16|all}" >&2

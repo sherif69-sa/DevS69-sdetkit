@@ -769,6 +769,35 @@ python scripts/check_day17_quality_contribution_delta_contract.py
 python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict
 ```
 
+## 🧱 Day 18 ultra: reliability evidence pack
+
+Day 18 now ships a production-grade **reliability operating pack** that consolidates Day 15/16 execution evidence and Day 17 quality+contribution deltas into one deterministic closeout lane.
+
+```bash
+python -m sdetkit reliability-evidence-pack --format text
+python -m sdetkit reliability-evidence-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --write-defaults --format json --strict
+python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit reliability-evidence-pack --format markdown --output docs/artifacts/day18-reliability-evidence-pack-sample.md
+```
+
+See implementation details: [Day 18 ultra upgrade report](docs/day-18-ultra-upgrade-report.md).
+
+Day 18 closeout checks:
+
+```bash
+python -m pytest -q tests/test_reliability_evidence_pack.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day18_reliability_evidence_pack_contract.py
+python -m sdetkit reliability-evidence-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
