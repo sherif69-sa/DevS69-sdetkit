@@ -3,6 +3,10 @@
 - Score: **100.0** (12/12)
 - Docs home: `docs/index.md`
 
+## Fast start
+
+- `sdetkit docs-nav --format json --strict`
+
 ## Top journeys
 
 - [ ] Run first command in under 60 seconds
@@ -12,11 +16,11 @@
 ## Required one-click links
 
 - `[⚡ Fast start](#fast-start)`
-- `[🛠 CLI commands](cli.md)`
-- `[🩺 Doctor checks](doctor.md)`
-- `[🤝 Contribute](contributing.md)`
-- `[✅ Day 10 ultra report](day-10-ultra-upgrade-report.md)`
-- `[🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md)`
+- `[🛠 CLI commands](../cli.md)`
+- `[🩺 Doctor checks](../doctor.md)`
+- `[🤝 Contribute](../contributing.md)`
+- `[✅ Day 10 ultra report](../day-10-ultra-upgrade-report.md)`
+- `[🧭 Day 11 ultra report](../day-11-ultra-upgrade-report.md)`
 
 ## Missing docs navigation content
 
