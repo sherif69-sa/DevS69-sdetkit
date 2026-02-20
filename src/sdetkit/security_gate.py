@@ -551,6 +551,22 @@ def _looks_like_slug(token: str) -> bool:
     return True
 
 
+def _looks_like_uuid(token: str) -> bool:
+    t = token
+    if t.startswith("urn:uuid:"):
+        t = t[len("urn:uuid:") :]
+    return (
+        re.fullmatch(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", t) is not None
+    )
+
+
+def _looks_like_hex_digest(token: str) -> bool:
+    n = len(token)
+    if n not in {24, 32, 40, 48, 56, 64}:
+        return False
+    return re.fullmatch(r"[0-9a-f]+", token) is not None
+
+
 def _is_test_fixture_secret(rel_path: str, line: str) -> bool:
     if not rel_path.startswith("tests/"):
         return False
@@ -581,6 +597,10 @@ def _scan_text_patterns(rel_path: str, text: str) -> list[Finding]:
         for match in re.finditer(r"['\"]([A-Za-z0-9+/=_\-]{20,})['\"]", line):
             token = match.group(1)
             if _looks_like_slug(token):
+                continue
+            if _looks_like_uuid(token):
+                continue
+            if _looks_like_hex_digest(token):
                 continue
             if _entropy(token) >= 4.0 and not token.isdigit():
                 findings.append(
