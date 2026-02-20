@@ -1,0 +1,22 @@
+{
+  "week": 3,
+  "kpis": {
+    "days_completed": 6,
+    "days_planned": 6,
+    "completion_rate_percent": 100,
+    "runnable_commands": 6,
+    "artifact_coverage": 6
+  },
+  "growth_signals": {
+    "traffic": 2550,
+    "stars": 132,
+    "discussions": 33,
+    "blocker_fixes": 10
+  },
+  "growth_deltas": {
+    "traffic": 750,
+    "stars": 42,
+    "discussions": 9,
+    "blocker_fixes": 3
+  }
+}
