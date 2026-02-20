@@ -700,8 +700,43 @@ def diff_runs(history_dir: Path, run_a: str, run_b: str) -> dict[str, Any]:
     a_steps = a.get("steps", {})
     b_steps = b.get("steps", {})
     changed_steps: list[str] = []
+
+    def _normalize_artifact_path(raw: str) -> str:
+        s = str(raw).replace("\\", "/")
+        if "ops-history" in s and "/artifacts/" in s:
+            return s.split("/artifacts/", 1)[1]
+        if "/ops-replay-artifacts/" in s:
+            return s.split("/ops-replay-artifacts/", 1)[1]
+        return str(raw)
+
+    def _canonical_step(step: Any) -> Any:
+        if not isinstance(step, dict):
+            return step
+        out = {
+            "step_id": step.get("step_id"),
+            "type": step.get("type"),
+            "status": step.get("status"),
+            "inputs": step.get("inputs"),
+            "outputs": step.get("outputs"),
+            "findings": step.get("findings"),
+        }
+        outputs = out.get("outputs")
+        if isinstance(outputs, dict):
+            o2 = dict(outputs)
+            if isinstance(o2.get("path"), str):
+                o2["path"] = _normalize_artifact_path(o2["path"])
+            out["outputs"] = o2
+        findings = out.get("findings")
+        if isinstance(findings, list):
+            norm = []
+            for item in findings:
+                norm.append(item if isinstance(item, dict) else {"value": item})
+            norm.sort(key=lambda x: json.dumps(x, sort_keys=True, ensure_ascii=True))
+            out["findings"] = norm
+        return out
+
     for sid in sorted(set(a_steps) | set(b_steps)):
-        if a_steps.get(sid) != b_steps.get(sid):
+        if _canonical_step(a_steps.get(sid)) != _canonical_step(b_steps.get(sid)):
             changed_steps.append(sid)
     a_art = {x["path"]: x["sha256"] for x in a.get("artifacts", [])}
     b_art = {x["path"]: x["sha256"] for x in b.get("artifacts", [])}

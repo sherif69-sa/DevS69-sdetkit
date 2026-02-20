@@ -8,4 +8,3 @@ python scripts/check_day16_gitlab_ci_quickstart_contract.py
 python -m sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict
 python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict
 ```
-

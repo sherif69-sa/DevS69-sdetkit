@@ -219,3 +219,26 @@ except Exception:
     rules = {item["rule_id"] for item in payload["findings"]}
     assert "SEC_UNCONTROLLED_PATH_EXPRESSION" in rules
     assert "SEC_EMPTY_EXCEPT" in rules
+
+
+def test_security_scan_ignores_uuid_and_hex_digests(tmp_path: Path, capsys) -> None:
+    import hashlib
+    import json
+    import uuid
+
+    src = tmp_path / "src"
+    src.mkdir()
+
+    u = f"urn:uuid:{uuid.UUID(int=123456789)}"
+    h = hashlib.sha256(b"sdetkit").hexdigest()[:24]
+
+    (src / "a.py").write_text(
+        f'X = "{u}"\nY = "{h}"\nZ = "day15-github-pack-example"\n',
+        encoding="utf-8",
+    )
+
+    assert _run(["scan", "--root", str(tmp_path), "--format", "json", "--fail-on", "none"]) == 0
+    out = capsys.readouterr().out
+    data = json.loads(out)
+    findings = data.get("findings", [])
+    assert not any(f.get("rule_id") == "SEC_HIGH_ENTROPY_STRING" for f in findings)

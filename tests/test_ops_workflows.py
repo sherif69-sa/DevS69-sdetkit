@@ -164,6 +164,49 @@ inputs = { path = "a.txt", text = "hello" }
     assert diff["changed_steps"] == []
 
 
+def test_history_diff_detects_changed_artifact_content(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    path = Path("wf.toml")
+    path.write_text(
+        """
+[workflow]
+name = "h2"
+version = "1"
+[[workflow.steps]]
+id = "a"
+type = "write_file"
+inputs = { path = "a.txt", text = "${input.text}" }
+""",
+        encoding="utf-8",
+    )
+
+    first = run_workflow(
+        path,
+        inputs={"text": "one"},
+        artifacts_dir=Path("art"),
+        history_dir=Path("."),
+        workers=1,
+        dry_run=False,
+        fail_fast=False,
+    )
+    run_a = first["run_id"]
+
+    second = run_workflow(
+        path,
+        inputs={"text": "two"},
+        artifacts_dir=Path("art"),
+        history_dir=Path("."),
+        workers=1,
+        dry_run=False,
+        fail_fast=False,
+    )
+    run_b = second["run_id"]
+
+    diff = diff_runs(Path("."), run_a, run_b)
+    assert diff["changed_steps"] == ["a"]
+    assert diff["changed_artifacts"] == ["a.txt"]
+
+
 def test_load_run_rejects_invalid_id(tmp_path: Path) -> None:
     from sdetkit.ops import load_run
 

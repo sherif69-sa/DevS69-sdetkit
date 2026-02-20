@@ -34,3 +34,6 @@ doctor.json
 
 # docs build output
 site/
+
+# Local CI/gate scratch
+sdet_check.json
