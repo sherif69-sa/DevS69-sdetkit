@@ -1,0 +1,17 @@
+stages:
+  - nightly
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+nightly-audit:
+  stage: nightly
+  image: python:3.11
+  script:
+    - python -m pip install -r requirements-test.txt -e .
+    - python -m sdetkit doctor --format text
+    - python -m sdetkit repo audit --format json
+    - python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"

@@ -1,0 +1,17 @@
+stages:
+  - quality
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+strict-gate:
+  stage: quality
+  image: python:3.11
+  script:
+    - python -m pip install -r requirements-test.txt -e .
+    - python -m pytest -q tests/test_cli_sdetkit.py tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py
+    - python -m sdetkit gitlab-ci-quickstart --format json --strict
+    - python scripts/check_day16_gitlab_ci_quickstart_contract.py
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_PIPELINE_SOURCE == "web"

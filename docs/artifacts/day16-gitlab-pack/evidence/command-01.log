@@ -1,0 +1,17 @@
+command: python -m sdetkit doctor --format text
+returncode: 0
+ok: True
+--- stdout ---
+doctor score: 100%
+[OK] ascii: ASCII scan not requested
+[OK] ci_workflows: CI workflow check not requested
+[OK] clean_tree: clean tree check not requested
+[OK] deps: dependency consistency check not requested
+[OK] pre_commit: pre-commit check not requested
+[OK] security_files: security governance file check not requested
+[OK] stdlib_shadowing: no stdlib shadowing detected
+recommendations:
+- No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality.
+
+--- stderr ---
+

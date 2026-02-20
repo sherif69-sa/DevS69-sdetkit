@@ -35,6 +35,8 @@ case "$mode" in
     python scripts/check_onboarding_contract.py
     python scripts/check_day3_proof_contract.py
     python scripts/check_day4_skills_contract.py
+    python scripts/check_day15_github_actions_quickstart_contract.py
+    python scripts/check_day16_gitlab_ci_quickstart_contract.py
     ;;
   onboarding)
     python scripts/check_onboarding_contract.py
@@ -44,6 +46,12 @@ case "$mode" in
     ;;
   day4)
     python scripts/check_day4_skills_contract.py
+    ;;
+  day15)
+    python scripts/check_day15_github_actions_quickstart_contract.py
+    ;;
+  day16)
+    python scripts/check_day16_gitlab_ci_quickstart_contract.py
     ;;
   all)
     ruff format --check .
@@ -55,9 +63,11 @@ case "$mode" in
     python scripts/check_onboarding_contract.py
     python scripts/check_day3_proof_contract.py
     python scripts/check_day4_skills_contract.py
+    python scripts/check_day15_github_actions_quickstart_contract.py
+    python scripts/check_day16_gitlab_ci_quickstart_contract.py
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|day15|day16|all}" >&2
     exit 2
     ;;
 esac
