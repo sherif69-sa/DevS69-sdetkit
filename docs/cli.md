@@ -263,6 +263,37 @@ Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, 
 
 See: day-15-ultra-upgrade-report.md
 
+
+## gitlab-ci-quickstart
+
+Builds Day 16 GitLab CI quickstart status and validates required integration sections, pipeline variants, and execution evidence workflow.
+
+Examples:
+
+- `sdetkit gitlab-ci-quickstart --format text --strict`
+- `sdetkit gitlab-ci-quickstart --format json --variant strict --strict`
+- `sdetkit gitlab-ci-quickstart --write-defaults --format json --strict`
+- `sdetkit gitlab-ci-quickstart --format markdown --variant strict --output docs/artifacts/day16-gitlab-ci-quickstart-sample.md`
+- `sdetkit gitlab-ci-quickstart --emit-pack-dir docs/artifacts/day16-gitlab-pack --format json --strict`
+- `sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict`
+- `sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--variant`, `--bootstrap-pipeline`, `--pipeline-path`, `--execute`, `--evidence-dir`, `--timeout-sec`.
+
+`--strict` returns non-zero if required Day 16 quickstart sections or command snippets are missing from `docs/integrations-gitlab-ci-quickstart.md`.
+
+`--write-defaults` writes a hardened Day 16 quickstart page if missing/incomplete, then validates again.
+
+`--emit-pack-dir` writes a Day 16 integration pack containing checklist, minimal/strict/nightly pipelines, distribution plan, and validation commands.
+
+`--bootstrap-pipeline` writes the selected pipeline variant directly to `--pipeline-path` for copy/paste-free adoption.
+
+`--execute` runs Day 16 command chain and captures pass/fail output.
+
+`--evidence-dir` writes `day16-execution-summary.json` plus per-command log files for CI incident triage and closeout handoff.
+
+See: day-16-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).

@@ -1,0 +1,18 @@
+command: python -m sdetkit gitlab-ci-quickstart --format json --strict
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "name": "day16-gitlab-ci-quickstart",
+  "page": "docs/integrations-gitlab-ci-quickstart.md",
+  "variant": "minimal",
+  "selected_pipeline": "stages:\n  - quality\n\nvariables:\n  PIP_DISABLE_PIP_VERSION_CHECK: \"1\"\n\nquickstart-gate:\n  stage: quality\n  image: python:3.11\n  script:\n    - python -m pip install -r requirements-test.txt -e .\n    - python -m sdetkit gitlab-ci-quickstart --format json --strict\n    - python -m pytest -q tests/test_cli_sdetkit.py tests/test_gitlab_ci_quickstart.py\n  rules:\n    - if: $CI_PIPELINE_SOURCE == \"merge_request_event\"\n    - if: $CI_PIPELINE_SOURCE == \"web\"\n",
+  "passed_checks": 19,
+  "total_checks": 19,
+  "score": 100.0,
+  "missing": [],
+  "touched_files": []
+}
+
+--- stderr ---
+

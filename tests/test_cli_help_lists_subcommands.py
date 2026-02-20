@@ -33,3 +33,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "startup-use-case" in out
     assert "enterprise-use-case" in out
     assert "github-actions-quickstart" in out
+    assert "gitlab-ci-quickstart" in out

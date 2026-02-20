@@ -711,6 +711,37 @@ python -m sdetkit github-actions-quickstart --format json --strict
 python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict
 ```
 
+## 🦊 Day 16 ultra: GitLab CI quickstart
+
+Day 16 ships a **production-ready GitLab CI integration recipe** with minimal + strict + nightly pipelines, evidence capture, and distribution-loop guidance.
+
+```bash
+python -m sdetkit gitlab-ci-quickstart --format text --strict
+python -m sdetkit gitlab-ci-quickstart --format json --variant strict --strict
+python -m sdetkit gitlab-ci-quickstart --write-defaults --format json --strict
+python -m sdetkit gitlab-ci-quickstart --emit-pack-dir docs/artifacts/day16-gitlab-pack --format json --strict
+python -m sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict
+python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit gitlab-ci-quickstart --format markdown --variant strict --output docs/artifacts/day16-gitlab-ci-quickstart-sample.md
+```
+
+See implementation details: [Day 16 ultra upgrade report](docs/day-16-ultra-upgrade-report.md).
+
+Day 16 closeout checks:
+
+```bash
+python -m pytest -q tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day16_gitlab_ci_quickstart_contract.py
+python -m sdetkit gitlab-ci-quickstart --format json --strict
+python -m sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict
+python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash

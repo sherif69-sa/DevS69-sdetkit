@@ -279,3 +279,17 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Capture deterministic execution evidence: `sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict`.
 - Review generated artifacts: [day15 quickstart sample](artifacts/day15-github-actions-quickstart-sample.md), [day15 strict workflow](artifacts/day15-github-pack/day15-sdetkit-strict.yml), [day15 evidence summary](artifacts/day15-github-pack/evidence/day15-execution-summary.json).
 
+
+
+## Day 16 ultra upgrades (GitLab CI quickstart)
+
+- Read the implementation report: [Day 16 ultra upgrade report](day-16-ultra-upgrade-report.md).
+- Run `sdetkit gitlab-ci-quickstart --format text --strict` to validate required integration recipe sections and pipeline variants.
+- Validate strict variant output: `sdetkit gitlab-ci-quickstart --format json --variant strict --strict`.
+- Auto-recover missing quickstart content: `sdetkit gitlab-ci-quickstart --write-defaults --format json --strict`.
+- Export markdown quickstart artifact: `sdetkit gitlab-ci-quickstart --format markdown --variant strict --output docs/artifacts/day16-gitlab-ci-quickstart-sample.md`.
+- Emit Day 16 rollout pack: `sdetkit gitlab-ci-quickstart --emit-pack-dir docs/artifacts/day16-gitlab-pack --format json --strict`.
+- Bootstrap `.gitlab-ci.yml` from strict variant: `sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict`.
+- Capture deterministic execution evidence: `sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict`.
+- Review generated artifacts: [day16 quickstart sample](artifacts/day16-gitlab-ci-quickstart-sample.md), [day16 strict pipeline](artifacts/day16-gitlab-pack/day16-sdetkit-strict.yml), [day16 evidence summary](artifacts/day16-gitlab-pack/evidence/day16-execution-summary.json).
+
