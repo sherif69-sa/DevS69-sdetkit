@@ -314,6 +314,31 @@ Useful flags: `--root`, `--current-signals-file`, `--previous-signals-file`, `--
 
 See: day-17-ultra-upgrade-report.md
 
+## reliability-evidence-pack
+
+Builds Day 18 reliability evidence by combining Day 15 GitHub execution logs, Day 16 GitLab execution logs, and Day 17 quality/contribution delta summary.
+
+Examples:
+
+- `sdetkit reliability-evidence-pack --format text`
+- `sdetkit reliability-evidence-pack --format json --strict`
+- `sdetkit reliability-evidence-pack --write-defaults --format json --strict`
+- `sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict`
+- `sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict`
+- `sdetkit reliability-evidence-pack --format markdown --output docs/artifacts/day18-reliability-evidence-pack-sample.md`
+
+Useful flags: `--root`, `--day15-summary`, `--day16-summary`, `--day17-summary`, `--min-reliability-score`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--strict`, `--format`, `--output`.
+
+`--write-defaults` writes a hardened Day 18 integration page if missing/incomplete, then validates it.
+
+`--emit-pack-dir` writes a Day 18 pack containing reliability summary JSON, scorecard markdown, closeout checklist markdown, and a validation commands file.
+
+`--execute` runs the Day 18 command chain and emits an execution summary plus per-command logs for closeout evidence.
+
+`--strict` returns non-zero if Day 18 required docs sections/commands are missing, strict gates are not green across Day 15/16/17 inputs, or reliability score falls below `--min-reliability-score`.
+
+See: day-18-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).

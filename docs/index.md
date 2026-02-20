@@ -301,3 +301,14 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Export markdown artifact: `sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format markdown --output docs/artifacts/day17-quality-contribution-delta-sample.md`.
 - Emit Day 17 delta pack: `sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --emit-pack-dir docs/artifacts/day17-delta-pack --format json --strict`.
 - Review generated artifacts: [day17 quality/contribution sample](artifacts/day17-quality-contribution-delta-sample.md), [day17 delta summary](artifacts/day17-delta-pack/day17-delta-summary.json), and [day17 contribution action plan](artifacts/day17-delta-pack/day17-contribution-action-plan.md).
+
+
+## Day 18 ultra upgrades (reliability evidence pack)
+
+- Read the implementation report: [Day 18 ultra upgrade report](day-18-ultra-upgrade-report.md).
+- Run `sdetkit reliability-evidence-pack --format json --strict` to compose Day 15/16/17 evidence into one reliability score.
+- Auto-recover missing Day 18 integration docs: `sdetkit reliability-evidence-pack --write-defaults --format json --strict`.
+- Export markdown artifact: `sdetkit reliability-evidence-pack --format markdown --output docs/artifacts/day18-reliability-evidence-pack-sample.md`.
+- Emit Day 18 reliability pack: `sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict`.
+- Capture deterministic execution logs: `sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict`.
+- Review generated artifacts: [day18 reliability sample](artifacts/day18-reliability-evidence-pack-sample.md), [day18 reliability summary](artifacts/day18-reliability-pack/day18-reliability-summary.json), [day18 validation commands](artifacts/day18-reliability-pack/day18-validation-commands.md), and [day18 execution summary](artifacts/day18-reliability-pack/evidence/day18-execution-summary.json).

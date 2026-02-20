@@ -35,3 +35,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "github-actions-quickstart" in out
     assert "gitlab-ci-quickstart" in out
     assert "quality-contribution-delta" in out
+    assert "reliability-evidence-pack" in out

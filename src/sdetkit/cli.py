@@ -5,7 +5,32 @@ import os
 from collections.abc import Sequence
 from importlib import metadata
 
-from . import apiget, contributor_funnel, demo, docs_navigation, docs_qa, enterprise_use_case, evidence, first_contribution, github_actions_quickstart, gitlab_ci_quickstart, kvcli, notify, onboarding, ops, patch, policy, proof, quality_contribution_delta, repo, report, startup_use_case, triage_templates, weekly_review
+from . import (
+    apiget,
+    contributor_funnel,
+    demo,
+    docs_navigation,
+    docs_qa,
+    enterprise_use_case,
+    evidence,
+    first_contribution,
+    github_actions_quickstart,
+    gitlab_ci_quickstart,
+    kvcli,
+    notify,
+    onboarding,
+    ops,
+    patch,
+    policy,
+    proof,
+    quality_contribution_delta,
+    reliability_evidence_pack,
+    repo,
+    report,
+    startup_use_case,
+    triage_templates,
+    weekly_review,
+)
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .security_gate import main as security_main
@@ -125,6 +150,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "quality-contribution-delta":
         return quality_contribution_delta.main(list(argv[1:]))
 
+    if argv and argv[0] == "reliability-evidence-pack":
+        return reliability_evidence_pack.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -216,6 +244,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     qcd = sub.add_parser("quality-contribution-delta")
     qcd.add_argument("args", nargs=argparse.REMAINDER)
 
+    rep = sub.add_parser("reliability-evidence-pack")
+    rep.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -295,6 +326,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "quality-contribution-delta":
         return quality_contribution_delta.main(ns.args)
+
+    if ns.cmd == "reliability-evidence-pack":
+        return reliability_evidence_pack.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

@@ -1,0 +1,32 @@
+{
+  "inputs": {
+    "day15": {
+      "pass_rate": 100.0,
+      "score": 100.0,
+      "strict": true
+    },
+    "day16": {
+      "pass_rate": 100.0,
+      "score": 100.0,
+      "strict": true
+    },
+    "day17": {
+      "stability_score": 100.0,
+      "strict_failures": [],
+      "velocity_score": 75.44
+    }
+  },
+  "missing": [],
+  "name": "day18-reliability-evidence-pack",
+  "page": "docs/integrations-reliability-evidence-pack.md",
+  "recommendations": [
+    "Reliability posture is strong; keep current CI and closeout operating cadence."
+  ],
+  "score": 100.0,
+  "summary": {
+    "gate_status": "pass",
+    "reliability_score": 95.09,
+    "strict_all_green": true
+  },
+  "touched_files": []
+}
