@@ -266,3 +266,16 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
   Approval gates, allowlists, shell restrictions, and MCP bridge defaults.
 
 </div>
+
+
+## Day 15 ultra upgrades (GitHub Actions quickstart)
+
+- Read the implementation report: [Day 15 ultra upgrade report](day-15-ultra-upgrade-report.md).
+- Run `sdetkit github-actions-quickstart --format text --strict` to validate required integration recipe sections and workflow variants.
+- Validate strict variant output: `sdetkit github-actions-quickstart --format json --variant strict --strict`.
+- Auto-recover missing quickstart content: `sdetkit github-actions-quickstart --write-defaults --format json --strict`.
+- Export markdown quickstart artifact: `sdetkit github-actions-quickstart --format markdown --variant strict --output docs/artifacts/day15-github-actions-quickstart-sample.md`.
+- Emit Day 15 rollout pack: `sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict`.
+- Capture deterministic execution evidence: `sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict`.
+- Review generated artifacts: [day15 quickstart sample](artifacts/day15-github-actions-quickstart-sample.md), [day15 strict workflow](artifacts/day15-github-pack/day15-sdetkit-strict.yml), [day15 evidence summary](artifacts/day15-github-pack/evidence/day15-execution-summary.json).
+

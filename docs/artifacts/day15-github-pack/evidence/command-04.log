@@ -1,0 +1,18 @@
+command: python -m sdetkit github-actions-quickstart --format json --strict
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "name": "day15-github-actions-quickstart",
+  "page": "docs/integrations-github-actions-quickstart.md",
+  "variant": "minimal",
+  "selected_workflow": "name: sdetkit-github-quickstart\non:\n  pull_request:\n  workflow_dispatch:\n\njobs:\n  quality-gate:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: '3.11'\n      - run: python -m pip install -r requirements-test.txt -e .\n      - run: python -m sdetkit github-actions-quickstart --format json --strict\n      - run: python -m pytest -q tests/test_cli_sdetkit.py tests/test_github_actions_quickstart.py\n",
+  "passed_checks": 18,
+  "total_checks": 18,
+  "score": 100.0,
+  "missing": [],
+  "touched_files": []
+}
+
+--- stderr ---
+

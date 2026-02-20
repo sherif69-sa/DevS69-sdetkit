@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 
-def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_proof_docs_qa_weekly_review_first_contribution_contributor_funnel_triage_templates_and_docs_nav_and_startup_and_enterprise_use_case() -> None:
+def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_proof_docs_qa_weekly_review_first_contribution_contributor_funnel_triage_templates_and_docs_nav_and_startup_and_enterprise_and_github_actions_quickstart_use_case() -> None:
     r = subprocess.run(
         [sys.executable, "-m", "sdetkit", "--help"],
         text=True,
@@ -32,3 +32,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "docs-nav" in out
     assert "startup-use-case" in out
     assert "enterprise-use-case" in out
+    assert "github-actions-quickstart" in out

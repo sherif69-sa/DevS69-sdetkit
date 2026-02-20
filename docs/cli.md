@@ -236,6 +236,33 @@ Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, 
 
 See: day-13-ultra-upgrade-report.md
 
+## github-actions-quickstart
+
+Builds Day 15 GitHub Actions quickstart status and validates required integration sections, workflow variants, and execution evidence workflow.
+
+Examples:
+
+- `sdetkit github-actions-quickstart --format text --strict`
+- `sdetkit github-actions-quickstart --format json --variant strict --strict`
+- `sdetkit github-actions-quickstart --write-defaults --format json --strict`
+- `sdetkit github-actions-quickstart --format markdown --variant strict --output docs/artifacts/day15-github-actions-quickstart-sample.md`
+- `sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict`
+- `sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--variant`, `--execute`, `--evidence-dir`, `--timeout-sec`.
+
+`--strict` returns non-zero if required Day 15 quickstart sections or command snippets are missing from `docs/integrations-github-actions-quickstart.md`.
+
+`--write-defaults` writes a hardened Day 15 quickstart page if missing/incomplete, then validates again.
+
+`--emit-pack-dir` writes a Day 15 integration pack containing checklist, minimal/strict/nightly workflows, distribution plan, and validation commands.
+
+`--execute` runs Day 15 command chain and captures pass/fail output.
+
+`--evidence-dir` writes `day15-execution-summary.json` plus per-command log files for CI incident triage and closeout handoff.
+
+See: day-15-ultra-upgrade-report.md
+
 ## patch
 
 Deterministic, spec-driven file edits (official CLI command).

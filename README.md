@@ -682,6 +682,35 @@ python scripts/check_day14_weekly_review_contract.py
 python -m sdetkit weekly-review --week 2 --format json --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json --strict
 ```
 
+## 🔁 Day 15 ultra: GitHub Actions quickstart
+
+Day 15 closes with a **production-ready integration recipe**: minimal + strict + nightly GitHub Actions workflows, execution evidence capture, and distribution-loop guidance.
+
+```bash
+python -m sdetkit github-actions-quickstart --format text --strict
+python -m sdetkit github-actions-quickstart --format json --variant strict --strict
+python -m sdetkit github-actions-quickstart --write-defaults --format json --strict
+python -m sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict
+python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit github-actions-quickstart --format markdown --variant strict --output docs/artifacts/day15-github-actions-quickstart-sample.md
+```
+
+See implementation details: [Day 15 ultra upgrade report](docs/day-15-ultra-upgrade-report.md).
+
+Day 15 closeout checks:
+
+```bash
+python -m pytest -q tests/test_github_actions_quickstart.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day15_github_actions_quickstart_contract.py
+python -m sdetkit github-actions-quickstart --format json --strict
+python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
