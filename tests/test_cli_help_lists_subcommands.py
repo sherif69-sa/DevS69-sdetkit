@@ -38,3 +38,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "reliability-evidence-pack" in out
     assert "release-readiness-board" in out
     assert "release-narrative" in out
+    assert "trust-signal-upgrade" in out

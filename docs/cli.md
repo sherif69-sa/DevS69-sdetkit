@@ -516,3 +516,26 @@ Useful flags: `--root`, `--day19-summary`, `--changelog`, `--min-release-score`,
 `--execute` runs the Day 20 command chain and emits an execution summary plus per-command logs for closeout evidence.
 
 `--strict` returns non-zero if Day 20 required docs sections/commands are missing, release posture is not ready, or release score falls below `--min-release-score`.
+
+## trust-signal-upgrade
+
+Builds Day 22 trust visibility posture from README badges, governance-policy discoverability links, and workflow/docs-index visibility checks.
+
+Examples:
+
+- `sdetkit trust-signal-upgrade --format text`
+- `sdetkit trust-signal-upgrade --format json --strict`
+- `sdetkit trust-signal-upgrade --write-defaults --format json --strict`
+- `sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict`
+- `sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict`
+- `sdetkit trust-signal-upgrade --format markdown --output docs/artifacts/day22-trust-signal-upgrade-sample.md`
+
+Useful flags: `--root`, `--readme`, `--docs-index`, `--min-trust-score`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--strict`, `--format`, `--output`.
+
+`--write-defaults` writes a hardened Day 22 integration page if missing/incomplete, then validates it.
+
+`--emit-pack-dir` writes a Day 22 pack containing summary JSON, trust scorecard markdown, visibility checklist markdown, trust action plan, and a validation commands file.
+
+`--execute` runs the Day 22 command chain and emits an execution summary plus per-command logs for closeout evidence.
+
+`--strict` returns non-zero if Day 22 required docs sections/commands are missing, any critical trust checks fail, or trust score falls below `--min-trust-score`.

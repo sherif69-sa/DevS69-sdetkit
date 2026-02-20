@@ -1,0 +1,166 @@
+command: python -m sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "badge_checks": {
+    "ci_badge": true,
+    "mutation_badge": true,
+    "pages_badge": true,
+    "quality_badge": true,
+    "security_badge": true
+  },
+  "checks": [
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/ci.yml/badge.svg",
+      "key": "ci_badge",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/quality.yml/badge.svg",
+      "key": "quality_badge",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/mutation-tests.yml/badge.svg",
+      "key": "mutation_badge",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/security.yml/badge.svg",
+      "key": "security_badge",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/pages.yml/badge.svg",
+      "key": "pages_badge",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "policy",
+      "evidence": {
+        "exists": true,
+        "path": "SECURITY.md",
+        "readme_link": true
+      },
+      "key": "security_doc_exists",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "policy",
+      "evidence": {
+        "exists": true,
+        "path": "docs/security.md",
+        "readme_link": true
+      },
+      "key": "security_guide_exists",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "policy",
+      "evidence": {
+        "exists": true,
+        "path": "docs/policy-and-baselines.md",
+        "readme_link": true
+      },
+      "key": "policy_baseline_exists",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "governance",
+      "evidence": ".github/workflows/ci.yml",
+      "key": "ci_workflow",
+      "passed": true,
+      "weight": 6
+    },
+    {
+      "category": "governance",
+      "evidence": ".github/workflows/security.yml",
+      "key": "security_workflow",
+      "passed": true,
+      "weight": 8
+    },
+    {
+      "category": "governance",
+      "evidence": ".github/workflows/pages.yml",
+      "key": "pages_workflow",
+      "passed": true,
+      "weight": 4
+    },
+    {
+      "category": "governance",
+      "evidence": "day-22-ultra-upgrade-report.md",
+      "key": "docs_index_day22",
+      "passed": true,
+      "weight": 2
+    }
+  ],
+  "emitted_pack_files": [
+    "docs/artifacts/day22-trust-pack/day22-trust-summary.json",
+    "docs/artifacts/day22-trust-pack/day22-trust-scorecard.md",
+    "docs/artifacts/day22-trust-pack/day22-visibility-checklist.md",
+    "docs/artifacts/day22-trust-pack/day22-trust-action-plan.md",
+    "docs/artifacts/day22-trust-pack/day22-validation-commands.md"
+  ],
+  "governance_checks": {
+    "ci_workflow": true,
+    "docs_index_day22": true,
+    "pages_workflow": true,
+    "security_workflow": true
+  },
+  "inputs": {
+    "docs_index": "docs/index.md",
+    "readme": "README.md"
+  },
+  "name": "day22-trust-signal-upgrade",
+  "policy_checks": {
+    "policy_baseline_exists": true,
+    "security_doc_exists": true,
+    "security_guide_exists": true
+  },
+  "recommendations": [
+    "Trust signals are complete; keep trust badges, policy links, and workflows current each release."
+  ],
+  "score": 100.0,
+  "strict_failures": [],
+  "summary": {
+    "category_coverage": {
+      "badges": {
+        "passed": 5,
+        "total": 5
+      },
+      "governance": {
+        "passed": 4,
+        "total": 4
+      },
+      "policy": {
+        "passed": 3,
+        "total": 3
+      }
+    },
+    "critical_failures": [],
+    "failed_checks": 0,
+    "trust_label": "strong",
+    "trust_score": 100.0,
+    "weighted_points": {
+      "earned": 100,
+      "total": 100
+    }
+  }
+}
+
+--- stderr ---
+

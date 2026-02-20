@@ -857,6 +857,36 @@ python -m sdetkit release-narrative --format json --strict
 python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict
 ```
 
+## 🔐 Day 22 ultra: trust signal upgrade
+
+Day 22 ships a deterministic **trust signal upgrade lane** that verifies reliability badges, policy discoverability links, and core trust workflows before broad promotion.
+
+```bash
+python -m sdetkit trust-signal-upgrade --format text
+python -m sdetkit trust-signal-upgrade --format json --strict
+python -m sdetkit trust-signal-upgrade --docs-index docs/index.md --min-trust-score 95 --format json --strict
+python -m sdetkit trust-signal-upgrade --write-defaults --format json --strict
+python -m sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict
+python -m sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit trust-signal-upgrade --format markdown --output docs/artifacts/day22-trust-signal-upgrade-sample.md
+```
+
+See implementation details: [Day 22 ultra upgrade report](docs/day-22-ultra-upgrade-report.md).
+
+Day 22 closeout checks:
+
+```bash
+python -m pytest -q tests/test_trust_signal_upgrade.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day22_trust_signal_upgrade_contract.py
+python -m sdetkit trust-signal-upgrade --format json --strict
+python -m sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash

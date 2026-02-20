@@ -30,6 +30,7 @@ from . import (
     repo,
     report,
     startup_use_case,
+    trust_signal_upgrade,
     triage_templates,
     weekly_review,
 )
@@ -161,6 +162,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "release-narrative":
         return release_narrative.main(list(argv[1:]))
 
+    if argv and argv[0] == "trust-signal-upgrade":
+        return trust_signal_upgrade.main(list(argv[1:]))
+
     p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -261,6 +265,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     rn = sub.add_parser("release-narrative")
     rn.add_argument("args", nargs=argparse.REMAINDER)
 
+    tsu = sub.add_parser("trust-signal-upgrade")
+    tsu.add_argument("args", nargs=argparse.REMAINDER)
+
     ns = p.parse_args(argv)
 
     if ns.cmd == "kv":
@@ -349,6 +356,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "release-narrative":
         return release_narrative.main(ns.args)
+
+    if ns.cmd == "trust-signal-upgrade":
+        return trust_signal_upgrade.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)
