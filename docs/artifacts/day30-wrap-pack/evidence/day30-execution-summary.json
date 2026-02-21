@@ -1,0 +1,19 @@
+{
+  "name": "day30-phase1-wrap-execution",
+  "total_commands": 2,
+  "failed_commands": [],
+  "commands": [
+    {
+      "command": "python -m sdetkit day30-phase1-wrap --format json --strict",
+      "returncode": 0,
+      "stdout": "{\n  \"name\": \"day30-phase1-wrap\",\n  \"inputs\": {\n    \"readme\": \"README.md\",\n    \"docs_index\": \"docs/index.md\",\n    \"docs_page\": \"docs/integrations-day30-phase1-wrap.md\",\n    \"top10\": \"docs/top-10-github-strategy.md\",\n    \"day27_summary\": \"docs/artifacts/day27-kpi-pack/day27-kpi-summary.json\",\n    \"day28_summary\": \"docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json\",\n    \"day29_summary\": \"docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json\"\n  },\n  \"checks\": [\n    {\n      \"key\": \"docs_page_exists\",\n      \"weight\": 10,\n      \"passed\": true,\n      \"evidence\": \"/workspace/DevS69-sdetkit/docs/integrations-day30-phase1-wrap.md\"\n    },\n    {\n      \"key\": \"required_sections_present\",\n      \"weight\": 10,\n      \"passed\": true,\n      \"evidence\": {\n        \"missing_sections\": []\n      }\n    },\n    {\n      \"key\": \"required_commands_present\",\n      \"weight\": 5,\n      \"passed\": true,\n      \"evidence\": {\n        \"missing_commands\": []\n      }\n    },\n    {\n      \"key\": \"readme_day30_link\",\n      \"weight\": 10,\n      \"passed\": true,\n      \"evidence\": \"docs/integrations-day30-phase1-wrap.md\"\n    },\n    {\n      \"key\": \"readme_day30_command\",\n      \"weight\": 5,\n      \"passed\": true,\n      \"evidence\": \"day30-phase1-wrap\"\n    },\n    {\n      \"key\": \"docs_index_day30_links\",\n      \"weight\": 10,\n      \"passed\": true,\n      \"evidence\": \"day-30-ultra-upgrade-report.md + integrations-day30-phase1-wrap.md\"\n    },\n    {\n      \"key\": \"top10_day30_alignment\",\n      \"weight\": 5,\n      \"passed\": true,\n      \"evidence\": \"Day 30 + Day 31 strategy chain\"\n    },\n    {\n      \"key\": \"day27_input_present\",\n      \"weight\": 8,\n      \"passed\": true,\n      \"evidence\": \"/workspace/DevS69-sdetkit/docs/artifacts/day27-kpi-pack/day27-kpi-summary.json\"\n    },\n    {\n      \"key\": \"day28_input_present\",\n      \"weight\": 8,\n      \"passed\": true,\n      \"evidence\": \"/workspace/DevS69-sdetkit/docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json\"\n    },\n    {\n      \"key\": \"day29_input_present\",\n      \"weight\": 8,\n      \"passed\": true,\n      \"evidence\": \"/workspace/DevS69-sdetkit/docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json\"\n    },\n    {\n      \"key\": \"phase2_backlog_locked\",\n      \"weight\": 20,\n      \"passed\": true,\n      \"evidence\": {\n        \"backlog_items\": 8\n      }\n    }\n  ],\n  \"rollup\": {\n    \"day27_activation_score\": 100.0,\n    \"day28_activation_score\": 100.0,\n    \"day29_activation_score\": 100.0,\n    \"average_activation_score\": 100.0\n  },\n  \"summary\": {\n    \"activation_score\": 99,\n    \"passed_checks\": 11,\n    \"failed_checks\": 0,\n    \"critical_failures\": [],\n    \"strict_pass\": true\n  },\n  \"wins\": [\n    \"Days 27-29 closeout artifacts loaded successfully (avg=100.0).\",\n    \"Phase-2 backlog locked with 8 actionable checklist items.\",\n    \"Day 30 wrap is release-ready and can hand off into Phase-2 kickoff.\"\n  ],\n  \"misses\": [],\n  \"handoff_actions\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python scripts/check_day30_phase1_wrap_contract.py --skip-evidence",
+      "returncode": 0,
+      "stdout": "{\n  \"errors\": [],\n  \"score\": 99\n}\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -46,3 +46,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "external-contribution-push" in out
     assert "kpi-audit" in out
     assert "day29-phase1-hardening" in out
+    assert "day30-phase1-wrap" in out

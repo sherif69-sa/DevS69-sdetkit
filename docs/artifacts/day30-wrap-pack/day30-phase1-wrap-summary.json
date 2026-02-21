@@ -1,0 +1,106 @@
+{
+  "name": "day30-phase1-wrap",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day30-phase1-wrap.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day27_summary": "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",
+    "day28_summary": "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json",
+    "day29_summary": "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+  },
+  "checks": [
+    {
+      "key": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day30-phase1-wrap.md"
+    },
+    {
+      "key": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "key": "required_commands_present",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "key": "readme_day30_link",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/integrations-day30-phase1-wrap.md"
+    },
+    {
+      "key": "readme_day30_command",
+      "weight": 5,
+      "passed": true,
+      "evidence": "day30-phase1-wrap"
+    },
+    {
+      "key": "docs_index_day30_links",
+      "weight": 10,
+      "passed": true,
+      "evidence": "day-30-ultra-upgrade-report.md + integrations-day30-phase1-wrap.md"
+    },
+    {
+      "key": "top10_day30_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 30 + Day 31 strategy chain"
+    },
+    {
+      "key": "day27_input_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
+    },
+    {
+      "key": "day28_input_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json"
+    },
+    {
+      "key": "day29_input_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+    },
+    {
+      "key": "phase2_backlog_locked",
+      "weight": 20,
+      "passed": true,
+      "evidence": {
+        "backlog_items": 8
+      }
+    }
+  ],
+  "rollup": {
+    "day27_activation_score": 100.0,
+    "day28_activation_score": 100.0,
+    "day29_activation_score": 100.0,
+    "average_activation_score": 100.0
+  },
+  "summary": {
+    "activation_score": 99,
+    "passed_checks": 11,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Days 27-29 closeout artifacts loaded successfully (avg=100.0).",
+    "Phase-2 backlog locked with 8 actionable checklist items.",
+    "Day 30 wrap is release-ready and can hand off into Phase-2 kickoff."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

@@ -10,6 +10,7 @@ from . import (
     contributor_funnel,
     community_activation,
     external_contribution_push,
+    day30_phase1_wrap,
     day29_phase1_hardening,
     day28_weekly_review,
     kpi_audit,
@@ -139,6 +140,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day29-phase1-hardening":
         return day29_phase1_hardening.main(list(argv[1:]))
 
+    if argv and argv[0] == "day30-phase1-wrap":
+        return day30_phase1_wrap.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -263,6 +267,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d29 = sub.add_parser("day29-phase1-hardening")
     d29.add_argument("args", nargs=argparse.REMAINDER)
 
+    d30 = sub.add_parser("day30-phase1-wrap")
+    d30.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -375,6 +382,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day29-phase1-hardening":
         return day29_phase1_hardening.main(ns.args)
+
+    if ns.cmd == "day30-phase1-wrap":
+        return day30_phase1_wrap.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

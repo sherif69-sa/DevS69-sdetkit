@@ -137,7 +137,7 @@ This phase now runs as a **day-by-day operating plan**. When we say "work Day 1,
 - **Day 28 — Weekly review #4:** document wins, misses, and corrective actions.
 
 - **Day 29 — Phase-1 hardening:** close stale docs gaps and polish top entry pages.
-- **Day 30 — Phase-1 wrap + handoff:** publish a full report and lock Phase-2 backlog.
+- **Day 30 — Phase-1 wrap + handoff:** publish a full report, lock Phase-2 backlog, and ship deterministic handoff evidence pack.
 
 #### Phase-1 weekly deliverables (must ship)
 

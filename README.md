@@ -965,6 +965,16 @@ See implementation details: [Day 28 ultra upgrade report](docs/day-28-ultra-upgr
 
 See implementation details: [Day 29 ultra upgrade report](docs/day-29-ultra-upgrade-report.md).
 
+
+## 🏁 Day 30 ultra: Phase-1 wrap + Phase-2 handoff
+
+- Run `python -m sdetkit day30-phase1-wrap --format json --strict` to validate Day 30 closeout and handoff readiness.
+- Emit shareable wrap pack: `python -m sdetkit day30-phase1-wrap --emit-pack-dir docs/artifacts/day30-wrap-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day30-phase1-wrap --execute --evidence-dir docs/artifacts/day30-wrap-pack/evidence --format json --strict`.
+- Review Day 30 integration guide: [Phase-1 wrap + handoff](docs/integrations-day30-phase1-wrap.md).
+
+See implementation details: [Day 30 ultra upgrade report](docs/day-30-ultra-upgrade-report.md).
+
 Day 23 closeout checks:
 
 ```bash

@@ -1,0 +1,82 @@
+{
+  "name": "day29-phase1-hardening",
+  "paths": {
+    "root": "/workspace/DevS69-sdetkit",
+    "docs_page": "docs/integrations-day29-phase1-hardening.md",
+    "report_page": "docs/day-29-ultra-upgrade-report.md"
+  },
+  "checks": [
+    {
+      "key": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day29-phase1-hardening.md"
+    },
+    {
+      "key": "required_sections_present",
+      "weight": 15,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "key": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "key": "readme_day29_link",
+      "weight": 12,
+      "passed": true,
+      "evidence": "docs/integrations-day29-phase1-hardening.md"
+    },
+    {
+      "key": "docs_index_day29_links",
+      "weight": 12,
+      "passed": true,
+      "evidence": "day-29-ultra-upgrade-report.md + integrations-day29-phase1-hardening.md"
+    },
+    {
+      "key": "top10_day29_alignment",
+      "weight": 11,
+      "passed": true,
+      "evidence": "Day 29 \u2014 Phase-1 hardening"
+    },
+    {
+      "key": "report_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/day-29-ultra-upgrade-report.md"
+    },
+    {
+      "key": "stale_markers_clean",
+      "weight": 20,
+      "passed": true,
+      "evidence": {}
+    }
+  ],
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 8,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "stale_hits": {},
+  "gaps": [],
+  "wins": [
+    "docs_page_exists passed",
+    "required_sections_present passed",
+    "required_commands_present passed",
+    "readme_day29_link passed",
+    "docs_index_day29_links passed",
+    "top10_day29_alignment passed",
+    "report_exists passed",
+    "stale_markers_clean passed"
+  ],
+  "corrective_actions": []
+}
