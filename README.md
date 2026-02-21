@@ -857,6 +857,33 @@ python -m sdetkit release-narrative --format json --strict
 python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict
 ```
 
+## 📊 Day 21 ultra: weekly review #3
+
+Day 21 ships a deterministic **weekly review #3 closeout lane** that tracks conversion and contributor-response movement across Days 15-20 in one scorecard.
+
+```bash
+python -m sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json
+python -m sdetkit weekly-review --week 3 --format json --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --strict
+python -m sdetkit weekly-review --week 3 --emit-pack-dir docs/artifacts/day21-weekly-pack --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md
+```
+
+See implementation details: [Day 21 ultra upgrade report](docs/day-21-ultra-upgrade-report.md).
+
+Day 21 closeout checks:
+
+```bash
+python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day21_weekly_review_contract.py
+python -m sdetkit weekly-review --week 3 --format json --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --strict
+python -m sdetkit weekly-review --week 3 --emit-pack-dir docs/artifacts/day21-weekly-pack --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict
+```
+
 ## 🔐 Day 22 ultra: trust signal upgrade
 
 Day 22 ships a deterministic **trust signal upgrade lane** that verifies reliability badges, policy discoverability links, and core trust workflows before broad promotion.
