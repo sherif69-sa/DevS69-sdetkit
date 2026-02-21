@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🏢 Day 13 ultra report](day-13-ultra-upgrade-report.md) · [📈 Day 14 ultra report](day-14-ultra-upgrade-report.md) · [🗞️ Day 20 ultra report](day-20-ultra-upgrade-report.md) · [📊 Day 21 ultra report](day-21-ultra-upgrade-report.md) · [🔐 Day 22 ultra report](day-22-ultra-upgrade-report.md) · [❓ Day 23 ultra report](day-23-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🏢 Day 13 ultra report](day-13-ultra-upgrade-report.md) · [📈 Day 14 ultra report](day-14-ultra-upgrade-report.md) · [🗞️ Day 20 ultra report](day-20-ultra-upgrade-report.md) · [📊 Day 21 ultra report](day-21-ultra-upgrade-report.md) · [🔐 Day 22 ultra report](day-22-ultra-upgrade-report.md) · [❓ Day 23 ultra report](day-23-ultra-upgrade-report.md) · [⏱️ Day 24 ultra report](day-24-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -348,6 +348,15 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Review generated artifacts: [day20 release narrative sample](artifacts/day20-release-narrative-sample.md), [day20 narrative summary](artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json), [day20 channel posts](artifacts/day20-release-narrative-pack/day20-channel-posts.md), [day20 validation commands](artifacts/day20-release-narrative-pack/day20-validation-commands.md), and [day20 execution summary](artifacts/day20-release-narrative-pack/evidence/day20-execution-summary.json).
 
 
+
+
+## Day 24 ultra upgrades (onboarding time closeout)
+
+- Read the implementation report: [Day 24 ultra upgrade report](day-24-ultra-upgrade-report.md).
+- Run `python -m sdetkit onboarding-time-upgrade --format json --strict` to score onboarding readiness for a <3 minute first-success path.
+- Emit Day 24 onboarding pack: `python -m sdetkit onboarding-time-upgrade --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit onboarding-time-upgrade --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict`.
+- Review sample output artifact: [day24 onboarding upgrade sample](artifacts/day24-onboarding-time-upgrade-sample.md).
 
 ## Day 22 ultra upgrades (trust signal upgrade)
 

@@ -909,6 +909,15 @@ python -m sdetkit faq-objections --format markdown --output docs/artifacts/day23
 
 See implementation details: [Day 23 ultra upgrade report](docs/day-23-ultra-upgrade-report.md).
 
+## ⏱️ Day 24 ultra: onboarding time-to-first-success
+
+- Run `python -m sdetkit onboarding-time-upgrade --format json --strict` to validate Day 24 closeout readiness.
+- Emit shareable onboarding pack: `python -m sdetkit onboarding-time-upgrade --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit onboarding-time-upgrade --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict`.
+- Review Day 24 integration guide: [Onboarding time upgrade](docs/integrations-onboarding-time-upgrade.md).
+
+See implementation details: [Day 24 ultra upgrade report](docs/day-24-ultra-upgrade-report.md).
+
 Day 23 closeout checks:
 
 ```bash

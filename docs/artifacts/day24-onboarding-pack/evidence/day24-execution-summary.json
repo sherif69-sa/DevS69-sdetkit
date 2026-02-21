@@ -1,0 +1,24 @@
+{
+  "name": "day24-onboarding-time-upgrade-execution",
+  "results": [
+    {
+      "command": "python -m sdetkit onboarding --format text --platform all",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Day 1 onboarding paths\n\n[SDET / QA engineer]\n  first: sdetkit doctor --format markdown\n  next : Run `sdetkit repo audit --format markdown` and triage the highest-signal findings.\n  docs : docs/doctor.md, docs/repo-audit.md\n\n[Platform / DevOps engineer]\n  first: sdetkit repo audit --format markdown\n  next : Wire checks into CI with `docs/github-action.md` and enforce deterministic gates.\n  docs : docs/repo-audit.md, docs/github-action.md\n\n[Security / compliance lead]\n  first: sdetkit security --format markdown\n  next : Apply policy controls from `docs/security.md` and `docs/policy-and-baselines.md`.\n  docs : docs/security.md, docs/policy-and-baselines.md\n\n[Engineering manager / tech lead]\n  first: sdetkit doctor --format markdown\n  next : Standardize team workflows using `docs/automation-os.md` and `docs/repo-tour.md`.\n  docs : docs/automation-os.md, docs/repo-tour.md\n\nDay 5 platform onboarding snippets\n\n[Linux (bash)]\n  python3 -m venv .venv\n  source .venv/bin/activate\n  python -m pip install -r requirements-test.txt -e .\n  python -m sdetkit doctor --format text\n\n[macOS (zsh/bash)]\n  python3 -m venv .venv\n  source .venv/bin/activate\n  python -m pip install -r requirements-test.txt -e .\n  python -m sdetkit doctor --format text\n\n[Windows (PowerShell)]\n  py -3 -m venv .venv\n  .\\.venv\\Scripts\\Activate.ps1\n  python -m pip install -r requirements-test.txt -e .\n  python -m sdetkit doctor --format text\n\nStart here: README quick start -> #quick-start\n"
+    },
+    {
+      "command": "python -m sdetkit onboarding-time-upgrade --format json --strict",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"checks\": [\n    {\n      \"category\": \"contract\",\n      \"evidence\": \"/workspace/DevS69-sdetkit/docs/integrations-onboarding-time-upgrade.md\",\n      \"key\": \"docs_page_exists\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"contract\",\n      \"evidence\": {\n        \"missing_sections\": []\n      },\n      \"key\": \"required_sections_present\",\n      \"passed\": true,\n      \"weight\": 15\n    },\n    {\n      \"category\": \"contract\",\n      \"evidence\": {\n        \"missing_commands\": []\n      },\n      \"key\": \"required_commands_present\",\n      \"passed\": true,\n      \"weight\": 5\n    },\n    {\n      \"category\": \"onboarding\",\n      \"evidence\": \"--role\",\n      \"key\": \"onboarding_role_support\",\n      \"passed\": true,\n      \"weight\": 15\n    },\n    {\n      \"category\": \"onboarding\",\n      \"evidence\": \"--platform\",\n      \"key\": \"onboarding_platform_support\",\n      \"passed\": true,\n      \"weight\": 15\n    },\n    {\n      \"category\": \"onboarding\",\n      \"evidence\": \"python -m sdetkit doctor --format text\",\n      \"key\": \"onboarding_quick_start_command\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"evidence\": \"docs/integrations-onboarding-time-upgrade.md\",\n      \"key\": \"readme_day24_link\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"evidence\": \"day-24-ultra-upgrade-report.md\",\n      \"key\": \"docs_index_day24_link\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"evidence\": \"onboarding-time-upgrade\",\n      \"key\": \"readme_onboarding_command\",\n      \"passed\": true,\n      \"weight\": 10\n    }\n  ],\n  \"inputs\": {\n    \"docs_index\": \"docs/index.md\",\n    \"docs_page\": \"docs/integrations-onboarding-time-upgrade.md\",\n    \"onboarding_module\": \"src/sdetkit/onboarding.py\",\n    \"readme\": \"README.md\"\n  },\n  \"name\": \"day24-onboarding-time-upgrade\",\n  \"recommendations\": [\n    \"Day 24 onboarding lane is healthy; keep execution evidence attached to releases.\"\n  ],\n  \"strict_failures\": [],\n  \"summary\": {\n    \"critical_failures\": [],\n    \"failed_checks\": 0,\n    \"onboarding_score\": 100.0,\n    \"readiness\": \"strong\",\n    \"weighted_points\": {\n      \"earned\": 100,\n      \"total\": 100\n    }\n  }\n}\n"
+    },
+    {
+      "command": "python scripts/check_day24_onboarding_time_upgrade_contract.py --skip-evidence",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"errors\": [],\n  \"score\": 100.0\n}\n"
+    }
+  ],
+  "total_commands": 3
+}

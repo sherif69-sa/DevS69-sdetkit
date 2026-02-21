@@ -1,0 +1,92 @@
+{
+  "checks": [
+    {
+      "category": "contract",
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-onboarding-time-upgrade.md",
+      "key": "docs_page_exists",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "contract",
+      "evidence": {
+        "missing_sections": []
+      },
+      "key": "required_sections_present",
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "contract",
+      "evidence": {
+        "missing_commands": []
+      },
+      "key": "required_commands_present",
+      "passed": true,
+      "weight": 5
+    },
+    {
+      "category": "onboarding",
+      "evidence": "--role",
+      "key": "onboarding_role_support",
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "onboarding",
+      "evidence": "--platform",
+      "key": "onboarding_platform_support",
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "onboarding",
+      "evidence": "python -m sdetkit doctor --format text",
+      "key": "onboarding_quick_start_command",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "discoverability",
+      "evidence": "docs/integrations-onboarding-time-upgrade.md",
+      "key": "readme_day24_link",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "discoverability",
+      "evidence": "day-24-ultra-upgrade-report.md",
+      "key": "docs_index_day24_link",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "discoverability",
+      "evidence": "onboarding-time-upgrade",
+      "key": "readme_onboarding_command",
+      "passed": true,
+      "weight": 10
+    }
+  ],
+  "inputs": {
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-onboarding-time-upgrade.md",
+    "onboarding_module": "src/sdetkit/onboarding.py",
+    "readme": "README.md"
+  },
+  "name": "day24-onboarding-time-upgrade",
+  "recommendations": [
+    "Day 24 onboarding lane is healthy; keep execution evidence attached to releases."
+  ],
+  "strict_failures": [],
+  "summary": {
+    "critical_failures": [],
+    "failed_checks": 0,
+    "onboarding_score": 100.0,
+    "readiness": "strong",
+    "weighted_points": {
+      "earned": 100,
+      "total": 100
+    }
+  }
+}

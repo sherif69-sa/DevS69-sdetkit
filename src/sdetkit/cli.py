@@ -20,6 +20,7 @@ from . import (
     kvcli,
     notify,
     onboarding,
+    onboarding_time_upgrade,
     ops,
     patch,
     policy,
@@ -114,6 +115,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "onboarding":
         return onboarding.main(list(argv[1:]))
+
+    if argv and argv[0] == "onboarding-time-upgrade":
+        return onboarding_time_upgrade.main(list(argv[1:]))
 
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
@@ -221,6 +225,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     onb = sub.add_parser("onboarding")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
+    otu = sub.add_parser("onboarding-time-upgrade")
+    otu.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -315,6 +322,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "onboarding":
         return onboarding.main(ns.args)
+
+    if ns.cmd == "onboarding-time-upgrade":
+        return onboarding_time_upgrade.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)
