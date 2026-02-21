@@ -955,6 +955,16 @@ See implementation details: [Day 27 ultra upgrade report](docs/day-27-ultra-upgr
 
 See implementation details: [Day 28 ultra upgrade report](docs/day-28-ultra-upgrade-report.md).
 
+
+## 🧱 Day 29 ultra: Phase-1 hardening closeout
+
+- Run `python -m sdetkit day29-phase1-hardening --format json --strict` to validate Day 29 entry-page hardening readiness.
+- Emit shareable hardening pack: `python -m sdetkit day29-phase1-hardening --emit-pack-dir docs/artifacts/day29-hardening-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day29-phase1-hardening --execute --evidence-dir docs/artifacts/day29-hardening-pack/evidence --format json --strict`.
+- Review Day 29 integration guide: [Phase-1 hardening](docs/integrations-day29-phase1-hardening.md).
+
+See implementation details: [Day 29 ultra upgrade report](docs/day-29-ultra-upgrade-report.md).
+
 Day 23 closeout checks:
 
 ```bash

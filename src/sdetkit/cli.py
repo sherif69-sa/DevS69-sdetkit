@@ -10,6 +10,7 @@ from . import (
     contributor_funnel,
     community_activation,
     external_contribution_push,
+    day29_phase1_hardening,
     day28_weekly_review,
     kpi_audit,
     demo,
@@ -135,6 +136,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day28-weekly-review":
         return day28_weekly_review.main(list(argv[1:]))
 
+    if argv and argv[0] == "day29-phase1-hardening":
+        return day29_phase1_hardening.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -256,6 +260,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     dwr = sub.add_parser("day28-weekly-review")
     dwr.add_argument("args", nargs=argparse.REMAINDER)
 
+    d29 = sub.add_parser("day29-phase1-hardening")
+    d29.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -365,6 +372,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day28-weekly-review":
         return day28_weekly_review.main(ns.args)
+
+    if ns.cmd == "day29-phase1-hardening":
+        return day29_phase1_hardening.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

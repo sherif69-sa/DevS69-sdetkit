@@ -401,3 +401,13 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 28 weekly pack: `python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/day28-weekly-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/day28-weekly-pack/evidence --format json --strict`.
 - Review sample output artifact: [day28 weekly review sample](artifacts/day28-weekly-review-sample.md).
+
+
+## Day 29 ultra upgrades (phase-1 hardening closeout)
+
+- Read the implementation report: [Day 29 ultra upgrade report](day-29-ultra-upgrade-report.md).
+- Run `python -m sdetkit day29-phase1-hardening --format json --strict` to score entry-page hardening readiness.
+- Emit Day 29 hardening pack: `python -m sdetkit day29-phase1-hardening --emit-pack-dir docs/artifacts/day29-hardening-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day29-phase1-hardening --execute --evidence-dir docs/artifacts/day29-hardening-pack/evidence --format json --strict`.
+- Review sample output artifact: [day29 hardening sample](artifacts/day29-phase1-hardening-sample.md).
+- Review integration guide: [Day 29 phase-1 hardening](integrations-day29-phase1-hardening.md).
