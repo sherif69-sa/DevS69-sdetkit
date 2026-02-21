@@ -13,6 +13,7 @@ from . import (
     docs_qa,
     enterprise_use_case,
     evidence,
+    faq_objections,
     first_contribution,
     github_actions_quickstart,
     gitlab_ci_quickstart,
@@ -113,6 +114,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "onboarding":
         return onboarding.main(list(argv[1:]))
+
+    if argv and argv[0] == "faq-objections":
+        return faq_objections.main(list(argv[1:]))
 
     if argv and argv[0] == "first-contribution":
         return first_contribution.main(list(argv[1:]))
@@ -217,6 +221,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     onb = sub.add_parser("onboarding")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
+    fqo = sub.add_parser("faq-objections")
+    fqo.add_argument("args", nargs=argparse.REMAINDER)
+
     dmo = sub.add_parser("demo")
     dmo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -308,6 +315,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "onboarding":
         return onboarding.main(ns.args)
+
+    if ns.cmd == "faq-objections":
+        return faq_objections.main(ns.args)
 
     if ns.cmd == "demo":
         return demo.main(ns.args)

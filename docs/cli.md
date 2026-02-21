@@ -539,3 +539,26 @@ Useful flags: `--root`, `--readme`, `--docs-index`, `--min-trust-score`, `--writ
 `--execute` runs the Day 22 command chain and emits an execution summary plus per-command logs for closeout evidence.
 
 `--strict` returns non-zero if Day 22 required docs sections/commands are missing, any critical trust checks fail, or trust score falls below `--min-trust-score`.
+
+## faq-objections
+
+Builds Day 23 objection-handling readiness from FAQ coverage, adoption clarity signals, and docs discoverability links.
+
+Examples:
+
+- `sdetkit faq-objections --format text`
+- `sdetkit faq-objections --format json --strict`
+- `sdetkit faq-objections --write-defaults --format json --strict`
+- `sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict`
+- `sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict`
+- `sdetkit faq-objections --format markdown --output docs/artifacts/day23-faq-objections-sample.md`
+
+Useful flags: `--root`, `--readme`, `--docs-index`, `--docs-page`, `--min-faq-score`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--strict`, `--format`, `--output`.
+
+`--write-defaults` writes a hardened Day 23 FAQ page if missing/incomplete, then validates it.
+
+`--emit-pack-dir` writes a Day 23 pack containing summary JSON, FAQ scorecard markdown, objection-response matrix, adoption playbook, and validation commands.
+
+`--execute` runs the Day 23 command chain and emits an execution summary for closeout evidence.
+
+`--strict` returns non-zero if Day 23 required docs sections/commands are missing, critical objection checks fail, or FAQ score falls below `--min-faq-score`.

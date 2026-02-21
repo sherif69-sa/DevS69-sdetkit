@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🏢 Day 13 ultra report](day-13-ultra-upgrade-report.md) · [📈 Day 14 ultra report](day-14-ultra-upgrade-report.md) · [🗞️ Day 20 ultra report](day-20-ultra-upgrade-report.md) · [📊 Day 21 ultra report](day-21-ultra-upgrade-report.md) · [🔐 Day 22 ultra report](day-22-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🏢 Day 13 ultra report](day-13-ultra-upgrade-report.md) · [📈 Day 14 ultra report](day-14-ultra-upgrade-report.md) · [🗞️ Day 20 ultra report](day-20-ultra-upgrade-report.md) · [📊 Day 21 ultra report](day-21-ultra-upgrade-report.md) · [🔐 Day 22 ultra report](day-22-ultra-upgrade-report.md) · [❓ Day 23 ultra report](day-23-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -179,6 +179,18 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 - Export markdown review artifact: `sdetkit weekly-review --week 2 --format markdown --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json --output docs/artifacts/day14-weekly-review-sample.md`.
 - Emit Day 14 closeout pack: `sdetkit weekly-review --week 2 --emit-pack-dir docs/artifacts/day14-weekly-pack --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json --format json --strict`.
 - Review generated artifacts: [day14 weekly review sample](artifacts/day14-weekly-review-sample.md), [day14 growth signals](artifacts/day14-growth-signals.json), and [day14 closeout checklist](artifacts/day14-weekly-pack/day14-closeout-checklist.md).
+
+
+## Day 23 ultra upgrades (FAQ and objections)
+
+- Read the implementation report: [Day 23 ultra upgrade report](day-23-ultra-upgrade-report.md).
+- Open the Day 23 guide: [FAQ and objections](integrations-faq-objections.md).
+- Run `sdetkit faq-objections --format json --strict` to validate objection coverage and adoption clarity posture.
+- Auto-recover Day 23 docs defaults: `sdetkit faq-objections --write-defaults --format json --strict`.
+- Export markdown artifact: `sdetkit faq-objections --format markdown --output docs/artifacts/day23-faq-objections-sample.md`.
+- Emit Day 23 FAQ pack: `sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict`.
+- Capture deterministic execution logs: `sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict`.
+- Review generated artifacts: [day23 FAQ sample](artifacts/day23-faq-objections-sample.md), [day23 FAQ summary](artifacts/day23-faq-pack/day23-faq-summary.json), [day23 scorecard](artifacts/day23-faq-pack/day23-faq-scorecard.md), [day23 objection matrix](artifacts/day23-faq-pack/day23-objection-response-matrix.md), [day23 adoption playbook](artifacts/day23-faq-pack/day23-adoption-playbook.md), [day23 validation commands](artifacts/day23-faq-pack/day23-validation-commands.md), and [day23 execution summary](artifacts/day23-faq-pack/evidence/day23-execution-summary.json).
 
 ## Fast start
 

@@ -1,0 +1,108 @@
+{
+  "checks": [
+    {
+      "category": "coverage",
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-faq-objections.md",
+      "key": "docs_page_exists",
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "coverage",
+      "evidence": {
+        "missing_sections": []
+      },
+      "key": "required_sections_present",
+      "passed": true,
+      "weight": 20
+    },
+    {
+      "category": "operational",
+      "evidence": {
+        "missing_commands": []
+      },
+      "key": "command_block_complete",
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "adoption",
+      "evidence": "## When to use sdetkit",
+      "key": "when_to_use_clarity",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "adoption",
+      "evidence": "## When not to use sdetkit",
+      "key": "when_not_to_use_clarity",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "adoption",
+      "evidence": "## Top objections and responses",
+      "key": "objection_responses",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "discoverability",
+      "evidence": "docs/integrations-faq-objections.md",
+      "key": "readme_day23_link",
+      "passed": true,
+      "weight": 8
+    },
+    {
+      "category": "discoverability",
+      "evidence": "day-23-ultra-upgrade-report.md",
+      "key": "docs_index_day23",
+      "passed": true,
+      "weight": 7
+    },
+    {
+      "category": "operational",
+      "evidence": "release-narrative",
+      "key": "release_narrative_alignment",
+      "passed": true,
+      "weight": 5
+    }
+  ],
+  "inputs": {
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-faq-objections.md",
+    "readme": "README.md"
+  },
+  "name": "day23-faq-objections",
+  "recommendations": [
+    "FAQ objections lane is healthy; keep objections refreshed from real issue/discussion trends."
+  ],
+  "summary": {
+    "category_coverage": {
+      "adoption": {
+        "passed": 3,
+        "total": 3
+      },
+      "coverage": {
+        "passed": 2,
+        "total": 2
+      },
+      "discoverability": {
+        "passed": 2,
+        "total": 2
+      },
+      "operational": {
+        "passed": 2,
+        "total": 2
+      }
+    },
+    "critical_failures": [],
+    "failed_checks": 0,
+    "faq_score": 100.0,
+    "objection_readiness": "strong",
+    "weighted_points": {
+      "earned": 100,
+      "total": 100
+    }
+  }
+}

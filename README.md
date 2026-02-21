@@ -887,6 +887,37 @@ python -m sdetkit trust-signal-upgrade --format json --strict
 python -m sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict
 ```
 
+
+## ❓ Day 23 ultra: FAQ and objections
+
+Day 23 ships a deterministic **FAQ and objection closeout lane** so adoption blockers become validated, operational answers instead of ad-hoc replies.
+
+```bash
+python -m sdetkit faq-objections --format text
+python -m sdetkit faq-objections --format json --strict
+python -m sdetkit faq-objections --docs-page docs/integrations-faq-objections.md --min-faq-score 90 --format json --strict
+python -m sdetkit faq-objections --write-defaults --format json --strict
+python -m sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict
+python -m sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
+```
+
+Export a markdown artifact for handoff:
+
+```bash
+python -m sdetkit faq-objections --format markdown --output docs/artifacts/day23-faq-objections-sample.md
+```
+
+See implementation details: [Day 23 ultra upgrade report](docs/day-23-ultra-upgrade-report.md).
+
+Day 23 closeout checks:
+
+```bash
+python -m pytest -q tests/test_faq_objections.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day23_faq_objections_contract.py
+python -m sdetkit faq-objections --format json --strict
+python -m sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
+```
+
 ## ⚡ Quick start
 
 ```bash
