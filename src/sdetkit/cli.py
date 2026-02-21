@@ -8,6 +8,7 @@ from importlib import metadata
 from . import (
     apiget,
     contributor_funnel,
+    community_activation,
     demo,
     docs_navigation,
     docs_qa,
@@ -119,6 +120,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "onboarding-time-upgrade":
         return onboarding_time_upgrade.main(list(argv[1:]))
 
+    if argv and argv[0] == "community-activation":
+        return community_activation.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -228,6 +232,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     otu = sub.add_parser("onboarding-time-upgrade")
     otu.add_argument("args", nargs=argparse.REMAINDER)
 
+    cau = sub.add_parser("community-activation")
+    cau.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -325,6 +332,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "onboarding-time-upgrade":
         return onboarding_time_upgrade.main(ns.args)
+
+    if ns.cmd == "community-activation":
+        return community_activation.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

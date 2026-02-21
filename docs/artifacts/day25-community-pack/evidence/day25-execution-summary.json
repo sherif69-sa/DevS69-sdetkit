@@ -1,0 +1,18 @@
+{
+  "name": "day25-community-activation-execution",
+  "results": [
+    {
+      "command": "python -m sdetkit community-activation --format json --strict",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"checks\": [\n    {\n      \"category\": \"contract\",\n      \"evidence\": \"/workspace/DevS69-sdetkit/docs/integrations-community-activation.md\",\n      \"key\": \"docs_page_exists\",\n      \"passed\": true,\n      \"weight\": 15\n    },\n    {\n      \"category\": \"contract\",\n      \"evidence\": {\n        \"missing_sections\": []\n      },\n      \"key\": \"required_sections_present\",\n      \"passed\": true,\n      \"weight\": 20\n    },\n    {\n      \"category\": \"contract\",\n      \"evidence\": {\n        \"missing_commands\": []\n      },\n      \"key\": \"required_commands_present\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"evidence\": \"docs/integrations-community-activation.md\",\n      \"key\": \"readme_day25_link\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"evidence\": \"community-activation\",\n      \"key\": \"readme_day25_command\",\n      \"passed\": true,\n      \"weight\": 8\n    },\n    {\n      \"category\": \"discoverability\",\n      \"evidence\": \"day-25-ultra-upgrade-report.md\",\n      \"key\": \"docs_index_day25_link\",\n      \"passed\": true,\n      \"weight\": 7\n    },\n    {\n      \"category\": \"strategy\",\n      \"evidence\": \"Day 25 \\u2014 Community activation\",\n      \"key\": \"top10_day25_alignment\",\n      \"passed\": true,\n      \"weight\": 20\n    },\n    {\n      \"category\": \"strategy\",\n      \"evidence\": \"roadmap-voting\",\n      \"key\": \"docs_mentions_roadmap_voting\",\n      \"passed\": true,\n      \"weight\": 10\n    }\n  ],\n  \"inputs\": {\n    \"docs_index\": \"docs/index.md\",\n    \"docs_page\": \"docs/integrations-community-activation.md\",\n    \"readme\": \"README.md\",\n    \"top10\": \"docs/top-10-github-strategy.md\"\n  },\n  \"name\": \"day25-community-activation\",\n  \"strict_failures\": [],\n  \"summary\": {\n    \"activation_score\": 100.0,\n    \"critical_failures\": [],\n    \"failed_checks\": [],\n    \"recommendations\": [\n      \"Day 25 community activation lane is healthy; keep weekly voting summaries flowing.\"\n    ],\n    \"total_checks\": 8\n  }\n}\n"
+    },
+    {
+      "command": "python scripts/check_day25_community_activation_contract.py --skip-evidence",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"errors\": [],\n  \"score\": 100.0\n}\n"
+    }
+  ],
+  "total_commands": 2
+}

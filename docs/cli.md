@@ -562,3 +562,25 @@ Useful flags: `--root`, `--readme`, `--docs-index`, `--docs-page`, `--min-faq-sc
 `--execute` runs the Day 23 command chain and emits an execution summary for closeout evidence.
 
 `--strict` returns non-zero if Day 23 required docs sections/commands are missing, critical objection checks fail, or FAQ score falls below `--min-faq-score`.
+
+## community-activation
+
+Builds Day 25 roadmap-voting and community-feedback readiness from docs contract completeness, discoverability links, and strategy alignment checks.
+
+Examples:
+
+- `sdetkit community-activation --format text`
+- `sdetkit community-activation --format json --strict`
+- `sdetkit community-activation --write-defaults --format json --strict`
+- `sdetkit community-activation --emit-pack-dir docs/artifacts/day25-community-pack --format json --strict`
+- `sdetkit community-activation --execute --evidence-dir docs/artifacts/day25-community-pack/evidence --format json --strict`
+
+Useful flags: `--root`, `--readme`, `--docs-index`, `--top10`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--min-score`, `--strict`, `--format`.
+
+`--write-defaults` writes a hardened Day 25 integration page if missing/incomplete, then validates it.
+
+`--emit-pack-dir` writes a Day 25 pack containing summary JSON, activation scorecard markdown, roadmap-vote discussion template, feedback triage board, and validation commands.
+
+`--execute` runs the Day 25 command chain and emits an execution summary for closeout evidence.
+
+`--strict` returns non-zero if Day 25 required docs sections/commands are missing, critical checks fail, or activation score falls below `--min-score`.

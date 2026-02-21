@@ -918,6 +918,15 @@ See implementation details: [Day 23 ultra upgrade report](docs/day-23-ultra-upgr
 
 See implementation details: [Day 24 ultra upgrade report](docs/day-24-ultra-upgrade-report.md).
 
+## 🗳️ Day 25 ultra: community activation
+
+- Run `python -m sdetkit community-activation --format json --strict` to validate Day 25 roadmap-voting readiness.
+- Emit shareable community pack: `python -m sdetkit community-activation --emit-pack-dir docs/artifacts/day25-community-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/day25-community-pack/evidence --format json --strict`.
+- Review Day 25 integration guide: [Community activation](docs/integrations-community-activation.md).
+
+See implementation details: [Day 25 ultra upgrade report](docs/day-25-ultra-upgrade-report.md).
+
 Day 23 closeout checks:
 
 ```bash

@@ -8,7 +8,7 @@ A practical, production-ready toolkit for SDET workflows — with clean CLI ergo
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🏢 Day 13 ultra report](day-13-ultra-upgrade-report.md) · [📈 Day 14 ultra report](day-14-ultra-upgrade-report.md) · [🗞️ Day 20 ultra report](day-20-ultra-upgrade-report.md) · [📊 Day 21 ultra report](day-21-ultra-upgrade-report.md) · [🔐 Day 22 ultra report](day-22-ultra-upgrade-report.md) · [❓ Day 23 ultra report](day-23-ultra-upgrade-report.md) · [⏱️ Day 24 ultra report](day-24-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [🧪 Day 1 ultra report](day-1-ultra-upgrade-report.md) · [⚡ Day 2 ultra report](day-2-ultra-upgrade-report.md) · [📸 Day 3 ultra report](day-3-ultra-upgrade-report.md) · [🧠 Day 4 ultra report](day-4-ultra-upgrade-report.md) · [🖥️ Day 5 ultra report](day-5-ultra-upgrade-report.md) · [🔗 Day 6 ultra report](day-6-ultra-upgrade-report.md) · [📊 Day 7 ultra report](day-7-ultra-upgrade-report.md) · [🧲 Day 8 ultra report](day-8-ultra-upgrade-report.md) · [🧩 Day 9 ultra report](day-9-ultra-upgrade-report.md) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧪 Day 12 ultra report](day-12-ultra-upgrade-report.md) · [🏢 Day 13 ultra report](day-13-ultra-upgrade-report.md) · [📈 Day 14 ultra report](day-14-ultra-upgrade-report.md) · [🗞️ Day 20 ultra report](day-20-ultra-upgrade-report.md) · [📊 Day 21 ultra report](day-21-ultra-upgrade-report.md) · [🔐 Day 22 ultra report](day-22-ultra-upgrade-report.md) · [❓ Day 23 ultra report](day-23-ultra-upgrade-report.md) · [⏱️ Day 24 ultra report](day-24-ultra-upgrade-report.md) · [🗳️ Day 25 ultra report](day-25-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
 
 </div>
 
@@ -357,6 +357,14 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 24 onboarding pack: `python -m sdetkit onboarding-time-upgrade --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit onboarding-time-upgrade --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict`.
 - Review sample output artifact: [day24 onboarding upgrade sample](artifacts/day24-onboarding-time-upgrade-sample.md).
+
+## Day 25 ultra upgrades (community activation closeout)
+
+- Read the implementation report: [Day 25 ultra upgrade report](day-25-ultra-upgrade-report.md).
+- Run `python -m sdetkit community-activation --format json --strict` to score roadmap-voting readiness and feedback loop coverage.
+- Emit Day 25 community pack: `python -m sdetkit community-activation --emit-pack-dir docs/artifacts/day25-community-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/day25-community-pack/evidence --format json --strict`.
+- Review sample output artifact: [day25 community activation sample](artifacts/day25-community-activation-sample.md).
 
 ## Day 22 ultra upgrades (trust signal upgrade)
 

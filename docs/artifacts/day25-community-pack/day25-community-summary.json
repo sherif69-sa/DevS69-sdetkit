@@ -1,0 +1,81 @@
+{
+  "checks": [
+    {
+      "category": "contract",
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-community-activation.md",
+      "key": "docs_page_exists",
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "contract",
+      "evidence": {
+        "missing_sections": []
+      },
+      "key": "required_sections_present",
+      "passed": true,
+      "weight": 20
+    },
+    {
+      "category": "contract",
+      "evidence": {
+        "missing_commands": []
+      },
+      "key": "required_commands_present",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "discoverability",
+      "evidence": "docs/integrations-community-activation.md",
+      "key": "readme_day25_link",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "discoverability",
+      "evidence": "community-activation",
+      "key": "readme_day25_command",
+      "passed": true,
+      "weight": 8
+    },
+    {
+      "category": "discoverability",
+      "evidence": "day-25-ultra-upgrade-report.md",
+      "key": "docs_index_day25_link",
+      "passed": true,
+      "weight": 7
+    },
+    {
+      "category": "strategy",
+      "evidence": "Day 25 \u2014 Community activation",
+      "key": "top10_day25_alignment",
+      "passed": true,
+      "weight": 20
+    },
+    {
+      "category": "strategy",
+      "evidence": "roadmap-voting",
+      "key": "docs_mentions_roadmap_voting",
+      "passed": true,
+      "weight": 10
+    }
+  ],
+  "inputs": {
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-community-activation.md",
+    "readme": "README.md",
+    "top10": "docs/top-10-github-strategy.md"
+  },
+  "name": "day25-community-activation",
+  "strict_failures": [],
+  "summary": {
+    "activation_score": 100.0,
+    "critical_failures": [],
+    "failed_checks": [],
+    "recommendations": [
+      "Day 25 community activation lane is healthy; keep weekly voting summaries flowing."
+    ],
+    "total_checks": 8
+  }
+}
