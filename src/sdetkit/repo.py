@@ -2270,13 +2270,18 @@ def run_repo_audit(
             raise ValueError(f"invalid cache strategy: {cache_strategy!r}")
 
         cached_doc = _load_cached_rule(cache_root, key) if cache_enabled else None
-        deps = cached_doc.get("dependencies") if isinstance(cached_doc, dict) else None
+        cached_doc_dict: dict[str, Any] | None = (
+            cached_doc if isinstance(cached_doc, dict) else None
+        )
+        deps = cached_doc_dict.get("dependencies") if cached_doc_dict is not None else None
 
-        if isinstance(deps, dict) and deps:
+        if cached_doc_dict is not None and isinstance(deps, dict) and deps:
             dep_paths = sorted(str(k) for k in deps)
 
             if changed_only and incremental_used and set(dep_paths).isdisjoint(changed_tree):
-                cached_findings = [x for x in cached_doc.get("findings", []) if isinstance(x, dict)]
+                cached_findings = [
+                    x for x in cached_doc_dict.get("findings", []) if isinstance(x, dict)
+                ]
                 check = {
                     "key": loaded.meta.id,
                     "title": loaded.meta.title,
@@ -2292,7 +2297,9 @@ def run_repo_audit(
                 p: (str(deps.get(p)) if isinstance(deps.get(p), str) else None) for p in dep_paths
             }
             if manifest == normalized:
-                cached_findings = [x for x in cached_doc.get("findings", []) if isinstance(x, dict)]
+                cached_findings = [
+                    x for x in cached_doc_dict.get("findings", []) if isinstance(x, dict)
+                ]
                 check = {
                     "key": loaded.meta.id,
                     "title": loaded.meta.title,
