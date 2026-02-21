@@ -163,3 +163,29 @@ def test_cache_invalidates_on_content_change_even_when_mtime_restored(tmp_path: 
     third_rc, third = _run_capture(tmp_path, "--cache-stats")
     assert third_rc in {0, 1}
     assert third["summary"]["cache"]["misses"]
+
+
+def test_deps_cache_survives_tracked_change_that_is_not_a_dependency(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+
+    rc1, first = _run_capture(tmp_path, "--cache-stats", "--cache-strategy", "deps")
+    assert rc1 in {0, 1}
+    assert first["summary"]["cache"]["misses"]
+
+    rc2, second = _run_capture(tmp_path, "--cache-stats", "--cache-strategy", "deps")
+    assert rc2 in {0, 1}
+    assert second["summary"]["cache"]["hits"]
+    assert not second["summary"]["cache"]["misses"]
+
+    readme = tmp_path / "README.md"
+    readme.write_text("# changed\n", encoding="utf-8")
+
+    rc3, third = _run_capture(tmp_path, "--cache-stats", "--cache-strategy", "deps")
+    assert rc3 in {0, 1}
+    assert third["summary"]["cache"]["hits"]
+    assert not third["summary"]["cache"]["misses"]
+
+    rc4, tree = _run_capture(tmp_path, "--cache-stats")
+    assert rc4 in {0, 1}
+    assert tree["summary"]["cache"]["misses"]
+    assert not tree["summary"]["cache"]["hits"]

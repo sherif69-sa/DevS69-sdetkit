@@ -330,26 +330,35 @@ class FileInfo:
     path: str
     mtime_ns: int
     size: int
+    ctime_ns: int = -1
 
     @property
     def rel_path(self) -> str:
         return self.path
 
     def to_dict(self) -> dict[str, int | str]:
-        return {"path": self.path, "mtime_ns": self.mtime_ns, "size": self.size}
+        return {
+            "path": self.path,
+            "mtime_ns": self.mtime_ns,
+            "size": self.size,
+            "ctime_ns": self.ctime_ns,
+        }
 
     @classmethod
     def from_dict(cls, d: dict[str, object]) -> FileInfo:
         path = d.get("path")
         mtime_ns = d.get("mtime_ns")
         size = d.get("size")
+        ctime_ns = d.get("ctime_ns", -1)
         if not isinstance(path, str):
             raise TypeError("path must be str")
         if not isinstance(mtime_ns, int):
             raise TypeError("mtime_ns must be int")
         if not isinstance(size, int):
             raise TypeError("size must be int")
-        return cls(path=path, mtime_ns=mtime_ns, size=size)
+        if not isinstance(ctime_ns, int):
+            raise TypeError("ctime_ns must be int")
+        return cls(path=path, mtime_ns=mtime_ns, size=size, ctime_ns=ctime_ns)
 
 
 def _inventory_for_root(repo_root: Path) -> list[FileInfo]:
@@ -361,6 +370,7 @@ def _inventory_for_root(repo_root: Path) -> list[FileInfo]:
                 path=fp.relative_to(repo_root).as_posix(),
                 mtime_ns=st.st_mtime_ns,
                 size=st.st_size,
+                ctime_ns=int(getattr(st, "st_ctime_ns", 0)),
             )
         )
     return out
@@ -431,6 +441,9 @@ class _FileInventoryCache:
             if st.st_mtime_ns != f.mtime_ns:
                 return False
             if st.st_size != f.size:
+                return False
+            expected_ctime = int(getattr(f, "ctime_ns", -1))
+            if expected_ctime != -1 and int(getattr(st, "st_ctime_ns", 0)) != expected_ctime:
                 return False
 
         current_paths = {fp.relative_to(repo_root).as_posix() for fp in _iter_files(repo_root)}
@@ -567,6 +580,8 @@ class _FileInventoryCache:
             return hashlib.sha256(b).hexdigest()
 
         rel_s = str(rel).replace("\\", "/")
+        if rel_s == "__repo_tree__":
+            return _repo_audit_tree_sig(repo_root, self.root)
         try:
             files = self.get_inventory(repo_root)
         except Exception:
@@ -574,18 +589,20 @@ class _FileInventoryCache:
 
         mtime_ns = None
         size = None
+        ctime_ns = None
         for f in files:
             fp = getattr(f, "path", None) or getattr(f, "rel_path", None)
             if fp == rel_s:
                 mtime_ns = int(getattr(f, "mtime_ns", 0))
                 size = int(getattr(f, "size", 0))
+                ctime_ns = int(getattr(f, "ctime_ns", -1))
                 break
 
         payload: dict[str, object]
         if mtime_ns is None:
             payload = {"path": rel_s, "missing": True}
         else:
-            payload = {"path": rel_s, "mtime_ns": mtime_ns, "size": size}
+            payload = {"path": rel_s, "mtime_ns": mtime_ns, "size": size, "ctime_ns": ctime_ns}
 
         b = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")).encode(
             "utf-8"
@@ -606,6 +623,9 @@ class RepoRuleExecutionContext:
         rel = Path(path).as_posix() if not isinstance(path, Path) else path.as_posix()
         rel = rel.lstrip("/") or "."
         self._deps.add(rel)
+
+    def track_repo_tree(self) -> None:
+        self._deps.add("__repo_tree__")
 
     def read_text(self, path: str | Path, *, encoding: str = "utf-8") -> str:
         rel = Path(path).as_posix() if not isinstance(path, Path) else path.as_posix()
@@ -1484,6 +1504,7 @@ def _plan_repo_fix_audit(
     no_cache: bool,
     cache_stats: bool,
     jobs: int,
+    cache_strategy: str,
 ) -> tuple[list[Fix], list[str], dict[str, Any]]:
     payload = run_repo_audit(
         root,
@@ -1498,6 +1519,7 @@ def _plan_repo_fix_audit(
         no_cache=no_cache,
         cache_stats=cache_stats,
         jobs=jobs,
+        cache_strategy=cache_strategy,
     )
     baseline_path = safe_path(root, policy.baseline_path, allow_absolute=allow_absolute_path)
     baseline_doc = _load_repo_baseline(baseline_path)
@@ -1609,6 +1631,7 @@ def _run_repo_fix_audit(
     no_cache: bool,
     cache_stats: bool,
     jobs: int,
+    cache_strategy: str,
 ) -> int:
     fixes, conflicts, _ = _plan_repo_fix_audit(
         root,
@@ -1626,6 +1649,7 @@ def _run_repo_fix_audit(
         no_cache=no_cache,
         cache_stats=cache_stats,
         jobs=jobs,
+        cache_strategy=cache_strategy,
     )
     if conflicts:
         for rel in conflicts:
@@ -2199,6 +2223,7 @@ def run_repo_audit(
     no_cache: bool = False,
     cache_stats: bool = False,
     jobs: int = 1,
+    cache_strategy: str = "tree",
 ) -> dict[str, Any]:
     catalog = load_rule_catalog()
     selected_packs = packs or normalize_packs(profile, None)
@@ -2232,31 +2257,58 @@ def run_repo_audit(
         pack_name = next(
             (t.split(":", 1)[1] for t in loaded.meta.tags if t.startswith("pack:")), "core"
         )
-        key = _rule_cache_key(
+        base_key = _rule_cache_key(
             rule_id=rule_id, repo_root=root, profile=profile, packs=selected_packs
         )
-        key = hashlib.sha256(
-            (key + ":" + _repo_audit_tree_sig(root, cache_root)).encode("utf-8")
-        ).hexdigest()
-        cached_doc = _load_cached_rule(cache_root, key) if cache_enabled else None
+        if cache_strategy == "tree":
+            key = hashlib.sha256(
+                (base_key + ":" + _repo_audit_tree_sig(root, cache_root)).encode("utf-8")
+            ).hexdigest()
+        elif cache_strategy == "deps":
+            key = base_key
+        else:
+            raise ValueError(f"invalid cache strategy: {cache_strategy!r}")
 
-        if cached_doc is not None and changed_only and incremental_used:
-            deps = cached_doc.get("dependencies")
-            if isinstance(deps, dict):
-                dep_paths = {str(item) for item in deps}
-                if dep_paths and dep_paths.isdisjoint(changed_tree):
-                    cached_findings = [
-                        x for x in cached_doc.get("findings", []) if isinstance(x, dict)
-                    ]
-                    check = {
-                        "key": loaded.meta.id,
-                        "title": loaded.meta.title,
-                        "status": "pass" if not cached_findings else "fail",
-                        "details": [loaded.meta.description],
-                        "pack": pack_name,
-                        "supports_fix": loaded.meta.supports_fix,
-                    }
-                    return rule_id, check, cached_findings, 1, 0
+        cached_doc = _load_cached_rule(cache_root, key) if cache_enabled else None
+        cached_doc_dict: dict[str, Any] | None = (
+            cached_doc if isinstance(cached_doc, dict) else None
+        )
+        deps = cached_doc_dict.get("dependencies") if cached_doc_dict is not None else None
+
+        if cached_doc_dict is not None and isinstance(deps, dict) and deps:
+            dep_paths = sorted(str(k) for k in deps)
+
+            if changed_only and incremental_used and set(dep_paths).isdisjoint(changed_tree):
+                cached_findings = [
+                    x for x in cached_doc_dict.get("findings", []) if isinstance(x, dict)
+                ]
+                check = {
+                    "key": loaded.meta.id,
+                    "title": loaded.meta.title,
+                    "status": "pass" if not cached_findings else "fail",
+                    "details": [loaded.meta.description],
+                    "pack": pack_name,
+                    "supports_fix": loaded.meta.supports_fix,
+                }
+                return rule_id, check, cached_findings, 1, 0
+
+            manifest = {p: inventory.digest_for(root, p) for p in dep_paths}
+            normalized = {
+                p: (str(deps.get(p)) if isinstance(deps.get(p), str) else None) for p in dep_paths
+            }
+            if manifest == normalized:
+                cached_findings = [
+                    x for x in cached_doc_dict.get("findings", []) if isinstance(x, dict)
+                ]
+                check = {
+                    "key": loaded.meta.id,
+                    "title": loaded.meta.title,
+                    "status": "pass" if not cached_findings else "fail",
+                    "details": [loaded.meta.description],
+                    "pack": pack_name,
+                    "supports_fix": loaded.meta.supports_fix,
+                }
+                return rule_id, check, cached_findings, 1, 0
 
         exec_ctx = RepoRuleExecutionContext(root, inventory, changed_files)
         context: dict[str, Any] = {
@@ -2274,9 +2326,6 @@ def run_repo_audit(
         deps_manifest = exec_ctx.dependency_manifest()
         if cache_enabled and deps_manifest:
             if cached_doc is not None and _cache_valid(cached_doc, deps_manifest):
-                normalized_findings = [
-                    x for x in cached_doc.get("findings", []) if isinstance(x, dict)
-                ]
                 hit_count = 1
             else:
                 _store_rule_cache(
@@ -3340,6 +3389,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--cache-dir", default=".sdetkit/cache")
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--cache-stats", action="store_true")
+    ap.add_argument("--cache-strategy", choices=["tree", "deps"], default="tree")
     ap.add_argument("--jobs", type=int, default=1)
     ap.add_argument("--ide", choices=["vscode", "generic"], default=None)
     ap.add_argument("--ide-output", default=None)
@@ -3418,6 +3468,7 @@ def main(argv: list[str] | None = None) -> int:
     fxap.add_argument("--cache-dir", default=".sdetkit/cache")
     fxap.add_argument("--no-cache", action="store_true")
     fxap.add_argument("--cache-stats", action="store_true")
+    fxap.add_argument("--cache-strategy", choices=["tree", "deps"], default="tree")
     fxap.add_argument("--jobs", type=int, default=1)
 
     prp = sub.add_parser("pr-fix")
@@ -3446,6 +3497,7 @@ def main(argv: list[str] | None = None) -> int:
     prp.add_argument("--cache-dir", default=".sdetkit/cache")
     prp.add_argument("--no-cache", action="store_true")
     prp.add_argument("--cache-stats", action="store_true")
+    prp.add_argument("--cache-strategy", choices=["tree", "deps"], default="tree")
     prp.add_argument("--jobs", type=int, default=1)
 
     prp.add_argument("--branch", default="sdetkit/fix-audit")
@@ -3894,6 +3946,7 @@ def main(argv: list[str] | None = None) -> int:
                     no_cache=bool(ns.no_cache),
                     cache_stats=bool(ns.cache_stats),
                     jobs=int(ns.jobs),
+                    cache_strategy=str(ns.cache_strategy),
                 )
                 original_findings = [
                     x for x in project_payload.get("findings", []) if isinstance(x, dict)
@@ -4040,6 +4093,7 @@ def main(argv: list[str] | None = None) -> int:
             no_cache=bool(ns.no_cache),
             cache_stats=bool(ns.cache_stats),
             jobs=int(ns.jobs),
+            cache_strategy=str(ns.cache_strategy),
         )
         original_findings = [x for x in audit_payload.get("findings", []) if isinstance(x, dict)]
         try:
@@ -4260,6 +4314,7 @@ def main(argv: list[str] | None = None) -> int:
                     no_cache=bool(ns.no_cache),
                     cache_stats=bool(ns.cache_stats),
                     jobs=int(ns.jobs),
+                    cache_strategy=str(ns.cache_strategy),
                 )
                 exit_code = max(exit_code, rc)
             return exit_code
@@ -4307,6 +4362,7 @@ def main(argv: list[str] | None = None) -> int:
             no_cache=bool(ns.no_cache),
             cache_stats=bool(ns.cache_stats),
             jobs=int(ns.jobs),
+            cache_strategy=str(ns.cache_strategy),
         )
 
     if ns.repo_cmd == "pr-fix":
@@ -4374,6 +4430,7 @@ def main(argv: list[str] | None = None) -> int:
                     no_cache=bool(ns.no_cache),
                     cache_stats=bool(ns.cache_stats),
                     jobs=int(ns.jobs),
+                    cache_strategy=str(ns.cache_strategy),
                 )
                 if conflicts:
                     for rel in conflicts:
@@ -4439,6 +4496,7 @@ def main(argv: list[str] | None = None) -> int:
                 no_cache=bool(ns.no_cache),
                 cache_stats=bool(ns.cache_stats),
                 jobs=int(ns.jobs),
+                cache_strategy=str(ns.cache_strategy),
             )
             if conflicts:
                 for rel in conflicts:

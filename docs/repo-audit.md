@@ -9,6 +9,15 @@ sdetkit repo audit
 sdetkit repo audit --format json --output repo-audit.json --force
 ```
 
+## Performance: cache strategy
+
+Repo audit writes a local cache under `.sdetkit/cache` to speed up repeated runs. The default `--cache-strategy tree` invalidates cached results when tracked files change. Use `--cache-strategy deps` to reuse per-rule results when the files a rule depends on are unchanged.
+
+```bash
+sdetkit repo audit --cache-stats
+sdetkit repo audit --cache-strategy deps --cache-stats
+```
+
 ## Checks performed (`sdetkit repo audit`)
 
 - **OSS readiness files**: checks for `README.md`, `LICENSE`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and `CHANGELOG.md`.
