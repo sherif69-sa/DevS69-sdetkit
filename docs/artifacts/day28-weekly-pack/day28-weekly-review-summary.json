@@ -1,0 +1,109 @@
+{
+  "name": "day28-weekly-review",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day28-weekly-review.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day25_summary": "docs/artifacts/day25-community-pack/day25-community-summary.json",
+    "day26_summary": "docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json",
+    "day27_summary": "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
+  },
+  "checks": [
+    {
+      "key": "docs_page_exists",
+      "category": "contract",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day28-weekly-review.md"
+    },
+    {
+      "key": "required_sections_present",
+      "category": "contract",
+      "weight": 20,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "key": "required_commands_present",
+      "category": "contract",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "key": "readme_day28_link",
+      "category": "discoverability",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/integrations-day28-weekly-review.md"
+    },
+    {
+      "key": "docs_index_day28_link",
+      "category": "discoverability",
+      "weight": 10,
+      "passed": true,
+      "evidence": "day-28-ultra-upgrade-report.md"
+    },
+    {
+      "key": "top10_day28_alignment",
+      "category": "strategy",
+      "weight": 8,
+      "passed": true,
+      "evidence": "Day 28 \u2014 Weekly review #4"
+    },
+    {
+      "key": "docs_mentions_wins_misses_actions",
+      "category": "strategy",
+      "weight": 7,
+      "passed": true,
+      "evidence": "wins/misses/corrective"
+    },
+    {
+      "key": "day25_input_present",
+      "category": "data",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day25-community-pack/day25-community-summary.json"
+    },
+    {
+      "key": "day26_input_present",
+      "category": "data",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json"
+    },
+    {
+      "key": "day27_input_present",
+      "category": "data",
+      "weight": 9,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
+    }
+  ],
+  "rollup": {
+    "day25_activation_score": 100.0,
+    "day26_activation_score": 100.0,
+    "day27_activation_score": 100.0,
+    "average_activation_score": 100.0
+  },
+  "summary": {
+    "activation_score": 100.0,
+    "passed_checks": 10,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 25 community activation remained strong (100.0).",
+    "Day 26 external contribution push stayed healthy (100.0).",
+    "Day 27 KPI audit preserved positive momentum (100.0).",
+    "Day 28 weekly review #4 is ready for final phase-close communication."
+  ],
+  "misses": [],
+  "corrective_actions": []
+}
