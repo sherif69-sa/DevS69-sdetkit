@@ -392,3 +392,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 27 KPI pack: `python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/day27-kpi-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/day27-kpi-pack/evidence --format json --strict`.
 - Review sample output artifact: [day27 KPI audit sample](artifacts/day27-kpi-audit-sample.md).
+
+
+## Day 28 ultra upgrades (weekly review #4 closeout)
+
+- Read the implementation report: [Day 28 ultra upgrade report](day-28-ultra-upgrade-report.md).
+- Run `python -m sdetkit day28-weekly-review --format json --strict` to score Day 28 weekly-close readiness.
+- Emit Day 28 weekly pack: `python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/day28-weekly-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/day28-weekly-pack/evidence --format json --strict`.
+- Review sample output artifact: [day28 weekly review sample](artifacts/day28-weekly-review-sample.md).

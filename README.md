@@ -945,6 +945,16 @@ See implementation details: [Day 26 ultra upgrade report](docs/day-26-ultra-upgr
 
 See implementation details: [Day 27 ultra upgrade report](docs/day-27-ultra-upgrade-report.md).
 
+
+## 🧾 Day 28 ultra: weekly review #4 closeout
+
+- Run `python -m sdetkit day28-weekly-review --format json --strict` to validate Day 28 wins/misses/corrective-actions readiness.
+- Emit shareable weekly pack: `python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/day28-weekly-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/day28-weekly-pack/evidence --format json --strict`.
+- Review Day 28 integration guide: [Weekly review #4](docs/integrations-day28-weekly-review.md).
+
+See implementation details: [Day 28 ultra upgrade report](docs/day-28-ultra-upgrade-report.md).
+
 Day 23 closeout checks:
 
 ```bash
