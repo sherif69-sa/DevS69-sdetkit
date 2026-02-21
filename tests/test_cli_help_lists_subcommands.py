@@ -43,3 +43,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "trust-signal-upgrade" in out
     assert "faq-objections" in out
     assert "community-activation" in out
+    assert "external-contribution-push" in out

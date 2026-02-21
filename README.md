@@ -927,6 +927,15 @@ See implementation details: [Day 24 ultra upgrade report](docs/day-24-ultra-upgr
 
 See implementation details: [Day 25 ultra upgrade report](docs/day-25-ultra-upgrade-report.md).
 
+## 📣 Day 26 ultra: external contribution push
+
+- Run `python -m sdetkit external-contribution-push --format json --strict` to validate Day 26 starter-task spotlight readiness.
+- Emit shareable external contribution pack: `python -m sdetkit external-contribution-push --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit external-contribution-push --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict`.
+- Review Day 26 integration guide: [External contribution push](docs/integrations-external-contribution-push.md).
+
+See implementation details: [Day 26 ultra upgrade report](docs/day-26-ultra-upgrade-report.md).
+
 Day 23 closeout checks:
 
 ```bash
