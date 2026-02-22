@@ -1,0 +1,127 @@
+{
+  "name": "day31-phase2-kickoff",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day31-phase2-kickoff.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day30_summary": "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json",
+    "day30_backlog": "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
+  },
+  "checks": [
+    {
+      "key": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day31-phase2-kickoff.md"
+    },
+    {
+      "key": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "key": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "key": "readme_day31_link",
+      "weight": 8,
+      "passed": true,
+      "evidence": "docs/integrations-day31-phase2-kickoff.md"
+    },
+    {
+      "key": "readme_day31_command",
+      "weight": 4,
+      "passed": true,
+      "evidence": "day31-phase2-kickoff"
+    },
+    {
+      "key": "docs_index_day31_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-31-ultra-upgrade-report.md + integrations-day31-phase2-kickoff.md"
+    },
+    {
+      "key": "top10_day31_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 31 + Day 32 strategy chain"
+    },
+    {
+      "key": "day30_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
+    },
+    {
+      "key": "day30_backlog_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
+    },
+    {
+      "key": "day30_quality_floor",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "day30_score": 99.0,
+        "day30_average": 100.0,
+        "strict_pass": true
+      }
+    },
+    {
+      "key": "phase2_backlog_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "backlog_items": 8,
+        "contains_day31": true,
+        "contains_day32": true
+      }
+    },
+    {
+      "key": "weekly_target_contract",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_target_lines": []
+      }
+    },
+    {
+      "key": "delivery_board_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day30_activation_score": 99.0,
+    "day30_average_activation_score": 100.0,
+    "day30_backlog_items": 8
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 13,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 30 continuity is strict-pass with score=99.0 and avg=100.0.",
+    "Phase-2 backlog integrity validated with 8 checklist items.",
+    "Week-1 targets and Day 31 delivery board are fully locked.",
+    "Day 31 kickoff is fully closed and ready for Day 32 release-cadence execution."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

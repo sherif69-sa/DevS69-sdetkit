@@ -1026,9 +1026,18 @@ Day 31 kickoff checks:
 ```bash
 python -m pytest -q tests/test_day31_phase2_kickoff.py tests/test_cli_help_lists_subcommands.py
 python scripts/check_day31_phase2_kickoff_contract.py
-python -m sdetkit day31-phase2-kickoff --format json --strict
+python -m sdetkit day31-phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict
 python -m sdetkit day31-phase2-kickoff --execute --evidence-dir docs/artifacts/day31-phase2-pack/evidence --format json --strict
+python -m sdetkit day31-phase2-kickoff --format json --strict
 ```
+
+Day 31 upgraded pack artifacts include:
+
+- `day31-phase2-kickoff-summary.json`
+- `day31-phase2-kickoff-summary.md`
+- `day31-baseline-snapshot.json`
+- `day31-delivery-board.md`
+- `day31-validation-commands.md`
 
 ## ⚡ Quick start
 

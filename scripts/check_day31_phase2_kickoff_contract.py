@@ -25,6 +25,12 @@ def main() -> int:
     for command in d31._REQUIRED_COMMANDS:
         if command not in page_text:
             strict_failures.append(command)
+    for target in d31._REQUIRED_WEEKLY_TARGET_LINES:
+        if f"- {target}" not in page_text:
+            strict_failures.append(target)
+    for board_item in d31._REQUIRED_DELIVERY_BOARD_LINES:
+        if board_item not in page_text:
+            strict_failures.append(board_item)
 
     errors: list[str] = []
     if strict_failures:
@@ -38,7 +44,7 @@ def main() -> int:
             errors.append(f"missing evidence file: {evidence}")
         else:
             data = json.loads(evidence.read_text(encoding="utf-8"))
-            if data.get("total_commands", 0) < 2:
+            if data.get("total_commands", 0) < 3:
                 errors.append("execution evidence has insufficient commands")
 
     print(json.dumps({"errors": errors, "score": payload["summary"]["activation_score"]}, indent=2))

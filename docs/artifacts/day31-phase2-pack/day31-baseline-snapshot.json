@@ -1,0 +1,13 @@
+{
+  "day": 31,
+  "baseline": {
+    "day30_activation_score": 99.0,
+    "day30_average_activation_score": 100.0,
+    "day30_backlog_items": 8
+  },
+  "week1_targets": {
+    "activation_score_floor": 95,
+    "external_assets": 3,
+    "kpi_checkpoints": 1
+  }
+}

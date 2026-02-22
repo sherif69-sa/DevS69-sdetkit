@@ -28,12 +28,21 @@ python scripts/check_day31_phase2_kickoff_contract.py
 - Week-1 Phase-2 target: maintain activation score >= 95 and preserve strict pass.
 - Week-1 growth target: publish 3 external-facing assets and 1 KPI checkpoint.
 - Week-1 quality gate: every shipped action includes command evidence and a summary artifact.
+- Week-1 decision gate: if any target misses, publish corrective actions in the next weekly review.
+
+## Day 31 delivery board
+
+- [ ] Day 31 baseline metrics snapshot emitted
+- [ ] Day 32 release cadence checklist drafted
+- [ ] Day 33 demo asset plan (doctor) assigned
+- [ ] Day 34 demo asset plan (repo audit) assigned
+- [ ] Day 35 weekly review preparation checklist ready
 
 ## Scoring model
 
 Day 31 weighted score (0-100):
 
-- Docs contract + command lane completeness: 35 points.
-- Discoverability alignment (README/docs index/top-10): 25 points.
-- Day 30 input continuity + quality thresholds: 30 points.
-- Weekly target contract quality: 10 points.
+- Docs contract + command lane completeness: 30 points.
+- Discoverability alignment (README/docs index/top-10): 20 points.
+- Day 30 continuity and quality baseline: 35 points.
+- Week-1 target and delivery board lock: 15 points.
