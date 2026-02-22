@@ -73,56 +73,61 @@ Day 26 computes weighted readiness score (0-100):
 """
 
 _SIGNALS = [
-    {"key": "docs_page_exists", "category": "contract", "weight": 15, "evaluator": "page_exists"},
     {
-        "key": "required_sections_present",
+        "check_id": "docs_page_exists",
+        "category": "contract",
+        "weight": 15,
+        "evaluator": "page_exists",
+    },
+    {
+        "check_id": "required_sections_present",
         "category": "contract",
         "weight": 20,
         "evaluator": "required_sections",
     },
     {
-        "key": "required_commands_present",
+        "check_id": "required_commands_present",
         "category": "contract",
         "weight": 10,
         "evaluator": "required_commands",
     },
     {
-        "key": "readme_day26_link",
+        "check_id": "readme_day26_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "docs/integrations-external-contribution-push.md",
         "source": "readme",
     },
     {
-        "key": "readme_day26_command",
+        "check_id": "readme_day26_command",
         "category": "discoverability",
         "weight": 8,
         "marker": "external-contribution-push",
         "source": "readme",
     },
     {
-        "key": "docs_index_day26_link",
+        "check_id": "docs_index_day26_link",
         "category": "discoverability",
         "weight": 7,
         "marker": "day-26-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {
-        "key": "top10_day26_alignment",
+        "check_id": "top10_day26_alignment",
         "category": "strategy",
         "weight": 10,
         "marker": "Day 26 — External contribution push",
         "source": "top10",
     },
     {
-        "key": "docs_mentions_starter_tasks",
+        "check_id": "docs_mentions_starter_tasks",
         "category": "strategy",
         "weight": 10,
         "marker": "starter task",
         "source": "page",
     },
     {
-        "key": "docs_mentions_response_sla",
+        "check_id": "docs_mentions_response_sla",
         "category": "evidence",
         "weight": 10,
         "marker": "24 hours",
@@ -160,7 +165,11 @@ def _evaluate_signals(
             passed = page_path.exists()
             evidence: Any = str(page_path)
         elif evaluator == "required_sections":
-            missing = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+            missing = [
+                section
+                for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS]
+                if section not in page_text
+            ]
             passed = not missing
             evidence = {"missing_sections": missing}
         elif evaluator == "required_commands":
@@ -182,9 +191,9 @@ def _evaluate_signals(
 
         rows.append(
             {
-                "key": str(signal["key"]),
+                "check_id": str(signal["check_id"]),
                 "category": str(signal["category"]),
-                "weight": int(signal["weight"]),
+                "weight": int(str(signal["weight"])),
                 "passed": bool(passed),
                 "evidence": evidence,
             }
@@ -214,17 +223,27 @@ def build_external_contribution_push_summary(
     score = round((earned_weight / total_weight) * 100, 2) if total_weight else 0.0
 
     failed = [item for item in checks if not item["passed"]]
-    critical_failures = [item["key"] for item in failed if item["key"] in _CRITICAL_FAILURE_KEYS]
+    critical_failures = [
+        item["check_id"] for item in failed if item["check_id"] in _CRITICAL_FAILURE_KEYS
+    ]
 
     recommendations: list[str] = []
     if any(item["category"] == "contract" for item in failed):
-        recommendations.append("Restore Day 26 docs contract sections and required command lane before launch.")
+        recommendations.append(
+            "Restore Day 26 docs contract sections and required command lane before launch."
+        )
     if any(item["category"] == "discoverability" for item in failed):
-        recommendations.append("Add Day 26 links and commands to README/docs index for external contributor visibility.")
+        recommendations.append(
+            "Add Day 26 links and commands to README/docs index for external contributor visibility."
+        )
     if any(item["category"] in {"strategy", "evidence"} for item in failed):
-        recommendations.append("Align Day 26 outputs with starter-task spotlighting and 24-hour first-response SLA.")
+        recommendations.append(
+            "Align Day 26 outputs with starter-task spotlighting and 24-hour first-response SLA."
+        )
     if not recommendations:
-        recommendations.append("Day 26 external contribution push lane is healthy; keep weekly conversion summaries flowing.")
+        recommendations.append(
+            "Day 26 external contribution push lane is healthy; keep weekly conversion summaries flowing."
+        )
 
     return {
         "name": "day26-external-contribution-push",
@@ -238,7 +257,7 @@ def build_external_contribution_push_summary(
         "summary": {
             "activation_score": score,
             "total_checks": len(checks),
-            "failed_checks": [item["key"] for item in failed],
+            "failed_checks": [item["check_id"] for item in failed],
             "critical_failures": critical_failures,
             "recommendations": recommendations,
         },
@@ -255,7 +274,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         "Checks:",
     ]
     for item in payload["checks"]:
-        lines.append(f"- [{'x' if item['passed'] else ' '}] {item['key']} ({item['category']}, w={item['weight']})")
+        lines.append(
+            f"- [{'x' if item['passed'] else ' '}] {item['check_id']} ({item['category']}, w={item['weight']})"
+        )
     return "\n".join(lines)
 
 
@@ -307,11 +328,14 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 26 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]) + "\n",
+        "\n".join(["# Day 26 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        + "\n",
         encoding="utf-8",
     )
 
-    return [str(path.relative_to(root)) for path in [summary, scorecard, spotlight, triage, validation]]
+    return [
+        str(path.relative_to(root)) for path in [summary, scorecard, spotlight, triage, validation]
+    ]
 
 
 def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[str, Any]:
@@ -346,20 +370,36 @@ def build_parser() -> argparse.ArgumentParser:
         description="Day 26 external contribution push closeout lane.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
-    parser.add_argument("--readme", default="README.md", help="README path for discoverability checks.")
-    parser.add_argument("--docs-index", default="docs/index.md", help="Docs index path for discoverability checks.")
+    parser.add_argument(
+        "--readme", default="README.md", help="README path for discoverability checks."
+    )
+    parser.add_argument(
+        "--docs-index", default="docs/index.md", help="Docs index path for discoverability checks."
+    )
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
-    parser.add_argument("--write-defaults", action="store_true", help="Create default Day 26 integration page.")
-    parser.add_argument("--emit-pack-dir", default="", help="Optional output directory for generated Day 26 files.")
-    parser.add_argument("--execute", action="store_true", help="Run Day 26 command chain and emit evidence logs.")
+    parser.add_argument(
+        "--write-defaults", action="store_true", help="Create default Day 26 integration page."
+    )
+    parser.add_argument(
+        "--emit-pack-dir", default="", help="Optional output directory for generated Day 26 files."
+    )
+    parser.add_argument(
+        "--execute", action="store_true", help="Run Day 26 command chain and emit evidence logs."
+    )
     parser.add_argument(
         "--evidence-dir",
         default="docs/artifacts/day26-external-contribution-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
-    parser.add_argument("--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute.")
-    parser.add_argument("--min-score", type=float, default=90.0, help="Minimum score for strict pass.")
-    parser.add_argument("--strict", action="store_true", help="Fail when score or critical checks are not ready.")
+    parser.add_argument(
+        "--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute."
+    )
+    parser.add_argument(
+        "--min-score", type=float, default=90.0, help="Minimum score for strict pass."
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Fail when score or critical checks are not ready."
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
     return parser
 
@@ -380,7 +420,9 @@ def main(argv: list[str] | None = None) -> int:
         top10_path=ns.top10,
     )
     page_text = _read(page)
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
     payload["strict_failures"] = [*missing_sections, *missing_commands]
 

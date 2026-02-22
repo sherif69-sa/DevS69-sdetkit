@@ -153,7 +153,9 @@ def build_day31_phase2_kickoff_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_targets = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_WEEKLY_TARGET_LINES])
+    missing_targets = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_WEEKLY_TARGET_LINES]
+    )
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day30_summary = root / _DAY30_SUMMARY_PATH
@@ -162,19 +164,98 @@ def build_day31_phase2_kickoff_summary(
     backlog_count, backlog_has_day31, backlog_has_day32 = _backlog_stats(day30_backlog)
 
     checks: list[dict[str, Any]] = [
-        {"key": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"key": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"key": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"key": "readme_day31_link", "weight": 8, "passed": "docs/integrations-day31-phase2-kickoff.md" in readme_text, "evidence": "docs/integrations-day31-phase2-kickoff.md"},
-        {"key": "readme_day31_command", "weight": 4, "passed": "day31-phase2-kickoff" in readme_text, "evidence": "day31-phase2-kickoff"},
-        {"key": "docs_index_day31_links", "weight": 8, "passed": ("day-31-ultra-upgrade-report.md" in docs_index_text and "integrations-day31-phase2-kickoff.md" in docs_index_text), "evidence": "day-31-ultra-upgrade-report.md + integrations-day31-phase2-kickoff.md"},
-        {"key": "top10_day31_alignment", "weight": 5, "passed": ("Day 31 — Phase-2 kickoff" in top10_text and "Day 32 — Release cadence setup" in top10_text), "evidence": "Day 31 + Day 32 strategy chain"},
-        {"key": "day30_summary_present", "weight": 10, "passed": day30_summary.exists(), "evidence": str(day30_summary)},
-        {"key": "day30_backlog_present", "weight": 8, "passed": day30_backlog.exists(), "evidence": str(day30_backlog)},
-        {"key": "day30_quality_floor", "weight": 10, "passed": day30_strict and day30_score >= 95 and day30_avg >= 95, "evidence": {"day30_score": day30_score, "day30_average": day30_avg, "strict_pass": day30_strict}},
-        {"key": "phase2_backlog_integrity", "weight": 7, "passed": backlog_count >= 8 and backlog_has_day31 and backlog_has_day32, "evidence": {"backlog_items": backlog_count, "contains_day31": backlog_has_day31, "contains_day32": backlog_has_day32}},
-        {"key": "weekly_target_contract", "weight": 5, "passed": not missing_targets, "evidence": {"missing_target_lines": missing_targets}},
-        {"key": "delivery_board_locked", "weight": 5, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day31_link",
+            "weight": 8,
+            "passed": "docs/integrations-day31-phase2-kickoff.md" in readme_text,
+            "evidence": "docs/integrations-day31-phase2-kickoff.md",
+        },
+        {
+            "check_id": "readme_day31_command",
+            "weight": 4,
+            "passed": "day31-phase2-kickoff" in readme_text,
+            "evidence": "day31-phase2-kickoff",
+        },
+        {
+            "check_id": "docs_index_day31_links",
+            "weight": 8,
+            "passed": (
+                "day-31-ultra-upgrade-report.md" in docs_index_text
+                and "integrations-day31-phase2-kickoff.md" in docs_index_text
+            ),
+            "evidence": "day-31-ultra-upgrade-report.md + integrations-day31-phase2-kickoff.md",
+        },
+        {
+            "check_id": "top10_day31_alignment",
+            "weight": 5,
+            "passed": (
+                "Day 31 — Phase-2 kickoff" in top10_text
+                and "Day 32 — Release cadence setup" in top10_text
+            ),
+            "evidence": "Day 31 + Day 32 strategy chain",
+        },
+        {
+            "check_id": "day30_summary_present",
+            "weight": 10,
+            "passed": day30_summary.exists(),
+            "evidence": str(day30_summary),
+        },
+        {
+            "check_id": "day30_backlog_present",
+            "weight": 8,
+            "passed": day30_backlog.exists(),
+            "evidence": str(day30_backlog),
+        },
+        {
+            "check_id": "day30_quality_floor",
+            "weight": 10,
+            "passed": day30_strict and day30_score >= 95 and day30_avg >= 95,
+            "evidence": {
+                "day30_score": day30_score,
+                "day30_average": day30_avg,
+                "strict_pass": day30_strict,
+            },
+        },
+        {
+            "check_id": "phase2_backlog_integrity",
+            "weight": 7,
+            "passed": backlog_count >= 8 and backlog_has_day31 and backlog_has_day32,
+            "evidence": {
+                "backlog_items": backlog_count,
+                "contains_day31": backlog_has_day31,
+                "contains_day32": backlog_has_day32,
+            },
+        },
+        {
+            "check_id": "weekly_target_contract",
+            "weight": 5,
+            "passed": not missing_targets,
+            "evidence": {"missing_target_lines": missing_targets},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -190,25 +271,37 @@ def build_day31_phase2_kickoff_summary(
     handoff_actions: list[str] = []
 
     if day30_strict:
-        wins.append(f"Day 30 continuity is strict-pass with score={day30_score} and avg={day30_avg}.")
+        wins.append(
+            f"Day 30 continuity is strict-pass with score={day30_score} and avg={day30_avg}."
+        )
     else:
         misses.append("Day 30 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 30 wrap command and restore strict pass baseline before Phase-2 expansion.")
+        handoff_actions.append(
+            "Re-run Day 30 wrap command and restore strict pass baseline before Phase-2 expansion."
+        )
 
     if backlog_count >= 8 and backlog_has_day31 and backlog_has_day32:
         wins.append(f"Phase-2 backlog integrity validated with {backlog_count} checklist items.")
     else:
-        misses.append("Phase-2 backlog integrity is incomplete (needs >=8 items and Day 31/32 anchors).")
-        handoff_actions.append("Repair Day 30 backlog to include at least 8 items with explicit Day 31 and Day 32 lines.")
+        misses.append(
+            "Phase-2 backlog integrity is incomplete (needs >=8 items and Day 31/32 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 30 backlog to include at least 8 items with explicit Day 31 and Day 32 lines."
+        )
 
     if not missing_targets and not missing_board_items:
         wins.append("Week-1 targets and Day 31 delivery board are fully locked.")
     else:
         misses.append("Week-1 target contract or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 31 target lines and delivery board checklist entries in integration docs.")
+        handoff_actions.append(
+            "Complete all Day 31 target lines and delivery board checklist entries in integration docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 31 kickoff is fully closed and ready for Day 32 release-cadence execution.")
+        wins.append(
+            "Day 31 kickoff is fully closed and ready for Day 32 release-cadence execution."
+        )
 
     return {
         "name": "day31-phase2-kickoff",
@@ -217,8 +310,12 @@ def build_day31_phase2_kickoff_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day30_summary": str(day30_summary.relative_to(root)) if day30_summary.exists() else str(day30_summary),
-            "day30_backlog": str(day30_backlog.relative_to(root)) if day30_backlog.exists() else str(day30_backlog),
+            "day30_summary": str(day30_summary.relative_to(root))
+            if day30_summary.exists()
+            else str(day30_summary),
+            "day30_backlog": str(day30_backlog.relative_to(root))
+            if day30_backlog.exists()
+            else str(day30_backlog),
         },
         "checks": checks,
         "rollup": {
@@ -272,7 +369,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -293,7 +392,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
                 "day": 31,
                 "baseline": {
                     "day30_activation_score": payload["rollup"]["day30_activation_score"],
-                    "day30_average_activation_score": payload["rollup"]["day30_average_activation_score"],
+                    "day30_average_activation_score": payload["rollup"][
+                        "day30_average_activation_score"
+                    ],
                     "day30_backlog_items": payload["rollup"]["day30_backlog_items"],
                 },
                 "week1_targets": {
@@ -310,7 +411,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day31-delivery-board.md",
         "# Day 31 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
-    _write(target / "day31-validation-commands.md", "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day31-validation-commands.md",
+        "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -318,8 +422,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day31-phase2-kickoff-execution",
         "total_commands": len(logs),
@@ -357,7 +470,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day31-phase2-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day31-phase2-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -368,11 +485,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

@@ -10,13 +10,13 @@
   },
   "checks": [
     {
-      "key": "docs_page_exists",
+      "check_id": "docs_page_exists",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day31-phase2-kickoff.md"
     },
     {
-      "key": "required_sections_present",
+      "check_id": "required_sections_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -24,7 +24,7 @@
       }
     },
     {
-      "key": "required_commands_present",
+      "check_id": "required_commands_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -32,43 +32,43 @@
       }
     },
     {
-      "key": "readme_day31_link",
+      "check_id": "readme_day31_link",
       "weight": 8,
       "passed": true,
       "evidence": "docs/integrations-day31-phase2-kickoff.md"
     },
     {
-      "key": "readme_day31_command",
+      "check_id": "readme_day31_command",
       "weight": 4,
       "passed": true,
       "evidence": "day31-phase2-kickoff"
     },
     {
-      "key": "docs_index_day31_links",
+      "check_id": "docs_index_day31_links",
       "weight": 8,
       "passed": true,
       "evidence": "day-31-ultra-upgrade-report.md + integrations-day31-phase2-kickoff.md"
     },
     {
-      "key": "top10_day31_alignment",
+      "check_id": "top10_day31_alignment",
       "weight": 5,
       "passed": true,
       "evidence": "Day 31 + Day 32 strategy chain"
     },
     {
-      "key": "day30_summary_present",
+      "check_id": "day30_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
     },
     {
-      "key": "day30_backlog_present",
+      "check_id": "day30_backlog_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
     },
     {
-      "key": "day30_quality_floor",
+      "check_id": "day30_quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -78,7 +78,7 @@
       }
     },
     {
-      "key": "phase2_backlog_integrity",
+      "check_id": "phase2_backlog_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
@@ -88,7 +88,7 @@
       }
     },
     {
-      "key": "weekly_target_contract",
+      "check_id": "weekly_target_contract",
       "weight": 5,
       "passed": true,
       "evidence": {
@@ -96,7 +96,7 @@
       }
     },
     {
-      "key": "delivery_board_locked",
+      "check_id": "delivery_board_locked",
       "weight": 5,
       "passed": true,
       "evidence": {

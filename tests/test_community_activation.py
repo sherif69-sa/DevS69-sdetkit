@@ -17,7 +17,9 @@ def _seed(root: Path) -> None:
         "- **Day 25 — Community activation:** open roadmap-voting discussion and collect feedback.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-community-activation.md").write_text(ca._DAY25_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-community-activation.md").write_text(
+        ca._DAY25_DEFAULT_PAGE, encoding="utf-8"
+    )
 
 
 def test_day25_community_activation_json(tmp_path: Path, capsys) -> None:

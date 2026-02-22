@@ -73,49 +73,54 @@ Day 25 computes weighted readiness score (0-100):
 """
 
 _SIGNALS = [
-    {"key": "docs_page_exists", "category": "contract", "weight": 15, "evaluator": "page_exists"},
     {
-        "key": "required_sections_present",
+        "check_id": "docs_page_exists",
+        "category": "contract",
+        "weight": 15,
+        "evaluator": "page_exists",
+    },
+    {
+        "check_id": "required_sections_present",
         "category": "contract",
         "weight": 20,
         "evaluator": "required_sections",
     },
     {
-        "key": "required_commands_present",
+        "check_id": "required_commands_present",
         "category": "contract",
         "weight": 10,
         "evaluator": "required_commands",
     },
     {
-        "key": "readme_day25_link",
+        "check_id": "readme_day25_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "docs/integrations-community-activation.md",
         "source": "readme",
     },
     {
-        "key": "readme_day25_command",
+        "check_id": "readme_day25_command",
         "category": "discoverability",
         "weight": 8,
         "marker": "community-activation",
         "source": "readme",
     },
     {
-        "key": "docs_index_day25_link",
+        "check_id": "docs_index_day25_link",
         "category": "discoverability",
         "weight": 7,
         "marker": "day-25-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {
-        "key": "top10_day25_alignment",
+        "check_id": "top10_day25_alignment",
         "category": "strategy",
         "weight": 20,
         "marker": "Day 25 — Community activation",
         "source": "top10",
     },
     {
-        "key": "docs_mentions_roadmap_voting",
+        "check_id": "docs_mentions_roadmap_voting",
         "category": "strategy",
         "weight": 10,
         "marker": "roadmap-voting",
@@ -153,7 +158,11 @@ def _evaluate_signals(
             passed = page_path.exists()
             evidence: Any = str(page_path)
         elif evaluator == "required_sections":
-            missing = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+            missing = [
+                section
+                for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS]
+                if section not in page_text
+            ]
             passed = not missing
             evidence = {"missing_sections": missing}
         elif evaluator == "required_commands":
@@ -175,9 +184,9 @@ def _evaluate_signals(
 
         rows.append(
             {
-                "key": str(signal["key"]),
+                "check_id": str(signal["check_id"]),
                 "category": str(signal["category"]),
-                "weight": int(signal["weight"]),
+                "weight": int(str(signal["weight"])),
                 "passed": bool(passed),
                 "evidence": evidence,
             }
@@ -211,17 +220,27 @@ def build_community_activation_summary(
     score = round((earned_weight / total_weight) * 100, 2) if total_weight else 0.0
 
     failed = [item for item in checks if not item["passed"]]
-    critical_failures = [item["key"] for item in failed if item["key"] in _CRITICAL_FAILURE_KEYS]
+    critical_failures = [
+        item["check_id"] for item in failed if item["check_id"] in _CRITICAL_FAILURE_KEYS
+    ]
 
     recommendations: list[str] = []
     if any(item["category"] == "contract" for item in failed):
-        recommendations.append("Restore Day 25 docs contract sections and required command lane before launch.")
+        recommendations.append(
+            "Restore Day 25 docs contract sections and required command lane before launch."
+        )
     if any(item["category"] == "discoverability" for item in failed):
-        recommendations.append("Add Day 25 links and command snippets to README/docs index for contributor visibility.")
+        recommendations.append(
+            "Add Day 25 links and command snippets to README/docs index for contributor visibility."
+        )
     if any(item["category"] == "strategy" for item in failed):
-        recommendations.append("Align Day 25 outputs with top-10 roadmap activation objective and roadmap-voting messaging.")
+        recommendations.append(
+            "Align Day 25 outputs with top-10 roadmap activation objective and roadmap-voting messaging."
+        )
     if not recommendations:
-        recommendations.append("Day 25 community activation lane is healthy; keep weekly voting summaries flowing.")
+        recommendations.append(
+            "Day 25 community activation lane is healthy; keep weekly voting summaries flowing."
+        )
 
     return {
         "name": "day25-community-activation",
@@ -235,7 +254,7 @@ def build_community_activation_summary(
         "summary": {
             "activation_score": score,
             "total_checks": len(checks),
-            "failed_checks": [item["key"] for item in failed],
+            "failed_checks": [item["check_id"] for item in failed],
             "critical_failures": critical_failures,
             "recommendations": recommendations,
         },
@@ -252,7 +271,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         "Checks:",
     ]
     for item in payload["checks"]:
-        lines.append(f"- [{'x' if item['passed'] else ' '}] {item['key']} ({item['category']}, w={item['weight']})")
+        lines.append(
+            f"- [{'x' if item['passed'] else ' '}] {item['check_id']} ({item['category']}, w={item['weight']})"
+        )
     return "\n".join(lines)
 
 
@@ -309,11 +330,14 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 25 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]) + "\n",
+        "\n".join(["# Day 25 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        + "\n",
         encoding="utf-8",
     )
 
-    return [str(path.relative_to(root)) for path in [summary, scorecard, discussion, triage, validation]]
+    return [
+        str(path.relative_to(root)) for path in [summary, scorecard, discussion, triage, validation]
+    ]
 
 
 def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[str, Any]:
@@ -348,20 +372,36 @@ def build_parser() -> argparse.ArgumentParser:
         description="Day 25 community activation and roadmap-voting closeout lane.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
-    parser.add_argument("--readme", default="README.md", help="README path for discoverability checks.")
-    parser.add_argument("--docs-index", default="docs/index.md", help="Docs index path for discoverability checks.")
+    parser.add_argument(
+        "--readme", default="README.md", help="README path for discoverability checks."
+    )
+    parser.add_argument(
+        "--docs-index", default="docs/index.md", help="Docs index path for discoverability checks."
+    )
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
-    parser.add_argument("--write-defaults", action="store_true", help="Create default Day 25 integration page.")
-    parser.add_argument("--emit-pack-dir", default="", help="Optional output directory for generated Day 25 files.")
-    parser.add_argument("--execute", action="store_true", help="Run Day 25 command chain and emit evidence logs.")
+    parser.add_argument(
+        "--write-defaults", action="store_true", help="Create default Day 25 integration page."
+    )
+    parser.add_argument(
+        "--emit-pack-dir", default="", help="Optional output directory for generated Day 25 files."
+    )
+    parser.add_argument(
+        "--execute", action="store_true", help="Run Day 25 command chain and emit evidence logs."
+    )
     parser.add_argument(
         "--evidence-dir",
         default="docs/artifacts/day25-community-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
-    parser.add_argument("--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute.")
-    parser.add_argument("--min-score", type=float, default=90.0, help="Minimum score for strict pass.")
-    parser.add_argument("--strict", action="store_true", help="Fail when score or critical checks are not ready.")
+    parser.add_argument(
+        "--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute."
+    )
+    parser.add_argument(
+        "--min-score", type=float, default=90.0, help="Minimum score for strict pass."
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Fail when score or critical checks are not ready."
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
     return parser
 
@@ -382,7 +422,9 @@ def main(argv: list[str] | None = None) -> int:
         top10_path=ns.top10,
     )
     page_text = _read(page)
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
     payload["strict_failures"] = [*missing_sections, *missing_commands]
 

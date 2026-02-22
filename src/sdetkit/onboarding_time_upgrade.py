@@ -74,56 +74,61 @@ Day 24 computes weighted readiness score (0-100):
 """
 
 _SIGNALS = [
-    {"key": "docs_page_exists", "category": "contract", "weight": 10, "evaluator": "page_exists"},
     {
-        "key": "required_sections_present",
+        "check_id": "docs_page_exists",
+        "category": "contract",
+        "weight": 10,
+        "evaluator": "page_exists",
+    },
+    {
+        "check_id": "required_sections_present",
         "category": "contract",
         "weight": 15,
         "evaluator": "required_sections",
     },
     {
-        "key": "required_commands_present",
+        "check_id": "required_commands_present",
         "category": "contract",
         "weight": 5,
         "evaluator": "required_commands",
     },
     {
-        "key": "onboarding_role_support",
+        "check_id": "onboarding_role_support",
         "category": "onboarding",
         "weight": 15,
         "marker": "--role",
         "source": "onboarding_module",
     },
     {
-        "key": "onboarding_platform_support",
+        "check_id": "onboarding_platform_support",
         "category": "onboarding",
         "weight": 15,
         "marker": "--platform",
         "source": "onboarding_module",
     },
     {
-        "key": "onboarding_quick_start_command",
+        "check_id": "onboarding_quick_start_command",
         "category": "onboarding",
         "weight": 10,
         "marker": "python -m sdetkit doctor --format text",
         "source": "onboarding_module",
     },
     {
-        "key": "readme_day24_link",
+        "check_id": "readme_day24_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "docs/integrations-onboarding-time-upgrade.md",
         "source": "readme",
     },
     {
-        "key": "docs_index_day24_link",
+        "check_id": "docs_index_day24_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "day-24-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {
-        "key": "readme_onboarding_command",
+        "check_id": "readme_onboarding_command",
         "category": "discoverability",
         "weight": 10,
         "marker": "onboarding-time-upgrade",
@@ -157,13 +162,17 @@ def _evaluate_signals(
 
     for signal in _SIGNALS:
         evaluator = signal.get("evaluator")
-        key = str(signal["key"])
+        key = str(signal["check_id"])
 
         if evaluator == "page_exists":
             passed = page_path.exists()
             evidence: Any = str(page_path)
         elif evaluator == "required_sections":
-            missing = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+            missing = [
+                section
+                for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS]
+                if section not in page_text
+            ]
             passed = not missing
             evidence = {"missing_sections": missing}
         elif evaluator == "required_commands":
@@ -185,9 +194,9 @@ def _evaluate_signals(
 
         rows.append(
             {
-                "key": key,
+                "check_id": key,
                 "category": signal["category"],
-                "weight": int(signal["weight"]),
+                "weight": int(str(signal["weight"])),
                 "passed": bool(passed),
                 "evidence": evidence,
             }
@@ -216,17 +225,27 @@ def build_onboarding_time_summary(
     score = round((earned_weight / total_weight) * 100, 2) if total_weight else 0.0
 
     failed = [item for item in checks if not item["passed"]]
-    critical_failures = [item["key"] for item in failed if item["key"] in _CRITICAL_FAILURE_KEYS]
+    critical_failures = [
+        item["check_id"] for item in failed if item["check_id"] in _CRITICAL_FAILURE_KEYS
+    ]
 
     recommendations: list[str] = []
     if any(item["category"] == "contract" for item in failed):
-        recommendations.append("Repair Day 24 docs contract sections and command lane before closeout.")
+        recommendations.append(
+            "Repair Day 24 docs contract sections and command lane before closeout."
+        )
     if any(item["category"] == "onboarding" for item in failed):
-        recommendations.append("Restore role/platform onboarding guidance to keep first success under three minutes.")
+        recommendations.append(
+            "Restore role/platform onboarding guidance to keep first success under three minutes."
+        )
     if any(item["category"] == "discoverability" for item in failed):
-        recommendations.append("Link Day 24 guidance from README and docs index for faster adoption.")
+        recommendations.append(
+            "Link Day 24 guidance from README and docs index for faster adoption."
+        )
     if not recommendations:
-        recommendations.append("Day 24 onboarding lane is healthy; keep execution evidence attached to releases.")
+        recommendations.append(
+            "Day 24 onboarding lane is healthy; keep execution evidence attached to releases."
+        )
 
     return {
         "name": "day24-onboarding-time-upgrade",
@@ -262,7 +281,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         "Checks:",
     ]
     for item in payload["checks"]:
-        lines.append(f"- [{'x' if item['passed'] else ' '}] {item['key']} ({item['category']}, w={item['weight']})")
+        lines.append(
+            f"- [{'x' if item['passed'] else ' '}] {item['check_id']} ({item['category']}, w={item['weight']})"
+        )
     return "\n".join(lines)
 
 
@@ -306,11 +327,14 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 24 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]) + "\n",
+        "\n".join(["# Day 24 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        + "\n",
         encoding="utf-8",
     )
 
-    return [str(path.relative_to(root)) for path in [summary, scorecard, checklist, runbook, validation]]
+    return [
+        str(path.relative_to(root)) for path in [summary, scorecard, checklist, runbook, validation]
+    ]
 
 
 def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[str, Any]:
@@ -345,19 +369,35 @@ def build_parser() -> argparse.ArgumentParser:
         description="Day 24 onboarding-time reduction and closeout lane.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
-    parser.add_argument("--readme", default="README.md", help="README path for discoverability checks.")
-    parser.add_argument("--docs-index", default="docs/index.md", help="Docs index path for discoverability checks.")
-    parser.add_argument("--write-defaults", action="store_true", help="Create default Day 24 integration page.")
-    parser.add_argument("--emit-pack-dir", default="", help="Optional output directory for generated Day 24 files.")
-    parser.add_argument("--execute", action="store_true", help="Run Day 24 command chain and emit evidence logs.")
+    parser.add_argument(
+        "--readme", default="README.md", help="README path for discoverability checks."
+    )
+    parser.add_argument(
+        "--docs-index", default="docs/index.md", help="Docs index path for discoverability checks."
+    )
+    parser.add_argument(
+        "--write-defaults", action="store_true", help="Create default Day 24 integration page."
+    )
+    parser.add_argument(
+        "--emit-pack-dir", default="", help="Optional output directory for generated Day 24 files."
+    )
+    parser.add_argument(
+        "--execute", action="store_true", help="Run Day 24 command chain and emit evidence logs."
+    )
     parser.add_argument(
         "--evidence-dir",
         default="docs/artifacts/day24-onboarding-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
-    parser.add_argument("--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute.")
-    parser.add_argument("--min-score", type=float, default=90.0, help="Minimum score for strict pass.")
-    parser.add_argument("--strict", action="store_true", help="Fail when score or critical checks are not ready.")
+    parser.add_argument(
+        "--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute."
+    )
+    parser.add_argument(
+        "--min-score", type=float, default=90.0, help="Minimum score for strict pass."
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Fail when score or critical checks are not ready."
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
     return parser
 
@@ -371,9 +411,13 @@ def main(argv: list[str] | None = None) -> int:
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(_DAY24_DEFAULT_PAGE, encoding="utf-8")
 
-    payload = build_onboarding_time_summary(root, readme_path=ns.readme, docs_index_path=ns.docs_index)
+    payload = build_onboarding_time_summary(
+        root, readme_path=ns.readme, docs_index_path=ns.docs_index
+    )
     page_text = _read(page)
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
     payload["strict_failures"] = [*missing_sections, *missing_commands]
 

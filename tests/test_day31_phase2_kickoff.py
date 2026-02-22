@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 32 — Release cadence setup:** lock weekly release rhythm and changelog publication checklist.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day31-phase2-kickoff.md").write_text(d31._DAY31_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day31-phase2-kickoff.md").write_text(
+        d31._DAY31_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-31-ultra-upgrade-report.md").write_text("# Day 31 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
@@ -100,7 +102,9 @@ def test_day31_strict_fails_when_day30_inputs_missing(tmp_path: Path) -> None:
 
 def test_day31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md").write_text("- [ ] Day 31 baseline\n", encoding="utf-8")
+    (tmp_path / "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md").write_text(
+        "- [ ] Day 31 baseline\n", encoding="utf-8"
+    )
     rc = d31.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

@@ -21,8 +21,12 @@ def _seed_repo(root: Path) -> None:
         "- **Day 29 — Phase-1 hardening:** close stale docs gaps and polish top entry pages.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day28-weekly-review.md").write_text("# Weekly review #4 (Day 28)\n", encoding="utf-8")
-    (root / "docs/integrations-day29-phase1-hardening.md").write_text(d29._DAY29_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day28-weekly-review.md").write_text(
+        "# Weekly review #4 (Day 28)\n", encoding="utf-8"
+    )
+    (root / "docs/integrations-day29-phase1-hardening.md").write_text(
+        d29._DAY29_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-29-ultra-upgrade-report.md").write_text("# Day 29 report\n", encoding="utf-8")
 
 
@@ -61,7 +65,9 @@ def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day29_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/integrations-day29-phase1-hardening.md").write_text("# Day 29 — Phase-1 hardening\n", encoding="utf-8")
+    (tmp_path / "docs/integrations-day29-phase1-hardening.md").write_text(
+        "# Day 29 — Phase-1 hardening\n", encoding="utf-8"
+    )
     rc = d29.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

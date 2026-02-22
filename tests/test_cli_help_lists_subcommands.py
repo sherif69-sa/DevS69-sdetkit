@@ -48,4 +48,3 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "day29-phase1-hardening" in out
     assert "day30-phase1-wrap" in out
     assert "day31-phase2-kickoff" in out
-

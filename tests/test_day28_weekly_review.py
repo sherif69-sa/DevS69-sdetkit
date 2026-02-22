@@ -18,7 +18,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 28 — Weekly review #4:** document wins, misses, and corrective actions.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day28-weekly-review.md").write_text(d28._DAY28_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day28-weekly-review.md").write_text(
+        d28._DAY28_DEFAULT_PAGE, encoding="utf-8"
+    )
 
     d25 = root / "docs/artifacts/day25-community-pack"
     d26 = root / "docs/artifacts/day26-external-contribution-pack"
@@ -26,11 +28,15 @@ def _seed_repo(root: Path) -> None:
     d25.mkdir(parents=True, exist_ok=True)
     d26.mkdir(parents=True, exist_ok=True)
     d27.mkdir(parents=True, exist_ok=True)
-    (d25 / "day25-community-summary.json").write_text('{"summary": {"activation_score": 95}}\n', encoding="utf-8")
+    (d25 / "day25-community-summary.json").write_text(
+        '{"summary": {"activation_score": 95}}\n', encoding="utf-8"
+    )
     (d26 / "day26-external-contribution-summary.json").write_text(
         '{"summary": {"activation_score": 93}}\n', encoding="utf-8"
     )
-    (d27 / "day27-kpi-summary.json").write_text('{"summary": {"activation_score": 97}}\n', encoding="utf-8")
+    (d27 / "day27-kpi-summary.json").write_text(
+        '{"summary": {"activation_score": 97}}\n', encoding="utf-8"
+    )
 
 
 def test_day28_weekly_review_json(tmp_path: Path, capsys) -> None:
@@ -68,7 +74,9 @@ def test_day28_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day28_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/integrations-day28-weekly-review.md").write_text("# Weekly review #4 (Day 28)\n", encoding="utf-8")
+    (tmp_path / "docs/integrations-day28-weekly-review.md").write_text(
+        "# Weekly review #4 (Day 28)\n", encoding="utf-8"
+    )
     rc = d28.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

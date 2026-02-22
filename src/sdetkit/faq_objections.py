@@ -90,57 +90,57 @@ python scripts/check_day23_faq_objections_contract.py
 
 _SIGNALS = [
     {
-        "key": "docs_page_exists",
+        "check_id": "docs_page_exists",
         "category": "coverage",
         "weight": 15,
         "evaluator": "page_exists",
     },
     {
-        "key": "required_sections_present",
+        "check_id": "required_sections_present",
         "category": "coverage",
         "weight": 20,
         "evaluator": "required_sections",
     },
     {
-        "key": "command_block_complete",
+        "check_id": "command_block_complete",
         "category": "operational",
         "weight": 15,
         "evaluator": "required_commands",
     },
     {
-        "key": "when_to_use_clarity",
+        "check_id": "when_to_use_clarity",
         "category": "adoption",
         "weight": 10,
         "marker": "## When to use sdetkit",
     },
     {
-        "key": "when_not_to_use_clarity",
+        "check_id": "when_not_to_use_clarity",
         "category": "adoption",
         "weight": 10,
         "marker": "## When not to use sdetkit",
     },
     {
-        "key": "objection_responses",
+        "check_id": "objection_responses",
         "category": "adoption",
         "weight": 10,
         "marker": "## Top objections and responses",
     },
     {
-        "key": "readme_day23_link",
+        "check_id": "readme_day23_link",
         "category": "discoverability",
         "weight": 8,
         "marker": "docs/integrations-faq-objections.md",
         "source": "readme",
     },
     {
-        "key": "docs_index_day23",
+        "check_id": "docs_index_day23",
         "category": "discoverability",
         "weight": 7,
         "marker": "day-23-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {
-        "key": "release_narrative_alignment",
+        "check_id": "release_narrative_alignment",
         "category": "operational",
         "weight": 5,
         "marker": "release-narrative",
@@ -161,13 +161,15 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _evaluate_signals(root: Path, page_text: str, readme_text: str, docs_index_text: str) -> list[dict[str, Any]]:
+def _evaluate_signals(
+    root: Path, page_text: str, readme_text: str, docs_index_text: str
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     page_path = root / _PAGE_PATH
 
     for signal in _SIGNALS:
         evaluator = signal.get("evaluator")
-        key = str(signal["key"])
+        key = str(signal["check_id"])
 
         if evaluator == "page_exists":
             passed = page_path.exists()
@@ -195,9 +197,9 @@ def _evaluate_signals(root: Path, page_text: str, readme_text: str, docs_index_t
 
         rows.append(
             {
-                "key": key,
+                "check_id": key,
                 "category": signal["category"],
-                "weight": int(signal["weight"]),
+                "weight": int(str(signal["weight"])),
                 "passed": bool(passed),
                 "evidence": evidence,
             }
@@ -223,7 +225,9 @@ def build_faq_objections_summary(
     score = round((earned_weight / total_weight) * 100, 2) if total_weight else 0.0
 
     failed = [item for item in checks if not item["passed"]]
-    critical_failures = [item["key"] for item in failed if item["key"] in _CRITICAL_FAILURE_KEYS]
+    critical_failures = [
+        item["check_id"] for item in failed if item["check_id"] in _CRITICAL_FAILURE_KEYS
+    ]
 
     by_category: dict[str, dict[str, int]] = {}
     for item in checks:
@@ -288,7 +292,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     lines.append("Checks:")
     for item in payload["checks"]:
         lines.append(
-            f"- [{'x' if item['passed'] else ' '}] {item['key']} ({item['category']}, w={item['weight']})"
+            f"- [{'x' if item['passed'] else ' '}] {item['check_id']} ({item['category']}, w={item['weight']})"
         )
     lines.append("")
     lines.append("Recommendations:")
@@ -315,7 +319,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     ]
     for item in payload["checks"]:
         status = "✅" if item["passed"] else "❌"
-        lines.append(f"| `{item['key']}` | {item['category']} | {item['weight']} | {status} |")
+        lines.append(f"| `{item['check_id']}` | {item['category']} | {item['weight']} | {status} |")
 
     lines.extend(["", "## Recommendations", ""])
     for rec in payload["recommendations"]:
@@ -359,7 +363,9 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     validation_lines = ["# Day 23 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]
     validation.write_text("\n".join(validation_lines) + "\n", encoding="utf-8")
 
-    return [str(path.relative_to(root)) for path in [summary, scorecard, matrix, playbook, validation]]
+    return [
+        str(path.relative_to(root)) for path in [summary, scorecard, matrix, playbook, validation]
+    ]
 
 
 def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[str, Any]:
@@ -405,7 +411,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--root", default=".", help="Repository root.")
     parser.add_argument("--readme", default="README.md", help="README path relative to root.")
-    parser.add_argument("--docs-index", default="docs/index.md", help="Docs index path relative to root.")
+    parser.add_argument(
+        "--docs-index", default="docs/index.md", help="Docs index path relative to root."
+    )
     parser.add_argument(
         "--docs-page",
         default=_PAGE_PATH,
@@ -435,7 +443,9 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Emit Day 23 FAQ pack into this directory relative to root.",
     )
-    parser.add_argument("--execute", action="store_true", help="Execute deterministic Day 23 command chain.")
+    parser.add_argument(
+        "--execute", action="store_true", help="Execute deterministic Day 23 command chain."
+    )
     parser.add_argument(
         "--evidence-dir",
         default="docs/artifacts/day23-faq-pack/evidence",
@@ -454,13 +464,9 @@ def _strict_failures(payload: dict[str, Any], min_score: float) -> list[str]:
     summary = payload["summary"]
     failures: list[str] = []
     if summary["faq_score"] < min_score:
-        failures.append(
-            f"faq_score {summary['faq_score']} is below min-faq-score {min_score}"
-        )
+        failures.append(f"faq_score {summary['faq_score']} is below min-faq-score {min_score}")
     if summary["critical_failures"]:
-        failures.append(
-            "critical failures: " + ", ".join(summary["critical_failures"])
-        )
+        failures.append("critical failures: " + ", ".join(summary["critical_failures"]))
     return failures
 
 

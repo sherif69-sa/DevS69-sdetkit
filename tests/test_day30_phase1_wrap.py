@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 31 — Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day30-phase1-wrap.md").write_text(d30._DAY30_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day30-phase1-wrap.md").write_text(
+        d30._DAY30_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-30-ultra-upgrade-report.md").write_text("# Day 30 report\n", encoding="utf-8")
 
     for rel in [

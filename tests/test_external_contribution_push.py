@@ -11,7 +11,8 @@ def _seed(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text("day-26-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "README.md").write_text(
-        "docs/integrations-external-contribution-push.md\nexternal-contribution-push\n", encoding="utf-8"
+        "docs/integrations-external-contribution-push.md\nexternal-contribution-push\n",
+        encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Day 26 — External contribution push:** spotlight open starter tasks publicly.\n",

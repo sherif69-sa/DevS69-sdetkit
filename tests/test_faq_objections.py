@@ -57,7 +57,9 @@ def test_day23_faq_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day23_faq_strict_fails_when_required_sections_missing(tmp_path: Path) -> None:
     _write_fixture(tmp_path)
-    (tmp_path / "docs/integrations-faq-objections.md").write_text("# FAQ and objections (Day 23)\n", encoding="utf-8")
+    (tmp_path / "docs/integrations-faq-objections.md").write_text(
+        "# FAQ and objections (Day 23)\n", encoding="utf-8"
+    )
 
     rc = fqo.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 1

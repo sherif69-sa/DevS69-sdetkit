@@ -113,7 +113,9 @@ def _load_metrics(path: Path, fallback: dict[str, float]) -> tuple[dict[str, flo
     return out, True
 
 
-def _metric_deltas(baseline: dict[str, float], current: dict[str, float]) -> dict[str, dict[str, float | str]]:
+def _metric_deltas(
+    baseline: dict[str, float], current: dict[str, float]
+) -> dict[str, dict[str, float | str]]:
     rows: dict[str, dict[str, float | str]] = {}
     for key, base in baseline.items():
         curr = current[key]
@@ -145,7 +147,9 @@ def build_kpi_audit_summary(
     docs_index_text = _read(root / docs_index_path)
     top10_text = _read(root / top10_path)
 
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 
     baseline, baseline_ok = _load_metrics(root / baseline_path, _DEFAULT_BASELINE)
@@ -154,70 +158,78 @@ def build_kpi_audit_summary(
 
     checks: list[dict[str, Any]] = [
         {
-            "key": "docs_page_exists",
+            "check_id": "docs_page_exists",
             "category": "contract",
             "weight": 10,
             "passed": page_path.exists(),
             "evidence": str(page_path),
         },
         {
-            "key": "required_sections_present",
+            "check_id": "required_sections_present",
             "category": "contract",
             "weight": 20,
             "passed": not missing_sections,
             "evidence": {"missing_sections": missing_sections},
         },
         {
-            "key": "required_commands_present",
+            "check_id": "required_commands_present",
             "category": "contract",
             "weight": 15,
             "passed": not missing_commands,
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "key": "readme_day27_link",
+            "check_id": "readme_day27_link",
             "category": "discoverability",
             "weight": 8,
             "passed": "docs/integrations-kpi-audit.md" in readme_text,
             "evidence": "docs/integrations-kpi-audit.md",
         },
         {
-            "key": "readme_day27_command",
+            "check_id": "readme_day27_command",
             "category": "discoverability",
             "weight": 6,
             "passed": "kpi-audit" in readme_text,
             "evidence": "kpi-audit",
         },
         {
-            "key": "docs_index_day27_link",
+            "check_id": "docs_index_day27_link",
             "category": "discoverability",
             "weight": 6,
             "passed": "day-27-ultra-upgrade-report.md" in docs_index_text,
             "evidence": "day-27-ultra-upgrade-report.md",
         },
         {
-            "key": "top10_day27_alignment",
+            "check_id": "top10_day27_alignment",
             "category": "strategy",
             "weight": 8,
             "passed": "Day 27 — KPI audit" in top10_text,
             "evidence": "Day 27 — KPI audit",
         },
         {
-            "key": "docs_mentions_core_kpis",
+            "check_id": "docs_mentions_core_kpis",
             "category": "strategy",
             "weight": 7,
-            "passed": all(marker in page_text for marker in ["stars_per_week", "readme_ctr_percent", "discussions_per_week", "external_prs_per_week"]),
+            "passed": all(
+                marker in page_text
+                for marker in [
+                    "stars_per_week",
+                    "readme_ctr_percent",
+                    "discussions_per_week",
+                    "external_prs_per_week",
+                ]
+            ),
             "evidence": "stars_per_week/readme_ctr_percent/discussions_per_week/external_prs_per_week",
         },
         {
-            "key": "baseline_metrics_valid",
+            "check_id": "baseline_metrics_valid",
             "category": "data",
             "weight": 10,
             "passed": baseline_ok,
             "evidence": baseline_path,
         },
         {
-            "key": "current_metrics_valid",
+            "check_id": "current_metrics_valid",
             "category": "data",
             "weight": 10,
             "passed": current_ok,
@@ -226,8 +238,15 @@ def build_kpi_audit_summary(
     ]
 
     failed = [item for item in checks if not item["passed"]]
-    critical = {"docs_page_exists", "required_sections_present", "required_commands_present", "top10_day27_alignment", "baseline_metrics_valid", "current_metrics_valid"}
-    critical_failures = [item["key"] for item in failed if item["key"] in critical]
+    critical = {
+        "docs_page_exists",
+        "required_sections_present",
+        "required_commands_present",
+        "top10_day27_alignment",
+        "baseline_metrics_valid",
+        "current_metrics_valid",
+    }
+    critical_failures = [item["check_id"] for item in failed if item["check_id"] in critical]
 
     total_weight = sum(int(item["weight"]) for item in checks)
     earned_weight = sum(int(item["weight"]) for item in checks if item["passed"])
@@ -237,11 +256,17 @@ def build_kpi_audit_summary(
     if missing_sections or missing_commands:
         recommendations.append("Restore Day 27 KPI docs contract and command lane before closeout.")
     if any(item["category"] == "discoverability" for item in failed):
-        recommendations.append("Add Day 27 KPI links and command examples in README/docs index for operator visibility.")
+        recommendations.append(
+            "Add Day 27 KPI links and command examples in README/docs index for operator visibility."
+        )
     if not baseline_ok or not current_ok:
-        recommendations.append("Provide valid numeric baseline/current KPI snapshots before strict KPI audit sign-off.")
+        recommendations.append(
+            "Provide valid numeric baseline/current KPI snapshots before strict KPI audit sign-off."
+        )
     if not recommendations:
-        recommendations.append("Day 27 KPI audit lane is healthy; publish weekly KPI deltas and corrective actions.")
+        recommendations.append(
+            "Day 27 KPI audit lane is healthy; publish weekly KPI deltas and corrective actions."
+        )
 
     return {
         "name": "day27-kpi-audit",
@@ -262,7 +287,7 @@ def build_kpi_audit_summary(
         "summary": {
             "activation_score": score,
             "total_checks": len(checks),
-            "failed_checks": [item["key"] for item in failed],
+            "failed_checks": [item["check_id"] for item in failed],
             "critical_failures": critical_failures,
             "recommendations": recommendations,
         },
@@ -298,7 +323,12 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_text(payload) + "\n", encoding="utf-8")
 
-    rows = ["# Day 27 KPI delta table", "", "| KPI | Baseline | Current | Delta | Delta % | Trend |", "| --- | --- | --- | --- | --- | --- |"]
+    rows = [
+        "# Day 27 KPI delta table",
+        "",
+        "| KPI | Baseline | Current | Delta | Delta % | Trend |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
     for key, row in payload["metrics"]["deltas"].items():
         rows.append(
             f"| {key} | {row['baseline']} | {row['current']} | {row['delta']} | {row['delta_percent']}% | {row['trend']} |"
@@ -324,40 +354,97 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         + "\n",
         encoding="utf-8",
     )
-    validation.write_text("\n".join(["# Day 27 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]) + "\n", encoding="utf-8")
-    baseline.write_text(json.dumps(payload["metrics"]["baseline"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    current.write_text(json.dumps(payload["metrics"]["current"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    validation.write_text(
+        "\n".join(["# Day 27 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        + "\n",
+        encoding="utf-8",
+    )
+    baseline.write_text(
+        json.dumps(payload["metrics"]["baseline"], indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    current.write_text(
+        json.dumps(payload["metrics"]["current"], indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
-    return [str(path.relative_to(root)) for path in [summary, scorecard, delta_table, action_plan, validation, baseline, current]]
+    return [
+        str(path.relative_to(root))
+        for path in [summary, scorecard, delta_table, action_plan, validation, baseline, current]
+    ]
 
 
 def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[str, Any]:
     evidence_dir.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, timeout=timeout_sec)
-        results.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, timeout=timeout_sec
+        )
+        results.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
 
-    payload = {"name": "day27-kpi-audit-execution", "total_commands": len(_EXECUTION_COMMANDS), "results": results}
-    (evidence_dir / "day27-execution-summary.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    payload = {
+        "name": "day27-kpi-audit-execution",
+        "total_commands": len(_EXECUTION_COMMANDS),
+        "results": results,
+    }
+    (evidence_dir / "day27-execution-summary.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return payload
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="sdetkit kpi-audit", description="Day 27 KPI audit closeout lane.")
+    parser = argparse.ArgumentParser(
+        prog="sdetkit kpi-audit", description="Day 27 KPI audit closeout lane."
+    )
     parser.add_argument("--root", default=".", help="Repository root path.")
-    parser.add_argument("--readme", default="README.md", help="README path for discoverability checks.")
-    parser.add_argument("--docs-index", default="docs/index.md", help="Docs index path for discoverability checks.")
+    parser.add_argument(
+        "--readme", default="README.md", help="README path for discoverability checks."
+    )
+    parser.add_argument(
+        "--docs-index", default="docs/index.md", help="Docs index path for discoverability checks."
+    )
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
-    parser.add_argument("--baseline", default="docs/artifacts/day27-kpi-pack/day27-kpi-baseline.json", help="Baseline KPI snapshot JSON.")
-    parser.add_argument("--current", default="docs/artifacts/day27-kpi-pack/day27-kpi-current.json", help="Current KPI snapshot JSON.")
-    parser.add_argument("--write-defaults", action="store_true", help="Create default Day 27 integration page.")
-    parser.add_argument("--emit-pack-dir", default="", help="Optional output directory for generated Day 27 files.")
-    parser.add_argument("--execute", action="store_true", help="Run Day 27 command chain and emit evidence logs.")
-    parser.add_argument("--evidence-dir", default="docs/artifacts/day27-kpi-pack/evidence", help="Output directory for execution evidence logs.")
-    parser.add_argument("--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute.")
-    parser.add_argument("--min-score", type=float, default=90.0, help="Minimum score for strict pass.")
-    parser.add_argument("--strict", action="store_true", help="Fail when score or critical checks are not ready.")
+    parser.add_argument(
+        "--baseline",
+        default="docs/artifacts/day27-kpi-pack/day27-kpi-baseline.json",
+        help="Baseline KPI snapshot JSON.",
+    )
+    parser.add_argument(
+        "--current",
+        default="docs/artifacts/day27-kpi-pack/day27-kpi-current.json",
+        help="Current KPI snapshot JSON.",
+    )
+    parser.add_argument(
+        "--write-defaults", action="store_true", help="Create default Day 27 integration page."
+    )
+    parser.add_argument(
+        "--emit-pack-dir", default="", help="Optional output directory for generated Day 27 files."
+    )
+    parser.add_argument(
+        "--execute", action="store_true", help="Run Day 27 command chain and emit evidence logs."
+    )
+    parser.add_argument(
+        "--evidence-dir",
+        default="docs/artifacts/day27-kpi-pack/evidence",
+        help="Output directory for execution evidence logs.",
+    )
+    parser.add_argument(
+        "--timeout-sec", type=int, default=120, help="Per-command timeout used by --execute."
+    )
+    parser.add_argument(
+        "--min-score", type=float, default=90.0, help="Minimum score for strict pass."
+    )
+    parser.add_argument(
+        "--strict", action="store_true", help="Fail when score or critical checks are not ready."
+    )
     parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format.")
     return parser
 
@@ -380,7 +467,9 @@ def main(argv: list[str] | None = None) -> int:
         current_path=ns.current,
     )
     page_text = _read(page)
-    missing_sections = [section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text]
+    missing_sections = [
+        section for section in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if section not in page_text
+    ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
     payload["strict_failures"] = [*missing_sections, *missing_commands]
 

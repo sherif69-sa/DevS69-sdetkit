@@ -21,8 +21,12 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-kpi-audit.md").write_text(kpa._DAY27_DEFAULT_PAGE, encoding="utf-8")
     pack = root / "docs/artifacts/day27-kpi-pack"
     pack.mkdir(parents=True, exist_ok=True)
-    (pack / "day27-kpi-baseline.json").write_text(json.dumps(kpa._DEFAULT_BASELINE) + "\n", encoding="utf-8")
-    (pack / "day27-kpi-current.json").write_text(json.dumps(kpa._DEFAULT_CURRENT) + "\n", encoding="utf-8")
+    (pack / "day27-kpi-baseline.json").write_text(
+        json.dumps(kpa._DEFAULT_BASELINE) + "\n", encoding="utf-8"
+    )
+    (pack / "day27-kpi-current.json").write_text(
+        json.dumps(kpa._DEFAULT_CURRENT) + "\n", encoding="utf-8"
+    )
 
 
 def test_day27_kpi_audit_json(tmp_path: Path, capsys) -> None:
@@ -61,7 +65,9 @@ def test_day27_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day27_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/integrations-kpi-audit.md").write_text("# KPI audit (Day 27)\n", encoding="utf-8")
+    (tmp_path / "docs/integrations-kpi-audit.md").write_text(
+        "# KPI audit (Day 27)\n", encoding="utf-8"
+    )
     rc = kpa.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

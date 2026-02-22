@@ -104,30 +104,102 @@ def build_day28_weekly_review_summary(
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
     day25_path = root / "docs/artifacts/day25-community-pack/day25-community-summary.json"
-    day26_path = root / "docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json"
+    day26_path = (
+        root
+        / "docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json"
+    )
     day27_path = root / "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
 
     day25_score, day25_ok = _load_score(day25_path)
     day26_score, day26_ok = _load_score(day26_path)
     day27_score, day27_ok = _load_score(day27_path)
-    rollup_avg = round((day25_score + day26_score + day27_score) / 3, 2) if (day25_ok and day26_ok and day27_ok) else 0.0
+    rollup_avg = (
+        round((day25_score + day26_score + day27_score) / 3, 2)
+        if (day25_ok and day26_ok and day27_ok)
+        else 0.0
+    )
 
     checks: list[dict[str, Any]] = [
-        {"key": "docs_page_exists", "category": "contract", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"key": "required_sections_present", "category": "contract", "weight": 20, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"key": "required_commands_present", "category": "contract", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"key": "readme_day28_link", "category": "discoverability", "weight": 10, "passed": "docs/integrations-day28-weekly-review.md" in readme_text, "evidence": "docs/integrations-day28-weekly-review.md"},
-        {"key": "docs_index_day28_link", "category": "discoverability", "weight": 10, "passed": "day-28-ultra-upgrade-report.md" in docs_index_text, "evidence": "day-28-ultra-upgrade-report.md"},
-        {"key": "top10_day28_alignment", "category": "strategy", "weight": 8, "passed": "Day 28 — Weekly review #4" in top10_text, "evidence": "Day 28 — Weekly review #4"},
-        {"key": "docs_mentions_wins_misses_actions", "category": "strategy", "weight": 7, "passed": all(word in page_text.lower() for word in ["wins", "misses", "corrective"]), "evidence": "wins/misses/corrective"},
-        {"key": "day25_input_present", "category": "data", "weight": 8, "passed": day25_ok, "evidence": str(day25_path)},
-        {"key": "day26_input_present", "category": "data", "weight": 8, "passed": day26_ok, "evidence": str(day26_path)},
-        {"key": "day27_input_present", "category": "data", "weight": 9, "passed": day27_ok, "evidence": str(day27_path)},
+        {
+            "check_id": "docs_page_exists",
+            "category": "contract",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "category": "contract",
+            "weight": 20,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "category": "contract",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day28_link",
+            "category": "discoverability",
+            "weight": 10,
+            "passed": "docs/integrations-day28-weekly-review.md" in readme_text,
+            "evidence": "docs/integrations-day28-weekly-review.md",
+        },
+        {
+            "check_id": "docs_index_day28_link",
+            "category": "discoverability",
+            "weight": 10,
+            "passed": "day-28-ultra-upgrade-report.md" in docs_index_text,
+            "evidence": "day-28-ultra-upgrade-report.md",
+        },
+        {
+            "check_id": "top10_day28_alignment",
+            "category": "strategy",
+            "weight": 8,
+            "passed": "Day 28 — Weekly review #4" in top10_text,
+            "evidence": "Day 28 — Weekly review #4",
+        },
+        {
+            "check_id": "docs_mentions_wins_misses_actions",
+            "category": "strategy",
+            "weight": 7,
+            "passed": all(word in page_text.lower() for word in ["wins", "misses", "corrective"]),
+            "evidence": "wins/misses/corrective",
+        },
+        {
+            "check_id": "day25_input_present",
+            "category": "data",
+            "weight": 8,
+            "passed": day25_ok,
+            "evidence": str(day25_path),
+        },
+        {
+            "check_id": "day26_input_present",
+            "category": "data",
+            "weight": 8,
+            "passed": day26_ok,
+            "evidence": str(day26_path),
+        },
+        {
+            "check_id": "day27_input_present",
+            "category": "data",
+            "weight": 9,
+            "passed": day27_ok,
+            "evidence": str(day27_path),
+        },
     ]
 
     failed = [item for item in checks if not item["passed"]]
-    critical = {"docs_page_exists", "required_sections_present", "required_commands_present", "top10_day28_alignment"}
-    critical_failures = [item["key"] for item in failed if item["key"] in critical]
+    critical = {
+        "docs_page_exists",
+        "required_sections_present",
+        "required_commands_present",
+        "top10_day28_alignment",
+    }
+    critical_failures = [item["check_id"] for item in failed if item["check_id"] in critical]
 
     total_weight = sum(int(item["weight"]) for item in checks)
     earned_weight = sum(int(item["weight"]) for item in checks if item["passed"])
@@ -140,22 +212,30 @@ def build_day28_weekly_review_summary(
         wins.append(f"Day 25 community activation remained strong ({day25_score}).")
     else:
         misses.append("Day 25 summary missing or below closeout target.")
-        corrective_actions.append("Re-run Day 25 pack generation and restore summary JSON for traceability.")
+        corrective_actions.append(
+            "Re-run Day 25 pack generation and restore summary JSON for traceability."
+        )
     if day26_ok and day26_score >= 90:
         wins.append(f"Day 26 external contribution push stayed healthy ({day26_score}).")
     else:
         misses.append("Day 26 summary missing or below closeout target.")
-        corrective_actions.append("Re-run Day 26 strict lane and publish updated external contribution summary.")
+        corrective_actions.append(
+            "Re-run Day 26 strict lane and publish updated external contribution summary."
+        )
     if day27_ok and day27_score >= 90:
         wins.append(f"Day 27 KPI audit preserved positive momentum ({day27_score}).")
     else:
         misses.append("Day 27 KPI summary missing or below closeout target.")
-        corrective_actions.append("Refresh KPI baseline/current snapshots and regenerate Day 27 artifacts.")
+        corrective_actions.append(
+            "Refresh KPI baseline/current snapshots and regenerate Day 27 artifacts."
+        )
 
     if score >= 90 and not critical_failures:
         wins.append("Day 28 weekly review #4 is ready for final phase-close communication.")
     else:
-        corrective_actions.append("Address Day 28 documentation and discoverability gaps before phase closeout.")
+        corrective_actions.append(
+            "Address Day 28 documentation and discoverability gaps before phase closeout."
+        )
 
     return {
         "name": "day28-weekly-review",
@@ -222,7 +302,10 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Corrective actions")
-    lines.extend(f"- [ ] {item}" for item in payload["corrective_actions"] or ["No corrective actions required."])
+    lines.extend(
+        f"- [ ] {item}"
+        for item in payload["corrective_actions"] or ["No corrective actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -239,10 +322,27 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day28-wins-misses-actions.md",
         "# Day 28 wins, misses, and corrective actions\n\n"
-        + "\n".join(["## Wins", *[f"- {x}" for x in payload["wins"]], "", "## Misses", *[f"- {x}" for x in payload["misses"] or ["No misses recorded."]], "", "## Corrective actions", *[f"- [ ] {x}" for x in payload["corrective_actions"] or ["No corrective actions required."]]])
+        + "\n".join(
+            [
+                "## Wins",
+                *[f"- {x}" for x in payload["wins"]],
+                "",
+                "## Misses",
+                *[f"- {x}" for x in payload["misses"] or ["No misses recorded."]],
+                "",
+                "## Corrective actions",
+                *[
+                    f"- [ ] {x}"
+                    for x in payload["corrective_actions"] or ["No corrective actions required."]
+                ],
+            ]
+        )
         + "\n",
     )
-    _write(target / "day28-validation-commands.md", "# Day 28 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day28-validation-commands.md",
+        "# Day 28 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -250,8 +350,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day28-weekly-review-execution",
         "total_commands": len(logs),
@@ -289,7 +398,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day28-weekly-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day28-weekly-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -300,11 +413,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 
