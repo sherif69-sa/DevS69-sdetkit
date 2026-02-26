@@ -1,0 +1,26 @@
+{
+  "generated_for": "day41-expansion-automation",
+  "metrics": [
+    {
+      "name": "automation_completion_rate",
+      "baseline": 52.0,
+      "current": 57.5,
+      "delta_pct": 10.58,
+      "confidence": "high"
+    },
+    {
+      "name": "docs_to_command_conversion",
+      "baseline": 20.0,
+      "current": 22.4,
+      "delta_pct": 12.0,
+      "confidence": "medium"
+    },
+    {
+      "name": "operator_feedback_positive",
+      "baseline": 76.0,
+      "current": 80.0,
+      "delta_pct": 5.26,
+      "confidence": "high"
+    }
+  ]
+}

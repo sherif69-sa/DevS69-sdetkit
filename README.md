@@ -1396,3 +1396,34 @@ Day 40 upgraded pack artifacts include:
 - `day40-execution-log.md`
 - `day40-delivery-board.md`
 - `day40-validation-commands.md`
+
+
+## ⚡ Day 41 big upgrade: Expansion automation lane
+
+- Run `python -m sdetkit day41-expansion-automation --format json --strict` to validate Day 41 expansion readiness.
+- Emit shareable Day 41 expansion pack: `python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict`.
+- Review Day 41 integration guide: [Expansion automation lane](docs/integrations-day41-expansion-automation.md).
+
+See implementation details: [Day 41 big upgrade report](docs/day-41-big-upgrade-report.md).
+
+Day 41 demo checks:
+
+```bash
+python -m pytest -q tests/test_day41_expansion_automation.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day41_expansion_automation_contract.py
+python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict
+python -m sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict
+python -m sdetkit day41-expansion-automation --format json --strict
+```
+
+Day 41 upgraded pack artifacts include:
+
+- `day41-expansion-automation-summary.json`
+- `day41-expansion-automation-summary.md`
+- `day41-expansion-plan.md`
+- `day41-automation-matrix.csv`
+- `day41-expansion-kpi-scorecard.json`
+- `day41-execution-log.md`
+- `day41-delivery-board.md`
+- `day41-validation-commands.md`

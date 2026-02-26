@@ -519,3 +519,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 40 scale lane pack: `python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict`.
 - Review integration guide: [Day 40 scale lane #1](integrations-day40-scale-lane.md).
+
+
+## Day 41 big upgrades (Expansion automation lane)
+
+- Read the implementation report: [Day 41 big upgrade report](day-41-big-upgrade-report.md).
+- Run `python -m sdetkit day41-expansion-automation --format json --strict` to score expansion automation readiness.
+- Emit Day 41 expansion automation pack: `python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict`.
+- Review integration guide: [Day 41 expansion automation lane](integrations-day41-expansion-automation.md).

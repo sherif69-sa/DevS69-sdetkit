@@ -1,0 +1,4 @@
+workflow,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target,risk_guardrail
+expansion-summary,pm-owner,backup-pm,2026-03-09T09:00:00Z,docs/integrations-day41-expansion-automation.md,python -m sdetkit day41-expansion-automation --format json --strict,completion:+6%,rollback-doc-ready
+matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/day-41-big-upgrade-report.md,python scripts/check_day41_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout
+kpi-review,growth-owner,backup-growth,2026-03-10T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict,ctr:+3%,trigger-alert-on-regression
