@@ -42,7 +42,9 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        evidence = root / "docs/artifacts/day32-release-cadence-pack/evidence/day32-execution-summary.json"
+        evidence = (
+            root / "docs/artifacts/day32-release-cadence-pack/evidence/day32-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:

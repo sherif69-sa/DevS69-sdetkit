@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day50-execution-prioritization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY49_SUMMARY_PATH = "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+_DAY49_SUMMARY_PATH = (
+    "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+)
 _DAY49_BOARD_PATH = "docs/artifacts/day49-weekly-review-closeout-pack/day49-delivery-board.md"
 _SECTION_HEADER = "# Day 50 — Execution prioritization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -161,9 +163,13 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
     page_text = _read(page_path)
     top10_text = _read(root / top10_path)
 
-    missing_sections = [item for item in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if item not in page_text]
+    missing_sections = [
+        item for item in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if item not in page_text
+    ]
     missing_commands = _contains_all_lines(page_text, _REQUIRED_COMMANDS)
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -173,35 +179,101 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
     board_count, board_has_day49, board_has_day50 = _board_stats(day49_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day50_link", "weight": 8, "passed": "docs/integrations-day50-execution-prioritization-closeout.md" in readme_text, "evidence": "docs/integrations-day50-execution-prioritization-closeout.md"},
-        {"check_id": "readme_day50_command", "weight": 4, "passed": "day50-execution-prioritization-closeout" in readme_text, "evidence": "day50-execution-prioritization-closeout"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day50_link",
+            "weight": 8,
+            "passed": "docs/integrations-day50-execution-prioritization-closeout.md" in readme_text,
+            "evidence": "docs/integrations-day50-execution-prioritization-closeout.md",
+        },
+        {
+            "check_id": "readme_day50_command",
+            "weight": 4,
+            "passed": "day50-execution-prioritization-closeout" in readme_text,
+            "evidence": "day50-execution-prioritization-closeout",
+        },
         {
             "check_id": "docs_index_day50_links",
             "weight": 8,
-            "passed": ("day-50-big-upgrade-report.md" in docs_index_text and "integrations-day50-execution-prioritization-closeout.md" in docs_index_text),
+            "passed": (
+                "day-50-big-upgrade-report.md" in docs_index_text
+                and "integrations-day50-execution-prioritization-closeout.md" in docs_index_text
+            ),
             "evidence": "day-50-big-upgrade-report.md + integrations-day50-execution-prioritization-closeout.md",
         },
-        {"check_id": "top10_day50_alignment", "weight": 5, "passed": ("Day 50" in top10_text and "Day 51" in top10_text), "evidence": "Day 50 + Day 51 strategy chain"},
-        {"check_id": "day49_summary_present", "weight": 10, "passed": day49_summary.exists(), "evidence": str(day49_summary)},
-        {"check_id": "day49_delivery_board_present", "weight": 8, "passed": day49_board.exists(), "evidence": str(day49_board)},
+        {
+            "check_id": "top10_day50_alignment",
+            "weight": 5,
+            "passed": ("Day 50" in top10_text and "Day 51" in top10_text),
+            "evidence": "Day 50 + Day 51 strategy chain",
+        },
+        {
+            "check_id": "day49_summary_present",
+            "weight": 10,
+            "passed": day49_summary.exists(),
+            "evidence": str(day49_summary),
+        },
+        {
+            "check_id": "day49_delivery_board_present",
+            "weight": 8,
+            "passed": day49_board.exists(),
+            "evidence": str(day49_board),
+        },
         {
             "check_id": "day49_quality_floor",
             "weight": 10,
             "passed": day49_strict and day49_score >= 95,
-            "evidence": {"day49_score": day49_score, "strict_pass": day49_strict, "day49_checks": day49_check_count},
+            "evidence": {
+                "day49_score": day49_score,
+                "strict_pass": day49_strict,
+                "day49_checks": day49_check_count,
+            },
         },
         {
             "check_id": "day49_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day49 and board_has_day50,
-            "evidence": {"board_items": board_count, "contains_day49": board_has_day49, "contains_day50": board_has_day50},
+            "evidence": {
+                "board_items": board_count,
+                "contains_day49": board_has_day49,
+                "contains_day50": board_has_day50,
+            },
         },
-        {"check_id": "execution_prioritization_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "execution_prioritization_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "execution_prioritization_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "execution_prioritization_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -220,22 +292,38 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
         wins.append(f"Day 49 continuity is strict-pass with activation score={day49_score}.")
     else:
         misses.append("Day 49 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 49 weekly review closeout command and restore strict pass baseline before Day 50 lock.")
+        handoff_actions.append(
+            "Re-run Day 49 weekly review closeout command and restore strict pass baseline before Day 50 lock."
+        )
 
     if board_count >= 5 and board_has_day49 and board_has_day50:
-        wins.append(f"Day 49 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 49 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 49 delivery board integrity is incomplete (needs >=5 items and Day 49/50 anchors).")
-        handoff_actions.append("Repair Day 49 delivery board entries to include Day 49 and Day 50 anchors.")
+        misses.append(
+            "Day 49 delivery board integrity is incomplete (needs >=5 items and Day 49/50 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 49 delivery board entries to include Day 49 and Day 50 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
-        wins.append("Execution prioritization contract + quality checklist is fully locked for execution.")
+        wins.append(
+            "Execution prioritization contract + quality checklist is fully locked for execution."
+        )
     else:
-        misses.append("Execution prioritization contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 50 execution prioritization contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Execution prioritization contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 50 execution prioritization contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 50 execution prioritization closeout lane is fully complete and ready for Day 51 execution lane.")
+        wins.append(
+            "Day 50 execution prioritization closeout lane is fully complete and ready for Day 51 execution lane."
+        )
 
     return {
         "name": "day50-execution-prioritization-closeout",
@@ -244,11 +332,19 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day49_summary": str(day49_summary.relative_to(root)) if day49_summary.exists() else str(day49_summary),
-            "day49_delivery_board": str(day49_board.relative_to(root)) if day49_board.exists() else str(day49_board),
+            "day49_summary": str(day49_summary.relative_to(root))
+            if day49_summary.exists()
+            else str(day49_summary),
+            "day49_delivery_board": str(day49_board.relative_to(root))
+            if day49_board.exists()
+            else str(day49_board),
         },
         "checks": checks,
-        "rollup": {"day49_activation_score": day49_score, "day49_checks": day49_check_count, "day49_delivery_board_items": board_count},
+        "rollup": {
+            "day49_activation_score": day49_score,
+            "day49_checks": day49_check_count,
+            "day49_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -290,9 +386,17 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day50-execution-prioritization-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day50-execution-prioritization-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day50-execution-prioritization-brief.md", "# Day 50 Execution Prioritization Brief\n\n- Objective: close Day 50 with measurable execution-board discipline and prioritized release storytelling gains.\n")
+    _write(
+        target / "day50-execution-prioritization-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
+    _write(
+        target / "day50-execution-prioritization-closeout-summary.md", _render_text(payload) + "\n"
+    )
+    _write(
+        target / "day50-execution-prioritization-brief.md",
+        "# Day 50 Execution Prioritization Brief\n\n- Objective: close Day 50 with measurable execution-board discipline and prioritized release storytelling gains.\n",
+    )
     _write(
         target / "day50-risk-register.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
@@ -303,16 +407,31 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         json.dumps(
             {
                 "kpis": [
-                    {"id": "strict_pass", "baseline": 1, "current": int(payload["summary"]["strict_pass"]), "delta": int(payload["summary"]["strict_pass"]) - 1, "confidence": "high"}
+                    {
+                        "id": "strict_pass",
+                        "baseline": 1,
+                        "current": int(payload["summary"]["strict_pass"]),
+                        "delta": int(payload["summary"]["strict_pass"]) - 1,
+                        "confidence": "high",
+                    }
                 ]
             },
             indent=2,
         )
         + "\n",
     )
-    _write(target / "day50-execution-log.md", "# Day 50 Execution Log\n\n- [ ] 2026-03-18: Record misses, wins, and Day 51 release priorities.\n")
-    _write(target / "day50-delivery-board.md", "# Day 50 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day50-validation-commands.md", "# Day 50 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day50-execution-log.md",
+        "# Day 50 Execution Log\n\n- [ ] 2026-03-18: Record misses, wins, and Day 51 release priorities.\n",
+    )
+    _write(
+        target / "day50-delivery-board.md",
+        "# Day 50 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day50-validation-commands.md",
+        "# Day 50 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -320,11 +439,21 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     evidence_path.mkdir(parents=True, exist_ok=True)
     events: list[dict[str, Any]] = []
     for index, command in enumerate(_EXECUTION_COMMANDS, start=1):
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        event = {"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr}
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        event = {
+            "command": command,
+            "returncode": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+        }
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(evidence_path / "day50-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        evidence_path / "day50-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -353,7 +482,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day50-execution-prioritization-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day50-execution-prioritization-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     if ns.format == "json":

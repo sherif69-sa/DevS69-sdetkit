@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 46 — Optimization lane continuation:** convert Day 45 expansion wins into optimization plays.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day45-expansion-closeout.md").write_text(d45._DAY45_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day45-expansion-closeout.md").write_text(
+        d45._DAY45_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-45-big-upgrade-report.md").write_text("# Day 45 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json"
@@ -93,7 +95,9 @@ def test_day45_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day45_strict_fails_when_day44_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json").unlink()
+    (
+        tmp_path / "docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json"
+    ).unlink()
     rc = d45.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

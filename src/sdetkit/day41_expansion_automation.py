@@ -162,7 +162,9 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -172,35 +174,101 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
     board_count, board_has_day40, board_has_day41 = _board_stats(day40_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day41_link", "weight": 8, "passed": "docs/integrations-day41-expansion-automation.md" in readme_text, "evidence": "docs/integrations-day41-expansion-automation.md"},
-        {"check_id": "readme_day41_command", "weight": 4, "passed": "day41-expansion-automation" in readme_text, "evidence": "day41-expansion-automation"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day41_link",
+            "weight": 8,
+            "passed": "docs/integrations-day41-expansion-automation.md" in readme_text,
+            "evidence": "docs/integrations-day41-expansion-automation.md",
+        },
+        {
+            "check_id": "readme_day41_command",
+            "weight": 4,
+            "passed": "day41-expansion-automation" in readme_text,
+            "evidence": "day41-expansion-automation",
+        },
         {
             "check_id": "docs_index_day41_links",
             "weight": 8,
-            "passed": ("day-41-big-upgrade-report.md" in docs_index_text and "integrations-day41-expansion-automation.md" in docs_index_text),
+            "passed": (
+                "day-41-big-upgrade-report.md" in docs_index_text
+                and "integrations-day41-expansion-automation.md" in docs_index_text
+            ),
             "evidence": "day-41-big-upgrade-report.md + integrations-day41-expansion-automation.md",
         },
-        {"check_id": "top10_day41_alignment", "weight": 5, "passed": ("Day 41" in top10_text and "Day 42" in top10_text), "evidence": "Day 41 + Day 42 strategy chain"},
-        {"check_id": "day40_summary_present", "weight": 10, "passed": day40_summary.exists(), "evidence": str(day40_summary)},
-        {"check_id": "day40_delivery_board_present", "weight": 8, "passed": day40_board.exists(), "evidence": str(day40_board)},
+        {
+            "check_id": "top10_day41_alignment",
+            "weight": 5,
+            "passed": ("Day 41" in top10_text and "Day 42" in top10_text),
+            "evidence": "Day 41 + Day 42 strategy chain",
+        },
+        {
+            "check_id": "day40_summary_present",
+            "weight": 10,
+            "passed": day40_summary.exists(),
+            "evidence": str(day40_summary),
+        },
+        {
+            "check_id": "day40_delivery_board_present",
+            "weight": 8,
+            "passed": day40_board.exists(),
+            "evidence": str(day40_board),
+        },
         {
             "check_id": "day40_quality_floor",
             "weight": 10,
             "passed": day40_strict and day40_score >= 95,
-            "evidence": {"day40_score": day40_score, "strict_pass": day40_strict, "day40_checks": day40_check_count},
+            "evidence": {
+                "day40_score": day40_score,
+                "strict_pass": day40_strict,
+                "day40_checks": day40_check_count,
+            },
         },
         {
             "check_id": "day40_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day40 and board_has_day41,
-            "evidence": {"board_items": board_count, "contains_day40": board_has_day40, "contains_day41": board_has_day41},
+            "evidence": {
+                "board_items": board_count,
+                "contains_day40": board_has_day40,
+                "contains_day41": board_has_day41,
+            },
         },
-        {"check_id": "expansion_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "expansion_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "expansion_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "expansion_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -219,22 +287,38 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
         wins.append(f"Day 40 continuity is strict-pass with activation score={day40_score}.")
     else:
         misses.append("Day 40 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 40 scale lane command and restore strict pass baseline before Day 41 lock.")
+        handoff_actions.append(
+            "Re-run Day 40 scale lane command and restore strict pass baseline before Day 41 lock."
+        )
 
     if board_count >= 5 and board_has_day40 and board_has_day41:
-        wins.append(f"Day 40 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 40 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 40 delivery board integrity is incomplete (needs >=5 items and Day 40/41 anchors).")
-        handoff_actions.append("Repair Day 40 delivery board entries to include Day 40 and Day 41 anchors.")
+        misses.append(
+            "Day 40 delivery board integrity is incomplete (needs >=5 items and Day 40/41 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 40 delivery board entries to include Day 40 and Day 41 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
-        wins.append("Expansion execution contract + quality checklist is fully locked for execution.")
+        wins.append(
+            "Expansion execution contract + quality checklist is fully locked for execution."
+        )
     else:
-        misses.append("Expansion contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 41 expansion contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Expansion contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 41 expansion contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 41 expansion automation lane is fully complete and ready for Day 42 optimization lane.")
+        wins.append(
+            "Day 41 expansion automation lane is fully complete and ready for Day 42 optimization lane."
+        )
 
     return {
         "name": "day41-expansion-automation",
@@ -243,11 +327,19 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day40_summary": str(day40_summary.relative_to(root)) if day40_summary.exists() else str(day40_summary),
-            "day40_delivery_board": str(day40_board.relative_to(root)) if day40_board.exists() else str(day40_board),
+            "day40_summary": str(day40_summary.relative_to(root))
+            if day40_summary.exists()
+            else str(day40_summary),
+            "day40_delivery_board": str(day40_board.relative_to(root))
+            if day40_board.exists()
+            else str(day40_board),
         },
         "checks": checks,
-        "rollup": {"day40_activation_score": day40_score, "day40_checks": day40_check_count, "day40_delivery_board_items": board_count},
+        "rollup": {
+            "day40_activation_score": day40_score,
+            "day40_checks": day40_check_count,
+            "day40_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -294,7 +386,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -332,9 +426,27 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
             {
                 "generated_for": "day41-expansion-automation",
                 "metrics": [
-                    {"name": "automation_completion_rate", "baseline": 52.0, "current": 57.5, "delta_pct": 10.58, "confidence": "high"},
-                    {"name": "docs_to_command_conversion", "baseline": 20.0, "current": 22.4, "delta_pct": 12.0, "confidence": "medium"},
-                    {"name": "operator_feedback_positive", "baseline": 76.0, "current": 80.0, "delta_pct": 5.26, "confidence": "high"},
+                    {
+                        "name": "automation_completion_rate",
+                        "baseline": 52.0,
+                        "current": 57.5,
+                        "delta_pct": 10.58,
+                        "confidence": "high",
+                    },
+                    {
+                        "name": "docs_to_command_conversion",
+                        "baseline": 20.0,
+                        "current": 22.4,
+                        "delta_pct": 12.0,
+                        "confidence": "medium",
+                    },
+                    {
+                        "name": "operator_feedback_positive",
+                        "baseline": 76.0,
+                        "current": 80.0,
+                        "delta_pct": 5.26,
+                        "confidence": "high",
+                    },
                 ],
             },
             indent=2,
@@ -348,8 +460,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] 2026-03-10: Execute automation matrix and capture first KPI pulse.\n"
         "- [ ] 2026-03-11: Record misses, wins, and Day 42 optimization priorities.\n",
     )
-    _write(target / "day41-delivery-board.md", "# Day 41 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day41-validation-commands.md", "# Day 41 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day41-delivery-board.md",
+        "# Day 41 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day41-validation-commands.md",
+        "# Day 41 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -357,8 +475,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day41-expansion-automation-execution",
         "total_commands": len(logs),
@@ -396,7 +523,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day41-expansion-automation-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day41-expansion-automation-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -407,11 +538,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

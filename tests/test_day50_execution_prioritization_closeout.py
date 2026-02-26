@@ -22,10 +22,15 @@ def _seed_repo(root: Path) -> None:
         "- **Day 51 — Case snippet #1:** publish mini-case on reliability or quality gate value.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day50-execution-prioritization-closeout.md").write_text(d50._DAY50_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day50-execution-prioritization-closeout.md").write_text(
+        d50._DAY50_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-50-big-upgrade-report.md").write_text("# Day 50 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -80,11 +85,17 @@ def test_day50_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day50-pack/day50-execution-prioritization-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day50-pack/day50-execution-prioritization-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day50-pack/day50-execution-prioritization-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day50-pack/day50-execution-prioritization-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day50-pack/day50-execution-prioritization-brief.md").exists()
     assert (tmp_path / "artifacts/day50-pack/day50-risk-register.csv").exists()
-    assert (tmp_path / "artifacts/day50-pack/day50-execution-prioritization-kpi-scorecard.json").exists()
+    assert (
+        tmp_path / "artifacts/day50-pack/day50-execution-prioritization-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/day50-pack/day50-execution-log.md").exists()
     assert (tmp_path / "artifacts/day50-pack/day50-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day50-pack/day50-validation-commands.md").exists()
@@ -93,13 +104,18 @@ def test_day50_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day50_strict_fails_when_day49_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+    ).unlink()
     rc = d50.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_day50_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day50-execution-prioritization-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day50-execution-prioritization-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 50 execution prioritization closeout summary" in capsys.readouterr().out

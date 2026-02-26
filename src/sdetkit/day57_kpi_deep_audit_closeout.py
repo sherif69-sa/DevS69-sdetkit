@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day57-kpi-deep-audit-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY56_SUMMARY_PATH = "docs/artifacts/day56-stabilization-closeout-pack/day56-stabilization-closeout-summary.json"
+_DAY56_SUMMARY_PATH = (
+    "docs/artifacts/day56-stabilization-closeout-pack/day56-stabilization-closeout-summary.json"
+)
 _DAY56_BOARD_PATH = "docs/artifacts/day56-stabilization-closeout-pack/day56-delivery-board.md"
 _SECTION_HEADER = "# Day 57 — KPI deep audit closeout lane"
 _REQUIRED_SECTIONS = [
@@ -127,10 +129,12 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 
 def _load_day56(path: Path) -> tuple[int, bool, int]:
     payload = _load_json(path)
-    if not payload:
+    if payload is None:
         return 0, False, 0
-    summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
-    checks = payload.get("checks") if isinstance(payload.get("checks"), list) else []
+    summary_obj = payload.get("summary")
+    summary = summary_obj if isinstance(summary_obj, dict) else {}
+    checks_obj = payload.get("checks")
+    checks = checks_obj if isinstance(checks_obj, list) else []
     score = int(summary.get("activation_score", 0) or 0)
     strict = bool(summary.get("strict_pass", False))
     return score, strict, len(checks)
@@ -164,30 +168,97 @@ def build_day57_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = [line for line in _REQUIRED_DELIVERY_BOARD_LINES if line not in page_text]
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day57_link", "weight": 8, "passed": _PAGE_PATH in readme_text, "evidence": _PAGE_PATH},
-        {"check_id": "readme_day57_command", "weight": 4, "passed": "day57-kpi-deep-audit-closeout" in readme_text, "evidence": "day57-kpi-deep-audit-closeout"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day57_link",
+            "weight": 8,
+            "passed": _PAGE_PATH in readme_text,
+            "evidence": _PAGE_PATH,
+        },
+        {
+            "check_id": "readme_day57_command",
+            "weight": 4,
+            "passed": "day57-kpi-deep-audit-closeout" in readme_text,
+            "evidence": "day57-kpi-deep-audit-closeout",
+        },
         {
             "check_id": "docs_index_day57_links",
             "weight": 8,
-            "passed": ("day-57-big-upgrade-report.md" in docs_index_text and "integrations-day57-kpi-deep-audit-closeout.md" in docs_index_text),
+            "passed": (
+                "day-57-big-upgrade-report.md" in docs_index_text
+                and "integrations-day57-kpi-deep-audit-closeout.md" in docs_index_text
+            ),
             "evidence": "day-57-big-upgrade-report.md + integrations-day57-kpi-deep-audit-closeout.md",
         },
-        {"check_id": "top10_day57_alignment", "weight": 5, "passed": ("Day 57" in top10_text and "Day 58" in top10_text), "evidence": "Day 57 + Day 58 strategy chain"},
-        {"check_id": "day56_summary_present", "weight": 10, "passed": day56_summary.exists(), "evidence": str(day56_summary)},
-        {"check_id": "day56_delivery_board_present", "weight": 8, "passed": day56_board.exists(), "evidence": str(day56_board)},
+        {
+            "check_id": "top10_day57_alignment",
+            "weight": 5,
+            "passed": ("Day 57" in top10_text and "Day 58" in top10_text),
+            "evidence": "Day 57 + Day 58 strategy chain",
+        },
+        {
+            "check_id": "day56_summary_present",
+            "weight": 10,
+            "passed": day56_summary.exists(),
+            "evidence": str(day56_summary),
+        },
+        {
+            "check_id": "day56_delivery_board_present",
+            "weight": 8,
+            "passed": day56_board.exists(),
+            "evidence": str(day56_board),
+        },
         {
             "check_id": "day56_quality_floor",
             "weight": 10,
             "passed": day56_strict and day56_score >= 95,
-            "evidence": {"day56_score": day56_score, "strict_pass": day56_strict, "day56_checks": day56_check_count},
+            "evidence": {
+                "day56_score": day56_score,
+                "strict_pass": day56_strict,
+                "day56_checks": day56_check_count,
+            },
         },
-        {"check_id": "day56_board_integrity", "weight": 7, "passed": board_count >= 5 and board_has_day56, "evidence": {"board_items": board_count, "contains_day56": board_has_day56}},
-        {"check_id": "kpi_deep_audit_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "kpi_deep_audit_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "day56_board_integrity",
+            "weight": 7,
+            "passed": board_count >= 5 and board_has_day56,
+            "evidence": {"board_items": board_count, "contains_day56": board_has_day56},
+        },
+        {
+            "check_id": "kpi_deep_audit_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "kpi_deep_audit_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -205,22 +276,34 @@ def build_day57_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append(f"Day 56 continuity is strict-pass with activation score={day56_score}.")
     else:
         misses.append("Day 56 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 56 stabilization closeout command and restore strict baseline before Day 57 lock.")
+        handoff_actions.append(
+            "Re-run Day 56 stabilization closeout command and restore strict baseline before Day 57 lock."
+        )
 
     if board_count >= 5 and board_has_day56:
-        wins.append(f"Day 56 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 56 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 56 delivery board integrity is incomplete (needs >=5 items and Day 56 anchors).")
+        misses.append(
+            "Day 56 delivery board integrity is incomplete (needs >=5 items and Day 56 anchors)."
+        )
         handoff_actions.append("Repair Day 56 delivery board entries to include Day 56 anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("KPI deep-audit contract + quality checklist is fully locked for execution.")
     else:
-        misses.append("KPI deep-audit contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 57 contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "KPI deep-audit contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 57 contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 57 KPI deep-audit closeout lane is fully complete and ready for Day 58 execution lane.")
+        wins.append(
+            "Day 57 KPI deep-audit closeout lane is fully complete and ready for Day 58 execution lane."
+        )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
@@ -230,11 +313,19 @@ def build_day57_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day56_summary": str(day56_summary.relative_to(root)) if day56_summary.exists() else str(day56_summary),
-            "day56_delivery_board": str(day56_board.relative_to(root)) if day56_board.exists() else str(day56_board),
+            "day56_summary": str(day56_summary.relative_to(root))
+            if day56_summary.exists()
+            else str(day56_summary),
+            "day56_delivery_board": str(day56_board.relative_to(root))
+            if day56_board.exists()
+            else str(day56_board),
         },
         "checks": checks,
-        "rollup": {"day56_activation_score": day56_score, "day56_checks": day56_check_count, "day56_delivery_board_items": board_count},
+        "rollup": {
+            "day56_activation_score": day56_score,
+            "day56_checks": day56_check_count,
+            "day56_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -266,14 +357,22 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "day57-kpi-deep-audit-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(
+        target / "day57-kpi-deep-audit-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+    )
     _write(target / "day57-kpi-deep-audit-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "day57-kpi-deep-audit-brief.md", "# Day 57 KPI deep-audit brief\n")
     _write(target / "day57-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "day57-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(target / "day57-execution-log.md", "# Day 57 execution log\n")
-    _write(target / "day57-delivery-board.md", "\n".join(["# Day 57 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n")
-    _write(target / "day57-validation-commands.md", "# Day 57 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day57-delivery-board.md",
+        "\n".join(["# Day 57 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+    )
+    _write(
+        target / "day57-validation-commands.md",
+        "# Day 57 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -282,10 +381,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
         result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
-        event = {"command": command, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(out_dir / "day57-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        out_dir / "day57-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -308,7 +415,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))

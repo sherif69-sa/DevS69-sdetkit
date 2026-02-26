@@ -22,12 +22,26 @@ def _seed_repo(root: Path) -> None:
         "- **Day 61 — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day60-phase2-wrap-handoff-closeout.md").write_text(d60._DAY60_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day60-phase2-wrap-handoff-closeout.md").write_text(
+        d60._DAY60_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-60-big-upgrade-report.md").write_text("# Day 60 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
-    summary.write_text(json.dumps({"summary": {"activation_score": 100, "strict_pass": True}, "checks": [{"passed": True}]}, indent=2), encoding="utf-8")
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 100, "strict_pass": True},
+                "checks": [{"passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     board = root / "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-delivery-board.md"
     board.write_text(
         "\n".join(
@@ -56,10 +70,27 @@ def test_day60_json(tmp_path: Path, capsys) -> None:
 
 def test_day60_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    rc = d60.main(["--root", str(tmp_path), "--emit-pack-dir", "artifacts/day60-pack", "--execute", "--evidence-dir", "artifacts/day60-pack/evidence", "--format", "json", "--strict"])
+    rc = d60.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/day60-pack",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/day60-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
     assert rc == 0
-    assert (tmp_path / "artifacts/day60-pack/day60-phase2-wrap-handoff-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day60-pack/day60-phase2-wrap-handoff-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day60-pack/day60-phase2-wrap-handoff-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day60-pack/day60-phase2-wrap-handoff-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day60-pack/day60-phase2-wrap-handoff-brief.md").exists()
     assert (tmp_path / "artifacts/day60-pack/day60-risk-ledger.csv").exists()
     assert (tmp_path / "artifacts/day60-pack/day60-kpi-scorecard.json").exists()
@@ -71,12 +102,17 @@ def test_day60_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day60_strict_fails_without_day59(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json"
+    ).unlink()
     assert d60.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
 def test_day60_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day60-phase2-wrap-handoff-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day60-phase2-wrap-handoff-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 60 Phase-2 wrap + handoff closeout summary" in capsys.readouterr().out

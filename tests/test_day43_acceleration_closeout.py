@@ -22,10 +22,15 @@ def _seed_repo(root: Path) -> None:
         "- **Day 44 — Scale lane continuation:** convert Day 43 acceleration wins into scale plays.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day43-acceleration-closeout.md").write_text(d42._DAY43_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day43-acceleration-closeout.md").write_text(
+        d42._DAY43_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-43-big-upgrade-report.md").write_text("# Day 43 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -93,7 +98,10 @@ def test_day43_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day43_strict_fails_when_day42_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json"
+    ).unlink()
     rc = d42.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

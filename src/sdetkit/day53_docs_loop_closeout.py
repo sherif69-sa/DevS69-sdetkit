@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day53-docs-loop-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY52_SUMMARY_PATH = "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+_DAY52_SUMMARY_PATH = (
+    "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+)
 _DAY52_BOARD_PATH = "docs/artifacts/day52-narrative-closeout-pack/day52-delivery-board.md"
 _SECTION_HEADER = "# Day 53 — Docs loop optimization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -129,8 +131,10 @@ def _load_day52(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
-    summary = data.get("summary") if isinstance(data.get("summary"), dict) else {}
-    checks = data.get("checks") if isinstance(data.get("checks"), list) else []
+    summary_obj = data.get("summary")
+    summary = summary_obj if isinstance(summary_obj, dict) else {}
+    checks_obj = data.get("checks")
+    checks = checks_obj if isinstance(checks_obj, list) else []
     score = float(summary.get("activation_score", 0.0))
     strict = bool(summary.get("strict_pass", False))
     check_count = len(checks)
@@ -159,9 +163,13 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(page_path)
     top10_text = _read(root / top10_path)
 
-    missing_sections = [item for item in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if item not in page_text]
+    missing_sections = [
+        item for item in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if item not in page_text
+    ]
     missing_commands = _contains_all_lines(page_text, _REQUIRED_COMMANDS)
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -171,35 +179,101 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     board_count, board_has_day52, board_has_day53 = _board_stats(day52_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day53_link", "weight": 8, "passed": "docs/integrations-day53-docs-loop-closeout.md" in readme_text, "evidence": "docs/integrations-day53-docs-loop-closeout.md"},
-        {"check_id": "readme_day53_command", "weight": 4, "passed": "day53-docs-loop-closeout" in readme_text, "evidence": "day53-docs-loop-closeout"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day53_link",
+            "weight": 8,
+            "passed": "docs/integrations-day53-docs-loop-closeout.md" in readme_text,
+            "evidence": "docs/integrations-day53-docs-loop-closeout.md",
+        },
+        {
+            "check_id": "readme_day53_command",
+            "weight": 4,
+            "passed": "day53-docs-loop-closeout" in readme_text,
+            "evidence": "day53-docs-loop-closeout",
+        },
         {
             "check_id": "docs_index_day53_links",
             "weight": 8,
-            "passed": ("day-53-big-upgrade-report.md" in docs_index_text and "integrations-day53-docs-loop-closeout.md" in docs_index_text),
+            "passed": (
+                "day-53-big-upgrade-report.md" in docs_index_text
+                and "integrations-day53-docs-loop-closeout.md" in docs_index_text
+            ),
             "evidence": "day-53-big-upgrade-report.md + integrations-day53-docs-loop-closeout.md",
         },
-        {"check_id": "top10_day53_alignment", "weight": 5, "passed": ("Day 52" in top10_text and "Day 53" in top10_text), "evidence": "Day 52 + Day 53 strategy chain"},
-        {"check_id": "day52_summary_present", "weight": 10, "passed": day52_summary.exists(), "evidence": str(day52_summary)},
-        {"check_id": "day52_delivery_board_present", "weight": 8, "passed": day52_board.exists(), "evidence": str(day52_board)},
+        {
+            "check_id": "top10_day53_alignment",
+            "weight": 5,
+            "passed": ("Day 52" in top10_text and "Day 53" in top10_text),
+            "evidence": "Day 52 + Day 53 strategy chain",
+        },
+        {
+            "check_id": "day52_summary_present",
+            "weight": 10,
+            "passed": day52_summary.exists(),
+            "evidence": str(day52_summary),
+        },
+        {
+            "check_id": "day52_delivery_board_present",
+            "weight": 8,
+            "passed": day52_board.exists(),
+            "evidence": str(day52_board),
+        },
         {
             "check_id": "day52_quality_floor",
             "weight": 10,
             "passed": day52_strict and day52_score >= 95,
-            "evidence": {"day52_score": day52_score, "strict_pass": day52_strict, "day52_checks": day52_check_count},
+            "evidence": {
+                "day52_score": day52_score,
+                "strict_pass": day52_strict,
+                "day52_checks": day52_check_count,
+            },
         },
         {
             "check_id": "day52_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day52 and board_has_day53,
-            "evidence": {"board_items": board_count, "contains_day52": board_has_day52, "contains_day53": board_has_day53},
+            "evidence": {
+                "board_items": board_count,
+                "contains_day52": board_has_day52,
+                "contains_day53": board_has_day53,
+            },
         },
-        {"check_id": "docs_loop_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "docs_loop_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "docs_loop_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "docs_loop_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -218,22 +292,36 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append(f"Day 52 continuity is strict-pass with activation score={day52_score}.")
     else:
         misses.append("Day 52 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 52 narrative closeout command and restore strict pass baseline before Day 53 lock.")
+        handoff_actions.append(
+            "Re-run Day 52 narrative closeout command and restore strict pass baseline before Day 53 lock."
+        )
 
     if board_count >= 5 and board_has_day52 and board_has_day53:
-        wins.append(f"Day 52 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 52 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 52 delivery board integrity is incomplete (needs >=5 items and Day 52/53 anchors).")
-        handoff_actions.append("Repair Day 52 delivery board entries to include Day 52 and Day 53 anchors.")
+        misses.append(
+            "Day 52 delivery board integrity is incomplete (needs >=5 items and Day 52/53 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 52 delivery board entries to include Day 52 and Day 53 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Docs-loop contract + quality checklist is fully locked for execution.")
     else:
-        misses.append("Docs-loop contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 53 docs-loop contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Docs-loop contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 53 docs-loop contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 53 docs-loop closeout lane is fully complete and ready for Day 54 execution lane.")
+        wins.append(
+            "Day 53 docs-loop closeout lane is fully complete and ready for Day 54 execution lane."
+        )
 
     return {
         "name": "day53-docs-loop-closeout",
@@ -242,11 +330,19 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day52_summary": str(day52_summary.relative_to(root)) if day52_summary.exists() else str(day52_summary),
-            "day52_delivery_board": str(day52_board.relative_to(root)) if day52_board.exists() else str(day52_board),
+            "day52_summary": str(day52_summary.relative_to(root))
+            if day52_summary.exists()
+            else str(day52_summary),
+            "day52_delivery_board": str(day52_board.relative_to(root))
+            if day52_board.exists()
+            else str(day52_board),
         },
         "checks": checks,
-        "rollup": {"day52_activation_score": day52_score, "day52_checks": day52_check_count, "day52_delivery_board_items": board_count},
+        "rollup": {
+            "day52_activation_score": day52_score,
+            "day52_checks": day52_check_count,
+            "day52_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -290,7 +386,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     _write(target / "day53-docs-loop-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "day53-docs-loop-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day53-docs-loop-brief.md", "# Day 53 Docs-loop Brief\n\n- Objective: close Day 53 with measurable docs-loop optimization gains and proof-backed cross-link quality.\n")
+    _write(
+        target / "day53-docs-loop-brief.md",
+        "# Day 53 Docs-loop Brief\n\n- Objective: close Day 53 with measurable docs-loop optimization gains and proof-backed cross-link quality.\n",
+    )
     _write(
         target / "day53-cross-link-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
@@ -301,16 +400,31 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         json.dumps(
             {
                 "kpis": [
-                    {"id": "strict_pass", "baseline": 1, "current": int(payload["summary"]["strict_pass"]), "delta": int(payload["summary"]["strict_pass"]) - 1, "confidence": "high"}
+                    {
+                        "id": "strict_pass",
+                        "baseline": 1,
+                        "current": int(payload["summary"]["strict_pass"]),
+                        "delta": int(payload["summary"]["strict_pass"]) - 1,
+                        "confidence": "high",
+                    }
                 ]
             },
             indent=2,
         )
         + "\n",
     )
-    _write(target / "day53-execution-log.md", "# Day 53 Execution Log\n\n- [ ] 2026-03-20: Record misses, wins, and Day 54 re-engagement priorities.\n")
-    _write(target / "day53-delivery-board.md", "# Day 53 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day53-validation-commands.md", "# Day 53 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day53-execution-log.md",
+        "# Day 53 Execution Log\n\n- [ ] 2026-03-20: Record misses, wins, and Day 54 re-engagement priorities.\n",
+    )
+    _write(
+        target / "day53-delivery-board.md",
+        "# Day 53 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day53-validation-commands.md",
+        "# Day 53 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -318,11 +432,21 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     evidence_path.mkdir(parents=True, exist_ok=True)
     events: list[dict[str, Any]] = []
     for index, command in enumerate(_EXECUTION_COMMANDS, start=1):
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        event = {"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr}
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        event = {
+            "command": command,
+            "returncode": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+        }
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(evidence_path / "day53-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        evidence_path / "day53-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -351,7 +475,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day53-docs-loop-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day53-docs-loop-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     if ns.format == "json":

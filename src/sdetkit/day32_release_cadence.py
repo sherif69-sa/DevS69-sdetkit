@@ -167,7 +167,9 @@ def build_day32_release_cadence_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_cadence_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CADENCE_LINES])
+    missing_cadence_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CADENCE_LINES]
+    )
     missing_changelog_lines = _contains_all_lines(page_text, _REQUIRED_CHANGELOG_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,7 +179,12 @@ def build_day32_release_cadence_summary(
     board_count, board_has_day32, board_has_day33 = _board_stats(day31_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
         {
             "check_id": "required_sections_present",
             "weight": 10,
@@ -293,9 +300,13 @@ def build_day32_release_cadence_summary(
         )
 
     if board_count >= 5 and board_has_day32 and board_has_day33:
-        wins.append(f"Day 31 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 31 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 31 delivery board integrity is incomplete (needs >=5 items and Day 32/33 anchors).")
+        misses.append(
+            "Day 31 delivery board integrity is incomplete (needs >=5 items and Day 32/33 anchors)."
+        )
         handoff_actions.append(
             "Repair Day 31 delivery board entries to include Day 32 and Day 33 anchors."
         )
@@ -303,13 +314,17 @@ def build_day32_release_cadence_summary(
     if not missing_cadence_lines and not missing_changelog_lines and not missing_board_items:
         wins.append("Release cadence + changelog contract is fully locked for weekly execution.")
     else:
-        misses.append("Cadence contract, changelog checklist, or delivery board entries are missing.")
+        misses.append(
+            "Cadence contract, changelog checklist, or delivery board entries are missing."
+        )
         handoff_actions.append(
             "Complete all Day 32 cadence lines, changelog checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
-        wins.append("Day 32 release cadence setup is fully closed and ready for Day 33 demo asset execution.")
+        wins.append(
+            "Day 32 release cadence setup is fully closed and ready for Day 33 demo asset execution."
+        )
 
     return {
         "name": "day32-release-cadence",
@@ -318,8 +333,12 @@ def build_day32_release_cadence_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day31_summary": str(day31_summary.relative_to(root)) if day31_summary.exists() else str(day31_summary),
-            "day31_delivery_board": str(day31_board.relative_to(root)) if day31_board.exists() else str(day31_board),
+            "day31_summary": str(day31_summary.relative_to(root))
+            if day31_summary.exists()
+            else str(day31_summary),
+            "day31_delivery_board": str(day31_board.relative_to(root))
+            if day31_board.exists()
+            else str(day31_board),
         },
         "checks": checks,
         "rollup": {
@@ -373,7 +392,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -416,8 +437,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "## KPI movement\n- Stars, discussions, conversions, adoption notes\n\n"
         "## Follow-up backlog\n- [ ] Item + owner + ETA\n",
     )
-    _write(target / "day32-delivery-board.md", "# Day 32 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day32-validation-commands.md", "# Day 32 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day32-delivery-board.md",
+        "# Day 32 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day32-validation-commands.md",
+        "# Day 32 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -425,8 +452,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day32-release-cadence-execution",
         "total_commands": len(logs),
@@ -464,7 +500,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day32-release-cadence-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day32-release-cadence-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -475,11 +515,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

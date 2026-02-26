@@ -22,12 +22,26 @@ def _seed_repo(root: Path) -> None:
         "- **Day 59 — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day58-phase2-hardening-closeout.md").write_text(d58._DAY58_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day58-phase2-hardening-closeout.md").write_text(
+        d58._DAY58_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-58-big-upgrade-report.md").write_text("# Day 58 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
-    summary.write_text(json.dumps({"summary": {"activation_score": 100, "strict_pass": True}, "checks": [{"passed": True}]}, indent=2), encoding="utf-8")
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 100, "strict_pass": True},
+                "checks": [{"passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     board = root / "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-delivery-board.md"
     board.write_text(
         "\n".join(
@@ -56,7 +70,20 @@ def test_day58_json(tmp_path: Path, capsys) -> None:
 
 def test_day58_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    rc = d58.main(["--root", str(tmp_path), "--emit-pack-dir", "artifacts/day58-pack", "--execute", "--evidence-dir", "artifacts/day58-pack/evidence", "--format", "json", "--strict"])
+    rc = d58.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/day58-pack",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/day58-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
     assert rc == 0
     assert (tmp_path / "artifacts/day58-pack/day58-phase2-hardening-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day58-pack/day58-phase2-hardening-closeout-summary.md").exists()
@@ -71,7 +98,10 @@ def test_day58_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day58_strict_fails_without_day57(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json"
+    ).unlink()
     assert d58.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 

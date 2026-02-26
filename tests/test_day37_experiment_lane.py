@@ -22,10 +22,15 @@ def _seed_repo(root: Path) -> None:
         "- **Day 38 — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day37-experiment-lane.md").write_text(d37._DAY37_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day37-experiment-lane.md").write_text(
+        d37._DAY37_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-37-big-upgrade-report.md").write_text("# Day 37 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -93,16 +98,19 @@ def test_day37_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day37_strict_fails_when_day36_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
+    ).unlink()
     rc = d37.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_day37_strict_fails_when_day36_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md").write_text(
-        "- [ ] Day 37 experiment backlog seeded from channel misses\n", encoding="utf-8"
-    )
+    (
+        tmp_path / "docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md"
+    ).write_text("- [ ] Day 37 experiment backlog seeded from channel misses\n", encoding="utf-8")
     rc = d37.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

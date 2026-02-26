@@ -167,7 +167,9 @@ def build_day33_demo_asset_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,7 +179,12 @@ def build_day33_demo_asset_summary(
     board_count, board_has_day33, board_has_day34 = _board_stats(day32_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
         {
             "check_id": "required_sections_present",
             "weight": 10,
@@ -215,8 +222,7 @@ def build_day33_demo_asset_summary(
             "check_id": "top10_day33_alignment",
             "weight": 5,
             "passed": (
-                "Day 33 — Demo asset #1" in top10_text
-                and "Day 34 — Demo asset #2" in top10_text
+                "Day 33 — Demo asset #1" in top10_text and "Day 34 — Demo asset #2" in top10_text
             ),
             "evidence": "Day 33 + Day 34 strategy chain",
         },
@@ -288,22 +294,34 @@ def build_day33_demo_asset_summary(
         wins.append(f"Day 32 continuity is strict-pass with activation score={day32_score}.")
     else:
         misses.append("Day 32 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 32 cadence command and restore strict pass baseline before demo lock.")
+        handoff_actions.append(
+            "Re-run Day 32 cadence command and restore strict pass baseline before demo lock."
+        )
 
     if board_count >= 5 and board_has_day33 and board_has_day34:
-        wins.append(f"Day 32 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 32 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 32 delivery board integrity is incomplete (needs >=5 items and Day 33/34 anchors).")
-        handoff_actions.append("Repair Day 32 delivery board entries to include Day 33 and Day 34 anchors.")
+        misses.append(
+            "Day 32 delivery board integrity is incomplete (needs >=5 items and Day 33/34 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 32 delivery board entries to include Day 33 and Day 34 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Demo production contract + quality checklist is fully locked for execution.")
     else:
         misses.append("Demo contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 33 contract lines, quality checklist entries, and delivery board tasks in docs.")
+        handoff_actions.append(
+            "Complete all Day 33 contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 33 demo asset #1 production is fully closed and ready for Day 34 sequencing.")
+        wins.append(
+            "Day 33 demo asset #1 production is fully closed and ready for Day 34 sequencing."
+        )
 
     return {
         "name": "day33-demo-asset",
@@ -312,8 +330,12 @@ def build_day33_demo_asset_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day32_summary": str(day32_summary.relative_to(root)) if day32_summary.exists() else str(day32_summary),
-            "day32_delivery_board": str(day32_board.relative_to(root)) if day32_board.exists() else str(day32_board),
+            "day32_summary": str(day32_summary.relative_to(root))
+            if day32_summary.exists()
+            else str(day32_summary),
+            "day32_delivery_board": str(day32_board.relative_to(root))
+            if day32_board.exists()
+            else str(day32_board),
         },
         "checks": checks,
         "rollup": {
@@ -367,7 +389,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -386,7 +410,11 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         json.dumps(
             {
                 "day": 33,
-                "asset": {"id": "demo-asset-1", "theme": "doctor workflow", "primary_formats": ["mp4", "gif"]},
+                "asset": {
+                    "id": "demo-asset-1",
+                    "theme": "doctor workflow",
+                    "primary_formats": ["mp4", "gif"],
+                },
                 "constraints": {"duration_seconds": {"min": 45, "max": 90}, "quality_floor": 95},
             },
             indent=2,
@@ -400,8 +428,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "## Command lane (10-45s)\n- Run: `python -m sdetkit doctor --json`\n- Highlight key output fields\n\n"
         "## Value proof + CTA (45-90s)\n- Trust signal + docs link + next step\n",
     )
-    _write(target / "day33-delivery-board.md", "# Day 33 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day33-validation-commands.md", "# Day 33 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day33-delivery-board.md",
+        "# Day 33 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day33-validation-commands.md",
+        "# Day 33 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -409,8 +443,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day33-demo-asset-execution",
         "total_commands": len(logs),
@@ -448,7 +491,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day33-demo-asset-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day33-demo-asset-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -459,11 +506,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

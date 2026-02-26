@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day39-playbook-post.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY38_SUMMARY_PATH = "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
+_DAY38_SUMMARY_PATH = (
+    "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
+)
 _DAY38_BOARD_PATH = "docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md"
 _SECTION_HEADER = "# Day 39 — Playbook post #1"
 _REQUIRED_SECTIONS = [
@@ -167,7 +169,9 @@ def build_day39_playbook_post_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,35 +181,101 @@ def build_day39_playbook_post_summary(
     board_count, board_has_day38, board_has_day39 = _board_stats(day38_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day39_link", "weight": 8, "passed": "docs/integrations-day39-playbook-post.md" in readme_text, "evidence": "docs/integrations-day39-playbook-post.md"},
-        {"check_id": "readme_day39_command", "weight": 4, "passed": "day39-playbook-post" in readme_text, "evidence": "day39-playbook-post"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day39_link",
+            "weight": 8,
+            "passed": "docs/integrations-day39-playbook-post.md" in readme_text,
+            "evidence": "docs/integrations-day39-playbook-post.md",
+        },
+        {
+            "check_id": "readme_day39_command",
+            "weight": 4,
+            "passed": "day39-playbook-post" in readme_text,
+            "evidence": "day39-playbook-post",
+        },
         {
             "check_id": "docs_index_day39_links",
             "weight": 8,
-            "passed": ("day-39-big-upgrade-report.md" in docs_index_text and "integrations-day39-playbook-post.md" in docs_index_text),
+            "passed": (
+                "day-39-big-upgrade-report.md" in docs_index_text
+                and "integrations-day39-playbook-post.md" in docs_index_text
+            ),
             "evidence": "day-39-big-upgrade-report.md + integrations-day39-playbook-post.md",
         },
-        {"check_id": "top10_day39_alignment", "weight": 5, "passed": ("Day 39" in top10_text and "Day 40" in top10_text), "evidence": "Day 39 + Day 40 strategy chain"},
-        {"check_id": "day38_summary_present", "weight": 10, "passed": day38_summary.exists(), "evidence": str(day38_summary)},
-        {"check_id": "day38_delivery_board_present", "weight": 8, "passed": day38_board.exists(), "evidence": str(day38_board)},
+        {
+            "check_id": "top10_day39_alignment",
+            "weight": 5,
+            "passed": ("Day 39" in top10_text and "Day 40" in top10_text),
+            "evidence": "Day 39 + Day 40 strategy chain",
+        },
+        {
+            "check_id": "day38_summary_present",
+            "weight": 10,
+            "passed": day38_summary.exists(),
+            "evidence": str(day38_summary),
+        },
+        {
+            "check_id": "day38_delivery_board_present",
+            "weight": 8,
+            "passed": day38_board.exists(),
+            "evidence": str(day38_board),
+        },
         {
             "check_id": "day38_quality_floor",
             "weight": 10,
             "passed": day38_strict and day38_score >= 95,
-            "evidence": {"day38_score": day38_score, "strict_pass": day38_strict, "day38_checks": day38_check_count},
+            "evidence": {
+                "day38_score": day38_score,
+                "strict_pass": day38_strict,
+                "day38_checks": day38_check_count,
+            },
         },
         {
             "check_id": "day38_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day38 and board_has_day39,
-            "evidence": {"board_items": board_count, "contains_day38": board_has_day38, "contains_day39": board_has_day39},
+            "evidence": {
+                "board_items": board_count,
+                "contains_day38": board_has_day38,
+                "contains_day39": board_has_day39,
+            },
         },
-        {"check_id": "playbook_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "playbook_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "playbook_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "playbook_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -224,19 +294,33 @@ def build_day39_playbook_post_summary(
         wins.append(f"Day 38 continuity is strict-pass with activation score={day38_score}.")
     else:
         misses.append("Day 38 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 38 distribution batch command and restore strict pass baseline before Day 39 lock.")
+        handoff_actions.append(
+            "Re-run Day 38 distribution batch command and restore strict pass baseline before Day 39 lock."
+        )
 
     if board_count >= 5 and board_has_day38 and board_has_day39:
-        wins.append(f"Day 38 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 38 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 38 delivery board integrity is incomplete (needs >=5 items and Day 38/39 anchors).")
-        handoff_actions.append("Repair Day 38 delivery board entries to include Day 38 and Day 39 anchors.")
+        misses.append(
+            "Day 38 delivery board integrity is incomplete (needs >=5 items and Day 38/39 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 38 delivery board entries to include Day 38 and Day 39 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
-        wins.append("Playbook publication contract + quality checklist is fully locked for execution.")
+        wins.append(
+            "Playbook publication contract + quality checklist is fully locked for execution."
+        )
     else:
-        misses.append("Playbook contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 39 playbook contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Playbook contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 39 playbook contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
         wins.append("Day 39 playbook post #1 is fully complete and ready for Day 40 scale lane.")
@@ -248,11 +332,19 @@ def build_day39_playbook_post_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day38_summary": str(day38_summary.relative_to(root)) if day38_summary.exists() else str(day38_summary),
-            "day38_delivery_board": str(day38_board.relative_to(root)) if day38_board.exists() else str(day38_board),
+            "day38_summary": str(day38_summary.relative_to(root))
+            if day38_summary.exists()
+            else str(day38_summary),
+            "day38_delivery_board": str(day38_board.relative_to(root))
+            if day38_board.exists()
+            else str(day38_board),
         },
         "checks": checks,
-        "rollup": {"day38_activation_score": day38_score, "day38_checks": day38_check_count, "day38_delivery_board_items": board_count},
+        "rollup": {
+            "day38_activation_score": day38_score,
+            "day38_checks": day38_check_count,
+            "day38_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -299,7 +391,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -337,9 +431,24 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
             {
                 "generated_for": "day39-playbook-post",
                 "metrics": [
-                    {"name": "playbook_read_completion", "baseline": 41.2, "current": 44.4, "delta_pct": 7.77},
-                    {"name": "docs_to_command_adoption", "baseline": 18.6, "current": 20.0, "delta_pct": 7.53},
-                    {"name": "operator_feedback_positive", "baseline": 72.0, "current": 76.0, "delta_pct": 5.56},
+                    {
+                        "name": "playbook_read_completion",
+                        "baseline": 41.2,
+                        "current": 44.4,
+                        "delta_pct": 7.77,
+                    },
+                    {
+                        "name": "docs_to_command_adoption",
+                        "baseline": 18.6,
+                        "current": 20.0,
+                        "delta_pct": 7.53,
+                    },
+                    {
+                        "name": "operator_feedback_positive",
+                        "baseline": 72.0,
+                        "current": 76.0,
+                        "delta_pct": 5.56,
+                    },
                 ],
             },
             indent=2,
@@ -353,8 +462,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] 2026-03-07: Execute rollout timeline and capture first KPI pulse.\n"
         "- [ ] 2026-03-08: Record misses, wins, and Day 40 scale priorities.\n",
     )
-    _write(target / "day39-delivery-board.md", "# Day 39 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day39-validation-commands.md", "# Day 39 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day39-delivery-board.md",
+        "# Day 39 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day39-validation-commands.md",
+        "# Day 39 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -362,8 +477,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day39-playbook-post-execution",
         "total_commands": len(logs),
@@ -401,7 +525,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day39-playbook-post-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day39-playbook-post-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -412,11 +540,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

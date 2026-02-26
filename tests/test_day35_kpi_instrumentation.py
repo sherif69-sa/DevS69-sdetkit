@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 36 — Demo asset #3:** produce/publish `security gate` workflow short video or GIF.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day35-kpi-instrumentation.md").write_text(d35._DAY35_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day35-kpi-instrumentation.md").write_text(
+        d35._DAY35_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-35-big-upgrade-report.md").write_text("# Day 35 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json"

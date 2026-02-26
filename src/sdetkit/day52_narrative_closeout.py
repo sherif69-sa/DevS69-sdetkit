@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day52-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY51_SUMMARY_PATH = "docs/artifacts/day51-case-snippet-closeout-pack/day51-case-snippet-closeout-summary.json"
+_DAY51_SUMMARY_PATH = (
+    "docs/artifacts/day51-case-snippet-closeout-pack/day51-case-snippet-closeout-summary.json"
+)
 _DAY51_BOARD_PATH = "docs/artifacts/day51-case-snippet-closeout-pack/day51-delivery-board.md"
 _SECTION_HEADER = "# Day 52 — Narrative closeout lane"
 _REQUIRED_SECTIONS = [
@@ -129,8 +131,10 @@ def _load_day51(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
-    summary = data.get("summary") if isinstance(data.get("summary"), dict) else {}
-    checks = data.get("checks") if isinstance(data.get("checks"), list) else []
+    summary_obj = data.get("summary")
+    summary = summary_obj if isinstance(summary_obj, dict) else {}
+    checks_obj = data.get("checks")
+    checks = checks_obj if isinstance(checks_obj, list) else []
     score = float(summary.get("activation_score", 0.0))
     strict = bool(summary.get("strict_pass", False))
     check_count = len(checks)
@@ -159,9 +163,13 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(page_path)
     top10_text = _read(root / top10_path)
 
-    missing_sections = [item for item in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if item not in page_text]
+    missing_sections = [
+        item for item in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if item not in page_text
+    ]
     missing_commands = _contains_all_lines(page_text, _REQUIRED_COMMANDS)
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -171,35 +179,101 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     board_count, board_has_day51, board_has_day52 = _board_stats(day51_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day52_link", "weight": 8, "passed": "docs/integrations-day52-narrative-closeout.md" in readme_text, "evidence": "docs/integrations-day52-narrative-closeout.md"},
-        {"check_id": "readme_day52_command", "weight": 4, "passed": "day52-narrative-closeout" in readme_text, "evidence": "day52-narrative-closeout"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day52_link",
+            "weight": 8,
+            "passed": "docs/integrations-day52-narrative-closeout.md" in readme_text,
+            "evidence": "docs/integrations-day52-narrative-closeout.md",
+        },
+        {
+            "check_id": "readme_day52_command",
+            "weight": 4,
+            "passed": "day52-narrative-closeout" in readme_text,
+            "evidence": "day52-narrative-closeout",
+        },
         {
             "check_id": "docs_index_day52_links",
             "weight": 8,
-            "passed": ("day-52-big-upgrade-report.md" in docs_index_text and "integrations-day52-narrative-closeout.md" in docs_index_text),
+            "passed": (
+                "day-52-big-upgrade-report.md" in docs_index_text
+                and "integrations-day52-narrative-closeout.md" in docs_index_text
+            ),
             "evidence": "day-52-big-upgrade-report.md + integrations-day52-narrative-closeout.md",
         },
-        {"check_id": "top10_day52_alignment", "weight": 5, "passed": ("Day 52" in top10_text and "Day 53" in top10_text), "evidence": "Day 52 + Day 53 strategy chain"},
-        {"check_id": "day51_summary_present", "weight": 10, "passed": day51_summary.exists(), "evidence": str(day51_summary)},
-        {"check_id": "day51_delivery_board_present", "weight": 8, "passed": day51_board.exists(), "evidence": str(day51_board)},
+        {
+            "check_id": "top10_day52_alignment",
+            "weight": 5,
+            "passed": ("Day 52" in top10_text and "Day 53" in top10_text),
+            "evidence": "Day 52 + Day 53 strategy chain",
+        },
+        {
+            "check_id": "day51_summary_present",
+            "weight": 10,
+            "passed": day51_summary.exists(),
+            "evidence": str(day51_summary),
+        },
+        {
+            "check_id": "day51_delivery_board_present",
+            "weight": 8,
+            "passed": day51_board.exists(),
+            "evidence": str(day51_board),
+        },
         {
             "check_id": "day51_quality_floor",
             "weight": 10,
             "passed": day51_strict and day51_score >= 95,
-            "evidence": {"day51_score": day51_score, "strict_pass": day51_strict, "day51_checks": day51_check_count},
+            "evidence": {
+                "day51_score": day51_score,
+                "strict_pass": day51_strict,
+                "day51_checks": day51_check_count,
+            },
         },
         {
             "check_id": "day51_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day51 and board_has_day52,
-            "evidence": {"board_items": board_count, "contains_day51": board_has_day51, "contains_day52": board_has_day52},
+            "evidence": {
+                "board_items": board_count,
+                "contains_day51": board_has_day51,
+                "contains_day52": board_has_day52,
+            },
         },
-        {"check_id": "narrative_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "narrative_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "narrative_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "narrative_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -218,22 +292,36 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append(f"Day 51 continuity is strict-pass with activation score={day51_score}.")
     else:
         misses.append("Day 51 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 51 case snippet closeout command and restore strict pass baseline before Day 52 lock.")
+        handoff_actions.append(
+            "Re-run Day 51 case snippet closeout command and restore strict pass baseline before Day 52 lock."
+        )
 
     if board_count >= 5 and board_has_day51 and board_has_day52:
-        wins.append(f"Day 51 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 51 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 51 delivery board integrity is incomplete (needs >=5 items and Day 51/52 anchors).")
-        handoff_actions.append("Repair Day 51 delivery board entries to include Day 51 and Day 52 anchors.")
+        misses.append(
+            "Day 51 delivery board integrity is incomplete (needs >=5 items and Day 51/52 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 51 delivery board entries to include Day 51 and Day 52 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Narrative contract + quality checklist is fully locked for execution.")
     else:
-        misses.append("Narrative contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 52 narrative contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Narrative contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 52 narrative contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 52 narrative closeout lane is fully complete and ready for Day 53 execution lane.")
+        wins.append(
+            "Day 52 narrative closeout lane is fully complete and ready for Day 53 execution lane."
+        )
 
     return {
         "name": "day52-narrative-closeout",
@@ -242,11 +330,19 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day51_summary": str(day51_summary.relative_to(root)) if day51_summary.exists() else str(day51_summary),
-            "day51_delivery_board": str(day51_board.relative_to(root)) if day51_board.exists() else str(day51_board),
+            "day51_summary": str(day51_summary.relative_to(root))
+            if day51_summary.exists()
+            else str(day51_summary),
+            "day51_delivery_board": str(day51_board.relative_to(root))
+            if day51_board.exists()
+            else str(day51_board),
         },
         "checks": checks,
-        "rollup": {"day51_activation_score": day51_score, "day51_checks": day51_check_count, "day51_delivery_board_items": board_count},
+        "rollup": {
+            "day51_activation_score": day51_score,
+            "day51_checks": day51_check_count,
+            "day51_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -290,7 +386,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     _write(target / "day52-narrative-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "day52-narrative-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day52-narrative-brief.md", "# Day 52 Narrative Brief\n\n- Objective: close Day 52 with measurable release-storytelling discipline and proof-backed narrative gains.\n")
+    _write(
+        target / "day52-narrative-brief.md",
+        "# Day 52 Narrative Brief\n\n- Objective: close Day 52 with measurable release-storytelling discipline and proof-backed narrative gains.\n",
+    )
     _write(
         target / "day52-proof-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
@@ -301,16 +400,31 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         json.dumps(
             {
                 "kpis": [
-                    {"id": "strict_pass", "baseline": 1, "current": int(payload["summary"]["strict_pass"]), "delta": int(payload["summary"]["strict_pass"]) - 1, "confidence": "high"}
+                    {
+                        "id": "strict_pass",
+                        "baseline": 1,
+                        "current": int(payload["summary"]["strict_pass"]),
+                        "delta": int(payload["summary"]["strict_pass"]) - 1,
+                        "confidence": "high",
+                    }
                 ]
             },
             indent=2,
         )
         + "\n",
     )
-    _write(target / "day52-execution-log.md", "# Day 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and Day 53 expansion priorities.\n")
-    _write(target / "day52-delivery-board.md", "# Day 52 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day52-validation-commands.md", "# Day 52 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day52-execution-log.md",
+        "# Day 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and Day 53 expansion priorities.\n",
+    )
+    _write(
+        target / "day52-delivery-board.md",
+        "# Day 52 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day52-validation-commands.md",
+        "# Day 52 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -318,11 +432,21 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     evidence_path.mkdir(parents=True, exist_ok=True)
     events: list[dict[str, Any]] = []
     for index, command in enumerate(_EXECUTION_COMMANDS, start=1):
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        event = {"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr}
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        event = {
+            "command": command,
+            "returncode": proc.returncode,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+        }
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(evidence_path / "day52-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        evidence_path / "day52-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -351,7 +475,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day52-narrative-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day52-narrative-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     if ns.format == "json":

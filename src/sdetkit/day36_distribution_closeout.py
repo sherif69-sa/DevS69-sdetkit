@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day36-distribution-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY35_SUMMARY_PATH = "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+_DAY35_SUMMARY_PATH = (
+    "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+)
 _DAY35_BOARD_PATH = "docs/artifacts/day35-kpi-instrumentation-pack/day35-delivery-board.md"
 _SECTION_HEADER = "# Day 36 — Community distribution closeout"
 _REQUIRED_SECTIONS = [
@@ -167,7 +169,9 @@ def build_day36_distribution_closeout_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,7 +181,12 @@ def build_day36_distribution_closeout_summary(
     board_count, board_has_day36, board_has_day37 = _board_stats(day35_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
         {
             "check_id": "required_sections_present",
             "weight": 10,
@@ -285,22 +294,36 @@ def build_day36_distribution_closeout_summary(
         wins.append(f"Day 35 continuity is strict-pass with activation score={day35_score}.")
     else:
         misses.append("Day 35 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 35 KPI instrumentation command and restore strict pass baseline before Day 36 lock.")
+        handoff_actions.append(
+            "Re-run Day 35 KPI instrumentation command and restore strict pass baseline before Day 36 lock."
+        )
 
     if board_count >= 5 and board_has_day36 and board_has_day37:
-        wins.append(f"Day 35 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 35 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 35 delivery board integrity is incomplete (needs >=5 items and Day 36/37 anchors).")
-        handoff_actions.append("Repair Day 35 delivery board entries to include Day 36 and Day 37 anchors.")
+        misses.append(
+            "Day 35 delivery board integrity is incomplete (needs >=5 items and Day 36/37 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 35 delivery board entries to include Day 36 and Day 37 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Distribution contract + quality checklist is fully locked for execution.")
     else:
-        misses.append("Distribution contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 36 distribution contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Distribution contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 36 distribution contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 36 community distribution closeout is fully complete and ready for Day 37 experiment execution.")
+        wins.append(
+            "Day 36 community distribution closeout is fully complete and ready for Day 37 experiment execution."
+        )
 
     return {
         "name": "day36-distribution-closeout",
@@ -309,8 +332,12 @@ def build_day36_distribution_closeout_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day35_summary": str(day35_summary.relative_to(root)) if day35_summary.exists() else str(day35_summary),
-            "day35_delivery_board": str(day35_board.relative_to(root)) if day35_board.exists() else str(day35_board),
+            "day35_summary": str(day35_summary.relative_to(root))
+            if day35_summary.exists()
+            else str(day35_summary),
+            "day35_delivery_board": str(day35_board.relative_to(root))
+            if day35_board.exists()
+            else str(day35_board),
         },
         "checks": checks,
         "rollup": {
@@ -364,7 +391,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -376,7 +405,9 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day36-distribution-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(
+        target / "day36-distribution-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+    )
     _write(target / "day36-distribution-closeout-summary.md", _to_markdown(payload))
     _write(
         target / "day36-distribution-message-kit.md",
@@ -408,8 +439,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] Compare morning vs afternoon LinkedIn posting window for CTR lift.\n"
         "- [ ] Add short GIF teaser to newsletter block and track reply rate delta.\n",
     )
-    _write(target / "day36-delivery-board.md", "# Day 36 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day36-validation-commands.md", "# Day 36 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day36-delivery-board.md",
+        "# Day 36 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day36-validation-commands.md",
+        "# Day 36 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -417,8 +454,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day36-distribution-closeout-execution",
         "total_commands": len(logs),
@@ -456,7 +502,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day36-distribution-closeout-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day36-distribution-closeout-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -467,11 +517,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

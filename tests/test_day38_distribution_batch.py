@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 39 — Playbook post #1:** publish Repo Reliability Playbook article #1.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day38-distribution-batch.md").write_text(d38._DAY38_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day38-distribution-batch.md").write_text(
+        d38._DAY38_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-38-big-upgrade-report.md").write_text("# Day 38 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
@@ -93,7 +95,9 @@ def test_day38_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day38_strict_fails_when_day37_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json").unlink()
+    (
+        tmp_path / "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
+    ).unlink()
     rc = d38.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

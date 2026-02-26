@@ -167,7 +167,9 @@ def build_day40_scale_lane_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,35 +179,101 @@ def build_day40_scale_lane_summary(
     board_count, board_has_day39, board_has_day40 = _board_stats(day39_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
-        {"check_id": "required_sections_present", "weight": 10, "passed": not missing_sections, "evidence": {"missing_sections": missing_sections}},
-        {"check_id": "required_commands_present", "weight": 10, "passed": not missing_commands, "evidence": {"missing_commands": missing_commands}},
-        {"check_id": "readme_day40_link", "weight": 8, "passed": "docs/integrations-day40-scale-lane.md" in readme_text, "evidence": "docs/integrations-day40-scale-lane.md"},
-        {"check_id": "readme_day40_command", "weight": 4, "passed": "day40-scale-lane" in readme_text, "evidence": "day40-scale-lane"},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
+        {
+            "check_id": "required_sections_present",
+            "weight": 10,
+            "passed": not missing_sections,
+            "evidence": {"missing_sections": missing_sections},
+        },
+        {
+            "check_id": "required_commands_present",
+            "weight": 10,
+            "passed": not missing_commands,
+            "evidence": {"missing_commands": missing_commands},
+        },
+        {
+            "check_id": "readme_day40_link",
+            "weight": 8,
+            "passed": "docs/integrations-day40-scale-lane.md" in readme_text,
+            "evidence": "docs/integrations-day40-scale-lane.md",
+        },
+        {
+            "check_id": "readme_day40_command",
+            "weight": 4,
+            "passed": "day40-scale-lane" in readme_text,
+            "evidence": "day40-scale-lane",
+        },
         {
             "check_id": "docs_index_day40_links",
             "weight": 8,
-            "passed": ("day-40-big-upgrade-report.md" in docs_index_text and "integrations-day40-scale-lane.md" in docs_index_text),
+            "passed": (
+                "day-40-big-upgrade-report.md" in docs_index_text
+                and "integrations-day40-scale-lane.md" in docs_index_text
+            ),
             "evidence": "day-40-big-upgrade-report.md + integrations-day40-scale-lane.md",
         },
-        {"check_id": "top10_day40_alignment", "weight": 5, "passed": ("Day 40" in top10_text and "Day 41" in top10_text), "evidence": "Day 40 + Day 41 strategy chain"},
-        {"check_id": "day39_summary_present", "weight": 10, "passed": day39_summary.exists(), "evidence": str(day39_summary)},
-        {"check_id": "day39_delivery_board_present", "weight": 8, "passed": day39_board.exists(), "evidence": str(day39_board)},
+        {
+            "check_id": "top10_day40_alignment",
+            "weight": 5,
+            "passed": ("Day 40" in top10_text and "Day 41" in top10_text),
+            "evidence": "Day 40 + Day 41 strategy chain",
+        },
+        {
+            "check_id": "day39_summary_present",
+            "weight": 10,
+            "passed": day39_summary.exists(),
+            "evidence": str(day39_summary),
+        },
+        {
+            "check_id": "day39_delivery_board_present",
+            "weight": 8,
+            "passed": day39_board.exists(),
+            "evidence": str(day39_board),
+        },
         {
             "check_id": "day39_quality_floor",
             "weight": 10,
             "passed": day39_strict and day39_score >= 95,
-            "evidence": {"day39_score": day39_score, "strict_pass": day39_strict, "day39_checks": day39_check_count},
+            "evidence": {
+                "day39_score": day39_score,
+                "strict_pass": day39_strict,
+                "day39_checks": day39_check_count,
+            },
         },
         {
             "check_id": "day39_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day39 and board_has_day40,
-            "evidence": {"board_items": board_count, "contains_day39": board_has_day39, "contains_day40": board_has_day40},
+            "evidence": {
+                "board_items": board_count,
+                "contains_day39": board_has_day39,
+                "contains_day40": board_has_day40,
+            },
         },
-        {"check_id": "playbook_contract_locked", "weight": 5, "passed": not missing_contract_lines, "evidence": {"missing_contract_lines": missing_contract_lines}},
-        {"check_id": "playbook_quality_checklist_locked", "weight": 3, "passed": not missing_quality_lines, "evidence": {"missing_quality_items": missing_quality_lines}},
-        {"check_id": "delivery_board_locked", "weight": 2, "passed": not missing_board_items, "evidence": {"missing_board_items": missing_board_items}},
+        {
+            "check_id": "playbook_contract_locked",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": {"missing_contract_lines": missing_contract_lines},
+        },
+        {
+            "check_id": "playbook_quality_checklist_locked",
+            "weight": 3,
+            "passed": not missing_quality_lines,
+            "evidence": {"missing_quality_items": missing_quality_lines},
+        },
+        {
+            "check_id": "delivery_board_locked",
+            "weight": 2,
+            "passed": not missing_board_items,
+            "evidence": {"missing_board_items": missing_board_items},
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -224,19 +292,31 @@ def build_day40_scale_lane_summary(
         wins.append(f"Day 39 continuity is strict-pass with activation score={day39_score}.")
     else:
         misses.append("Day 39 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 39 scale lane command and restore strict pass baseline before Day 40 lock.")
+        handoff_actions.append(
+            "Re-run Day 39 scale lane command and restore strict pass baseline before Day 40 lock."
+        )
 
     if board_count >= 5 and board_has_day39 and board_has_day40:
-        wins.append(f"Day 39 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 39 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 39 delivery board integrity is incomplete (needs >=5 items and Day 39/40 anchors).")
-        handoff_actions.append("Repair Day 39 delivery board entries to include Day 39 and Day 40 anchors.")
+        misses.append(
+            "Day 39 delivery board integrity is incomplete (needs >=5 items and Day 39/40 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 39 delivery board entries to include Day 39 and Day 40 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Scale execution contract + quality checklist is fully locked for execution.")
     else:
-        misses.append("Playbook contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 40 scale contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Playbook contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 40 scale contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
         wins.append("Day 40 scale lane #1 is fully complete and ready for Day 41 expansion lane.")
@@ -248,11 +328,19 @@ def build_day40_scale_lane_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day39_summary": str(day39_summary.relative_to(root)) if day39_summary.exists() else str(day39_summary),
-            "day39_delivery_board": str(day39_board.relative_to(root)) if day39_board.exists() else str(day39_board),
+            "day39_summary": str(day39_summary.relative_to(root))
+            if day39_summary.exists()
+            else str(day39_summary),
+            "day39_delivery_board": str(day39_board.relative_to(root))
+            if day39_board.exists()
+            else str(day39_board),
         },
         "checks": checks,
-        "rollup": {"day39_activation_score": day39_score, "day39_checks": day39_check_count, "day39_delivery_board_items": board_count},
+        "rollup": {
+            "day39_activation_score": day39_score,
+            "day39_checks": day39_check_count,
+            "day39_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -299,7 +387,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -337,9 +427,24 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
             {
                 "generated_for": "day40-scale-lane",
                 "metrics": [
-                    {"name": "playbook_read_completion", "baseline": 41.2, "current": 44.4, "delta_pct": 7.77},
-                    {"name": "docs_to_command_adoption", "baseline": 18.6, "current": 20.0, "delta_pct": 7.53},
-                    {"name": "operator_feedback_positive", "baseline": 72.0, "current": 76.0, "delta_pct": 5.56},
+                    {
+                        "name": "playbook_read_completion",
+                        "baseline": 41.2,
+                        "current": 44.4,
+                        "delta_pct": 7.77,
+                    },
+                    {
+                        "name": "docs_to_command_adoption",
+                        "baseline": 18.6,
+                        "current": 20.0,
+                        "delta_pct": 7.53,
+                    },
+                    {
+                        "name": "operator_feedback_positive",
+                        "baseline": 72.0,
+                        "current": 76.0,
+                        "delta_pct": 5.56,
+                    },
                 ],
             },
             indent=2,
@@ -353,8 +458,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] 2026-03-07: Execute rollout timeline and capture first KPI pulse.\n"
         "- [ ] 2026-03-08: Record misses, wins, and Day 40 scale priorities.\n",
     )
-    _write(target / "day40-delivery-board.md", "# Day 40 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day40-validation-commands.md", "# Day 40 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day40-delivery-board.md",
+        "# Day 40 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day40-validation-commands.md",
+        "# Day 40 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -362,8 +473,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day40-scale-lane-execution",
         "total_commands": len(logs),
@@ -401,7 +521,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day40-scale-lane-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day40-scale-lane-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -412,11 +536,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

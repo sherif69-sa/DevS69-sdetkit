@@ -22,13 +22,29 @@ def _seed_repo(root: Path) -> None:
         "- **Day 57 — KPI deep audit:** validate strict trendlines and blockers.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day56-stabilization-closeout.md").write_text(d56._DAY56_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day56-stabilization-closeout.md").write_text(
+        d56._DAY56_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-56-big-upgrade-report.md").write_text("# Day 56 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
-    summary.write_text(json.dumps({"summary": {"activation_score": 100, "strict_pass": True}, "checks": [{"passed": True}]}, indent=2), encoding="utf-8")
-    board = root / "docs/artifacts/day55-contributor-activation-closeout-pack/day55-delivery-board.md"
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 100, "strict_pass": True},
+                "checks": [{"passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    board = (
+        root / "docs/artifacts/day55-contributor-activation-closeout-pack/day55-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -56,7 +72,20 @@ def test_day56_json(tmp_path: Path, capsys) -> None:
 
 def test_day56_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    rc = d56.main(["--root", str(tmp_path), "--emit-pack-dir", "artifacts/day56-pack", "--execute", "--evidence-dir", "artifacts/day56-pack/evidence", "--format", "json", "--strict"])
+    rc = d56.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/day56-pack",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/day56-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
     assert rc == 0
     assert (tmp_path / "artifacts/day56-pack/day56-stabilization-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day56-pack/day56-stabilization-closeout-summary.md").exists()
@@ -71,7 +100,10 @@ def test_day56_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day56_strict_fails_without_day55(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json"
+    ).unlink()
     assert d56.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 

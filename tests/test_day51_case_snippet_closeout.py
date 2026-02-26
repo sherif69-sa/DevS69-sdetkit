@@ -22,10 +22,15 @@ def _seed_repo(root: Path) -> None:
         "- **Day 52 — Case snippet #2:** publish mini-case on security/ops workflow value.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day51-case-snippet-closeout.md").write_text(d51._DAY51_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day51-case-snippet-closeout.md").write_text(
+        d51._DAY51_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-51-big-upgrade-report.md").write_text("# Day 51 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -37,7 +42,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md"
+    board = (
+        root / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -93,7 +100,10 @@ def test_day51_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day51_strict_fails_when_day50_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+    ).unlink()
     rc = d51.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

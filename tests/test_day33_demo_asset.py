@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 34 — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day33-demo-asset.md").write_text(d33._DAY33_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day33-demo-asset.md").write_text(
+        d33._DAY33_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-33-ultra-upgrade-report.md").write_text("# Day 33 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
@@ -91,7 +93,9 @@ def test_day33_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day33_strict_fails_when_day32_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json").unlink()
+    (
+        tmp_path / "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
+    ).unlink()
     rc = d33.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

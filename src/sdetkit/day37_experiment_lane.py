@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day37-experiment-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY36_SUMMARY_PATH = "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
+_DAY36_SUMMARY_PATH = (
+    "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
+)
 _DAY36_BOARD_PATH = "docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md"
 _SECTION_HEADER = "# Day 37 — Experiment lane activation"
 _REQUIRED_SECTIONS = [
@@ -167,7 +169,9 @@ def build_day37_experiment_lane_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,7 +181,12 @@ def build_day37_experiment_lane_summary(
     board_count, board_has_day36, board_has_day37 = _board_stats(day36_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
         {
             "check_id": "required_sections_present",
             "weight": 10,
@@ -205,7 +214,10 @@ def build_day37_experiment_lane_summary(
         {
             "check_id": "docs_index_day37_links",
             "weight": 8,
-            "passed": ("day-37-big-upgrade-report.md" in docs_index_text and "integrations-day37-experiment-lane.md" in docs_index_text),
+            "passed": (
+                "day-37-big-upgrade-report.md" in docs_index_text
+                and "integrations-day37-experiment-lane.md" in docs_index_text
+            ),
             "evidence": "day-37-big-upgrade-report.md + integrations-day37-experiment-lane.md",
         },
         {
@@ -282,22 +294,36 @@ def build_day37_experiment_lane_summary(
         wins.append(f"Day 36 continuity is strict-pass with activation score={day36_score}.")
     else:
         misses.append("Day 36 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 36 distribution closeout command and restore strict pass baseline before Day 37 lock.")
+        handoff_actions.append(
+            "Re-run Day 36 distribution closeout command and restore strict pass baseline before Day 37 lock."
+        )
 
     if board_count >= 5 and board_has_day36 and board_has_day37:
-        wins.append(f"Day 36 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 36 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 36 delivery board integrity is incomplete (needs >=5 items and Day 36/37 anchors).")
-        handoff_actions.append("Repair Day 36 delivery board entries to include Day 36 and Day 37 anchors.")
+        misses.append(
+            "Day 36 delivery board integrity is incomplete (needs >=5 items and Day 36/37 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 36 delivery board entries to include Day 36 and Day 37 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Experiment contract + quality checklist is fully locked for execution.")
     else:
-        misses.append("Experiment contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 37 experiment contract lines, quality checklist entries, and delivery board tasks in docs.")
+        misses.append(
+            "Experiment contract, quality checklist, or delivery board entries are missing."
+        )
+        handoff_actions.append(
+            "Complete all Day 37 experiment contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 37 experiment lane activation is fully complete and ready for Day 38 distribution batch #1.")
+        wins.append(
+            "Day 37 experiment lane activation is fully complete and ready for Day 38 distribution batch #1."
+        )
 
     return {
         "name": "day37-experiment-lane",
@@ -306,8 +332,12 @@ def build_day37_experiment_lane_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day36_summary": str(day36_summary.relative_to(root)) if day36_summary.exists() else str(day36_summary),
-            "day36_delivery_board": str(day36_board.relative_to(root)) if day36_board.exists() else str(day36_board),
+            "day36_summary": str(day36_summary.relative_to(root))
+            if day36_summary.exists()
+            else str(day36_summary),
+            "day36_delivery_board": str(day36_board.relative_to(root))
+            if day36_board.exists()
+            else str(day36_board),
         },
         "checks": checks,
         "rollup": {
@@ -361,7 +391,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -436,8 +468,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] 2026-03-01: Pause losing variant(s) and record fallback plan.\n"
         "- [ ] 2026-03-02: Publish day37 closeout summary with Day 38 rollout checklist.\n",
     )
-    _write(target / "day37-delivery-board.md", "# Day 37 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day37-validation-commands.md", "# Day 37 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day37-delivery-board.md",
+        "# Day 37 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day37-validation-commands.md",
+        "# Day 37 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -445,8 +483,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day37-experiment-lane-execution",
         "total_commands": len(logs),
@@ -484,7 +531,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day37-experiment-lane-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day37-experiment-lane-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -495,11 +546,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 

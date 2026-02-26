@@ -22,7 +22,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 35 — KPI instrumentation:** tighten signal loops and close attribution gaps.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day34-demo-asset2.md").write_text(d34._DAY34_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day34-demo-asset2.md").write_text(
+        d34._DAY34_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-34-ultra-upgrade-report.md").write_text("# Day 34 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json"

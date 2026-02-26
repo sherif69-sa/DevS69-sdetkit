@@ -8,7 +8,9 @@ from sdetkit import day50_execution_prioritization_closeout as d50
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 50 execution prioritization closeout contract.")
+    parser = argparse.ArgumentParser(
+        description="Validate Day 50 execution prioritization closeout contract."
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -42,7 +44,10 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        evidence = root / "docs/artifacts/day50-execution-prioritization-closeout-pack/evidence/day50-execution-summary.json"
+        evidence = (
+            root
+            / "docs/artifacts/day50-execution-prioritization-closeout-pack/evidence/day50-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:

@@ -22,10 +22,15 @@ def _seed_repo(root: Path) -> None:
         "- **Day 45 — Expansion lane continuation:** convert Day 44 scale wins into expansion plays.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day44-scale-closeout.md").write_text(d44._DAY44_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day44-scale-closeout.md").write_text(
+        d44._DAY44_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-44-big-upgrade-report.md").write_text("# Day 44 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -93,7 +98,10 @@ def test_day44_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day44_strict_fails_when_day43_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json"
+    ).unlink()
     rc = d44.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

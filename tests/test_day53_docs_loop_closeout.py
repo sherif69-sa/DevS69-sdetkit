@@ -22,10 +22,14 @@ def _seed_repo(root: Path) -> None:
         "- **Day 53 — Docs loop optimization:** publish mini-case on security/ops workflow value.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day53-docs-loop-closeout.md").write_text(d53._DAY53_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day53-docs-loop-closeout.md").write_text(
+        d53._DAY53_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-53-big-upgrade-report.md").write_text("# Day 53 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+    summary = (
+        root / "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -93,7 +97,10 @@ def test_day53_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day53_strict_fails_when_day52_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+    ).unlink()
     rc = d53.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

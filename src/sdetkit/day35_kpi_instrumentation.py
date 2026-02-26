@@ -167,7 +167,9 @@ def build_day35_kpi_instrumentation_summary(
 
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
-    missing_contract_lines = _contains_all_lines(page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES])
+    missing_contract_lines = _contains_all_lines(
+        page_text, [f"- {line}" for line in _REQUIRED_CONTRACT_LINES]
+    )
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
@@ -177,7 +179,12 @@ def build_day35_kpi_instrumentation_summary(
     board_count, board_has_day35, board_has_day36 = _board_stats(day34_board)
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "docs_page_exists", "weight": 10, "passed": page_path.exists(), "evidence": str(page_path)},
+        {
+            "check_id": "docs_page_exists",
+            "weight": 10,
+            "passed": page_path.exists(),
+            "evidence": str(page_path),
+        },
         {
             "check_id": "required_sections_present",
             "weight": 10,
@@ -285,22 +292,36 @@ def build_day35_kpi_instrumentation_summary(
         wins.append(f"Day 34 continuity is strict-pass with activation score={day34_score}.")
     else:
         misses.append("Day 34 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 34 demo asset #2 command and restore strict pass baseline before Day 35 lock.")
+        handoff_actions.append(
+            "Re-run Day 34 demo asset #2 command and restore strict pass baseline before Day 35 lock."
+        )
 
     if board_count >= 5 and board_has_day35 and board_has_day36:
-        wins.append(f"Day 34 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 34 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 34 delivery board integrity is incomplete (needs >=5 items and Day 35/36 anchors).")
-        handoff_actions.append("Repair Day 34 delivery board entries to include Day 35 and Day 36 anchors.")
+        misses.append(
+            "Day 34 delivery board integrity is incomplete (needs >=5 items and Day 35/36 anchors)."
+        )
+        handoff_actions.append(
+            "Repair Day 34 delivery board entries to include Day 35 and Day 36 anchors."
+        )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
-        wins.append("KPI instrumentation contract + quality checklist is fully locked for execution.")
+        wins.append(
+            "KPI instrumentation contract + quality checklist is fully locked for execution."
+        )
     else:
         misses.append("KPI contract, quality checklist, or delivery board entries are missing.")
-        handoff_actions.append("Complete all Day 35 KPI contract lines, quality checklist entries, and delivery board tasks in docs.")
+        handoff_actions.append(
+            "Complete all Day 35 KPI contract lines, quality checklist entries, and delivery board tasks in docs."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 35 KPI instrumentation closeout is fully complete and ready for Day 36 distribution execution.")
+        wins.append(
+            "Day 35 KPI instrumentation closeout is fully complete and ready for Day 36 distribution execution."
+        )
 
     return {
         "name": "day35-kpi-instrumentation",
@@ -309,8 +330,12 @@ def build_day35_kpi_instrumentation_summary(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day34_summary": str(day34_summary.relative_to(root)) if day34_summary.exists() else str(day34_summary),
-            "day34_delivery_board": str(day34_board.relative_to(root)) if day34_board.exists() else str(day34_board),
+            "day34_summary": str(day34_summary.relative_to(root))
+            if day34_summary.exists()
+            else str(day34_summary),
+            "day34_delivery_board": str(day34_board.relative_to(root))
+            if day34_board.exists()
+            else str(day34_board),
         },
         "checks": checks,
         "rollup": {
@@ -364,7 +389,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
     lines.append("\n## Misses")
     lines.extend(f"- {item}" for item in payload["misses"] or ["No misses recorded."])
     lines.append("\n## Handoff actions")
-    lines.extend(f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."])
+    lines.extend(
+        f"- [ ] {item}" for item in payload["handoff_actions"] or ["No handoff actions required."]
+    )
     return "\n".join(lines) + "\n"
 
 
@@ -397,8 +424,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- `ci_flake_rate > 3%` on daily sweep -> block release tagging until flaky tests triaged.\n"
         "- `discussion_reply_time_hours > 24` for 3+ threads -> trigger backup reviewer support shift.\n",
     )
-    _write(target / "day35-delivery-board.md", "# Day 35 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n")
-    _write(target / "day35-validation-commands.md", "# Day 35 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n")
+    _write(
+        target / "day35-delivery-board.md",
+        "# Day 35 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
+        target / "day35-validation-commands.md",
+        "# Day 35 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+    )
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -406,8 +439,17 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     logs: list[dict[str, Any]] = []
     for command in _EXECUTION_COMMANDS:
-        proc = subprocess.run(shlex.split(command), cwd=root, text=True, capture_output=True, check=False)
-        logs.append({"command": command, "returncode": proc.returncode, "stdout": proc.stdout, "stderr": proc.stderr})
+        proc = subprocess.run(
+            shlex.split(command), cwd=root, text=True, capture_output=True, check=False
+        )
+        logs.append(
+            {
+                "command": command,
+                "returncode": proc.returncode,
+                "stdout": proc.stdout,
+                "stderr": proc.stderr,
+            }
+        )
     summary = {
         "name": "day35-kpi-instrumentation-execution",
         "total_commands": len(logs),
@@ -445,7 +487,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
     if ns.execute:
-        ev_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day35-kpi-instrumentation-pack/evidence")
+        ev_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day35-kpi-instrumentation-pack/evidence")
+        )
         _run_execution(root, ev_dir)
 
     if ns.format == "json":
@@ -456,11 +502,16 @@ def main(argv: list[str] | None = None) -> int:
         rendered = _to_text(payload)
 
     if ns.output:
-        _write((root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output), rendered)
+        _write(
+            (root / ns.output).resolve() if not Path(ns.output).is_absolute() else Path(ns.output),
+            rendered,
+        )
     else:
         print(rendered, end="")
 
-    if ns.strict and (payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]):
+    if ns.strict and (
+        payload["summary"]["failed_checks"] > 0 or payload["summary"]["critical_failures"]
+    ):
         return 1
     return 0
 
