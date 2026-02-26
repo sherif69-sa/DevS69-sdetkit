@@ -1458,3 +1458,12 @@ Day 42 upgraded pack artifacts include:
 - `day42-execution-log.md`
 - `day42-delivery-board.md`
 - `day42-validation-commands.md`
+
+### Day 43 — Acceleration closeout lane
+
+- Run `python -m sdetkit day43-acceleration-closeout --format json --strict` to validate Day 43 acceleration readiness.
+- Emit shareable Day 43 acceleration pack: `python -m sdetkit day43-acceleration-closeout --emit-pack-dir docs/artifacts/day43-acceleration-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day43-acceleration-closeout --execute --evidence-dir docs/artifacts/day43-acceleration-closeout-pack/evidence --format json --strict`.
+- Review Day 43 integration guide: [Acceleration closeout lane](docs/integrations-day43-acceleration-closeout.md).
+
+See implementation details: [Day 43 big upgrade report](docs/day-43-big-upgrade-report.md).
