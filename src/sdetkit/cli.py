@@ -32,6 +32,7 @@ from . import (
     day48_objection_closeout,
     day49_weekly_review_closeout,
     day50_execution_prioritization_closeout,
+    day51_case_snippet_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -219,6 +220,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return day49_weekly_review_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day50-execution-prioritization-closeout":
         return day50_execution_prioritization_closeout.main(list(argv[1:]))
+    if argv and argv[0] == "day51-case-snippet-closeout":
+        return day51_case_snippet_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))

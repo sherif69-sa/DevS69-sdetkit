@@ -1,0 +1,2 @@
+stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag
+case-snippet-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-day51-case-snippet-closeout.md,python -m sdetkit day51-case-snippet-closeout --format json --strict,failed-checks:0,narrative-drift

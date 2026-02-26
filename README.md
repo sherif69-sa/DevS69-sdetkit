@@ -1531,3 +1531,12 @@ See implementation details: [Day 49 big upgrade report](docs/day-49-big-upgrade-
 
 See implementation details: [Day 50 big upgrade report](docs/day-50-big-upgrade-report.md).
 
+### Day 51 — Case snippet closeout lane
+
+- Run `python -m sdetkit day51-case-snippet-closeout --format json --strict` to validate Day 51 case snippet readiness.
+- Emit shareable Day 51 case snippet pack: `python -m sdetkit day51-case-snippet-closeout --emit-pack-dir docs/artifacts/day51-case-snippet-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day51-case-snippet-closeout --execute --evidence-dir docs/artifacts/day51-case-snippet-closeout-pack/evidence --format json --strict`.
+- Review Day 51 integration guide: [Case snippet closeout lane](docs/integrations-day51-case-snippet-closeout.md).
+
+See implementation details: [Day 51 big upgrade report](docs/day-51-big-upgrade-report.md).
+

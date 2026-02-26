@@ -605,3 +605,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day50-execution-prioritization-closeout --execute --evidence-dir docs/artifacts/day50-execution-prioritization-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 50 execution prioritization closeout lane](integrations-day50-execution-prioritization-closeout.md).
 
+
+## Day 51 case snippet closeout lane
+
+- Read the implementation report: [Day 51 big upgrade report](day-51-big-upgrade-report.md).
+- Run `python -m sdetkit day51-case-snippet-closeout --format json --strict` to score case snippet closeout readiness.
+- Emit Day 51 case snippet closeout pack: `python -m sdetkit day51-case-snippet-closeout --emit-pack-dir docs/artifacts/day51-case-snippet-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day51-case-snippet-closeout --execute --evidence-dir docs/artifacts/day51-case-snippet-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 51 case snippet closeout lane](integrations-day51-case-snippet-closeout.md).
+
