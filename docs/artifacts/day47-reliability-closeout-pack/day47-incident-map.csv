@@ -1,0 +1,2 @@
+stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag
+reliability-floor,qa-lead,platform-owner,2026-03-15T10:00:00Z,docs/integrations-day47-reliability-closeout.md,python -m sdetkit day47-reliability-closeout --format json --strict,failed-checks:0,reliability-drift

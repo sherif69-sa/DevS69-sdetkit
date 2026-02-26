@@ -1495,3 +1495,12 @@ See implementation details: [Day 45 big upgrade report](docs/day-45-big-upgrade-
 
 See implementation details: [Day 46 big upgrade report](docs/day-46-big-upgrade-report.md).
 
+### Day 47 — Reliability closeout lane
+
+- Run `python -m sdetkit day47-reliability-closeout --format json --strict` to validate Day 47 reliability readiness.
+- Emit shareable Day 47 reliability pack: `python -m sdetkit day47-reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day47-reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict`.
+- Review Day 47 integration guide: [Reliability closeout lane](docs/integrations-day47-reliability-closeout.md).
+
+See implementation details: [Day 47 big upgrade report](docs/day-47-big-upgrade-report.md).
+
