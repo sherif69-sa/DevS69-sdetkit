@@ -19,6 +19,7 @@ from . import (
     day35_kpi_instrumentation,
     day36_distribution_closeout,
     day37_experiment_lane,
+    day38_distribution_batch,
     demo,
     docs_navigation,
     docs_qa,
@@ -171,6 +172,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day37-experiment-lane":
         return day37_experiment_lane.main(list(argv[1:]))
 
+    if argv and argv[0] == "day38-distribution-batch":
+        return day38_distribution_batch.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -319,6 +323,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d37 = sub.add_parser("day37-experiment-lane")
     d37.add_argument("args", nargs=argparse.REMAINDER)
 
+    d38 = sub.add_parser("day38-distribution-batch")
+    d38.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -455,6 +462,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day37-experiment-lane":
         return day37_experiment_lane.main(ns.args)
+
+    if ns.cmd == "day38-distribution-batch":
+        return day38_distribution_batch.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

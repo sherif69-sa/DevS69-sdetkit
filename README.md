@@ -1218,6 +1218,37 @@ Day 37 upgraded pack artifacts include:
 - `day37-validation-commands.md`
 
 
+## 📣 Day 38 big upgrade: Distribution batch #1
+
+- Run `python -m sdetkit day38-distribution-batch --format json --strict` to validate Day 38 distribution batch readiness.
+- Emit shareable distribution batch pack: `python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict`.
+- Review Day 38 integration guide: [Distribution batch #1](docs/integrations-day38-distribution-batch.md).
+
+See implementation details: [Day 38 big upgrade report](docs/day-38-big-upgrade-report.md).
+
+Day 38 demo checks:
+
+```bash
+python -m pytest -q tests/test_day38_distribution_batch.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day38_distribution_batch_contract.py
+python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict
+python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict
+python -m sdetkit day38-distribution-batch --format json --strict
+```
+
+Day 38 upgraded pack artifacts include:
+
+- `day38-distribution-batch-summary.json`
+- `day38-distribution-batch-summary.md`
+- `day38-channel-plan.csv`
+- `day38-post-copy.md`
+- `day38-kpi-scorecard.json`
+- `day38-execution-log.md`
+- `day38-delivery-board.md`
+- `day38-validation-commands.md`
+
+
 ## ⚡ Quick start
 
 ```bash

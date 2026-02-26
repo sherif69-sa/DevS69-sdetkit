@@ -493,3 +493,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit upgraded experiment pack outputs (`summary`, `matrix`, `scorecard`, `decision log`): `python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict`.
 - Review integration guide: [Day 37 experiment lane activation](integrations-day37-experiment-lane.md).
 
+
+## Day 38 big upgrades (Distribution batch #1)
+
+- Read the implementation report: [Day 38 big upgrade report](day-38-big-upgrade-report.md).
+- Run `python -m sdetkit day38-distribution-batch --format json --strict` to score distribution batch readiness.
+- Emit Day 38 distribution batch pack: `python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict`.
+- Emit upgraded distribution pack outputs (`summary`, `channel plan`, `post copy`, `scorecard`): `python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`.
+- Review integration guide: [Day 38 distribution batch #1](integrations-day38-distribution-batch.md).

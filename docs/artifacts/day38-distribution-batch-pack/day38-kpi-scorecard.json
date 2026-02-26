@@ -1,0 +1,26 @@
+{
+  "generated_for": "day38-distribution-batch",
+  "channels": [
+    {
+      "channel": "github",
+      "kpi": "readme_to_command_ctr",
+      "baseline": 3.4,
+      "current": 3.6,
+      "delta_pct": 5.88
+    },
+    {
+      "channel": "linkedin",
+      "kpi": "docs_unique_visitors",
+      "baseline": 776,
+      "current": 825,
+      "delta_pct": 6.31
+    },
+    {
+      "channel": "newsletter",
+      "kpi": "reply_rate",
+      "baseline": 1.52,
+      "current": 1.61,
+      "delta_pct": 5.92
+    }
+  ]
+}

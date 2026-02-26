@@ -1,0 +1,135 @@
+{
+  "name": "day38-distribution-batch",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day38-distribution-batch.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day37_summary": "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json",
+    "day37_delivery_board": "docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day38-distribution-batch.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day38_link",
+      "weight": 8,
+      "passed": true,
+      "evidence": "docs/integrations-day38-distribution-batch.md"
+    },
+    {
+      "check_id": "readme_day38_command",
+      "weight": 4,
+      "passed": true,
+      "evidence": "day38-distribution-batch"
+    },
+    {
+      "check_id": "docs_index_day38_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-38-big-upgrade-report.md + integrations-day38-distribution-batch.md"
+    },
+    {
+      "check_id": "top10_day38_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 38 + Day 39 strategy chain"
+    },
+    {
+      "check_id": "day37_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
+    },
+    {
+      "check_id": "day37_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
+    },
+    {
+      "check_id": "day37_quality_floor",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "day37_score": 100.0,
+        "strict_pass": true,
+        "day37_checks": 14
+      }
+    },
+    {
+      "check_id": "day37_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day37": true,
+        "contains_day38": true
+      }
+    },
+    {
+      "check_id": "distribution_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_contract_lines": []
+      }
+    },
+    {
+      "check_id": "distribution_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day37_activation_score": 100.0,
+    "day37_checks": 14,
+    "day37_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 37 continuity is strict-pass with activation score=100.0.",
+    "Day 37 delivery board integrity validated with 5 checklist items.",
+    "Distribution contract + quality checklist is fully locked for execution.",
+    "Day 38 distribution batch #1 is fully complete and ready for Day 39 playbook post #1."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}
