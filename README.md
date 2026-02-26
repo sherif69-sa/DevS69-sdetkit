@@ -1558,3 +1558,13 @@ See implementation details: [Day 52 big upgrade report](docs/day-52-big-upgrade-
 
 See implementation details: [Day 53 big upgrade report](docs/day-53-big-upgrade-report.md).
 
+
+### Day 55 — Contributor activation closeout lane
+
+- Run `python -m sdetkit day55-contributor-activation-closeout --format json --strict` to validate Day 55 contributor activation readiness.
+- Emit shareable Day 55 contributor activation pack: `python -m sdetkit day55-contributor-activation-closeout --emit-pack-dir docs/artifacts/day55-contributor-activation-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day55-contributor-activation-closeout --execute --evidence-dir docs/artifacts/day55-contributor-activation-closeout-pack/evidence --format json --strict`.
+- Review Day 55 integration guide: [Contributor activation closeout lane](docs/integrations-day55-contributor-activation-closeout.md).
+
+See implementation details: [Day 55 big upgrade report](docs/day-55-big-upgrade-report.md).
+
