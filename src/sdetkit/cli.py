@@ -34,6 +34,7 @@ from . import (
     day50_execution_prioritization_closeout,
     day51_case_snippet_closeout,
     day52_narrative_closeout,
+    day53_docs_loop_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -225,6 +226,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return day51_case_snippet_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day52-narrative-closeout":
         return day52_narrative_closeout.main(list(argv[1:]))
+    if argv and argv[0] == "day53-docs-loop-closeout":
+        return day53_docs_loop_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
@@ -414,6 +417,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d52 = sub.add_parser("day52-narrative-closeout")
     d52.add_argument("args", nargs=argparse.REMAINDER)
 
+    d53 = sub.add_parser("day53-docs-loop-closeout")
+    d53.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -590,6 +596,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return day51_case_snippet_closeout.main(ns.args)
     if ns.cmd == "day52-narrative-closeout":
         return day52_narrative_closeout.main(ns.args)
+    if ns.cmd == "day53-docs-loop-closeout":
+        return day53_docs_loop_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

@@ -622,3 +622,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day52-narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 52 narrative closeout lane](integrations-day52-narrative-closeout.md).
 
+
+## Day 53 docs-loop optimization closeout lane
+
+- Read the implementation report: [Day 53 big upgrade report](day-53-big-upgrade-report.md).
+- Run `python -m sdetkit day53-docs-loop-closeout --format json --strict` to score docs-loop closeout readiness.
+- Emit Day 53 docs-loop closeout pack: `python -m sdetkit day53-docs-loop-closeout --emit-pack-dir docs/artifacts/day53-docs-loop-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day53-docs-loop-closeout --execute --evidence-dir docs/artifacts/day53-docs-loop-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 53 docs-loop optimization closeout lane](integrations-day53-docs-loop-closeout.md).
+
