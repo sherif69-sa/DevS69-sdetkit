@@ -640,3 +640,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day55-contributor-activation-closeout --execute --evidence-dir docs/artifacts/day55-contributor-activation-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 55 contributor activation closeout lane](integrations-day55-contributor-activation-closeout.md).
 
+
+## Day 56 stabilization closeout lane
+
+- Read the implementation report: [Day 56 big upgrade report](day-56-big-upgrade-report.md).
+- Run `python -m sdetkit day56-stabilization-closeout --format json --strict` to score stabilization closeout readiness.
+- Emit Day 56 stabilization closeout pack: `python -m sdetkit day56-stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day56-stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 56 stabilization closeout lane](integrations-day56-stabilization-closeout.md).
+

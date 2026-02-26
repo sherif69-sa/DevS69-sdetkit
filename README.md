@@ -1568,3 +1568,12 @@ See implementation details: [Day 53 big upgrade report](docs/day-53-big-upgrade-
 
 See implementation details: [Day 55 big upgrade report](docs/day-55-big-upgrade-report.md).
 
+### Day 56 — Stabilization closeout lane
+
+- Run `python -m sdetkit day56-stabilization-closeout --format json --strict` to validate Day 56 stabilization readiness.
+- Emit shareable Day 56 stabilization pack: `python -m sdetkit day56-stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day56-stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict`.
+- Review Day 56 integration guide: [Stabilization closeout lane](docs/integrations-day56-stabilization-closeout.md).
+
+See implementation details: [Day 56 big upgrade report](docs/day-56-big-upgrade-report.md).
+
