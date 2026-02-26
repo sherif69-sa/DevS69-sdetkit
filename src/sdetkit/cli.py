@@ -15,6 +15,7 @@ from . import (
     day31_phase2_kickoff,
     day32_release_cadence,
     day33_demo_asset,
+    day34_demo_asset2,
     demo,
     docs_navigation,
     docs_qa,
@@ -155,6 +156,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day33-demo-asset":
         return day33_demo_asset.main(list(argv[1:]))
 
+    if argv and argv[0] == "day34-demo-asset2":
+        return day34_demo_asset2.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -291,6 +295,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d33 = sub.add_parser("day33-demo-asset")
     d33.add_argument("args", nargs=argparse.REMAINDER)
 
+    d34 = sub.add_parser("day34-demo-asset2")
+    d34.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -415,6 +422,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day33-demo-asset":
         return day33_demo_asset.main(ns.args)
+
+    if ns.cmd == "day34-demo-asset2":
+        return day34_demo_asset2.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

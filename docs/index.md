@@ -451,3 +451,14 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit upgraded demo pack outputs (`summary`, `demo plan`, `script template`): `python -m sdetkit day33-demo-asset --emit-pack-dir docs/artifacts/day33-demo-asset-pack --format json --strict`.
 - Review integration guide: [Day 33 demo asset #1 production](integrations-day33-demo-asset.md).
 
+
+## Day 34 ultra upgrades (Demo asset #2 production)
+
+- Read the implementation report: [Day 34 ultra upgrade report](day-34-ultra-upgrade-report.md).
+- Run `python -m sdetkit day34-demo-asset2 --format json --strict` to score repo-audit demo-production readiness.
+- Emit Day 34 demo pack: `python -m sdetkit day34-demo-asset2 --emit-pack-dir docs/artifacts/day34-demo-asset2-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day34-demo-asset2 --execute --evidence-dir docs/artifacts/day34-demo-asset2-pack/evidence --format json --strict`.
+- Emit upgraded demo pack outputs (`summary`, `demo plan`, `script template`): `python -m sdetkit day34-demo-asset2 --emit-pack-dir docs/artifacts/day34-demo-asset2-pack --format json --strict`.
+- Review integration guide: [Day 34 demo asset #2 production](integrations-day34-demo-asset2.md).
+
+
