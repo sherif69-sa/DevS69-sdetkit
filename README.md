@@ -1595,3 +1595,12 @@ See implementation details: [Day 57 big upgrade report](docs/day-57-big-upgrade-
 
 See implementation details: [Day 58 big upgrade report](docs/day-58-big-upgrade-report.md).
 
+### Day 59 — Phase-3 pre-plan closeout lane
+
+- Run `python -m sdetkit day59-phase3-preplan-closeout --format json --strict` to validate Day 59 Phase-3 pre-plan readiness.
+- Emit shareable Day 59 Phase-3 pre-plan pack: `python -m sdetkit day59-phase3-preplan-closeout --emit-pack-dir docs/artifacts/day59-phase3-preplan-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day59-phase3-preplan-closeout --execute --evidence-dir docs/artifacts/day59-phase3-preplan-closeout-pack/evidence --format json --strict`.
+- Review Day 59 integration guide: [Phase-3 pre-plan closeout lane](docs/integrations-day59-phase3-preplan-closeout.md).
+
+See implementation details: [Day 59 big upgrade report](docs/day-59-big-upgrade-report.md).
+

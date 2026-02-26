@@ -39,6 +39,7 @@ from . import (
     day56_stabilization_closeout,
     day57_kpi_deep_audit_closeout,
     day58_phase2_hardening_closeout,
+    day59_phase3_preplan_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -244,6 +245,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day58-phase2-hardening-closeout":
         return day58_phase2_hardening_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day59-phase3-preplan-closeout":
+        return day59_phase3_preplan_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -444,6 +448,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d57 = sub.add_parser("day57-kpi-deep-audit-closeout")
     d57.add_argument("args", nargs=argparse.REMAINDER)
 
+    d59 = sub.add_parser("day59-phase3-preplan-closeout")
+    d59.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -630,6 +637,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day57-kpi-deep-audit-closeout":
         return day57_kpi_deep_audit_closeout.main(ns.args)
+
+    if ns.cmd == "day59-phase3-preplan-closeout":
+        return day59_phase3_preplan_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

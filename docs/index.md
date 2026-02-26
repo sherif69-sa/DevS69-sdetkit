@@ -667,4 +667,13 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day58-phase2-hardening-closeout --execute --evidence-dir docs/artifacts/day58-phase2-hardening-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 58 Phase-2 hardening closeout lane](integrations-day58-phase2-hardening-closeout.md).
 
+## Day 59 Phase-3 pre-plan closeout lane
+
+- Read the implementation report: [Day 59 big upgrade report](day-59-big-upgrade-report.md).
+- Run `python -m sdetkit day59-phase3-preplan-closeout --format json --strict` to score Phase-3 pre-plan closeout readiness.
+- Emit Day 59 Phase-3 pre-plan closeout pack: `python -m sdetkit day59-phase3-preplan-closeout --emit-pack-dir docs/artifacts/day59-phase3-preplan-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day59-phase3-preplan-closeout --execute --evidence-dir docs/artifacts/day59-phase3-preplan-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 59 Phase-3 pre-plan closeout lane](integrations-day59-phase3-preplan-closeout.md).
+
+
 
