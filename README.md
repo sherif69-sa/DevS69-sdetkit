@@ -1366,3 +1366,33 @@ Day 39 upgraded pack artifacts include:
 - `day39-execution-log.md`
 - `day39-delivery-board.md`
 - `day39-validation-commands.md`
+
+## 🚀 Day 40 big upgrade: Scale lane #1
+
+- Run `python -m sdetkit day40-scale-lane --format json --strict` to validate Day 40 scale lane readiness.
+- Emit shareable Day 40 scale pack: `python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict`.
+- Review Day 40 integration guide: [Scale lane #1](docs/integrations-day40-scale-lane.md).
+
+See implementation details: [Day 40 big upgrade report](docs/day-40-big-upgrade-report.md).
+
+Day 40 demo checks:
+
+```bash
+python -m pytest -q tests/test_day40_scale_lane.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day40_scale_lane_contract.py
+python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict
+python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict
+python -m sdetkit day40-scale-lane --format json --strict
+```
+
+Day 40 upgraded pack artifacts include:
+
+- `day40-scale-lane-summary.json`
+- `day40-scale-lane-summary.md`
+- `day40-scale-plan.md`
+- `day40-channel-matrix.csv`
+- `day40-scale-kpi-scorecard.json`
+- `day40-execution-log.md`
+- `day40-delivery-board.md`
+- `day40-validation-commands.md`

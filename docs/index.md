@@ -511,3 +511,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 39 playbook post pack: `python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict`.
 - Review integration guide: [Day 39 playbook post #1](integrations-day39-playbook-post.md).
+
+## Day 40 big upgrades (Scale lane #1)
+
+- Read the implementation report: [Day 40 big upgrade report](day-40-big-upgrade-report.md).
+- Run `python -m sdetkit day40-scale-lane --format json --strict` to score scale lane readiness.
+- Emit Day 40 scale lane pack: `python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict`.
+- Review integration guide: [Day 40 scale lane #1](integrations-day40-scale-lane.md).
