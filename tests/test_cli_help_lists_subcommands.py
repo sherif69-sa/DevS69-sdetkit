@@ -60,3 +60,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "day41-expansion-automation" in out
     assert "day42-optimization-closeout" in out
     assert "day43-acceleration-closeout" in out
+    assert "day44-scale-closeout" in out
