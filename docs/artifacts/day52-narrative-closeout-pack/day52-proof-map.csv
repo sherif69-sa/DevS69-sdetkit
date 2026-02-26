@@ -1,0 +1,2 @@
+stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag
+narrative-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-day52-narrative-closeout.md,python -m sdetkit day52-narrative-closeout --format json --strict,failed-checks:0,narrative-drift

@@ -1540,3 +1540,12 @@ See implementation details: [Day 50 big upgrade report](docs/day-50-big-upgrade-
 
 See implementation details: [Day 51 big upgrade report](docs/day-51-big-upgrade-report.md).
 
+### Day 52 — Narrative closeout lane
+
+- Run `python -m sdetkit day52-narrative-closeout --format json --strict` to validate Day 52 narrative readiness.
+- Emit shareable Day 52 narrative pack: `python -m sdetkit day52-narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day52-narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict`.
+- Review Day 52 integration guide: [Narrative closeout lane](docs/integrations-day52-narrative-closeout.md).
+
+See implementation details: [Day 52 big upgrade report](docs/day-52-big-upgrade-report.md).
+
