@@ -1,0 +1,2 @@
+stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag
+objection-floor,qa-lead,docs-owner,2026-03-16T10:00:00Z,docs/integrations-day48-objection-closeout.md,python -m sdetkit day48-objection-closeout --format json --strict,failed-checks:0,faq-drift

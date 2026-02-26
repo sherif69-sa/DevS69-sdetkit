@@ -1504,3 +1504,12 @@ See implementation details: [Day 46 big upgrade report](docs/day-46-big-upgrade-
 
 See implementation details: [Day 47 big upgrade report](docs/day-47-big-upgrade-report.md).
 
+### Day 48 — Objection closeout lane
+
+- Run `python -m sdetkit day48-objection-closeout --format json --strict` to validate Day 48 objection readiness.
+- Emit shareable Day 48 objection pack: `python -m sdetkit day48-objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day48-objection-closeout --execute --evidence-dir docs/artifacts/day48-objection-closeout-pack/evidence --format json --strict`.
+- Review Day 48 integration guide: [Objection closeout lane](docs/integrations-day48-objection-closeout.md).
+
+See implementation details: [Day 48 big upgrade report](docs/day-48-big-upgrade-report.md).
+

@@ -29,6 +29,7 @@ from . import (
     day45_expansion_closeout,
     day46_optimization_closeout,
     day47_reliability_closeout,
+    day48_objection_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -210,6 +211,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "day47-reliability-closeout":
         return day47_reliability_closeout.main(list(argv[1:]))
+    if argv and argv[0] == "day48-objection-closeout":
+        return day48_objection_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
@@ -388,6 +391,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     d47 = sub.add_parser("day47-reliability-closeout")
     d47.add_argument("args", nargs=argparse.REMAINDER)
+    d48 = sub.add_parser("day48-objection-closeout")
+    d48.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
@@ -555,6 +560,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day47-reliability-closeout":
         return day47_reliability_closeout.main(ns.args)
+    if ns.cmd == "day48-objection-closeout":
+        return day48_objection_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

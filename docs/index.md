@@ -581,3 +581,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day47-reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 47 reliability closeout lane](integrations-day47-reliability-closeout.md).
 
+## Day 48 objection closeout lane
+
+- Read the implementation report: [Day 48 big upgrade report](day-48-big-upgrade-report.md).
+- Run `python -m sdetkit day48-objection-closeout --format json --strict` to score objection closeout readiness.
+- Emit Day 48 objection closeout pack: `python -m sdetkit day48-objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day48-objection-closeout --execute --evidence-dir docs/artifacts/day48-objection-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 48 objection closeout lane](integrations-day48-objection-closeout.md).
+
