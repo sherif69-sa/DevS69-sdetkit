@@ -1,0 +1,23 @@
+{
+  "generated_for": "day40-scale-lane",
+  "metrics": [
+    {
+      "name": "playbook_read_completion",
+      "baseline": 41.2,
+      "current": 44.4,
+      "delta_pct": 7.77
+    },
+    {
+      "name": "docs_to_command_adoption",
+      "baseline": 18.6,
+      "current": 20.0,
+      "delta_pct": 7.53
+    },
+    {
+      "name": "operator_feedback_positive",
+      "baseline": 72.0,
+      "current": 76.0,
+      "delta_pct": 5.56
+    }
+  ]
+}

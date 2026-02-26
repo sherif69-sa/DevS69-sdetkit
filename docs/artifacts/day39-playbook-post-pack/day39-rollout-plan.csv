@@ -1,0 +1,4 @@
+section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target
+executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-day39-playbook-post.md,python -m sdetkit day39-playbook-post --format json --strict,completion:+5%
+tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-39-big-upgrade-report.md,python scripts/check_day39_playbook_post_contract.py,adoption:+7%
+rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict,ctr:+2%

@@ -175,8 +175,8 @@ Phase 2 converts early traction into repeatable growth loops. Each day ships one
 - **Day 37 — Experiment lane activation:** seed controlled experiments from Day 36 distribution misses and KPI deltas.
 - **Day 38 — Distribution batch #1:** publish coordinated posts linking demo assets to docs.
 - **Day 39 — Playbook post #1:** publish Repo Reliability Playbook article #1.
-- **Day 40 — Playbook post #2:** publish Repo Reliability Playbook article #2.
-- **Day 41 — Playbook post #3:** publish Repo Reliability Playbook article #3.
+- **Day 40 — Scale lane #1:** scale proven playbook motion across docs, commands, and channel matrix artifacts.
+- **Day 41 — Expansion automation kickoff:** automate Day 40 winners into repeatable workflows.
 - **Day 42 — Weekly review #6:** measure referral traffic, asset engagement, and stars/week trend.
 
 - **Day 43 — Production templates bundle v1:** package and document first template set.
