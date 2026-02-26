@@ -631,3 +631,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day53-docs-loop-closeout --execute --evidence-dir docs/artifacts/day53-docs-loop-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 53 docs-loop optimization closeout lane](integrations-day53-docs-loop-closeout.md).
 
+
+## Day 55 contributor activation closeout lane
+
+- Read the implementation report: [Day 55 big upgrade report](day-55-big-upgrade-report.md).
+- Run `python -m sdetkit day55-contributor-activation-closeout --format json --strict` to score contributor activation closeout readiness.
+- Emit Day 55 contributor activation closeout pack: `python -m sdetkit day55-contributor-activation-closeout --emit-pack-dir docs/artifacts/day55-contributor-activation-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day55-contributor-activation-closeout --execute --evidence-dir docs/artifacts/day55-contributor-activation-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 55 contributor activation closeout lane](integrations-day55-contributor-activation-closeout.md).
+
