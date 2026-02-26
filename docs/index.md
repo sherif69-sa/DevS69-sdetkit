@@ -553,3 +553,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 44 scale closeout pack: `python -m sdetkit day44-scale-closeout --emit-pack-dir docs/artifacts/day44-scale-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day44-scale-closeout --execute --evidence-dir docs/artifacts/day44-scale-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 44 scale closeout lane](integrations-day44-scale-closeout.md).
+
+
+## Day 45 expansion closeout lane
+
+- Read the implementation report: [Day 45 big upgrade report](day-45-big-upgrade-report.md).
+- Run `python -m sdetkit day45-expansion-closeout --format json --strict` to score expansion closeout readiness.
+- Emit Day 45 expansion closeout pack: `python -m sdetkit day45-expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day45-expansion-closeout --execute --evidence-dir docs/artifacts/day45-expansion-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 45 expansion closeout lane](integrations-day45-expansion-closeout.md).

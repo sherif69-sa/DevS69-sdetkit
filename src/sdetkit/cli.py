@@ -26,6 +26,7 @@ from . import (
     day42_optimization_closeout,
     day43_acceleration_closeout,
     day44_scale_closeout,
+    day45_expansion_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -199,6 +200,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day44-scale-closeout":
         return day44_scale_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day45-expansion-closeout":
+        return day45_expansion_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -368,6 +372,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d44 = sub.add_parser("day44-scale-closeout")
     d44.add_argument("args", nargs=argparse.REMAINDER)
 
+    d45 = sub.add_parser("day45-expansion-closeout")
+    d45.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -525,6 +532,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day44-scale-closeout":
         return day44_scale_closeout.main(ns.args)
+
+    if ns.cmd == "day45-expansion-closeout":
+        return day45_expansion_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)
