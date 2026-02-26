@@ -53,4 +53,3 @@ Day 43 weighted score (0-100):
 - Discoverability alignment (README/docs index/top-10): 20 points.
 - Day 42 continuity and strict baseline carryover: 35 points.
 - Acceleration contract lock + delivery board readiness: 15 points.
-

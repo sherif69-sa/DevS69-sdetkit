@@ -1612,4 +1612,3 @@ See implementation details: [Day 59 big upgrade report](docs/day-59-big-upgrade-
 - Review Day 60 integration guide: [Phase-2 wrap + handoff closeout lane](docs/integrations-day60-phase2-wrap-handoff-closeout.md).
 
 See implementation details: [Day 60 big upgrade report](docs/day-60-big-upgrade-report.md).
-

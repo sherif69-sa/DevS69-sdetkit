@@ -53,4 +53,3 @@ Day 53 weighted score (0-100):
 - Discoverability alignment (README/docs index/top-10): 20 points.
 - Day 52 continuity and strict baseline carryover: 35 points.
 - Docs-loop contract lock + delivery board readiness: 15 points.
-
