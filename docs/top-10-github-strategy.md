@@ -317,3 +317,6 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 5. Publish a public 90-day milestone board.
 6. Ship one integration quickstart per week for 4 weeks.
 7. Post weekly changelog highlights with one visual artifact each.
+
+- **Day 43 — Acceleration closeout lane:** convert Day 42 optimization proof into deterministic growth loops.
+- **Day 44 — Scale lane continuation:** convert Day 43 acceleration wins into scale plays.
