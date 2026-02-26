@@ -1476,3 +1476,12 @@ See implementation details: [Day 43 big upgrade report](docs/day-43-big-upgrade-
 - Review Day 44 integration guide: [Scale closeout lane](docs/integrations-day44-scale-closeout.md).
 
 See implementation details: [Day 44 big upgrade report](docs/day-44-big-upgrade-report.md).
+
+### Day 45 — Expansion closeout lane
+
+- Run `python -m sdetkit day45-expansion-closeout --format json --strict` to validate Day 45 expansion readiness.
+- Emit shareable Day 45 expansion pack: `python -m sdetkit day45-expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day45-expansion-closeout --execute --evidence-dir docs/artifacts/day45-expansion-closeout-pack/evidence --format json --strict`.
+- Review Day 45 integration guide: [Expansion closeout lane](docs/integrations-day45-expansion-closeout.md).
+
+See implementation details: [Day 45 big upgrade report](docs/day-45-big-upgrade-report.md).
