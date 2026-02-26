@@ -1335,3 +1335,34 @@ bash scripts/shell.sh
 ## 📄 License
 
 Free for personal/educational noncommercial use. Commercial use requires a paid license (see [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md)).
+
+
+## 📣 Day 39 big upgrade: Playbook post #1
+
+- Run `python -m sdetkit day39-playbook-post --format json --strict` to validate Day 39 playbook publication readiness.
+- Emit shareable Day 39 playbook pack: `python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict`.
+- Review Day 39 integration guide: [Playbook post #1](docs/integrations-day39-playbook-post.md).
+
+See implementation details: [Day 39 big upgrade report](docs/day-39-big-upgrade-report.md).
+
+Day 39 demo checks:
+
+```bash
+python -m pytest -q tests/test_day39_playbook_post.py tests/test_cli_help_lists_subcommands.py
+python scripts/check_day39_playbook_post_contract.py
+python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict
+python -m sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict
+python -m sdetkit day39-playbook-post --format json --strict
+```
+
+Day 39 upgraded pack artifacts include:
+
+- `day39-playbook-post-summary.json`
+- `day39-playbook-post-summary.md`
+- `day39-playbook-draft.md`
+- `day39-rollout-plan.csv`
+- `day39-kpi-scorecard.json`
+- `day39-execution-log.md`
+- `day39-delivery-board.md`
+- `day39-validation-commands.md`

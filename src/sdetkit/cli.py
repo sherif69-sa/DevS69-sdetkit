@@ -20,6 +20,7 @@ from . import (
     day36_distribution_closeout,
     day37_experiment_lane,
     day38_distribution_batch,
+    day39_playbook_post,
     demo,
     docs_navigation,
     docs_qa,
@@ -175,6 +176,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day38-distribution-batch":
         return day38_distribution_batch.main(list(argv[1:]))
 
+    if argv and argv[0] == "day39-playbook-post":
+        return day39_playbook_post.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -326,6 +330,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d38 = sub.add_parser("day38-distribution-batch")
     d38.add_argument("args", nargs=argparse.REMAINDER)
 
+    d39 = sub.add_parser("day39-playbook-post")
+    d39.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -465,6 +472,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day38-distribution-batch":
         return day38_distribution_batch.main(ns.args)
+
+    if ns.cmd == "day39-playbook-post":
+        return day39_playbook_post.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

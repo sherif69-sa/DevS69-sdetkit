@@ -502,3 +502,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict`.
 - Emit upgraded distribution pack outputs (`summary`, `channel plan`, `post copy`, `scorecard`): `python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`.
 - Review integration guide: [Day 38 distribution batch #1](integrations-day38-distribution-batch.md).
+
+
+## Day 39 big upgrades (Playbook post #1)
+
+- Read the implementation report: [Day 39 big upgrade report](day-39-big-upgrade-report.md).
+- Run `python -m sdetkit day39-playbook-post --format json --strict` to score playbook publication readiness.
+- Emit Day 39 playbook post pack: `python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict`.
+- Review integration guide: [Day 39 playbook post #1](integrations-day39-playbook-post.md).

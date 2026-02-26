@@ -55,3 +55,4 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "day36-distribution-closeout" in out
     assert "day37-experiment-lane" in out
     assert "day38-distribution-batch" in out
+    assert "day39-playbook-post" in out
