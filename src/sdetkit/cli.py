@@ -36,6 +36,7 @@ from . import (
     day52_narrative_closeout,
     day53_docs_loop_closeout,
     day55_contributor_activation_closeout,
+    day56_stabilization_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -232,6 +233,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day55-contributor-activation-closeout":
         return day55_contributor_activation_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day56-stabilization-closeout":
+        return day56_stabilization_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -426,6 +430,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d55 = sub.add_parser("day55-contributor-activation-closeout")
     d55.add_argument("args", nargs=argparse.REMAINDER)
 
+    d56 = sub.add_parser("day56-stabilization-closeout")
+    d56.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -606,6 +613,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return day53_docs_loop_closeout.main(ns.args)
     if ns.cmd == "day55-contributor-activation-closeout":
         return day55_contributor_activation_closeout.main(ns.args)
+
+    if ns.cmd == "day56-stabilization-closeout":
+        return day56_stabilization_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)
