@@ -649,3 +649,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day56-stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 56 stabilization closeout lane](integrations-day56-stabilization-closeout.md).
 
+
+## Day 57 KPI deep audit closeout lane
+
+- Read the implementation report: [Day 57 big upgrade report](day-57-big-upgrade-report.md).
+- Run `python -m sdetkit day57-kpi-deep-audit-closeout --format json --strict` to score KPI deep-audit closeout readiness.
+- Emit Day 57 KPI deep-audit closeout pack: `python -m sdetkit day57-kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day57-kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 57 KPI deep audit closeout lane](integrations-day57-kpi-deep-audit-closeout.md).
+

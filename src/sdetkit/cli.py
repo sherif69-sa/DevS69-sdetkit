@@ -37,6 +37,7 @@ from . import (
     day53_docs_loop_closeout,
     day55_contributor_activation_closeout,
     day56_stabilization_closeout,
+    day57_kpi_deep_audit_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -236,6 +237,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day56-stabilization-closeout":
         return day56_stabilization_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day57-kpi-deep-audit-closeout":
+        return day57_kpi_deep_audit_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -433,6 +437,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d56 = sub.add_parser("day56-stabilization-closeout")
     d56.add_argument("args", nargs=argparse.REMAINDER)
 
+    d57 = sub.add_parser("day57-kpi-deep-audit-closeout")
+    d57.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -616,6 +623,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day56-stabilization-closeout":
         return day56_stabilization_closeout.main(ns.args)
+
+    if ns.cmd == "day57-kpi-deep-audit-closeout":
+        return day57_kpi_deep_audit_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

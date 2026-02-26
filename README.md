@@ -1577,3 +1577,12 @@ See implementation details: [Day 55 big upgrade report](docs/day-55-big-upgrade-
 
 See implementation details: [Day 56 big upgrade report](docs/day-56-big-upgrade-report.md).
 
+### Day 57 — KPI deep audit closeout lane
+
+- Run `python -m sdetkit day57-kpi-deep-audit-closeout --format json --strict` to validate Day 57 KPI deep-audit readiness.
+- Emit shareable Day 57 KPI deep-audit pack: `python -m sdetkit day57-kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day57-kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence --format json --strict`.
+- Review Day 57 integration guide: [KPI deep audit closeout lane](docs/integrations-day57-kpi-deep-audit-closeout.md).
+
+See implementation details: [Day 57 big upgrade report](docs/day-57-big-upgrade-report.md).
+

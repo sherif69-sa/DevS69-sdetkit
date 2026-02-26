@@ -198,7 +198,7 @@ Phase 2 converts early traction into repeatable growth loops. Each day ships one
 - **Day 55 — Contributor activation #2:** highlight advanced issues for repeat contributors.
 - **Day 56 — Stabilization closeout:** enforce deterministic follow-through, KPI recovery, and risk rollback proof.
 
-- **Day 57 — KPI deep audit:** validate 30-day trendlines (stars, CTR, discussions, PRs, returning users).
+- **Day 57 — KPI deep audit closeout:** lock 30-day trendlines (stars, CTR, discussions, PRs, returning users) with strict anomaly triage.
 - **Day 58 — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.
 - **Day 59 — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.
 - **Day 60 — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.
