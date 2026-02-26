@@ -1604,3 +1604,12 @@ See implementation details: [Day 58 big upgrade report](docs/day-58-big-upgrade-
 
 See implementation details: [Day 59 big upgrade report](docs/day-59-big-upgrade-report.md).
 
+### Day 60 — Phase-2 wrap + handoff closeout lane
+
+- Run `python -m sdetkit day60-phase2-wrap-handoff-closeout --format json --strict` to validate Day 60 Phase-2 wrap + handoff readiness.
+- Emit shareable Day 60 Phase-2 wrap + handoff pack: `python -m sdetkit day60-phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day60-phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence --format json --strict`.
+- Review Day 60 integration guide: [Phase-2 wrap + handoff closeout lane](docs/integrations-day60-phase2-wrap-handoff-closeout.md).
+
+See implementation details: [Day 60 big upgrade report](docs/day-60-big-upgrade-report.md).
+

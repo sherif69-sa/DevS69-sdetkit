@@ -676,4 +676,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Review integration guide: [Day 59 Phase-3 pre-plan closeout lane](integrations-day59-phase3-preplan-closeout.md).
 
 
+## Day 60 Phase-2 wrap + handoff closeout lane
+
+- Read the implementation report: [Day 60 big upgrade report](day-60-big-upgrade-report.md).
+- Run `python -m sdetkit day60-phase2-wrap-handoff-closeout --format json --strict` to score Phase-2 wrap + handoff closeout readiness.
+- Emit Day 60 Phase-2 wrap + handoff closeout pack: `python -m sdetkit day60-phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day60-phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 60 Phase-2 wrap + handoff closeout lane](integrations-day60-phase2-wrap-handoff-closeout.md).
+
 

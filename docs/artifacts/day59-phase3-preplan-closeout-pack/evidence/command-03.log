@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_day59_phase3_preplan_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "day59-phase3-preplan-closeout contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['day58_summary_present', 'day58_delivery_board_present', 'day58_quality_floor', 'day58_board_integrity']\n"
+}

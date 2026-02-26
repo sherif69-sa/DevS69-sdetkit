@@ -1,0 +1,13 @@
+{
+  "name": "day59-phase3-preplan-closeout",
+  "summary": {
+    "activation_score": 100,
+    "strict_pass": true
+  },
+  "checks": [
+    {
+      "check_id": "seed",
+      "passed": true
+    }
+  ]
+}
