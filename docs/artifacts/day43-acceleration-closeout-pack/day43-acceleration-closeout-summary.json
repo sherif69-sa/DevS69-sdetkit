@@ -1,0 +1,9 @@
+{
+  "summary": {
+    "activation_score": 98,
+    "strict_pass": true
+  },
+  "checks": [
+    {"check_id": "docs_page_exists", "passed": true}
+  ]
+}

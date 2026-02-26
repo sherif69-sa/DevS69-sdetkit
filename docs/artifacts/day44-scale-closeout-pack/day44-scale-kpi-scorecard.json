@@ -1,0 +1,11 @@
+{
+  "kpis": [
+    {
+      "id": "strict_pass",
+      "baseline": 1,
+      "current": 1,
+      "delta": 0,
+      "confidence": "high"
+    }
+  ]
+}

@@ -1467,3 +1467,12 @@ Day 42 upgraded pack artifacts include:
 - Review Day 43 integration guide: [Acceleration closeout lane](docs/integrations-day43-acceleration-closeout.md).
 
 See implementation details: [Day 43 big upgrade report](docs/day-43-big-upgrade-report.md).
+
+### Day 44 — Scale closeout lane
+
+- Run `python -m sdetkit day44-scale-closeout --format json --strict` to validate Day 44 scale readiness.
+- Emit shareable Day 44 scale pack: `python -m sdetkit day44-scale-closeout --emit-pack-dir docs/artifacts/day44-scale-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day44-scale-closeout --execute --evidence-dir docs/artifacts/day44-scale-closeout-pack/evidence --format json --strict`.
+- Review Day 44 integration guide: [Scale closeout lane](docs/integrations-day44-scale-closeout.md).
+
+See implementation details: [Day 44 big upgrade report](docs/day-44-big-upgrade-report.md).
