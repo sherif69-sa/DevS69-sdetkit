@@ -1586,3 +1586,12 @@ See implementation details: [Day 56 big upgrade report](docs/day-56-big-upgrade-
 
 See implementation details: [Day 57 big upgrade report](docs/day-57-big-upgrade-report.md).
 
+### Day 58 — Phase-2 hardening closeout lane
+
+- Run `python -m sdetkit day58-phase2-hardening-closeout --format json --strict` to validate Day 58 Phase-2 hardening readiness.
+- Emit shareable Day 58 Phase-2 hardening pack: `python -m sdetkit day58-phase2-hardening-closeout --emit-pack-dir docs/artifacts/day58-phase2-hardening-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day58-phase2-hardening-closeout --execute --evidence-dir docs/artifacts/day58-phase2-hardening-closeout-pack/evidence --format json --strict`.
+- Review Day 58 integration guide: [Phase-2 hardening closeout lane](docs/integrations-day58-phase2-hardening-closeout.md).
+
+See implementation details: [Day 58 big upgrade report](docs/day-58-big-upgrade-report.md).
+

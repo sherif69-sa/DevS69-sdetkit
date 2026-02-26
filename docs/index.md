@@ -658,3 +658,13 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Run deterministic execution evidence lane: `python -m sdetkit day57-kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 57 KPI deep audit closeout lane](integrations-day57-kpi-deep-audit-closeout.md).
 
+
+## Day 58 Phase-2 hardening closeout lane
+
+- Read the implementation report: [Day 58 big upgrade report](day-58-big-upgrade-report.md).
+- Run `python -m sdetkit day58-phase2-hardening-closeout --format json --strict` to score Phase-2 hardening closeout readiness.
+- Emit Day 58 Phase-2 hardening closeout pack: `python -m sdetkit day58-phase2-hardening-closeout --emit-pack-dir docs/artifacts/day58-phase2-hardening-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day58-phase2-hardening-closeout --execute --evidence-dir docs/artifacts/day58-phase2-hardening-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 58 Phase-2 hardening closeout lane](integrations-day58-phase2-hardening-closeout.md).
+
+

@@ -38,6 +38,7 @@ from . import (
     day55_contributor_activation_closeout,
     day56_stabilization_closeout,
     day57_kpi_deep_audit_closeout,
+    day58_phase2_hardening_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -239,6 +240,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "day57-kpi-deep-audit-closeout":
         return day57_kpi_deep_audit_closeout.main(list(argv[1:]))
+
+    if argv and argv[0] == "day58-phase2-hardening-closeout":
+        return day58_phase2_hardening_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
