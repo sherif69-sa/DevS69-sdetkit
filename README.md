@@ -1513,3 +1513,12 @@ See implementation details: [Day 47 big upgrade report](docs/day-47-big-upgrade-
 
 See implementation details: [Day 48 big upgrade report](docs/day-48-big-upgrade-report.md).
 
+### Day 49 — Weekly review closeout lane
+
+- Run `python -m sdetkit day49-weekly-review-closeout --format json --strict` to validate Day 49 weekly review readiness.
+- Emit shareable Day 49 weekly review pack: `python -m sdetkit day49-weekly-review-closeout --emit-pack-dir docs/artifacts/day49-weekly-review-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day49-weekly-review-closeout --execute --evidence-dir docs/artifacts/day49-weekly-review-closeout-pack/evidence --format json --strict`.
+- Review Day 49 integration guide: [Weekly review closeout lane](docs/integrations-day49-weekly-review-closeout.md).
+
+See implementation details: [Day 49 big upgrade report](docs/day-49-big-upgrade-report.md).
+

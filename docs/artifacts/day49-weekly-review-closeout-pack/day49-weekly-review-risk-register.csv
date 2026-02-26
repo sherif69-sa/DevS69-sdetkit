@@ -1,0 +1,2 @@
+stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag
+weekly-review-floor,qa-lead,docs-owner,2026-03-17T10:00:00Z,docs/integrations-day49-weekly-review-closeout.md,python -m sdetkit day49-weekly-review-closeout --format json --strict,failed-checks:0,priority-drift

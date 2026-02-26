@@ -1,0 +1,135 @@
+{
+  "name": "day49-weekly-review-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day49-weekly-review-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day48_summary": "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json",
+    "day48_delivery_board": "docs/artifacts/day48-objection-closeout-pack/day48-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day49-weekly-review-closeout.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day49_link",
+      "weight": 8,
+      "passed": true,
+      "evidence": "docs/integrations-day49-weekly-review-closeout.md"
+    },
+    {
+      "check_id": "readme_day49_command",
+      "weight": 4,
+      "passed": true,
+      "evidence": "day49-weekly-review-closeout"
+    },
+    {
+      "check_id": "docs_index_day49_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-49-big-upgrade-report.md + integrations-day49-weekly-review-closeout.md"
+    },
+    {
+      "check_id": "top10_day49_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 49 + Day 50 strategy chain"
+    },
+    {
+      "check_id": "day48_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json"
+    },
+    {
+      "check_id": "day48_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day48-objection-closeout-pack/day48-delivery-board.md"
+    },
+    {
+      "check_id": "day48_quality_floor",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "day48_score": 100.0,
+        "strict_pass": true,
+        "day48_checks": 14
+      }
+    },
+    {
+      "check_id": "day48_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day48": true,
+        "contains_day49": true
+      }
+    },
+    {
+      "check_id": "weekly_review_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_contract_lines": []
+      }
+    },
+    {
+      "check_id": "weekly_review_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day48_activation_score": 100.0,
+    "day48_checks": 14,
+    "day48_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 48 continuity is strict-pass with activation score=100.0.",
+    "Day 48 delivery board integrity validated with 5 checklist items.",
+    "Weekly review execution contract + quality checklist is fully locked for execution.",
+    "Day 49 weekly review closeout lane is fully complete and ready for Day 50 execution lane."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}
