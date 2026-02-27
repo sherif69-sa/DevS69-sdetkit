@@ -1,0 +1,118 @@
+{
+  "name": "day63-onboarding-activation-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day63-onboarding-activation-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day62_summary": "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json",
+    "day62_delivery_board": "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day63_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day63 command lane"
+    },
+    {
+      "check_id": "docs_index_day63_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-63-big-upgrade-report.md + integrations-day63-onboarding-activation-closeout.md"
+    },
+    {
+      "check_id": "top10_day63_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 63 + Day 64 strategy chain"
+    },
+    {
+      "check_id": "day62_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
+    },
+    {
+      "check_id": "day62_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
+    },
+    {
+      "check_id": "day62_quality_floor",
+      "weight": 15,
+      "passed": true,
+      "evidence": {
+        "day62_score": 95,
+        "strict_pass": true,
+        "day62_checks": 13
+      }
+    },
+    {
+      "check_id": "day62_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day62": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 63 \u2014 Contributor onboarding activation closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 10,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 3,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 2,
+      "passed": true,
+      "evidence": "delivery board locked"
+    }
+  ],
+  "rollup": {
+    "day62_activation_score": 95,
+    "day62_checks": 13,
+    "day62_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 95,
+    "passed_checks": 13,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 62 continuity is strict-pass with activation score=95.",
+    "Day 62 delivery board integrity validated with 5 checklist items.",
+    "Onboarding activation contract + quality checklist is fully locked for execution.",
+    "Day 63 onboarding activation closeout lane is fully complete and ready for Day 64 contributor pipeline lane."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

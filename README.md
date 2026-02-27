@@ -1643,6 +1643,15 @@ See implementation details: [Day 61 big upgrade report](docs/day-61-big-upgrade-
 
 See implementation details: [Day 62 big upgrade report](docs/day-62-big-upgrade-report.md).
 
+### Day 63 — Contributor onboarding activation closeout lane
+
+- Run `python -m sdetkit day63-onboarding-activation-closeout --format json --strict` to validate Day 63 onboarding activation readiness.
+- Emit shareable Day 63 onboarding activation pack: `python -m sdetkit day63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day63-onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict`.
+- Review Day 63 integration guide: [Contributor onboarding activation closeout lane](docs/integrations-day63-onboarding-activation-closeout.md).
+
+See implementation details: [Day 63 big upgrade report](docs/day-63-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
