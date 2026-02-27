@@ -3,6 +3,10 @@
     <img src="docs/assets/devs69-hero.svg" alt="DevS69 Hero" width="100%" />
   </a>
 
+  <h1>DevS69 (sdetkit)</h1>
+
+  <p><strong>Production-ready SDET toolkit</strong> for API reliability, repository quality, and enterprise-grade engineering workflows.</p>
+
   <p>
     <a href="https://sherif69-sa.github.io/DevS69-sdetkit/"><img src="https://img.shields.io/badge/Experience-Interactive%20Portal-6f42c1?style=for-the-badge" alt="Interactive Portal"></a>
     <a href="docs/index.md"><img src="https://img.shields.io/badge/Docs-Structured%20Guides-0969da?style=for-the-badge" alt="Structured Docs"></a>
@@ -10,35 +14,20 @@
     <a href="docs/security.md"><img src="https://img.shields.io/badge/Security-Always%20On-bd561d?style=for-the-badge" alt="Always On Security"></a>
   </p>
 
-  <h1 style="margin: 14px 0 6px; text-align: center;">DevS69 (sdetkit)</h1>
+  <p><strong>Built for:</strong> SDETs · QA Leads · Platform Engineers · Security Champions · Engineering Managers</p>
 
-  <p style="max-width: 920px; margin: 0 auto 8px; font-size: 17px; line-height: 1.5;">
-    <strong>One-line value proposition:</strong> DevS69 turns SDET quality, API reliability, and repository governance into one repeatable CLI workflow your team can run locally or in CI.
-  </p>
-
-  <p style="max-width: 920px; margin: 0 auto 10px; font-size: 16px; line-height: 1.55;">
-    <strong>Production-ready SDET toolkit</strong> for API reliability, repository quality,
-    and enterprise-grade engineering workflows — tightly aligned with the live portal experience.
-  </p>
-
-  <p style="margin: 6px 0 8px;"><strong>Built for:</strong> SDETs · QA Leads · Platform Engineers · Security Champions · Engineering Managers</p>
-
-  <p style="margin: 10px 0 16px;">
-    <a href="#quick-start"><strong>⚡ Start in 60 seconds</strong></a>
+  <p>
+    <a href="#quick-start"><strong>⚡ Quick Start</strong></a>
     ·
-    <a href="#day-1-ultra-upgrade-pack"><strong>🧭 Day 1 onboarding</strong></a>
+    <a href="#day-1-ultra-upgrade-pack"><strong>🧭 Day 1 Onboarding</strong></a>
     ·
-    <a href="https://sherif69-sa.github.io/DevS69-sdetkit/"><strong>🌐 Live Experience Portal</strong></a>
+    <a href="https://sherif69-sa.github.io/DevS69-sdetkit/"><strong>🌐 Live Portal</strong></a>
     ·
     <a href="docs/index.md"><strong>📚 Documentation</strong></a>
     ·
-    <a href="CONTRIBUTING.md"><strong>🤝 Contribute</strong></a>
+    <a href="docs/repo-tour.md"><strong>🗺️ Repo Tour</strong></a>
     ·
-    <a href="docs/repo-tour.md"><strong>🧭 Repo Tour</strong></a>
-  </p>
-
-  <p>
-    <a href="https://sherif69-sa.github.io/DevS69-sdetkit/"><strong>Open Portal Now →</strong></a>
+    <a href="CONTRIBUTING.md"><strong>🤝 Contributing</strong></a>
   </p>
 
   <table>
@@ -58,50 +47,14 @@
         <a href="docs/index.md"><strong>Browse Documentation Hub →</strong></a>
       </td>
       <td align="center">
-        <a href="CONTRIBUTING.md">
-          <img src="docs/assets/devs69-card-contribute.svg" width="360" alt="Contribute" />
-        </a>
-        <br />
-        <a href="CONTRIBUTING.md"><strong>Start Contributing Guide →</strong></a>
-      </td>
-    </tr>
-  </table>
-
-  <table>
-    <tr>
-      <td align="center">
         <a href="docs/repo-tour.md">
-          <img src="docs/assets/devs69-card-monorepo.svg" width="360" alt="Monorepo Projects" />
+          <img src="docs/assets/devs69-card-monorepo.svg" width="360" alt="Repo Tour" />
         </a>
         <br />
         <a href="docs/repo-tour.md"><strong>Explore Repo Tour →</strong></a>
       </td>
-      <td align="center">
-        <a href="docs/repo-audit.md">
-          <img src="docs/assets/devs69-card-cache.svg" width="360" alt="Incremental + Cache" />
-        </a>
-        <br />
-        <a href="docs/repo-audit.md"><strong>Review Cache + Audit Strategy →</strong></a>
-      </td>
-      <td align="center">
-        <a href="docs/repo-audit.md">
-          <img src="docs/assets/devs69-card-exporters.svg" width="360" alt="Exporters" />
-        </a>
-        <br />
-        <a href="docs/repo-audit.md"><strong>See Exporters + Reports →</strong></a>
-      </td>
     </tr>
   </table>
-
-  <h2>✨ Big UX + UI boost (repo HUD edition)</h2>
-
-  <p align="center">
-    <strong>A cleaner, more visual README hub with command HUD, repository map, and diff intelligence flow.</strong>
-  </p>
-
-  <div align="center">
-    <img src="docs/assets/devs69-hero.svg" alt="DevS69 Hero" width="100%" />
-  </div>
 
   <table>
     <tr>
@@ -110,88 +63,36 @@
           <img src="docs/assets/devs69-card-hud.svg" width="360" alt="DevS69 Command HUD" />
         </a>
         <br />
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/"><strong>🕹️ Open Command HUD (large)</strong></a>
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/"><strong>🕹️ Open Command HUD →</strong></a>
       </td>
       <td align="center">
         <a href="https://sherif69-sa.github.io/DevS69-sdetkit/repo-map-live/">
           <img src="docs/assets/devs69-card-repo-map.svg" width="360" alt="DevS69 Repo Map" />
         </a>
         <br />
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/repo-map-live/"><strong>🗺️ Open Repo Map (large)</strong></a>
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/repo-map-live/"><strong>🗺️ Open Repo Map →</strong></a>
       </td>
       <td align="center">
         <a href="https://sherif69-sa.github.io/DevS69-sdetkit/diff-flow-live/">
-          <img src="docs/assets/devs69-card-diff-flow.svg" width="360" alt="DevS69 Diff to Decision" />
+          <img src="docs/assets/devs69-card-diff-flow.svg" width="360" alt="DevS69 Diff Flow" />
         </a>
         <br />
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/diff-flow-live/"><strong>🔄 Open Diff Flow (large)</strong></a>
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/diff-flow-live/"><strong>🔄 Open Diff Flow →</strong></a>
       </td>
     </tr>
   </table>
 
-  <p align="center"><strong>Tip:</strong> click any SVG card above to open a larger visual with quick hints and a direct portal redirect.</p>
-
-### 🕹️ DevS69 Command HUD
-
-| HUD Lane | Command | Result | Open Docs |
-|---|---|---|---|
-| Health baseline | `python -m sdetkit doctor --format markdown` | Immediate health + recommendations | [Doctor docs](docs/doctor.md) |
-| Governance checks | `python -m sdetkit repo audit --format markdown` | Policy + hygiene status | [Repo audit](docs/repo-audit.md) |
-| Security hardening | `python -m sdetkit security scan --format text` | Risk view + actionable fixes | [Security docs](docs/security.md) |
-| Workflow orchestration | `python -m sdetkit agent run 'action repo.audit {"profile":"default"}' --approve` | Deterministic automation lane | [Automation OS](docs/automation-os.md) |
-
-### 🗺️ DevS69 Repo Map
-
-| Zone | Purpose | Click |
-|---|---|---|
-| Source | CLI and orchestration code | [src/sdetkit](src/sdetkit) |
-| Tests | Deterministic checks and contracts | [tests](tests) |
-| Docs | Guides, runbooks, references | [docs](docs) |
-| Templates | Reusable automation templates | [templates](templates) |
-| Tools | Helper scripts and policies | [tools](tools) |
-
-### 🔄 DevS69 Diff-to-Decision
-
-| Stage | Command | Artifact |
-|---|---|---|
-| Validate | `python -m pytest -q` | Test pass/fail signal |
-| Audit | `python -m sdetkit repo audit --format markdown` | Quality findings |
-| Secure | `python -m sdetkit security report --format sarif --output build/security.sarif` | SARIF report |
-| Publish evidence | `python -m sdetkit proof --execute --strict --format markdown --output docs/artifacts/day3-proof-sample.md` | Shareable proof pack |
-| Decide | `python -m sdetkit release-narrative --format markdown --output docs/artifacts/day20-release-narrative-sample.md` | Release narrative |
-
-  <h3>🧩 Repo rearrange + discoverability upgrades</h3>
-
-  <table>
-    <tr><td><strong>Upgrade lane</strong></td><td><strong>What improved</strong></td><td><strong>Why it feels better</strong></td></tr>
-    <tr><td><strong>README hub hierarchy</strong></td><td>Stronger top navigation + grouped visual cards</td><td>Faster first-click orientation for new and returning contributors</td></tr>
-    <tr><td><strong>HUD language</strong></td><td>Product-style terminology (HUD, control center, flow lanes)</td><td>Makes CLI capabilities feel cohesive instead of fragmented</td></tr>
-    <tr><td><strong>Visual repo map</strong></td><td>Added architecture-style map card for repo layout</td><td>Faster understanding of project structure without deep scrolling</td></tr>
-    <tr><td><strong>Diff narrative</strong></td><td>Added diff-to-insight story card and workflow framing</td><td>Better context for audits, reports, and quality governance</td></tr>
-  </table>
-
-  <h3>🛸 What is now uniquely "DevS69"</h3>
-  <ul>
-    <li><strong>Hero-first identity</strong> with live portal alignment and consistent visual rhythm.</li>
-    <li><strong>CLI-as-a-control-center</strong> storytelling across README sections.</li>
-    <li><strong>Repo intelligence framing</strong> (map + diff + output) instead of plain command dumps.</li>
-    <li><strong>Design continuity</strong> between docs portal, README cards, and automation narratives.</li>
-  </ul>
-
-  <p style="margin: 14px 0 8px;">
+  <p>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main" alt="Quality"></a>
-    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml/badge.svg?branch=main" alt="Mutation Tests"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml/badge.svg?branch=main" alt="Security"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main" alt="Pages"></a>
   </p>
 
-  <p style="margin: 0 0 10px;">
+  <p>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/releases"><img src="https://img.shields.io/github/v/release/sherif69-sa/DevS69-sdetkit?sort=semver" alt="Latest Release"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-Noncommercial%20%2B%20Commercial%20Required-blue" alt="License"></a>
     <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
-    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/security/code-scanning"><img src="https://img.shields.io/badge/security-code%20scanning-success" alt="Code Scanning"></a>
-    <a href="https://github.com/sherif69-sa/DevS69-sdetkit/security/dependabot"><img src="https://img.shields.io/badge/dependencies-auto%20update-success" alt="Dependabot"></a>
   </p>
 </div>
 
