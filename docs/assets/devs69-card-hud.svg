@@ -1,56 +1,59 @@
-<svg width="960" height="540" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">DevS69 HUD Console</title>
-  <desc id="desc">A neon-styled command center card for DevS69 with health, security, and release widgets.</desc>
+<svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">DevS69 Command HUD Card</title>
+  <desc id="desc">Modern DevS69 command HUD card with onboarding, quality, security and release lanes.</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0b1022"/>
-      <stop offset="100%" stop-color="#1a1f3f"/>
+      <stop offset="0%" stop-color="#060b1a"/>
+      <stop offset="60%" stop-color="#101b39"/>
+      <stop offset="100%" stop-color="#1f1f46"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2753" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#111b3b" stop-opacity="0.85"/>
     </linearGradient>
     <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#22c55e"/>
     </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#020617" flood-opacity="0.5"/>
+    </filter>
   </defs>
-  <rect x="0" y="0" width="960" height="540" rx="28" fill="url(#bg)"/>
-  <rect x="24" y="24" width="912" height="492" rx="22" fill="#0f1630" stroke="#2b3a67"/>
-  <rect x="56" y="58" width="848" height="42" rx="10" fill="#162044"/>
-  <circle cx="82" cy="79" r="7" fill="#34d399"/>
-  <circle cx="106" cy="79" r="7" fill="#fbbf24"/>
-  <circle cx="130" cy="79" r="7" fill="#f87171"/>
-  <text x="160" y="85" fill="#c7d2fe" font-size="18" font-family="Inter,Segoe UI,Arial">DevS69 Command HUD • Live Signals</text>
 
-  <rect x="56" y="124" width="270" height="160" rx="16" fill="#101a39" stroke="#2c3f72"/>
-  <text x="78" y="156" fill="#e2e8f0" font-size="20" font-family="Inter,Segoe UI,Arial">Quality</text>
-  <text x="78" y="190" fill="#34d399" font-size="38" font-family="Inter,Segoe UI,Arial" font-weight="700">98.7%</text>
-  <rect x="78" y="214" width="220" height="12" rx="6" fill="#1e2b53"/>
-  <rect x="78" y="214" width="202" height="12" rx="6" fill="url(#accent)"/>
-  <text x="78" y="253" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">Mutation + policy + docs coverage</text>
+  <rect width="1200" height="700" rx="36" fill="url(#bg)"/>
+  <rect x="26" y="26" width="1148" height="648" rx="26" fill="none" stroke="#4f46e5" stroke-opacity="0.35"/>
 
-  <rect x="345" y="124" width="270" height="160" rx="16" fill="#101a39" stroke="#2c3f72"/>
-  <text x="367" y="156" fill="#e2e8f0" font-size="20" font-family="Inter,Segoe UI,Arial">Security</text>
-  <text x="367" y="190" fill="#22d3ee" font-size="38" font-family="Inter,Segoe UI,Arial" font-weight="700">A+</text>
-  <text x="367" y="224" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">0 critical • 0 high • hardened defaults</text>
-  <text x="367" y="247" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">code scanning + CI gates online</text>
+  <rect x="52" y="50" width="1096" height="64" rx="14" fill="#0f1a3b" stroke="#334155"/>
+  <circle cx="86" cy="82" r="8" fill="#22c55e"/>
+  <circle cx="112" cy="82" r="8" fill="#f59e0b"/>
+  <circle cx="138" cy="82" r="8" fill="#ef4444"/>
+  <text x="176" y="90" fill="#e2e8f0" font-size="27" font-family="Inter, Segoe UI, Arial" font-weight="700">DevS69 Command HUD</text>
+  <text x="486" y="90" fill="#93c5fd" font-size="18" font-family="Inter, Segoe UI, Arial">Reliable SDET operations from one control surface</text>
 
-  <rect x="634" y="124" width="270" height="160" rx="16" fill="#101a39" stroke="#2c3f72"/>
-  <text x="656" y="156" fill="#e2e8f0" font-size="20" font-family="Inter,Segoe UI,Arial">Delivery</text>
-  <text x="656" y="190" fill="#a78bfa" font-size="38" font-family="Inter,Segoe UI,Arial" font-weight="700">Fast</text>
-  <text x="656" y="224" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">One-command onboarding + daily reports</text>
-  <text x="656" y="247" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">Automation OS + trend exports</text>
+  <rect x="52" y="136" width="526" height="250" rx="18" fill="url(#glass)" stroke="#334155" filter="url(#shadow)"/>
+  <text x="84" y="176" fill="#f8fafc" font-size="26" font-family="Inter, Segoe UI, Arial" font-weight="700">Operator lanes</text>
+  <text x="84" y="212" fill="#a5b4fc" font-size="20" font-family="Inter, Segoe UI, Arial">1. doctor → baseline repo health</text>
+  <text x="84" y="244" fill="#67e8f9" font-size="20" font-family="Inter, Segoe UI, Arial">2. repo audit → policy + standards</text>
+  <text x="84" y="276" fill="#86efac" font-size="20" font-family="Inter, Segoe UI, Arial">3. security scan → risk visibility</text>
+  <text x="84" y="308" fill="#c4b5fd" font-size="20" font-family="Inter, Segoe UI, Arial">4. report/proof → release evidence</text>
+  <rect x="84" y="332" width="460" height="14" rx="7" fill="#1e293b"/>
+  <rect x="84" y="332" width="392" height="14" rx="7" fill="url(#accent)"/>
 
-  <rect x="56" y="304" width="848" height="172" rx="16" fill="#0d1530" stroke="#2c3f72"/>
-  <rect x="78" y="334" width="380" height="20" rx="10" fill="#1e2b53"/>
-  <rect x="78" y="334" width="280" height="20" rx="10" fill="#34d399"/>
-  <text x="472" y="349" fill="#cbd5e1" font-size="15" font-family="Inter,Segoe UI,Arial">Doctor health score</text>
-  <rect x="78" y="372" width="380" height="20" rx="10" fill="#1e2b53"/>
-  <rect x="78" y="372" width="240" height="20" rx="10" fill="#22d3ee"/>
-  <text x="472" y="387" fill="#cbd5e1" font-size="15" font-family="Inter,Segoe UI,Arial">Repo audit pass ratio</text>
-  <rect x="78" y="410" width="380" height="20" rx="10" fill="#1e2b53"/>
-  <rect x="78" y="410" width="336" height="20" rx="10" fill="#a78bfa"/>
-  <text x="472" y="425" fill="#cbd5e1" font-size="15" font-family="Inter,Segoe UI,Arial">Automation replay determinism</text>
+  <rect x="598" y="136" width="550" height="250" rx="18" fill="url(#glass)" stroke="#334155" filter="url(#shadow)"/>
+  <text x="630" y="176" fill="#f8fafc" font-size="26" font-family="Inter, Segoe UI, Arial" font-weight="700">Live quality signals</text>
+  <text x="630" y="214" fill="#22d3ee" font-size="52" font-family="Inter, Segoe UI, Arial" font-weight="700">98.7%</text>
+  <text x="800" y="214" fill="#bfdbfe" font-size="20" font-family="Inter, Segoe UI, Arial">health score</text>
+  <text x="630" y="246" fill="#34d399" font-size="20" font-family="Inter, Segoe UI, Arial">A+ security posture · 0 critical findings</text>
+  <text x="630" y="278" fill="#c4b5fd" font-size="20" font-family="Inter, Segoe UI, Arial">Deterministic CI checks + auditable output</text>
+  <rect x="630" y="304" width="470" height="16" rx="8" fill="#0f172a"/>
+  <rect x="630" y="304" width="428" height="16" rx="8" fill="#22c55e"/>
+  <text x="630" y="348" fill="#93c5fd" font-size="18" font-family="Inter, Segoe UI, Arial">Optimized for SDET, QA, DevOps, and platform teams.</text>
 
-  <text x="656" y="352" fill="#dbeafe" font-size="18" font-family="Inter,Segoe UI,Arial" font-weight="700">Operator Flow</text>
-  <text x="656" y="380" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">1. sdetkit doctor --score</text>
-  <text x="656" y="404" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">2. sdetkit repo-audit --strict</text>
-  <text x="656" y="428" fill="#93c5fd" font-size="14" font-family="Inter,Segoe UI,Arial">3. sdetkit report --format markdown</text>
+  <rect x="52" y="410" width="1096" height="236" rx="18" fill="#0c1530" stroke="#334155"/>
+  <text x="84" y="452" fill="#f8fafc" font-size="26" font-family="Inter, Segoe UI, Arial" font-weight="700">Suggested start commands</text>
+  <text x="84" y="492" fill="#bae6fd" font-size="21" font-family="JetBrains Mono, Consolas, monospace">python -m sdetkit doctor --format markdown</text>
+  <text x="84" y="526" fill="#bae6fd" font-size="21" font-family="JetBrains Mono, Consolas, monospace">python -m sdetkit repo audit --format markdown</text>
+  <text x="84" y="560" fill="#bae6fd" font-size="21" font-family="JetBrains Mono, Consolas, monospace">python -m sdetkit security scan --format text</text>
+  <text x="84" y="596" fill="#cbd5e1" font-size="18" font-family="Inter, Segoe UI, Arial">Click this card in README to open large visual view.</text>
 </svg>
