@@ -1661,6 +1661,15 @@ See implementation details: [Day 63 big upgrade report](docs/day-63-big-upgrade-
 
 See implementation details: [Day 64 big upgrade report](docs/day-64-big-upgrade-report.md).
 
+### Day 65 — Weekly review #9 closeout lane
+
+- Run `python -m sdetkit day65-weekly-review-closeout --format json --strict` to validate Day 65 weekly review readiness.
+- Emit shareable Day 65 weekly review pack: `python -m sdetkit day65-weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day65-weekly-review-closeout --execute --evidence-dir docs/artifacts/day65-weekly-review-closeout-pack/evidence --format json --strict`.
+- Review Day 65 integration guide: [Weekly review #9 closeout lane](docs/integrations-day65-weekly-review-closeout.md).
+
+See implementation details: [Day 65 big upgrade report](docs/day-65-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

@@ -1,0 +1,125 @@
+{
+  "name": "day65-weekly-review-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day65-weekly-review-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day64_summary": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json",
+    "day64_delivery_board": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md",
+    "day64_workflow": ".github/workflows/day64-advanced-github-actions-reference.yml"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day65_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day65 command lane"
+    },
+    {
+      "check_id": "docs_index_day65_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-65-big-upgrade-report.md + integrations-day65-weekly-review-closeout.md"
+    },
+    {
+      "check_id": "top10_day65_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 65 + Day 66 strategy chain"
+    },
+    {
+      "check_id": "day64_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
+    },
+    {
+      "check_id": "day64_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+    },
+    {
+      "check_id": "day64_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day64_score": 100,
+        "strict_pass": true,
+        "day64_checks": 14
+      }
+    },
+    {
+      "check_id": "day64_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day64": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 65 \u2014 Weekly review #9 closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "day64_workflow_reference_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": ".github/workflows/day64-advanced-github-actions-reference.yml"
+    }
+  ],
+  "rollup": {
+    "day64_activation_score": 100,
+    "day64_checks": 14,
+    "day64_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 64 continuity is strict-pass with activation score=100.",
+    "Day 64 delivery board integrity validated with 5 checklist items.",
+    "Day 64 workflow reference remains available for weekly KPI baseline review.",
+    "Day 65 weekly review closeout lane is fully complete and ready for Day 66 integration expansion #2."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}
