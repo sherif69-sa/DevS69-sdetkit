@@ -699,3 +699,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 62 community program closeout pack: `python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day62-community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 62 community program setup closeout lane](integrations-day62-community-program-closeout.md).
+
+## Day 63 contributor onboarding activation closeout lane
+
+- Read the implementation report: [Day 63 big upgrade report](day-63-big-upgrade-report.md).
+- Run `python -m sdetkit day63-onboarding-activation-closeout --format json --strict` to score onboarding activation readiness.
+- Emit Day 63 onboarding activation closeout pack: `python -m sdetkit day63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day63-onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 63 contributor onboarding activation closeout lane](integrations-day63-onboarding-activation-closeout.md).

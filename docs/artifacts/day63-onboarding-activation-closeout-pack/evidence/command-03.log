@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_day63_onboarding_activation_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "day63-onboarding-activation-closeout contract check passed\n",
+  "stderr": ""
+}

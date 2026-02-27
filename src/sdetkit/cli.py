@@ -43,6 +43,7 @@ from . import (
     day60_phase2_wrap_handoff_closeout,
     day61_phase3_kickoff_closeout,
     day62_community_program_closeout,
+    day63_onboarding_activation_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -260,6 +261,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day62-community-program-closeout":
         return day62_community_program_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day63-onboarding-activation-closeout":
+        return day63_onboarding_activation_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -472,6 +476,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d62 = sub.add_parser("day62-community-program-closeout")
     d62.add_argument("args", nargs=argparse.REMAINDER)
 
+    d63 = sub.add_parser("day63-onboarding-activation-closeout")
+    d63.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -670,6 +677,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day62-community-program-closeout":
         return day62_community_program_closeout.main(ns.args)
+
+    if ns.cmd == "day63-onboarding-activation-closeout":
+        return day63_onboarding_activation_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)
