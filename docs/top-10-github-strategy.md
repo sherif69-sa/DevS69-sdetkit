@@ -255,7 +255,8 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 
 - **Day 79 — Enterprise onboarding path:** publish role-based enterprise adoption checklist.
 - **Day 80 — Ecosystem partner outreach:** identify and contact maintainers of adjacent tooling.
-- **Day 81 — Integration feedback loop:** fold field feedback into docs/templates.
+- **Day 81 — Growth campaign closeout:** convert partner signals into measurable campaign execution controls.
+- **Day 82 — Integration feedback loop:** fold field feedback into docs/templates.
 - **Day 82 — Community touchpoint #2:** run second office-hours/community Q&A session.
 - **Day 83 — Trust FAQ expansion:** answer top compliance/security objections from real users.
 - **Day 84 — Weekly review #12:** compare Phase-3 week-over-week ecosystem metrics.

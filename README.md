@@ -1814,6 +1814,16 @@ See implementation details: [Day 79 big upgrade report](docs/day-79-big-upgrade-
 
 See implementation details: [Day 80 big upgrade report](docs/day-80-big-upgrade-report.md).
 
+
+### Day 81 — Growth campaign closeout lane
+
+- Run `python -m sdetkit day81-growth-campaign-closeout --format json --strict` to validate Day 81 growth campaign readiness.
+- Emit shareable Day 81 growth campaign pack: `python -m sdetkit day81-growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day81-growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict`.
+- Review Day 81 integration guide: [Growth campaign closeout lane](docs/integrations-day81-growth-campaign-closeout.md).
+
+See implementation details: [Day 81 big upgrade report](docs/day-81-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
