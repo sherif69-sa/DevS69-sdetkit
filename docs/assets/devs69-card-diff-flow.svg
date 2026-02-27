@@ -1,0 +1,32 @@
+<svg width="960" height="540" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">DevS69 Diff to Decision Flow</title>
+  <desc id="desc">Visualization of how code diffs become scored recommendations and release-ready outputs in DevS69.</desc>
+  <rect width="960" height="540" rx="28" fill="#0b1220"/>
+  <text x="52" y="72" fill="#f8fafc" font-size="34" font-family="Inter,Segoe UI,Arial" font-weight="700">Diff → Insight → Action Flow</text>
+  <text x="52" y="102" fill="#93c5fd" font-size="16" font-family="Inter,Segoe UI,Arial">Turn raw repository changes into operator-ready decisions with repeatable checks.</text>
+
+  <rect x="70" y="180" width="200" height="190" rx="16" fill="#1e293b" stroke="#334155"/>
+  <text x="95" y="222" fill="#e2e8f0" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="700">Git Diff</text>
+  <text x="95" y="255" fill="#bae6fd" font-size="14" font-family="Inter,Segoe UI,Arial">Changed files</text>
+  <text x="95" y="277" fill="#bae6fd" font-size="14" font-family="Inter,Segoe UI,Arial">Added risk hints</text>
+  <text x="95" y="299" fill="#bae6fd" font-size="14" font-family="Inter,Segoe UI,Arial">Context metadata</text>
+
+  <rect x="370" y="140" width="220" height="270" rx="16" fill="#312e81" stroke="#6366f1"/>
+  <text x="394" y="188" fill="#fff" font-size="24" font-family="Inter,Segoe UI,Arial" font-weight="700">DevS69 Engine</text>
+  <text x="394" y="224" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit repo-audit</text>
+  <text x="394" y="246" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit doctor --score</text>
+  <text x="394" y="268" fill="#ddd6fe" font-size="14" font-family="Inter,Segoe UI,Arial">sdetkit report --format</text>
+  <text x="394" y="304" fill="#c4b5fd" font-size="13" font-family="Inter,Segoe UI,Arial">Policy gates + deterministic checks</text>
+  <text x="394" y="326" fill="#c4b5fd" font-size="13" font-family="Inter,Segoe UI,Arial">Recommendations + remediation plan</text>
+
+  <rect x="690" y="180" width="200" height="190" rx="16" fill="#0f766e" stroke="#14b8a6"/>
+  <text x="714" y="222" fill="#ecfeff" font-size="22" font-family="Inter,Segoe UI,Arial" font-weight="700">Outputs</text>
+  <text x="714" y="255" fill="#99f6e4" font-size="14" font-family="Inter,Segoe UI,Arial">Markdown report</text>
+  <text x="714" y="277" fill="#99f6e4" font-size="14" font-family="Inter,Segoe UI,Arial">JSON artifacts</text>
+  <text x="714" y="299" fill="#99f6e4" font-size="14" font-family="Inter,Segoe UI,Arial">CI-ready signals</text>
+
+  <line x1="270" y1="275" x2="370" y2="275" stroke="#60a5fa" stroke-width="5"/>
+  <polygon points="360,263 360,287 380,275" fill="#60a5fa"/>
+  <line x1="590" y1="275" x2="690" y2="275" stroke="#2dd4bf" stroke-width="5"/>
+  <polygon points="680,263 680,287 700,275" fill="#2dd4bf"/>
+</svg>

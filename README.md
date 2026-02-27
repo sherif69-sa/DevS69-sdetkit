@@ -93,6 +93,63 @@
     </tr>
   </table>
 
+  <h2>✨ Big UX + UI boost (repo HUD edition)</h2>
+
+  <p align="center">
+    <strong>A cleaner, more visual README hub with command HUD, repository map, and diff intelligence flow.</strong>
+  </p>
+
+  <div align="center">
+    <img src="docs/assets/devs69-hero.svg" alt="DevS69 Hero" width="100%" />
+  </div>
+
+  <table>
+    <tr>
+      <td align="center">
+        <a href="#core-cli-commands">
+          <img src="docs/assets/devs69-card-hud.svg" width="360" alt="DevS69 Command HUD" />
+        </a>
+        <br />
+        <strong>Operator HUD</strong><br />
+        Live-style control panel feeling for quality, security, and delivery actions.
+      </td>
+      <td align="center">
+        <a href="docs/repo-tour.md">
+          <img src="docs/assets/devs69-card-repo-map.svg" width="360" alt="DevS69 Repo Map" />
+        </a>
+        <br />
+        <strong>Repo Visualization</strong><br />
+        Clear map of where source, tests, docs, templates, and tools connect.
+      </td>
+      <td align="center">
+        <a href="#automation-highlights">
+          <img src="docs/assets/devs69-card-diff-flow.svg" width="360" alt="DevS69 Diff Flow" />
+        </a>
+        <br />
+        <strong>Diff-to-Decision Flow</strong><br />
+        Better mental model of how changes become scorecards and release-ready output.
+      </td>
+    </tr>
+  </table>
+
+  <h3>🧩 Repo rearrange + discoverability upgrades</h3>
+
+  <table>
+    <tr><td><strong>Upgrade lane</strong></td><td><strong>What improved</strong></td><td><strong>Why it feels better</strong></td></tr>
+    <tr><td><strong>README hub hierarchy</strong></td><td>Stronger top navigation + grouped visual cards</td><td>Faster first-click orientation for new and returning contributors</td></tr>
+    <tr><td><strong>HUD language</strong></td><td>Product-style terminology (HUD, control center, flow lanes)</td><td>Makes CLI capabilities feel cohesive instead of fragmented</td></tr>
+    <tr><td><strong>Visual repo map</strong></td><td>Added architecture-style map card for repo layout</td><td>Faster understanding of project structure without deep scrolling</td></tr>
+    <tr><td><strong>Diff narrative</strong></td><td>Added diff-to-insight story card and workflow framing</td><td>Better context for audits, reports, and quality governance</td></tr>
+  </table>
+
+  <h3>🛸 What is now uniquely "DevS69"</h3>
+  <ul>
+    <li><strong>Hero-first identity</strong> with live portal alignment and consistent visual rhythm.</li>
+    <li><strong>CLI-as-a-control-center</strong> storytelling across README sections.</li>
+    <li><strong>Repo intelligence framing</strong> (map + diff + output) instead of plain command dumps.</li>
+    <li><strong>Design continuity</strong> between docs portal, README cards, and automation narratives.</li>
+  </ul>
+
   <p style="margin: 14px 0 8px;">
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
     <a href="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml"><img src="https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main" alt="Quality"></a>
