@@ -6,19 +6,19 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day62_community_program_closeout as d62
+from sdetkit import day64_integration_expansion_closeout as d64
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 62 community program closeout contract"
+        description="Validate Day 64 integration expansion closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d62.build_day62_community_program_closeout_summary(root)
+    payload = d64.build_day64_integration_expansion_closeout_summary(root)
     errors: list[str] = []
 
     if payload["summary"]["activation_score"] < 95:
@@ -33,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day62-community-program-closeout-pack/evidence/day62-execution-summary.json"
+            / "docs/artifacts/day64-integration-expansion-closeout-pack/evidence/day64-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day62-community-program-closeout contract check failed:", file=sys.stderr)
+        print("day64-integration-expansion-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day62-community-program-closeout contract check passed")
+    print("day64-integration-expansion-closeout contract check passed")
     return 0
 
 

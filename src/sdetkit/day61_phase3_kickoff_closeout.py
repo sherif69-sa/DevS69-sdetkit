@@ -9,9 +9,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day61-phase3-kickoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY60_SUMMARY_PATH = (
-    "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json"
-)
+_DAY60_SUMMARY_PATH = "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json"
 _DAY60_BOARD_PATH = "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md"
 _SECTION_HEADER = "# Day 61 — Phase-3 kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [

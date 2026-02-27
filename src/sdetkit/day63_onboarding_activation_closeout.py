@@ -9,9 +9,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day63-onboarding-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY62_SUMMARY_PATH = (
-    "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
-)
+_DAY62_SUMMARY_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
 _DAY62_BOARD_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
 _SECTION_HEADER = "# Day 63 — Contributor onboarding activation closeout lane"
 _REQUIRED_SECTIONS = [
@@ -272,7 +270,9 @@ def build_day63_onboarding_activation_closeout_summary(root: Path) -> dict[str, 
         )
 
     if board_count >= 5 and board_has_day62:
-        wins.append(f"Day 62 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 62 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
         misses.append(
             "Day 62 delivery board integrity is incomplete (needs >=5 items and Day 62 anchors)."
@@ -280,7 +280,9 @@ def build_day63_onboarding_activation_closeout_summary(root: Path) -> dict[str, 
         handoff_actions.append("Repair Day 62 delivery board entries to include Day 62 anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
-        wins.append("Onboarding activation contract + quality checklist is fully locked for execution.")
+        wins.append(
+            "Onboarding activation contract + quality checklist is fully locked for execution."
+        )
     else:
         misses.append(
             "Onboarding activation contract, quality checklist, or delivery board entries are missing."

@@ -44,6 +44,7 @@ from . import (
     day61_phase3_kickoff_closeout,
     day62_community_program_closeout,
     day63_onboarding_activation_closeout,
+    day64_integration_expansion_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -264,6 +265,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day63-onboarding-activation-closeout":
         return day63_onboarding_activation_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day64-integration-expansion-closeout":
+        return day64_integration_expansion_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -479,6 +483,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     d63 = sub.add_parser("day63-onboarding-activation-closeout")
     d63.add_argument("args", nargs=argparse.REMAINDER)
 
+    d64 = sub.add_parser("day64-integration-expansion-closeout")
+    d64.add_argument("args", nargs=argparse.REMAINDER)
+
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -680,6 +687,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day63-onboarding-activation-closeout":
         return day63_onboarding_activation_closeout.main(ns.args)
+
+    if ns.cmd == "day64-integration-expansion-closeout":
+        return day64_integration_expansion_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

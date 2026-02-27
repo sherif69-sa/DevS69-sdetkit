@@ -1652,6 +1652,15 @@ See implementation details: [Day 62 big upgrade report](docs/day-62-big-upgrade-
 
 See implementation details: [Day 63 big upgrade report](docs/day-63-big-upgrade-report.md).
 
+### Day 64 — Integration expansion #1 closeout lane
+
+- Run `python -m sdetkit day64-integration-expansion-closeout --format json --strict` to validate Day 64 integration expansion readiness.
+- Emit shareable Day 64 integration expansion pack: `python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict`.
+- Review Day 64 integration guide: [Integration expansion #1 closeout lane](docs/integrations-day64-integration-expansion-closeout.md).
+
+See implementation details: [Day 64 big upgrade report](docs/day-64-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

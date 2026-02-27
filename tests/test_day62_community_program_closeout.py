@@ -85,7 +85,9 @@ def test_day62_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day62-pack/day62-community-program-closeout-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day62-pack/day62-community-program-closeout-summary.json"
+    ).exists()
     assert (tmp_path / "artifacts/day62-pack/day62-community-program-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day62-pack/day62-community-launch-brief.md").exists()
     assert (tmp_path / "artifacts/day62-pack/day62-office-hours-cadence.md").exists()
