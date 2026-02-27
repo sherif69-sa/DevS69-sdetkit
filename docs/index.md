@@ -861,3 +861,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 81 growth campaign closeout pack: `python -m sdetkit day81-growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day81-growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 81 growth campaign closeout lane](integrations-day81-growth-campaign-closeout.md).
+
+
+## Day 82 integration feedback closeout lane
+
+- Read the implementation report: [Day 82 big upgrade report](day-82-big-upgrade-report.md).
+- Run `python -m sdetkit day82-integration-feedback-closeout --format json --strict` to score integration feedback readiness.
+- Emit Day 82 integration feedback closeout pack: `python -m sdetkit day82-integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day82-integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 82 integration feedback closeout lane](integrations-day82-integration-feedback-closeout.md).

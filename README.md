@@ -1824,6 +1824,16 @@ See implementation details: [Day 80 big upgrade report](docs/day-80-big-upgrade-
 
 See implementation details: [Day 81 big upgrade report](docs/day-81-big-upgrade-report.md).
 
+
+### Day 82 — Integration feedback closeout lane
+
+- Run `python -m sdetkit day82-integration-feedback-closeout --format json --strict` to validate Day 82 integration feedback readiness.
+- Emit shareable Day 82 integration feedback pack: `python -m sdetkit day82-integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day82-integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict`.
+- Review Day 82 integration guide: [Integration feedback closeout lane](docs/integrations-day82-integration-feedback-closeout.md).
+
+See implementation details: [Day 82 big upgrade report](docs/day-82-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
