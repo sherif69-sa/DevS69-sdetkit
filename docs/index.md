@@ -879,3 +879,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 83 trust FAQ expansion closeout pack: `python -m sdetkit day83-trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day83-trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 83 trust FAQ expansion closeout lane](integrations-day83-trust-faq-expansion-closeout.md).
+
+## Day 84 evidence narrative closeout lane
+
+- Read the implementation report: [Day 84 big upgrade report](day-84-big-upgrade-report.md).
+- Run `python -m sdetkit day84-evidence-narrative-closeout --format json --strict` to score evidence narrative readiness.
+- Emit Day 84 evidence narrative closeout pack: `python -m sdetkit day84-evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day84-evidence-narrative-closeout --execute --evidence-dir docs/artifacts/day84-evidence-narrative-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 84 evidence narrative closeout lane](integrations-day84-evidence-narrative-closeout.md).

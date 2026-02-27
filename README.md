@@ -1843,6 +1843,15 @@ See implementation details: [Day 82 big upgrade report](docs/day-82-big-upgrade-
 
 See implementation details: [Day 83 big upgrade report](docs/day-83-big-upgrade-report.md).
 
+### Day 84 — Evidence narrative closeout lane
+
+- Run `python -m sdetkit day84-evidence-narrative-closeout --format json --strict` to validate Day 84 evidence narrative readiness.
+- Emit shareable Day 84 evidence narrative pack: `python -m sdetkit day84-evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day84-evidence-narrative-closeout --execute --evidence-dir docs/artifacts/day84-evidence-narrative-closeout-pack/evidence --format json --strict`.
+- Review Day 84 integration guide: [Evidence narrative closeout lane](docs/integrations-day84-evidence-narrative-closeout.md).
+
+See implementation details: [Day 84 big upgrade report](docs/day-84-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
