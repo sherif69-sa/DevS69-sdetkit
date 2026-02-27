@@ -106,25 +106,25 @@
   <table>
     <tr>
       <td align="center">
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/#command-hud">
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/">
           <img src="docs/assets/devs69-card-hud.svg" width="360" alt="DevS69 Command HUD" />
         </a>
         <br />
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/#command-hud"><strong>🕹️ Open Command HUD (large)</strong></a>
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/command-hud-live/"><strong>🕹️ Open Command HUD (large)</strong></a>
       </td>
       <td align="center">
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/#repo-map">
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/repo-map-live/">
           <img src="docs/assets/devs69-card-repo-map.svg" width="360" alt="DevS69 Repo Map" />
         </a>
         <br />
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/#repo-map"><strong>🗺️ Open Repo Map (large)</strong></a>
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/repo-map-live/"><strong>🗺️ Open Repo Map (large)</strong></a>
       </td>
       <td align="center">
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/#diff-to-decision">
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/diff-flow-live/">
           <img src="docs/assets/devs69-card-diff-flow.svg" width="360" alt="DevS69 Diff to Decision" />
         </a>
         <br />
-        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/#diff-to-decision"><strong>🔄 Open Diff Flow (large)</strong></a>
+        <a href="https://sherif69-sa.github.io/DevS69-sdetkit/diff-flow-live/"><strong>🔄 Open Diff Flow (large)</strong></a>
       </td>
     </tr>
   </table>

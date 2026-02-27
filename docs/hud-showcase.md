@@ -6,24 +6,24 @@ Large, clickable visual cards with quick usage hints.
 
 ## Command HUD
 
-[![DevS69 Command HUD](assets/devs69-card-hud.svg)](assets/devs69-card-hud.svg)
+[![DevS69 Command HUD](assets/devs69-card-hud.svg)](command-hud-live.md)
 
 **Quick hint:** Start with `python -m sdetkit doctor --format markdown` to get your baseline health score and next actions.
 
-[Open in live portal](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[Open full Command HUD view](command-hud-live.md)
 
 ## Repo Map
 
-[![DevS69 Repo Map](assets/devs69-card-repo-map.svg)](assets/devs69-card-repo-map.svg)
+[![DevS69 Repo Map](assets/devs69-card-repo-map.svg)](repo-map-live.md)
 
 **Quick hint:** Use this visual to understand where source, tests, docs, templates, and tooling are located.
 
-[Open in live portal](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[Open full Repo Map view](repo-map-live.md)
 
 ## Diff-to-Decision
 
-[![DevS69 Diff-to-Decision](assets/devs69-card-diff-flow.svg)](assets/devs69-card-diff-flow.svg)
+[![DevS69 Diff-to-Decision](assets/devs69-card-diff-flow.svg)](diff-flow-live.md)
 
 **Quick hint:** Follow the sequence: tests → repo audit → security → proof pack → release narrative.
 
-[Open in live portal](https://sherif69-sa.github.io/DevS69-sdetkit/)
+[Open full Diff-to-Decision view](diff-flow-live.md)
