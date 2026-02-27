@@ -32,7 +32,7 @@ jobs:
         run: bash scripts/maintenance_ci.sh full false artifacts/maintenance
 
       - name: Upload baseline artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: weekly-maintenance
           path: |
@@ -60,7 +60,7 @@ jobs:
 
       - name: Upload fix artifacts
         if: steps.decide_fix.outputs.run_fix == 'true'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: weekly-maintenance-fixed
           path: |
