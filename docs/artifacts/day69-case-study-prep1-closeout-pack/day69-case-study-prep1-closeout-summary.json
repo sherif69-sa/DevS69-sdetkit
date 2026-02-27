@@ -1,0 +1,125 @@
+{
+  "name": "day69-case-study-prep1-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day69-case-study-prep1-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day68_summary": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json",
+    "day68_delivery_board": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md",
+    "case_study_data": ".day69-reliability-case-study.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day69_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day69 command lane"
+    },
+    {
+      "check_id": "docs_index_day69_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-69-big-upgrade-report.md + integrations-day69-case-study-prep1-closeout.md"
+    },
+    {
+      "check_id": "top10_day69_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 69 + Day 70 strategy chain"
+    },
+    {
+      "check_id": "day68_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json"
+    },
+    {
+      "check_id": "day68_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md"
+    },
+    {
+      "check_id": "day68_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day68_score": 100,
+        "strict_pass": true,
+        "day68_checks": 14
+      }
+    },
+    {
+      "check_id": "day68_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day68": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 69 \u2014 Case-study prep #1 closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "case_study_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": ".day69-reliability-case-study.json"
+    }
+  ],
+  "rollup": {
+    "day68_activation_score": 100,
+    "day68_checks": 14,
+    "day68_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 68 continuity is strict-pass with activation score=100.",
+    "Day 68 delivery board integrity validated with 5 checklist items.",
+    "Day 69 reliability case-study dataset is available for case-study prep execution.",
+    "Day 69 case-study prep #1 closeout lane is fully complete and ready for Day 70 case-study prep #2."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

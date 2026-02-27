@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_day69_case_study_prep1_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "day69-case-study-prep1-closeout contract check passed\n",
+  "stderr": ""
+}

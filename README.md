@@ -1697,6 +1697,15 @@ See implementation details: [Day 67 big upgrade report](docs/day-67-big-upgrade-
 
 See implementation details: [Day 68 big upgrade report](docs/day-68-big-upgrade-report.md).
 
+### Day 69 — Case-study prep #1 closeout lane
+
+- Run `python -m sdetkit day69-case-study-prep1-closeout --format json --strict` to validate Day 69 case-study prep readiness.
+- Emit shareable Day 69 case-study prep pack: `python -m sdetkit day69-case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day69-case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict`.
+- Review Day 69 integration guide: [Case-study prep #1 closeout lane](docs/integrations-day69-case-study-prep1-closeout.md).
+
+See implementation details: [Day 69 big upgrade report](docs/day-69-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

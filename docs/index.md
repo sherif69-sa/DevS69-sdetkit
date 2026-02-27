@@ -747,3 +747,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 68 integration expansion closeout pack: `python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 68 integration expansion #4 closeout lane](integrations-day68-integration-expansion4-closeout.md).
+
+## Day 69 case-study prep #1 closeout lane
+
+- Read the implementation report: [Day 69 big upgrade report](day-69-big-upgrade-report.md).
+- Run `python -m sdetkit day69-case-study-prep1-closeout --format json --strict` to score case-study prep readiness.
+- Emit Day 69 case-study prep closeout pack: `python -m sdetkit day69-case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day69-case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 69 case-study prep #1 closeout lane](integrations-day69-case-study-prep1-closeout.md).
