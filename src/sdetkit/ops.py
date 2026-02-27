@@ -868,11 +868,14 @@ class _OpsHandler(BaseHTTPRequestHandler):
         self._json(404, {"error": "not found"})
 
 
-def serve(host: str, port: int, history_dir: Path) -> None:
+def create_server(host: str, port: int, history_dir: Path) -> ThreadingHTTPServer:
     _OpsHandler.registry = build_registry()
     _OpsHandler.history_dir = history_dir
-    server = ThreadingHTTPServer((host, port), _OpsHandler)
-    server.serve_forever()
+    return ThreadingHTTPServer((host, port), _OpsHandler)
+
+
+def serve(host: str, port: int, history_dir: Path) -> None:
+    create_server(host, port, history_dir).serve_forever()
 
 
 def main(argv: list[str] | None = None) -> int:

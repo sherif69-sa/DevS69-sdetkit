@@ -53,4 +53,3 @@ Day 80 weighted score (0-100):
 - Contract + command lane integrity (35)
 - Day 79 continuity baseline quality (35)
 - Partner evidence data + delivery board completeness (30)
-

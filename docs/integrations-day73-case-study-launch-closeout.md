@@ -55,4 +55,3 @@ Day 73 weighted score (0-100):
 - Publication-quality evidence data + delivery board completeness (30)
 
 Strict pass requires score >= 95 and zero critical failures.
-
