@@ -816,3 +816,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 76 contributor recognition closeout pack: `python -m sdetkit day76-contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day76-contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 76 contributor recognition closeout lane](integrations-day76-contributor-recognition-closeout.md).
+
+
+## Day 77 community touchpoint closeout lane
+
+- Read the implementation report: [Day 77 big upgrade report](day-77-big-upgrade-report.md).
+- Run `python -m sdetkit day77-community-touchpoint-closeout --format json --strict` to score community touchpoint readiness.
+- Emit Day 77 community touchpoint closeout pack: `python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 77 community touchpoint closeout lane](integrations-day77-community-touchpoint-closeout.md).

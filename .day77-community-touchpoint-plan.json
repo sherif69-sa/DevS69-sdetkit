@@ -1,0 +1,24 @@
+{
+  "plan_id": "day77-community-touchpoint-001",
+  "contributors": [
+    "maintainers",
+    "reviewers",
+    "community-team"
+  ],
+  "touchpoint_tracks": [
+    "office-hours",
+    "community-thread-roundup",
+    "release-highlights"
+  ],
+  "baseline": {
+    "sessions": 1,
+    "participants": 15,
+    "resolved_questions": 5
+  },
+  "target": {
+    "sessions": 3,
+    "participants": 40,
+    "resolved_questions": 18
+  },
+  "owner": "community-ops"
+}

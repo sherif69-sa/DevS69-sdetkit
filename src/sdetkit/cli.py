@@ -57,6 +57,7 @@ from . import (
     day74_distribution_scaling_closeout,
     day75_trust_assets_refresh_closeout,
     day76_contributor_recognition_closeout,
+    day77_community_touchpoint_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -316,6 +317,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day76-contributor-recognition-closeout":
         return day76_contributor_recognition_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day77-community-touchpoint-closeout":
+        return day77_community_touchpoint_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -563,6 +567,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     d75.add_argument("args", nargs=argparse.REMAINDER)
     d76 = sub.add_parser("day76-contributor-recognition-closeout")
     d76.add_argument("args", nargs=argparse.REMAINDER)
+    d77 = sub.add_parser("day77-community-touchpoint-closeout")
+    d77.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
@@ -804,6 +810,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day76-contributor-recognition-closeout":
         return day76_contributor_recognition_closeout.main(ns.args)
+
+    if ns.cmd == "day77-community-touchpoint-closeout":
+        return day77_community_touchpoint_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

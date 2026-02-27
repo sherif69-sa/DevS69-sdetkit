@@ -1774,6 +1774,16 @@ See implementation details: [Day 75 big upgrade report](docs/day-75-big-upgrade-
 
 See implementation details: [Day 76 big upgrade report](docs/day-76-big-upgrade-report.md).
 
+
+### Day 77 — Community touchpoint closeout lane
+
+- Run `python -m sdetkit day77-community-touchpoint-closeout --format json --strict` to validate Day 77 community touchpoint readiness.
+- Emit shareable Day 77 community touchpoint pack: `python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict`.
+- Review Day 77 integration guide: [Community touchpoint closeout lane](docs/integrations-day77-community-touchpoint-closeout.md).
+
+See implementation details: [Day 77 big upgrade report](docs/day-77-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
