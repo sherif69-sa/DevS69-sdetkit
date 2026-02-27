@@ -55,6 +55,7 @@ from . import (
     day72_case_study_prep4_closeout,
     day73_case_study_launch_closeout,
     day74_distribution_scaling_closeout,
+    day75_trust_assets_refresh_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -308,6 +309,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day74-distribution-scaling-closeout":
         return day74_distribution_scaling_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day75-trust-assets-refresh-closeout":
+        return day75_trust_assets_refresh_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -551,6 +555,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     d73.add_argument("args", nargs=argparse.REMAINDER)
     d74 = sub.add_parser("day74-distribution-scaling-closeout")
     d74.add_argument("args", nargs=argparse.REMAINDER)
+    d75 = sub.add_parser("day75-trust-assets-refresh-closeout")
+    d75.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
@@ -786,6 +792,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day74-distribution-scaling-closeout":
         return day74_distribution_scaling_closeout.main(ns.args)
+
+    if ns.cmd == "day75-trust-assets-refresh-closeout":
+        return day75_trust_assets_refresh_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

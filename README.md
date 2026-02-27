@@ -1754,6 +1754,16 @@ See implementation details: [Day 73 big upgrade report](docs/day-73-big-upgrade-
 
 See implementation details: [Day 74 big upgrade report](docs/day-74-big-upgrade-report.md).
 
+
+### Day 75 — Trust assets refresh closeout lane
+
+- Run `python -m sdetkit day75-trust-assets-refresh-closeout --format json --strict` to validate Day 75 trust refresh readiness.
+- Emit shareable Day 75 trust refresh pack: `python -m sdetkit day75-trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day75-trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack/evidence --format json --strict`.
+- Review Day 75 integration guide: [Trust assets refresh closeout lane](docs/integrations-day75-trust-assets-refresh-closeout.md).
+
+See implementation details: [Day 75 big upgrade report](docs/day-75-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

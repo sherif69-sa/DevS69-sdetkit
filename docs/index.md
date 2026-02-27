@@ -798,3 +798,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 74 distribution scaling closeout pack: `python -m sdetkit day74-distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day74-distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 74 distribution scaling closeout lane](integrations-day74-distribution-scaling-closeout.md).
+
+
+## Day 75 trust assets refresh closeout lane
+
+- Read the implementation report: [Day 75 big upgrade report](day-75-big-upgrade-report.md).
+- Run `python -m sdetkit day75-trust-assets-refresh-closeout --format json --strict` to score trust refresh readiness.
+- Emit Day 75 trust assets refresh closeout pack: `python -m sdetkit day75-trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day75-trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 75 trust assets refresh closeout lane](integrations-day75-trust-assets-refresh-closeout.md).
