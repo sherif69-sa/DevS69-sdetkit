@@ -1,0 +1,14 @@
+{
+  "case_id": "day72-publication-quality-001",
+  "metric": "publication-quality-score",
+  "baseline": {
+    "score": 72.1,
+    "window": "day69-day71"
+  },
+  "after": {
+    "score": 91.4,
+    "window": "day72"
+  },
+  "confidence": 0.93,
+  "owner": "quality-systems"
+}
