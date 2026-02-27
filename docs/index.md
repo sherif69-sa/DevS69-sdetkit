@@ -843,3 +843,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 79 scale upgrade closeout pack: `python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day79-scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 79 scale upgrade closeout lane](integrations-day79-scale-upgrade-closeout.md).
+
+
+## Day 80 partner outreach closeout lane
+
+- Read the implementation report: [Day 80 big upgrade report](day-80-big-upgrade-report.md).
+- Run `python -m sdetkit day80-partner-outreach-closeout --format json --strict` to score partner outreach readiness.
+- Emit Day 80 partner outreach closeout pack: `python -m sdetkit day80-partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day80-partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 80 partner outreach closeout lane](integrations-day80-partner-outreach-closeout.md).

@@ -1804,6 +1804,16 @@ See implementation details: [Day 78 big upgrade report](docs/day-78-big-upgrade-
 
 See implementation details: [Day 79 big upgrade report](docs/day-79-big-upgrade-report.md).
 
+
+### Day 80 — Partner outreach closeout lane
+
+- Run `python -m sdetkit day80-partner-outreach-closeout --format json --strict` to validate Day 80 partner outreach readiness.
+- Emit shareable Day 80 partner outreach pack: `python -m sdetkit day80-partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day80-partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict`.
+- Review Day 80 integration guide: [Partner outreach closeout lane](docs/integrations-day80-partner-outreach-closeout.md).
+
+See implementation details: [Day 80 big upgrade report](docs/day-80-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
