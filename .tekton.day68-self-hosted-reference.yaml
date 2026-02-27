@@ -1,0 +1,42 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: day68-self-hosted-enterprise
+spec:
+  description: Day 68 self-hosted enterprise reference pipeline for integration expansion closeout.
+  workspaces:
+    - name: shared-workspace
+  params:
+    - name: branch
+      type: string
+      default: main
+  tasks:
+    - name: policy-preflight
+      when:
+        - input: "$(params.branch)"
+          operator: in
+          values: ["main", "release/*"]
+      taskSpec:
+        steps:
+          - name: policy-check
+            image: python:3.12
+            script: |
+              echo "Running policy checks"
+    - name: integration-test
+      runAfter: ["policy-preflight"]
+      taskSpec:
+        steps:
+          - name: run-tests
+            image: python:3.12
+            script: |
+              echo "Executing integration tests"
+  finally:
+    - name: rollback-guard
+      taskSpec:
+        steps:
+          - name: rollback-decision
+            image: alpine:3.20
+            script: |
+              echo "Evaluate rollback trigger and notify recovery owner"
+  taskRunTemplate:
+    serviceAccountName: self-hosted-runner-sa
