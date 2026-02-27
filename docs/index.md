@@ -922,3 +922,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 88 governance priorities closeout pack: `python -m sdetkit day88-governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day88-governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 88 governance priorities closeout lane](integrations-day88-governance-priorities-closeout.md).
+
+
+## Day 89 governance scale closeout lane
+
+- Read the implementation report: [Day 89 big upgrade report](day-89-big-upgrade-report.md).
+- Run `python -m sdetkit day89-governance-scale-closeout --format json --strict` to score governance scale readiness.
+- Emit Day 89 governance scale closeout pack: `python -m sdetkit day89-governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day89-governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 89 governance scale closeout lane](integrations-day89-governance-scale-closeout.md).
