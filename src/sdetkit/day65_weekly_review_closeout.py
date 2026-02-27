@@ -10,7 +10,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-day65-weekly-review-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY64_SUMMARY_PATH = "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
-_DAY64_BOARD_PATH = "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+_DAY64_BOARD_PATH = (
+    "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+)
 _DAY64_WORKFLOW_PATH = ".github/workflows/day64-advanced-github-actions-reference.yml"
 _SECTION_HEADER = "# Day 65 — Weekly review #9 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -292,7 +294,9 @@ def build_day65_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append("Day 64 workflow reference remains available for weekly KPI baseline review.")
     else:
         misses.append("Day 64 workflow reference is missing for weekly review context.")
-        handoff_actions.append("Restore day64 workflow reference before publishing Day 65 outcomes.")
+        handoff_actions.append(
+            "Restore day64 workflow reference before publishing Day 65 outcomes."
+        )
 
     if not failed and not critical_failures:
         wins.append(
@@ -307,8 +311,12 @@ def build_day65_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day64_summary": str(day64_summary.relative_to(root)) if day64_summary.exists() else str(day64_summary),
-            "day64_delivery_board": str(day64_board.relative_to(root)) if day64_board.exists() else str(day64_board),
+            "day64_summary": str(day64_summary.relative_to(root))
+            if day64_summary.exists()
+            else str(day64_summary),
+            "day64_delivery_board": str(day64_board.relative_to(root))
+            if day64_board.exists()
+            else str(day64_board),
             "day64_workflow": _DAY64_WORKFLOW_PATH,
         },
         "checks": checks,
@@ -355,7 +363,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "day65-weekly-review-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "day65-weekly-brief.md", "# Day 65 weekly brief\n")
     _write(target / "day65-kpi-dashboard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day65-governance-decision-register.md", "# Day 65 governance decision register\n")
+    _write(
+        target / "day65-governance-decision-register.md", "# Day 65 governance decision register\n"
+    )
     _write(target / "day65-risk-ledger.csv", "risk_id,severity,owner,mitigation,status\n")
     _write(target / "day65-execution-log.md", "# Day 65 execution log\n")
     _write(

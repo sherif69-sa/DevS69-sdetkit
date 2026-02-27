@@ -1,301 +1,121 @@
 {
   "entries": [
     {
-      "column": 14,
-      "fingerprint": "39c756661128d749ee90c613",
-      "line": 52,
+      "column": 19,
+      "fingerprint": "6968ba85ec30278a0eef4ce9",
+      "line": 25,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day25-community-pack/day25-community-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 14,
-      "fingerprint": "2074db91e077dcef2e3c6651",
-      "line": 52,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 14,
-      "fingerprint": "8df29f4c590bda35be9c79c9",
-      "line": 52,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 14,
-      "fingerprint": "ded4de2c866dbb42ace0ad3d",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 14,
-      "fingerprint": "71ef4bf996bfb1b0fdc51ab2",
-      "line": 44,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json",
+      "path": "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "606debf20f573ccde7968a14",
-      "line": 65,
+      "fingerprint": "ede4fa790a68e5aab540118a",
+      "line": 25,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json",
+      "path": "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "f617a525e1070502df3d05e6",
-      "line": 81,
+      "fingerprint": "1e955060f848bf4100b28154",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json",
+      "path": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "e3e852cb7d6416b910c0dc62",
-      "line": 53,
+      "fingerprint": "bcf89934d894fdea82399f62",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json",
+      "path": "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "5d84066b840c057d38bb0b68",
-      "line": 53,
+      "fingerprint": "191ef0063c4acb5fc01a61e5",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json",
+      "path": "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-integration-expansion3-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "9ae9f4256dff1bdca5009829",
-      "line": 53,
+      "fingerprint": "227d562a27fa9e1b99f9b91f",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json",
+      "path": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "0a36a58249c19423c7eed019",
-      "line": 53,
+      "fingerprint": "976f831630f74deea67f2a03",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json",
+      "path": "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "d559847ed1c9539f1fe77d03",
-      "line": 53,
+      "fingerprint": "481c35d10d7ad10a7bd47c51",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json",
+      "path": "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "4b52502bd99eadf98c9d4dde",
-      "line": 99,
+      "fingerprint": "b3036f7e556ec7ab02e113d0",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json",
+      "path": "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "613aa2a2731a7d1c289f8da2",
-      "line": 53,
+      "fingerprint": "6d58848049c5c97b261afe65",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json",
+      "path": "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "00b45f5e0a8f6e659b4561ce",
-      "line": 53,
+      "fingerprint": "a2da065a9dbf6b3d884250af",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json",
+      "path": "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
       "column": 19,
-      "fingerprint": "c94aeac046c496c68774bf1c",
-      "line": 99,
+      "fingerprint": "0dd90e9cfcf8c39b29018c7b",
+      "line": 26,
       "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "901b01fe4b2eb192a5805adc",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "f558d2e8eb3aa9431f264628",
-      "line": 99,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "e3aef6094842306c729d2eb2",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "25b678fc2210b7310cbafe57",
-      "line": 99,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "16aa1acc7235bc1bc49db350",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "dc394ebede6184005f950f58",
-      "line": 99,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "7c3e91521c637393b9add547",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day47-reliability-closeout-pack/day47-reliability-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "75d524d2d4518e533dcde75a",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "eeccf6a64cda69d6ce7b907e",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "dc2585728b6ae40ea065a758",
-      "line": 99,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "aaee97bf5766ace342990a49",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 19,
-      "fingerprint": "084c65d9db2d21f586b5617a",
-      "line": 53,
-      "message": "High-entropy string literal detected.",
-      "path": "docs/artifacts/day53-docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 21,
-      "fingerprint": "b1ff18475feee18ecb596857",
-      "line": 116,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/community_activation.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 5,
-      "fingerprint": "bf05cabe865530ecd9a85059",
-      "line": 135,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/community_activation.py",
+      "path": "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
@@ -321,26 +141,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "938311efdf5fe088b080d54a",
-      "line": 159,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day28_weekly_review.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 9,
-      "fingerprint": "3b89bbef4a6346de7b64c0ad",
-      "line": 200,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day28_weekly_review.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "e3182322969fa4f8156107fb",
       "line": 421,
@@ -348,16 +148,6 @@
       "path": "src/sdetkit/day28_weekly_review.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "3d8b39bb9f37f4c680d5e4bb",
-      "line": 155,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day29_phase1_hardening.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -381,26 +171,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "da9caa6becd175091a950bbc",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day31_phase2_kickoff.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "cc5d9da6517468ec23e7e15b",
-      "line": 238,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day31_phase2_kickoff.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "a5ae7ff14e400bf7a55024a2",
       "line": 493,
@@ -408,16 +178,6 @@
       "path": "src/sdetkit/day31_phase2_kickoff.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "4988223ba603219e088996c9",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day32_release_cadence.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -441,16 +201,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "049550a615fdb224f07139c3",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day34_demo_asset2.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "ca62a32f607cb8a9503a9d2c",
       "line": 516,
@@ -458,16 +208,6 @@
       "path": "src/sdetkit/day34_demo_asset2.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "d9436d47b0f3aa64ff53f609",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day35_kpi_instrumentation.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -481,16 +221,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "a0b116ec0f99595aa35e99aa",
-      "line": 224,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day36_distribution_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "8fe5da3ec8d32d9e6f1a609d",
       "line": 525,
@@ -498,26 +228,6 @@
       "path": "src/sdetkit/day36_distribution_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "16eb1c9126915d2085fcd773",
-      "line": 224,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day37_experiment_lane.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "76fdcf4df0420500044d1137",
-      "line": 268,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day37_experiment_lane.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -531,16 +241,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "7cbfb8298e7c24254fee6bc7",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day38_distribution_batch.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "6d3220bf2e5c202bf44470ae",
       "line": 554,
@@ -548,16 +248,6 @@
       "path": "src/sdetkit/day38_distribution_batch.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "1ffef8e73e587085ddb5eafa",
-      "line": 224,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day39_playbook_post.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -581,16 +271,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "040a3ddbdf7a0c5dbc5f6ef2",
-      "line": 261,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day41_expansion_automation.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "696ee89f865147c81f57b833",
       "line": 546,
@@ -598,26 +278,6 @@
       "path": "src/sdetkit/day41_expansion_automation.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "dcb3e42332b3708d633940aa",
-      "line": 219,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day42_optimization_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "51bf2baa6786b78e745e26ca",
-      "line": 263,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day42_optimization_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -638,16 +298,6 @@
       "path": "src/sdetkit/day42_optimization_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "67580bc2934fc91dcd086529",
-      "line": 219,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day43_acceleration_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -691,26 +341,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "f27d157f178ee17c2cace761",
-      "line": 217,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day45_expansion_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "70f6ae2ededdd671e6a6abda",
-      "line": 261,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day45_expansion_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "1be5f5232ed7398dafa2601b",
       "line": 483,
@@ -728,26 +358,6 @@
       "path": "src/sdetkit/day45_expansion_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "0478cd4ecd7524a6e84817ab",
-      "line": 218,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day46_optimization_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "cf4d8975a21739ef301a1816",
-      "line": 262,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day46_optimization_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -771,16 +381,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "263f0820f3c52ebadb576f19",
-      "line": 218,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day47_reliability_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "1d3e202b284288524d198724",
       "line": 484,
@@ -798,16 +398,6 @@
       "path": "src/sdetkit/day47_reliability_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "a5211c7245209327577345d5",
-      "line": 218,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day48_objection_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -831,16 +421,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "48f51b8fab80ac9696e3d1f9",
-      "line": 218,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day49_weekly_review_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "874501f780a76ac968632515",
       "line": 486,
@@ -858,16 +438,6 @@
       "path": "src/sdetkit/day49_weekly_review_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "205e2511216f6bf883d709ad",
-      "line": 266,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day50_execution_prioritization_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -911,16 +481,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "7f2c3c0c8ff4706ead239e54",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day52_narrative_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 8,
       "fingerprint": "7aa217d0c3f638321d3e117e",
       "line": 486,
@@ -938,16 +498,6 @@
       "path": "src/sdetkit/day52_narrative_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "9bb95dd6ec1222d8224b9ae5",
-      "line": 222,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day53_docs_loop_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -981,16 +531,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "646e30fa0c2772df2d8eec69",
-      "line": 218,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day56_stabilization_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 4,
       "fingerprint": "4248e9fd1c2f37a7b5b36612",
       "line": 434,
@@ -998,16 +538,6 @@
       "path": "src/sdetkit/day56_stabilization_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "eed19af63ea48a65331292b4",
-      "line": 211,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day57_kpi_deep_audit_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -1021,16 +551,6 @@
       "suggestion": ""
     },
     {
-      "column": 25,
-      "fingerprint": "3056a0342c05f6efd6f1d9aa",
-      "line": 193,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day58_phase2_hardening_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
       "column": 4,
       "fingerprint": "2408ca0e60090efcaf71a5f8",
       "line": 426,
@@ -1038,16 +558,6 @@
       "path": "src/sdetkit/day58_phase2_hardening_closeout.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "24444b68e0d25109976d88a3",
-      "line": 182,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/day59_phase3_preplan_closeout.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -1071,23 +581,513 @@
       "suggestion": ""
     },
     {
-      "column": 21,
-      "fingerprint": "0b0bda38d724935d21b197e3",
-      "line": 116,
+      "column": 4,
+      "fingerprint": "4866ae92027917ea2b18b575",
+      "line": 415,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day61_phase3_kickoff_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "b2ccde9dc7705ed0dc76b54f",
+      "line": 184,
       "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/external_contribution_push.py",
+      "path": "src/sdetkit/day62_community_program_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
       "suggestion": ""
     },
     {
-      "column": 5,
-      "fingerprint": "a180e27336ec6dce0e5fd945",
-      "line": 142,
+      "column": 4,
+      "fingerprint": "072a94f45907f54a19e83164",
+      "line": 422,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day62_community_program_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "9c9b08bd96b27f734f8d336f",
+      "line": 182,
       "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/external_contribution_push.py",
+      "path": "src/sdetkit/day63_onboarding_activation_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "f0e4ee28f30916a3dc289109",
+      "line": 419,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day63_onboarding_activation_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "1ffdf84557089c3ca8a90f4f",
+      "line": 196,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day64_integration_expansion_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "2bddc6ab6486c279c128e8a2",
+      "line": 435,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day64_integration_expansion_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "b4782b8b04494ab7a09969c1",
+      "line": 187,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day65_weekly_review_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "76b4a9727d5927cc49bdee62",
+      "line": 428,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day65_weekly_review_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "70b1729b94cfbbb5d9ade655",
+      "line": 439,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day66_integration_expansion2_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "651c0ad0f48257ce6d9a87a4",
+      "line": 196,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day67_integration_expansion3_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "245b27a818059c38d8b5c86f",
+      "line": 439,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day67_integration_expansion3_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "ce0d492fb7ad4da28d93e09e",
+      "line": 196,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day68_integration_expansion4_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "9365b78da84504cc3d1586fb",
+      "line": 439,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day68_integration_expansion4_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "8c6d1963320b4405bac71a69",
+      "line": 191,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day69_case_study_prep1_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "4c79e5b38d8f9d937ce124b6",
+      "line": 432,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day69_case_study_prep1_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "93759603d6863896035429c5",
+      "line": 430,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day70_case_study_prep2_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "957face960e8abe95782a0b2",
+      "line": 430,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day71_case_study_prep3_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "4428619020da00d5e7ec4e48",
+      "line": 189,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day72_case_study_prep4_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "05e05586c1721b232e8b88a4",
+      "line": 430,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day72_case_study_prep4_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "f88f3fc26b9163d826d89f12",
+      "line": 189,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day73_case_study_launch_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "d2f7011161c2be240b4d3dd6",
+      "line": 426,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day73_case_study_launch_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "15af5187ad9d8cf1ff548040",
+      "line": 189,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day74_distribution_scaling_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "5fe4f68e4f155655d9c11bd7",
+      "line": 430,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day74_distribution_scaling_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "1cc569d1d0b0806343337f52",
+      "line": 188,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day75_trust_assets_refresh_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "65cc26f18a29c02d95e3a47e",
+      "line": 427,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day75_trust_assets_refresh_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "1a3ce72b3210fcd2b716681f",
+      "line": 188,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day76_contributor_recognition_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "d594f609383871487ca9b3a8",
+      "line": 436,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day76_contributor_recognition_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "62a58c226f44f95ca4bc2fdf",
+      "line": 432,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day77_community_touchpoint_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "fed94e75bb211d8c66a20a93",
+      "line": 188,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day78_ecosystem_priorities_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "87950bb8979894d5a7499feb",
+      "line": 428,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day78_ecosystem_priorities_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "a07fd861655788e660312f1b",
+      "line": 186,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day79_scale_upgrade_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "3083e27a5074c4fb349ff9df",
+      "line": 425,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day79_scale_upgrade_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "863b629e4b3fec6fdc72f50f",
+      "line": 430,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day80_partner_outreach_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "831b416e1d458144a92cd0e6",
+      "line": 423,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day81_growth_campaign_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "2b82c4cfe58696a0918af90e",
+      "line": 195,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day82_integration_feedback_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "9a6629b506389e79cd66018b",
+      "line": 438,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day82_integration_feedback_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "9c22645574a2088a0bc77210",
+      "line": 195,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day83_trust_faq_expansion_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "08addc62aef6423d40052743",
+      "line": 439,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day83_trust_faq_expansion_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "3d0d6706f715a41258d0a3d8",
+      "line": 185,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day84_evidence_narrative_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "4ca475758c806e7ad8fff537",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day84_evidence_narrative_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "c2126ea666aa5591879b0762",
+      "line": 185,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day85_release_prioritization_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "892a454d58dea7f3cc0946ec",
+      "line": 433,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day85_release_prioritization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "63e7a82a9e38d4df8c83ce77",
+      "line": 187,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day86_launch_readiness_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "636e53665f1e1d1fa930546b",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day86_launch_readiness_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "23bc4dee039ce17ba95ea4af",
+      "line": 185,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day87_governance_handoff_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "2bdd5bf8cef5086444844cb9",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day87_governance_handoff_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "a6dddd3a7217f9adec1908aa",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day88_governance_priorities_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 25,
+      "fingerprint": "d3c0c0ebee5853f421b2d45b",
+      "line": 187,
+      "message": "High-entropy string literal detected.",
+      "path": "src/sdetkit/day89_governance_scale_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "4da5201bcf88abef3e00fe2d",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day89_governance_scale_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "52f48b1d397a11d6601b9d6a",
+      "line": 435,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day90_phase3_wrap_publication_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
       "suggestion": ""
     },
     {
@@ -1118,26 +1118,6 @@
       "path": "src/sdetkit/faq_objections.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 25,
-      "fingerprint": "a6ee98a6382d5127752be5b6",
-      "line": 203,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/kpi_audit.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 9,
-      "fingerprint": "0c0e20ed0973e605ac134948",
-      "line": 245,
-      "message": "High-entropy string literal detected.",
-      "path": "src/sdetkit/kpi_audit.py",
-      "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "severity": "warn",
       "suggestion": ""
     },
     {
@@ -1176,36 +1156,6 @@
       "line": 438,
       "message": "print(...) found in src/.",
       "path": "src/sdetkit/onboarding_time_upgrade.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "b6688cf3ca33e69e85eff0ae",
-      "line": 1062,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/premium_gate_engine.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "73d25e67dfd1239174f9bf85",
-      "line": 1064,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/premium_gate_engine.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "e662995eaa7660406b17e290",
-      "line": 1066,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/premium_gate_engine.py",
       "rule_id": "SEC_DEBUG_PRINT",
       "severity": "info",
       "suggestion": ""

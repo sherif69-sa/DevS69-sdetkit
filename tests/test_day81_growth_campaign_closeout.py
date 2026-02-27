@@ -27,7 +27,10 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/day-81-big-upgrade-report.md").write_text("# Day 81 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -113,7 +116,8 @@ def test_day81_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_day81_strict_fails_without_day80(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
+        tmp_path
+        / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
     ).unlink()
     assert d81.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

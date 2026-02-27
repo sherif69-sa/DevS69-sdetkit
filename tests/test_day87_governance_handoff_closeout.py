@@ -27,7 +27,10 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/day-87-big-upgrade-report.md").write_text("# Day 87 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -98,7 +101,9 @@ def test_day87_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day87-pack/day87-governance-handoff-closeout-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day87-pack/day87-governance-handoff-closeout-summary.json"
+    ).exists()
     assert (tmp_path / "artifacts/day87-pack/day87-governance-handoff-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day87-pack/day87-evidence-brief.md").exists()
     assert (tmp_path / "artifacts/day87-pack/day87-governance-handoff-plan.md").exists()
@@ -113,12 +118,17 @@ def test_day87_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day87_strict_fails_without_day86(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+    ).unlink()
     assert d87.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
 def test_day87_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day87-governance-handoff-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day87-governance-handoff-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 87 governance handoff closeout summary" in capsys.readouterr().out

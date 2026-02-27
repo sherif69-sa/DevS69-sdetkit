@@ -10,7 +10,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-day78-ecosystem-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY77_SUMMARY_PATH = "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json"
-_DAY77_BOARD_PATH = "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
+_DAY77_BOARD_PATH = (
+    "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
+)
 _PLAN_PATH = ".day78-ecosystem-priorities-plan.json"
 _SECTION_HEADER = "# Day 78 — Ecosystem priorities closeout lane"
 _REQUIRED_SECTIONS = [
@@ -53,7 +55,14 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 78 ecosystem KPI scorecard snapshot exported",
     "- [ ] Day 79 scale priorities drafted from Day 78 learnings",
 ]
-_REQUIRED_DATA_KEYS = ['"plan_id"', '"contributors"', '"ecosystem_tracks"', '"baseline"', '"target"', '"owner"']
+_REQUIRED_DATA_KEYS = [
+    '"plan_id"',
+    '"contributors"',
+    '"ecosystem_tracks"',
+    '"baseline"',
+    '"target"',
+    '"owner"',
+]
 
 _DAY78_DEFAULT_PAGE = """# Day 78 — Ecosystem priorities closeout lane
 
@@ -125,7 +134,11 @@ def _load_day77(summary_path: Path) -> tuple[int, bool, int]:
     data = json.loads(summary_path.read_text(encoding="utf-8"))
     summary = data.get("summary", {})
     checks = data.get("checks", [])
-    return int(summary.get("activation_score", 0)), bool(summary.get("strict_pass", False)), len(checks)
+    return (
+        int(summary.get("activation_score", 0)),
+        bool(summary.get("strict_pass", False)),
+        len(checks),
+    )
 
 
 def _count_board_items(board_path: Path, anchor: str) -> tuple[int, bool]:
@@ -156,21 +169,48 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
     missing_plan_keys = [x for x in _REQUIRED_DATA_KEYS if x not in plan_text]
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "readme_day78_command", "weight": 7, "passed": ("day78-ecosystem-priorities-closeout" in readme_text), "evidence": "README day78 command lane"},
+        {
+            "check_id": "readme_day78_command",
+            "weight": 7,
+            "passed": ("day78-ecosystem-priorities-closeout" in readme_text),
+            "evidence": "README day78 command lane",
+        },
         {
             "check_id": "docs_index_day78_links",
             "weight": 8,
-            "passed": ("day-78-big-upgrade-report.md" in docs_index_text and "integrations-day78-ecosystem-priorities-closeout.md" in docs_index_text),
+            "passed": (
+                "day-78-big-upgrade-report.md" in docs_index_text
+                and "integrations-day78-ecosystem-priorities-closeout.md" in docs_index_text
+            ),
             "evidence": "day-78-big-upgrade-report.md + integrations-day78-ecosystem-priorities-closeout.md",
         },
-        {"check_id": "top10_day78_alignment", "weight": 5, "passed": ("Day 77" in top10_text and "Day 78" in top10_text), "evidence": "Day 77 + Day 78 strategy chain"},
-        {"check_id": "day77_summary_present", "weight": 10, "passed": day77_summary.exists(), "evidence": str(day77_summary)},
-        {"check_id": "day77_delivery_board_present", "weight": 7, "passed": day77_board.exists(), "evidence": str(day77_board)},
+        {
+            "check_id": "top10_day78_alignment",
+            "weight": 5,
+            "passed": ("Day 77" in top10_text and "Day 78" in top10_text),
+            "evidence": "Day 77 + Day 78 strategy chain",
+        },
+        {
+            "check_id": "day77_summary_present",
+            "weight": 10,
+            "passed": day77_summary.exists(),
+            "evidence": str(day77_summary),
+        },
+        {
+            "check_id": "day77_delivery_board_present",
+            "weight": 7,
+            "passed": day77_board.exists(),
+            "evidence": str(day77_board),
+        },
         {
             "check_id": "day77_quality_floor",
             "weight": 13,
             "passed": day77_score >= 85,
-            "evidence": {"day77_score": day77_score, "strict_pass": day77_strict, "day77_checks": day77_check_count},
+            "evidence": {
+                "day77_score": day77_score,
+                "strict_pass": day77_strict,
+                "day77_checks": day77_check_count,
+            },
         },
         {
             "check_id": "day77_board_integrity",
@@ -178,20 +218,55 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
             "passed": board_count >= 5 and board_has_day77,
             "evidence": {"board_items": board_count, "contains_day77": board_has_day77},
         },
-        {"check_id": "page_header", "weight": 7, "passed": _SECTION_HEADER in page_text, "evidence": _SECTION_HEADER},
-        {"check_id": "required_sections", "weight": 8, "passed": not missing_sections, "evidence": missing_sections or "all sections present"},
-        {"check_id": "required_commands", "weight": 5, "passed": not missing_commands, "evidence": missing_commands or "all commands present"},
-        {"check_id": "contract_lock", "weight": 5, "passed": not missing_contract_lines, "evidence": missing_contract_lines or "contract locked"},
-        {"check_id": "quality_checklist_lock", "weight": 5, "passed": not missing_quality_lines, "evidence": missing_quality_lines or "quality checklist locked"},
-        {"check_id": "delivery_board_lock", "weight": 5, "passed": not missing_board_items, "evidence": missing_board_items or "delivery board locked"},
-        {"check_id": "ecosystem_plan_data_present", "weight": 10, "passed": not missing_plan_keys, "evidence": missing_plan_keys or _PLAN_PATH},
+        {
+            "check_id": "page_header",
+            "weight": 7,
+            "passed": _SECTION_HEADER in page_text,
+            "evidence": _SECTION_HEADER,
+        },
+        {
+            "check_id": "required_sections",
+            "weight": 8,
+            "passed": not missing_sections,
+            "evidence": missing_sections or "all sections present",
+        },
+        {
+            "check_id": "required_commands",
+            "weight": 5,
+            "passed": not missing_commands,
+            "evidence": missing_commands or "all commands present",
+        },
+        {
+            "check_id": "contract_lock",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": missing_contract_lines or "contract locked",
+        },
+        {
+            "check_id": "quality_checklist_lock",
+            "weight": 5,
+            "passed": not missing_quality_lines,
+            "evidence": missing_quality_lines or "quality checklist locked",
+        },
+        {
+            "check_id": "delivery_board_lock",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": missing_board_items or "delivery board locked",
+        },
+        {
+            "check_id": "ecosystem_plan_data_present",
+            "weight": 10,
+            "passed": not missing_plan_keys,
+            "evidence": missing_plan_keys or _PLAN_PATH,
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
     if not day77_summary.exists() or not day77_board.exists():
         critical_failures.append("day77_handoff_inputs")
-    
+
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
@@ -200,22 +275,32 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
         wins.append(f"Day 77 continuity baseline is stable with activation score={day77_score}.")
     else:
         misses.append("Day 77 continuity baseline is below the floor (<85).")
-        handoff_actions.append("Re-run Day 77 closeout command and raise baseline quality above 85 before Day 78 lock.")
+        handoff_actions.append(
+            "Re-run Day 77 closeout command and raise baseline quality above 85 before Day 78 lock."
+        )
 
     if board_count >= 5 and board_has_day77:
-        wins.append(f"Day 77 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 77 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 77 delivery board integrity is incomplete (needs >=5 items and Day 77 anchors).")
+        misses.append(
+            "Day 77 delivery board integrity is incomplete (needs >=5 items and Day 77 anchors)."
+        )
         handoff_actions.append("Repair Day 77 delivery board entries to include Day 77 anchors.")
 
     if not missing_plan_keys:
         wins.append("Day 78 ecosystem priorities dataset is available for launch execution.")
     else:
         misses.append("Day 78 ecosystem priorities dataset is missing required keys.")
-        handoff_actions.append("Update .day78-ecosystem-priorities-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update .day78-ecosystem-priorities-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 78 ecosystem priorities closeout lane is fully complete and ready for Day 79 scale priorities.")
+        wins.append(
+            "Day 78 ecosystem priorities closeout lane is fully complete and ready for Day 79 scale priorities."
+        )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
@@ -225,12 +310,20 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day77_summary": str(day77_summary.relative_to(root)) if day77_summary.exists() else str(day77_summary),
-            "day77_delivery_board": str(day77_board.relative_to(root)) if day77_board.exists() else str(day77_board),
+            "day77_summary": str(day77_summary.relative_to(root))
+            if day77_summary.exists()
+            else str(day77_summary),
+            "day77_delivery_board": str(day77_board.relative_to(root))
+            if day77_board.exists()
+            else str(day77_board),
             "ecosystem_priorities_plan": _PLAN_PATH,
         },
         "checks": checks,
-        "rollup": {"day77_activation_score": day77_score, "day77_checks": day77_check_count, "day77_delivery_board_items": board_count},
+        "rollup": {
+            "day77_activation_score": day77_score,
+            "day77_checks": day77_check_count,
+            "day77_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -262,15 +355,27 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "day78-ecosystem-priorities-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(
+        target / "day78-ecosystem-priorities-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
     _write(target / "day78-ecosystem-priorities-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "day78-integration-brief.md", "# Day 78 integration brief\n")
     _write(target / "day78-ecosystem-priorities-plan.md", "# Day 78 ecosystem priorities plan\n")
-    _write(target / "day78-ecosystem-workstream-ledger.json", json.dumps({"workstreams": []}, indent=2) + "\n")
+    _write(
+        target / "day78-ecosystem-workstream-ledger.json",
+        json.dumps({"workstreams": []}, indent=2) + "\n",
+    )
     _write(target / "day78-ecosystem-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(target / "day78-execution-log.md", "# Day 78 execution log\n")
-    _write(target / "day78-delivery-board.md", "\n".join(["# Day 78 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n")
-    _write(target / "day78-validation-commands.md", "# Day 78 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day78-delivery-board.md",
+        "\n".join(["# Day 78 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+    )
+    _write(
+        target / "day78-validation-commands.md",
+        "# Day 78 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -279,10 +384,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
         result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
-        event = {"command": command, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(out_dir / "day78-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        out_dir / "day78-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -305,7 +418,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))

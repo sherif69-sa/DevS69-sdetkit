@@ -10,7 +10,9 @@ from sdetkit import day89_governance_scale_closeout as d89
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 89 governance scale closeout contract")
+    parser = argparse.ArgumentParser(
+        description="Validate Day 89 governance scale closeout contract"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -29,7 +31,10 @@ def main() -> int:
         errors.append("critical_failures is not empty")
 
     if not ns.skip_evidence:
-        evidence = root / "docs/artifacts/day89-governance-scale-closeout-pack/evidence/day89-execution-summary.json"
+        evidence = (
+            root
+            / "docs/artifacts/day89-governance-scale-closeout-pack/evidence/day89-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
         else:

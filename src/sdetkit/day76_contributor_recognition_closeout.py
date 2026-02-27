@@ -10,7 +10,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-day76-contributor-recognition-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY75_SUMMARY_PATH = "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
-_DAY75_BOARD_PATH = "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
+_DAY75_BOARD_PATH = (
+    "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
+)
 _PLAN_PATH = ".day76-contributor-recognition-plan.json"
 _SECTION_HEADER = "# Day 76 — Contributor recognition closeout lane"
 _REQUIRED_SECTIONS = [
@@ -53,7 +55,14 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 76 recognition KPI scorecard snapshot exported",
     "- [ ] Day 77 scale priorities drafted from Day 76 learnings",
 ]
-_REQUIRED_DATA_KEYS = ['"plan_id"', '"contributors"', '"recognition_tracks"', '"baseline"', '"target"', '"owner"']
+_REQUIRED_DATA_KEYS = [
+    '"plan_id"',
+    '"contributors"',
+    '"recognition_tracks"',
+    '"baseline"',
+    '"target"',
+    '"owner"',
+]
 
 _DAY76_DEFAULT_PAGE = """# Day 76 — Contributor recognition closeout lane
 
@@ -125,7 +134,11 @@ def _load_day75(summary_path: Path) -> tuple[int, bool, int]:
     data = json.loads(summary_path.read_text(encoding="utf-8"))
     summary = data.get("summary", {})
     checks = data.get("checks", [])
-    return int(summary.get("activation_score", 0)), bool(summary.get("strict_pass", False)), len(checks)
+    return (
+        int(summary.get("activation_score", 0)),
+        bool(summary.get("strict_pass", False)),
+        len(checks),
+    )
 
 
 def _count_board_items(board_path: Path, anchor: str) -> tuple[int, bool]:
@@ -156,21 +169,48 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
     missing_plan_keys = [x for x in _REQUIRED_DATA_KEYS if x not in plan_text]
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "readme_day76_command", "weight": 7, "passed": ("day76-contributor-recognition-closeout" in readme_text), "evidence": "README day76 command lane"},
+        {
+            "check_id": "readme_day76_command",
+            "weight": 7,
+            "passed": ("day76-contributor-recognition-closeout" in readme_text),
+            "evidence": "README day76 command lane",
+        },
         {
             "check_id": "docs_index_day76_links",
             "weight": 8,
-            "passed": ("day-76-big-upgrade-report.md" in docs_index_text and "integrations-day76-contributor-recognition-closeout.md" in docs_index_text),
+            "passed": (
+                "day-76-big-upgrade-report.md" in docs_index_text
+                and "integrations-day76-contributor-recognition-closeout.md" in docs_index_text
+            ),
             "evidence": "day-76-big-upgrade-report.md + integrations-day76-contributor-recognition-closeout.md",
         },
-        {"check_id": "top10_day76_alignment", "weight": 5, "passed": ("Day 75" in top10_text and "Day 76" in top10_text), "evidence": "Day 75 + Day 76 strategy chain"},
-        {"check_id": "day75_summary_present", "weight": 10, "passed": day75_summary.exists(), "evidence": str(day75_summary)},
-        {"check_id": "day75_delivery_board_present", "weight": 7, "passed": day75_board.exists(), "evidence": str(day75_board)},
+        {
+            "check_id": "top10_day76_alignment",
+            "weight": 5,
+            "passed": ("Day 75" in top10_text and "Day 76" in top10_text),
+            "evidence": "Day 75 + Day 76 strategy chain",
+        },
+        {
+            "check_id": "day75_summary_present",
+            "weight": 10,
+            "passed": day75_summary.exists(),
+            "evidence": str(day75_summary),
+        },
+        {
+            "check_id": "day75_delivery_board_present",
+            "weight": 7,
+            "passed": day75_board.exists(),
+            "evidence": str(day75_board),
+        },
         {
             "check_id": "day75_quality_floor",
             "weight": 13,
             "passed": day75_strict and day75_score >= 95,
-            "evidence": {"day75_score": day75_score, "strict_pass": day75_strict, "day75_checks": day75_check_count},
+            "evidence": {
+                "day75_score": day75_score,
+                "strict_pass": day75_strict,
+                "day75_checks": day75_check_count,
+            },
         },
         {
             "check_id": "day75_board_integrity",
@@ -178,13 +218,48 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
             "passed": board_count >= 5 and board_has_day75,
             "evidence": {"board_items": board_count, "contains_day75": board_has_day75},
         },
-        {"check_id": "page_header", "weight": 7, "passed": _SECTION_HEADER in page_text, "evidence": _SECTION_HEADER},
-        {"check_id": "required_sections", "weight": 8, "passed": not missing_sections, "evidence": missing_sections or "all sections present"},
-        {"check_id": "required_commands", "weight": 5, "passed": not missing_commands, "evidence": missing_commands or "all commands present"},
-        {"check_id": "contract_lock", "weight": 5, "passed": not missing_contract_lines, "evidence": missing_contract_lines or "contract locked"},
-        {"check_id": "quality_checklist_lock", "weight": 5, "passed": not missing_quality_lines, "evidence": missing_quality_lines or "quality checklist locked"},
-        {"check_id": "delivery_board_lock", "weight": 5, "passed": not missing_board_items, "evidence": missing_board_items or "delivery board locked"},
-        {"check_id": "recognition_plan_data_present", "weight": 10, "passed": not missing_plan_keys, "evidence": missing_plan_keys or _PLAN_PATH},
+        {
+            "check_id": "page_header",
+            "weight": 7,
+            "passed": _SECTION_HEADER in page_text,
+            "evidence": _SECTION_HEADER,
+        },
+        {
+            "check_id": "required_sections",
+            "weight": 8,
+            "passed": not missing_sections,
+            "evidence": missing_sections or "all sections present",
+        },
+        {
+            "check_id": "required_commands",
+            "weight": 5,
+            "passed": not missing_commands,
+            "evidence": missing_commands or "all commands present",
+        },
+        {
+            "check_id": "contract_lock",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": missing_contract_lines or "contract locked",
+        },
+        {
+            "check_id": "quality_checklist_lock",
+            "weight": 5,
+            "passed": not missing_quality_lines,
+            "evidence": missing_quality_lines or "quality checklist locked",
+        },
+        {
+            "check_id": "delivery_board_lock",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": missing_board_items or "delivery board locked",
+        },
+        {
+            "check_id": "recognition_plan_data_present",
+            "weight": 10,
+            "passed": not missing_plan_keys,
+            "evidence": missing_plan_keys or _PLAN_PATH,
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -202,22 +277,32 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
         wins.append(f"Day 75 continuity is strict-pass with activation score={day75_score}.")
     else:
         misses.append("Day 75 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 75 closeout command and restore strict baseline before Day 76 lock.")
+        handoff_actions.append(
+            "Re-run Day 75 closeout command and restore strict baseline before Day 76 lock."
+        )
 
     if board_count >= 5 and board_has_day75:
-        wins.append(f"Day 75 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 75 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 75 delivery board integrity is incomplete (needs >=5 items and Day 75 anchors).")
+        misses.append(
+            "Day 75 delivery board integrity is incomplete (needs >=5 items and Day 75 anchors)."
+        )
         handoff_actions.append("Repair Day 75 delivery board entries to include Day 75 anchors.")
 
     if not missing_plan_keys:
         wins.append("Day 76 contributor recognition dataset is available for launch execution.")
     else:
         misses.append("Day 76 contributor recognition dataset is missing required keys.")
-        handoff_actions.append("Update .day76-contributor-recognition-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update .day76-contributor-recognition-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 76 contributor recognition closeout lane is fully complete and ready for Day 77 scale priorities.")
+        wins.append(
+            "Day 76 contributor recognition closeout lane is fully complete and ready for Day 77 scale priorities."
+        )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
@@ -227,12 +312,20 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day75_summary": str(day75_summary.relative_to(root)) if day75_summary.exists() else str(day75_summary),
-            "day75_delivery_board": str(day75_board.relative_to(root)) if day75_board.exists() else str(day75_board),
+            "day75_summary": str(day75_summary.relative_to(root))
+            if day75_summary.exists()
+            else str(day75_summary),
+            "day75_delivery_board": str(day75_board.relative_to(root))
+            if day75_board.exists()
+            else str(day75_board),
             "recognition_plan": _PLAN_PATH,
         },
         "checks": checks,
-        "rollup": {"day75_activation_score": day75_score, "day75_checks": day75_check_count, "day75_delivery_board_items": board_count},
+        "rollup": {
+            "day75_activation_score": day75_score,
+            "day75_checks": day75_check_count,
+            "day75_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -264,15 +357,33 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "day76-contributor-recognition-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day76-contributor-recognition-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "day76-contributor-recognition-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
+    _write(
+        target / "day76-contributor-recognition-closeout-summary.md", _render_text(payload) + "\n"
+    )
     _write(target / "day76-integration-brief.md", "# Day 76 integration brief\n")
-    _write(target / "day76-contributor-recognition-plan.md", "# Day 76 contributor recognition plan\n")
-    _write(target / "day76-recognition-credits-ledger.json", json.dumps({"credits": []}, indent=2) + "\n")
-    _write(target / "day76-recognition-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "day76-contributor-recognition-plan.md", "# Day 76 contributor recognition plan\n"
+    )
+    _write(
+        target / "day76-recognition-credits-ledger.json",
+        json.dumps({"credits": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "day76-recognition-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "day76-execution-log.md", "# Day 76 execution log\n")
-    _write(target / "day76-delivery-board.md", "\n".join(["# Day 76 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n")
-    _write(target / "day76-validation-commands.md", "# Day 76 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day76-delivery-board.md",
+        "\n".join(["# Day 76 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+    )
+    _write(
+        target / "day76-validation-commands.md",
+        "# Day 76 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -281,10 +392,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
         result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
-        event = {"command": command, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(out_dir / "day76-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        out_dir / "day76-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -307,7 +426,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day76-contributor-recognition-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day76-contributor-recognition-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))

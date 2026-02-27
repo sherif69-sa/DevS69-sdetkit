@@ -10,7 +10,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-day68-integration-expansion4-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY67_SUMMARY_PATH = "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-integration-expansion3-closeout-summary.json"
-_DAY67_BOARD_PATH = "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md"
+_DAY67_BOARD_PATH = (
+    "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md"
+)
 _REFERENCE_PATH = ".tekton.day68-self-hosted-reference.yaml"
 _SECTION_HEADER = "# Day 68 — Integration expansion #4 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -175,21 +177,48 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
     missing_reference_lines = [x for x in _REQUIRED_REFERENCE_LINES if x not in reference_text]
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "readme_day68_command", "weight": 7, "passed": ("day68-integration-expansion4-closeout" in readme_text), "evidence": "README day68 command lane"},
+        {
+            "check_id": "readme_day68_command",
+            "weight": 7,
+            "passed": ("day68-integration-expansion4-closeout" in readme_text),
+            "evidence": "README day68 command lane",
+        },
         {
             "check_id": "docs_index_day68_links",
             "weight": 8,
-            "passed": ("day-68-big-upgrade-report.md" in docs_index_text and "integrations-day68-integration-expansion4-closeout.md" in docs_index_text),
+            "passed": (
+                "day-68-big-upgrade-report.md" in docs_index_text
+                and "integrations-day68-integration-expansion4-closeout.md" in docs_index_text
+            ),
             "evidence": "day-68-big-upgrade-report.md + integrations-day68-integration-expansion4-closeout.md",
         },
-        {"check_id": "top10_day68_alignment", "weight": 5, "passed": ("Day 68" in top10_text and "Day 69" in top10_text), "evidence": "Day 68 + Day 69 strategy chain"},
-        {"check_id": "day67_summary_present", "weight": 10, "passed": day67_summary.exists(), "evidence": str(day67_summary)},
-        {"check_id": "day67_delivery_board_present", "weight": 7, "passed": day67_board.exists(), "evidence": str(day67_board)},
+        {
+            "check_id": "top10_day68_alignment",
+            "weight": 5,
+            "passed": ("Day 68" in top10_text and "Day 69" in top10_text),
+            "evidence": "Day 68 + Day 69 strategy chain",
+        },
+        {
+            "check_id": "day67_summary_present",
+            "weight": 10,
+            "passed": day67_summary.exists(),
+            "evidence": str(day67_summary),
+        },
+        {
+            "check_id": "day67_delivery_board_present",
+            "weight": 7,
+            "passed": day67_board.exists(),
+            "evidence": str(day67_board),
+        },
         {
             "check_id": "day67_quality_floor",
             "weight": 13,
             "passed": day67_strict and day67_score >= 95,
-            "evidence": {"day67_score": day67_score, "strict_pass": day67_strict, "day67_checks": day67_check_count},
+            "evidence": {
+                "day67_score": day67_score,
+                "strict_pass": day67_strict,
+                "day67_checks": day67_check_count,
+            },
         },
         {
             "check_id": "day67_board_integrity",
@@ -197,13 +226,48 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
             "passed": board_count >= 5 and board_has_day67,
             "evidence": {"board_items": board_count, "contains_day67": board_has_day67},
         },
-        {"check_id": "page_header", "weight": 7, "passed": _SECTION_HEADER in page_text, "evidence": _SECTION_HEADER},
-        {"check_id": "required_sections", "weight": 8, "passed": not missing_sections, "evidence": missing_sections or "all sections present"},
-        {"check_id": "required_commands", "weight": 5, "passed": not missing_commands, "evidence": missing_commands or "all commands present"},
-        {"check_id": "contract_lock", "weight": 5, "passed": not missing_contract_lines, "evidence": missing_contract_lines or "contract locked"},
-        {"check_id": "quality_checklist_lock", "weight": 5, "passed": not missing_quality_lines, "evidence": missing_quality_lines or "quality checklist locked"},
-        {"check_id": "delivery_board_lock", "weight": 5, "passed": not missing_board_items, "evidence": missing_board_items or "delivery board locked"},
-        {"check_id": "self_hosted_reference_present", "weight": 10, "passed": not missing_reference_lines, "evidence": missing_reference_lines or _REFERENCE_PATH},
+        {
+            "check_id": "page_header",
+            "weight": 7,
+            "passed": _SECTION_HEADER in page_text,
+            "evidence": _SECTION_HEADER,
+        },
+        {
+            "check_id": "required_sections",
+            "weight": 8,
+            "passed": not missing_sections,
+            "evidence": missing_sections or "all sections present",
+        },
+        {
+            "check_id": "required_commands",
+            "weight": 5,
+            "passed": not missing_commands,
+            "evidence": missing_commands or "all commands present",
+        },
+        {
+            "check_id": "contract_lock",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": missing_contract_lines or "contract locked",
+        },
+        {
+            "check_id": "quality_checklist_lock",
+            "weight": 5,
+            "passed": not missing_quality_lines,
+            "evidence": missing_quality_lines or "quality checklist locked",
+        },
+        {
+            "check_id": "delivery_board_lock",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": missing_board_items or "delivery board locked",
+        },
+        {
+            "check_id": "self_hosted_reference_present",
+            "weight": 10,
+            "passed": not missing_reference_lines,
+            "evidence": missing_reference_lines or _REFERENCE_PATH,
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -221,22 +285,34 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
         wins.append(f"Day 67 continuity is strict-pass with activation score={day67_score}.")
     else:
         misses.append("Day 67 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 67 closeout command and restore strict baseline before Day 68 lock.")
+        handoff_actions.append(
+            "Re-run Day 67 closeout command and restore strict baseline before Day 68 lock."
+        )
 
     if board_count >= 5 and board_has_day67:
-        wins.append(f"Day 67 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 67 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 67 delivery board integrity is incomplete (needs >=5 items and Day 67 anchors).")
+        misses.append(
+            "Day 67 delivery board integrity is incomplete (needs >=5 items and Day 67 anchors)."
+        )
         handoff_actions.append("Repair Day 67 delivery board entries to include Day 67 anchors.")
 
     if not missing_reference_lines:
-        wins.append("Day 68 self-hosted reference pipeline is available for integration expansion execution.")
+        wins.append(
+            "Day 68 self-hosted reference pipeline is available for integration expansion execution."
+        )
     else:
         misses.append("Day 68 self-hosted reference pipeline is missing required controls.")
-        handoff_actions.append("Update .tekton.day68-self-hosted-reference.yaml to restore required controls.")
+        handoff_actions.append(
+            "Update .tekton.day68-self-hosted-reference.yaml to restore required controls."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 68 integration expansion #4 closeout lane is fully complete and ready for Day 69 case-study prep #1.")
+        wins.append(
+            "Day 68 integration expansion #4 closeout lane is fully complete and ready for Day 69 case-study prep #1."
+        )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
@@ -246,12 +322,20 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day67_summary": str(day67_summary.relative_to(root)) if day67_summary.exists() else str(day67_summary),
-            "day67_delivery_board": str(day67_board.relative_to(root)) if day67_board.exists() else str(day67_board),
+            "day67_summary": str(day67_summary.relative_to(root))
+            if day67_summary.exists()
+            else str(day67_summary),
+            "day67_delivery_board": str(day67_board.relative_to(root))
+            if day67_board.exists()
+            else str(day67_board),
             "self_hosted_reference": _REFERENCE_PATH,
         },
         "checks": checks,
-        "rollup": {"day67_activation_score": day67_score, "day67_checks": day67_check_count, "day67_delivery_board_items": board_count},
+        "rollup": {
+            "day67_activation_score": day67_score,
+            "day67_checks": day67_check_count,
+            "day67_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -283,15 +367,26 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "day68-integration-expansion4-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day68-integration-expansion4-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "day68-integration-expansion4-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
+    _write(
+        target / "day68-integration-expansion4-closeout-summary.md", _render_text(payload) + "\n"
+    )
     _write(target / "day68-integration-brief.md", "# Day 68 integration brief\n")
     _write(target / "day68-self-hosted-blueprint.md", "# Day 68 self-hosted blueprint\n")
     _write(target / "day68-policy-plan.json", json.dumps({"policy_controls": []}, indent=2) + "\n")
     _write(target / "day68-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(target / "day68-execution-log.md", "# Day 68 execution log\n")
-    _write(target / "day68-delivery-board.md", "\n".join(["# Day 68 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n")
-    _write(target / "day68-validation-commands.md", "# Day 68 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day68-delivery-board.md",
+        "\n".join(["# Day 68 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+    )
+    _write(
+        target / "day68-validation-commands.md",
+        "# Day 68 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -300,10 +395,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
         result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
-        event = {"command": command, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(out_dir / "day68-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        out_dir / "day68-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -326,7 +429,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day68-integration-expansion4-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day68-integration-expansion4-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))

@@ -6,12 +6,12 @@
   },
   "call_to_action": "Share this narrative in release notes, weekly updates, and community announcements.",
   "highlights": [
+    "add Day 86 launch readiness closeout lane command, docs, checks, and tests (`day86-launch-readiness-closeout`).",
     "Packaging: modernize license metadata.",
     "CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.",
     "Enterprise hardening: GitHub Actions pinned to commit SHAs.",
     "Dependency hygiene: requirements pinned and lockfiles added.",
-    "Repo init/apply reliability: tolerate non-UTF-8 preset template files.",
-    "Repo cleanliness: ignore local SDETKit workspace and docs build output."
+    "Repo init/apply reliability: tolerate non-UTF-8 preset template files."
   ],
   "inputs": {
     "changelog": "CHANGELOG.md",
@@ -21,7 +21,7 @@
   "narrative_channels": {
     "community_post": "Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.",
     "internal_update": "Day 20 narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.",
-    "release_notes": "This release is ready to communicate broadly with a stable quality posture. Key highlights: Packaging: modernize license metadata."
+    "release_notes": "This release is ready to communicate broadly with a stable quality posture. Key highlights: add Day 86 launch readiness closeout lane command, docs, checks, and tests (`day86-launch-readiness-closeout`)."
   },
   "risks": [
     "Release posture is strong; proceed with release candidate tagging and notes preparation."

@@ -10,7 +10,9 @@ from sdetkit import day69_case_study_prep1_closeout as d69
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 69 case-study prep #1 closeout contract")
+    parser = argparse.ArgumentParser(
+        description="Validate Day 69 case-study prep #1 closeout contract"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -29,7 +31,10 @@ def main() -> int:
         errors.append(f"failed checks: {failed}")
 
     if not ns.skip_evidence:
-        evidence = root / "docs/artifacts/day69-case-study-prep1-closeout-pack/evidence/day69-execution-summary.json"
+        evidence = (
+            root
+            / "docs/artifacts/day69-case-study-prep1-closeout-pack/evidence/day69-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
         else:

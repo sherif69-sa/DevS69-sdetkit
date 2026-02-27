@@ -53,7 +53,14 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 90 storyline outcomes ledger exported",
     "- [ ] Next-cycle roadmap draft captured from Day 90 outcomes",
 ]
-_REQUIRED_DATA_KEYS = ['"plan_id"', '"contributors"', '"narrative_channels"', '"baseline"', '"target"', '"owner"']
+_REQUIRED_DATA_KEYS = [
+    '"plan_id"',
+    '"contributors"',
+    '"narrative_channels"',
+    '"baseline"',
+    '"target"',
+    '"owner"',
+]
 
 _DAY90_DEFAULT_PAGE = """# Day 90 — Phase-3 wrap publication closeout lane
 
@@ -136,10 +143,14 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
     day89_board = root / _DAY89_BOARD_PATH
 
     day89_data = _load_json(day89_summary)
-    day89_summary_data = day89_data.get("summary", {}) if isinstance(day89_data.get("summary"), dict) else {}
+    day89_summary_data = (
+        day89_data.get("summary", {}) if isinstance(day89_data.get("summary"), dict) else {}
+    )
     day89_score = int(day89_summary_data.get("activation_score", 0) or 0)
     day89_strict = bool(day89_summary_data.get("strict_pass", False))
-    day89_check_count = len(day89_data.get("checks", [])) if isinstance(day89_data.get("checks"), list) else 0
+    day89_check_count = (
+        len(day89_data.get("checks", [])) if isinstance(day89_data.get("checks"), list) else 0
+    )
 
     board_text = _read_text(day89_board)
     board_count = _checklist_count(board_text)
@@ -155,21 +166,48 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
     missing_plan_keys = [key for key in _REQUIRED_DATA_KEYS if key not in plan_text]
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "readme_day90_command", "weight": 7, "passed": ("day90-phase3-wrap-publication-closeout" in readme_text), "evidence": "README day90 command lane"},
+        {
+            "check_id": "readme_day90_command",
+            "weight": 7,
+            "passed": ("day90-phase3-wrap-publication-closeout" in readme_text),
+            "evidence": "README day90 command lane",
+        },
         {
             "check_id": "docs_index_day90_links",
             "weight": 8,
-            "passed": ("day-90-big-upgrade-report.md" in docs_index_text and "integrations-day90-phase3-wrap-publication-closeout.md" in docs_index_text),
+            "passed": (
+                "day-90-big-upgrade-report.md" in docs_index_text
+                and "integrations-day90-phase3-wrap-publication-closeout.md" in docs_index_text
+            ),
             "evidence": "day-90-big-upgrade-report.md + integrations-day90-phase3-wrap-publication-closeout.md",
         },
-        {"check_id": "top10_day90_alignment", "weight": 5, "passed": ("Day 89" in top10_text and "Day 90" in top10_text), "evidence": "Day 89 + Day 90 strategy chain"},
-        {"check_id": "day89_summary_present", "weight": 10, "passed": day89_summary.exists(), "evidence": str(day89_summary)},
-        {"check_id": "day89_delivery_board_present", "weight": 7, "passed": day89_board.exists(), "evidence": str(day89_board)},
+        {
+            "check_id": "top10_day90_alignment",
+            "weight": 5,
+            "passed": ("Day 89" in top10_text and "Day 90" in top10_text),
+            "evidence": "Day 89 + Day 90 strategy chain",
+        },
+        {
+            "check_id": "day89_summary_present",
+            "weight": 10,
+            "passed": day89_summary.exists(),
+            "evidence": str(day89_summary),
+        },
+        {
+            "check_id": "day89_delivery_board_present",
+            "weight": 7,
+            "passed": day89_board.exists(),
+            "evidence": str(day89_board),
+        },
         {
             "check_id": "day89_quality_floor",
             "weight": 13,
             "passed": day89_score >= 85 and day89_strict,
-            "evidence": {"day89_score": day89_score, "strict_pass": day89_strict, "day89_checks": day89_check_count},
+            "evidence": {
+                "day89_score": day89_score,
+                "strict_pass": day89_strict,
+                "day89_checks": day89_check_count,
+            },
         },
         {
             "check_id": "day89_board_integrity",
@@ -177,13 +215,48 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
             "passed": board_count >= 5 and board_has_day89,
             "evidence": {"board_items": board_count, "contains_day89": board_has_day89},
         },
-        {"check_id": "page_header", "weight": 7, "passed": _SECTION_HEADER in page_text, "evidence": _SECTION_HEADER},
-        {"check_id": "required_sections", "weight": 8, "passed": not missing_sections, "evidence": missing_sections or "all sections present"},
-        {"check_id": "required_commands", "weight": 5, "passed": not missing_commands, "evidence": missing_commands or "all commands present"},
-        {"check_id": "contract_lock", "weight": 5, "passed": not missing_contract_lines, "evidence": missing_contract_lines or "contract locked"},
-        {"check_id": "quality_checklist_lock", "weight": 5, "passed": not missing_quality_lines, "evidence": missing_quality_lines or "quality checklist locked"},
-        {"check_id": "delivery_board_lock", "weight": 5, "passed": not missing_board_items, "evidence": missing_board_items or "delivery board locked"},
-        {"check_id": "evidence_plan_data_present", "weight": 10, "passed": not missing_plan_keys, "evidence": missing_plan_keys or _PLAN_PATH},
+        {
+            "check_id": "page_header",
+            "weight": 7,
+            "passed": _SECTION_HEADER in page_text,
+            "evidence": _SECTION_HEADER,
+        },
+        {
+            "check_id": "required_sections",
+            "weight": 8,
+            "passed": not missing_sections,
+            "evidence": missing_sections or "all sections present",
+        },
+        {
+            "check_id": "required_commands",
+            "weight": 5,
+            "passed": not missing_commands,
+            "evidence": missing_commands or "all commands present",
+        },
+        {
+            "check_id": "contract_lock",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": missing_contract_lines or "contract locked",
+        },
+        {
+            "check_id": "quality_checklist_lock",
+            "weight": 5,
+            "passed": not missing_quality_lines,
+            "evidence": missing_quality_lines or "quality checklist locked",
+        },
+        {
+            "check_id": "delivery_board_lock",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": missing_board_items or "delivery board locked",
+        },
+        {
+            "check_id": "evidence_plan_data_present",
+            "weight": 10,
+            "passed": not missing_plan_keys,
+            "evidence": missing_plan_keys or _PLAN_PATH,
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -199,22 +272,34 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
         wins.append(f"Day 89 continuity baseline is stable with activation score={day89_score}.")
     else:
         misses.append("Day 89 continuity baseline is below the floor (<85) or not strict-pass.")
-        handoff_actions.append("Re-run Day 89 closeout command and raise baseline quality above 85 with strict pass before Day 90 lock.")
+        handoff_actions.append(
+            "Re-run Day 89 closeout command and raise baseline quality above 85 with strict pass before Day 90 lock."
+        )
 
     if board_count >= 5 and board_has_day89:
-        wins.append(f"Day 89 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 89 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 89 delivery board integrity is incomplete (needs >=5 items and Day 89 anchors).")
+        misses.append(
+            "Day 89 delivery board integrity is incomplete (needs >=5 items and Day 89 anchors)."
+        )
         handoff_actions.append("Repair Day 89 delivery board entries to include Day 89 anchors.")
 
     if not missing_plan_keys:
-        wins.append("Day 90 phase-3 wrap publication dataset is available for governance execution.")
+        wins.append(
+            "Day 90 phase-3 wrap publication dataset is available for governance execution."
+        )
     else:
         misses.append("Day 90 phase-3 wrap publication dataset is missing required keys.")
-        handoff_actions.append("Update .day90-phase3-wrap-publication-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update .day90-phase3-wrap-publication-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 90 phase-3 wrap publication closeout lane is fully complete and ready for next-cycle roadmap execution.")
+        wins.append(
+            "Day 90 phase-3 wrap publication closeout lane is fully complete and ready for next-cycle roadmap execution."
+        )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
@@ -224,12 +309,20 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day89_summary": str(day89_summary.relative_to(root)) if day89_summary.exists() else str(day89_summary),
-            "day89_delivery_board": str(day89_board.relative_to(root)) if day89_board.exists() else str(day89_board),
+            "day89_summary": str(day89_summary.relative_to(root))
+            if day89_summary.exists()
+            else str(day89_summary),
+            "day89_delivery_board": str(day89_board.relative_to(root))
+            if day89_board.exists()
+            else str(day89_board),
             "phase3_wrap_publication_plan": _PLAN_PATH,
         },
         "checks": checks,
-        "rollup": {"day89_activation_score": day89_score, "day89_checks": day89_check_count, "day89_delivery_board_items": board_count},
+        "rollup": {
+            "day89_activation_score": day89_score,
+            "day89_checks": day89_check_count,
+            "day89_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -261,16 +354,35 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "day90-phase3-wrap-publication-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day90-phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "day90-phase3-wrap-publication-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
+    _write(
+        target / "day90-phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n"
+    )
     _write(target / "day90-evidence-brief.md", "# Day 90 phase-3 wrap publication brief\n")
-    _write(target / "day90-phase3-wrap-publication-plan.md", "# Day 90 phase-3 wrap publication plan\n")
-    _write(target / "day90-narrative-template-upgrade-ledger.json", json.dumps({"upgrades": []}, indent=2) + "\n")
-    _write(target / "day90-storyline-outcomes-ledger.json", json.dumps({"outcomes": []}, indent=2) + "\n")
+    _write(
+        target / "day90-phase3-wrap-publication-plan.md", "# Day 90 phase-3 wrap publication plan\n"
+    )
+    _write(
+        target / "day90-narrative-template-upgrade-ledger.json",
+        json.dumps({"upgrades": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "day90-storyline-outcomes-ledger.json",
+        json.dumps({"outcomes": []}, indent=2) + "\n",
+    )
     _write(target / "day90-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(target / "day90-execution-log.md", "# Day 90 execution log\n")
-    _write(target / "day90-delivery-board.md", "\n".join(["# Day 90 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n")
-    _write(target / "day90-validation-commands.md", "# Day 90 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day90-delivery-board.md",
+        "\n".join(["# Day 90 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+    )
+    _write(
+        target / "day90-validation-commands.md",
+        "# Day 90 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -279,10 +391,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
         result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
-        event = {"command": command, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(out_dir / "day90-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        out_dir / "day90-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -305,7 +425,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))

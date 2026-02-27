@@ -10,7 +10,9 @@ from sdetkit import day90_phase3_wrap_publication_closeout as d90
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 90 phase-3 wrap publication closeout contract")
+    parser = argparse.ArgumentParser(
+        description="Validate Day 90 phase-3 wrap publication closeout contract"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -29,7 +31,10 @@ def main() -> int:
         errors.append("critical_failures is not empty")
 
     if not ns.skip_evidence:
-        evidence = root / "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence/day90-execution-summary.json"
+        evidence = (
+            root
+            / "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence/day90-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
         else:

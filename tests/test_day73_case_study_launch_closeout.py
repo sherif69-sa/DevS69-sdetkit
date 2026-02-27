@@ -101,7 +101,9 @@ def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day73-pack/day73-case-study-launch-closeout-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day73-pack/day73-case-study-launch-closeout-summary.json"
+    ).exists()
     assert (tmp_path / "artifacts/day73-pack/day73-case-study-launch-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day73-pack/day73-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day73-pack/day73-case-study-narrative.md").exists()

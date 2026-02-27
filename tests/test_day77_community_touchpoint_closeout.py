@@ -42,7 +42,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
+    board = (
+        root / "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -101,8 +103,12 @@ def test_day77_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day77-pack/day77-community-touchpoint-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-community-touchpoint-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day77-pack/day77-community-touchpoint-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day77-pack/day77-community-touchpoint-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day77-pack/day77-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day77-pack/day77-community-touchpoint-plan.md").exists()
     assert (tmp_path / "artifacts/day77-pack/day77-touchpoint-session-ledger.json").exists()
@@ -124,6 +130,8 @@ def test_day77_strict_fails_without_day76(tmp_path: Path) -> None:
 
 def test_day77_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day77-community-touchpoint-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day77-community-touchpoint-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 77 community touchpoint closeout summary" in capsys.readouterr().out

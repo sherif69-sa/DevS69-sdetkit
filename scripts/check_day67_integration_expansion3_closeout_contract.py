@@ -10,7 +10,9 @@ from sdetkit import day67_integration_expansion3_closeout as d67
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 67 integration expansion #3 closeout contract")
+    parser = argparse.ArgumentParser(
+        description="Validate Day 67 integration expansion #3 closeout contract"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

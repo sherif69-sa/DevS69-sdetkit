@@ -1,7 +1,7 @@
 {
   "badge_checks": {
     "ci_badge": true,
-    "mutation_badge": true,
+    "mutation_badge": false,
     "pages_badge": true,
     "quality_badge": true,
     "security_badge": true
@@ -25,7 +25,7 @@
       "category": "badges",
       "evidence": "actions/workflows/mutation-tests.yml/badge.svg",
       "key": "mutation_badge",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
@@ -121,14 +121,14 @@
     "security_guide_exists": true
   },
   "recommendations": [
-    "Trust signals are complete; keep trust badges, policy links, and workflows current each release."
+    "Restore missing trust badges in README so reliability status is visible at a glance."
   ],
   "score": 100.0,
   "strict_failures": [],
   "summary": {
     "category_coverage": {
       "badges": {
-        "passed": 5,
+        "passed": 4,
         "total": 5
       },
       "governance": {
@@ -141,11 +141,11 @@
       }
     },
     "critical_failures": [],
-    "failed_checks": 0,
+    "failed_checks": 1,
     "trust_label": "strong",
-    "trust_score": 100.0,
+    "trust_score": 90.0,
     "weighted_points": {
-      "earned": 100,
+      "earned": 90,
       "total": 100
     }
   }

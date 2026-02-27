@@ -1,3 +1,3 @@
 # Day 22 trust action plan
 
-- Trust signals are complete; keep trust badges, policy links, and workflows current each release.
+- Restore missing trust badges in README so reliability status is visible at a glance.

@@ -27,7 +27,10 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/day-83-big-upgrade-report.md").write_text("# Day 83 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -98,8 +101,12 @@ def test_day83_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day83-pack/day83-trust-faq-brief.md").exists()
     assert (tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-plan.md").exists()
     assert (tmp_path / "artifacts/day83-pack/day83-trust-template-upgrade-ledger.json").exists()
@@ -114,13 +121,16 @@ def test_day83_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_day83_strict_fails_without_day82(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+        tmp_path
+        / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
     ).unlink()
     assert d83.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
 def test_day83_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day83-trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day83-trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 83 trust FAQ expansion closeout summary" in capsys.readouterr().out

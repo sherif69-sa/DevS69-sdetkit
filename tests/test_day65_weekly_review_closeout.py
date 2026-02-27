@@ -42,7 +42,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+    board = (
+        root / "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [

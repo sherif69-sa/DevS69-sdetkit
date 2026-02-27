@@ -27,7 +27,10 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/day-88-big-upgrade-report.md").write_text("# Day 88 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -98,8 +101,12 @@ def test_day88_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day88-pack/day88-governance-priorities-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-governance-priorities-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day88-pack/day88-governance-priorities-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day88-pack/day88-governance-priorities-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day88-pack/day88-evidence-brief.md").exists()
     assert (tmp_path / "artifacts/day88-pack/day88-governance-priorities-plan.md").exists()
     assert (tmp_path / "artifacts/day88-pack/day88-narrative-template-upgrade-ledger.json").exists()
@@ -113,12 +120,17 @@ def test_day88_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day88_strict_fails_without_day87(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+    ).unlink()
     assert d88.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
 def test_day88_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day88-governance-priorities-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day88-governance-priorities-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 88 governance priorities closeout summary" in capsys.readouterr().out

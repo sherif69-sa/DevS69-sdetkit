@@ -101,8 +101,12 @@ def test_day74_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day74-pack/day74-distribution-scaling-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-distribution-scaling-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day74-pack/day74-distribution-scaling-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day74-pack/day74-distribution-scaling-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day74-pack/day74-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day74-pack/day74-distribution-scaling-plan.md").exists()
     assert (tmp_path / "artifacts/day74-pack/day74-channel-controls-log.json").exists()
@@ -124,6 +128,8 @@ def test_day74_strict_fails_without_day73(tmp_path: Path) -> None:
 
 def test_day74_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day74-distribution-scaling-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day74-distribution-scaling-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 74 distribution scaling closeout summary" in capsys.readouterr().out

@@ -27,7 +27,10 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/day-82-big-upgrade-report.md").write_text("# Day 82 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -98,8 +101,12 @@ def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day82-pack/day82-integration-feedback-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-integration-feedback-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day82-pack/day82-integration-feedback-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day82-pack/day82-integration-feedback-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day82-pack/day82-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day82-pack/day82-integration-feedback-plan.md").exists()
     assert (tmp_path / "artifacts/day82-pack/day82-template-upgrade-ledger.json").exists()
@@ -114,13 +121,16 @@ def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_day82_strict_fails_without_day81(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
+        tmp_path
+        / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
     ).unlink()
     assert d82.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
 def test_day82_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day82-integration-feedback-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day82-integration-feedback-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 82 integration feedback closeout summary" in capsys.readouterr().out

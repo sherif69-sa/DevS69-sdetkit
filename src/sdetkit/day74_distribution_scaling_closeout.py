@@ -135,7 +135,11 @@ def _load_day73(summary_path: Path) -> tuple[int, bool, int]:
         return 0, False, 0
     summary = payload.get("summary", {})
     checks = payload.get("checks", [])
-    return int(summary.get("activation_score", 0)), bool(summary.get("strict_pass", False)), len(checks)
+    return (
+        int(summary.get("activation_score", 0)),
+        bool(summary.get("strict_pass", False)),
+        len(checks),
+    )
 
 
 def _count_board_items(board_path: Path, anchor: str) -> tuple[int, bool]:
@@ -166,21 +170,48 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
     missing_scaling_plan_keys = [x for x in _REQUIRED_DATA_KEYS if x not in scaling_plan_text]
 
     checks: list[dict[str, Any]] = [
-        {"check_id": "readme_day74_command", "weight": 7, "passed": ("day74-distribution-scaling-closeout" in readme_text), "evidence": "README day74 command lane"},
+        {
+            "check_id": "readme_day74_command",
+            "weight": 7,
+            "passed": ("day74-distribution-scaling-closeout" in readme_text),
+            "evidence": "README day74 command lane",
+        },
         {
             "check_id": "docs_index_day74_links",
             "weight": 8,
-            "passed": ("day-74-big-upgrade-report.md" in docs_index_text and "integrations-day74-distribution-scaling-closeout.md" in docs_index_text),
+            "passed": (
+                "day-74-big-upgrade-report.md" in docs_index_text
+                and "integrations-day74-distribution-scaling-closeout.md" in docs_index_text
+            ),
             "evidence": "day-74-big-upgrade-report.md + integrations-day74-distribution-scaling-closeout.md",
         },
-        {"check_id": "top10_day74_alignment", "weight": 5, "passed": ("Day 74" in top10_text and "Day 75" in top10_text), "evidence": "Day 74 + Day 75 strategy chain"},
-        {"check_id": "day73_summary_present", "weight": 10, "passed": day73_summary.exists(), "evidence": str(day73_summary)},
-        {"check_id": "day73_delivery_board_present", "weight": 7, "passed": day73_board.exists(), "evidence": str(day73_board)},
+        {
+            "check_id": "top10_day74_alignment",
+            "weight": 5,
+            "passed": ("Day 74" in top10_text and "Day 75" in top10_text),
+            "evidence": "Day 74 + Day 75 strategy chain",
+        },
+        {
+            "check_id": "day73_summary_present",
+            "weight": 10,
+            "passed": day73_summary.exists(),
+            "evidence": str(day73_summary),
+        },
+        {
+            "check_id": "day73_delivery_board_present",
+            "weight": 7,
+            "passed": day73_board.exists(),
+            "evidence": str(day73_board),
+        },
         {
             "check_id": "day73_quality_floor",
             "weight": 13,
             "passed": day73_strict and day73_score >= 95,
-            "evidence": {"day73_score": day73_score, "strict_pass": day73_strict, "day73_checks": day73_check_count},
+            "evidence": {
+                "day73_score": day73_score,
+                "strict_pass": day73_strict,
+                "day73_checks": day73_check_count,
+            },
         },
         {
             "check_id": "day73_board_integrity",
@@ -188,13 +219,48 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
             "passed": board_count >= 5 and board_has_day73,
             "evidence": {"board_items": board_count, "contains_day73": board_has_day73},
         },
-        {"check_id": "page_header", "weight": 7, "passed": _SECTION_HEADER in page_text, "evidence": _SECTION_HEADER},
-        {"check_id": "required_sections", "weight": 8, "passed": not missing_sections, "evidence": missing_sections or "all sections present"},
-        {"check_id": "required_commands", "weight": 5, "passed": not missing_commands, "evidence": missing_commands or "all commands present"},
-        {"check_id": "contract_lock", "weight": 5, "passed": not missing_contract_lines, "evidence": missing_contract_lines or "contract locked"},
-        {"check_id": "quality_checklist_lock", "weight": 5, "passed": not missing_quality_lines, "evidence": missing_quality_lines or "quality checklist locked"},
-        {"check_id": "delivery_board_lock", "weight": 5, "passed": not missing_board_items, "evidence": missing_board_items or "delivery board locked"},
-        {"check_id": "distribution_plan_data_present", "weight": 10, "passed": not missing_scaling_plan_keys, "evidence": missing_scaling_plan_keys or _SCALING_PLAN_PATH},
+        {
+            "check_id": "page_header",
+            "weight": 7,
+            "passed": _SECTION_HEADER in page_text,
+            "evidence": _SECTION_HEADER,
+        },
+        {
+            "check_id": "required_sections",
+            "weight": 8,
+            "passed": not missing_sections,
+            "evidence": missing_sections or "all sections present",
+        },
+        {
+            "check_id": "required_commands",
+            "weight": 5,
+            "passed": not missing_commands,
+            "evidence": missing_commands or "all commands present",
+        },
+        {
+            "check_id": "contract_lock",
+            "weight": 5,
+            "passed": not missing_contract_lines,
+            "evidence": missing_contract_lines or "contract locked",
+        },
+        {
+            "check_id": "quality_checklist_lock",
+            "weight": 5,
+            "passed": not missing_quality_lines,
+            "evidence": missing_quality_lines or "quality checklist locked",
+        },
+        {
+            "check_id": "delivery_board_lock",
+            "weight": 5,
+            "passed": not missing_board_items,
+            "evidence": missing_board_items or "delivery board locked",
+        },
+        {
+            "check_id": "distribution_plan_data_present",
+            "weight": 10,
+            "passed": not missing_scaling_plan_keys,
+            "evidence": missing_scaling_plan_keys or _SCALING_PLAN_PATH,
+        },
     ]
 
     failed = [c for c in checks if not c["passed"]]
@@ -212,22 +278,32 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
         wins.append(f"Day 73 continuity is strict-pass with activation score={day73_score}.")
     else:
         misses.append("Day 73 strict continuity signal is missing.")
-        handoff_actions.append("Re-run Day 73 closeout command and restore strict baseline before Day 74 lock.")
+        handoff_actions.append(
+            "Re-run Day 73 closeout command and restore strict baseline before Day 74 lock."
+        )
 
     if board_count >= 5 and board_has_day73:
-        wins.append(f"Day 73 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 73 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 73 delivery board integrity is incomplete (needs >=5 items and Day 73 anchors).")
+        misses.append(
+            "Day 73 delivery board integrity is incomplete (needs >=5 items and Day 73 anchors)."
+        )
         handoff_actions.append("Repair Day 73 delivery board entries to include Day 73 anchors.")
 
     if not missing_scaling_plan_keys:
         wins.append("Day 74 distribution scaling dataset is available for launch execution.")
     else:
         misses.append("Day 74 distribution scaling dataset is missing required keys.")
-        handoff_actions.append("Update .day74-distribution-scaling-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update .day74-distribution-scaling-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
-        wins.append("Day 74 distribution scaling closeout lane is fully complete and ready for Day 75 trust refresh.")
+        wins.append(
+            "Day 74 distribution scaling closeout lane is fully complete and ready for Day 75 trust refresh."
+        )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
@@ -237,12 +313,20 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day73_summary": str(day73_summary.relative_to(root)) if day73_summary.exists() else str(day73_summary),
-            "day73_delivery_board": str(day73_board.relative_to(root)) if day73_board.exists() else str(day73_board),
+            "day73_summary": str(day73_summary.relative_to(root))
+            if day73_summary.exists()
+            else str(day73_summary),
+            "day73_delivery_board": str(day73_board.relative_to(root))
+            if day73_board.exists()
+            else str(day73_board),
             "distribution_scaling_plan": _SCALING_PLAN_PATH,
         },
         "checks": checks,
-        "rollup": {"day73_activation_score": day73_score, "day73_checks": day73_check_count, "day73_delivery_board_items": board_count},
+        "rollup": {
+            "day73_activation_score": day73_score,
+            "day73_checks": day73_check_count,
+            "day73_delivery_board_items": board_count,
+        },
         "summary": {
             "activation_score": score,
             "passed_checks": len(checks) - len(failed),
@@ -274,15 +358,26 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(target / "day74-distribution-scaling-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(
+        target / "day74-distribution-scaling-closeout-summary.json",
+        json.dumps(payload, indent=2) + "\n",
+    )
     _write(target / "day74-distribution-scaling-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "day74-integration-brief.md", "# Day 74 integration brief\n")
     _write(target / "day74-distribution-scaling-plan.md", "# Day 74 distribution scaling plan\n")
-    _write(target / "day74-channel-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
+    _write(
+        target / "day74-channel-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
+    )
     _write(target / "day74-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(target / "day74-execution-log.md", "# Day 74 execution log\n")
-    _write(target / "day74-delivery-board.md", "\n".join(["# Day 74 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n")
-    _write(target / "day74-validation-commands.md", "# Day 74 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n")
+    _write(
+        target / "day74-delivery-board.md",
+        "\n".join(["# Day 74 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+    )
+    _write(
+        target / "day74-validation-commands.md",
+        "# Day 74 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -291,10 +386,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
         result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
-        event = {"command": command, "returncode": result.returncode, "stdout": result.stdout, "stderr": result.stderr}
+        event = {
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(out_dir / "day74-execution-summary.json", json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n")
+    _write(
+        out_dir / "day74-execution-summary.json",
+        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -317,7 +420,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
     if ns.execute:
-        evidence_dir = Path(ns.evidence_dir) if ns.evidence_dir else Path("docs/artifacts/day74-distribution-scaling-closeout-pack/evidence")
+        evidence_dir = (
+            Path(ns.evidence_dir)
+            if ns.evidence_dir
+            else Path("docs/artifacts/day74-distribution-scaling-closeout-pack/evidence")
+        )
         _execute_commands(root, evidence_dir)
 
     print(json.dumps(payload, indent=2) if ns.format == "json" else _render_text(payload))

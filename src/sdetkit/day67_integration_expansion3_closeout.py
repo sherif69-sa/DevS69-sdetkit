@@ -10,7 +10,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-day67-integration-expansion3-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY66_SUMMARY_PATH = "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json"
-_DAY66_BOARD_PATH = "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md"
+_DAY66_BOARD_PATH = (
+    "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md"
+)
 _JENKINS_PATH = ".jenkins.day67-advanced-reference.Jenkinsfile"
 _SECTION_HEADER = "# Day 67 — Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -288,16 +290,24 @@ def build_day67_integration_expansion3_closeout_summary(root: Path) -> dict[str,
         )
 
     if board_count >= 5 and board_has_day66:
-        wins.append(f"Day 66 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 66 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 66 delivery board integrity is incomplete (needs >=5 items and Day 66 anchors).")
+        misses.append(
+            "Day 66 delivery board integrity is incomplete (needs >=5 items and Day 66 anchors)."
+        )
         handoff_actions.append("Repair Day 66 delivery board entries to include Day 66 anchors.")
 
     if not missing_jenkins_lines:
-        wins.append("Day 67 Jenkins reference pipeline is available for integration expansion execution.")
+        wins.append(
+            "Day 67 Jenkins reference pipeline is available for integration expansion execution."
+        )
     else:
         misses.append("Day 67 Jenkins reference pipeline is missing required controls.")
-        handoff_actions.append("Update .jenkins.day67-advanced-reference.Jenkinsfile to restore required controls.")
+        handoff_actions.append(
+            "Update .jenkins.day67-advanced-reference.Jenkinsfile to restore required controls."
+        )
 
     if not failed and not critical_failures:
         wins.append(
@@ -312,8 +322,12 @@ def build_day67_integration_expansion3_closeout_summary(root: Path) -> dict[str,
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day66_summary": str(day66_summary.relative_to(root)) if day66_summary.exists() else str(day66_summary),
-            "day66_delivery_board": str(day66_board.relative_to(root)) if day66_board.exists() else str(day66_board),
+            "day66_summary": str(day66_summary.relative_to(root))
+            if day66_summary.exists()
+            else str(day66_summary),
+            "day66_delivery_board": str(day66_board.relative_to(root))
+            if day66_board.exists()
+            else str(day66_board),
             "jenkins_reference": _JENKINS_PATH,
         },
         "checks": checks,
@@ -357,7 +371,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "day67-integration-expansion3-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day67-integration-expansion3-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "day67-integration-expansion3-closeout-summary.md", _render_text(payload) + "\n"
+    )
     _write(target / "day67-integration-brief.md", "# Day 67 integration brief\n")
     _write(target / "day67-jenkins-blueprint.md", "# Day 67 Jenkins blueprint\n")
     _write(target / "day67-matrix-plan.json", json.dumps({"matrix": []}, indent=2) + "\n")

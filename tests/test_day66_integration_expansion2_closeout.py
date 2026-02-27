@@ -106,8 +106,12 @@ def test_day66_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day66-pack/day66-integration-expansion2-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day66-pack/day66-integration-expansion2-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day66-pack/day66-integration-expansion2-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day66-pack/day66-integration-expansion2-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day66-pack/day66-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day66-pack/day66-pipeline-blueprint.md").exists()
     assert (tmp_path / "artifacts/day66-pack/day66-matrix-plan.json").exists()
@@ -129,6 +133,8 @@ def test_day66_strict_fails_without_day65(tmp_path: Path) -> None:
 
 def test_day66_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day66-integration-expansion2-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(
+        ["day66-integration-expansion2-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert rc == 0
     assert "Day 66 integration expansion #2 closeout summary" in capsys.readouterr().out

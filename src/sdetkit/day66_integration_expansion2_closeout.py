@@ -9,7 +9,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day66-integration-expansion2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY65_SUMMARY_PATH = "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
+_DAY65_SUMMARY_PATH = (
+    "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
+)
 _DAY65_BOARD_PATH = "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md"
 _GITLAB_PATH = ".gitlab-ci.day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 — Integration expansion #2 closeout lane"
@@ -288,16 +290,24 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
         )
 
     if board_count >= 5 and board_has_day65:
-        wins.append(f"Day 65 delivery board integrity validated with {board_count} checklist items.")
+        wins.append(
+            f"Day 65 delivery board integrity validated with {board_count} checklist items."
+        )
     else:
-        misses.append("Day 65 delivery board integrity is incomplete (needs >=5 items and Day 65 anchors).")
+        misses.append(
+            "Day 65 delivery board integrity is incomplete (needs >=5 items and Day 65 anchors)."
+        )
         handoff_actions.append("Repair Day 65 delivery board entries to include Day 65 anchors.")
 
     if not missing_gitlab_lines:
-        wins.append("Day 66 GitLab reference pipeline is available for integration expansion execution.")
+        wins.append(
+            "Day 66 GitLab reference pipeline is available for integration expansion execution."
+        )
     else:
         misses.append("Day 66 GitLab reference pipeline is missing required controls.")
-        handoff_actions.append("Update .gitlab-ci.day66-advanced-reference.yml to restore required controls.")
+        handoff_actions.append(
+            "Update .gitlab-ci.day66-advanced-reference.yml to restore required controls."
+        )
 
     if not failed and not critical_failures:
         wins.append(
@@ -312,8 +322,12 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day65_summary": str(day65_summary.relative_to(root)) if day65_summary.exists() else str(day65_summary),
-            "day65_delivery_board": str(day65_board.relative_to(root)) if day65_board.exists() else str(day65_board),
+            "day65_summary": str(day65_summary.relative_to(root))
+            if day65_summary.exists()
+            else str(day65_summary),
+            "day65_delivery_board": str(day65_board.relative_to(root))
+            if day65_board.exists()
+            else str(day65_board),
             "gitlab_reference": _GITLAB_PATH,
         },
         "checks": checks,
@@ -357,7 +371,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "day66-integration-expansion2-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day66-integration-expansion2-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "day66-integration-expansion2-closeout-summary.md", _render_text(payload) + "\n"
+    )
     _write(target / "day66-integration-brief.md", "# Day 66 integration brief\n")
     _write(target / "day66-pipeline-blueprint.md", "# Day 66 pipeline blueprint\n")
     _write(target / "day66-matrix-plan.json", json.dumps({"matrix": []}, indent=2) + "\n")

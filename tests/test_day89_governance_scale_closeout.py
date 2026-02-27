@@ -22,10 +22,15 @@ def _seed_repo(root: Path) -> None:
         "- **Day 89 — Governance scale closeout lane:** scale governance priorities into deterministic execution lanes.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-day89-governance-scale-closeout.md").write_text(d89._DAY89_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-day89-governance-scale-closeout.md").write_text(
+        d89._DAY89_DEFAULT_PAGE, encoding="utf-8"
+    )
     (root / "docs/day-89-big-upgrade-report.md").write_text("# Day 89 report\n", encoding="utf-8")
 
-    summary = root / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json"
+    summary = (
+        root
+        / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json"
+    )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -37,7 +42,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md"
+    board = (
+        root / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -111,7 +118,10 @@ def test_day89_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day89_strict_fails_without_day88(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json").unlink()
+    (
+        tmp_path
+        / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json"
+    ).unlink()
     assert d89.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
