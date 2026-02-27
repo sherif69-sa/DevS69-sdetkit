@@ -1898,3 +1898,13 @@ See implementation details: [Day 87 big upgrade report](docs/day-87-big-upgrade-
 - Review Day 88 integration guide: [Governance priorities closeout lane](docs/integrations-day88-governance-priorities-closeout.md).
 
 See implementation details: [Day 88 big upgrade report](docs/day-88-big-upgrade-report.md).
+
+
+### Day 89 — Governance scale closeout lane
+
+- Run `python -m sdetkit day89-governance-scale-closeout --format json --strict` to validate Day 89 governance scale readiness.
+- Emit shareable Day 89 governance scale pack: `python -m sdetkit day89-governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day89-governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict`.
+- Review Day 89 integration guide: [Governance scale closeout lane](docs/integrations-day89-governance-scale-closeout.md).
+
+See implementation details: [Day 89 big upgrade report](docs/day-89-big-upgrade-report.md).

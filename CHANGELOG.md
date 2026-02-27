@@ -16,3 +16,4 @@
 - Dependency hygiene: requirements pinned and lockfiles added.
 - Repo init/apply reliability: tolerate non-UTF-8 preset template files.
 - Repo cleanliness: ignore local SDETKit workspace and docs build output.
+- feat: add `day89-governance-scale-closeout` with strict closeout checks, pack emission, and execution evidence lane.

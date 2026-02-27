@@ -69,6 +69,7 @@ from . import (
     day86_launch_readiness_closeout,
     day87_governance_handoff_closeout,
     day88_governance_priorities_closeout,
+    day89_governance_scale_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -364,6 +365,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day88-governance-priorities-closeout":
         return day88_governance_priorities_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day89-governance-scale-closeout":
+        return day89_governance_scale_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -635,6 +639,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     d87.add_argument("args", nargs=argparse.REMAINDER)
     d88 = sub.add_parser("day88-governance-priorities-closeout")
     d88.add_argument("args", nargs=argparse.REMAINDER)
+    d89 = sub.add_parser("day89-governance-scale-closeout")
+    d89.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
@@ -912,6 +918,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day88-governance-priorities-closeout":
         return day88_governance_priorities_closeout.main(ns.args)
+
+    if ns.cmd == "day89-governance-scale-closeout":
+        return day89_governance_scale_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)
