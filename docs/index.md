@@ -807,3 +807,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 75 trust assets refresh closeout pack: `python -m sdetkit day75-trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day75-trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 75 trust assets refresh closeout lane](integrations-day75-trust-assets-refresh-closeout.md).
+
+
+## Day 76 contributor recognition closeout lane
+
+- Read the implementation report: [Day 76 big upgrade report](day-76-big-upgrade-report.md).
+- Run `python -m sdetkit day76-contributor-recognition-closeout --format json --strict` to score contributor recognition readiness.
+- Emit Day 76 contributor recognition closeout pack: `python -m sdetkit day76-contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day76-contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 76 contributor recognition closeout lane](integrations-day76-contributor-recognition-closeout.md).

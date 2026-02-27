@@ -1764,6 +1764,16 @@ See implementation details: [Day 74 big upgrade report](docs/day-74-big-upgrade-
 
 See implementation details: [Day 75 big upgrade report](docs/day-75-big-upgrade-report.md).
 
+
+### Day 76 — Contributor recognition closeout lane
+
+- Run `python -m sdetkit day76-contributor-recognition-closeout --format json --strict` to validate Day 76 contributor recognition readiness.
+- Emit shareable Day 76 contributor recognition pack: `python -m sdetkit day76-contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day76-contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict`.
+- Review Day 76 integration guide: [Contributor recognition closeout lane](docs/integrations-day76-contributor-recognition-closeout.md).
+
+See implementation details: [Day 76 big upgrade report](docs/day-76-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

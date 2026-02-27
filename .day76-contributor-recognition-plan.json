@@ -1,0 +1,34 @@
+{
+  "plan_id": "day76-contributor-recognition-closeout",
+  "owner": "community-ops",
+  "contributors": [
+    {
+      "name": "primary-contributor",
+      "recognition_track": "release-credits",
+      "baseline": 68,
+      "target": 92
+    }
+  ],
+  "recognition_tracks": [
+    {
+      "track": "release-credits",
+      "baseline": 1,
+      "target": 3,
+      "cadence": "weekly"
+    },
+    {
+      "track": "spotlight-post",
+      "baseline": 0,
+      "target": 2,
+      "cadence": "weekly"
+    }
+  ],
+  "baseline": {
+    "credits_coverage": 0.52,
+    "trust_carryover": 0.84
+  },
+  "target": {
+    "credits_coverage": 0.9,
+    "trust_carryover": 0.95
+  }
+}
