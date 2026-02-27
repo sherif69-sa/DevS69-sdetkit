@@ -53,6 +53,7 @@ from . import (
     day70_case_study_prep2_closeout,
     day71_case_study_prep3_closeout,
     day72_case_study_prep4_closeout,
+    day73_case_study_launch_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -300,6 +301,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day72-case-study-prep4-closeout":
         return day72_case_study_prep4_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day73-case-study-launch-closeout":
+        return day73_case_study_launch_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -539,6 +543,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     d71.add_argument("args", nargs=argparse.REMAINDER)
     d72 = sub.add_parser("day72-case-study-prep4-closeout")
     d72.add_argument("args", nargs=argparse.REMAINDER)
+    d73 = sub.add_parser("day73-case-study-launch-closeout")
+    d73.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
@@ -768,6 +774,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day72-case-study-prep4-closeout":
         return day72_case_study_prep4_closeout.main(ns.args)
+
+    if ns.cmd == "day73-case-study-launch-closeout":
+        return day73_case_study_launch_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

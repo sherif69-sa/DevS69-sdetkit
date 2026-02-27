@@ -1734,6 +1734,16 @@ See implementation details: [Day 71 big upgrade report](docs/day-71-big-upgrade-
 
 See implementation details: [Day 72 big upgrade report](docs/day-72-big-upgrade-report.md).
 
+
+### Day 73 — Case-study launch closeout lane
+
+- Run `python -m sdetkit day73-case-study-launch-closeout --format json --strict` to validate Day 73 case-study launch readiness.
+- Emit shareable Day 73 launch closeout pack: `python -m sdetkit day73-case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day73-case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict`.
+- Review Day 73 integration guide: [Case-study launch closeout lane](docs/integrations-day73-case-study-launch-closeout.md).
+
+See implementation details: [Day 73 big upgrade report](docs/day-73-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
