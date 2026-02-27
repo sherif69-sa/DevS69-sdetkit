@@ -1,0 +1,14 @@
+{
+  "plan_id": "day87-governance-handoff-001",
+  "contributors": ["maintainers", "release-ops", "community-ops"],
+  "narrative_channels": ["governance-review", "roadmap-sync", "community-touchpoint"],
+  "baseline": {
+    "ownership_coverage": 0.61,
+    "handoff_confidence": 0.55
+  },
+  "target": {
+    "ownership_coverage": 0.87,
+    "handoff_confidence": 0.78
+  },
+  "owner": "community-ops"
+}

@@ -904,3 +904,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 86 launch readiness closeout pack: `python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day86-launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 86 launch readiness closeout lane](integrations-day86-launch-readiness-closeout.md).
+
+
+## Day 87 governance handoff closeout lane
+
+- Read the implementation report: [Day 87 big upgrade report](day-87-big-upgrade-report.md).
+- Run `python -m sdetkit day87-governance-handoff-closeout --format json --strict` to score governance handoff readiness.
+- Emit Day 87 governance handoff closeout pack: `python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day87-governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 87 governance handoff closeout lane](integrations-day87-governance-handoff-closeout.md).

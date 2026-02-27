@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_day87_governance_handoff_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "day87-governance-handoff-closeout contract check passed\n",
+  "stderr": ""
+}

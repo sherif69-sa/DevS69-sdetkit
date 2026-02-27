@@ -1879,3 +1879,13 @@ Use these entry points instead:
 - [🕹️ Visual HUD showcase (large SVG views)](https://sherif69-sa.github.io/DevS69-sdetkit/hud-showcase/)
 - [🧭 Repository tour](docs/repo-tour.md)
 - [📚 Docs index](docs/index.md)
+
+
+### Day 87 — Governance handoff closeout lane
+
+- Run `python -m sdetkit day87-governance-handoff-closeout --format json --strict` to validate Day 87 governance handoff readiness.
+- Emit shareable Day 87 governance handoff pack: `python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day87-governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict`.
+- Review Day 87 integration guide: [Governance handoff closeout lane](docs/integrations-day87-governance-handoff-closeout.md).
+
+See implementation details: [Day 87 big upgrade report](docs/day-87-big-upgrade-report.md).
