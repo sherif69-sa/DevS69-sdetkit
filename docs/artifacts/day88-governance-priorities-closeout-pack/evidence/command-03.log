@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_day88_governance_priorities_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "day88-governance-priorities-closeout contract check passed\n",
+  "stderr": ""
+}
