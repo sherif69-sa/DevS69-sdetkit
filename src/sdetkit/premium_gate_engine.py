@@ -7,6 +7,7 @@ import json
 import re
 import sqlite3
 import subprocess
+import sys
 import urllib.parse
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass
@@ -1064,11 +1065,11 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if ns.format == "json":
-        print(json.dumps(payload, indent=2, sort_keys=True))
+        sys.stdout.write(f"{json.dumps(payload, indent=2, sort_keys=True)}\n")
     elif ns.format == "markdown":
-        print(render_markdown(payload))
+        sys.stdout.write(f"{render_markdown(payload)}\n")
     else:
-        print(render_text(payload))
+        sys.stdout.write(f"{render_text(payload)}\n")
 
     if ns.min_score is not None and payload["score"] < ns.min_score:
         return 2

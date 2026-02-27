@@ -128,12 +128,12 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 
 
 def _load_day55(path: Path) -> tuple[int, bool, int]:
-    payload = _load_json(path)
-    if payload is None:
+    payload_obj = _load_json(path)
+    if not isinstance(payload_obj, dict):
         return 0, False, 0
-    summary_obj = payload.get("summary")
+    summary_obj = payload_obj.get("summary")
     summary = summary_obj if isinstance(summary_obj, dict) else {}
-    checks_obj = payload.get("checks")
+    checks_obj = payload_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     return (
         int(summary.get("activation_score", 0)),
@@ -312,7 +312,7 @@ def build_day56_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "Day 56 stabilization closeout lane is fully complete and ready for Day 57 deep audit lane."
         )
 
-    score = int(round(sum(c["weight"] for c in checks if c["passed"])))
+    score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     return {
         "name": "day56-stabilization-closeout",
         "inputs": {

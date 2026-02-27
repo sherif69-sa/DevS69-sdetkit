@@ -128,14 +128,14 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 
 
 def _load_day59(path: Path) -> tuple[int, bool, int]:
-    payload = _load_json(path)
-    if payload is None:
+    payload_obj = _load_json(path)
+    if not isinstance(payload_obj, dict):
         return 0, False, 0
-    summary_obj = payload.get("summary")
+    summary_obj = payload_obj.get("summary")
     summary = summary_obj if isinstance(summary_obj, dict) else {}
     score = int(summary.get("activation_score", 0))
     strict = bool(summary.get("strict_pass", False))
-    checks_obj = payload.get("checks")
+    checks_obj = payload_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     return score, strict, len(checks)
 
