@@ -1,0 +1,125 @@
+{
+  "name": "day71-case-study-prep3-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day71-case-study-prep3-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day70_summary": "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json",
+    "day70_delivery_board": "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md",
+    "case_study_data": ".day71-escalation-quality-case-study.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day71_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day71 command lane"
+    },
+    {
+      "check_id": "docs_index_day71_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-71-big-upgrade-report.md + integrations-day71-case-study-prep3-closeout.md"
+    },
+    {
+      "check_id": "top10_day71_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 71 + Day 72 strategy chain"
+    },
+    {
+      "check_id": "day70_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json"
+    },
+    {
+      "check_id": "day70_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md"
+    },
+    {
+      "check_id": "day70_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day70_score": 100,
+        "strict_pass": true,
+        "day70_checks": 14
+      }
+    },
+    {
+      "check_id": "day70_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day70": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 71 \u2014 Case-study prep #3 closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "case_study_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": ".day71-escalation-quality-case-study.json"
+    }
+  ],
+  "rollup": {
+    "day70_activation_score": 100,
+    "day70_checks": 14,
+    "day70_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 70 continuity is strict-pass with activation score=100.",
+    "Day 70 delivery board integrity validated with 5 checklist items.",
+    "Day 71 escalation-quality case-study dataset is available for case-study prep execution.",
+    "Day 71 case-study prep #3 closeout lane is fully complete and ready for Day 72 case-study prep #4."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

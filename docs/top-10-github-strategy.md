@@ -241,7 +241,8 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 - **Day 68 — Integration expansion #4:** add one more ecosystem example (self-hosted/enterprise variant).
 - **Day 69 — Case-study prep #1:** gather measurable before/after data for reliability outcome.
 - **Day 70 — Case-study prep #2:** gather measurable before/after data for triage-speed outcome.
-- **Day 71 — Weekly review #10:** assess integration adoption and feedback quality.
+- **Day 71 — Case-study prep #3:** lock escalation-quality evidence and publication readiness handoff.
+- **Day 72 — Weekly review #10:** assess integration adoption and feedback quality.
 
 - **Day 72 — Case study #1 publish:** reduced flaky checks with reproducible workflow evidence.
 - **Day 73 — Case study #2 publish:** faster incident triage with concrete artifact trail.
