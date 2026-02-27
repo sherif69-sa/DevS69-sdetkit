@@ -266,7 +266,8 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 - **Day 85 — KPI deep audit:** validate full 90-day trends vs original baseline.
 - **Day 86 — Reputation hardening:** clean up top public surfaces (README/docs/release highlights).
 - **Day 87 — Governance handoff prep:** map long-term ownership for community and roadmap loops.
-- **Day 88 — Next-cycle planning:** draft next 90-day strategy from validated learnings.
+- **Day 88 — Governance priorities closeout lane:** lock governance priorities from Day 87 handoff outcomes with strict quality gates.
+- **Day 89 — Next-cycle planning:** draft next 90-day strategy from validated learnings.
 - **Day 89 — Final review:** package wins, misses, and corrective actions.
 - **Day 90 — Phase-3 wrap + publication:** ship final 90-day report and publish next-cycle roadmap.
 

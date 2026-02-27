@@ -1889,3 +1889,12 @@ Use these entry points instead:
 - Review Day 87 integration guide: [Governance handoff closeout lane](docs/integrations-day87-governance-handoff-closeout.md).
 
 See implementation details: [Day 87 big upgrade report](docs/day-87-big-upgrade-report.md).
+
+### Day 88 — Governance priorities closeout lane
+
+- Run `python -m sdetkit day88-governance-priorities-closeout --format json --strict` to validate Day 88 governance priorities readiness.
+- Emit shareable Day 88 governance priorities pack: `python -m sdetkit day88-governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day88-governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict`.
+- Review Day 88 integration guide: [Governance priorities closeout lane](docs/integrations-day88-governance-priorities-closeout.md).
+
+See implementation details: [Day 88 big upgrade report](docs/day-88-big-upgrade-report.md).

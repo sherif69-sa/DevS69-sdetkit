@@ -913,3 +913,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 87 governance handoff closeout pack: `python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day87-governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 87 governance handoff closeout lane](integrations-day87-governance-handoff-closeout.md).
+
+
+## Day 88 governance priorities closeout lane
+
+- Read the implementation report: [Day 88 big upgrade report](day-88-big-upgrade-report.md).
+- Run `python -m sdetkit day88-governance-priorities-closeout --format json --strict` to score governance priorities readiness.
+- Emit Day 88 governance priorities closeout pack: `python -m sdetkit day88-governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day88-governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 88 governance priorities closeout lane](integrations-day88-governance-priorities-closeout.md).
