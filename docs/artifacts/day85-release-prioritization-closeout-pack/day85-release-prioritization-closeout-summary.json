@@ -1,0 +1,23 @@
+{
+  "summary": {
+    "activation_score": 100,
+    "strict_pass": true
+  },
+  "checks": [
+    {
+      "passed": true
+    },
+    {
+      "passed": true
+    },
+    {
+      "passed": true
+    },
+    {
+      "passed": true
+    },
+    {
+      "passed": true
+    }
+  ]
+}

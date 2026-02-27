@@ -66,6 +66,7 @@ from . import (
     day83_trust_faq_expansion_closeout,
     day84_evidence_narrative_closeout,
     day85_release_prioritization_closeout,
+    day86_launch_readiness_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -352,6 +353,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day85-release-prioritization-closeout":
         return day85_release_prioritization_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day86-launch-readiness-closeout":
+        return day86_launch_readiness_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -617,6 +621,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     d84.add_argument("args", nargs=argparse.REMAINDER)
     d85 = sub.add_parser("day85-release-prioritization-closeout")
     d85.add_argument("args", nargs=argparse.REMAINDER)
+    d86 = sub.add_parser("day86-launch-readiness-closeout")
+    d86.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)

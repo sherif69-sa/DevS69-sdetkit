@@ -1,0 +1,125 @@
+{
+  "name": "day86-launch-readiness-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day86-launch-readiness-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day85_summary": "docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json",
+    "day85_delivery_board": "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md",
+    "launch_readiness_plan": ".day86-launch-readiness-plan.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day86_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day86 command lane"
+    },
+    {
+      "check_id": "docs_index_day86_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-86-big-upgrade-report.md + integrations-day86-launch-readiness-closeout.md"
+    },
+    {
+      "check_id": "top10_day86_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 85 + Day 86 strategy chain"
+    },
+    {
+      "check_id": "day85_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json"
+    },
+    {
+      "check_id": "day85_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md"
+    },
+    {
+      "check_id": "day85_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day85_score": 100,
+        "strict_pass": true,
+        "day85_checks": 5
+      }
+    },
+    {
+      "check_id": "day85_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day85": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 86 \u2014 Launch readiness closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "evidence_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": ".day86-launch-readiness-plan.json"
+    }
+  ],
+  "rollup": {
+    "day85_activation_score": 100,
+    "day85_checks": 5,
+    "day85_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 85 continuity baseline is stable with activation score=100.",
+    "Day 85 delivery board integrity validated with 5 checklist items.",
+    "Day 86 launch readiness dataset is available for launch execution.",
+    "Day 86 launch readiness closeout lane is fully complete and ready for Day 87 launch planning."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

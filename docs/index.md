@@ -895,3 +895,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 85 release prioritization closeout pack: `python -m sdetkit day85-release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day85-release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 85 release prioritization closeout lane](integrations-day85-release-prioritization-closeout.md).
+
+
+## Day 86 launch readiness closeout lane
+
+- Read the implementation report: [Day 86 big upgrade report](day-86-big-upgrade-report.md).
+- Run `python -m sdetkit day86-launch-readiness-closeout --format json --strict` to score launch readiness.
+- Emit Day 86 launch readiness closeout pack: `python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day86-launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 86 launch readiness closeout lane](integrations-day86-launch-readiness-closeout.md).

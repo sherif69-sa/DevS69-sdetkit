@@ -1861,6 +1861,15 @@ See implementation details: [Day 84 big upgrade report](docs/day-84-big-upgrade-
 
 See implementation details: [Day 85 big upgrade report](docs/day-85-big-upgrade-report.md).
 
+### Day 86 — Launch readiness closeout lane
+
+- Run `python -m sdetkit day86-launch-readiness-closeout --format json --strict` to validate Day 86 launch readiness.
+- Emit shareable Day 86 launch readiness pack: `python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day86-launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict`.
+- Review Day 86 integration guide: [Launch readiness closeout lane](docs/integrations-day86-launch-readiness-closeout.md).
+
+See implementation details: [Day 86 big upgrade report](docs/day-86-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

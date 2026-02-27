@@ -1,3 +1,7 @@
+## Unreleased
+
+- add Day 86 launch readiness closeout lane command, docs, checks, and tests (`day86-launch-readiness-closeout`).
+
 # Changelog
 ## [1.0.2]
 
