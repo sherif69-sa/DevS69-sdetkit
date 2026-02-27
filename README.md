@@ -1794,6 +1794,16 @@ See implementation details: [Day 77 big upgrade report](docs/day-77-big-upgrade-
 
 See implementation details: [Day 78 big upgrade report](docs/day-78-big-upgrade-report.md).
 
+
+### Day 79 — Scale upgrade closeout lane
+
+- Run `python -m sdetkit day79-scale-upgrade-closeout --format json --strict` to validate Day 79 scale upgrade readiness.
+- Emit shareable Day 79 scale upgrade pack: `python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day79-scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict`.
+- Review Day 79 integration guide: [Scale upgrade closeout lane](docs/integrations-day79-scale-upgrade-closeout.md).
+
+See implementation details: [Day 79 big upgrade report](docs/day-79-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.

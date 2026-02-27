@@ -59,6 +59,7 @@ from . import (
     day76_contributor_recognition_closeout,
     day77_community_touchpoint_closeout,
     day78_ecosystem_priorities_closeout,
+    day79_scale_upgrade_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -324,6 +325,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day78-ecosystem-priorities-closeout":
         return day78_ecosystem_priorities_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "day79-scale-upgrade-closeout":
+        return day79_scale_upgrade_closeout.main(list(argv[1:]))
+
     if argv and argv[0] == "faq-objections":
         return faq_objections.main(list(argv[1:]))
 
@@ -575,6 +579,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     d77.add_argument("args", nargs=argparse.REMAINDER)
     d78 = sub.add_parser("day78-ecosystem-priorities-closeout")
     d78.add_argument("args", nargs=argparse.REMAINDER)
+    d79 = sub.add_parser("day79-scale-upgrade-closeout")
+    d79.add_argument("args", nargs=argparse.REMAINDER)
 
     fqo = sub.add_parser("faq-objections")
     fqo.add_argument("args", nargs=argparse.REMAINDER)
@@ -822,6 +828,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day78-ecosystem-priorities-closeout":
         return day78_ecosystem_priorities_closeout.main(ns.args)
+
+    if ns.cmd == "day79-scale-upgrade-closeout":
+        return day79_scale_upgrade_closeout.main(ns.args)
 
     if ns.cmd == "faq-objections":
         return faq_objections.main(ns.args)

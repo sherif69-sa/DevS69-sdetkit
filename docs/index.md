@@ -834,3 +834,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 78 ecosystem priorities closeout pack: `python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day78-ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 78 ecosystem priorities closeout lane](integrations-day78-ecosystem-priorities-closeout.md).
+
+
+## Day 79 scale upgrade closeout lane
+
+- Read the implementation report: [Day 79 big upgrade report](day-79-big-upgrade-report.md).
+- Run `python -m sdetkit day79-scale-upgrade-closeout --format json --strict` to score scale upgrade readiness.
+- Emit Day 79 scale upgrade closeout pack: `python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day79-scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 79 scale upgrade closeout lane](integrations-day79-scale-upgrade-closeout.md).
