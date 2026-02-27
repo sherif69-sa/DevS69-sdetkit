@@ -128,12 +128,12 @@ def _load_json(path: Path) -> dict[str, Any] | None:
 
 
 def _load_day52(path: Path) -> tuple[float, bool, int]:
-    data = _load_json(path)
-    if data is None:
+    data_obj = _load_json(path)
+    if not isinstance(data_obj, dict):
         return 0.0, False, 0
-    summary_obj = data.get("summary")
+    summary_obj = data_obj.get("summary")
     summary = summary_obj if isinstance(summary_obj, dict) else {}
-    checks_obj = data.get("checks")
+    checks_obj = data_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     score = float(summary.get("activation_score", 0.0))
     strict = bool(summary.get("strict_pass", False))
@@ -277,7 +277,7 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     ]
 
     failed = [c for c in checks if not c["passed"]]
-    score = int(round(sum(c["weight"] for c in checks if c["passed"])))
+    score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     critical_failures: list[str] = []
     if not day52_summary.exists() or not day52_board.exists():
         critical_failures.append("day52_handoff_inputs")
