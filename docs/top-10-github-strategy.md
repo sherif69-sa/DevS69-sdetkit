@@ -246,7 +246,7 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 
 - **Day 72 — Case study #1 publish:** reduced flaky checks with reproducible workflow evidence.
 - **Day 73 — Case study #2 publish:** faster incident triage with concrete artifact trail.
-- **Day 74 — Case study #3 publish:** tighter policy compliance with governance checks.
+- **Day 74 — Distribution scaling closeout:** convert Day 73 publication outcomes into repeatable channel execution.
 - **Day 75 — Trust assets refresh:** improve security/governance trust section with proof links.
 - **Day 76 — Contributor recognition board:** publish contributor spotlight and release credits model.
 - **Day 77 — Community touchpoint #1:** run first office-hours session and summarize outcomes.

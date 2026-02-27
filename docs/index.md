@@ -789,3 +789,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 73 case-study launch closeout pack: `python -m sdetkit day73-case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day73-case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 73 case-study launch closeout lane](integrations-day73-case-study-launch-closeout.md).
+
+
+## Day 74 distribution scaling closeout lane
+
+- Read the implementation report: [Day 74 big upgrade report](day-74-big-upgrade-report.md).
+- Run `python -m sdetkit day74-distribution-scaling-closeout --format json --strict` to score distribution scaling readiness.
+- Emit Day 74 distribution scaling closeout pack: `python -m sdetkit day74-distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day74-distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 74 distribution scaling closeout lane](integrations-day74-distribution-scaling-closeout.md).

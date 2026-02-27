@@ -1744,6 +1744,16 @@ See implementation details: [Day 72 big upgrade report](docs/day-72-big-upgrade-
 
 See implementation details: [Day 73 big upgrade report](docs/day-73-big-upgrade-report.md).
 
+
+### Day 74 — Distribution scaling closeout lane
+
+- Run `python -m sdetkit day74-distribution-scaling-closeout --format json --strict` to validate Day 74 distribution scaling readiness.
+- Emit shareable Day 74 distribution scaling pack: `python -m sdetkit day74-distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day74-distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict`.
+- Review Day 74 integration guide: [Distribution scaling closeout lane](docs/integrations-day74-distribution-scaling-closeout.md).
+
+See implementation details: [Day 74 big upgrade report](docs/day-74-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
