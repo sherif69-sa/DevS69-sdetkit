@@ -250,7 +250,8 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 - **Day 75 — Trust assets refresh:** improve security/governance trust section with proof links.
 - **Day 76 — Contributor recognition board:** publish contributor spotlight and release credits model.
 - **Day 77 — Community touchpoint #1:** run first office-hours session and summarize outcomes.
-- **Day 78 — Weekly review #11:** capture what improved trust and what still blocks adoption.
+- **Day 78 — Ecosystem priorities closeout:** convert Day 77 evidence into partner/adoption workstream priorities with strict KPI guardrails.
+- **Day 79 — Weekly review #11:** capture what improved trust and what still blocks adoption.
 
 - **Day 79 — Enterprise onboarding path:** publish role-based enterprise adoption checklist.
 - **Day 80 — Ecosystem partner outreach:** identify and contact maintainers of adjacent tooling.

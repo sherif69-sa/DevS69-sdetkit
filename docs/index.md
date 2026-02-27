@@ -825,3 +825,12 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 77 community touchpoint closeout pack: `python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 77 community touchpoint closeout lane](integrations-day77-community-touchpoint-closeout.md).
+
+
+## Day 78 ecosystem priorities closeout lane
+
+- Read the implementation report: [Day 78 big upgrade report](day-78-big-upgrade-report.md).
+- Run `python -m sdetkit day78-ecosystem-priorities-closeout --format json --strict` to score ecosystem priorities readiness.
+- Emit Day 78 ecosystem priorities closeout pack: `python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day78-ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 78 ecosystem priorities closeout lane](integrations-day78-ecosystem-priorities-closeout.md).

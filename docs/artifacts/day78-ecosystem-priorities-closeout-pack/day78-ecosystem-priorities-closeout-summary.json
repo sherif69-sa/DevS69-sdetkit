@@ -1,0 +1,125 @@
+{
+  "name": "day78-ecosystem-priorities-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day78-ecosystem-priorities-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day77_summary": "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json",
+    "day77_delivery_board": "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md",
+    "ecosystem_priorities_plan": ".day78-ecosystem-priorities-plan.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day78_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day78 command lane"
+    },
+    {
+      "check_id": "docs_index_day78_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-78-big-upgrade-report.md + integrations-day78-ecosystem-priorities-closeout.md"
+    },
+    {
+      "check_id": "top10_day78_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 77 + Day 78 strategy chain"
+    },
+    {
+      "check_id": "day77_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json"
+    },
+    {
+      "check_id": "day77_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
+    },
+    {
+      "check_id": "day77_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day77_score": 87,
+        "strict_pass": false,
+        "day77_checks": 14
+      }
+    },
+    {
+      "check_id": "day77_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day77": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 78 \u2014 Ecosystem priorities closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "ecosystem_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": ".day78-ecosystem-priorities-plan.json"
+    }
+  ],
+  "rollup": {
+    "day77_activation_score": 87,
+    "day77_checks": 14,
+    "day77_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 77 continuity baseline is stable with activation score=87.",
+    "Day 77 delivery board integrity validated with 5 checklist items.",
+    "Day 78 ecosystem priorities dataset is available for launch execution.",
+    "Day 78 ecosystem priorities closeout lane is fully complete and ready for Day 79 scale priorities."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

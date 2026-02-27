@@ -1,24 +1,27 @@
 {
-  "plan_id": "day77-community-touchpoint-001",
-  "contributors": [
-    "maintainers",
-    "reviewers",
-    "community-team"
-  ],
+  "plan_id": "day77-community-touchpoint-v1",
+  "contributors": ["maintainer", "community-lead"],
   "touchpoint_tracks": [
-    "office-hours",
-    "community-thread-roundup",
-    "release-highlights"
+    {
+      "name": "office-hours",
+      "baseline": 2,
+      "target": 4,
+      "owner": "community-lead"
+    },
+    {
+      "name": "feedback-roundups",
+      "baseline": 1,
+      "target": 3,
+      "owner": "maintainer"
+    }
   ],
   "baseline": {
-    "sessions": 1,
-    "participants": 15,
-    "resolved_questions": 5
+    "trust_score": 75,
+    "confidence": 0.8
   },
   "target": {
-    "sessions": 3,
-    "participants": 40,
-    "resolved_questions": 18
+    "touchpoint_score": 84,
+    "confidence": 0.9
   },
-  "owner": "community-ops"
+  "owner": "community-program-owner"
 }

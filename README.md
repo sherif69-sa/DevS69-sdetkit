@@ -1784,6 +1784,16 @@ See implementation details: [Day 76 big upgrade report](docs/day-76-big-upgrade-
 
 See implementation details: [Day 77 big upgrade report](docs/day-77-big-upgrade-report.md).
 
+
+### Day 78 — Ecosystem priorities closeout lane
+
+- Run `python -m sdetkit day78-ecosystem-priorities-closeout --format json --strict` to validate Day 78 ecosystem priorities readiness.
+- Emit shareable Day 78 ecosystem priorities pack: `python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day78-ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict`.
+- Review Day 78 integration guide: [Ecosystem priorities closeout lane](docs/integrations-day78-ecosystem-priorities-closeout.md).
+
+See implementation details: [Day 78 big upgrade report](docs/day-78-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
