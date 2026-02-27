@@ -1,0 +1,45 @@
+stages:
+  - validate
+  - test
+  - package
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH'
+
+default:
+  image: python:3.11
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .venv/
+      - .cache/pip/
+
+lint:
+  stage: validate
+  script:
+    - python -m pip install -U pip
+    - pip install -r requirements-test.txt
+    - python -m pytest -q tests/test_day66_integration_expansion2_closeout.py
+
+integration-matrix:
+  stage: test
+  parallel:
+    matrix:
+      - PYTHON_VERSION: ["3.10", "3.11"]
+  image: python:${PYTHON_VERSION}
+  script:
+    - python -m pip install -U pip
+    - pip install -r requirements-test.txt
+    - python -m sdetkit day66-integration-expansion2-closeout --format json --strict
+
+package-evidence:
+  stage: package
+  script:
+    - python -m sdetkit day66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
+    - python scripts/check_day66_integration_expansion2_closeout_contract.py --skip-evidence
+  artifacts:
+    when: always
+    paths:
+      - docs/artifacts/day66-integration-expansion2-closeout-pack/

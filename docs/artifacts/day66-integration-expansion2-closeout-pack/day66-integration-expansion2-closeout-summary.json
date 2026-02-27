@@ -1,0 +1,125 @@
+{
+  "name": "day66-integration-expansion2-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day66-integration-expansion2-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day65_summary": "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json",
+    "day65_delivery_board": "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md",
+    "gitlab_reference": ".gitlab-ci.day66-advanced-reference.yml"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day66_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day66 command lane"
+    },
+    {
+      "check_id": "docs_index_day66_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "day-66-big-upgrade-report.md + integrations-day66-integration-expansion2-closeout.md"
+    },
+    {
+      "check_id": "top10_day66_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 66 + Day 67 strategy chain"
+    },
+    {
+      "check_id": "day65_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
+    },
+    {
+      "check_id": "day65_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md"
+    },
+    {
+      "check_id": "day65_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day65_score": 100,
+        "strict_pass": true,
+        "day65_checks": 14
+      }
+    },
+    {
+      "check_id": "day65_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day65": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 66 \u2014 Integration expansion #2 closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "gitlab_reference_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": ".gitlab-ci.day66-advanced-reference.yml"
+    }
+  ],
+  "rollup": {
+    "day65_activation_score": 100,
+    "day65_checks": 14,
+    "day65_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 65 continuity is strict-pass with activation score=100.",
+    "Day 65 delivery board integrity validated with 5 checklist items.",
+    "Day 66 GitLab reference pipeline is available for integration expansion execution.",
+    "Day 66 integration expansion #2 closeout lane is fully complete and ready for Day 67 integration expansion #3."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

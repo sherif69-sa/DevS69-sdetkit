@@ -723,3 +723,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 65 weekly review closeout pack: `python -m sdetkit day65-weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day65-weekly-review-closeout --execute --evidence-dir docs/artifacts/day65-weekly-review-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 65 weekly review #9 closeout lane](integrations-day65-weekly-review-closeout.md).
+
+## Day 66 integration expansion #2 closeout lane
+
+- Read the implementation report: [Day 66 big upgrade report](day-66-big-upgrade-report.md).
+- Run `python -m sdetkit day66-integration-expansion2-closeout --format json --strict` to score integration expansion readiness.
+- Emit Day 66 integration expansion closeout pack: `python -m sdetkit day66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day66-integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 66 integration expansion #2 closeout lane](integrations-day66-integration-expansion2-closeout.md).
