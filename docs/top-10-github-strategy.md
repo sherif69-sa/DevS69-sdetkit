@@ -231,6 +231,7 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 
 - **Day 61 — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.
 - **Day 62 — Community program setup:** publish office-hours cadence and participation rules.
+- **Day 63 — Contributor onboarding activation:** launch orientation flow and ownership handoff loops.
 - **Day 63 — Roadmap voting launch:** open ranked voting thread for next-priority capabilities.
 - **Day 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.
 - **Day 65 — Weekly review #9:** report baseline movement and community signal quality.

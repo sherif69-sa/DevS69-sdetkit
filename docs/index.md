@@ -691,3 +691,11 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 61 Phase-3 kickoff closeout pack: `python -m sdetkit day61-phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day61-phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 61 Phase-3 kickoff execution closeout lane](integrations-day61-phase3-kickoff-closeout.md).
+
+## Day 62 community program setup closeout lane
+
+- Read the implementation report: [Day 62 big upgrade report](day-62-big-upgrade-report.md).
+- Run `python -m sdetkit day62-community-program-closeout --format json --strict` to score community program setup readiness.
+- Emit Day 62 community program closeout pack: `python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict`.
+- Run deterministic execution evidence lane: `python -m sdetkit day62-community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict`.
+- Review integration guide: [Day 62 community program setup closeout lane](integrations-day62-community-program-closeout.md).

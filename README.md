@@ -1634,6 +1634,15 @@ See implementation details: [Day 60 big upgrade report](docs/day-60-big-upgrade-
 
 See implementation details: [Day 61 big upgrade report](docs/day-61-big-upgrade-report.md).
 
+### Day 62 — Community program setup closeout lane
+
+- Run `python -m sdetkit day62-community-program-closeout --format json --strict` to validate Day 62 community-program readiness.
+- Emit shareable Day 62 community program pack: `python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict`.
+- Execute and collect deterministic logs: `python -m sdetkit day62-community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict`.
+- Review Day 62 integration guide: [Community program setup closeout lane](docs/integrations-day62-community-program-closeout.md).
+
+See implementation details: [Day 62 big upgrade report](docs/day-62-big-upgrade-report.md).
+
 ## 🧱 Repository navigation (short version)
 
 For a cleaner README experience, the giant file listings were removed.
