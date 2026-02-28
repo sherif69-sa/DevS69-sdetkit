@@ -65,16 +65,16 @@ def build_manifest(repo_root: Path | None = None) -> dict[str, Any]:
                 raise ValueError(f"duplicate plan for day {day}: {e['plan_path']} and {p}")
             rel = p.relative_to(root).as_posix()
             data = _load_json(p)
-            plan_title: str | None = None
+            title = None
             if isinstance(data, dict):
                 for k in ("title", "name"):
                     v = data.get(k)
                     if isinstance(v, str) and v.strip():
-                        plan_title = v.strip()
+                        title = v.strip()
                         break
             e["plan_path"] = rel
-            if plan_title:
-                e["plan_title"] = plan_title
+            if title:
+                e["plan_title"] = title
 
     days = [items[k] for k in sorted(items)]
     return {"days": days}
