@@ -55,7 +55,10 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="governance_core_docs",
             weight=15,
-            passed=all(_exists(root, p) for p in ["README.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"]),
+            passed=all(
+                _exists(root, p)
+                for p in ["README.md", "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"]
+            ),
             evidence="README/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT",
             remediation="Add missing governance docs and require link visibility from README.",
         ),
@@ -76,7 +79,10 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="docs_operating_surface",
             weight=15,
-            passed=all(_exists(root, p) for p in ["docs/index.md", "docs/repo-audit.md", "docs/security.md"]),
+            passed=all(
+                _exists(root, p)
+                for p in ["docs/index.md", "docs/repo-audit.md", "docs/security.md"]
+            ),
             evidence="docs/index.md + docs/repo-audit.md + docs/security.md",
             remediation="Create central docs index and operating guides.",
         ),
@@ -176,8 +182,15 @@ def _parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--root", type=Path, default=Path("."), help="Repository root to evaluate.")
     p.add_argument("--format", choices=["text", "json", "markdown"], default="text")
-    p.add_argument("--strict", action="store_true", help="Return exit code 1 if strict pass is false.")
-    p.add_argument("--emit-pack-dir", type=Path, default=None, help="Optional output directory for report artifacts.")
+    p.add_argument(
+        "--strict", action="store_true", help="Return exit code 1 if strict pass is false."
+    )
+    p.add_argument(
+        "--emit-pack-dir",
+        type=Path,
+        default=None,
+        help="Optional output directory for report artifacts.",
+    )
     return p
 
 
