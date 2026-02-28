@@ -1,0 +1,22 @@
+{
+  "plan_id": "day90-phase3-wrap-publication-001",
+  "contributors": [
+    "maintainers",
+    "release-ops",
+    "docs-stewards"
+  ],
+  "narrative_channels": [
+    "release-report",
+    "docs-index",
+    "roadmap-brief"
+  ],
+  "baseline": {
+    "publication_readiness": 0.71,
+    "roadmap_alignment": 0.62
+  },
+  "target": {
+    "publication_readiness": 0.92,
+    "roadmap_alignment": 0.84
+  },
+  "owner": "release-ops"
+}

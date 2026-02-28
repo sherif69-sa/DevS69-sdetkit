@@ -1,0 +1,14 @@
+{
+  "case_id": "day69-reliability-prep-001",
+  "metric": "ci_failure_rate",
+  "baseline": {
+    "window": "2026-02-week1",
+    "value": 0.127
+  },
+  "after": {
+    "window": "2026-02-week2",
+    "value": 0.069
+  },
+  "confidence": "medium",
+  "owner": "reliability-lane"
+}

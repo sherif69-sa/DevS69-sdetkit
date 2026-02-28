@@ -1,0 +1,18 @@
+{
+  "plan_id": "day74-distribution-scaling-001",
+  "channels": [
+    "github",
+    "linkedin",
+    "newsletter"
+  ],
+  "baseline": {
+    "qualified_leads": 22,
+    "ctr": 0.038
+  },
+  "target": {
+    "qualified_leads": 35,
+    "ctr": 0.051
+  },
+  "confidence": 0.9,
+  "owner": "growth-ops"
+}

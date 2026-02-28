@@ -1,0 +1,27 @@
+{
+  "plan_id": "day78-ecosystem-priorities-v1",
+  "contributors": ["maintainer", "community-lead"],
+  "ecosystem_tracks": [
+    {
+      "name": "integration-partners",
+      "baseline": 3,
+      "target": 5,
+      "owner": "community-lead"
+    },
+    {
+      "name": "reference-adopters",
+      "baseline": 4,
+      "target": 7,
+      "owner": "maintainer"
+    }
+  ],
+  "baseline": {
+    "touchpoint_score": 78,
+    "confidence": 0.81
+  },
+  "target": {
+    "ecosystem_score": 85,
+    "confidence": 0.9
+  },
+  "owner": "ecosystem-program-owner"
+}

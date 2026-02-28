@@ -1,0 +1,14 @@
+{
+  "case_id": "day70-triage-speed-prep-001",
+  "metric": "triage_median_minutes",
+  "baseline": {
+    "window": "2026-02-week1",
+    "value": 47
+  },
+  "after": {
+    "window": "2026-02-week2",
+    "value": 31
+  },
+  "confidence": "medium",
+  "owner": "triage-speed-lane"
+}

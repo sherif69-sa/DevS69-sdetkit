@@ -1,0 +1,14 @@
+{
+  "plan_id": "day88-governance-priorities-001",
+  "contributors": ["maintainers", "governance-ops", "release-ops"],
+  "narrative_channels": ["governance-brief", "roadmap-review", "risk-digest"],
+  "baseline": {
+    "governance_alignment": 0.66,
+    "ownership_clarity": 0.58
+  },
+  "target": {
+    "governance_alignment": 0.88,
+    "ownership_clarity": 0.79
+  },
+  "owner": "governance-ops"
+}

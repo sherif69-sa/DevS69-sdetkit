@@ -1,0 +1,27 @@
+{
+  "plan_id": "day77-community-touchpoint-v1",
+  "contributors": ["maintainer", "community-lead"],
+  "touchpoint_tracks": [
+    {
+      "name": "office-hours",
+      "baseline": 2,
+      "target": 4,
+      "owner": "community-lead"
+    },
+    {
+      "name": "feedback-roundups",
+      "baseline": 1,
+      "target": 3,
+      "owner": "maintainer"
+    }
+  ],
+  "baseline": {
+    "trust_score": 75,
+    "confidence": 0.8
+  },
+  "target": {
+    "touchpoint_score": 84,
+    "confidence": 0.9
+  },
+  "owner": "community-program-owner"
+}
