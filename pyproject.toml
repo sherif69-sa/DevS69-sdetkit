@@ -27,12 +27,8 @@ classifiers = [
   "Topic :: Utilities",
 ]
 dependencies = [
-  "httpx>=0.27,<1",
-  "hypothesis>=6,<7",
-  "pre-commit>=4,<5"
+  "httpx>=0.27,<1"
 ]
-
-
 [project.urls]
 Homepage = "https://github.com/sherif69-sa/DevS69-sdetkit"
 Repository = "https://github.com/sherif69-sa/DevS69-sdetkit"

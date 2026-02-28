@@ -21,6 +21,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "cassette-get" in out
     assert "repo" in out
     assert "dev" in out
+    assert "playbooks" in out
 
     assert "report" in out
     assert "maintenance" in out
@@ -45,19 +46,29 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "community-activation" in out
     assert "external-contribution-push" in out
     assert "kpi-audit" in out
-    assert "day29-phase1-hardening" in out
-    assert "day30-phase1-wrap" in out
-    assert "day31-phase2-kickoff" in out
-    assert "day32-release-cadence" in out
-    assert "day33-demo-asset" in out
-    assert "day34-demo-asset2" in out
-    assert "day35-kpi-instrumentation" in out
-    assert "day36-distribution-closeout" in out
-    assert "day37-experiment-lane" in out
-    assert "day38-distribution-batch" in out
-    assert "day39-playbook-post" in out
-    assert "day40-scale-lane" in out
-    assert "day41-expansion-automation" in out
-    assert "day42-optimization-closeout" in out
-    assert "day43-acceleration-closeout" in out
-    assert "day44-scale-closeout" in out
+    assert "day29-phase1-hardening" not in out
+    assert "day30-phase1-wrap" not in out
+    assert "day31-phase2-kickoff" not in out
+    assert "day32-release-cadence" not in out
+    assert "day33-demo-asset" not in out
+    assert "day34-demo-asset2" not in out
+    assert "day35-kpi-instrumentation" not in out
+    assert "day36-distribution-closeout" not in out
+    assert "day37-experiment-lane" not in out
+    assert "day38-distribution-batch" not in out
+    assert "day39-playbook-post" not in out
+    assert "day40-scale-lane" not in out
+    assert "day41-expansion-automation" not in out
+    assert "day42-optimization-closeout" not in out
+    assert "day43-acceleration-closeout" not in out
+    assert "day44-scale-closeout" not in out
+    r2 = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "playbooks"],
+        text=True,
+        capture_output=True,
+    )
+    assert r2.returncode == 0
+    out2 = r2.stdout
+    assert "day29-phase1-hardening" in out2
+    assert "day30-phase1-wrap" in out2
+    assert "day44-scale-closeout" in out2
