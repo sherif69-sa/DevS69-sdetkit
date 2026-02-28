@@ -4,6 +4,7 @@ import argparse
 import json
 import shlex
 import subprocess
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -239,8 +240,11 @@ def _execute_commands(
     results: list[dict[str, Any]] = []
     for idx, command in enumerate(commands, start=1):
         try:
+            argv = shlex.split(command)
+            if argv and argv[0] == "python":
+                argv[0] = sys.executable
             proc = subprocess.run(
-                shlex.split(command),
+                argv,
                 shell=False,
                 capture_output=True,
                 text=True,

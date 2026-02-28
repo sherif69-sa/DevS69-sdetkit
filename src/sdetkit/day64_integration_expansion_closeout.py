@@ -4,6 +4,7 @@ import argparse
 import json
 import shlex
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -390,7 +391,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     out_dir = evidence_dir if evidence_dir.is_absolute() else root / evidence_dir
     out_dir.mkdir(parents=True, exist_ok=True)
     for idx, command in enumerate(_EXECUTION_COMMANDS, start=1):
-        result = subprocess.run(shlex.split(command), cwd=root, capture_output=True, text=True)
+        argv = shlex.split(command)
+        if argv and argv[0] == "python":
+            argv[0] = sys.executable
+        result = subprocess.run(argv, cwd=root, capture_output=True, text=True)
         event = {
             "command": command,
             "returncode": result.returncode,
