@@ -343,6 +343,18 @@
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "path": "src/sdetkit/day85_release_prioritization_closeout.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/day86_launch_readiness_closeout.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/day87_governance_handoff_closeout.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "src/sdetkit/day89_governance_scale_closeout.py"
     }
   ],
   "version": 1

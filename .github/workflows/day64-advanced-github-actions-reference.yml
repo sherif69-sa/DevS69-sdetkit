@@ -23,7 +23,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         python-version: ["3.11", "3.12", "3.13"]
     concurrency:
-      group: day64-reference-${{ github.workflow }}-${{ github.ref }}
+      group: day64-reference-${{ github.workflow }}-${{ github.ref }}-${{ matrix.os }}-py${{ matrix.python-version }}
       cancel-in-progress: true
     steps:
       - name: Checkout
