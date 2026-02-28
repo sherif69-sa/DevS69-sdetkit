@@ -1917,3 +1917,34 @@ See implementation details: [Day 89 big upgrade report](docs/day-89-big-upgrade-
 - Review Day 90 integration guide: [Phase-3 wrap publication closeout lane](docs/integrations-day90-phase3-wrap-publication-closeout.md).
 
 See implementation details: [Day 90 big upgrade report](docs/day-90-big-upgrade-report.md).
+
+## 🏁 Next 90-day production boost (new)
+
+Turn the 3-phase strategy into an executable production plan:
+
+```bash
+python -m sdetkit phase-boost --repo-name DevS69-sdetkit --start-date YYYY-MM-DD
+```
+
+This command generates:
+
+- `docs/artifacts/production-s-class-90-day-plan.md`
+- `docs/artifacts/production-s-class-90-day-plan.json`
+
+Use it with the [Production S-class blueprint](docs/production-s-class-90-day-boost.md) to drive owners, KPIs, and closeout evidence for the next execution cycle.
+
+## 🛡️ Company onboarding readiness gate (new)
+
+Before any team starts execution, run:
+
+```bash
+python -m sdetkit production-readiness --format text
+```
+
+For CI gating:
+
+```bash
+python -m sdetkit production-readiness --format json --strict
+```
+
+This scores governance, CI/security workflow coverage, packaging/test layout, and reproducibility baseline. Full guide: [docs/production-readiness.md](docs/production-readiness.md).

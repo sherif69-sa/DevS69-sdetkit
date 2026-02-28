@@ -88,7 +88,9 @@ from . import (
     onboarding_time_upgrade,
     ops,
     patch,
+    phase_boost,
     policy,
+    production_readiness,
     proof,
     quality_contribution_delta,
     release_narrative,
@@ -183,6 +185,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "onboarding-time-upgrade":
         return onboarding_time_upgrade.main(list(argv[1:]))
+
+    if argv and argv[0] == "phase-boost":
+        return phase_boost.main(list(argv[1:]))
+
+    if argv and argv[0] == "production-readiness":
+        return production_readiness.main(list(argv[1:]))
 
     if argv and argv[0] == "community-activation":
         return community_activation.main(list(argv[1:]))

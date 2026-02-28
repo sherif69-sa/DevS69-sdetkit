@@ -939,3 +939,15 @@ Free for personal/educational noncommercial use. Commercial use requires a paid 
 - Emit Day 90 phase-3 wrap publication closeout pack: `python -m sdetkit day90-phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict`.
 - Run deterministic execution evidence lane: `python -m sdetkit day90-phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict`.
 - Review integration guide: [Day 90 phase-3 wrap publication closeout lane](integrations-day90-phase3-wrap-publication-closeout.md).
+
+## Production 90-day boost blueprint
+
+- Read the blueprint: [Production S-class tier blueprint](production-s-class-90-day-boost.md).
+- Generate a fresh 90-day 3-phase execution artifact with `python -m sdetkit phase-boost --repo-name DevS69-sdetkit --start-date YYYY-MM-DD`.
+- Default outputs are saved under `docs/artifacts/production-s-class-90-day-plan.md` and `.json` for planning + automation handoff.
+
+## Company onboarding production readiness
+
+- Run `python -m sdetkit production-readiness --format text` for a quick readiness score.
+- Run `python -m sdetkit production-readiness --format json --strict` to gate CI.
+- Read guide: [Production readiness command](production-readiness.md).
