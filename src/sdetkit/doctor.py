@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import shutil
@@ -242,10 +243,17 @@ def _check_clean_tree(root: Path) -> bool:
 
 
 def _check_tools() -> tuple[list[str], list[str]]:
-    want = ["git", "pytest", "ruff", "python3"]
-    present = sorted([t for t in want if shutil.which(t)])
-    missing = sorted([t for t in want if t not in present])
-    return present, missing
+    want_bins = ["git", "python3"]
+    want_mods = {"pytest": "pytest", "ruff": "ruff"}
+    present: set[str] = set()
+    for t in want_bins:
+        if shutil.which(t):
+            present.add(t)
+    for tool, mod in want_mods.items():
+        if shutil.which(tool) or importlib.util.find_spec(mod) is not None:
+            present.add(tool)
+    missing = sorted([t for t in (want_bins + list(want_mods)) if t not in present])
+    return sorted(present), missing
 
 
 def _calculate_score(checks: list[bool]) -> int:
