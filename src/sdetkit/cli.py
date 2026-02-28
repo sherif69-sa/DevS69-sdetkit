@@ -98,6 +98,7 @@ from . import (
     reliability_evidence_pack,
     repo,
     report,
+    roadmap,
     startup_use_case,
     triage_templates,
     trust_signal_upgrade,
@@ -406,6 +407,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "docs-nav":
         return docs_navigation.main(list(argv[1:]))
+    if argv and argv[0] == "roadmap":
+        return roadmap.main(list(argv[1:]))
 
     if argv and argv[0] == "startup-use-case":
         return startup_use_case.main(list(argv[1:]))
@@ -682,6 +685,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     dnv = sub.add_parser("docs-nav")
     dnv.add_argument("args", nargs=argparse.REMAINDER)
+    rdm = sub.add_parser("roadmap")
+    rdm.add_argument("args", nargs=argparse.REMAINDER)
 
     suc = sub.add_parser("startup-use-case")
     suc.add_argument("args", nargs=argparse.REMAINDER)
@@ -965,6 +970,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "docs-nav":
         return docs_navigation.main(ns.args)
+    if ns.cmd == "roadmap":
+        return roadmap.main(ns.args)
 
     if ns.cmd == "startup-use-case":
         return startup_use_case.main(ns.args)

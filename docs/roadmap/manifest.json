@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "days": [
+    {
+      "day": 1,
+      "report_file": "day-1-ultra-upgrade-report.md"
+    },
+    {
+      "day": 2,
+      "report_file": "day-2-ultra-upgrade-report.md"
+    },
+    {
+      "day": 3,
+      "report_file": "day-3-ultra-upgrade-report.md"
+    },
+    {
+      "day": 4,
+      "report_file": "day-4-ultra-upgrade-report.md"
+    },
+    {
+      "day": 5,
+      "report_file": "day-5-ultra-upgrade-report.md"
+    },
+    {
+      "day": 6,
+      "report_file": "day-6-ultra-upgrade-report.md"
+    },
+    {
+      "day": 7,
+      "report_file": "day-7-ultra-upgrade-report.md"
+    },
+    {
+      "day": 8,
+      "report_file": "day-8-ultra-upgrade-report.md"
+    },
+    {
+      "day": 9,
+      "report_file": "day-9-ultra-upgrade-report.md"
+    },
+    {
+      "day": 10,
+      "report_file": "day-10-ultra-upgrade-report.md"
+    },
+    {
+      "day": 11,
+      "report_file": "day-11-ultra-upgrade-report.md"
+    },
+    {
+      "day": 12,
+      "report_file": "day-12-ultra-upgrade-report.md"
+    },
+    {
+      "day": 13,
+      "report_file": "day-13-ultra-upgrade-report.md"
+    },
+    {
+      "day": 14,
+      "report_file": "day-14-ultra-upgrade-report.md"
+    },
+    {
+      "day": 15,
+      "report_file": "day-15-ultra-upgrade-report.md"
+    },
+    {
+      "day": 16,
+      "report_file": "day-16-ultra-upgrade-report.md"
+    },
+    {
+      "day": 17,
+      "report_file": "day-17-ultra-upgrade-report.md"
+    },
+    {
+      "day": 18,
+      "report_file": "day-18-ultra-upgrade-report.md"
+    },
+    {
+      "day": 19,
+      "report_file": "day-19-ultra-upgrade-report.md"
+    },
+    {
+      "day": 20,
+      "report_file": "day-20-ultra-upgrade-report.md"
+    },
+    {
+      "day": 21,
+      "report_file": "day-21-ultra-upgrade-report.md"
+    },
+    {
+      "day": 22,
+      "report_file": "day-22-ultra-upgrade-report.md"
+    },
+    {
+      "day": 23,
+      "report_file": "day-23-ultra-upgrade-report.md"
+    },
+    {
+      "day": 24,
+      "report_file": "day-24-ultra-upgrade-report.md"
+    },
+    {
+      "day": 25,
+      "report_file": "day-25-ultra-upgrade-report.md"
+    },
+    {
+      "day": 26,
+      "report_file": "day-26-ultra-upgrade-report.md"
+    },
+    {
+      "day": 27,
+      "report_file": "day-27-ultra-upgrade-report.md"
+    },
+    {
+      "day": 28,
+      "report_file": "day-28-ultra-upgrade-report.md"
+    },
+    {
+      "day": 29,
+      "report_file": "day-29-ultra-upgrade-report.md"
+    },
+    {
+      "day": 30,
+      "report_file": "day-30-ultra-upgrade-report.md"
+    },
+    {
+      "day": 31,
+      "report_file": "day-31-ultra-upgrade-report.md"
+    },
+    {
+      "day": 32,
+      "report_file": "day-32-ultra-upgrade-report.md"
+    },
+    {
+      "day": 33,
+      "report_file": "day-33-ultra-upgrade-report.md"
+    },
+    {
+      "day": 34,
+      "report_file": "day-34-ultra-upgrade-report.md"
+    },
+    {
+      "day": 35,
+      "report_file": "day-35-big-upgrade-report.md"
+    },
+    {
+      "day": 36,
+      "report_file": "day-36-big-upgrade-report.md"
+    },
+    {
+      "day": 37,
+      "report_file": "day-37-big-upgrade-report.md"
+    },
+    {
+      "day": 38,
+      "report_file": "day-38-big-upgrade-report.md"
+    },
+    {
+      "day": 39,
+      "report_file": "day-39-big-upgrade-report.md"
+    },
+    {
+      "day": 40,
+      "report_file": "day-40-big-upgrade-report.md"
+    },
+    {
+      "day": 41,
+      "report_file": "day-41-big-upgrade-report.md"
+    },
+    {
+      "day": 42,
+      "report_file": "day-42-big-upgrade-report.md"
+    },
+    {
+      "day": 43,
+      "report_file": "day-43-big-upgrade-report.md"
+    },
+    {
+      "day": 44,
+      "report_file": "day-44-big-upgrade-report.md"
+    },
+    {
+      "day": 45,
+      "report_file": "day-45-big-upgrade-report.md"
+    },
+    {
+      "day": 46,
+      "report_file": "day-46-big-upgrade-report.md"
+    },
+    {
+      "day": 47,
+      "report_file": "day-47-big-upgrade-report.md"
+    },
+    {
+      "day": 48,
+      "report_file": "day-48-big-upgrade-report.md"
+    },
+    {
+      "day": 49,
+      "report_file": "day-49-big-upgrade-report.md"
+    },
+    {
+      "day": 50,
+      "report_file": "day-50-big-upgrade-report.md"
+    },
+    {
+      "day": 51,
+      "report_file": "day-51-big-upgrade-report.md"
+    },
+    {
+      "day": 52,
+      "report_file": "day-52-big-upgrade-report.md"
+    },
+    {
+      "day": 53,
+      "report_file": "day-53-big-upgrade-report.md"
+    },
+    {
+      "day": 55,
+      "report_file": "day-55-big-upgrade-report.md"
+    },
+    {
+      "day": 56,
+      "report_file": "day-56-big-upgrade-report.md"
+    },
+    {
+      "day": 57,
+      "report_file": "day-57-big-upgrade-report.md"
+    },
+    {
+      "day": 58,
+      "report_file": "day-58-big-upgrade-report.md"
+    },
+    {
+      "day": 59,
+      "report_file": "day-59-big-upgrade-report.md"
+    },
+    {
+      "day": 60,
+      "report_file": "day-60-big-upgrade-report.md"
+    },
+    {
+      "day": 61,
+      "report_file": "day-61-big-upgrade-report.md"
+    },
+    {
+      "day": 62,
+      "report_file": "day-62-big-upgrade-report.md"
+    },
+    {
+      "day": 63,
+      "report_file": "day-63-big-upgrade-report.md"
+    },
+    {
+      "day": 64,
+      "report_file": "day-64-big-upgrade-report.md"
+    },
+    {
+      "day": 65,
+      "report_file": "day-65-big-upgrade-report.md"
+    },
+    {
+      "day": 66,
+      "report_file": "day-66-big-upgrade-report.md"
+    },
+    {
+      "day": 67,
+      "report_file": "day-67-big-upgrade-report.md"
+    },
+    {
+      "day": 68,
+      "report_file": "day-68-big-upgrade-report.md"
+    },
+    {
+      "day": 69,
+      "report_file": "day-69-big-upgrade-report.md",
+      "plan_file": ".day69-reliability-case-study.json"
+    },
+    {
+      "day": 70,
+      "report_file": "day-70-big-upgrade-report.md",
+      "plan_file": ".day70-triage-speed-case-study.json"
+    },
+    {
+      "day": 71,
+      "report_file": "day-71-big-upgrade-report.md",
+      "plan_file": ".day71-escalation-quality-case-study.json"
+    },
+    {
+      "day": 72,
+      "report_file": "day-72-big-upgrade-report.md",
+      "plan_file": ".day72-publication-quality-case-study.json"
+    },
+    {
+      "day": 73,
+      "report_file": "day-73-big-upgrade-report.md",
+      "plan_file": ".day73-published-case-study.json"
+    },
+    {
+      "day": 74,
+      "report_file": "day-74-big-upgrade-report.md",
+      "plan_file": ".day74-distribution-scaling-plan.json"
+    },
+    {
+      "day": 75,
+      "report_file": "day-75-big-upgrade-report.md",
+      "plan_file": ".day75-trust-assets-refresh-plan.json"
+    },
+    {
+      "day": 76,
+      "report_file": "day-76-big-upgrade-report.md",
+      "plan_file": ".day76-contributor-recognition-plan.json"
+    },
+    {
+      "day": 77,
+      "report_file": "day-77-big-upgrade-report.md",
+      "plan_file": ".day77-community-touchpoint-plan.json"
+    },
+    {
+      "day": 78,
+      "report_file": "day-78-big-upgrade-report.md",
+      "plan_file": ".day78-ecosystem-priorities-plan.json"
+    },
+    {
+      "day": 79,
+      "report_file": "day-79-big-upgrade-report.md",
+      "plan_file": ".day79-scale-upgrade-plan.json"
+    },
+    {
+      "day": 80,
+      "report_file": "day-80-big-upgrade-report.md",
+      "plan_file": ".day80-partner-outreach-plan.json"
+    },
+    {
+      "day": 81,
+      "report_file": "day-81-big-upgrade-report.md",
+      "plan_file": ".day81-growth-campaign-plan.json"
+    },
+    {
+      "day": 82,
+      "report_file": "day-82-big-upgrade-report.md",
+      "plan_file": ".day82-integration-feedback-plan.json"
+    },
+    {
+      "day": 83,
+      "report_file": "day-83-big-upgrade-report.md",
+      "plan_file": ".day83-trust-faq-expansion-plan.json"
+    },
+    {
+      "day": 84,
+      "report_file": "day-84-big-upgrade-report.md",
+      "plan_file": ".day84-evidence-narrative-plan.json"
+    },
+    {
+      "day": 85,
+      "report_file": "day-85-big-upgrade-report.md",
+      "plan_file": ".day85-release-prioritization-plan.json"
+    },
+    {
+      "day": 86,
+      "report_file": "day-86-big-upgrade-report.md",
+      "plan_file": ".day86-launch-readiness-plan.json"
+    },
+    {
+      "day": 87,
+      "report_file": "day-87-big-upgrade-report.md",
+      "plan_file": ".day87-governance-handoff-plan.json"
+    },
+    {
+      "day": 88,
+      "report_file": "day-88-big-upgrade-report.md",
+      "plan_file": ".day88-governance-priorities-plan.json"
+    },
+    {
+      "day": 89,
+      "report_file": "day-89-big-upgrade-report.md",
+      "plan_file": ".day89-governance-scale-plan.json"
+    },
+    {
+      "day": 90,
+      "report_file": "day-90-big-upgrade-report.md",
+      "plan_file": ".day90-phase3-wrap-publication-plan.json"
+    }
+  ]
+}
