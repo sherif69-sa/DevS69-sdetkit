@@ -14,7 +14,7 @@ _DAY52_SUMMARY_PATH = (
     "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
 )
 _DAY52_BOARD_PATH = "docs/artifacts/day52-narrative-closeout-pack/day52-delivery-board.md"
-_SECTION_HEADER = "# Day 53 — Docs loop optimization closeout lane"
+_SECTION_HEADER = "# Day 53 \u2014 Docs loop optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 53 matters",
     "## Required inputs (Day 52)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 54 re-engagement priorities drafted from Day 53 learnings",
 ]
 
-_DAY53_DEFAULT_PAGE = """# Day 53 — Docs loop optimization closeout lane
+_DAY53_DEFAULT_PAGE = """# Day 53 \u2014 Docs loop optimization closeout lane
 
 Day 53 closes with a major docs loop optimization upgrade that converts Day 52 narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
 

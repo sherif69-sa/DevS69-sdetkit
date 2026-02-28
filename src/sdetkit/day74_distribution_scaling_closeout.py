@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY73_SUMMARY_PATH = "docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json"
 _DAY73_BOARD_PATH = "docs/artifacts/day73-case-study-launch-closeout-pack/day73-delivery-board.md"
 _SCALING_PLAN_PATH = ".day74-distribution-scaling-plan.json"
-_SECTION_HEADER = "# Day 74 — Distribution scaling closeout lane"
+_SECTION_HEADER = "# Day 74 \u2014 Distribution scaling closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 74 matters",
     "## Required inputs (Day 73)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY74_DEFAULT_PAGE = """# Day 74 — Distribution scaling closeout lane
+_DAY74_DEFAULT_PAGE = """# Day 74 \u2014 Distribution scaling closeout lane
 
 Day 74 closes with a major upgrade that turns Day 73 published case-study outcomes into a scalable distribution execution pack with governance safeguards.
 

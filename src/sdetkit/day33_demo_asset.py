@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day33-demo-asset.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY32_SUMMARY_PATH = "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
 _DAY32_BOARD_PATH = "docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md"
-_SECTION_HEADER = "# Day 33 — Demo asset #1 production"
+_SECTION_HEADER = "# Day 33 \u2014 Demo asset #1 production"
 _REQUIRED_SECTIONS = [
     "## Why Day 33 matters",
     "## Required inputs (Day 32)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 35 KPI instrumentation plan updated",
 ]
 
-_DAY33_DEFAULT_PAGE = """# Day 33 — Demo asset #1 production
+_DAY33_DEFAULT_PAGE = """# Day 33 \u2014 Demo asset #1 production
 
 Day 33 closes the first demo-asset production lane so strategy turns into distributable proof.
 
@@ -223,7 +223,8 @@ def build_day33_demo_asset_summary(
             "check_id": "top10_day33_alignment",
             "weight": 5,
             "passed": (
-                "Day 33 — Demo asset #1" in top10_text and "Day 34 — Demo asset #2" in top10_text
+                "Day 33 \u2014 Demo asset #1" in top10_text
+                and "Day 34 \u2014 Demo asset #2" in top10_text
             ),
             "evidence": "Day 33 + Day 34 strategy chain",
         },

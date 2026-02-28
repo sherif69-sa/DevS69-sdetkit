@@ -14,7 +14,7 @@ _DAY45_SUMMARY_PATH = (
     "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"
 )
 _DAY45_BOARD_PATH = "docs/artifacts/day45-expansion-closeout-pack/day45-delivery-board.md"
-_SECTION_HEADER = "# Day 46 — Optimization closeout lane"
+_SECTION_HEADER = "# Day 46 \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 46 matters",
     "## Required inputs (Day 45)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 47 reliability priorities drafted from Day 46 learnings",
 ]
 
-_DAY46_DEFAULT_PAGE = """# Day 46 — Optimization closeout lane
+_DAY46_DEFAULT_PAGE = """# Day 46 \u2014 Optimization closeout lane
 
 Day 46 closes with a major optimization upgrade that converts Day 45 expansion evidence into deterministic improvement loops.
 

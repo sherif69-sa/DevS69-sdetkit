@@ -15,7 +15,7 @@ _DAY66_BOARD_PATH = (
     "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md"
 )
 _JENKINS_PATH = ".jenkins.day67-advanced-reference.Jenkinsfile"
-_SECTION_HEADER = "# Day 67 — Integration expansion #3 closeout lane"
+_SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 67 matters",
     "## Required inputs (Day 66)",
@@ -65,7 +65,7 @@ _REQUIRED_JENKINS_LINES = [
     "parallel",
 ]
 
-_DAY67_DEFAULT_PAGE = """# Day 67 — Integration expansion #3 closeout lane
+_DAY67_DEFAULT_PAGE = """# Day 67 \u2014 Integration expansion #3 closeout lane
 
 Day 67 closes with a major integration upgrade that converts Day 66 integration outputs into an advanced Jenkins reference pipeline.
 

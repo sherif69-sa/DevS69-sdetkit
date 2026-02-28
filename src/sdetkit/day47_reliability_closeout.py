@@ -14,7 +14,7 @@ _DAY46_SUMMARY_PATH = (
     "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json"
 )
 _DAY46_BOARD_PATH = "docs/artifacts/day46-optimization-closeout-pack/day46-delivery-board.md"
-_SECTION_HEADER = "# Day 47 — Reliability closeout lane"
+_SECTION_HEADER = "# Day 47 \u2014 Reliability closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 47 matters",
     "## Required inputs (Day 46)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 48 execution priorities drafted from Day 47 learnings",
 ]
 
-_DAY47_DEFAULT_PAGE = """# Day 47 — Reliability closeout lane
+_DAY47_DEFAULT_PAGE = """# Day 47 \u2014 Reliability closeout lane
 
 Day 47 closes with a major reliability upgrade that converts Day 46 optimization evidence into deterministic hardening loops.
 

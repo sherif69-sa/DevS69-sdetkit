@@ -263,7 +263,7 @@ def _render_text(review: WeeklyReview) -> str:
         f"What shipped ({shipped_window}):",
     ]
     for item in review.shipped:
-        mark = "✅" if item["status"] == "shipped" else "⚠️"
+        mark = "\u2705" if item["status"] == "shipped" else "\u26a0\ufe0f"
         lines.append(
             f"- {mark} Day {item['day']}: {item['title']} | report={item['report_exists']} artifact={item['artifact_exists']}"
         )
@@ -321,7 +321,7 @@ def _render_markdown(review: WeeklyReview) -> str:
     ]
 
     for item in review.shipped:
-        status = "shipped ✅" if item["status"] == "shipped" else "incomplete ⚠️"
+        status = "shipped \u2705" if item["status"] == "shipped" else "incomplete \u26a0\ufe0f"
         lines.append(
             f"| {item['day']} | {item['title']} | `{item['report']}` | `{item['artifact']}` | {status} |"
         )

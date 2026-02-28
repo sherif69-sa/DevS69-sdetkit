@@ -10,7 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day29-phase1-hardening.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_SECTION_HEADER = "# Day 29 — Phase-1 hardening"
+_SECTION_HEADER = "# Day 29 \u2014 Phase-1 hardening"
 _REQUIRED_SECTIONS = [
     "## Why Day 29 exists",
     "## Hardening scope",
@@ -30,7 +30,7 @@ _EXECUTION_COMMANDS = [
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
-_DAY29_DEFAULT_PAGE = """# Day 29 — Phase-1 hardening
+_DAY29_DEFAULT_PAGE = """# Day 29 \u2014 Phase-1 hardening
 
 Day 29 closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.
 
@@ -155,8 +155,8 @@ def build_day29_phase1_hardening_summary(
         {
             "check_id": "top10_day29_alignment",
             "weight": 11,
-            "passed": "Day 29 — Phase-1 hardening" in top10_text,
-            "evidence": "Day 29 — Phase-1 hardening",
+            "passed": "Day 29 \u2014 Phase-1 hardening" in top10_text,
+            "evidence": "Day 29 \u2014 Phase-1 hardening",
         },
         {
             "check_id": "report_exists",

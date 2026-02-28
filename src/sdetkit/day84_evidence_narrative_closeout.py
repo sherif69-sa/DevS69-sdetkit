@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY83_SUMMARY_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json"
 _DAY83_BOARD_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md"
 _PLAN_PATH = ".day84-evidence-narrative-plan.json"
-_SECTION_HEADER = "# Day 84 — Evidence narrative closeout lane"
+_SECTION_HEADER = "# Day 84 \u2014 Evidence narrative closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 84 matters",
     "## Required inputs (Day 83)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY84_DEFAULT_PAGE = """# Day 84 — Evidence narrative closeout lane
+_DAY84_DEFAULT_PAGE = """# Day 84 \u2014 Evidence narrative closeout lane
 
 Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into a deterministic evidence narrative operating lane.
 

@@ -15,7 +15,7 @@ _DAY77_BOARD_PATH = (
     "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
 )
 _PLAN_PATH = ".day78-ecosystem-priorities-plan.json"
-_SECTION_HEADER = "# Day 78 — Ecosystem priorities closeout lane"
+_SECTION_HEADER = "# Day 78 \u2014 Ecosystem priorities closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 78 matters",
     "## Required inputs (Day 77)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY78_DEFAULT_PAGE = """# Day 78 — Ecosystem priorities closeout lane
+_DAY78_DEFAULT_PAGE = """# Day 78 \u2014 Ecosystem priorities closeout lane
 
 Day 78 closes with a major upgrade that converts Day 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
 

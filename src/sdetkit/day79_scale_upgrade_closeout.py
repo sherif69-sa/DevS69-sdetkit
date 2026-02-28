@@ -15,7 +15,7 @@ _DAY78_BOARD_PATH = (
     "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md"
 )
 _PLAN_PATH = ".day79-scale-upgrade-plan.json"
-_SECTION_HEADER = "# Day 79 — Scale upgrade closeout lane"
+_SECTION_HEADER = "# Day 79 \u2014 Scale upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 79 matters",
     "## Required inputs (Day 78)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY79_DEFAULT_PAGE = """# Day 79 — Scale upgrade closeout lane
+_DAY79_DEFAULT_PAGE = """# Day 79 \u2014 Scale upgrade closeout lane
 
 Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
 

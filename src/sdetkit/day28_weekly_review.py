@@ -160,8 +160,8 @@ def build_day28_weekly_review_summary(
             "check_id": "top10_day28_alignment",
             "category": "strategy",
             "weight": 8,
-            "passed": "Day 28 — Weekly review #4" in top10_text,
-            "evidence": "Day 28 — Weekly review #4",
+            "passed": "Day 28 \u2014 Weekly review #4" in top10_text,
+            "evidence": "Day 28 \u2014 Weekly review #4",
         },
         {
             "check_id": "docs_mentions_wins_misses_actions",

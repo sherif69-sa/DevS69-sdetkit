@@ -14,7 +14,7 @@ _DAY38_SUMMARY_PATH = (
     "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
 )
 _DAY38_BOARD_PATH = "docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md"
-_SECTION_HEADER = "# Day 39 — Playbook post #1"
+_SECTION_HEADER = "# Day 39 \u2014 Playbook post #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 39 matters",
     "## Required inputs (Day 38)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 40 scale priorities drafted from Day 39 learnings",
 ]
 
-_DAY39_DEFAULT_PAGE = """# Day 39 — Playbook post #1
+_DAY39_DEFAULT_PAGE = """# Day 39 \u2014 Playbook post #1
 
 Day 39 publishes playbook post #1 that converts Day 38 distribution evidence into a reusable operator guide.
 

@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY72_SUMMARY_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
 _DAY72_BOARD_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md"
 _CASE_STUDY_DATA_PATH = ".day73-published-case-study.json"
-_SECTION_HEADER = "# Day 73 — Case-study launch closeout lane"
+_SECTION_HEADER = "# Day 73 \u2014 Case-study launch closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 73 matters",
     "## Required inputs (Day 72)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY73_DEFAULT_PAGE = """# Day 73 — Case-study launch closeout lane
+_DAY73_DEFAULT_PAGE = """# Day 73 \u2014 Case-study launch closeout lane
 
 Day 73 closes with a major upgrade that turns Day 72 publication-quality prep into a published case-study launch pack with rollout safeguards.
 

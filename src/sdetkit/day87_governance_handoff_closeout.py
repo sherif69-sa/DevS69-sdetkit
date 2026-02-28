@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY86_SUMMARY_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
 _DAY86_BOARD_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md"
 _PLAN_PATH = ".day87-governance-handoff-plan.json"
-_SECTION_HEADER = "# Day 87 — Governance handoff closeout lane"
+_SECTION_HEADER = "# Day 87 \u2014 Governance handoff closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 87 matters",
     "## Required inputs (Day 86)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY87_DEFAULT_PAGE = """# Day 87 — Governance handoff closeout lane
+_DAY87_DEFAULT_PAGE = """# Day 87 \u2014 Governance handoff closeout lane
 
 Day 87 closes with a major upgrade that converts Day 86 launch readiness outcomes into a deterministic governance handoff operating lane.
 

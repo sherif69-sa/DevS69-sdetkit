@@ -15,7 +15,7 @@ _DAY74_BOARD_PATH = (
     "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md"
 )
 _TRUST_PLAN_PATH = ".day75-trust-assets-refresh-plan.json"
-_SECTION_HEADER = "# Day 75 — Trust assets refresh closeout lane"
+_SECTION_HEADER = "# Day 75 \u2014 Trust assets refresh closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 75 matters",
     "## Required inputs (Day 74)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY75_DEFAULT_PAGE = """# Day 75 — Trust assets refresh closeout lane
+_DAY75_DEFAULT_PAGE = """# Day 75 \u2014 Trust assets refresh closeout lane
 
 Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into a governance-grade trust refresh execution pack.
 

@@ -14,7 +14,7 @@ _DAY48_SUMMARY_PATH = (
     "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json"
 )
 _DAY48_BOARD_PATH = "docs/artifacts/day48-objection-closeout-pack/day48-delivery-board.md"
-_SECTION_HEADER = "# Day 49 — Weekly review closeout lane"
+_SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 49 matters",
     "## Required inputs (Day 48)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 50 execution priorities drafted from Day 49 learnings",
 ]
 
-_DAY49_DEFAULT_PAGE = """# Day 49 — Weekly review closeout lane
+_DAY49_DEFAULT_PAGE = """# Day 49 \u2014 Weekly review closeout lane
 
 Day 49 closes with a major weekly-review upgrade that converts Day 48 objection evidence into deterministic prioritization and handoff loops.
 

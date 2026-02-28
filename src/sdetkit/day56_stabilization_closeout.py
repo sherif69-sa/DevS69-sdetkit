@@ -14,7 +14,7 @@ _DAY55_SUMMARY_PATH = "docs/artifacts/day55-contributor-activation-closeout-pack
 _DAY55_BOARD_PATH = (
     "docs/artifacts/day55-contributor-activation-closeout-pack/day55-delivery-board.md"
 )
-_SECTION_HEADER = "# Day 56 — Stabilization closeout lane"
+_SECTION_HEADER = "# Day 56 \u2014 Stabilization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 56 matters",
     "## Required inputs (Day 55)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 57 deep-audit priorities drafted from Day 56 learnings",
 ]
 
-_DAY56_DEFAULT_PAGE = """# Day 56 — Stabilization closeout lane
+_DAY56_DEFAULT_PAGE = """# Day 56 \u2014 Stabilization closeout lane
 
 Day 56 closes with a major stabilization upgrade that turns Day 55 contributor-activation outcomes into deterministic KPI recovery and follow-through.
 

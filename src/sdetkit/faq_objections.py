@@ -319,7 +319,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         "| --- | --- | ---: | --- |",
     ]
     for item in payload["checks"]:
-        status = "✅" if item["passed"] else "❌"
+        status = "\u2705" if item["passed"] else "\u274c"
         lines.append(f"| `{item['check_id']}` | {item['category']} | {item['weight']} | {status} |")
 
     lines.extend(["", "## Recommendations", ""])

@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day40-scale-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY39_SUMMARY_PATH = "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
 _DAY39_BOARD_PATH = "docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md"
-_SECTION_HEADER = "# Day 40 — Scale lane #1"
+_SECTION_HEADER = "# Day 40 \u2014 Scale lane #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 40 matters",
     "## Required inputs (Day 39)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 41 expansion priorities drafted from Day 40 learnings",
 ]
 
-_DAY40_DEFAULT_PAGE = """# Day 40 — Scale lane #1
+_DAY40_DEFAULT_PAGE = """# Day 40 \u2014 Scale lane #1
 
 Day 40 publishes scale lane #1 that converts Day 39 publication evidence into a reusable operator guide.
 

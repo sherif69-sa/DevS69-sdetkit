@@ -86,7 +86,7 @@ def build_phase_boost_payload(repo_name: str, start_date: str) -> dict[str, Any]
 
 def _as_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# S-class production readiness — 90-day phase boost",
+        "# S-class production readiness \u2014 90-day phase boost",
         "",
         f"- **Repository:** {payload['repository']}",
         f"- **Start date:** {payload['start_date']}",
@@ -102,7 +102,7 @@ def _as_markdown(payload: dict[str, Any]) -> str:
         lines.extend(
             [
                 "",
-                f"## {phase['phase']} — {phase['theme']}",
+                f"## {phase['phase']} \u2014 {phase['theme']}",
                 "",
                 "### Goals",
             ]

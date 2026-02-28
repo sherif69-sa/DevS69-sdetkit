@@ -178,7 +178,7 @@ def _render_text(report: Report) -> str:
     ]
     if report.issues:
         lines.append("- issues:")
-        lines.extend(f"  - {item.file}:{item.line} — {item.message}" for item in report.issues)
+        lines.extend(f"  - {item.file}:{item.line} \u2014 {item.message}" for item in report.issues)
     else:
         lines.append("- issues: none")
     return "\n".join(lines) + "\n"

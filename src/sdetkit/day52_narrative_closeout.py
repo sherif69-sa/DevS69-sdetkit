@@ -14,7 +14,7 @@ _DAY51_SUMMARY_PATH = (
     "docs/artifacts/day51-case-snippet-closeout-pack/day51-case-snippet-closeout-summary.json"
 )
 _DAY51_BOARD_PATH = "docs/artifacts/day51-case-snippet-closeout-pack/day51-delivery-board.md"
-_SECTION_HEADER = "# Day 52 — Narrative closeout lane"
+_SECTION_HEADER = "# Day 52 \u2014 Narrative closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 52 matters",
     "## Required inputs (Day 51)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 53 expansion priorities drafted from Day 52 learnings",
 ]
 
-_DAY52_DEFAULT_PAGE = """# Day 52 — Narrative closeout lane
+_DAY52_DEFAULT_PAGE = """# Day 52 \u2014 Narrative closeout lane
 
 Day 52 closes with a major narrative upgrade that converts Day 51 case-snippet evidence into a deterministic release-storytelling lane.
 

@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY71_SUMMARY_PATH = "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-case-study-prep3-closeout-summary.json"
 _DAY71_BOARD_PATH = "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-delivery-board.md"
 _CASE_STUDY_DATA_PATH = ".day72-publication-quality-case-study.json"
-_SECTION_HEADER = "# Day 72 — Case-study prep #4 closeout lane"
+_SECTION_HEADER = "# Day 72 \u2014 Case-study prep #4 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 72 matters",
     "## Required inputs (Day 71)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY72_DEFAULT_PAGE = """# Day 72 — Case-study prep #4 closeout lane
+_DAY72_DEFAULT_PAGE = """# Day 72 \u2014 Case-study prep #4 closeout lane
 
 Day 72 closes with a major upgrade that turns Day 71 escalation-quality outputs into a measurable publication-quality case-study launch pack.
 

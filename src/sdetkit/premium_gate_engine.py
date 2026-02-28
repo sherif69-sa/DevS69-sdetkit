@@ -266,7 +266,7 @@ def _scan_step_logs(out_dir: Path) -> list[StepStatus]:
         text = log.read_text(encoding="utf-8", errors="replace")
         low = text.lower()
         failed = "error: step failed" in low or "traceback" in low
-        wc = low.count("warning") + low.count("⚠️")
+        wc = low.count("warning") + low.count("\u26a0\ufe0f")
         details = (
             "failure markers found in log"
             if failed
@@ -900,7 +900,7 @@ def render_text(payload: dict[str, Any]) -> str:
         f"source digest: {payload.get('source_digest', 'n/a')[:16]}",
     ]
     if payload["ok"]:
-        lines.append("✅ no active warnings detected")
+        lines.append("\u2705 no active warnings detected")
 
     if payload.get("hotspots"):
         lines.append("risk hotspots:")
@@ -910,33 +910,33 @@ def render_text(payload: dict[str, Any]) -> str:
     if payload["step_status"]:
         lines.append("step status:")
         for st in payload["step_status"][:30]:
-            icon = "✅" if st["ok"] else "❌"
+            icon = "\u2705" if st["ok"] else "\u274c"
             lines.append(f"- {icon} {st['name']} ({st['details']})")
 
     if payload["engine_checks"]:
         lines.append("engine double-checks:")
         for item in payload["engine_checks"][:30]:
-            lines.append(f"- ⚠️ {item['category']}: {item['message']}")
+            lines.append(f"- \u26a0\ufe0f {item['category']}: {item['message']}")
 
     if payload["warnings"]:
         lines.append("active warnings:")
         for item in payload["warnings"][:30]:
             lines.append(
-                f"- ⚠️ {item['source']}:{item['category']} [{item['severity']}] {item['message']}"
+                f"- \u26a0\ufe0f {item['source']}:{item['category']} [{item['severity']}] {item['message']}"
             )
 
     if payload["recommendations"]:
         lines.append("top recommendations:")
         for item in payload["recommendations"][:30]:
             lines.append(
-                f"- 💡 {item['source']}:{item['category']} [{item['severity']}] {item['message']}"
+                f"- \U0001f4a1 {item['source']}:{item['category']} [{item['severity']}] {item['message']}"
             )
 
     if payload.get("manual_fix_plan"):
         lines.append("manual follow-up plan:")
         for item in payload["manual_fix_plan"][:20]:
             lines.append(
-                f"- 🔧 {item['priority']} {item['rule_id']} {item['path']}: {item['suggested_edit']}"
+                f"- \U0001f527 {item['priority']} {item['rule_id']} {item['path']}: {item['suggested_edit']}"
             )
 
     return "\n".join(lines)
@@ -957,7 +957,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
     if payload.get("warnings"):
         for item in payload["warnings"][:30]:
             lines.append(
-                f"- ⚠️ `{item['source']}:{item['category']}` ({item['severity']}): {item['message']}"
+                f"- \u26a0\ufe0f `{item['source']}:{item['category']}` ({item['severity']}): {item['message']}"
             )
     else:
         lines.append("- none")
@@ -966,7 +966,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
     if payload.get("recommendations"):
         for item in payload["recommendations"][:30]:
             lines.append(
-                f"- 💡 `{item['source']}:{item['category']}` ({item['severity']}): {item['message']}"
+                f"- \U0001f4a1 `{item['source']}:{item['category']}` ({item['severity']}): {item['message']}"
             )
     else:
         lines.append("- none")
@@ -975,7 +975,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         lines.append("## manual fix plan")
         for item in payload["manual_fix_plan"][:20]:
             lines.append(
-                f"- 🔧 `{item['priority']}` `{item['rule_id']}` `{item['path']}` — {item['suggested_edit']}"
+                f"- \U0001f527 `{item['priority']}` `{item['rule_id']}` `{item['path']}` \u2014 {item['suggested_edit']}"
             )
     return "\n".join(lines)
 

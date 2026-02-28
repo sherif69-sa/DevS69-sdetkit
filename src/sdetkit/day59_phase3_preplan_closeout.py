@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day59-phase3-preplan-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY58_SUMMARY_PATH = "docs/artifacts/day58-phase2-hardening-closeout-pack/day58-phase2-hardening-closeout-summary.json"
 _DAY58_BOARD_PATH = "docs/artifacts/day58-phase2-hardening-closeout-pack/day58-delivery-board.md"
-_SECTION_HEADER = "# Day 59 — Phase-3 pre-plan closeout lane"
+_SECTION_HEADER = "# Day 59 \u2014 Phase-3 pre-plan closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 59 matters",
     "## Required inputs (Day 58)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 60 execution priorities drafted from Day 59 learnings",
 ]
 
-_DAY59_DEFAULT_PAGE = """# Day 59 — Phase-3 pre-plan closeout lane
+_DAY59_DEFAULT_PAGE = """# Day 59 \u2014 Phase-3 pre-plan closeout lane
 
 Day 59 closes with a major Phase-3 pre-plan upgrade that turns Day 58 hardening outcomes into deterministic Day 60 execution priorities.
 

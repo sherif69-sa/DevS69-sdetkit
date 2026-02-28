@@ -164,7 +164,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         "|---|---|---:|---|",
     ]
     for c in payload["checks"]:
-        status = "✅ pass" if c["passed"] else "❌ fail"
+        status = "\u2705 pass" if c["passed"] else "\u274c fail"
         lines.append(f"| `{c['check_id']}` | {status} | {c['weight']} | {c['evidence']} |")
 
     if payload["missing"]:

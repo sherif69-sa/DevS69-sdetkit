@@ -14,7 +14,7 @@ _DAY56_SUMMARY_PATH = (
     "docs/artifacts/day56-stabilization-closeout-pack/day56-stabilization-closeout-summary.json"
 )
 _DAY56_BOARD_PATH = "docs/artifacts/day56-stabilization-closeout-pack/day56-delivery-board.md"
-_SECTION_HEADER = "# Day 57 — KPI deep audit closeout lane"
+_SECTION_HEADER = "# Day 57 \u2014 KPI deep audit closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 57 matters",
     "## Required inputs (Day 56)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 58 execution priorities drafted from Day 57 learnings",
 ]
 
-_DAY57_DEFAULT_PAGE = """# Day 57 — KPI deep audit closeout lane
+_DAY57_DEFAULT_PAGE = """# Day 57 \u2014 KPI deep audit closeout lane
 
 Day 57 closes with a major KPI deep-audit upgrade that turns Day 56 stabilization outcomes into deterministic trendline governance.
 

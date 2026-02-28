@@ -15,7 +15,7 @@ _DAY79_SUMMARY_PATH = (
 )
 _DAY79_BOARD_PATH = "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md"
 _PLAN_PATH = ".day80-partner-outreach-plan.json"
-_SECTION_HEADER = "# Day 80 — Partner outreach closeout lane"
+_SECTION_HEADER = "# Day 80 \u2014 Partner outreach closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 80 matters",
     "## Required inputs (Day 79)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY80_DEFAULT_PAGE = """# Day 80 — Partner outreach closeout lane
+_DAY80_DEFAULT_PAGE = """# Day 80 \u2014 Partner outreach closeout lane
 
 Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a partner-outreach execution pack.
 

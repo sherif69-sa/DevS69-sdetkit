@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day38-distribution-batch.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY37_SUMMARY_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
 _DAY37_BOARD_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
-_SECTION_HEADER = "# Day 38 — Distribution batch #1"
+_SECTION_HEADER = "# Day 38 \u2014 Distribution batch #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 38 matters",
     "## Required inputs (Day 37)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 39 playbook post priorities drafted from Day 38 outcomes",
 ]
 
-_DAY38_DEFAULT_PAGE = """# Day 38 — Distribution batch #1
+_DAY38_DEFAULT_PAGE = """# Day 38 \u2014 Distribution batch #1
 
 Day 38 publishes a coordinated distribution batch that operationalizes Day 37 experiment winners into high-signal channel execution.
 

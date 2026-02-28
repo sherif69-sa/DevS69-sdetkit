@@ -117,7 +117,7 @@ _SIGNALS = [
         "check_id": "top10_day26_alignment",
         "category": "strategy",
         "weight": 10,
-        "marker": "Day 26 — External contribution push",
+        "marker": "Day 26 \u2014 External contribution push",
         "source": "top10",
     },
     {

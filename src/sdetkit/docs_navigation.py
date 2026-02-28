@@ -10,12 +10,12 @@ _QUICK_JUMP_START = '<div class="quick-jump" markdown>'
 _QUICK_JUMP_END = "</div>"
 
 _REQUIRED_LINKS = [
-    "[⚡ Fast start](#fast-start)",
-    "[🛠 CLI commands](cli.md)",
-    "[🩺 Doctor checks](doctor.md)",
-    "[🤝 Contribute](contributing.md)",
-    "[✅ Day 10 ultra report](day-10-ultra-upgrade-report.md)",
-    "[🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md)",
+    "[\u26a1 Fast start](#fast-start)",
+    "[\U0001f6e0 CLI commands](cli.md)",
+    "[\U0001fa7a Doctor checks](doctor.md)",
+    "[\U0001f91d Contribute](contributing.md)",
+    "[\u2705 Day 10 ultra report](day-10-ultra-upgrade-report.md)",
+    "[\U0001f9ed Day 11 ultra report](day-11-ultra-upgrade-report.md)",
 ]
 
 _DAY11_SECTION_HEADER = "## Day 11 ultra upgrades (docs navigation tune-up)"
@@ -29,7 +29,7 @@ _TOP_JOURNEYS = [
 
 _DAY11_QUICK_JUMP_BLOCK = """<div class=\"quick-jump\" markdown>
 
-[⚡ Fast start](#fast-start) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [✅ Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[\u26a1 Fast start](#fast-start) \u00b7 [\U0001f680 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) \u00b7 [\u2705 Day 10 ultra report](day-10-ultra-upgrade-report.md) \u00b7 [\U0001f9ed Day 11 ultra report](day-11-ultra-upgrade-report.md) \u00b7 [\U0001f9ed Repo tour](repo-tour.md) \u00b7 [\U0001f4c8 Top-10 strategy](top-10-github-strategy.md) \u00b7 [\U0001f916 AgentOS](agentos-foundation.md) \u00b7 [\U0001f373 Cookbook](agentos-cookbook.md) \u00b7 [\U0001f6e0 CLI commands](cli.md) \u00b7 [\U0001fa7a Doctor checks](doctor.md) \u00b7 [\U0001f91d Contribute](contributing.md)
 
 </div>
 """

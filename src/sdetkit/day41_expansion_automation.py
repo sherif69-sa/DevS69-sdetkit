@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day41-expansion-automation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY40_SUMMARY_PATH = "docs/artifacts/day40-scale-lane-pack/day40-scale-lane-summary.json"
 _DAY40_BOARD_PATH = "docs/artifacts/day40-scale-lane-pack/day40-delivery-board.md"
-_SECTION_HEADER = "# Day 41 — Expansion automation lane"
+_SECTION_HEADER = "# Day 41 \u2014 Expansion automation lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 41 matters",
     "## Required inputs (Day 40)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 42 optimization priorities drafted from Day 41 learnings",
 ]
 
-_DAY41_DEFAULT_PAGE = """# Day 41 — Expansion automation lane
+_DAY41_DEFAULT_PAGE = """# Day 41 \u2014 Expansion automation lane
 
 Day 41 closes with a major expansion automation upgrade that converts Day 40 scale evidence into repeatable workflows.
 

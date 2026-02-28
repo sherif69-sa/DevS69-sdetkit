@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day34-demo-asset2.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY33_SUMMARY_PATH = "docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json"
 _DAY33_BOARD_PATH = "docs/artifacts/day33-demo-asset-pack/day33-delivery-board.md"
-_SECTION_HEADER = "# Day 34 — Demo asset #2 production (repo audit)"
+_SECTION_HEADER = "# Day 34 \u2014 Demo asset #2 production (repo audit)"
 _REQUIRED_SECTIONS = [
     "## Why Day 34 matters",
     "## Required inputs (Day 33)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 36 community distribution plan updated",
 ]
 
-_DAY34_DEFAULT_PAGE = """# Day 34 — Demo asset #2 production (repo audit)
+_DAY34_DEFAULT_PAGE = """# Day 34 \u2014 Demo asset #2 production (repo audit)
 
 Day 34 closes the second demo-asset production lane, translating repository-audit value into distributable proof.
 
@@ -222,7 +222,7 @@ def build_day34_demo_asset2_summary(
         {
             "check_id": "top10_day34_alignment",
             "weight": 5,
-            "passed": ("Day 34 — Demo asset #2" in top10_text and "Day 35" in top10_text),
+            "passed": ("Day 34 \u2014 Demo asset #2" in top10_text and "Day 35" in top10_text),
             "evidence": "Day 34 + Day 35 strategy chain",
         },
         {

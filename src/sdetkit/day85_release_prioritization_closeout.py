@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY84_SUMMARY_PATH = "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json"
 _DAY84_BOARD_PATH = "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md"
 _PLAN_PATH = ".day85-release-prioritization-plan.json"
-_SECTION_HEADER = "# Day 85 — Release prioritization closeout lane"
+_SECTION_HEADER = "# Day 85 \u2014 Release prioritization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 85 matters",
     "## Required inputs (Day 84)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY85_DEFAULT_PAGE = """# Day 85 — Release prioritization closeout lane
+_DAY85_DEFAULT_PAGE = """# Day 85 \u2014 Release prioritization closeout lane
 
 Day 85 closes with a major upgrade that converts Day 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
 

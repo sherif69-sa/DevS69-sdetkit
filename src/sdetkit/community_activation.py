@@ -117,7 +117,7 @@ _SIGNALS = [
         "check_id": "top10_day25_alignment",
         "category": "strategy",
         "weight": 20,
-        "marker": "Day 25 — Community activation",
+        "marker": "Day 25 \u2014 Community activation",
         "source": "top10",
     },
     {

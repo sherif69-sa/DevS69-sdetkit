@@ -14,7 +14,7 @@ _DAY57_SUMMARY_PATH = (
     "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json"
 )
 _DAY57_BOARD_PATH = "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-delivery-board.md"
-_SECTION_HEADER = "# Day 58 — Phase-2 hardening closeout lane"
+_SECTION_HEADER = "# Day 58 \u2014 Phase-2 hardening closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 58 matters",
     "## Required inputs (Day 57)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 59 pre-plan priorities drafted from Day 58 learnings",
 ]
 
-_DAY58_DEFAULT_PAGE = """# Day 58 — Phase-2 hardening closeout lane
+_DAY58_DEFAULT_PAGE = """# Day 58 \u2014 Phase-2 hardening closeout lane
 
 Day 58 closes with a major Phase-2 hardening upgrade that turns Day 57 KPI deep-audit outcomes into deterministic execution hardening governance.
 

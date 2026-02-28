@@ -15,7 +15,7 @@ _DAY68_BOARD_PATH = (
     "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md"
 )
 _CASE_STUDY_DATA_PATH = ".day69-reliability-case-study.json"
-_SECTION_HEADER = "# Day 69 — Case-study prep #1 closeout lane"
+_SECTION_HEADER = "# Day 69 \u2014 Case-study prep #1 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 69 matters",
     "## Required inputs (Day 68)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY69_DEFAULT_PAGE = """# Day 69 — Case-study prep #1 closeout lane
+_DAY69_DEFAULT_PAGE = """# Day 69 \u2014 Case-study prep #1 closeout lane
 
 Day 69 closes with a major upgrade that turns Day 68 integration outputs into a measurable reliability case-study prep pack.
 

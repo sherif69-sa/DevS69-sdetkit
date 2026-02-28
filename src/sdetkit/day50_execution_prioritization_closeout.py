@@ -14,7 +14,7 @@ _DAY49_SUMMARY_PATH = (
     "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
 )
 _DAY49_BOARD_PATH = "docs/artifacts/day49-weekly-review-closeout-pack/day49-delivery-board.md"
-_SECTION_HEADER = "# Day 50 — Execution prioritization closeout lane"
+_SECTION_HEADER = "# Day 50 \u2014 Execution prioritization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 50 matters",
     "## Required inputs (Day 49)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 51 release priorities drafted from Day 50 learnings",
 ]
 
-_DAY50_DEFAULT_PAGE = """# Day 50 — Execution prioritization closeout lane
+_DAY50_DEFAULT_PAGE = """# Day 50 \u2014 Execution prioritization closeout lane
 
 Day 50 closes with a major execution-prioritization upgrade that converts Day 49 weekly-review evidence into a deterministic execution board and release-storytelling handoff.
 

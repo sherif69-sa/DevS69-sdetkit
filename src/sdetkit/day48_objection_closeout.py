@@ -14,7 +14,7 @@ _DAY47_SUMMARY_PATH = (
     "docs/artifacts/day47-reliability-closeout-pack/day47-reliability-closeout-summary.json"
 )
 _DAY47_BOARD_PATH = "docs/artifacts/day47-reliability-closeout-pack/day47-delivery-board.md"
-_SECTION_HEADER = "# Day 48 — Objection closeout lane"
+_SECTION_HEADER = "# Day 48 \u2014 Objection closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 48 matters",
     "## Required inputs (Day 47)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 49 weekly-review priorities drafted from Day 48 learnings",
 ]
 
-_DAY48_DEFAULT_PAGE = """# Day 48 — Objection closeout lane
+_DAY48_DEFAULT_PAGE = """# Day 48 \u2014 Objection closeout lane
 
 Day 48 closes with a major objection-handling upgrade that converts Day 47 reliability evidence into deterministic documentation hardening loops.
 

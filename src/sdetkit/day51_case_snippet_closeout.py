@@ -14,7 +14,7 @@ _DAY50_SUMMARY_PATH = "docs/artifacts/day50-execution-prioritization-closeout-pa
 _DAY50_BOARD_PATH = (
     "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md"
 )
-_SECTION_HEADER = "# Day 51 — Case snippet closeout lane"
+_SECTION_HEADER = "# Day 51 \u2014 Case snippet closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 51 matters",
     "## Required inputs (Day 50)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 52 narrative priorities drafted from Day 51 learnings",
 ]
 
-_DAY51_DEFAULT_PAGE = """# Day 51 — Case snippet closeout lane
+_DAY51_DEFAULT_PAGE = """# Day 51 \u2014 Case snippet closeout lane
 
 Day 51 closes with a major case-snippet upgrade that converts Day 50 execution-prioritization evidence into a deterministic release-storytelling lane.
 

@@ -14,7 +14,7 @@ _DAY36_SUMMARY_PATH = (
     "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
 )
 _DAY36_BOARD_PATH = "docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md"
-_SECTION_HEADER = "# Day 37 — Experiment lane activation"
+_SECTION_HEADER = "# Day 37 \u2014 Experiment lane activation"
 _REQUIRED_SECTIONS = [
     "## Why Day 37 matters",
     "## Required inputs (Day 36)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 38 fallback plan documented for losing variants",
 ]
 
-_DAY37_DEFAULT_PAGE = """# Day 37 — Experiment lane activation
+_DAY37_DEFAULT_PAGE = """# Day 37 \u2014 Experiment lane activation
 
 Day 37 turns Day 36 distribution misses into controlled experiments with strict scoring, owner accountability, and Day 38 rollout decisions.
 

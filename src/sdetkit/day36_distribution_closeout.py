@@ -14,7 +14,7 @@ _DAY35_SUMMARY_PATH = (
     "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
 )
 _DAY35_BOARD_PATH = "docs/artifacts/day35-kpi-instrumentation-pack/day35-delivery-board.md"
-_SECTION_HEADER = "# Day 36 — Community distribution closeout"
+_SECTION_HEADER = "# Day 36 \u2014 Community distribution closeout"
 _REQUIRED_SECTIONS = [
     "## Why Day 36 matters",
     "## Required inputs (Day 35)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 37 summary owner confirmed",
 ]
 
-_DAY36_DEFAULT_PAGE = """# Day 36 — Community distribution closeout
+_DAY36_DEFAULT_PAGE = """# Day 36 \u2014 Community distribution closeout
 
 Day 36 closes the distribution lane by converting the Day 35 KPI story into channel-ready messaging, schedule commitments, and Day 37 experiments.
 

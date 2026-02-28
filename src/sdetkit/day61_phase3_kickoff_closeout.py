@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day61-phase3-kickoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY60_SUMMARY_PATH = "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json"
 _DAY60_BOARD_PATH = "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md"
-_SECTION_HEADER = "# Day 61 — Phase-3 kickoff execution closeout lane"
+_SECTION_HEADER = "# Day 61 \u2014 Phase-3 kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 61 matters",
     "## Required inputs (Day 60)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 62 community program priorities drafted from Day 61 learnings",
 ]
 
-_DAY61_DEFAULT_PAGE = """# Day 61 — Phase-3 kickoff execution closeout lane
+_DAY61_DEFAULT_PAGE = """# Day 61 \u2014 Phase-3 kickoff execution closeout lane
 
 Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence into a strict baseline for ecosystem + trust execution.
 

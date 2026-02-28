@@ -15,7 +15,7 @@ _DAY82_BOARD_PATH = (
     "docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md"
 )
 _PLAN_PATH = ".day83-trust-faq-expansion-plan.json"
-_SECTION_HEADER = "# Day 83 — Trust FAQ expansion loop closeout lane"
+_SECTION_HEADER = "# Day 83 \u2014 Trust FAQ expansion loop closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 83 matters",
     "## Required inputs (Day 82)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY83_DEFAULT_PAGE = """# Day 83 — Trust FAQ expansion loop closeout lane
+_DAY83_DEFAULT_PAGE = """# Day 83 \u2014 Trust FAQ expansion loop closeout lane
 
 Day 83 closes with a major upgrade that folds Day 82 integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
 

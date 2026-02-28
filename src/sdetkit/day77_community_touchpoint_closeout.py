@@ -15,7 +15,7 @@ _DAY76_BOARD_PATH = (
     "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
 )
 _PLAN_PATH = ".day77-community-touchpoint-plan.json"
-_SECTION_HEADER = "# Day 77 — Community touchpoint closeout lane"
+_SECTION_HEADER = "# Day 77 \u2014 Community touchpoint closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 77 matters",
     "## Required inputs (Day 76)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY77_DEFAULT_PAGE = """# Day 77 — Community touchpoint closeout lane
+_DAY77_DEFAULT_PAGE = """# Day 77 \u2014 Community touchpoint closeout lane
 
 Day 77 closes with a major upgrade that converts Day 76 contributor-recognition outcomes into a community-touchpoint execution pack.
 

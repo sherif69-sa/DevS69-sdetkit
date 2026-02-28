@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY69_SUMMARY_PATH = "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json"
 _DAY69_BOARD_PATH = "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md"
 _CASE_STUDY_DATA_PATH = ".day70-triage-speed-case-study.json"
-_SECTION_HEADER = "# Day 70 — Case-study prep #2 closeout lane"
+_SECTION_HEADER = "# Day 70 \u2014 Case-study prep #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 70 matters",
     "## Required inputs (Day 69)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY70_DEFAULT_PAGE = """# Day 70 — Case-study prep #2 closeout lane
+_DAY70_DEFAULT_PAGE = """# Day 70 \u2014 Case-study prep #2 closeout lane
 
 Day 70 closes with a major upgrade that turns Day 69 integration outputs into a measurable triage-speed case-study prep pack.
 

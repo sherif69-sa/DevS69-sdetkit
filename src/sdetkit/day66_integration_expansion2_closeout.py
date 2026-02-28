@@ -15,7 +15,7 @@ _DAY65_SUMMARY_PATH = (
 )
 _DAY65_BOARD_PATH = "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md"
 _GITLAB_PATH = ".gitlab-ci.day66-advanced-reference.yml"
-_SECTION_HEADER = "# Day 66 — Integration expansion #2 closeout lane"
+_SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 66 matters",
     "## Required inputs (Day 65)",
@@ -65,7 +65,7 @@ _REQUIRED_GITLAB_LINES = [
     "cache:",
 ]
 
-_DAY66_DEFAULT_PAGE = """# Day 66 — Integration expansion #2 closeout lane
+_DAY66_DEFAULT_PAGE = """# Day 66 \u2014 Integration expansion #2 closeout lane
 
 Day 66 closes with a major integration upgrade that converts Day 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
 

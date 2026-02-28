@@ -15,7 +15,7 @@ _DAY81_SUMMARY_PATH = (
 )
 _DAY81_BOARD_PATH = "docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md"
 _PLAN_PATH = ".day82-integration-feedback-plan.json"
-_SECTION_HEADER = "# Day 82 — Integration feedback loop closeout lane"
+_SECTION_HEADER = "# Day 82 \u2014 Integration feedback loop closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 82 matters",
     "## Required inputs (Day 81)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY82_DEFAULT_PAGE = """# Day 82 — Integration feedback loop closeout lane
+_DAY82_DEFAULT_PAGE = """# Day 82 \u2014 Integration feedback loop closeout lane
 
 Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes into docs/template upgrades and community touchpoint execution.
 

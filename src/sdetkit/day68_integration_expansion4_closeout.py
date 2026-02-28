@@ -15,7 +15,7 @@ _DAY67_BOARD_PATH = (
     "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md"
 )
 _REFERENCE_PATH = ".tekton.day68-self-hosted-reference.yaml"
-_SECTION_HEADER = "# Day 68 — Integration expansion #4 closeout lane"
+_SECTION_HEADER = "# Day 68 \u2014 Integration expansion #4 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 68 matters",
     "## Required inputs (Day 67)",
@@ -65,7 +65,7 @@ _REQUIRED_REFERENCE_LINES = [
     "when:",
 ]
 
-_DAY68_DEFAULT_PAGE = """# Day 68 — Integration expansion #4 closeout lane
+_DAY68_DEFAULT_PAGE = """# Day 68 \u2014 Integration expansion #4 closeout lane
 
 Day 68 closes with a major integration upgrade that converts Day 67 outputs into a self-hosted enterprise Tekton reference.
 

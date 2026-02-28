@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day45-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY44_SUMMARY_PATH = "docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json"
 _DAY44_BOARD_PATH = "docs/artifacts/day44-scale-closeout-pack/day44-delivery-board.md"
-_SECTION_HEADER = "# Day 45 — Expansion closeout lane"
+_SECTION_HEADER = "# Day 45 \u2014 Expansion closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 45 matters",
     "## Required inputs (Day 44)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 46 optimization priorities drafted from Day 45 learnings",
 ]
 
-_DAY45_DEFAULT_PAGE = """# Day 45 — Expansion closeout lane
+_DAY45_DEFAULT_PAGE = """# Day 45 \u2014 Expansion closeout lane
 
 Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence into deterministic improvement loops.
 

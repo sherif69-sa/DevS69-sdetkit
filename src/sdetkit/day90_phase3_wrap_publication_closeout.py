@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY89_SUMMARY_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
 _DAY89_BOARD_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md"
 _PLAN_PATH = ".day90-phase3-wrap-publication-plan.json"
-_SECTION_HEADER = "# Day 90 — Phase-3 wrap publication closeout lane"
+_SECTION_HEADER = "# Day 90 \u2014 Phase-3 wrap publication closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 90 matters",
     "## Required inputs (Day 89)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY90_DEFAULT_PAGE = """# Day 90 — Phase-3 wrap publication closeout lane
+_DAY90_DEFAULT_PAGE = """# Day 90 \u2014 Phase-3 wrap publication closeout lane
 
 Day 90 closes with a major upgrade that converts Day 89 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 

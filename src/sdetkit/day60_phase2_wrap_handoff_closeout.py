@@ -14,7 +14,7 @@ _DAY58_SUMMARY_PATH = (
     "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json"
 )
 _DAY58_BOARD_PATH = "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-delivery-board.md"
-_SECTION_HEADER = "# Day 60 — Phase-2 wrap + handoff closeout lane"
+_SECTION_HEADER = "# Day 60 \u2014 Phase-2 wrap + handoff closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 60 matters",
     "## Required inputs (Day 59)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 61 execution priorities drafted from Day 60 learnings",
 ]
 
-_DAY60_DEFAULT_PAGE = """# Day 60 — Phase-2 wrap + handoff closeout lane
+_DAY60_DEFAULT_PAGE = """# Day 60 \u2014 Phase-2 wrap + handoff closeout lane
 
 Day 60 closes with a major Phase-2 wrap + handoff upgrade that turns Day 59 pre-plan outcomes into deterministic Day 61 execution priorities.
 

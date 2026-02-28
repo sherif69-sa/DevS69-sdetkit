@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY87_SUMMARY_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
 _DAY87_BOARD_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md"
 _PLAN_PATH = ".day88-governance-priorities-plan.json"
-_SECTION_HEADER = "# Day 88 — Governance priorities closeout lane"
+_SECTION_HEADER = "# Day 88 \u2014 Governance priorities closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 88 matters",
     "## Required inputs (Day 87)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY88_DEFAULT_PAGE = """# Day 88 — Governance priorities closeout lane
+_DAY88_DEFAULT_PAGE = """# Day 88 \u2014 Governance priorities closeout lane
 
 Day 88 closes with a major upgrade that converts Day 87 governance handoff outcomes into a deterministic governance priorities operating lane.
 

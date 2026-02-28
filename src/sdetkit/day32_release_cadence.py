@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day32-release-cadence.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY31_SUMMARY_PATH = "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
 _DAY31_BOARD_PATH = "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
-_SECTION_HEADER = "# Day 32 — Release cadence setup"
+_SECTION_HEADER = "# Day 32 \u2014 Release cadence setup"
 _REQUIRED_SECTIONS = [
     "## Why Day 32 matters",
     "## Required inputs (Day 31)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 35 weekly review KPI frame locked",
 ]
 
-_DAY32_DEFAULT_PAGE = """# Day 32 — Release cadence setup
+_DAY32_DEFAULT_PAGE = """# Day 32 \u2014 Release cadence setup
 
 Day 32 converts Day 31 baseline goals into a repeatable release operating cadence with a strict changelog quality gate.
 
@@ -223,8 +223,8 @@ def build_day32_release_cadence_summary(
             "check_id": "top10_day32_alignment",
             "weight": 5,
             "passed": (
-                "Day 32 — Release cadence setup" in top10_text
-                and "Day 33 — Demo asset #1" in top10_text
+                "Day 32 \u2014 Release cadence setup" in top10_text
+                and "Day 33 \u2014 Demo asset #1" in top10_text
             ),
             "evidence": "Day 32 + Day 33 strategy chain",
         },

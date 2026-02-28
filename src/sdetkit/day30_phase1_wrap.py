@@ -10,7 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-day30-phase1-wrap.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_SECTION_HEADER = "# Day 30 — Phase-1 wrap and Phase-2 handoff"
+_SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
 _REQUIRED_SECTIONS = [
     "## Why Day 30 matters",
     "## Required inputs (Days 27-29)",
@@ -29,7 +29,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day30_phase1_wrap_contract.py --skip-evidence",
 ]
 
-_DAY30_DEFAULT_PAGE = """# Day 30 — Phase-1 wrap and Phase-2 handoff
+_DAY30_DEFAULT_PAGE = """# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff
 
 Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 execution backlog.
 
@@ -170,8 +170,8 @@ def build_day30_phase1_wrap_summary(
             "check_id": "top10_day30_alignment",
             "weight": 5,
             "passed": (
-                "Day 30 — Phase-1 wrap + handoff" in top10_text
-                and "Day 31 — Phase-2 kickoff" in top10_text
+                "Day 30 \u2014 Phase-1 wrap + handoff" in top10_text
+                and "Day 31 \u2014 Phase-2 kickoff" in top10_text
             ),
             "evidence": "Day 30 + Day 31 strategy chain",
         },

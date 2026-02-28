@@ -204,8 +204,8 @@ def build_kpi_audit_summary(
             "check_id": "top10_day27_alignment",
             "category": "strategy",
             "weight": 8,
-            "passed": "Day 27 — KPI audit" in top10_text,
-            "evidence": "Day 27 — KPI audit",
+            "passed": "Day 27 \u2014 KPI audit" in top10_text,
+            "evidence": "Day 27 \u2014 KPI audit",
         },
         {
             "check_id": "docs_mentions_core_kpis",

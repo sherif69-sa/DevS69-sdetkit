@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day31-phase2-kickoff.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY30_SUMMARY_PATH = "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
 _DAY30_BACKLOG_PATH = "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
-_SECTION_HEADER = "# Day 31 — Phase-2 kickoff baseline"
+_SECTION_HEADER = "# Day 31 \u2014 Phase-2 kickoff baseline"
 _REQUIRED_SECTIONS = [
     "## Why Day 31 matters",
     "## Required inputs (Day 30)",
@@ -46,7 +46,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 35 weekly review preparation checklist ready",
 ]
 
-_DAY31_DEFAULT_PAGE = """# Day 31 — Phase-2 kickoff baseline
+_DAY31_DEFAULT_PAGE = """# Day 31 \u2014 Phase-2 kickoff baseline
 
 Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a fixed weekly growth target set.
 
@@ -208,8 +208,8 @@ def build_day31_phase2_kickoff_summary(
             "check_id": "top10_day31_alignment",
             "weight": 5,
             "passed": (
-                "Day 31 — Phase-2 kickoff" in top10_text
-                and "Day 32 — Release cadence setup" in top10_text
+                "Day 31 \u2014 Phase-2 kickoff" in top10_text
+                and "Day 32 \u2014 Release cadence setup" in top10_text
             ),
             "evidence": "Day 31 + Day 32 strategy chain",
         },

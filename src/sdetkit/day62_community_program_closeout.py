@@ -14,7 +14,7 @@ _DAY61_SUMMARY_PATH = (
     "docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json"
 )
 _DAY61_BOARD_PATH = "docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md"
-_SECTION_HEADER = "# Day 62 — Community program setup closeout lane"
+_SECTION_HEADER = "# Day 62 \u2014 Community program setup closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 62 matters",
     "## Required inputs (Day 61)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 63 onboarding priorities drafted from Day 62 learnings",
 ]
 
-_DAY62_DEFAULT_PAGE = """# Day 62 — Community program setup closeout lane
+_DAY62_DEFAULT_PAGE = """# Day 62 \u2014 Community program setup closeout lane
 
 Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a deterministic community operations lane.
 

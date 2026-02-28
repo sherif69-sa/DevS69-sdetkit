@@ -15,7 +15,7 @@ _DAY63_BOARD_PATH = (
     "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md"
 )
 _WORKFLOW_PATH = ".github/workflows/day64-advanced-github-actions-reference.yml"
-_SECTION_HEADER = "# Day 64 — Integration expansion #1 closeout lane"
+_SECTION_HEADER = "# Day 64 \u2014 Integration expansion #1 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 64 matters",
     "## Required inputs (Day 63)",
@@ -66,7 +66,7 @@ _REQUIRED_WORKFLOW_LINES = [
     "actions/cache@v4",
 ]
 
-_DAY64_DEFAULT_PAGE = """# Day 64 — Integration expansion #1 closeout lane
+_DAY64_DEFAULT_PAGE = """# Day 64 \u2014 Integration expansion #1 closeout lane
 
 Day 64 closes with a major integration upgrade that turns Day 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 

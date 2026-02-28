@@ -15,7 +15,7 @@ _DAY88_BOARD_PATH = (
     "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md"
 )
 _PLAN_PATH = ".day89-governance-scale-plan.json"
-_SECTION_HEADER = "# Day 89 — Governance scale closeout lane"
+_SECTION_HEADER = "# Day 89 \u2014 Governance scale closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 89 matters",
     "## Required inputs (Day 88)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY89_DEFAULT_PAGE = """# Day 89 — Governance scale closeout lane
+_DAY89_DEFAULT_PAGE = """# Day 89 \u2014 Governance scale closeout lane
 
 Day 89 closes with a major upgrade that converts Day 88 governance handoff outcomes into a deterministic governance scale operating lane.
 

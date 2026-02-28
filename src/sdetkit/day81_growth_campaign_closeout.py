@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY80_SUMMARY_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
 _DAY80_BOARD_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md"
 _PLAN_PATH = ".day81-growth-campaign-plan.json"
-_SECTION_HEADER = "# Day 81 — Growth campaign closeout lane"
+_SECTION_HEADER = "# Day 81 \u2014 Growth campaign closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 81 matters",
     "## Required inputs (Day 80)",
@@ -63,7 +63,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY81_DEFAULT_PAGE = """# Day 81 — Growth campaign closeout lane
+_DAY81_DEFAULT_PAGE = """# Day 81 \u2014 Growth campaign closeout lane
 
 Day 81 closes with a major upgrade that converts Day 80 partner outreach outcomes into a growth-campaign execution pack.
 

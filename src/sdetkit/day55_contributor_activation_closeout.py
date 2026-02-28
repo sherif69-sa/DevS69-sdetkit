@@ -14,7 +14,7 @@ _DAY53_SUMMARY_PATH = (
     "docs/artifacts/day53-docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
 )
 _DAY53_BOARD_PATH = "docs/artifacts/day53-docs-loop-closeout-pack/day53-delivery-board.md"
-_SECTION_HEADER = "# Day 55 — Contributor activation closeout lane"
+_SECTION_HEADER = "# Day 55 \u2014 Contributor activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 55 matters",
     "## Required inputs (Day 53)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 56 priorities drafted from Day 55 learnings",
 ]
 
-_DAY55_DEFAULT_PAGE = """# Day 55 — Contributor activation closeout lane
+_DAY55_DEFAULT_PAGE = """# Day 55 \u2014 Contributor activation closeout lane
 
 Day 55 closes with a major contributor activation upgrade that turns Day 53 docs-loop evidence into a deterministic contributor follow-through lane.
 

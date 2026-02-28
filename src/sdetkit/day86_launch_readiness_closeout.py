@@ -15,7 +15,7 @@ _DAY85_BOARD_PATH = (
     "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md"
 )
 _PLAN_PATH = ".day86-launch-readiness-plan.json"
-_SECTION_HEADER = "# Day 86 — Launch readiness closeout lane"
+_SECTION_HEADER = "# Day 86 \u2014 Launch readiness closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 86 matters",
     "## Required inputs (Day 85)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY86_DEFAULT_PAGE = """# Day 86 — Launch readiness closeout lane
+_DAY86_DEFAULT_PAGE = """# Day 86 \u2014 Launch readiness closeout lane
 
 Day 86 closes with a major upgrade that converts Day 85 release prioritization outcomes into a deterministic launch readiness operating lane.
 

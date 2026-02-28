@@ -332,7 +332,7 @@ def _render_text(payload: dict[str, Any]) -> str:
         "",
     ]
     for template in payload["templates"]:
-        mark = "✅" if template["ok"] else "❌"
+        mark = "\u2705" if template["ok"] else "\u274c"
         lines.append(f"{mark} [{template['name']}] {template['coverage']} :: {template['path']}")
         if template["missing"]:
             for item in template["missing"]:

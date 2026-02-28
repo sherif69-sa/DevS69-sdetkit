@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day63-onboarding-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY62_SUMMARY_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
 _DAY62_BOARD_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
-_SECTION_HEADER = "# Day 63 — Contributor onboarding activation closeout lane"
+_SECTION_HEADER = "# Day 63 \u2014 Contributor onboarding activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 63 matters",
     "## Required inputs (Day 62)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 64 contributor pipeline priorities drafted from Day 63 learnings",
 ]
 
-_DAY63_DEFAULT_PAGE = """# Day 63 — Contributor onboarding activation closeout lane
+_DAY63_DEFAULT_PAGE = """# Day 63 \u2014 Contributor onboarding activation closeout lane
 
 Day 63 ships a major onboarding-activation upgrade that converts Day 62 community program evidence into deterministic onboarding ownership and roadmap-voting loops.
 

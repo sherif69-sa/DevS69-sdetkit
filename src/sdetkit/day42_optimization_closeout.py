@@ -14,7 +14,7 @@ _DAY41_SUMMARY_PATH = (
     "docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json"
 )
 _DAY41_BOARD_PATH = "docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md"
-_SECTION_HEADER = "# Day 42 — Optimization closeout lane"
+_SECTION_HEADER = "# Day 42 \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 42 matters",
     "## Required inputs (Day 41)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 43 acceleration priorities drafted from Day 42 learnings",
 ]
 
-_DAY42_DEFAULT_PAGE = """# Day 42 — Optimization closeout lane
+_DAY42_DEFAULT_PAGE = """# Day 42 \u2014 Optimization closeout lane
 
 Day 42 closes with a major optimization upgrade that converts Day 41 expansion evidence into deterministic improvement loops.
 

@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day35-kpi-instrumentation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY34_SUMMARY_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json"
 _DAY34_BOARD_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-delivery-board.md"
-_SECTION_HEADER = "# Day 35 — KPI instrumentation closeout"
+_SECTION_HEADER = "# Day 35 \u2014 KPI instrumentation closeout"
 _REQUIRED_SECTIONS = [
     "## Why Day 35 matters",
     "## Required inputs (Day 34)",
@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 37 experiment backlog seeded from KPI misses",
 ]
 
-_DAY35_DEFAULT_PAGE = """# Day 35 — KPI instrumentation closeout
+_DAY35_DEFAULT_PAGE = """# Day 35 \u2014 KPI instrumentation closeout
 
 Day 35 closes the instrumentation lane by converting demo activity into measurable weekly signals and next-week actions.
 

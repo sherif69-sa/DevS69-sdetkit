@@ -15,7 +15,7 @@ _DAY75_BOARD_PATH = (
     "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
 )
 _PLAN_PATH = ".day76-contributor-recognition-plan.json"
-_SECTION_HEADER = "# Day 76 — Contributor recognition closeout lane"
+_SECTION_HEADER = "# Day 76 \u2014 Contributor recognition closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 76 matters",
     "## Required inputs (Day 75)",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY76_DEFAULT_PAGE = """# Day 76 — Contributor recognition closeout lane
+_DAY76_DEFAULT_PAGE = """# Day 76 \u2014 Contributor recognition closeout lane
 
 Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes into a contributor-recognition execution pack.
 

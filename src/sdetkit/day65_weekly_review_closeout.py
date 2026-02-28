@@ -15,7 +15,7 @@ _DAY64_BOARD_PATH = (
     "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
 )
 _DAY64_WORKFLOW_PATH = ".github/workflows/day64-advanced-github-actions-reference.yml"
-_SECTION_HEADER = "# Day 65 — Weekly review #9 closeout lane"
+_SECTION_HEADER = "# Day 65 \u2014 Weekly review #9 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 65 matters",
     "## Required inputs (Day 64)",
@@ -57,7 +57,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 66 integration expansion priorities drafted from Day 65 review",
 ]
 
-_DAY65_DEFAULT_PAGE = """# Day 65 — Weekly review #9 closeout lane
+_DAY65_DEFAULT_PAGE = """# Day 65 \u2014 Weekly review #9 closeout lane
 
 Day 65 closes with a major weekly review upgrade that converts Day 64 integration execution evidence into strict KPI governance and a deterministic Day 66 handoff.
 

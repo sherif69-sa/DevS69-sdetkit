@@ -450,7 +450,7 @@ def main(argv: list[str] | None = None) -> int:
             lines.append("- Missing:")
             lines.extend(f"  - `{item}`" for item in missing)
         else:
-            lines.append("- Missing: none ✅")
+            lines.append("- Missing: none \u2705")
 
         lines.extend(
             [

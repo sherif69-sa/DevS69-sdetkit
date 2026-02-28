@@ -14,7 +14,7 @@ _DAY43_SUMMARY_PATH = (
     "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json"
 )
 _DAY43_BOARD_PATH = "docs/artifacts/day43-acceleration-closeout-pack/day43-delivery-board.md"
-_SECTION_HEADER = "# Day 44 — Scale closeout lane"
+_SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 44 matters",
     "## Required inputs (Day 43)",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 45 expansion priorities drafted from Day 44 learnings",
 ]
 
-_DAY44_DEFAULT_PAGE = """# Day 44 — Scale closeout lane
+_DAY44_DEFAULT_PAGE = """# Day 44 \u2014 Scale closeout lane
 
 Day 44 closes with a major scale upgrade that converts Day 43 acceleration evidence into deterministic improvement loops.
 
