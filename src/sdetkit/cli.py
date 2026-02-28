@@ -128,6 +128,41 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _is_hidden_cmd(name: str) -> bool:
+    if name == "playbooks":
+        return False
+    if name.startswith("day") and len(name) > 3 and name[3].isdigit():
+        return True
+    if name.endswith("-closeout"):
+        return True
+    return False
+
+
+def _hide_help_subcommands(sub) -> None:
+    actions = getattr(sub, "_choices_actions", None)
+    if not isinstance(actions, list):
+        return
+    filtered = []
+    for a in actions:
+        n = getattr(a, "name", "")
+        if isinstance(n, str) and _is_hidden_cmd(n):
+            continue
+        filtered.append(a)
+    sub._choices_actions = filtered
+
+
+def _print_playbooks(sub) -> None:
+    mp = getattr(sub, "_name_parser_map", {})
+    if not isinstance(mp, dict):
+        return
+    names = sorted([k for k in mp.keys() if isinstance(k, str) and _is_hidden_cmd(k)])
+    print("Playbooks (hidden from main --help):")
+    for n in names:
+        print(f"  {n}")
+    print("")
+    print("Tip: these commands still run directly, e.g. sdetkit <name> --help")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     import sys
 
@@ -437,10 +472,66 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "trust-signal-upgrade":
         return trust_signal_upgrade.main(list(argv[1:]))
 
-    p = argparse.ArgumentParser(prog="sdetkit", add_help=True)
-    p.add_argument("--version", action="version", version=_tool_version())
-    sub = p.add_subparsers(dest="cmd", required=True)
+    help_epilog = """\
+Command groups:
 
+  Core:
+    kv
+    apiget
+    cassette-get
+    doctor
+    patch
+    repo
+    dev
+    report
+    maintenance
+    agent
+    security
+    ops
+    notify
+
+  Docs and governance:
+    docs-qa
+    docs-nav
+    roadmap
+    policy
+    evidence
+    release-narrative
+    release-readiness-board
+    trust-signal-upgrade
+
+  Playbooks and examples:
+    onboarding
+    weekly-review
+    proof
+    demo
+    first-contribution
+    contributor-funnel
+    triage-templates
+    startup-use-case
+    enterprise-use-case
+    github-actions-quickstart
+    gitlab-ci-quickstart
+    quality-contribution-delta
+    reliability-evidence-pack
+    faq-objections
+    community-activation
+    external-contribution-push
+    kpi-audit
+
+Run: sdetkit playbooks
+  to list additional playbook flows hidden from the main --help output.
+"""
+
+    p = argparse.ArgumentParser(
+        prog="sdetkit",
+        add_help=True,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=help_epilog,
+    )
+    p.add_argument("--version", action="version", version=_tool_version())
+    sub = p.add_subparsers(dest="cmd", required=True, metavar="command")
+    sub.add_parser("playbooks", help="List playbooks and legacy flows")
     kv = sub.add_parser("kv")
     kv.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -715,7 +806,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     tsu = sub.add_parser("trust-signal-upgrade")
     tsu.add_argument("args", nargs=argparse.REMAINDER)
 
+    _hide_help_subcommands(sub)
+
     ns = p.parse_args(argv)
+
+    if ns.cmd == "playbooks":
+        _print_playbooks(sub)
+
+        return 0
 
     if ns.cmd == "kv":
         return kvcli.main(ns.args)
