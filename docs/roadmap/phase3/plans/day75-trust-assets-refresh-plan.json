@@ -1,0 +1,18 @@
+{
+  "plan_id": "day75-trust-assets-refresh-001",
+  "trust_surfaces": [
+    "README security section",
+    "SECURITY.md policy links",
+    "governance ownership map"
+  ],
+  "baseline": {
+    "proof_links": 7,
+    "policy_coverage": 0.66
+  },
+  "target": {
+    "proof_links": 14,
+    "policy_coverage": 0.9
+  },
+  "confidence": 0.9,
+  "owner": "trust-ops"
+}

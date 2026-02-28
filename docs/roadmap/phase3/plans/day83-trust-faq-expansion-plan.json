@@ -1,0 +1,16 @@
+{
+  "plan_id": "day83-trust-faq-expansion-001",
+  "contributors": ["docs-ops", "support-ops", "developer-relations"],
+  "objection_channels": ["issues", "discussions", "office-hours", "faq-form"],
+  "baseline": {
+    "faq_coverage": 0.63,
+    "deflection_rate": 0.45,
+    "sla_hours": 36
+  },
+  "target": {
+    "faq_coverage": 0.84,
+    "deflection_rate": 0.62,
+    "sla_hours": 18
+  },
+  "owner": "docs-ops"
+}

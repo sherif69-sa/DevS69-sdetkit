@@ -1,0 +1,27 @@
+{
+  "plan_id": "day79-scale-upgrade-v1",
+  "contributors": ["maintainer", "enterprise-lead"],
+  "scale_tracks": [
+    {
+      "name": "enterprise-onboarding-checklist",
+      "baseline": 2,
+      "target": 5,
+      "owner": "enterprise-lead"
+    },
+    {
+      "name": "adoption-evidence-pack",
+      "baseline": 3,
+      "target": 6,
+      "owner": "maintainer"
+    }
+  ],
+  "baseline": {
+    "ecosystem_score": 85,
+    "confidence": 0.82
+  },
+  "target": {
+    "scale_score": 90,
+    "confidence": 0.92
+  },
+  "owner": "scale-program-owner"
+}

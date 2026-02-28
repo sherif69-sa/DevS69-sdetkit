@@ -1,0 +1,16 @@
+{
+  "plan_id": "day89-governance-scale-001",
+  "contributors": ["release-ops", "maintainers", "community-moderation"],
+  "narrative_channels": ["governance-brief", "maintainer-update", "release-notes"],
+  "baseline": {
+    "adoption_rate": 0.62,
+    "objection_deflection": 0.51,
+    "confidence": 0.66
+  },
+  "target": {
+    "adoption_rate": 0.84,
+    "objection_deflection": 0.73,
+    "confidence": 0.88
+  },
+  "owner": "release-ops"
+}

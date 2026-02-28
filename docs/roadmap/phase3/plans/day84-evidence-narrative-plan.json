@@ -1,0 +1,22 @@
+{
+  "plan_id": "day84-evidence-narrative-001",
+  "contributors": [
+    "docs-ops",
+    "release-engineering",
+    "community-maintainers"
+  ],
+  "narrative_channels": [
+    "release-report",
+    "trust-faq",
+    "incident-runbook"
+  ],
+  "baseline": {
+    "evidence_coverage": 0.67,
+    "narrative_reuse": 0.44
+  },
+  "target": {
+    "evidence_coverage": 0.86,
+    "narrative_reuse": 0.68
+  },
+  "owner": "docs-ops"
+}

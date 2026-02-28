@@ -1,0 +1,16 @@
+{
+  "case_id": "day71-escalation-quality-001",
+  "metric": "escalation-quality-score",
+  "baseline": {
+    "window": "day63-day70",
+    "score": 61.4,
+    "notes": "Escalation bundles had uneven context and reviewer ownership gaps."
+  },
+  "after": {
+    "window": "day71-pilot",
+    "score": 84.9,
+    "notes": "Structured ownership + narrative templates increased handoff quality."
+  },
+  "confidence": 0.91,
+  "owner": "quality-systems"
+}

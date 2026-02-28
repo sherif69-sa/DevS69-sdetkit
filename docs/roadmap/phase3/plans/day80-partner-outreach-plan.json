@@ -1,0 +1,8 @@
+{
+  "plan_id": "day80-partner-outreach-main",
+  "contributors": ["maintainers", "partner-success", "field-enablement"],
+  "partner_tracks": ["co-marketing", "integration-acceleration", "partner-onboarding"],
+  "baseline": {"activated_partners": 5, "first-response-hours": 48},
+  "target": {"activated_partners": 12, "first-response-hours": 24},
+  "owner": "partner-ops"
+}
