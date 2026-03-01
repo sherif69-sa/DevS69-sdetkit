@@ -8,7 +8,7 @@ cov_fail_under=${COV_FAIL_UNDER:-70}
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 && return 0
   echo "missing tool: $1" >&2
-  echo "hint: activate a venv and run: python -m pip install -e '.[dev,test,docs]'" >&2
+  echo "hint: bash scripts/bootstrap.sh && . .venv/bin/activate" >&2
   exit 127
 }
 
