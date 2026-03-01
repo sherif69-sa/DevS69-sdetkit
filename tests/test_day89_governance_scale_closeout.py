@@ -8,6 +8,18 @@ from sdetkit import day89_governance_scale_closeout as d89
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day89-governance-scale-closeout.md\nday89-governance-scale-closeout\n",
         encoding="utf-8",
@@ -60,7 +72,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / ".day89-governance-scale-plan.json"
+    plan = root / "docs/roadmap/plans/day89-governance-scale-plan.json"
     plan.write_text(
         json.dumps(
             {

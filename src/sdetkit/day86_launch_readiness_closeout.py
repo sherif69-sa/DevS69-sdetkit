@@ -14,7 +14,7 @@ _DAY85_SUMMARY_PATH = "docs/artifacts/day85-release-prioritization-closeout-pack
 _DAY85_BOARD_PATH = (
     "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md"
 )
-_PLAN_PATH = ".day86-launch-readiness-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day86-launch-readiness-plan.json"
 _SECTION_HEADER = "# Day 86 \u2014 Launch readiness closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 86 matters",
@@ -79,7 +79,7 @@ Day 86 closes with a major upgrade that converts Day 85 release prioritization o
 
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json`
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md`
-- `.day86-launch-readiness-plan.json`
+- `docs/roadmap/plans/day86-launch-readiness-plan.json`
 
 ## Day 86 command lane
 
@@ -293,7 +293,9 @@ def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append("Day 86 launch readiness dataset is available for launch execution.")
     else:
         misses.append("Day 86 launch readiness dataset is missing required keys.")
-        handoff_actions.append("Update .day86-launch-readiness-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/day86-launch-readiness-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
         wins.append(

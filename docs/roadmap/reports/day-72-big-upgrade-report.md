@@ -10,7 +10,7 @@ Close Day 72 with a high-signal case-study prep #4 lane that upgrades Day 71 esc
 - New Day 72 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 72 contract checker script for CI and local execution gating.
 - New publication-quality artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
-- New `.day72-publication-quality-case-study.json` baseline dataset scaffold for Day 72 publication-quality prep.
+- New `docs/roadmap/plans/day72-publication-quality-case-study.json` baseline dataset scaffold for Day 72 publication-quality prep.
 
 ## Validation flow
 

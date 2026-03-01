@@ -12,7 +12,7 @@ Day 72 closes with a major upgrade that turns Day 71 escalation-quality outputs 
 
 - `docs/artifacts/day71-case-study-prep3-closeout-pack/day71-case-study-prep3-closeout-summary.json`
 - `docs/artifacts/day71-case-study-prep3-closeout-pack/day71-delivery-board.md`
-- `.day72-publication-quality-case-study.json`
+- `docs/roadmap/plans/day72-publication-quality-case-study.json`
 
 ## Day 72 command lane
 

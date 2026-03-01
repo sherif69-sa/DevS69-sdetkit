@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day71-case-study-prep3-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY70_SUMMARY_PATH = "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json"
 _DAY70_BOARD_PATH = "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md"
-_CASE_STUDY_DATA_PATH = ".day71-escalation-quality-case-study.json"
+_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day71-escalation-quality-case-study.json"
 _SECTION_HEADER = "# Day 71 \u2014 Case-study prep #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 71 matters",
@@ -77,7 +77,7 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 
 - `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json`
 - `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md`
-- `.day71-escalation-quality-case-study.json`
+- `docs/roadmap/plans/day71-escalation-quality-case-study.json`
 
 ## Day 71 command lane
 
@@ -300,7 +300,7 @@ def build_day71_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 71 escalation-quality case-study dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day71-escalation-quality-case-study.json to restore required keys."
+            "Update docs/roadmap/plans/day71-escalation-quality-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:

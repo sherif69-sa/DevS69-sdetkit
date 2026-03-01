@@ -9,7 +9,7 @@ Close Day 78 with a high-signal ecosystem-priorities lane that upgrades Day 77 c
 - New `day78-ecosystem-priorities-closeout` CLI lane with strict scoring and Day 77 continuity validation.
 - New Day 78 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 78 contract checker script for CI and local execution gating.
-- New `.day78-ecosystem-priorities-plan.json` baseline dataset scaffold for ecosystem execution planning.
+- New `docs/roadmap/plans/day78-ecosystem-priorities-plan.json` baseline dataset scaffold for ecosystem execution planning.
 
 ### Command lane
 

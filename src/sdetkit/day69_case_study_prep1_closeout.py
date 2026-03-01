@@ -14,7 +14,7 @@ _DAY68_SUMMARY_PATH = "docs/artifacts/day68-integration-expansion4-closeout-pack
 _DAY68_BOARD_PATH = (
     "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md"
 )
-_CASE_STUDY_DATA_PATH = ".day69-reliability-case-study.json"
+_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day69-reliability-case-study.json"
 _SECTION_HEADER = "# Day 69 \u2014 Case-study prep #1 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 69 matters",
@@ -79,7 +79,7 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json`
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
-- `.day69-reliability-case-study.json`
+- `docs/roadmap/plans/day69-reliability-case-study.json`
 
 ## Day 69 command lane
 
@@ -302,7 +302,7 @@ def build_day69_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 69 reliability case-study dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day69-reliability-case-study.json to restore required keys."
+            "Update docs/roadmap/plans/day69-reliability-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:

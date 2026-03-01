@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day90-phase3-wrap-publication-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY89_SUMMARY_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
 _DAY89_BOARD_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md"
-_PLAN_PATH = ".day90-phase3-wrap-publication-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day90-phase3-wrap-publication-plan.json"
 _SECTION_HEADER = "# Day 90 \u2014 Phase-3 wrap publication closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 90 matters",
@@ -77,7 +77,7 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 
 - `docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json`
 - `docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md`
-- `.day90-phase3-wrap-publication-plan.json`
+- `docs/roadmap/plans/day90-phase3-wrap-publication-plan.json`
 
 ## Day 90 command lane
 
@@ -294,7 +294,7 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
     else:
         misses.append("Day 90 phase-3 wrap publication dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day90-phase3-wrap-publication-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day90-phase3-wrap-publication-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

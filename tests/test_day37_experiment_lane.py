@@ -8,6 +8,18 @@ from sdetkit import day37_experiment_lane as d37
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day37-experiment-lane.md\nday37-experiment-lane\n",
         encoding="utf-8",

@@ -14,7 +14,7 @@ _DAY82_SUMMARY_PATH = "docs/artifacts/day82-integration-feedback-closeout-pack/d
 _DAY82_BOARD_PATH = (
     "docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md"
 )
-_PLAN_PATH = ".day83-trust-faq-expansion-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day83-trust-faq-expansion-plan.json"
 _SECTION_HEADER = "# Day 83 \u2014 Trust FAQ expansion loop closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 83 matters",
@@ -79,7 +79,7 @@ Day 83 closes with a major upgrade that folds Day 82 integration feedback outcom
 
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json`
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md`
-- `.day83-trust-faq-expansion-plan.json`
+- `docs/roadmap/plans/day83-trust-faq-expansion-plan.json`
 
 ## Day 83 command lane
 
@@ -302,7 +302,7 @@ def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, An
     else:
         misses.append("Day 83 trust FAQ expansion dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day83-trust-faq-expansion-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day83-trust-faq-expansion-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

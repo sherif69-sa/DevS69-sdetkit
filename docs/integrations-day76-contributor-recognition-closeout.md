@@ -12,7 +12,7 @@ Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes i
 
 - `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json`
 - `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md`
-- `.day76-contributor-recognition-plan.json`
+- `docs/roadmap/plans/day76-contributor-recognition-plan.json`
 
 ## Day 76 command lane
 

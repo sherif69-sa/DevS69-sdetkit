@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day84-evidence-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY83_SUMMARY_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json"
 _DAY83_BOARD_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md"
-_PLAN_PATH = ".day84-evidence-narrative-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day84-evidence-narrative-plan.json"
 _SECTION_HEADER = "# Day 84 \u2014 Evidence narrative closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 84 matters",
@@ -77,7 +77,7 @@ Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into 
 
 - `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json`
 - `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md`
-- `.day84-evidence-narrative-plan.json`
+- `docs/roadmap/plans/day84-evidence-narrative-plan.json`
 
 ## Day 84 command lane
 
@@ -292,7 +292,7 @@ def build_day84_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any
     else:
         misses.append("Day 84 evidence narrative dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day84-evidence-narrative-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day84-evidence-narrative-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

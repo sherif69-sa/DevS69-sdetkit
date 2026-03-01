@@ -12,7 +12,7 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 
 - `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json`
 - `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md`
-- `.day70-triage-speed-case-study.json`
+- `docs/roadmap/plans/day70-triage-speed-case-study.json`
 
 ## Day 70 command lane
 

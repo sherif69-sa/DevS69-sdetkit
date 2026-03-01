@@ -12,7 +12,7 @@ Day 86 closes with a major upgrade that converts Day 85 release prioritization o
 
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json`
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md`
-- `.day86-launch-readiness-plan.json`
+- `docs/roadmap/plans/day86-launch-readiness-plan.json`
 
 ## Day 86 command lane
 

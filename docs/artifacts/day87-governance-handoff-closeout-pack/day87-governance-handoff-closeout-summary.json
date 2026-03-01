@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day86_summary": "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json",
     "day86_delivery_board": "docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md",
-    "launch_readiness_plan": ".day87-governance-handoff-plan.json"
+    "launch_readiness_plan": "docs/roadmap/plans/day87-governance-handoff-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "evidence_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day87-governance-handoff-plan.json"
+      "evidence": "docs/roadmap/plans/day87-governance-handoff-plan.json"
     }
   ],
   "rollup": {

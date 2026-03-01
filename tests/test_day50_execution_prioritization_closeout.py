@@ -8,6 +8,18 @@ from sdetkit import day50_execution_prioritization_closeout as d50
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day50-execution-prioritization-closeout.md\nday50-execution-prioritization-closeout\n",
         encoding="utf-8",

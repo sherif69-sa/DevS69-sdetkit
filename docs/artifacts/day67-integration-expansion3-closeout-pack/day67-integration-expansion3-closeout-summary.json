@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day66_summary": "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json",
     "day66_delivery_board": "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md",
-    "jenkins_reference": ".jenkins.day67-advanced-reference.Jenkinsfile"
+    "jenkins_reference": "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "jenkins_reference_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".jenkins.day67-advanced-reference.Jenkinsfile"
+      "evidence": "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
     }
   ],
   "rollup": {

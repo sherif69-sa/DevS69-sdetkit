@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day70_summary": "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json",
     "day70_delivery_board": "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md",
-    "case_study_data": ".day71-escalation-quality-case-study.json"
+    "case_study_data": "docs/roadmap/plans/day71-escalation-quality-case-study.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "case_study_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day71-escalation-quality-case-study.json"
+      "evidence": "docs/roadmap/plans/day71-escalation-quality-case-study.json"
     }
   ],
   "rollup": {

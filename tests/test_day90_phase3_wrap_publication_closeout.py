@@ -8,6 +8,18 @@ from sdetkit import day90_phase3_wrap_publication_closeout as d90
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day90-phase3-wrap-publication-closeout.md\nday90-phase3-wrap-publication-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / ".day90-phase3-wrap-publication-plan.json"
+    plan = root / "docs/roadmap/plans/day90-phase3-wrap-publication-plan.json"
     plan.write_text(
         json.dumps(
             {

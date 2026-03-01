@@ -12,7 +12,7 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 
 - `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json`
 - `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md`
-- `.day78-ecosystem-priorities-plan.json`
+- `docs/roadmap/plans/day78-ecosystem-priorities-plan.json`
 
 ## Day 78 command lane
 

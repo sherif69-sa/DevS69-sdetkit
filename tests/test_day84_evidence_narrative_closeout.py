@@ -8,6 +8,18 @@ from sdetkit import day84_evidence_narrative_closeout as d84
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day84-evidence-narrative-closeout.md\nday84-evidence-narrative-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / ".day84-evidence-narrative-plan.json"
+    plan = root / "docs/roadmap/plans/day84-evidence-narrative-plan.json"
     plan.write_text(
         json.dumps(
             {

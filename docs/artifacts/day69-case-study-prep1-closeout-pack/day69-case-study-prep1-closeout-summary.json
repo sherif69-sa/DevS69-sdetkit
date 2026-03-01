@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day68_summary": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json",
     "day68_delivery_board": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md",
-    "case_study_data": ".day69-reliability-case-study.json"
+    "case_study_data": "docs/roadmap/plans/day69-reliability-case-study.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "case_study_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day69-reliability-case-study.json"
+      "evidence": "docs/roadmap/plans/day69-reliability-case-study.json"
     }
   ],
   "rollup": {

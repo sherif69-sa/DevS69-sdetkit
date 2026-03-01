@@ -12,7 +12,7 @@ Day 83 closes with a major upgrade that folds Day 82 integration feedback outcom
 
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json`
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md`
-- `.day83-trust-faq-expansion-plan.json`
+- `docs/roadmap/plans/day83-trust-faq-expansion-plan.json`
 
 ## Day 83 command lane
 

@@ -12,7 +12,7 @@ Day 73 closes with a major upgrade that turns Day 72 publication-quality prep in
 
 - `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json`
 - `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md`
-- `.day73-published-case-study.json`
+- `docs/roadmap/plans/day73-published-case-study.json`
 
 ## Day 73 command lane
 

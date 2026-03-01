@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day85_summary": "docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json",
     "day85_delivery_board": "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md",
-    "launch_readiness_plan": ".day86-launch-readiness-plan.json"
+    "launch_readiness_plan": "docs/roadmap/plans/day86-launch-readiness-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "evidence_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day86-launch-readiness-plan.json"
+      "evidence": "docs/roadmap/plans/day86-launch-readiness-plan.json"
     }
   ],
   "rollup": {

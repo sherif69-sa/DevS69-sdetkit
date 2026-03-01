@@ -8,6 +8,18 @@ from sdetkit import day67_integration_expansion3_closeout as d67
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day67-integration-expansion3-closeout.md\nday67-integration-expansion3-closeout\n",
         encoding="utf-8",
@@ -60,7 +72,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    jenkins = root / ".jenkins.day67-advanced-reference.Jenkinsfile"
+    jenkins = root / "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
     jenkins.write_text(
         "pipeline {\n"
         "  agent any\n"

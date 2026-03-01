@@ -8,6 +8,18 @@ from sdetkit import day88_governance_priorities_closeout as d88
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day88-governance-priorities-closeout.md\nday88-governance-priorities-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / ".day88-governance-priorities-plan.json"
+    plan = root / "docs/roadmap/plans/day88-governance-priorities-plan.json"
     plan.write_text(
         json.dumps(
             {

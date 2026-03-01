@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day75_summary": "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json",
     "day75_delivery_board": "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md",
-    "recognition_plan": ".day76-contributor-recognition-plan.json"
+    "recognition_plan": "docs/roadmap/plans/day76-contributor-recognition-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "recognition_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day76-contributor-recognition-plan.json"
+      "evidence": "docs/roadmap/plans/day76-contributor-recognition-plan.json"
     }
   ],
   "rollup": {

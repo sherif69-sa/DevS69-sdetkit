@@ -12,7 +12,7 @@ Day 88 closes with a major upgrade that converts Day 87 governance handoff outco
 
 - `docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json`
 - `docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md`
-- `.day88-governance-priorities-plan.json`
+- `docs/roadmap/plans/day88-governance-priorities-plan.json`
 
 ## Day 88 command lane
 

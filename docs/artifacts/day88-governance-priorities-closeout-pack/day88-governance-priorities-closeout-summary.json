@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day87_summary": "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json",
     "day87_delivery_board": "docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md",
-    "governance_priorities_plan": ".day88-governance-priorities-plan.json"
+    "governance_priorities_plan": "docs/roadmap/plans/day88-governance-priorities-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "evidence_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day88-governance-priorities-plan.json"
+      "evidence": "docs/roadmap/plans/day88-governance-priorities-plan.json"
     }
   ],
   "rollup": {

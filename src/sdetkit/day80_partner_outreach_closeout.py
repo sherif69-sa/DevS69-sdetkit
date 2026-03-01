@@ -14,7 +14,7 @@ _DAY79_SUMMARY_PATH = (
     "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json"
 )
 _DAY79_BOARD_PATH = "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md"
-_PLAN_PATH = ".day80-partner-outreach-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day80-partner-outreach-plan.json"
 _SECTION_HEADER = "# Day 80 \u2014 Partner outreach closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 80 matters",
@@ -79,7 +79,7 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 
 - `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json`
 - `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md`
-- `.day80-partner-outreach-plan.json`
+- `docs/roadmap/plans/day80-partner-outreach-plan.json`
 
 ## Day 80 command lane
 
@@ -298,7 +298,9 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append("Day 80 partner outreach dataset is available for launch execution.")
     else:
         misses.append("Day 80 partner outreach dataset is missing required keys.")
-        handoff_actions.append("Update .day80-partner-outreach-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/day80-partner-outreach-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
         wins.append(

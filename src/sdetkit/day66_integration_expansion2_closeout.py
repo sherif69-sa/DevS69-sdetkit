@@ -14,7 +14,7 @@ _DAY65_SUMMARY_PATH = (
     "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
 )
 _DAY65_BOARD_PATH = "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md"
-_GITLAB_PATH = ".gitlab-ci.day66-advanced-reference.yml"
+_GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 66 matters",
@@ -79,7 +79,7 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 
 - `docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json`
 - `docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md`
-- `.gitlab-ci.day66-advanced-reference.yml`
+- `templates/ci/gitlab/day66-advanced-reference.yml`
 
 ## Day 66 command lane
 
@@ -307,7 +307,7 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
     else:
         misses.append("Day 66 GitLab reference pipeline is missing required controls.")
         handoff_actions.append(
-            "Update .gitlab-ci.day66-advanced-reference.yml to restore required controls."
+            "Update templates/ci/gitlab/day66-advanced-reference.yml to restore required controls."
         )
 
     if not failed and not critical_failures:

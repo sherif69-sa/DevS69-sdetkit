@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day67_summary": "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-integration-expansion3-closeout-summary.json",
     "day67_delivery_board": "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md",
-    "self_hosted_reference": ".tekton.day68-self-hosted-reference.yaml"
+    "self_hosted_reference": "templates/ci/tekton/day68-self-hosted-reference.yaml"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "self_hosted_reference_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".tekton.day68-self-hosted-reference.yaml"
+      "evidence": "templates/ci/tekton/day68-self-hosted-reference.yaml"
     }
   ],
   "rollup": {

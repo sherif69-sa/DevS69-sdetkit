@@ -14,7 +14,7 @@ _DAY75_SUMMARY_PATH = "docs/artifacts/day75-trust-assets-refresh-closeout-pack/d
 _DAY75_BOARD_PATH = (
     "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
 )
-_PLAN_PATH = ".day76-contributor-recognition-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day76-contributor-recognition-plan.json"
 _SECTION_HEADER = "# Day 76 \u2014 Contributor recognition closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 76 matters",
@@ -79,7 +79,7 @@ Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes i
 
 - `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json`
 - `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md`
-- `.day76-contributor-recognition-plan.json`
+- `docs/roadmap/plans/day76-contributor-recognition-plan.json`
 
 ## Day 76 command lane
 
@@ -297,7 +297,7 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
     else:
         misses.append("Day 76 contributor recognition dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day76-contributor-recognition-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day76-contributor-recognition-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

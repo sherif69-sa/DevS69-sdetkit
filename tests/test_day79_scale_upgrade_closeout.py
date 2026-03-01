@@ -8,6 +8,18 @@ from sdetkit import day79_scale_upgrade_closeout as d79
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day79-scale-upgrade-closeout.md\nday79-scale-upgrade-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    scale_plan = root / ".day79-scale-upgrade-plan.json"
+    scale_plan = root / "docs/roadmap/plans/day79-scale-upgrade-plan.json"
     scale_plan.write_text(
         json.dumps(
             {

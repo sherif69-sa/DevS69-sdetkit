@@ -12,7 +12,7 @@ Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into 
 
 - `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json`
 - `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md`
-- `.day75-trust-assets-refresh-plan.json`
+- `docs/roadmap/plans/day75-trust-assets-refresh-plan.json`
 
 ## Day 75 command lane
 

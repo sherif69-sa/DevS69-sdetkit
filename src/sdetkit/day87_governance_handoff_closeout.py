@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day87-governance-handoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY86_SUMMARY_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
 _DAY86_BOARD_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md"
-_PLAN_PATH = ".day87-governance-handoff-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day87-governance-handoff-plan.json"
 _SECTION_HEADER = "# Day 87 \u2014 Governance handoff closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 87 matters",
@@ -77,7 +77,7 @@ Day 87 closes with a major upgrade that converts Day 86 launch readiness outcome
 
 - `docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json`
 - `docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md`
-- `.day87-governance-handoff-plan.json`
+- `docs/roadmap/plans/day87-governance-handoff-plan.json`
 
 ## Day 87 command lane
 
@@ -292,7 +292,7 @@ def build_day87_governance_handoff_closeout_summary(root: Path) -> dict[str, Any
     else:
         misses.append("Day 87 governance handoff dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day87-governance-handoff-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day87-governance-handoff-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

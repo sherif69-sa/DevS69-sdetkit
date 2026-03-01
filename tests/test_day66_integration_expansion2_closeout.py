@@ -8,6 +8,18 @@ from sdetkit import day66_integration_expansion2_closeout as d66
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day66-integration-expansion2-closeout.md\nday66-integration-expansion2-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    gitlab = root / ".gitlab-ci.day66-advanced-reference.yml"
+    gitlab = root / "templates/ci/gitlab/day66-advanced-reference.yml"
     gitlab.write_text(
         "stages:\n"
         "  - lint\n"

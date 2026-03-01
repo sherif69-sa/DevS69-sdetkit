@@ -8,6 +8,18 @@ from sdetkit import day83_trust_faq_expansion_closeout as d83
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day83-trust-faq-expansion-closeout.md\nday83-trust-faq-expansion-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / ".day83-trust-faq-expansion-plan.json"
+    plan = root / "docs/roadmap/plans/day83-trust-faq-expansion-plan.json"
     plan.write_text(
         json.dumps(
             {

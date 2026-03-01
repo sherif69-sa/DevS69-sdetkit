@@ -8,6 +8,18 @@ from sdetkit import day77_community_touchpoint_closeout as d77
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day77-community-touchpoint-closeout.md\nday77-community-touchpoint-closeout\n",
         encoding="utf-8",
@@ -60,7 +72,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    touchpoint_plan = root / ".day77-community-touchpoint-plan.json"
+    touchpoint_plan = root / "docs/roadmap/plans/day77-community-touchpoint-plan.json"
     touchpoint_plan.write_text(
         json.dumps(
             {

@@ -26,6 +26,18 @@ class CliRunner:
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text("# repo\n", encoding="utf-8")
     (root / "LICENSE").write_text("MIT\n", encoding="utf-8")
     (root / "CONTRIBUTING.md").write_text("guide\n", encoding="utf-8")
@@ -38,7 +50,7 @@ def _seed_repo(root: Path) -> None:
     (root / "requirements-test.txt").write_text("pytest\n", encoding="utf-8")
     (root / ".gitignore").write_text(".venv/\n", encoding="utf-8")
     (root / "tests").mkdir()
-    (root / "docs").mkdir()
+    (root / "docs").mkdir(parents=True, exist_ok=True)
     wf = root / ".github" / "workflows"
     wf.mkdir(parents=True)
     (wf / "ci.yml").write_text("name: ci\n", encoding="utf-8")

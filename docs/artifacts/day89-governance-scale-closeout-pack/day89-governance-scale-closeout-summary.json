@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day88_summary": "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json",
     "day88_delivery_board": "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md",
-    "governance_scale_plan": ".day89-governance-scale-plan.json"
+    "governance_scale_plan": "docs/roadmap/plans/day89-governance-scale-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "evidence_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day89-governance-scale-plan.json"
+      "evidence": "docs/roadmap/plans/day89-governance-scale-plan.json"
     }
   ],
   "rollup": {

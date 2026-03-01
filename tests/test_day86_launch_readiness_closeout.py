@@ -8,6 +8,18 @@ from sdetkit import day86_launch_readiness_closeout as d86
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day86-launch-readiness-closeout.md\nday86-launch-readiness-closeout\n",
         encoding="utf-8",
@@ -60,7 +72,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    plan = root / ".day86-launch-readiness-plan.json"
+    plan = root / "docs/roadmap/plans/day86-launch-readiness-plan.json"
     plan.write_text(
         json.dumps(
             {

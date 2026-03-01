@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day69_summary": "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json",
     "day69_delivery_board": "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md",
-    "case_study_data": ".day70-triage-speed-case-study.json"
+    "case_study_data": "docs/roadmap/plans/day70-triage-speed-case-study.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "case_study_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day70-triage-speed-case-study.json"
+      "evidence": "docs/roadmap/plans/day70-triage-speed-case-study.json"
     }
   ],
   "rollup": {

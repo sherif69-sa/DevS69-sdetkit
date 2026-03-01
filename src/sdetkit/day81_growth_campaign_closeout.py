@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day81-growth-campaign-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY80_SUMMARY_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
 _DAY80_BOARD_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md"
-_PLAN_PATH = ".day81-growth-campaign-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day81-growth-campaign-plan.json"
 _SECTION_HEADER = "# Day 81 \u2014 Growth campaign closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 81 matters",
@@ -77,7 +77,7 @@ Day 81 closes with a major upgrade that converts Day 80 partner outreach outcome
 
 - `docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json`
 - `docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md`
-- `.day81-growth-campaign-plan.json`
+- `docs/roadmap/plans/day81-growth-campaign-plan.json`
 
 ## Day 81 command lane
 
@@ -292,7 +292,9 @@ def build_day81_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append("Day 81 growth campaign dataset is available for launch execution.")
     else:
         misses.append("Day 81 growth campaign dataset is missing required keys.")
-        handoff_actions.append("Update .day81-growth-campaign-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/day81-growth-campaign-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
         wins.append(

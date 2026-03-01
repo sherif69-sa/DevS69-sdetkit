@@ -12,7 +12,7 @@ Day 85 closes with a major upgrade that converts Day 84 evidence narrative outco
 
 - `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json`
 - `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md`
-- `.day85-release-prioritization-plan.json`
+- `docs/roadmap/plans/day85-release-prioritization-plan.json`
 
 ## Day 85 command lane
 

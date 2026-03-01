@@ -14,7 +14,7 @@ _DAY74_SUMMARY_PATH = "docs/artifacts/day74-distribution-scaling-closeout-pack/d
 _DAY74_BOARD_PATH = (
     "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md"
 )
-_TRUST_PLAN_PATH = ".day75-trust-assets-refresh-plan.json"
+_TRUST_PLAN_PATH = "docs/roadmap/plans/day75-trust-assets-refresh-plan.json"
 _SECTION_HEADER = "# Day 75 \u2014 Trust assets refresh closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 75 matters",
@@ -79,7 +79,7 @@ Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into 
 
 - `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json`
 - `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md`
-- `.day75-trust-assets-refresh-plan.json`
+- `docs/roadmap/plans/day75-trust-assets-refresh-plan.json`
 
 ## Day 75 command lane
 
@@ -297,7 +297,7 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
     else:
         misses.append("Day 75 trust assets refresh dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day75-trust-assets-refresh-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day75-trust-assets-refresh-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

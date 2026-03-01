@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day76_summary": "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json",
     "day76_delivery_board": "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md",
-    "touchpoint_plan": ".day77-community-touchpoint-plan.json"
+    "touchpoint_plan": "docs/roadmap/plans/day77-community-touchpoint-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "touchpoint_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day77-community-touchpoint-plan.json"
+      "evidence": "docs/roadmap/plans/day77-community-touchpoint-plan.json"
     }
   ],
   "rollup": {

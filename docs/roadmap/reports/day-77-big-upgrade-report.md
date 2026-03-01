@@ -9,7 +9,7 @@ Close Day 77 with a high-signal community-touchpoint lane that upgrades Day 76 c
 - New `day77-community-touchpoint-closeout` CLI lane with strict scoring and Day 76 continuity validation.
 - New Day 77 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 77 contract checker script for CI and local execution gating.
-- New `.day77-community-touchpoint-plan.json` baseline dataset scaffold for touchpoint execution planning.
+- New `docs/roadmap/plans/day77-community-touchpoint-plan.json` baseline dataset scaffold for touchpoint execution planning.
 
 ### Command lane
 

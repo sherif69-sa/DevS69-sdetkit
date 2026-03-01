@@ -12,7 +12,7 @@ Day 74 closes with a major upgrade that turns Day 73 published case-study outcom
 
 - `docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json`
 - `docs/artifacts/day73-case-study-launch-closeout-pack/day73-delivery-board.md`
-- `.day74-distribution-scaling-plan.json`
+- `docs/roadmap/plans/day74-distribution-scaling-plan.json`
 
 ## Day 74 command lane
 

@@ -9,7 +9,7 @@ Close Day 76 with a high-signal contributor-recognition lane that upgrades Day 7
 - New `day76-contributor-recognition-closeout` CLI lane with strict scoring and Day 75 continuity validation.
 - New Day 76 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 76 contract checker script for CI and local execution gating.
-- New `.day76-contributor-recognition-plan.json` baseline dataset scaffold for recognition execution planning.
+- New `docs/roadmap/plans/day76-contributor-recognition-plan.json` baseline dataset scaffold for recognition execution planning.
 
 ### Command lane
 

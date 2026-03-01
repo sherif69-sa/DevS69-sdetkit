@@ -12,7 +12,7 @@ Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into 
 
 - `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json`
 - `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md`
-- `.day84-evidence-narrative-plan.json`
+- `docs/roadmap/plans/day84-evidence-narrative-plan.json`
 
 ## Day 84 command lane
 

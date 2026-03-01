@@ -14,7 +14,7 @@ _DAY66_SUMMARY_PATH = "docs/artifacts/day66-integration-expansion2-closeout-pack
 _DAY66_BOARD_PATH = (
     "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md"
 )
-_JENKINS_PATH = ".jenkins.day67-advanced-reference.Jenkinsfile"
+_JENKINS_PATH = "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
 _SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 67 matters",
@@ -79,7 +79,7 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 
 - `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json`
 - `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md`
-- `.jenkins.day67-advanced-reference.Jenkinsfile`
+- `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
 ## Day 67 command lane
 
@@ -307,7 +307,7 @@ def build_day67_integration_expansion3_closeout_summary(root: Path) -> dict[str,
     else:
         misses.append("Day 67 Jenkins reference pipeline is missing required controls.")
         handoff_actions.append(
-            "Update .jenkins.day67-advanced-reference.Jenkinsfile to restore required controls."
+            "Update templates/ci/jenkins/day67-advanced-reference.Jenkinsfile to restore required controls."
         )
 
     if not failed and not critical_failures:

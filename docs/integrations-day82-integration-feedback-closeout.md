@@ -12,7 +12,7 @@ Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes in
 
 - `docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json`
 - `docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md`
-- `.day82-integration-feedback-plan.json`
+- `docs/roadmap/plans/day82-integration-feedback-plan.json`
 
 ## Day 82 command lane
 

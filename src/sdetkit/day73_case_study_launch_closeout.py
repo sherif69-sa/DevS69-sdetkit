@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-day73-case-study-launch-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY72_SUMMARY_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
 _DAY72_BOARD_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md"
-_CASE_STUDY_DATA_PATH = ".day73-published-case-study.json"
+_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day73-published-case-study.json"
 _SECTION_HEADER = "# Day 73 \u2014 Case-study launch closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 73 matters",
@@ -77,7 +77,7 @@ Day 73 closes with a major upgrade that turns Day 72 publication-quality prep in
 
 - `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json`
 - `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md`
-- `.day73-published-case-study.json`
+- `docs/roadmap/plans/day73-published-case-study.json`
 
 ## Day 73 command lane
 
@@ -297,7 +297,9 @@ def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]
         wins.append("Day 73 published case-study dataset is available for launch execution.")
     else:
         misses.append("Day 73 published case-study dataset is missing required keys.")
-        handoff_actions.append("Update .day73-published-case-study.json to restore required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/day73-published-case-study.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
         wins.append(

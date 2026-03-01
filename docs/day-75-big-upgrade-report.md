@@ -9,7 +9,7 @@ Close Day 75 with a high-signal trust-assets refresh lane that upgrades Day 74 d
 - New `day75-trust-assets-refresh-closeout` CLI lane with strict scoring and Day 74 continuity validation.
 - New Day 75 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 75 contract checker script for CI and local execution gating.
-- New `.day75-trust-assets-refresh-plan.json` baseline dataset scaffold for trust refresh execution planning.
+- New `docs/roadmap/plans/day75-trust-assets-refresh-plan.json` baseline dataset scaffold for trust refresh execution planning.
 
 ### Command lane
 

@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day77_summary": "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json",
     "day77_delivery_board": "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md",
-    "ecosystem_priorities_plan": ".day78-ecosystem-priorities-plan.json"
+    "ecosystem_priorities_plan": "docs/roadmap/plans/day78-ecosystem-priorities-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "ecosystem_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day78-ecosystem-priorities-plan.json"
+      "evidence": "docs/roadmap/plans/day78-ecosystem-priorities-plan.json"
     }
   ],
   "rollup": {

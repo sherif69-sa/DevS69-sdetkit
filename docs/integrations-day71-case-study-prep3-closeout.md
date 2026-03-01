@@ -12,7 +12,7 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 
 - `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json`
 - `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md`
-- `.day71-escalation-quality-case-study.json`
+- `docs/roadmap/plans/day71-escalation-quality-case-study.json`
 
 ## Day 71 command lane
 

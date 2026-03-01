@@ -12,7 +12,7 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 
 - `docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json`
 - `docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md`
-- `.day90-phase3-wrap-publication-plan.json`
+- `docs/roadmap/plans/day90-phase3-wrap-publication-plan.json`
 
 ## Day 90 command lane
 

@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day89_summary": "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json",
     "day89_delivery_board": "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md",
-    "phase3_wrap_publication_plan": ".day90-phase3-wrap-publication-plan.json"
+    "phase3_wrap_publication_plan": "docs/roadmap/plans/day90-phase3-wrap-publication-plan.json"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "evidence_plan_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".day90-phase3-wrap-publication-plan.json"
+      "evidence": "docs/roadmap/plans/day90-phase3-wrap-publication-plan.json"
     }
   ],
   "rollup": {

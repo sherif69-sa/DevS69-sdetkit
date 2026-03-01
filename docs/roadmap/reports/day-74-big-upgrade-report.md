@@ -9,7 +9,7 @@ Close Day 74 with a high-signal distribution scaling lane that upgrades Day 73 p
 - New `day74-distribution-scaling-closeout` CLI lane with strict scoring and Day 73 continuity validation.
 - New Day 74 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 74 contract checker script for CI and local execution gating.
-- New `.day74-distribution-scaling-plan.json` baseline dataset scaffold for Day 74 distribution execution planning.
+- New `docs/roadmap/plans/day74-distribution-scaling-plan.json` baseline dataset scaffold for Day 74 distribution execution planning.
 
 ### Command lane
 

@@ -12,7 +12,7 @@ Day 81 closes with a major upgrade that converts Day 80 partner outreach outcome
 
 - `docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json`
 - `docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md`
-- `.day81-growth-campaign-plan.json`
+- `docs/roadmap/plans/day81-growth-campaign-plan.json`
 
 ## Day 81 command lane
 

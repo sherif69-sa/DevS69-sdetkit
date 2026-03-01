@@ -14,7 +14,7 @@ _DAY78_SUMMARY_PATH = "docs/artifacts/day78-ecosystem-priorities-closeout-pack/d
 _DAY78_BOARD_PATH = (
     "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md"
 )
-_PLAN_PATH = ".day79-scale-upgrade-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day79-scale-upgrade-plan.json"
 _SECTION_HEADER = "# Day 79 \u2014 Scale upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 79 matters",
@@ -79,7 +79,7 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 
 - `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json`
 - `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md`
-- `.day79-scale-upgrade-plan.json`
+- `docs/roadmap/plans/day79-scale-upgrade-plan.json`
 
 ## Day 79 command lane
 
@@ -292,7 +292,9 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append("Day 79 scale upgrade dataset is available for launch execution.")
     else:
         misses.append("Day 79 scale upgrade dataset is missing required keys.")
-        handoff_actions.append("Update .day79-scale-upgrade-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/day79-scale-upgrade-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
         wins.append(

@@ -12,7 +12,7 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 
 - `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json`
 - `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md`
-- `.day80-partner-outreach-plan.json`
+- `docs/roadmap/plans/day80-partner-outreach-plan.json`
 
 ## Day 80 command lane
 

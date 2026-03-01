@@ -14,7 +14,7 @@ _DAY88_SUMMARY_PATH = "docs/artifacts/day88-governance-priorities-closeout-pack/
 _DAY88_BOARD_PATH = (
     "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md"
 )
-_PLAN_PATH = ".day89-governance-scale-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day89-governance-scale-plan.json"
 _SECTION_HEADER = "# Day 89 \u2014 Governance scale closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 89 matters",
@@ -79,7 +79,7 @@ Day 89 closes with a major upgrade that converts Day 88 governance handoff outco
 
 - `docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json`
 - `docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md`
-- `.day89-governance-scale-plan.json`
+- `docs/roadmap/plans/day89-governance-scale-plan.json`
 
 ## Day 89 command lane
 
@@ -293,7 +293,9 @@ def build_day89_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
         wins.append("Day 89 governance scale dataset is available for governance execution.")
     else:
         misses.append("Day 89 governance scale dataset is missing required keys.")
-        handoff_actions.append("Update .day89-governance-scale-plan.json to restore required keys.")
+        handoff_actions.append(
+            "Update docs/roadmap/plans/day89-governance-scale-plan.json to restore required keys."
+        )
 
     if not failed and not critical_failures:
         wins.append(

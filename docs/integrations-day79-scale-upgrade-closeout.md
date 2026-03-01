@@ -12,7 +12,7 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 
 - `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json`
 - `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md`
-- `.day79-scale-upgrade-plan.json`
+- `docs/roadmap/plans/day79-scale-upgrade-plan.json`
 
 ## Day 79 command lane
 

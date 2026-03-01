@@ -10,7 +10,7 @@ Close Day 69 with a high-signal case-study prep lane that converts Day 68 output
 - New Day 69 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 69 contract checker script for CI and local execution gating.
 - New case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
-- New `.day69-reliability-case-study.json` baseline dataset scaffold for reliability case-study prep.
+- New `docs/roadmap/plans/day69-reliability-case-study.json` baseline dataset scaffold for reliability case-study prep.
 
 ## Validation flow
 

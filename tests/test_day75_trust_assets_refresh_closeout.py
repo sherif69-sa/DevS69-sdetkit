@@ -8,6 +8,18 @@ from sdetkit import day75_trust_assets_refresh_closeout as d75
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day75-trust-assets-refresh-closeout.md\nday75-trust-assets-refresh-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    trust_plan = root / ".day75-trust-assets-refresh-plan.json"
+    trust_plan = root / "docs/roadmap/plans/day75-trust-assets-refresh-plan.json"
     trust_plan.write_text(
         json.dumps(
             {

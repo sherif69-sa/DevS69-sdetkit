@@ -10,7 +10,7 @@ Close Day 73 with a high-signal case-study launch lane that upgrades Day 72 publ
 - New Day 73 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 73 contract checker script for CI and local execution gating.
 - New published-case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
-- New `.day73-published-case-study.json` baseline dataset scaffold for Day 73 publication launch.
+- New `docs/roadmap/plans/day73-published-case-study.json` baseline dataset scaffold for Day 73 publication launch.
 
 ## Validation flow
 

@@ -10,7 +10,7 @@ Close Day 70 with a high-signal case-study prep lane that converts Day 69 output
 - New Day 70 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 70 contract checker script for CI and local execution gating.
 - New case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
-- New `.day70-triage-speed-case-study.json` baseline dataset scaffold for triage-speed case-study prep.
+- New `docs/roadmap/plans/day70-triage-speed-case-study.json` baseline dataset scaffold for triage-speed case-study prep.
 
 ## Validation flow
 

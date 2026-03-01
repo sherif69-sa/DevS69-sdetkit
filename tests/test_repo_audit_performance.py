@@ -17,6 +17,18 @@ def _git(root: Path, *args: str) -> str:
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text("# repo\n", encoding="utf-8")
     (root / "SECURITY.md").write_text("ok\n", encoding="utf-8")
     (root / "CODE_OF_CONDUCT.md").write_text("ok\n", encoding="utf-8")

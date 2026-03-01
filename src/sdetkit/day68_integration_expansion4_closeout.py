@@ -14,7 +14,7 @@ _DAY67_SUMMARY_PATH = "docs/artifacts/day67-integration-expansion3-closeout-pack
 _DAY67_BOARD_PATH = (
     "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md"
 )
-_REFERENCE_PATH = ".tekton.day68-self-hosted-reference.yaml"
+_REFERENCE_PATH = "templates/ci/tekton/day68-self-hosted-reference.yaml"
 _SECTION_HEADER = "# Day 68 \u2014 Integration expansion #4 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 68 matters",
@@ -79,7 +79,7 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 
 - `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-integration-expansion3-closeout-summary.json`
 - `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md`
-- `.tekton.day68-self-hosted-reference.yaml`
+- `templates/ci/tekton/day68-self-hosted-reference.yaml`
 
 ## Day 68 command lane
 
@@ -307,7 +307,7 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
     else:
         misses.append("Day 68 self-hosted reference pipeline is missing required controls.")
         handoff_actions.append(
-            "Update .tekton.day68-self-hosted-reference.yaml to restore required controls."
+            "Update templates/ci/tekton/day68-self-hosted-reference.yaml to restore required controls."
         )
 
     if not failed and not critical_failures:

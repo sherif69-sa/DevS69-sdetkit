@@ -14,7 +14,7 @@ _DAY76_SUMMARY_PATH = "docs/artifacts/day76-contributor-recognition-closeout-pac
 _DAY76_BOARD_PATH = (
     "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
 )
-_PLAN_PATH = ".day77-community-touchpoint-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/day77-community-touchpoint-plan.json"
 _SECTION_HEADER = "# Day 77 \u2014 Community touchpoint closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 77 matters",
@@ -79,7 +79,7 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 
 - `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json`
 - `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md`
-- `.day77-community-touchpoint-plan.json`
+- `docs/roadmap/plans/day77-community-touchpoint-plan.json`
 
 ## Day 77 command lane
 
@@ -297,7 +297,7 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
     else:
         misses.append("Day 77 community touchpoint dataset is missing required keys.")
         handoff_actions.append(
-            "Update .day77-community-touchpoint-plan.json to restore required keys."
+            "Update docs/roadmap/plans/day77-community-touchpoint-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

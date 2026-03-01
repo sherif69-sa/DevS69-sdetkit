@@ -12,7 +12,7 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 
 - `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json`
 - `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md`
-- `.day77-community-touchpoint-plan.json`
+- `docs/roadmap/plans/day77-community-touchpoint-plan.json`
 
 ## Day 77 command lane
 

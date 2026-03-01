@@ -7,7 +7,7 @@
     "top10": "docs/top-10-github-strategy.md",
     "day65_summary": "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json",
     "day65_delivery_board": "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md",
-    "gitlab_reference": ".gitlab-ci.day66-advanced-reference.yml"
+    "gitlab_reference": "templates/ci/gitlab/day66-advanced-reference.yml"
   },
   "checks": [
     {
@@ -99,7 +99,7 @@
       "check_id": "gitlab_reference_present",
       "weight": 10,
       "passed": true,
-      "evidence": ".gitlab-ci.day66-advanced-reference.yml"
+      "evidence": "templates/ci/gitlab/day66-advanced-reference.yml"
     }
   ],
   "rollup": {

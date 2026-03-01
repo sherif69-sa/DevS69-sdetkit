@@ -10,7 +10,7 @@ Close Day 71 with a high-signal case-study prep lane that converts Day 70 output
 - New Day 71 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 71 contract checker script for CI and local execution gating.
 - New case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
-- New `.day71-escalation-quality-case-study.json` baseline dataset scaffold for escalation-quality case-study prep.
+- New `docs/roadmap/plans/day71-escalation-quality-case-study.json` baseline dataset scaffold for escalation-quality case-study prep.
 
 ## Validation flow
 

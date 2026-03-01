@@ -8,6 +8,18 @@ from sdetkit import day72_case_study_prep4_closeout as d72
 
 
 def _seed_repo(root: Path) -> None:
+
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
         "docs/integrations-day72-case-study-prep4-closeout.md\nday72-case-study-prep4-closeout\n",
         encoding="utf-8",
@@ -58,7 +70,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    case_study = root / ".day72-publication-quality-case-study.json"
+    case_study = root / "docs/roadmap/plans/day72-publication-quality-case-study.json"
     case_study.write_text(
         json.dumps(
             {

@@ -12,7 +12,7 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json`
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
-- `.day69-reliability-case-study.json`
+- `docs/roadmap/plans/day69-reliability-case-study.json`
 
 ## Day 69 command lane
 
