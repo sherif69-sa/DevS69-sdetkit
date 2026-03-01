@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+python3 scripts/check_repo_layout.py
 
 mode=${1:-all}
 cov_fail_under=${COV_FAIL_UNDER:-70}
