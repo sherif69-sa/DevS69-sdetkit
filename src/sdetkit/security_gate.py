@@ -486,7 +486,24 @@ def _normalized_message(message: str) -> str:
 
 
 def _fingerprint(rule_id: str, path: str, line: int, message: str) -> str:
-    raw = f"{rule_id}|{path}|{line}|{_normalized_message(message)}"
+    try:
+        lines = Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+    except Exception:
+        lines = []
+
+    line_text = ""
+    if 1 <= line <= len(lines):
+        line_text = lines[line - 1].strip()
+
+    scope = ""
+    if lines and 1 <= line <= len(lines):
+        for k in range(line - 2, -1, -1):
+            s = lines[k].lstrip()
+            if s.startswith("def ") or s.startswith("class "):
+                scope = s.split("(", 1)[0].split(":", 1)[0].strip()
+                break
+
+    raw = f"{rule_id}\n{path}\n{scope}\n{line_text}\n{message}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
 
 
@@ -938,12 +955,11 @@ def _filter_new(findings: list[Finding], baseline_entries: list[dict[str, Any]])
         (
             str(x.get("rule_id", "")),
             str(x.get("path", "")),
-            int(x.get("line", 0) or 0),
             str(x.get("fingerprint", "")),
         )
         for x in baseline_entries
     }
-    return [f for f in findings if (f.rule_id, f.path, f.line, f.fingerprint) not in known]
+    return [f for f in findings if (f.rule_id, f.path, f.fingerprint) not in known]
 
 
 def _render(
