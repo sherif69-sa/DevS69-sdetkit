@@ -19,7 +19,7 @@ done
 
 if [[ "${VIRTUAL_ENV:-}" == "" ]]; then
   echo "error: no virtualenv active" >&2
-  echo "hint: python3 -m venv .venv && . .venv/bin/activate && python -m pip install -e '.[dev,test,docs]'" >&2
+  echo "hint: bash scripts/bootstrap.sh && . .venv/bin/activate" >&2
   exit 2
 fi
 

@@ -1,6 +1,1116 @@
 {
   "entries": [
     {
+      "column": 8,
+      "fingerprint": "930351d024542773fc01ca86",
+      "line": 445,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/community_activation.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a72adcefc6b9dc1d5586cd84",
+      "line": 447,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/community_activation.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "3a3906bc01397b27e2c443af",
+      "line": 423,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day28_weekly_review.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "69a7bb22d2b24701e47d51c5",
+      "line": 338,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day29_phase1_hardening.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "ff4696978568a4cf2ac9b5e6",
+      "line": 431,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day30_phase1_wrap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a91a5b53e3074e35c4d96dce",
+      "line": 495,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day31_phase2_kickoff.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "c6e8d55af086889f6026dd92",
+      "line": 525,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day32_release_cadence.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "2eabdef5e88a518609f98680",
+      "line": 517,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day33_demo_asset.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "f237167e9a9d94f93bcffc20",
+      "line": 518,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day34_demo_asset2.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "f8c78be476af820416f65d4b",
+      "line": 512,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day35_kpi_instrumentation.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "04c3daa367b9f949ef0f6e2f",
+      "line": 527,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day36_distribution_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "7a0c0c6f57f457eb404629ef",
+      "line": 556,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day37_experiment_lane.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a3fb0c56a6be4682131d7115",
+      "line": 556,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day38_distribution_batch.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "04d1ef5243e0ff9b5218c104",
+      "line": 550,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day39_playbook_post.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a3398580cec77a0c835f2213",
+      "line": 546,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day40_scale_lane.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "5c19b0652d32911dff7f7fd4",
+      "line": 548,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day41_expansion_automation.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "ca052a052a1fdc0ef86965de",
+      "line": 489,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day42_optimization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "38eb44c9ad0ed6b10ae5a1c2",
+      "line": 491,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day42_optimization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "ab50442c072a9e351438b723",
+      "line": 489,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day43_acceleration_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "09423c567e4931d58ed02a9b",
+      "line": 491,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day43_acceleration_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "6ce3c31e32e773303dccdcba",
+      "line": 483,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day44_scale_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "9ede1d317f20c7f5e5fdcf30",
+      "line": 485,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day44_scale_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "063e68a075983f0fa1cb4c57",
+      "line": 485,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day45_expansion_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a1395efbb3d9596749409152",
+      "line": 487,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day45_expansion_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "cfd3658b8da3ad617e71f2b7",
+      "line": 488,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day46_optimization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "744a60612938ff373ff6285a",
+      "line": 490,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day46_optimization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "31f91b238617c38209f9a1c6",
+      "line": 486,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day47_reliability_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "69fd220a0ec123c9e6cf768a",
+      "line": 488,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day47_reliability_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "b496f3bef899744d1746534d",
+      "line": 486,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day48_objection_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "388e0416c5c84da75867ba1e",
+      "line": 488,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day48_objection_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "59db866cced4604e4d4d3df4",
+      "line": 488,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day49_weekly_review_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "585687298cf74c21525db717",
+      "line": 490,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day49_weekly_review_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "fd6997dd6eb3d23adeca60f7",
+      "line": 495,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day50_execution_prioritization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "22490ccdf4fd79ca4c068293",
+      "line": 497,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day50_execution_prioritization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "2ee4e2724793172d69d35ed8",
+      "line": 490,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day51_case_snippet_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "c16f21d86ed098a02aeab93d",
+      "line": 492,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day51_case_snippet_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "43680752b3a478624b4609f8",
+      "line": 488,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day52_narrative_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "7300df18560f82718ee1522a",
+      "line": 490,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day52_narrative_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "49258dcd8eb7b050de4f2415",
+      "line": 488,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day53_docs_loop_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "616cc97b4a4d6c3f17848f0c",
+      "line": 490,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day53_docs_loop_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "d4d7439abd56a07e4329d165",
+      "line": 444,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day55_contributor_activation_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "fbccbbf292bda391f4a5cfc3",
+      "line": 438,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day56_stabilization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "b84f07e98307970acc9b12af",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day57_kpi_deep_audit_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "3882551ae11ec8dc157e703a",
+      "line": 430,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day58_phase2_hardening_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "9c636a1adb3eafc7a979ebf7",
+      "line": 418,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day59_phase3_preplan_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "1cbbf8a00b0ba1f91d70b88f",
+      "line": 423,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day60_phase2_wrap_handoff_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "021e9662edfe51b8e9675a8b",
+      "line": 419,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day61_phase3_kickoff_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "ebf0ffe02c5e2c6ec87387a6",
+      "line": 426,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day62_community_program_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "e5fc2f09baf7a761734e4f57",
+      "line": 423,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day63_onboarding_activation_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "9a242a97ab06bf81e1c7fbeb",
+      "line": 439,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day64_integration_expansion_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "ef97b7d72c2aee6f7c5e592b",
+      "line": 432,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day65_weekly_review_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "81e2138c808fae10c7299665",
+      "line": 443,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day66_integration_expansion2_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "27483cb7a501366139d1ca88",
+      "line": 443,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day67_integration_expansion3_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "4727b6e692768cd9b984e452",
+      "line": 443,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day68_integration_expansion4_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "9d8083c6a23564392fdaa229",
+      "line": 436,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day69_case_study_prep1_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "0af27b5c698fc4883298901d",
+      "line": 434,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day70_case_study_prep2_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "f0c35baf5dfa370a2117ac62",
+      "line": 434,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day71_case_study_prep3_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "a241b2ade9a49750b5879f7a",
+      "line": 434,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day72_case_study_prep4_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "49bd634aebdd7cb3087163df",
+      "line": 432,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day73_case_study_launch_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "431333b9cecdf91810706d47",
+      "line": 434,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day74_distribution_scaling_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "c710cdd0cfd810bd4d95fc57",
+      "line": 431,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day75_trust_assets_refresh_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "9575faccc64d63ee8d24c2ad",
+      "line": 440,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day76_contributor_recognition_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "39ccdf1ec93aef77c749783b",
+      "line": 436,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day77_community_touchpoint_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "d0d25480501f9f9a905333df",
+      "line": 432,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day78_ecosystem_priorities_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "5f6760d43b55226d8b6de82c",
+      "line": 431,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day79_scale_upgrade_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "82c472416b7b4f022b9e2ed5",
+      "line": 436,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day80_partner_outreach_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "ec7006dacd6e9d30b9efd284",
+      "line": 429,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day81_growth_campaign_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "f36638b879f4f7dff17ee3ad",
+      "line": 442,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day82_integration_feedback_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "006bb46c5201750c59b42c62",
+      "line": 443,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day83_trust_faq_expansion_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "b74d441d9aba67f0592bbe98",
+      "line": 433,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day84_evidence_narrative_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "7eb2dad72efd305850b4f6a0",
+      "line": 437,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day85_release_prioritization_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "66e4993df745c6ffd35f137c",
+      "line": 435,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day86_launch_readiness_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "ca26fbd547dd7dacdf97643e",
+      "line": 433,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day87_governance_handoff_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "f31f85e5bb37a771d094303f",
+      "line": 433,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day88_governance_priorities_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "fce0bb4dcabfff100711b606",
+      "line": 435,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day89_governance_scale_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "c77775a24530cb9d98395fd0",
+      "line": 439,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/day90_phase3_wrap_publication_closeout.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "1d2b7675db49a8b21cf4383e",
+      "line": 443,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/external_contribution_push.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "3c0ec4186c0648bb6498a045",
+      "line": 445,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/external_contribution_push.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "46e50938a26f31d5eca0d7f9",
+      "line": 520,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/faq_objections.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "d10364ad6dd6d58695cf8a83",
+      "line": 490,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/kpi_audit.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "3d4ea56f6b759d569119905e",
+      "line": 492,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/kpi_audit.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "41ad340e737395f898cc2ebd",
+      "line": 438,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/onboarding_time_upgrade.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "5af7ff829c2965bc0d618b6c",
+      "line": 440,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/onboarding_time_upgrade.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "67746ad5b30c5d7a3641d21a",
+      "line": 158,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/phase_boost.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "94fe3139a50af2eaa388ae80",
+      "line": 159,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/phase_boost.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "b23cfcfd03b81af2234ebaee",
+      "line": 211,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/production_readiness.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "7afcdd66380f9564bd519516",
+      "line": 213,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/production_readiness.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "af30465ca248460c275be7d6",
+      "line": 215,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/production_readiness.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "1e3346dc4b842e15b11b85cd",
+      "line": 206,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/proof.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "36d709ac3717a2fa3de1b5cf",
+      "line": 349,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/quality_contribution_delta.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a7e3e06945b0216662a669ed",
+      "line": 461,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/release_narrative.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "f7166b37b22fcbd5248505f3",
+      "line": 404,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/release_readiness_board.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "07c3714f44ce3e102c7aa7cd",
+      "line": 403,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/reliability_evidence_pack.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "f429e9be2286b559c0a9b9f1",
+      "line": 461,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/reliability_evidence_pack.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "a74c333f474cf12abfae9299",
+      "line": 96,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 12,
+      "fingerprint": "021e6d94f991c808608b1bcc",
+      "line": 107,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 12,
+      "fingerprint": "06d0a226a92eb5ca5e245947",
+      "line": 112,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 12,
+      "fingerprint": "1691c8ea002e4f0bbb1167b8",
+      "line": 117,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 12,
+      "fingerprint": "c536452e3550ce1d82123ea4",
+      "line": 122,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 12,
+      "fingerprint": "ae0b66559544486ef8d2a2a8",
+      "line": 131,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 12,
+      "fingerprint": "e9aa3c198283b859e9efd7ac",
+      "line": 137,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "06952bc12d5941631e496a56",
+      "line": 141,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "ff25a5e6d54508433eb841f0",
+      "line": 146,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "be08583e9f6400af594a47c9",
+      "line": 114,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap_manifest.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "31ea76221c6f29933048db05",
+      "line": 123,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap_manifest.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "e4a48b375052d3cea5dda719",
+      "line": 129,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap_manifest.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "626984deac7691a6c747bb63",
+      "line": 135,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/roadmap_manifest.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "b0e2d49c2c72e041e675f732",
+      "line": 329,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/startup_use_case.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 4,
+      "fingerprint": "376bbe0354d99e0c4a96d192",
+      "line": 432,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/triage_templates.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "33d7cc86152c6c1c55ac1885",
+      "line": 511,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/trust_signal_upgrade.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
+      "column": 8,
+      "fingerprint": "e7da4685e2ebe73770daa995",
+      "line": 608,
+      "message": "print(...) found in src/.",
+      "path": "src/sdetkit/weekly_review.py",
+      "rule_id": "SEC_DEBUG_PRINT",
+      "severity": "info",
+      "suggestion": ""
+    },
+    {
       "column": 19,
       "fingerprint": "6968ba85ec30278a0eef4ce9",
       "line": 25,
@@ -121,476 +1231,6 @@
       "suggestion": ""
     },
     {
-      "column": 8,
-      "fingerprint": "12760a5ae8f62cb6e950d916",
-      "line": 443,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/community_activation.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "930351d024542773fc01ca86",
-      "line": 445,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/community_activation.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "e3182322969fa4f8156107fb",
-      "line": 421,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day28_weekly_review.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "3152b04f48934c211e80361d",
-      "line": 336,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day29_phase1_hardening.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "6a7a202df7f4d9657cf85aa0",
-      "line": 429,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day30_phase1_wrap.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "a5ae7ff14e400bf7a55024a2",
-      "line": 493,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day31_phase2_kickoff.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "ba021f1d2d2521e89dbb99dd",
-      "line": 523,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day32_release_cadence.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "2974807cb087d96562c174fb",
-      "line": 514,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day33_demo_asset.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "ca62a32f607cb8a9503a9d2c",
-      "line": 516,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day34_demo_asset2.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "40a873c09fd254f9780668c7",
-      "line": 510,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day35_kpi_instrumentation.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "8fe5da3ec8d32d9e6f1a609d",
-      "line": 525,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day36_distribution_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "5916b67d83a8877fc4c39657",
-      "line": 554,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day37_experiment_lane.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "6d3220bf2e5c202bf44470ae",
-      "line": 554,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day38_distribution_batch.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "5baff612a18d3a310169a2ab",
-      "line": 548,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day39_playbook_post.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "1607947608c30fbd0e13a150",
-      "line": 544,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day40_scale_lane.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "696ee89f865147c81f57b833",
-      "line": 546,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day41_expansion_automation.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "a52602f7162ae80c80c45be3",
-      "line": 487,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day42_optimization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "ca052a052a1fdc0ef86965de",
-      "line": 489,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day42_optimization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "faa3dbec93fb7cc64ed88cc4",
-      "line": 487,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day43_acceleration_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "ab50442c072a9e351438b723",
-      "line": 489,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day43_acceleration_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "dedfcbff341d1e001f3c2166",
-      "line": 481,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day44_scale_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "6ce3c31e32e773303dccdcba",
-      "line": 483,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day44_scale_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "1be5f5232ed7398dafa2601b",
-      "line": 483,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day45_expansion_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "063e68a075983f0fa1cb4c57",
-      "line": 485,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day45_expansion_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "032ede7cf709f530c385c110",
-      "line": 486,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day46_optimization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "cfd3658b8da3ad617e71f2b7",
-      "line": 488,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day46_optimization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "1d3e202b284288524d198724",
-      "line": 484,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day47_reliability_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "31f91b238617c38209f9a1c6",
-      "line": 486,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day47_reliability_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "06742b0bb9bfb9e242a07afe",
-      "line": 484,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day48_objection_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "b496f3bef899744d1746534d",
-      "line": 486,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day48_objection_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "874501f780a76ac968632515",
-      "line": 486,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day49_weekly_review_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "59db866cced4604e4d4d3df4",
-      "line": 488,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day49_weekly_review_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "3c45a225c209866b57bcd5c2",
-      "line": 493,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day50_execution_prioritization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "fd6997dd6eb3d23adeca60f7",
-      "line": 495,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day50_execution_prioritization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "e47bb8e4dfdcb95cd41ff1ce",
-      "line": 488,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day51_case_snippet_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "2ee4e2724793172d69d35ed8",
-      "line": 490,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day51_case_snippet_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "7aa217d0c3f638321d3e117e",
-      "line": 486,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day52_narrative_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "43680752b3a478624b4609f8",
-      "line": 488,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day52_narrative_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "e3873f5c287199c88eaa4a9f",
-      "line": 486,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day53_docs_loop_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "49258dcd8eb7b050de4f2415",
-      "line": 488,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day53_docs_loop_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "dce5990b7db844bc0839aa32",
-      "line": 440,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day55_contributor_activation_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "4248e9fd1c2f37a7b5b36612",
-      "line": 434,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day56_stabilization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "5831267290a3d41d94757211",
-      "line": 425,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day57_kpi_deep_audit_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "2408ca0e60090efcaf71a5f8",
-      "line": 426,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day58_phase2_hardening_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "39c1c5b3e47893b3e0d4c07b",
-      "line": 414,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day59_phase3_preplan_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "d6ca6e1893479ca5d1c663e6",
-      "line": 419,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day60_phase2_wrap_handoff_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "4866ae92027917ea2b18b575",
-      "line": 415,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day61_phase3_kickoff_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "b2ccde9dc7705ed0dc76b54f",
       "line": 184,
@@ -598,16 +1238,6 @@
       "path": "src/sdetkit/day62_community_program_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "072a94f45907f54a19e83164",
-      "line": 422,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day62_community_program_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -621,16 +1251,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "f0e4ee28f30916a3dc289109",
-      "line": 419,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day63_onboarding_activation_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "1ffdf84557089c3ca8a90f4f",
       "line": 196,
@@ -638,16 +1258,6 @@
       "path": "src/sdetkit/day64_integration_expansion_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "2bddc6ab6486c279c128e8a2",
-      "line": 435,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day64_integration_expansion_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -661,26 +1271,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "76b4a9727d5927cc49bdee62",
-      "line": 428,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day65_weekly_review_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "70b1729b94cfbbb5d9ade655",
-      "line": 439,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day66_integration_expansion2_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "651c0ad0f48257ce6d9a87a4",
       "line": 196,
@@ -688,16 +1278,6 @@
       "path": "src/sdetkit/day67_integration_expansion3_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "245b27a818059c38d8b5c86f",
-      "line": 439,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day67_integration_expansion3_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -711,16 +1291,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "9365b78da84504cc3d1586fb",
-      "line": 439,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day68_integration_expansion4_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "8c6d1963320b4405bac71a69",
       "line": 191,
@@ -728,36 +1298,6 @@
       "path": "src/sdetkit/day69_case_study_prep1_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "4c79e5b38d8f9d937ce124b6",
-      "line": 432,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day69_case_study_prep1_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "93759603d6863896035429c5",
-      "line": 430,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day70_case_study_prep2_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "957face960e8abe95782a0b2",
-      "line": 430,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day71_case_study_prep3_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -771,16 +1311,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "05e05586c1721b232e8b88a4",
-      "line": 430,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day72_case_study_prep4_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "f88f3fc26b9163d826d89f12",
       "line": 189,
@@ -788,16 +1318,6 @@
       "path": "src/sdetkit/day73_case_study_launch_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "d2f7011161c2be240b4d3dd6",
-      "line": 426,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day73_case_study_launch_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -811,16 +1331,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "5fe4f68e4f155655d9c11bd7",
-      "line": 430,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day74_distribution_scaling_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "1cc569d1d0b0806343337f52",
       "line": 188,
@@ -828,16 +1338,6 @@
       "path": "src/sdetkit/day75_trust_assets_refresh_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "65cc26f18a29c02d95e3a47e",
-      "line": 427,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day75_trust_assets_refresh_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -851,26 +1351,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "d594f609383871487ca9b3a8",
-      "line": 436,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day76_contributor_recognition_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "62a58c226f44f95ca4bc2fdf",
-      "line": 432,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day77_community_touchpoint_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "fed94e75bb211d8c66a20a93",
       "line": 188,
@@ -878,16 +1358,6 @@
       "path": "src/sdetkit/day78_ecosystem_priorities_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "87950bb8979894d5a7499feb",
-      "line": 428,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day78_ecosystem_priorities_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -901,36 +1371,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "3083e27a5074c4fb349ff9df",
-      "line": 425,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day79_scale_upgrade_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "863b629e4b3fec6fdc72f50f",
-      "line": 430,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day80_partner_outreach_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "831b416e1d458144a92cd0e6",
-      "line": 423,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day81_growth_campaign_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "2b82c4cfe58696a0918af90e",
       "line": 195,
@@ -938,16 +1378,6 @@
       "path": "src/sdetkit/day82_integration_feedback_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "9a6629b506389e79cd66018b",
-      "line": 438,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day82_integration_feedback_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -961,16 +1391,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "08addc62aef6423d40052743",
-      "line": 439,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day83_trust_faq_expansion_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "3d0d6706f715a41258d0a3d8",
       "line": 185,
@@ -978,16 +1398,6 @@
       "path": "src/sdetkit/day84_evidence_narrative_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "4ca475758c806e7ad8fff537",
-      "line": 429,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day84_evidence_narrative_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -1001,16 +1411,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "892a454d58dea7f3cc0946ec",
-      "line": 433,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day85_release_prioritization_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "63e7a82a9e38d4df8c83ce77",
       "line": 187,
@@ -1018,16 +1418,6 @@
       "path": "src/sdetkit/day86_launch_readiness_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "636e53665f1e1d1fa930546b",
-      "line": 429,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day86_launch_readiness_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     },
     {
@@ -1041,26 +1431,6 @@
       "suggestion": ""
     },
     {
-      "column": 4,
-      "fingerprint": "2bdd5bf8cef5086444844cb9",
-      "line": 429,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day87_governance_handoff_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "a6dddd3a7217f9adec1908aa",
-      "line": 429,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day88_governance_priorities_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
       "column": 25,
       "fingerprint": "d3c0c0ebee5853f421b2d45b",
       "line": 187,
@@ -1068,196 +1438,6 @@
       "path": "src/sdetkit/day89_governance_scale_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "4da5201bcf88abef3e00fe2d",
-      "line": 429,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day89_governance_scale_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "52f48b1d397a11d6601b9d6a",
-      "line": 435,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/day90_phase3_wrap_publication_closeout.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "b620048784ea4fa14809a296",
-      "line": 441,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/external_contribution_push.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "1d2b7675db49a8b21cf4383e",
-      "line": 443,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/external_contribution_push.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "67f975cfba0f3d3a842a0b7a",
-      "line": 516,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/faq_objections.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "8ae4ded9ef70745b5f2af1cc",
-      "line": 488,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/kpi_audit.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "d10364ad6dd6d58695cf8a83",
-      "line": 490,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/kpi_audit.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "3d4f7a612fa4cc818fb32f70",
-      "line": 436,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/onboarding_time_upgrade.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "41ad340e737395f898cc2ebd",
-      "line": 438,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/onboarding_time_upgrade.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "1e3346dc4b842e15b11b85cd",
-      "line": 206,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/proof.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "36d709ac3717a2fa3de1b5cf",
-      "line": 349,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/quality_contribution_delta.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "9fe16343c6a3330a20674819",
-      "line": 457,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/release_narrative.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "a840662697adef6d6d87a3d6",
-      "line": 400,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/release_readiness_board.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "bada77e54397cd0d4eb56b53",
-      "line": 399,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/reliability_evidence_pack.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "0f1eac5b484e6c19a1b8848c",
-      "line": 457,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/reliability_evidence_pack.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "b0e2d49c2c72e041e675f732",
-      "line": 329,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/startup_use_case.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 4,
-      "fingerprint": "376bbe0354d99e0c4a96d192",
-      "line": 432,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/triage_templates.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "2ef5191eca55d6fb74e369af",
-      "line": 507,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/trust_signal_upgrade.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
-      "suggestion": ""
-    },
-    {
-      "column": 8,
-      "fingerprint": "e7da4685e2ebe73770daa995",
-      "line": 608,
-      "message": "print(...) found in src/.",
-      "path": "src/sdetkit/weekly_review.py",
-      "rule_id": "SEC_DEBUG_PRINT",
-      "severity": "info",
       "suggestion": ""
     }
   ]

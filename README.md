@@ -7,8 +7,9 @@ SDETKit is a production-oriented SDET + DevOps toolkit for auditing repositories
 Runtime install (minimal dependencies):
 - `python -m pip install sdetkit`
 
-Developer install (all tooling):
-- `python -m pip install -e '.[dev,test,docs]'`
+Developer install (all tooling, pinned toolchain):
+- `bash scripts/bootstrap.sh`
+- `source .venv/bin/activate`
 
 ## Quickstart
 
@@ -71,7 +72,8 @@ This runs formatting/linting, typing, and tests using the repo's pinned tooling.
 
 ## Contributing
 
-- Use a virtualenv and install extras:
-  - `python -m pip install -e '.[dev,test,docs]'`
+- Bootstrap the pinned dev toolchain:
+  - `bash scripts/bootstrap.sh`
+  - `source .venv/bin/activate`
 - Run the local quality gate before opening a PR:
   - `bash quality.sh all`
