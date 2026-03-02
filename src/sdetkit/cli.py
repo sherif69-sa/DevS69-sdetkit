@@ -183,6 +183,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         return _doctor_main(argv[1:])
 
+    if argv and argv[0] == "ci":
+        from .ci import main as _ci_main
+
+        return _ci_main(list(argv[1:]))
+
     if argv and argv[0] == "patch":
         return patch.main(list(argv[1:]))
 
@@ -483,6 +488,7 @@ Command groups:
     apiget
     cassette-get
     doctor
+    ci
     patch
     repo
     dev
@@ -543,6 +549,9 @@ Run: sdetkit playbooks
 
     doc = sub.add_parser("doctor")
     doc.add_argument("args", nargs=argparse.REMAINDER)
+
+    ci = sub.add_parser("ci")
+    ci.add_argument("args", nargs=argparse.REMAINDER)
 
     pg = sub.add_parser("patch")
     pg.add_argument("args", nargs=argparse.REMAINDER)

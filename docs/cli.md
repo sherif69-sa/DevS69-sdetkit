@@ -35,6 +35,17 @@ Examples:
 
 See: doctor.md
 
+## ci
+
+CI/CD template validation commands.
+
+Examples:
+
+- `sdetkit ci validate-templates --format json --strict`
+- `sdetkit ci validate-templates --root . --format text --strict`
+
+Validates the required GitLab/Jenkins/Tekton reference templates under `templates/ci/`.
+
 ## onboarding
 
 Renders Day 1 role-based paths plus Day 5 platform setup snippets.
