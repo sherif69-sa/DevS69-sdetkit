@@ -2,7 +2,9 @@
 
 This project follows semantic versioning and a reproducible release flow.
 
-Current target: **v1.0.0 (stable)**.
+Current version is taken from `[project].version` in `pyproject.toml`.
+
+Release tags must be `vX.Y.Z` and must match the package version. `CHANGELOG.md` must include a matching heading (for example: `## [X.Y.Z]` or `## vX.Y.Z`).
 
 ## Versioning Policy
 
@@ -11,12 +13,13 @@ Current target: **v1.0.0 (stable)**.
 
 ## Checklist
 
-1. Ensure release metadata is finalized for `v1.0.0` (or next target):
+1. Ensure release metadata is finalized for the version in `pyproject.toml`:
    - `pyproject.toml` version
    - matching heading in `CHANGELOG.md`
    - any embedded fallback `tool_version` values used in reports/templates
 2. Create a release tag `vX.Y.Z`.
 3. Run release validation locally:
+   - `python -m sdetkit doctor --release --format md`
    - `python -m build`
    - `python -m twine check dist/*`
    - `python -m pip install dist/*.whl`
