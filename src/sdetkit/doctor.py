@@ -4,6 +4,7 @@ import argparse
 import importlib.util
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -25,6 +26,7 @@ SUPPORTED_POLICY_CHECKS = {
     "deps",
     "pre_commit",
     "repo_readiness",
+    "release_meta",
 }
 
 
@@ -103,6 +105,15 @@ def _baseline_checks() -> dict[str, dict[str, Any]]:
                 "Run doctor with --repo to validate gate scripts, templates, and pre-commit hooks."
             ],
         ),
+        "release_meta": _make_check(
+            ok=True,
+            severity="high",
+            summary="release metadata check not requested",
+            skipped=True,
+            fix=[
+                "Run doctor with --release to validate version, changelog, and release workflow wiring."
+            ],
+        ),
     }
 
 
@@ -149,6 +160,109 @@ def _check_pyproject_toml(root: Path) -> tuple[bool, str]:
     except Exception as exc:
         return False, f"pyproject.toml parse failed: {exc}"
     return True, "pyproject.toml is valid TOML"
+
+
+def _project_version_from_pyproject(root: Path) -> tuple[str | None, str | None]:
+    path = root / "pyproject.toml"
+    if not path.exists():
+        return None, "pyproject.toml is missing"
+    try:
+        payload = _toml.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return None, f"pyproject.toml parse failed: {exc}"
+    if not isinstance(payload, dict):
+        return None, "pyproject.toml did not parse to a table"
+    project = payload.get("project")
+    if not isinstance(project, dict):
+        return None, "[project] table is missing"
+    version = project.get("version")
+    if not isinstance(version, str) or not version.strip():
+        return None, "[project].version is missing"
+    return version.strip(), None
+
+
+def _check_release_meta(
+    root: Path,
+) -> tuple[bool, str, list[dict[str, Any]], list[str], dict[str, Any]]:
+    evidence: list[dict[str, Any]] = []
+    fix: list[str] = []
+    meta: dict[str, Any] = {}
+
+    version, verr = _project_version_from_pyproject(root)
+    if verr:
+        evidence.append({"type": "pyproject_version", "message": verr, "path": "pyproject.toml"})
+        fix.append("Set [project].version in pyproject.toml.")
+    else:
+        meta["version"] = version
+
+    changelog = root / "CHANGELOG.md"
+    if not changelog.exists():
+        evidence.append(
+            {"type": "missing_file", "message": "CHANGELOG.md is missing", "path": "CHANGELOG.md"}
+        )
+        fix.append("Add CHANGELOG.md with a version heading for the current release.")
+    elif version:
+        text = changelog.read_text(encoding="utf-8", errors="replace")
+        pat = re.compile(rf"^##\s+\[?v?{re.escape(version)}\]?\s*$", re.M)
+        if not pat.search(text):
+            evidence.append(
+                {
+                    "type": "changelog",
+                    "message": f"missing changelog heading for {version}",
+                    "path": "CHANGELOG.md",
+                }
+            )
+            fix.append(
+                f"Add a CHANGELOG.md heading for {version} (e.g., ## [{version}] or ## v{version})."
+            )
+
+    wf_candidates = [
+        root / ".github" / "workflows" / "release.yml",
+        root / ".github" / "workflows" / "release.yaml",
+    ]
+    wf = next((x for x in wf_candidates if x.exists()), None)
+    if wf is None:
+        evidence.append(
+            {
+                "type": "missing_file",
+                "message": "release workflow is missing",
+                "path": ".github/workflows/release.yml",
+            }
+        )
+        fix.append("Add .github/workflows/release.yml that validates tag vs package version.")
+    else:
+        wf_text = wf.read_text(encoding="utf-8", errors="replace")
+        if "scripts/check_release_tag_version.py" not in wf_text:
+            evidence.append(
+                {
+                    "type": "workflow",
+                    "message": "release workflow does not run scripts/check_release_tag_version.py",
+                    "path": wf.relative_to(root).as_posix(),
+                }
+            )
+            fix.append(
+                "Update the release workflow to run scripts/check_release_tag_version.py on the resolved tag."
+            )
+
+    script = root / "scripts" / "check_release_tag_version.py"
+    if not script.exists():
+        evidence.append(
+            {
+                "type": "missing_file",
+                "message": "release tag/version check script missing",
+                "path": "scripts/check_release_tag_version.py",
+            }
+        )
+        fix.append("Add scripts/check_release_tag_version.py used by the release workflow.")
+
+    ok = not bool(evidence)
+    if ok and version:
+        summary = f"release metadata present for v{version}"
+    elif ok:
+        summary = "release metadata present"
+    else:
+        summary = "release metadata missing or inconsistent"
+    return ok, summary, evidence, fix, meta
 
 
 def _is_ignored_binary(p: Path) -> bool:
@@ -548,6 +662,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pr", action="store_true", help="print a PR-ready markdown summary")
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--release", action="store_true")
+    parser.add_argument("--release-full", dest="release_full", action="store_true")
     parser.add_argument("--policy")
     parser.add_argument("--fail-on", choices=["low", "medium", "high"])
     parser.add_argument("--strict", action="store_true")
@@ -560,22 +675,24 @@ def main(argv: list[str] | None = None) -> int:
         ns.json = True
     root = Path.cwd()
 
-    if ns.all or ns.release:
+    release_any = bool(ns.release or getattr(ns, "release_full", False))
+
+    if ns.all:
         ns.ascii = True
         ns.ci = True
         ns.deps = True
         ns.clean_tree = True
 
-    if ns.release:
+    if release_any:
         ns.pyproject = True
+        ns.clean_tree = True
 
+    if getattr(ns, "release_full", False):
         ns.ascii = True
         ns.ci = True
         ns.pre_commit = True
         ns.deps = True
-        ns.clean_tree = True
         ns.dev = True
-        ns.pyproject = True
         ns.repo_readiness = True
 
     if ns.dev and (ns.ci or ns.deps or ns.clean_tree):
@@ -626,7 +743,7 @@ def main(argv: list[str] | None = None) -> int:
             summary="virtual environment is active"
             if venv_ok
             else "virtual environment is not active (recommended for stable tooling/deps)",
-            severity="low",
+            severity="high" if release_any else "low",
             evidence=[] if venv_ok else [{"type": "environment", "message": "VIRTUAL_ENV not set"}],
             fix=[] if venv_ok else ["python -m venv .venv && source .venv/bin/activate"],
         )
@@ -662,6 +779,19 @@ def main(argv: list[str] | None = None) -> int:
             fix=[] if pyproject_ok else ["Fix pyproject.toml syntax."],
         )
         score_items.append(pyproject_ok)
+    if release_any:
+        rel_ok, rel_summary, rel_ev, rel_fix, rel_meta = _check_release_meta(root)
+        data["release_meta_ok"] = rel_ok
+        data["checks"]["release_meta"] = _make_check(
+            ok=rel_ok,
+            severity="high",
+            summary=rel_summary,
+            evidence=rel_ev,
+            fix=rel_fix,
+            skipped=False,
+            meta=rel_meta,
+        )
+        score_items.append(rel_ok)
 
     if ns.ascii:
         bad, bad_err = _scan_non_ascii(root)
@@ -772,7 +902,7 @@ def main(argv: list[str] | None = None) -> int:
         data["clean_tree_ok"] = ct_ok
         data["checks"]["clean_tree"] = _make_check(
             ok=ct_ok,
-            severity="low",
+            severity="high" if release_any else "low",
             summary="working tree is clean" if ct_ok else "working tree has uncommitted changes",
             evidence=[]
             if ct_ok
