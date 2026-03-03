@@ -934,6 +934,50 @@ def _load_baseline(path: Path) -> list[dict[str, Any]]:
     return entries
 
 
+def _load_scan_json(path: Path) -> tuple[list[Finding], dict[str, Any] | None]:
+    if not path.exists():
+        raise SecurityScanError(f"scan json not found: {path.as_posix()}")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SecurityScanError(f"invalid scan json: {exc}") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("findings"), list):
+        raise SecurityScanError("scan json must be object with findings[]")
+
+    findings: list[Finding] = []
+    for item in payload["findings"]:
+        if not isinstance(item, dict):
+            continue
+        rid = str(item.get("rule_id", ""))
+        sev = str(item.get("severity", ""))
+        if rid not in RULES or sev not in SEVERITY_RANK:
+            continue
+        try:
+            line = int(item.get("line", 0) or 0)
+        except Exception:
+            line = 0
+        try:
+            column = int(item.get("column", 0) or 0)
+        except Exception:
+            column = 0
+        findings.append(
+            Finding(
+                rule_id=rid,
+                severity=sev,
+                path=str(item.get("path", "")),
+                line=line,
+                column=column,
+                message=str(item.get("message", "")),
+                suggestion=str(item.get("suggestion", "")),
+                fingerprint=str(item.get("fingerprint", "")),
+            )
+        )
+
+    findings.sort(key=lambda x: (x.path, x.line, x.column, x.rule_id, x.message))
+    sbom = payload.get("sbom") if isinstance(payload.get("sbom"), dict) else None
+    return findings, sbom
+
+
 def _make_baseline_entries(findings: list[Finding]) -> list[dict[str, Any]]:
     entries = [
         {
@@ -1036,7 +1080,7 @@ def main(argv: list[str] | None = None) -> int:
     common.add_argument("--root", default=".")
     common.add_argument("--allowlist", default=str(DEFAULT_ALLOWLIST_PATH))
     common.add_argument("--format", choices=["text", "json", "sarif"], default="text")
-    common.add_argument("--output", default=None)
+    common.add_argument("--output", "--out", default=None)
     common.add_argument(
         "--fail-on",
         choices=["none", "low", "medium", "high", "critical", "warn", "error"],
@@ -1046,10 +1090,12 @@ def main(argv: list[str] | None = None) -> int:
     common.add_argument("--sbom-output", default=None, help="Write CycloneDX SBOM JSON to file")
 
     sub.add_parser("scan", parents=[common])
-    sub.add_parser("report", parents=[common])
+    rpt = sub.add_parser("report", parents=[common])
+    rpt.add_argument("--scan-json", default=None)
 
     chk = sub.add_parser("check", parents=[common])
     chk.add_argument("--baseline", default=str(DEFAULT_BASELINE_PATH))
+    chk.add_argument("--scan-json", default=None)
 
     chk.add_argument(
         "--include-info",
@@ -1146,12 +1192,22 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         sbom_output = Path(ns.sbom_output) if getattr(ns, "sbom_output", None) else None
-        findings, sbom = run_security_scan(
-            root,
-            allowlist_path=allowlist,
-            online=bool(getattr(ns, "online", False)),
-            sbom_output=sbom_output,
-        )
+        scan_json = getattr(ns, "scan_json", None)
+        if scan_json:
+            findings, sbom = _load_scan_json(Path(scan_json))
+            if sbom_output is not None and isinstance(sbom, dict):
+                sbom_output.parent.mkdir(parents=True, exist_ok=True)
+                sbom_output.write_text(
+                    json.dumps(sbom, ensure_ascii=True, sort_keys=True, indent=2) + "\n",
+                    encoding="utf-8",
+                )
+        else:
+            findings, sbom = run_security_scan(
+                root,
+                allowlist_path=allowlist,
+                online=bool(getattr(ns, "online", False)),
+                sbom_output=sbom_output,
+            )
 
         if ns.cmd == "check":
             baseline_path = Path(ns.baseline)
