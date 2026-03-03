@@ -651,3 +651,5 @@ Examples:
 - `sdetkit gate fast --no-pytest --format json`
 - `sdetkit gate fast --fix`
 - `sdetkit gate fast --fix-only --format json`
+- `sdetkit gate baseline write`
+- `sdetkit gate baseline check`

@@ -10,6 +10,48 @@ from pathlib import Path
 from typing import Any
 
 
+def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
+    out: dict[str, object] = dict(payload)
+    root = out.get("root")
+    root_str = root if isinstance(root, str) else ""
+    out["root"] = "<repo>"
+    steps = out.get("steps")
+    if isinstance(steps, list):
+        new_steps: list[object] = []
+        for s in steps:
+            if isinstance(s, dict):
+                sd: dict[str, object] = dict(s)
+                sd.pop("duration_ms", None)
+                cmd = sd.get("cmd")
+                if isinstance(cmd, list):
+                    new_cmd: list[object] = []
+                    for tok in cmd:
+                        if isinstance(tok, str):
+                            if root_str and (tok == root_str or tok.startswith(root_str + "/")):
+                                tok = tok.replace(root_str, "<repo>", 1)
+                            if tok.startswith("/") and tok.rsplit("/", 1)[-1].startswith("python"):
+                                tok = "python"
+                        new_cmd.append(tok)
+                    sd["cmd"] = new_cmd
+                new_steps.append(sd)
+            else:
+                new_steps.append(s)
+        out["steps"] = new_steps
+    return out
+
+
+def _stable_json(data: dict[str, object]) -> str:
+    return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
+
+
+def _baseline_snapshot_path(root: Path) -> Path:
+    return root / ".sdetkit" / "gate.fast.snapshot.json"
+
+
+def _read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
 def _run(cmd: list[str], cwd: Path) -> dict[str, Any]:
     started = time.time()
     proc = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True, check=False)
@@ -205,6 +247,60 @@ def _run_fast(ns: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    raw = list(argv) if argv is not None else None
+    args0 = raw if raw is not None else list(sys.argv[1:])
+    if args0 and args0[0] == "baseline":
+        bp = argparse.ArgumentParser(prog="gate baseline")
+        bp.add_argument("action", choices=["write", "check"])
+        bp.add_argument("--path", default=None)
+        ns, extra = bp.parse_known_args(args0[1:])
+        if extra and extra[0] == "--":
+            extra = extra[1:]
+
+        root = Path.cwd()
+        snap = (
+            Path(ns.path) if isinstance(ns.path, str) and ns.path else _baseline_snapshot_path(root)
+        )
+        if not snap.is_absolute():
+            snap = root / snap
+        snap.parent.mkdir(parents=True, exist_ok=True)
+
+        import io
+        from contextlib import redirect_stdout
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc_fast = main(["fast", "--format", "json"] + list(extra))
+        cur_text = buf.getvalue()
+        if rc_fast != 0:
+            return rc_fast
+
+        try:
+            cur_obj = json.loads(cur_text)
+        except Exception:
+            cur_obj = None
+
+        if isinstance(cur_obj, dict):
+            norm = _normalize_gate_payload(cur_obj)
+            cur_text = _stable_json(norm)
+
+        if ns.action == "write":
+            snap.write_text(cur_text, encoding="utf-8")
+            return 0
+
+        snap_text = _read_text(snap) if snap.exists() else ""
+        diff_ok = snap_text == cur_text
+        try:
+            out_obj = json.loads(cur_text)
+            if isinstance(out_obj, dict):
+                out_obj["snapshot_diff_ok"] = diff_ok
+                out_obj["snapshot_diff_summary"] = [] if diff_ok else ["snapshot drift detected"]
+                cur_text = _stable_json(out_obj)
+        except Exception:
+            pass
+        sys.stdout.write(cur_text)
+        return 0 if diff_ok else 2
+
     parser = argparse.ArgumentParser(prog="gate")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
