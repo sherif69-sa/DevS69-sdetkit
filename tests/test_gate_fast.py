@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from sdetkit import gate
+
 
 def _run_sdetkit(repo_root: Path, cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
@@ -177,3 +179,57 @@ def test_gate_fast_rejects_unknown_step() -> None:
     proc = _run_sdetkit(repo_root, repo_root, "gate", "fast", "--only", "wat")
     assert proc.returncode == 2
     assert "unknown step id" in proc.stderr
+
+
+def test_gate_fast_default_pytest_scope_is_smoke_subset(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(
+        ["fast", "--format", "json", "--no-doctor", "--no-ci-templates", "--no-ruff", "--no-mypy"]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert [s["id"] for s in payload["steps"]] == ["pytest"]
+    assert calls[0][3:] == [
+        "-q",
+        "tests/test_gate_fast.py",
+        "tests/test_gate_baseline.py",
+        "tests/test_doctor_surgical.py",
+        "tests/test_baseline_umbrella.py",
+    ]
+
+
+def test_gate_fast_full_pytest_uses_entire_suite(monkeypatch, tmp_path: Path, capsys) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(
+        [
+            "fast",
+            "--format",
+            "json",
+            "--no-doctor",
+            "--no-ci-templates",
+            "--no-ruff",
+            "--no-mypy",
+            "--full-pytest",
+        ]
+    )
+    assert rc == 0
+    _ = json.loads(capsys.readouterr().out)
+    assert calls[0][3:] == ["-q"]

@@ -657,7 +657,10 @@ Examples:
 - `sdetkit gate fast --list-steps`
 - `sdetkit gate fast --only ci_templates --format json`
 - `sdetkit gate fast --skip pytest --format json`
+- `sdetkit gate fast --full-pytest`
 - `sdetkit gate baseline write`
 - `sdetkit gate baseline check`
 
-Useful flags: `--root`, `--format`, `--out`/`--output`, `--strict`, `--fix`, `--fix-only`, `--list-steps`, `--only`, `--skip`, `--no-doctor`, `--no-ci-templates`, `--no-ruff`, `--no-mypy`, `--no-pytest`, `--mypy-args`, `--pytest-args`.
+Useful flags: `--root`, `--format`, `--out`/`--output`, `--strict`, `--fix`, `--fix-only`, `--list-steps`, `--only`, `--skip`, `--no-doctor`, `--no-ci-templates`, `--no-ruff`, `--no-mypy`, `--no-pytest`, `--mypy-args`, `--pytest-args`, `--full-pytest`.
+
+Note: `gate fast` uses a default smoke pytest subset for speed. Use `--full-pytest` or explicit `--pytest-args` to run the full test suite.

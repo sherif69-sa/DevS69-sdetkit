@@ -20,6 +20,14 @@ AVAILABLE_STEPS = [
     "pytest",
 ]
 
+FAST_DEFAULT_PYTEST_ARGS = [
+    "-q",
+    "tests/test_gate_fast.py",
+    "tests/test_gate_baseline.py",
+    "tests/test_doctor_surgical.py",
+    "tests/test_baseline_umbrella.py",
+]
+
 
 def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
     out: dict[str, object] = dict(payload)
@@ -248,7 +256,9 @@ def _run_fast(ns: argparse.Namespace) -> int:
         )
 
     if not ns.no_pytest and should_run("pytest"):
-        pytest_args = ["-q"]
+        pytest_args = list(FAST_DEFAULT_PYTEST_ARGS)
+        if ns.full_pytest:
+            pytest_args = ["-q"]
         if ns.pytest_args:
             pytest_args = shlex.split(ns.pytest_args)
         steps.append(
@@ -362,6 +372,7 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--no-pytest", action="store_true")
 
     fast.add_argument("--pytest-args", default=None)
+    fast.add_argument("--full-pytest", action="store_true")
     fast.add_argument("--mypy-args", default=None)
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
