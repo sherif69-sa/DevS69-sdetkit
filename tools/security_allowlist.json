@@ -355,6 +355,22 @@
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "path": "src/sdetkit/day89_governance_scale_closeout.py"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json"
+    },
+    {
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "path": "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
     }
   ],
   "version": 1

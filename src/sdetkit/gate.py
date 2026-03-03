@@ -326,14 +326,17 @@ def main(argv: list[str] | None = None) -> int:
 
         snap_text = _read_text(snap) if snap.exists() else ""
         diff_ok = snap_text == cur_text
+        out_obj: dict[str, object] | None = None
         try:
-            out_obj = json.loads(cur_text)
-            if isinstance(out_obj, dict):
-                out_obj["snapshot_diff_ok"] = diff_ok
-                out_obj["snapshot_diff_summary"] = [] if diff_ok else ["snapshot drift detected"]
-                cur_text = _stable_json(out_obj)
-        except Exception:
-            pass
+            parsed = json.loads(cur_text)
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, dict):
+            out_obj = parsed
+        if out_obj is not None:
+            out_obj["snapshot_diff_ok"] = diff_ok
+            out_obj["snapshot_diff_summary"] = [] if diff_ok else ["snapshot drift detected"]
+            cur_text = _stable_json(out_obj)
         sys.stdout.write(cur_text)
         return 0 if diff_ok else 2
 
