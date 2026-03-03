@@ -452,6 +452,22 @@ def _parse_check_csv(value: str | None) -> list[str]:
     return out
 
 
+def _stable_json(data: dict[str, Any]) -> str:
+    return (
+        json.dumps(
+            data,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+        + "\n"
+    )
+
+
+def _read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
 def _calculate_score(checks: list[bool]) -> int:
     if not checks:
         return 100
@@ -791,6 +807,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--treat-only", dest="treat_only", action="store_true")
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--apply-plan", dest="apply_plan", default=None)
+    parser.add_argument("--snapshot", default=None)
+    parser.add_argument("--diff-snapshot", dest="diff_snapshot", default=None)
     parser.add_argument("--list-checks", action="store_true")
     parser.add_argument("--only", default=None)
     parser.add_argument("--skip", default=None)
@@ -1261,6 +1279,30 @@ def main(argv: list[str] | None = None) -> int:
         output = "\n".join(lines) + "\n"
         is_json = False
 
+    snap_base = data
+    stable_text = _stable_json(snap_base)
+
+    if isinstance(getattr(ns, "snapshot", None), str) and ns.snapshot:
+        Path(ns.snapshot).write_text(stable_text, encoding="utf-8")
+
+    if isinstance(getattr(ns, "diff_snapshot", None), str) and ns.diff_snapshot:
+        snap_path = Path(ns.diff_snapshot)
+        snap_text = _read_text(snap_path) if snap_path.exists() else ""
+        diff_ok = snap_text == stable_text
+        diff_summary: list[str] = []
+        if not diff_ok:
+            diff_summary.append("snapshot drift detected")
+            if not snap_path.exists():
+                diff_summary.append("snapshot file missing")
+            gate_ok = False
+            data["ok"] = False
+
+        data["snapshot_diff_ok"] = diff_ok
+        data["snapshot_diff_summary"] = diff_summary
+
+        if ns.json:
+            output = _stable_json(data)
+
     if ns.out:
         Path(ns.out).write_text(output, encoding="utf-8")
 
@@ -1268,6 +1310,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if not gate_ok and not is_json:
         sys.stderr.write("doctor: problems found\n")
+
     return 0 if gate_ok else 2
 
 
