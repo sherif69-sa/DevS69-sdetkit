@@ -1,4 +1,4 @@
-name: Day64 Advanced GitHub Actions Reference
+name: GitHub Actions Advanced Reference
 
 on:
   workflow_dispatch:
