@@ -50,3 +50,30 @@ def test_doctor_baseline_check_fails_when_missing(tmp_path: Path, monkeypatch, c
     data = json.loads(capsys.readouterr().out)
     assert rc == 2
     assert data["snapshot_diff_ok"] is False
+    assert "snapshot_diff" not in data
+
+
+def test_doctor_baseline_check_includes_diff_when_requested(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname="x"\nversion="1.2.3"\n', encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    rc1 = doctor.main(["baseline", "write", "--", "--only", "pyproject"])
+    assert rc1 == 0
+    capsys.readouterr()
+
+    snap = tmp_path / ".sdetkit" / "doctor.snapshot.json"
+    snap.write_text("{}\n", encoding="utf-8")
+
+    rc2 = doctor.main(
+        ["baseline", "check", "--diff", "--diff-context", "1", "--", "--only", "pyproject"]
+    )
+    data = json.loads(capsys.readouterr().out)
+    assert rc2 == 2
+    assert data["snapshot_diff_ok"] is False
+    assert "snapshot drift detected" in data["snapshot_diff_summary"]
+    assert isinstance(data.get("snapshot_diff"), str)
+    assert data["snapshot_diff"].startswith("--- snapshot\n+++ current\n")

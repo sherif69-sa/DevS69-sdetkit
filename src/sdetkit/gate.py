@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import shlex
 import subprocess
@@ -301,6 +302,8 @@ def main(argv: list[str] | None = None) -> int:
         bp = argparse.ArgumentParser(prog="gate baseline")
         bp.add_argument("action", choices=["write", "check"])
         bp.add_argument("--path", default=None)
+        bp.add_argument("--diff", action="store_true")
+        bp.add_argument("--diff-context", type=int, default=3)
         ns, extra = bp.parse_known_args(args0[1:])
         if extra and extra[0] == "--":
             extra = extra[1:]
@@ -338,6 +341,33 @@ def main(argv: list[str] | None = None) -> int:
 
         snap_text = _read_text(snap) if snap.exists() else ""
         diff_ok = snap_text == cur_text
+
+        diff_payload = ""
+        if getattr(ns, "diff", False) and not diff_ok:
+            n = int(getattr(ns, "diff_context", 3) or 0)
+            n = n if n >= 0 else 0
+            a = snap_text
+            b = cur_text
+            try:
+                ao = json.loads(a)
+                a = json.dumps(ao, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
+            except Exception:
+                pass
+            try:
+                bo = json.loads(b)
+                b = json.dumps(bo, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
+            except Exception:
+                pass
+            diff_lines = difflib.unified_diff(
+                a.splitlines(keepends=True),
+                b.splitlines(keepends=True),
+                fromfile="snapshot",
+                tofile="current",
+                n=n,
+            )
+            diff_payload = "".join(diff_lines)
+            if diff_payload and not diff_payload.endswith("\n"):
+                diff_payload += "\n"
         out_obj: dict[str, object] | None = None
         try:
             parsed = json.loads(cur_text)
@@ -347,7 +377,15 @@ def main(argv: list[str] | None = None) -> int:
             out_obj = parsed
         if out_obj is not None:
             out_obj["snapshot_diff_ok"] = diff_ok
-            out_obj["snapshot_diff_summary"] = [] if diff_ok else ["snapshot drift detected"]
+            if diff_ok:
+                out_obj["snapshot_diff_summary"] = []
+            else:
+                summary = ["snapshot drift detected"]
+                if not snap.exists():
+                    summary.append("snapshot file missing")
+                out_obj["snapshot_diff_summary"] = summary
+            if diff_payload:
+                out_obj["snapshot_diff"] = diff_payload
             cur_text = _stable_json(out_obj)
         sys.stdout.write(cur_text)
         return 0 if diff_ok else 2

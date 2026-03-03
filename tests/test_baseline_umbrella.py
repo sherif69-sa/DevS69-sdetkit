@@ -25,3 +25,26 @@ def test_baseline_write_and_check(tmp_path: Path, monkeypatch, capsys) -> None:
     data2 = json.loads(capsys.readouterr().out)
     assert rc2 == 0
     assert data2["ok"] is True
+
+
+def test_baseline_check_forwards_diff_flags(tmp_path: Path, monkeypatch, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    import sdetkit.doctor
+    import sdetkit.gate
+
+    calls: list[list[str]] = []
+
+    def rec(argv=None) -> int:
+        calls.append(list(argv) if argv is not None else [])
+        return 0
+
+    monkeypatch.setattr(sdetkit.doctor, "main", rec)
+    monkeypatch.setattr(sdetkit.gate, "main", rec)
+
+    rc = cli.main(["baseline", "check", "--format", "json", "--diff", "--diff-context", "7"])
+    data = json.loads(capsys.readouterr().out)
+    assert rc == 0
+    assert data["ok"] is True
+    assert calls[0][:5] == ["baseline", "check", "--diff", "--diff-context", "7"]
+    assert calls[1][:5] == ["baseline", "check", "--diff", "--diff-context", "7"]

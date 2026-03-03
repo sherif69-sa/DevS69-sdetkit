@@ -852,6 +852,8 @@ Run: sdetkit playbooks
         bp = argparse.ArgumentParser(prog="sdetkit baseline")
         bp.add_argument("action", choices=["write", "check"])
         bp.add_argument("--format", choices=["text", "json"], default="text")
+        bp.add_argument("--diff", action="store_true")
+        bp.add_argument("--diff-context", type=int, default=3)
         bns, extra = bp.parse_known_args(list(getattr(ns, "args", [])))
         if extra and extra[0] == "--":
             extra = extra[1:]
@@ -860,6 +862,11 @@ Run: sdetkit playbooks
 
         steps: list[dict[str, object]] = []
         failed: list[str] = []
+
+        diff_args: list[str] = []
+        if getattr(bns, "diff", False):
+            diff_args.append("--diff")
+            diff_args.extend(["--diff-context", str(getattr(bns, "diff_context", 3))])
         for sid, fn in [
             ("doctor_baseline", doctor.main),
             ("gate_baseline", gate.main),
@@ -867,7 +874,7 @@ Run: sdetkit playbooks
             buf_out = io.StringIO()
             buf_err = io.StringIO()
             with redirect_stdout(buf_out), redirect_stderr(buf_err):
-                rc = fn(["baseline", bns.action] + (["--"] + extra if extra else []))
+                rc = fn(["baseline", bns.action] + diff_args + (["--"] + extra if extra else []))
             step = {
                 "id": sid,
                 "rc": rc,

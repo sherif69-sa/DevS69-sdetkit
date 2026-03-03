@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import hashlib
 import importlib.util
 import json
@@ -460,6 +461,8 @@ def _baseline_cmd(argv: list[str]) -> int:
     bp = argparse.ArgumentParser(prog="doctor baseline")
     bp.add_argument("action", choices=["write", "check"])
     bp.add_argument("--path", default=None)
+    bp.add_argument("--diff", action="store_true")
+    bp.add_argument("--diff-context", type=int, default=3)
     ns, extra = bp.parse_known_args(argv)
     if extra and extra[0] == "--":
         extra = extra[1:]
@@ -485,7 +488,13 @@ def _baseline_cmd(argv: list[str]) -> int:
         base.extend(["--skip", "clean_tree"])
     if ns.action == "write":
         return main(base + ["--snapshot", str(snap)] + list(extra))
-    return main(base + ["--diff-snapshot", str(snap)] + list(extra))
+
+    diff_args: list[str] = []
+    if getattr(ns, "diff", False):
+        diff_args.append("--diff")
+        diff_args.extend(["--diff-context", str(getattr(ns, "diff_context", 3))])
+
+    return main(base + ["--diff-snapshot", str(snap)] + diff_args + list(extra))
 
 
 def _stable_json(data: dict[str, Any]) -> str:
@@ -868,6 +877,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--apply-plan", dest="apply_plan", default=None)
     parser.add_argument("--snapshot", default=None)
     parser.add_argument("--diff-snapshot", dest="diff_snapshot", default=None)
+    parser.add_argument("--diff", action="store_true")
+    parser.add_argument("--diff-context", type=int, default=3)
     parser.add_argument("--list-checks", action="store_true")
     parser.add_argument("--only", default=None)
     parser.add_argument("--skip", default=None)
@@ -1359,7 +1370,34 @@ def main(argv: list[str] | None = None) -> int:
         data["snapshot_diff_ok"] = diff_ok
         data["snapshot_diff_summary"] = diff_summary
 
-        if ns.json:
+        if getattr(ns, "diff", False) and not diff_ok:
+            n = int(getattr(ns, "diff_context", 3) or 0)
+            n = n if n >= 0 else 0
+            a = snap_text
+            b = stable_text
+            try:
+                ao = json.loads(a)
+                a = json.dumps(ao, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
+            except Exception:
+                pass
+            try:
+                bo = json.loads(b)
+                b = json.dumps(bo, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
+            except Exception:
+                pass
+            diff_lines = difflib.unified_diff(
+                a.splitlines(keepends=True),
+                b.splitlines(keepends=True),
+                fromfile="snapshot",
+                tofile="current",
+                n=n,
+            )
+            diff_text = "".join(diff_lines)
+            if diff_text and not diff_text.endswith("\n"):
+                diff_text += "\n"
+            data["snapshot_diff"] = diff_text
+
+        if is_json:
             output = _stable_json(data)
 
     if ns.out:

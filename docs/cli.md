@@ -664,3 +664,20 @@ Examples:
 Useful flags: `--root`, `--format`, `--out`/`--output`, `--strict`, `--fix`, `--fix-only`, `--list-steps`, `--only`, `--skip`, `--no-doctor`, `--no-ci-templates`, `--no-ruff`, `--no-mypy`, `--no-pytest`, `--mypy-args`, `--pytest-args`, `--full-pytest`.
 
 Note: `gate fast` uses a default smoke pytest subset for speed. Use `--full-pytest` or explicit `--pytest-args` to run the full test suite.
+
+### Baselines: show drift diff
+
+When a baseline check fails, you can request a deterministic unified diff between the stored snapshot and the current normalized output.
+
+- Show drift diff (JSON output):
+
+  python -m sdetkit baseline check --format json --diff
+
+- Limit diff context lines:
+
+  python -m sdetkit baseline check --format json --diff --diff-context 1
+
+- Per-step baselines:
+
+  python -m sdetkit doctor baseline check --diff
+  python -m sdetkit gate baseline check --diff
