@@ -1,4 +1,7 @@
 # CLI
+- `sdetkit baseline write`
+- `sdetkit baseline check`
+- `sdetkit baseline check --format json`
 
 ## kv
 

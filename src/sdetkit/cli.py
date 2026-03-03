@@ -546,6 +546,8 @@ Run: sdetkit playbooks
     )
     p.add_argument("--version", action="version", version=_tool_version())
     sub = p.add_subparsers(dest="cmd", required=True, metavar="command")
+    bsl = sub.add_parser("baseline")
+    bsl.add_argument("args", nargs=argparse.REMAINDER)
     sub.add_parser("playbooks", help="List playbooks and legacy flows")
     kv = sub.add_parser("kv")
     kv.add_argument("args", nargs=argparse.REMAINDER)
@@ -841,6 +843,60 @@ Run: sdetkit playbooks
     _hide_help_subcommands(sub)
 
     ns = p.parse_args(argv)
+
+    if ns.cmd == "baseline":
+        import io
+        import json
+        from contextlib import redirect_stderr, redirect_stdout
+
+        bp = argparse.ArgumentParser(prog="sdetkit baseline")
+        bp.add_argument("action", choices=["write", "check"])
+        bp.add_argument("--format", choices=["text", "json"], default="text")
+        bns, extra = bp.parse_known_args(list(getattr(ns, "args", [])))
+        if extra and extra[0] == "--":
+            extra = extra[1:]
+
+        from sdetkit import doctor, gate
+
+        steps: list[dict[str, object]] = []
+        failed: list[str] = []
+        for sid, fn in [
+            ("doctor_baseline", doctor.main),
+            ("gate_baseline", gate.main),
+        ]:
+            buf_out = io.StringIO()
+            buf_err = io.StringIO()
+            with redirect_stdout(buf_out), redirect_stderr(buf_err):
+                rc = fn(["baseline", bns.action] + (["--"] + extra if extra else []))
+            step = {
+                "id": sid,
+                "rc": rc,
+                "ok": rc == 0,
+                "stdout": buf_out.getvalue(),
+                "stderr": buf_err.getvalue(),
+            }
+            steps.append(step)
+            if rc != 0:
+                failed.append(sid)
+
+        ok = not failed
+        payload: dict[str, object] = {"ok": ok, "steps": steps, "failed_steps": failed}
+        if bns.format == "json":
+            sys.stdout.write(
+                json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
+            )
+        else:
+            lines: list[str] = []
+            lines.append(f"baseline: {'OK' if ok else 'FAIL'}")
+            for s in steps:
+                marker = "OK" if s.get("ok") else "FAIL"
+                lines.append(f"[{marker}] {s.get('id')} rc={s.get('rc')}")
+            if failed:
+                lines.append("failed_steps:")
+                for f in failed:
+                    lines.append(f"- {f}")
+            sys.stdout.write("\n".join(lines) + "\n")
+        return 0 if ok else 2
 
     if ns.cmd == "playbooks":
         _print_playbooks(sub)
