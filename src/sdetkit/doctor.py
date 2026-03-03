@@ -452,6 +452,40 @@ def _parse_check_csv(value: str | None) -> list[str]:
     return out
 
 
+def _baseline_snapshot_path(root: Path) -> Path:
+    return root / ".sdetkit" / "doctor.snapshot.json"
+
+
+def _baseline_cmd(argv: list[str]) -> int:
+    bp = argparse.ArgumentParser(prog="doctor baseline")
+    bp.add_argument("action", choices=["write", "check"])
+    bp.add_argument("--path", default=None)
+    ns, extra = bp.parse_known_args(argv)
+    if extra and extra[0] == "--":
+        extra = extra[1:]
+
+    root = Path.cwd()
+    snap = Path(ns.path) if isinstance(ns.path, str) and ns.path else _baseline_snapshot_path(root)
+    if not snap.is_absolute():
+        snap = root / snap
+    snap.parent.mkdir(parents=True, exist_ok=True)
+
+    base = [
+        "--dev",
+        "--ci",
+        "--deps",
+        "--clean-tree",
+        "--repo",
+        "--fail-on",
+        "high",
+        "--format",
+        "json",
+    ]
+    if ns.action == "write":
+        return main(base + ["--snapshot", str(snap)] + list(extra))
+    return main(base + ["--diff-snapshot", str(snap)] + list(extra))
+
+
 def _stable_json(data: dict[str, Any]) -> str:
     return (
         json.dumps(
@@ -783,6 +817,29 @@ def _evaluate_gate(checks: dict[str, dict[str, Any]], threshold: str) -> tuple[b
 
 
 def main(argv: list[str] | None = None) -> int:
+    raw = list(argv) if argv is not None else None
+    args0 = raw if raw is not None else list(sys.argv[1:])
+    value_opts = {
+        "--format",
+        "--fail-on",
+        "--policy",
+        "--out",
+        "--only",
+        "--skip",
+        "--apply-plan",
+        "--snapshot",
+        "--diff-snapshot",
+    }
+    i = 0
+    while i < len(args0):
+        a = args0[i]
+        if a in value_opts:
+            i += 2
+            continue
+        if a == "baseline":
+            return _baseline_cmd(args0[i + 1 :])
+        i += 1
+
     parser = argparse.ArgumentParser(prog="doctor")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--format", choices=["text", "json", "md", "markdown"], default="text")

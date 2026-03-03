@@ -41,6 +41,9 @@ See: doctor.md
 - `sdetkit doctor --treat-only --format json`
 - `sdetkit doctor --plan --format json`
 - `sdetkit doctor --apply-plan <plan_id> --format json`
+- `sdetkit doctor baseline write`
+- `sdetkit doctor baseline check`
+- `sdetkit doctor baseline check -- --only pyproject`
 
 ## ci
 
