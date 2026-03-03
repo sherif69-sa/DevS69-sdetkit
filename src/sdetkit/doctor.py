@@ -17,6 +17,22 @@ from .import_hazards import find_stdlib_shadowing
 from .security import SecurityError, safe_path
 
 SEVERITY_ORDER = {"low": 1, "medium": 2, "high": 3}
+
+CHECK_ORDER = [
+    "pyproject",
+    "stdlib_shadowing",
+    "venv",
+    "dev_tools",
+    "clean_tree",
+    "deps",
+    "pre_commit",
+    "ci_workflows",
+    "security_files",
+    "repo_readiness",
+    "release_meta",
+    "ascii",
+]
+
 SUPPORTED_POLICY_CHECKS = {
     "ascii",
     "stdlib_shadowing",
@@ -424,6 +440,17 @@ def _check_tools() -> tuple[list[str], list[str]]:
     return sorted(present), missing
 
 
+def _parse_check_csv(value: str | None) -> list[str]:
+    if value is None:
+        return []
+    out: list[str] = []
+    for part in value.split(","):
+        s = part.strip()
+        if s:
+            out.append(s)
+    return out
+
+
 def _calculate_score(checks: list[bool]) -> int:
     if not checks:
         return 100
@@ -667,6 +694,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--fail-on", choices=["low", "medium", "high"])
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--out", default=None)
+    parser.add_argument("--list-checks", action="store_true")
+    parser.add_argument("--only", default=None)
+    parser.add_argument("--skip", default=None)
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
     if ns.format == "markdown":
@@ -674,8 +704,62 @@ def main(argv: list[str] | None = None) -> int:
     if ns.format == "json":
         ns.json = True
     root = Path.cwd()
+    if ns.list_checks:
+        sys.stdout.write("\n".join(CHECK_ORDER) + "\n")
+        return 0
+
+    only_raw = _parse_check_csv(ns.only)
+    skip_raw = _parse_check_csv(ns.skip)
+    if only_raw and skip_raw:
+        parser.error("use only one of --only or --skip")
+    unknown = sorted({x for x in (only_raw + skip_raw) if x not in CHECK_ORDER})
+    if unknown:
+        parser.error("unknown check id(s): " + ", ".join(unknown))
+    only_set = set(only_raw)
+    skip_set = set(skip_raw)
+
+    if only_set:
+        ns.ascii = False
+        ns.ci = False
+        ns.pre_commit = False
+        ns.deps = False
+        ns.clean_tree = False
+        ns.repo_readiness = False
+        ns.dev = False
+        ns.pyproject = False
+        ns.all = False
+        ns.release = False
+        ns.release_full = False
+
+        if "pyproject" in only_set:
+            ns.pyproject = True
+        if "ascii" in only_set:
+            ns.ascii = True
+        if "ci_workflows" in only_set or "security_files" in only_set:
+            ns.ci = True
+        if "deps" in only_set:
+            ns.deps = True
+        if "clean_tree" in only_set:
+            ns.clean_tree = True
+        if "repo_readiness" in only_set:
+            ns.repo_readiness = True
+        if "pre_commit" in only_set:
+            ns.pre_commit = True
+        if "venv" in only_set or "dev_tools" in only_set:
+            ns.dev = True
+        if "release_meta" in only_set:
+            ns.release = True
+
+    def _is_selected(check_id: str) -> bool:
+        if only_set:
+            return check_id in only_set
+        if skip_set:
+            return check_id not in skip_set
+        return True
 
     release_any = bool(ns.release or getattr(ns, "release_full", False))
+
+    release_any = False
 
     if ns.all:
         ns.ascii = True
@@ -683,7 +767,7 @@ def main(argv: list[str] | None = None) -> int:
         ns.deps = True
         ns.clean_tree = True
 
-    if release_any:
+    if release_any and _is_selected("release_meta"):
         ns.pyproject = True
         ns.clean_tree = True
 
@@ -705,32 +789,44 @@ def main(argv: list[str] | None = None) -> int:
     }
     score_items: list[bool] = []
 
-    shadow = find_stdlib_shadowing(Path("."))
-    if shadow:
-        data["checks"]["stdlib_shadowing"] = _make_check(
-            ok=False,
-            severity="high",
-            summary="stdlib shadowing detected",
-            evidence=[
-                {
-                    "type": "shadowing",
-                    "message": f"stdlib module shadowed: {name}",
-                    "path": f"src/{name}.py",
-                }
-                for name in shadow
-            ],
-            fix=["Rename modules under src/ that match Python stdlib module names."],
-            meta={"shadow": shadow},
-        )
-        data["checks"]["stdlib_shadowing"]["shadow"] = shadow
-        sys.stderr.write("[WARN] stdlib-shadow: " + ", ".join(shadow) + "\n")
+    if _is_selected("stdlib_shadowing"):
+        shadow = find_stdlib_shadowing(Path("."))
+        if shadow:
+            data["checks"]["stdlib_shadowing"] = _make_check(
+                ok=False,
+                severity="high",
+                summary="stdlib shadowing detected",
+                evidence=[
+                    {
+                        "type": "shadowing",
+                        "message": f"stdlib module shadowed: {name}",
+                        "path": f"src/{name}.py",
+                    }
+                    for name in shadow
+                ],
+                fix=["Rename modules under src/ that match Python stdlib module names."],
+                meta={"shadow": shadow},
+            )
+            data["checks"]["stdlib_shadowing"]["shadow"] = shadow
+            sys.stderr.write("[WARN] stdlib-shadow: " + ", ".join(shadow) + "\n")
+        else:
+            data["checks"]["stdlib_shadowing"] = _make_check(
+                ok=True,
+                severity="high",
+                summary="no stdlib shadowing detected",
+                evidence=[],
+                fix=["Keep src/ module names distinct from Python standard library modules."],
+                meta={"shadow": []},
+            )
+            data["checks"]["stdlib_shadowing"]["shadow"] = []
     else:
         data["checks"]["stdlib_shadowing"] = _make_check(
             ok=True,
             severity="high",
-            summary="no stdlib shadowing detected",
+            summary="stdlib shadowing check not selected",
             evidence=[],
-            fix=["Keep src/ module names distinct from Python standard library modules."],
+            fix=[],
+            skipped=True,
             meta={"shadow": []},
         )
         data["checks"]["stdlib_shadowing"]["shadow"] = []
@@ -766,7 +862,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         data.setdefault("missing", [])
 
-    if ns.pyproject:
+    if ns.pyproject and _is_selected("pyproject"):
         pyproject_ok, pyproject_summary = _check_pyproject_toml(root)
         data["pyproject_ok"] = pyproject_ok
         data["checks"]["pyproject"] = _make_check(
@@ -793,7 +889,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(rel_ok)
 
-    if ns.ascii:
+    if ns.ascii and _is_selected("ascii"):
         bad, bad_err = _scan_non_ascii(root)
         data["non_ascii"] = bad
         check_ok = not bool(bad)
@@ -816,7 +912,7 @@ def main(argv: list[str] | None = None) -> int:
         for line in bad_err:
             sys.stderr.write(line + "\n")
 
-    if ns.ci:
+    if ns.ci and _is_selected("ci_workflows"):
         ci_evidence, ci_missing_groups = _check_ci_workflows(root)
         sec_evidence, sec_missing = _check_security_files(root)
         data["ci_missing"] = ci_missing_groups
@@ -857,7 +953,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(sec_ok)
 
-    if ns.pre_commit:
+    if ns.pre_commit and _is_selected("pre_commit"):
         pc_ok = _check_pre_commit(root)
         data["pre_commit_ok"] = pc_ok
         data["checks"]["pre_commit"] = _make_check(
@@ -880,7 +976,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(pc_ok)
 
-    if ns.deps:
+    if ns.deps and _is_selected("deps"):
         deps_ok = _check_deps(root)
         data["deps_ok"] = deps_ok
         data["checks"]["deps"] = _make_check(
@@ -897,7 +993,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(deps_ok)
 
-    if ns.clean_tree:
+    if ns.clean_tree and _is_selected("clean_tree"):
         ct_ok = _check_clean_tree(root)
         data["clean_tree_ok"] = ct_ok
         data["checks"]["clean_tree"] = _make_check(
@@ -912,7 +1008,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(ct_ok)
 
-    if ns.repo_readiness:
+    if ns.repo_readiness and _is_selected("repo_readiness"):
         rr_evidence, rr_missing = _check_repo_readiness(root)
         data["repo_readiness_missing"] = rr_missing
         rr_ok = not bool(rr_missing)
@@ -951,6 +1047,27 @@ def main(argv: list[str] | None = None) -> int:
 
     threshold = _resolve_threshold(ns, policy)
     gate_ok, failed_checks = _evaluate_gate(data["checks"], threshold)
+    data["selected_checks"] = [cid for cid in CHECK_ORDER if _is_selected(cid)]
+    next_actions: list[dict[str, Any]] = []
+    for cid in CHECK_ORDER:
+        chk = data["checks"].get(cid)
+        if not isinstance(chk, dict):
+            continue
+        if chk.get("skipped"):
+            continue
+        if chk.get("ok") is False:
+            next_actions.append(
+                {
+                    "id": cid,
+                    "severity": chk.get("severity"),
+                    "summary": chk.get("summary"),
+                    "fix": chk.get("fix", []),
+                }
+            )
+    next_actions.sort(
+        key=lambda x: (-SEVERITY_ORDER.get(str(x.get("severity")), 0), str(x.get("id")))
+    )
+    data["next_actions"] = next_actions
 
     try:
         policy_resolved = _resolve_policy_path(root, ns.policy)

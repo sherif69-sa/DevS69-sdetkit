@@ -34,6 +34,9 @@ Examples:
 - `sdetkit doctor --dev --ci --deps --clean-tree --pr`
 
 See: doctor.md
+- `sdetkit doctor --list-checks`
+- `sdetkit doctor --only pyproject,clean_tree --format json`
+- `sdetkit doctor --skip deps,pre_commit --format json`
 
 ## ci
 
