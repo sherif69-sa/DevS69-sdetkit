@@ -639,3 +639,5 @@ Examples:
 - `sdetkit gate fast`
 - `sdetkit gate fast --format json | python -m json.tool >/dev/null`
 - `sdetkit gate fast --no-pytest --format json`
+- `sdetkit gate fast --fix`
+- `sdetkit gate fast --fix-only --format json`

@@ -76,6 +76,26 @@ def _run_fast(ns: argparse.Namespace) -> int:
 
     steps: list[dict[str, Any]] = []
 
+    if ns.fix or ns.fix_only:
+        steps.append(
+            {
+                "id": "ruff_fix",
+                **_run([sys.executable, "-m", "ruff", "check", "--fix", "."], cwd=root),
+            }
+        )
+        steps.append(
+            {
+                "id": "ruff_format_apply",
+                **_run([sys.executable, "-m", "ruff", "format", "."], cwd=root),
+            }
+        )
+        if ns.fix_only:
+            ns.no_doctor = True
+            ns.no_ci_templates = True
+            ns.no_ruff = True
+            ns.no_mypy = True
+            ns.no_pytest = True
+
     if not ns.no_doctor:
         fail_on = "medium" if ns.strict else "high"
         steps.append(
@@ -193,6 +213,9 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--format", choices=["text", "json", "md"], default="text")
     fast.add_argument("--out", "--output", default=None)
     fast.add_argument("--strict", action="store_true")
+
+    fast.add_argument("--fix", action="store_true")
+    fast.add_argument("--fix-only", dest="fix_only", action="store_true")
 
     fast.add_argument("--no-doctor", action="store_true")
     fast.add_argument("--no-ci-templates", action="store_true")

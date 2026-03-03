@@ -66,3 +66,54 @@ def test_gate_fast_can_run_ci_templates_only(tmp_path: Path) -> None:
     data = json.loads(proc.stdout)
     assert data["ok"] is True
     assert [s["id"] for s in data["steps"]] == ["ci_templates"]
+
+
+def test_gate_fast_fix_only_formats_files(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    (tmp_path / "a.py").write_text("x=1\n", encoding="utf-8")
+
+    proc = _run_sdetkit(
+        repo_root,
+        tmp_path,
+        "gate",
+        "fast",
+        "--root",
+        str(tmp_path),
+        "--format",
+        "json",
+        "--fix-only",
+    )
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout)
+    assert [s["id"] for s in data["steps"]] == ["ruff_fix", "ruff_format_apply"]
+    assert (tmp_path / "a.py").read_text(encoding="utf-8") == "x = 1\n"
+
+
+def test_gate_fast_fix_runs_before_ruff_checks(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    (tmp_path / "a.py").write_text("x=1\n", encoding="utf-8")
+
+    proc = _run_sdetkit(
+        repo_root,
+        tmp_path,
+        "gate",
+        "fast",
+        "--root",
+        str(tmp_path),
+        "--format",
+        "json",
+        "--fix",
+        "--no-doctor",
+        "--no-ci-templates",
+        "--no-mypy",
+        "--no-pytest",
+    )
+    assert proc.returncode == 0, proc.stderr
+    data = json.loads(proc.stdout)
+    assert [s["id"] for s in data["steps"]] == [
+        "ruff_fix",
+        "ruff_format_apply",
+        "ruff",
+        "ruff_format",
+    ]
+    assert (tmp_path / "a.py").read_text(encoding="utf-8") == "x = 1\n"
