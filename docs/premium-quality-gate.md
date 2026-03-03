@@ -52,9 +52,37 @@ Use these commands to quickly diagnose PR quality issues and unblock reviews.
 
 ## One-command premium gate
 
-Use `bash premium-gate.sh` locally and in CI. It runs quality, explicit ruff checks, CI, doctor (ASCII + JSON), full maintenance checks, baseline-aware security triage, security SARIF export, control-plane ops, and evidence pack generation.
+Use `bash premium-gate.sh` locally and in CI. The gate is now a self-contained **five-head engine** with explicit phases and runtime telemetry:
 
-The script now also emits **real-time step recommendations**, writes per-step logs under `.sdetkit/out/`, and runs a top-level connector intelligence engine (`python3 -m sdetkit.premium_gate_engine --double-check --min-score 70 --auto-fix --fix-root .`) that unifies step logs, doctor, maintenance, and security triage artifacts into one scored control-plane summary with warnings, hotspot ranking, and prioritized recommendations.
+1. **Head-1 Foundation & Quality** (`bash quality.sh`)
+2. **Head-2 Source Truth & Style** (ruff format/lint)
+3. **Head-3 Operational Confidence** (CI + doctor + maintenance + ops profile)
+4. **Head-4 Security & Compliance** (SARIF scan + baseline-aware triage + evidence pack)
+5. **Head-5 Intelligence Brain** (`python3 -m sdetkit.premium_gate_engine`)
+
+The script emits:
+
+- per-step logs under `.sdetkit/out/premium-gate.*.log`
+- a machine ledger: `.sdetkit/out/premium-step-results.ndjson`
+- a structured five-head index: `.sdetkit/out/premium-step-index.json`
+- premium engine summary: `.sdetkit/out/premium-summary.json`
+
+Useful flags:
+
+- `--mode full|fast|engine-only`
+- `--continue-on-error` (collect all failures in one run)
+- `--engine-min-score <int>`
+- `--out-dir <path>`
+- `--ops-jobs <int>`
+
+Examples:
+
+```bash
+bash premium-gate.sh --mode full
+bash premium-gate.sh --mode full --continue-on-error
+bash premium-gate.sh --mode fast --engine-min-score 75
+bash premium-gate.sh --mode engine-only --out-dir .sdetkit/out
+```
 
 
 ## Local insights API (editable guideline reference + commit learning)
