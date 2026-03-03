@@ -563,6 +563,14 @@ def main(argv: list[str] | None = None) -> int:
     if ns.all or ns.release:
         ns.ascii = True
         ns.ci = True
+        ns.deps = True
+        ns.clean_tree = True
+
+    if ns.release:
+        ns.pyproject = True
+
+        ns.ascii = True
+        ns.ci = True
         ns.pre_commit = True
         ns.deps = True
         ns.clean_tree = True
