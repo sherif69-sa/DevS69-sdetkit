@@ -65,6 +65,14 @@ Recommended CI entrypoint:
 
 This runs formatting/linting, typing, and tests using the repo's pinned tooling.
 
+### Security gate budgets (new)
+
+Use the new `security enforce` command to lock alert budgets in CI and prevent drift over time:
+- `python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0`
+- `python -m sdetkit security enforce --format json --max-rule SEC_OS_SYSTEM=0 --max-rule SEC_YAML_UNSAFE_LOAD=0`
+
+Tip: pair `security scan --format sarif` (for code scanning upload) with `security enforce` (for deterministic policy budgets).
+
 ## Documentation
 
 - Build docs locally:

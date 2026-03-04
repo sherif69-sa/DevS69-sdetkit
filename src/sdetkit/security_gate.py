@@ -917,6 +917,74 @@ def _severity_trips(findings: list[Finding], threshold: str) -> bool:
     return any(SEVERITY_TO_FAIL_LEVEL[f.severity] >= gate for f in findings)
 
 
+def _parse_rule_budgets(items: list[str]) -> dict[str, int]:
+    budgets: dict[str, int] = {}
+    for raw in items:
+        if "=" not in raw:
+            raise SecurityScanError(f"invalid --max-rule value (expected RULE=COUNT): {raw}")
+        rid, count_text = raw.split("=", 1)
+        rid = rid.strip()
+        if rid not in RULES:
+            raise SecurityScanError(f"unknown rule in --max-rule: {rid}")
+        try:
+            count = int(count_text.strip())
+        except ValueError as exc:
+            raise SecurityScanError(f"invalid count in --max-rule: {raw}") from exc
+        if count < 0:
+            raise SecurityScanError(f"--max-rule count must be >= 0: {raw}")
+        budgets[rid] = count
+    return budgets
+
+
+def _enforce_budgets(
+    findings: list[Finding],
+    *,
+    max_total: int | None,
+    max_info: int | None,
+    max_warn: int | None,
+    max_error: int | None,
+    rule_budgets: dict[str, int],
+) -> tuple[dict[str, Any], bool]:
+    sev_counts = {"info": 0, "warn": 0, "error": 0}
+    rule_counts: dict[str, int] = {}
+    for item in findings:
+        sev_counts[item.severity] += 1
+        rule_counts[item.rule_id] = rule_counts.get(item.rule_id, 0) + 1
+
+    limits = {
+        "total": max_total,
+        "info": max_info,
+        "warn": max_warn,
+        "error": max_error,
+    }
+    exceeded: list[dict[str, Any]] = []
+
+    total = len(findings)
+    if max_total is not None and total > max_total:
+        exceeded.append({"metric": "total", "count": total, "limit": max_total})
+    for sev in ("info", "warn", "error"):
+        lim = limits[sev]
+        count = sev_counts[sev]
+        if lim is not None and count > lim:
+            exceeded.append({"metric": sev, "count": count, "limit": lim})
+
+    exceeded_rules: list[dict[str, Any]] = []
+    for rid, lim in sorted(rule_budgets.items()):
+        count = rule_counts.get(rid, 0)
+        if count > lim:
+            exceeded_rules.append({"rule_id": rid, "count": count, "limit": lim})
+
+    payload = {
+        "ok": not exceeded and not exceeded_rules,
+        "counts": {"total": total, **sev_counts},
+        "limits": {k: v for k, v in limits.items() if v is not None},
+        "rule_limits": rule_budgets,
+        "exceeded": exceeded,
+        "exceeded_rules": exceeded_rules,
+    }
+    return payload, payload["ok"]
+
+
 def _load_baseline(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -1115,6 +1183,20 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Include info-level findings in new_findings and SARIF/text summaries.",
     )
+
+    enf = sub.add_parser("enforce", parents=[common])
+    enf.add_argument("--scan-json", default=None)
+    enf.add_argument("--max-total", type=int, default=None)
+    enf.add_argument("--max-info", type=int, default=0)
+    enf.add_argument("--max-warn", type=int, default=None)
+    enf.add_argument("--max-error", type=int, default=0)
+    enf.add_argument(
+        "--max-rule",
+        action="append",
+        default=[],
+        metavar="RULE=COUNT",
+        help="Per-rule budget (repeatable), e.g. --max-rule SEC_OS_SYSTEM=0",
+    )
     base = sub.add_parser("baseline", parents=[common])
     base.add_argument(
         "--include-info",
@@ -1240,6 +1322,47 @@ def main(argv: list[str] | None = None) -> int:
             )
             _write_output(rendered, ns.output)
             return 1 if _severity_trips(new_findings, ns.fail_on) else 0
+
+        if ns.cmd == "enforce":
+            thresholds = [ns.max_total, ns.max_info, ns.max_warn, ns.max_error]
+            if any(v is not None and v < 0 for v in thresholds):
+                raise SecurityScanError("enforce thresholds must be >= 0")
+            rule_budgets = _parse_rule_budgets(ns.max_rule)
+            payload, ok = _enforce_budgets(
+                findings,
+                max_total=ns.max_total,
+                max_info=ns.max_info,
+                max_warn=ns.max_warn,
+                max_error=ns.max_error,
+                rule_budgets=rule_budgets,
+            )
+            if ns.format == "json":
+                rendered = json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+            else:
+                lines = [
+                    (
+                        "security enforce: "
+                        f"ok={payload['ok']} total={payload['counts']['total']} "
+                        f"error={payload['counts']['error']} warn={payload['counts']['warn']} info={payload['counts']['info']}"
+                    )
+                ]
+                if payload["exceeded"]:
+                    lines.append("threshold breaches:")
+                    for item in payload["exceeded"]:
+                        lines.append(
+                            f"- {item['metric']}: count={item['count']} limit={item['limit']}"
+                        )
+                if payload["exceeded_rules"]:
+                    lines.append("rule breaches:")
+                    for item in payload["exceeded_rules"]:
+                        lines.append(
+                            f"- {item['rule_id']}: count={item['count']} limit={item['limit']}"
+                        )
+                if not payload["exceeded"] and not payload["exceeded_rules"]:
+                    lines.append("- all budgets satisfied")
+                rendered = "\n".join(lines) + "\n"
+            _write_output(rendered, ns.output)
+            return 0 if ok else 1
 
         if ns.cmd == "report":
             rendered = _render(findings, ns.format, sbom=sbom, include_info=ns.include_info)
