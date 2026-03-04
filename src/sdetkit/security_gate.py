@@ -240,7 +240,9 @@ class _RuleVisitor(ast.NodeVisitor):
 
     def _allow_print_for_module(self) -> bool:
         rel = self.rel_path.replace("\\", "/")
-        return rel.startswith("src/sdetkit/") and rel.endswith(PRINT_ALLOWED_MODULE_SUFFIXES)
+        if rel.startswith("src/sdetkit/"):
+            return True
+        return rel.startswith("src/") and rel.endswith(PRINT_ALLOWED_MODULE_SUFFIXES)
 
     def visit_Call(self, node: ast.Call) -> Any:
         name = _call_name(node)
