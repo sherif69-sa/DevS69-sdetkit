@@ -974,7 +974,7 @@ def _enforce_budgets(
         if count > lim:
             exceeded_rules.append({"rule_id": rid, "count": count, "limit": lim})
 
-    ok: bool = len(exceeded) == 0 and len(exceeded_rules) == 0
+    ok = not exceeded and not exceeded_rules
     payload: dict[str, Any] = {
         "ok": ok,
         "counts": {"total": total, **sev_counts},
@@ -983,7 +983,7 @@ def _enforce_budgets(
         "exceeded": exceeded,
         "exceeded_rules": exceeded_rules,
     }
-    return payload, bool(ok)
+    return payload, ok
 
 
 def _load_baseline(path: Path) -> list[dict[str, Any]]:
