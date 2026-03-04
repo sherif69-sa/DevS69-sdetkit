@@ -295,6 +295,20 @@ def _run_fast(ns: argparse.Namespace) -> int:
     return 2
 
 
+def _normalize_release_cmd(cmd: list[str], root: Path) -> list[str]:
+    root_str = str(root)
+    out: list[str] = []
+    for tok in cmd:
+        if tok == sys.executable:
+            out.append("python")
+            continue
+        if tok == root_str or tok.startswith(root_str + "/"):
+            out.append(tok.replace(root_str, "<repo>", 1))
+            continue
+        out.append(tok)
+    return out
+
+
 def _playbooks_validate_args(ns: argparse.Namespace) -> list[str]:
     args = ["--format", "json"]
     if getattr(ns, "playbooks_all", False):
@@ -377,9 +391,14 @@ def _run_release(ns: argparse.Namespace) -> int:
             steps.append({"id": step_id, **_run(cmd, cwd=root)})
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
+    for step in steps:
+        step_cmd = step.get("cmd")
+        if isinstance(step_cmd, list):
+            step["cmd"] = _normalize_release_cmd([str(t) for t in step_cmd], root)
+
     payload = {
         "profile": "release",
-        "root": str(root),
+        "root": "<repo>",
         "dry_run": bool(ns.dry_run),
         "ok": not bool(failed),
         "failed_steps": failed,

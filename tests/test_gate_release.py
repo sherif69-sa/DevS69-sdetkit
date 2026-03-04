@@ -12,6 +12,7 @@ def test_gate_release_dry_run_lists_steps(monkeypatch, tmp_path: Path, capsys) -
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["dry_run"] is True
+    assert payload["root"] == "<repo>"
     assert [step["id"] for step in payload["steps"]] == [
         "doctor_release",
         "playbooks_validate",
@@ -92,3 +93,13 @@ def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys
         "--format",
         "json",
     ]
+
+
+def test_gate_release_dry_run_normalizes_commands(monkeypatch, tmp_path: Path, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = gate.main(["release", "--dry-run", "--format", "json"])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    cmds = [step["cmd"] for step in payload["steps"]]
+    assert all(cmd[0] == "python" for cmd in cmds)
+    assert any("<repo>" in tok for tok in cmds[-1])
