@@ -681,3 +681,17 @@ When a baseline check fails, you can request a deterministic unified diff betwee
 
   python -m sdetkit doctor baseline check --diff
   python -m sdetkit gate baseline check --diff
+
+### Playbooks and legacy study flows
+
+Some legacy "dayXX-*" and case-study flows are available under the playbooks group to keep the main CLI focused.
+
+- List hidden playbooks:
+
+  python -m sdetkit playbooks
+
+- Run a playbook:
+
+  python -m sdetkit playbooks run day28-weekly-review -- --root . --format text
+
+- Legacy direct names still work, but prefer playbooks run for discoverability.

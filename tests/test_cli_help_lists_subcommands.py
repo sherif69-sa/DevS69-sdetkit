@@ -62,6 +62,17 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "day42-optimization-closeout" not in out
     assert "day43-acceleration-closeout" not in out
     assert "day44-scale-closeout" not in out
+    r3 = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "playbooks", "list", "--format", "json"],
+        text=True,
+        capture_output=True,
+    )
+    assert r3.returncode == 0
+    import json as _json
+
+    j = _json.loads(r3.stdout)
+    assert "playbooks" in j
+    assert "day29-phase1-hardening" in j["playbooks"]
     r2 = subprocess.run(
         [sys.executable, "-m", "sdetkit", "playbooks"],
         text=True,
@@ -72,3 +83,18 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "day29-phase1-hardening" in out2
     assert "day30-phase1-wrap" in out2
     assert "day44-scale-closeout" in out2
+    assert "Run: sdetkit playbooks run <name>" in out2
+
+
+def test_playbooks_run_unknown_name_fails() -> None:
+    import subprocess
+    import sys
+
+    r = subprocess.run(
+        [sys.executable, "-m", "sdetkit", "playbooks", "run", "nope-nope-nope"],
+        text=True,
+        capture_output=True,
+    )
+    assert r.returncode == 2
+    assert r.stdout == ""
+    assert r.stderr.strip() == "playbooks: unknown name"

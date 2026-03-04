@@ -169,6 +169,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
 
+    if argv and argv[0] == "playbooks":
+        from .playbooks_cli import main as _playbooks_main
+
+        return _playbooks_main(list(argv[1:]))
+
     if argv and argv[0] == "cassette-get":
         from .__main__ import _cassette_get
 
