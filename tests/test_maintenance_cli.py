@@ -192,3 +192,166 @@ def test_security_check_uses_new_findings_when_baseline_exists(tmp_path: Path, m
 
     out = security_check.run(ctx)
     assert out.ok is True
+
+
+def test_security_check_requires_repeated_failure(tmp_path: Path, monkeypatch) -> None:
+    class Result:
+        def __init__(self, returncode: int, stdout: str) -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = ""
+
+    calls = iter(
+        [
+            Result(0, json.dumps({"findings": [{"severity": "warn", "rule_id": "SEC_X"}]})),
+            Result(0, "security fix complete; files changed: 0\n"),
+            Result(0, json.dumps({"findings": []})),
+        ]
+    )
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: next(calls))
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is True
+    assert out.summary == "security check recovered after auto-fix/retry"
+
+
+def test_security_check_fix_mode_applies_fix_before_follow_up(tmp_path: Path, monkeypatch) -> None:
+    class Result:
+        def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
+    seen: list[list[str]] = []
+
+    def _run(cmd: list[str], *, cwd: Path):
+        seen.append(cmd)
+        if cmd[-2:] == ["fix", "--apply"]:
+            return Result(0, "fixed")
+        check_index = sum(1 for item in seen if item[-1] == "none")
+        if check_index == 1:
+            return Result(0, json.dumps({"findings": [{"severity": "warn", "rule_id": "SEC_X"}]}))
+        return Result(0, json.dumps({"findings": []}))
+
+    monkeypatch.setattr(security_check, "run_cmd", _run)
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=True,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is True
+    assert any(action.id == "security-fix" and action.applied for action in out.actions)
+    assert any(cmd[-2:] == ["fix", "--apply"] for cmd in seen)
+
+
+def test_security_check_first_occurrence_is_recorded_not_failed(
+    tmp_path: Path, monkeypatch
+) -> None:
+    class Result:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps(
+            {
+                "findings": [
+                    {"severity": "warn", "fingerprint": "fp-1", "rule_id": "SEC_EMPTY_EXCEPT"}
+                ]
+            }
+        )
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: Result())
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is True
+    assert out.details["repeated"] is False
+    assert "non-repeated" in out.summary
+
+
+def test_security_check_repeated_fingerprint_fails(tmp_path: Path, monkeypatch) -> None:
+    state = tmp_path / ".sdetkit" / "out"
+    state.mkdir(parents=True)
+    (state / "maintenance-security-check.json").write_text(
+        json.dumps({"fingerprints": ["fp-1"]}) + "\n", encoding="utf-8"
+    )
+
+    class Result:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps(
+            {
+                "findings": [
+                    {"severity": "warn", "fingerprint": "fp-1", "rule_id": "SEC_EMPTY_EXCEPT"}
+                ]
+            }
+        )
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: Result())
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is False
+    assert out.details["repeated"] is True
+    assert "reproduced" in out.summary
+
+
+def test_security_check_autofix_runs_without_fix_flag(tmp_path: Path, monkeypatch) -> None:
+    class Result:
+        def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+            self.stderr = stderr
+
+    seen: list[list[str]] = []
+
+    def _run(cmd: list[str], *, cwd: Path):
+        seen.append(cmd)
+        if cmd[-2:] == ["fix", "--apply"]:
+            return Result(0, "fixed")
+        check_index = sum(1 for item in seen if item[-1] == "none")
+        if check_index == 1:
+            return Result(
+                0, json.dumps({"findings": [{"severity": "warn", "fingerprint": "fp-2"}]})
+            )
+        return Result(0, json.dumps({"findings": []}))
+
+    monkeypatch.setattr(security_check, "run_cmd", _run)
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is True
+    assert any(cmd[-2:] == ["fix", "--apply"] for cmd in seen)

@@ -351,12 +351,12 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 ao = json.loads(a)
                 a = json.dumps(ao, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
-            except Exception:
+            except json.JSONDecodeError:
                 pass
             try:
                 bo = json.loads(b)
                 b = json.dumps(bo, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
-            except Exception:
+            except json.JSONDecodeError:
                 pass
             diff_lines = difflib.unified_diff(
                 a.splitlines(keepends=True),
