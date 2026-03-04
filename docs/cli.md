@@ -662,10 +662,12 @@ Examples:
 - `sdetkit gate baseline check`
 - `sdetkit gate release --dry-run --format json`
 - `sdetkit gate release --format json`
+- `sdetkit gate release --playbooks-legacy --format json`
+- `sdetkit gate release --playbook-name day28-weekly-review --playbook-name day29-phase1-hardening --format json`
 
 Useful flags (`gate fast`): `--root`, `--format`, `--out`/`--output`, `--strict`, `--fix`, `--fix-only`, `--list-steps`, `--only`, `--skip`, `--no-doctor`, `--no-ci-templates`, `--no-ruff`, `--no-mypy`, `--no-pytest`, `--mypy-args`, `--pytest-args`, `--full-pytest`.
 
-Useful flags (`gate release`): `--root`, `--format`, `--out`/`--output`, `--dry-run`, `--release-full`.
+Useful flags (`gate release`): `--root`, `--format`, `--out`/`--output`, `--dry-run`, `--release-full`, `--playbooks-all`, `--playbooks-legacy`, `--playbooks-aliases`, `--playbook-name` (repeatable).
 
 Note: `gate fast` uses a default smoke pytest subset for speed. Use `--full-pytest` or explicit `--pytest-args` to run the full test suite.
 
@@ -701,6 +703,7 @@ Some legacy "dayXX-*" and case-study flows are available under the playbooks gro
 - Validate playbooks are importable and expose callable `main()`:
 
   python -m sdetkit playbooks validate --recommended --format json
+  python -m sdetkit playbooks validate --legacy --format json
   python -m sdetkit playbooks validate --name onboarding --name weekly-review --format json
 
 - Legacy direct names still work, but prefer playbooks run for discoverability.

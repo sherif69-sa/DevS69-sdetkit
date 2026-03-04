@@ -41,3 +41,54 @@ def test_gate_release_runs_expected_commands(monkeypatch, tmp_path: Path, capsys
     assert calls[0][3:] == ["doctor", "--release-full", "--format", "json"]
     assert calls[1][3:] == ["playbooks", "validate", "--recommended", "--format", "json"]
     assert calls[2][3:6] == ["gate", "fast", "--root"]
+
+
+def test_gate_release_passes_playbook_selection_flags(monkeypatch, tmp_path: Path, capsys) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(["release", "--format", "json", "--playbooks-legacy"])
+    assert rc == 0
+    _ = json.loads(capsys.readouterr().out)
+    assert calls[1][3:] == ["playbooks", "validate", "--legacy", "--format", "json"]
+
+
+def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(
+        [
+            "release",
+            "--format",
+            "json",
+            "--playbook-name",
+            "day28-weekly-review",
+            "--playbook-name",
+            "day29-phase1-hardening",
+        ]
+    )
+    assert rc == 0
+    _ = json.loads(capsys.readouterr().out)
+    assert calls[1][3:] == [
+        "playbooks",
+        "validate",
+        "--name",
+        "day28-weekly-review",
+        "--name",
+        "day29-phase1-hardening",
+        "--format",
+        "json",
+    ]

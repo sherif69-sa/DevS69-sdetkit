@@ -295,7 +295,11 @@ def _cmd_run(ns: argparse.Namespace) -> int:
     return int(fn(args))
 
 
-def _selected_playbooks(ns: argparse.Namespace, all_names: list[str]) -> list[str]:
+def _selected_playbooks(
+    ns: argparse.Namespace,
+    all_names: list[str],
+    alias_to_canonical: dict[str, str],
+) -> list[str]:
     if ns.all:
         return all_names
     if ns.recommended:
@@ -303,12 +307,7 @@ def _selected_playbooks(ns: argparse.Namespace, all_names: list[str]) -> list[st
     if ns.legacy:
         return [n for n in all_names if n.startswith("day") or n.endswith("-closeout")]
     if ns.aliases:
-        return [
-            n
-            for n in all_names
-            if not (n.startswith("day") or n.endswith("-closeout"))
-            and n not in RECOMMENDED_PLAYBOOKS
-        ]
+        return sorted(alias_to_canonical.keys())
 
     explicit = sorted(set(ns.name or []))
     if explicit:
@@ -320,7 +319,7 @@ def _cmd_validate(ns: argparse.Namespace) -> int:
     pkg_dir = _pkg_dir()
     cmd_to_mod, alias_to_canonical = _build_registry(pkg_dir)
     all_names = sorted(cmd_to_mod.keys())
-    selected = _selected_playbooks(ns, all_names)
+    selected = _selected_playbooks(ns, all_names, alias_to_canonical)
 
     for name in selected:
         if name not in cmd_to_mod:

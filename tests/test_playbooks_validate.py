@@ -33,3 +33,13 @@ def test_playbooks_validate_legacy_selection_only_has_legacy(capsys) -> None:
         item["name"].startswith("day") or item["name"].endswith("-closeout")
         for item in payload["results"]
     )
+
+
+def test_playbooks_validate_aliases_are_only_alias_names(capsys) -> None:
+    rc = playbooks_cli.main(["validate", "--aliases", "--format", "json"])
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True
+    assert payload["results"]
+    assert all(not item["name"].startswith("day") for item in payload["results"])
+    assert all(item["canonical"].startswith("day") for item in payload["results"])

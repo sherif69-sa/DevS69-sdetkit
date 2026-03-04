@@ -29,8 +29,6 @@ FAST_DEFAULT_PYTEST_ARGS = [
     "tests/test_baseline_umbrella.py",
 ]
 
-RELEASE_STEPS = ["doctor_release", "playbooks_validate", "gate_fast"]
-
 
 def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
     out: dict[str, object] = dict(payload)
@@ -297,6 +295,25 @@ def _run_fast(ns: argparse.Namespace) -> int:
     return 2
 
 
+def _playbooks_validate_args(ns: argparse.Namespace) -> list[str]:
+    args = ["--format", "json"]
+    if getattr(ns, "playbooks_all", False):
+        return ["--all", *args]
+    if getattr(ns, "playbooks_legacy", False):
+        return ["--legacy", *args]
+    if getattr(ns, "playbooks_aliases", False):
+        return ["--aliases", *args]
+
+    names = list(getattr(ns, "playbook_name", []) or [])
+    if names:
+        out: list[str] = []
+        for name in names:
+            out.extend(["--name", name])
+        return [*out, *args]
+
+    return ["--recommended", *args]
+
+
 def _format_release_text(payload: dict[str, Any]) -> str:
     lines = [f"gate release: {'OK' if payload.get('ok') else 'FAIL'}"]
     for step in payload.get("steps", []):
@@ -333,9 +350,7 @@ def _run_release(ns: argparse.Namespace) -> int:
                 "sdetkit",
                 "playbooks",
                 "validate",
-                "--recommended",
-                "--format",
-                "json",
+                *_playbooks_validate_args(ns),
             ],
         ),
         (
@@ -510,6 +525,11 @@ def main(argv: list[str] | None = None) -> int:
     release.add_argument("--out", "--output", default=None)
     release.add_argument("--dry-run", action="store_true")
     release.add_argument("--release-full", action="store_true")
+    playbook_group = release.add_mutually_exclusive_group()
+    playbook_group.add_argument("--playbooks-all", action="store_true")
+    playbook_group.add_argument("--playbooks-legacy", action="store_true")
+    playbook_group.add_argument("--playbooks-aliases", action="store_true")
+    release.add_argument("--playbook-name", action="append", default=[])
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
 
