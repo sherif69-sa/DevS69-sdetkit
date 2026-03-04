@@ -129,9 +129,16 @@ def _run_security_check(ctx: MaintenanceContext) -> tuple[bool, dict[str, object
         item for item in findings if isinstance(item, dict)
     ]
     digest = _build_findings_digest(normalized_findings)
-    counts = digest["counts"] if isinstance(digest.get("counts"), dict) else {}
-    error_count = int(counts.get("error", 0))
-    warn_count = int(counts.get("warn", 0))
+    counts_obj = digest.get("counts")
+    counts: dict[str, int] = {"error": 0, "warn": 0, "info": 0}
+    if isinstance(counts_obj, dict):
+        counts = {
+            "error": int(counts_obj.get("error", 0)),
+            "warn": int(counts_obj.get("warn", 0)),
+            "info": int(counts_obj.get("info", 0)),
+        }
+    error_count = counts["error"]
+    warn_count = counts["warn"]
 
     ok = result.returncode == 0 and error_count == 0 and warn_count == 0
     details: dict[str, object] = {
