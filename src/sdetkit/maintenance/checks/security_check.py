@@ -30,6 +30,17 @@ def _save_fingerprints(path: Path, fingerprints: set[str]) -> None:
     path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
 
 
+def _rule_hint(rule_id: str) -> str:
+    hints = {
+        "SEC_EMPTY_EXCEPT": "Replace broad/empty except blocks with specific exception handling and explicit error paths.",
+        "SEC_DEBUG_PRINT": "Route runtime output through structured logging and remove debug print statements from src/ code.",
+    }
+    return hints.get(
+        rule_id,
+        "Review the rule metadata and apply the documented remediation before accepting drift.",
+    )
+
+
 def _build_findings_digest(findings: list[dict[str, Any]]) -> dict[str, object]:
     severity_counts: dict[str, int] = {"error": 0, "warn": 0, "info": 0}
     rule_counts: Counter[str] = Counter()
@@ -63,15 +74,21 @@ def _build_findings_digest(findings: list[dict[str, Any]]) -> dict[str, object]:
                 }
             )
 
+    top_rules = [{"rule_id": rule, "count": count} for rule, count in rule_counts.most_common(5)]
+    remediation_hints = [
+        {"rule_id": item["rule_id"], "hint": _rule_hint(str(item["rule_id"]))}
+        for item in top_rules
+        if isinstance(item, dict) and item.get("rule_id")
+    ]
+
     return {
         "counts": severity_counts,
         "fingerprints": sorted(fingerprints),
         "findings_total": len(findings),
-        "top_rules": [
-            {"rule_id": rule, "count": count} for rule, count in rule_counts.most_common(5)
-        ],
+        "top_rules": top_rules,
         "top_paths": [{"path": path, "count": count} for path, count in path_counts.most_common(5)],
         "sample_findings": sample,
+        "remediation_hints": remediation_hints,
     }
 
 
@@ -126,6 +143,7 @@ def _run_security_check(ctx: MaintenanceContext) -> tuple[bool, dict[str, object
         "top_rules": digest.get("top_rules", []),
         "top_paths": digest.get("top_paths", []),
         "sample_findings": digest.get("sample_findings", []),
+        "remediation_hints": digest.get("remediation_hints", []),
         "stdout": result.stdout,
         "stderr": result.stderr,
     }

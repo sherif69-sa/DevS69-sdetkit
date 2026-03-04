@@ -392,6 +392,8 @@ def test_security_check_details_include_findings_digest(tmp_path: Path, monkeypa
     assert follow_up["top_rules"][0]["rule_id"] == "SEC_EMPTY_EXCEPT"
     assert follow_up["top_paths"][0]["path"] == "src/sdetkit/doctor.py"
     assert follow_up["sample_findings"][0]["line"] == 12
+    assert follow_up["remediation_hints"][0]["rule_id"] == "SEC_EMPTY_EXCEPT"
+    assert "except blocks" in follow_up["remediation_hints"][0]["hint"]
 
 
 def test_security_check_summary_includes_repeated_fingerprint_hint(
