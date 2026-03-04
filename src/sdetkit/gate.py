@@ -475,12 +475,12 @@ def main(argv: list[str] | None = None) -> int:
                 ao = json.loads(a)
                 a = json.dumps(ao, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
             except json.JSONDecodeError:
-                pass
+                a = snap_text
             try:
                 bo = json.loads(b)
                 b = json.dumps(bo, sort_keys=True, indent=2, ensure_ascii=True) + "\n"
             except json.JSONDecodeError:
-                pass
+                b = cur_text
             diff_lines = difflib.unified_diff(
                 a.splitlines(keepends=True),
                 b.splitlines(keepends=True),

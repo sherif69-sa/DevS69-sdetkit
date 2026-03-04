@@ -80,7 +80,9 @@ def test_enforce_scan_json_input(tmp_path: Path, capsys) -> None:
         encoding="utf-8",
     )
 
-    rc = _run(["enforce", "--root", str(tmp_path), "--scan-json", str(scan_json), "--format", "json"])
+    rc = _run(
+        ["enforce", "--root", str(tmp_path), "--scan-json", str(scan_json), "--format", "json"]
+    )
     assert rc == 1
     payload = json.loads(capsys.readouterr().out)
     assert payload["counts"]["total"] == 1
