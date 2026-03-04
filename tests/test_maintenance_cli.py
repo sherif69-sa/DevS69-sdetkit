@@ -355,3 +355,82 @@ def test_security_check_autofix_runs_without_fix_flag(tmp_path: Path, monkeypatc
     out = security_check.run(ctx)
     assert out.ok is True
     assert any(cmd[-2:] == ["fix", "--apply"] for cmd in seen)
+
+
+def test_security_check_details_include_findings_digest(tmp_path: Path, monkeypatch) -> None:
+    class Result:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps(
+            {
+                "findings": [
+                    {
+                        "severity": "warn",
+                        "fingerprint": "fp-7",
+                        "rule_id": "SEC_EMPTY_EXCEPT",
+                        "path": "src/sdetkit/doctor.py",
+                        "line": 12,
+                        "message": "except block silently swallows errors via pass.",
+                    }
+                ]
+            }
+        )
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: Result())
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={"SDETKIT_MAINTENANCE_SECURITY_AUTOFIX": "0"},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    follow_up = out.details["follow_up"]
+    assert follow_up["findings_total"] == 1
+    assert follow_up["top_rules"][0]["rule_id"] == "SEC_EMPTY_EXCEPT"
+    assert follow_up["top_paths"][0]["path"] == "src/sdetkit/doctor.py"
+    assert follow_up["sample_findings"][0]["line"] == 12
+    assert follow_up["remediation_hints"][0]["rule_id"] == "SEC_EMPTY_EXCEPT"
+    assert "except blocks" in follow_up["remediation_hints"][0]["hint"]
+
+
+def test_security_check_summary_includes_repeated_fingerprint_hint(
+    tmp_path: Path, monkeypatch
+) -> None:
+    state = tmp_path / ".sdetkit" / "out"
+    state.mkdir(parents=True)
+    (state / "maintenance-security-check.json").write_text(
+        json.dumps({"fingerprints": ["fp-r1"]}) + "\n", encoding="utf-8"
+    )
+
+    class Result:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps(
+            {
+                "findings": [
+                    {
+                        "severity": "warn",
+                        "fingerprint": "fp-r1",
+                        "rule_id": "SEC_EMPTY_EXCEPT",
+                    }
+                ]
+            }
+        )
+
+    monkeypatch.setattr(security_check, "run_cmd", lambda _cmd, cwd: Result())
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={"SDETKIT_MAINTENANCE_SECURITY_AUTOFIX": "0"},
+        logger=object(),
+    )
+
+    out = security_check.run(ctx)
+    assert out.ok is False
+    assert "fp-r1" in out.summary
+    assert out.details["repeated_fingerprints"] == ["fp-r1"]
