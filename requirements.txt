@@ -24,7 +24,7 @@ cyclonedx-bom==7.2.2
 
 # Docs
 mkdocs==1.6.1
-mkdocs-material==9.7.3
+mkdocs-material==9.7.4
 
 # Backport for environments below Python 3.11
 # (kept for compatibility in ad-hoc environments)
