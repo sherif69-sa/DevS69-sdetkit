@@ -240,9 +240,7 @@ class _RuleVisitor(ast.NodeVisitor):
 
     def _allow_print_for_module(self) -> bool:
         rel = self.rel_path.replace("\\", "/")
-        if rel.startswith("src/sdetkit/"):
-            return True
-        return rel.startswith("src/") and rel.endswith(PRINT_ALLOWED_MODULE_SUFFIXES)
+        return rel.startswith("src/sdetkit/") and rel.endswith(PRINT_ALLOWED_MODULE_SUFFIXES)
 
     def visit_Call(self, node: ast.Call) -> Any:
         name = _call_name(node)
@@ -1014,6 +1012,7 @@ def _render(
     *,
     new_only: list[Finding] | None = None,
     sbom: dict[str, Any] | None = None,
+    include_info: bool = True,
 ) -> str:
     if fmt == "text":
         target = findings if new_only is None else new_only
@@ -1031,6 +1030,8 @@ def _render(
         )
     if fmt == "sarif":
         target = findings if new_only is None else new_only
+        if not include_info:
+            target = [item for item in target if item.severity != "info"]
         return json.dumps(_to_sarif(target), ensure_ascii=True, sort_keys=True, indent=2) + "\n"
     raise SecurityScanError(f"unsupported format: {fmt}")
 
@@ -1091,9 +1092,19 @@ def main(argv: list[str] | None = None) -> int:
     common.add_argument("--online", action="store_true", help="Enable optional online scanning")
     common.add_argument("--sbom-output", default=None, help="Write CycloneDX SBOM JSON to file")
 
-    sub.add_parser("scan", parents=[common])
+    scan = sub.add_parser("scan", parents=[common])
+    scan.add_argument(
+        "--include-info",
+        action="store_true",
+        help="Include info-level findings when rendering SARIF output.",
+    )
     rpt = sub.add_parser("report", parents=[common])
     rpt.add_argument("--scan-json", default=None)
+    rpt.add_argument(
+        "--include-info",
+        action="store_true",
+        help="Include info-level findings when rendering SARIF output.",
+    )
 
     chk = sub.add_parser("check", parents=[common])
     chk.add_argument("--baseline", default=str(DEFAULT_BASELINE_PATH))
@@ -1220,16 +1231,22 @@ def main(argv: list[str] | None = None) -> int:
                 new_findings = findings
             if not ns.include_info:
                 new_findings = [f for f in new_findings if f.severity != "info"]
-            rendered = _render(findings, ns.format, new_only=new_findings, sbom=sbom)
+            rendered = _render(
+                findings,
+                ns.format,
+                new_only=new_findings,
+                sbom=sbom,
+                include_info=ns.include_info,
+            )
             _write_output(rendered, ns.output)
             return 1 if _severity_trips(new_findings, ns.fail_on) else 0
 
         if ns.cmd == "report":
-            rendered = _render(findings, ns.format, sbom=sbom)
+            rendered = _render(findings, ns.format, sbom=sbom, include_info=ns.include_info)
             _write_output(rendered, ns.output)
             return 0
 
-        rendered = _render(findings, ns.format, sbom=sbom)
+        rendered = _render(findings, ns.format, sbom=sbom, include_info=ns.include_info)
         _write_output(rendered, ns.output)
         return 1 if _severity_trips(findings, ns.fail_on) else 0
     except SecurityScanError as exc:
