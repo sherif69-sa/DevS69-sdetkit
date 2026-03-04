@@ -134,30 +134,98 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     return cmd_to_mod, alias_to_canonical
 
 
-def _list_payload() -> dict[str, object]:
+def _apply_search_list(xs: list[str], search: str | None) -> list[str]:
+    if not search:
+        return xs
+    s = search.lower()
+    return [x for x in xs if s in x.lower()]
+
+
+def _apply_search_aliases(d: dict[str, str], search: str | None) -> dict[str, str]:
+    if not search:
+        return d
+    s = search.lower()
+    return {k: v for k, v in d.items() if (s in k.lower()) or (s in v.lower())}
+
+
+def _counts(payload: dict[str, object]) -> dict[str, int]:
+    out: dict[str, int] = {}
+    for k in ["recommended", "legacy", "aliases", "playbooks"]:
+        v = payload.get(k)
+        if isinstance(v, list):
+            out[k] = len(v)
+        elif isinstance(v, dict):
+            out[k] = len(v)
+        else:
+            out[k] = 0
+    return out
+
+
+def _list_payload(
+    *,
+    want_recommended: bool,
+    want_legacy: bool,
+    want_aliases: bool,
+    search: str | None,
+) -> dict[str, object]:
     pkg_dir = _pkg_dir()
     cmd_to_mod, alias_to_canonical = _build_registry(pkg_dir)
 
-    recommended: list[str] = [c for c in RECOMMENDED_PLAYBOOKS if c in cmd_to_mod]
+    recommended = [c for c in RECOMMENDED_PLAYBOOKS if c in cmd_to_mod]
+    recommended = _apply_search_list(recommended, search)
 
-    legacy_canonical: list[str] = []
+    legacy: list[str] = []
     for c in cmd_to_mod.keys():
         if c in recommended:
             continue
         if c in alias_to_canonical:
             continue
         if c.startswith("day") or c.endswith("-closeout"):
-            legacy_canonical.append(c)
-    legacy_canonical = sorted(legacy_canonical)
+            legacy.append(c)
+    legacy = sorted(_apply_search_list(legacy, search))
 
-    all_names = sorted(cmd_to_mod.keys())
+    aliases = _apply_search_aliases(dict(sorted(alias_to_canonical.items())), search)
+    all_names = sorted(_apply_search_list(sorted(cmd_to_mod.keys()), search))
 
-    return {
+    if want_recommended:
+        payload: dict[str, object] = {
+            "recommended": recommended,
+            "legacy": [],
+            "aliases": {},
+            "playbooks": recommended,
+        }
+        payload["counts"] = _counts(payload)
+        return payload
+
+    if want_legacy:
+        payload = {
+            "recommended": [],
+            "legacy": legacy,
+            "aliases": {},
+            "playbooks": legacy,
+        }
+        payload["counts"] = _counts(payload)
+        return payload
+
+    if want_aliases:
+        alias_names = sorted(list(aliases.keys()))
+        payload = {
+            "recommended": [],
+            "legacy": [],
+            "aliases": aliases,
+            "playbooks": alias_names,
+        }
+        payload["counts"] = _counts(payload)
+        return payload
+
+    payload = {
         "recommended": recommended,
-        "legacy": legacy_canonical,
-        "aliases": dict(sorted(alias_to_canonical.items())),
+        "legacy": legacy,
+        "aliases": aliases,
         "playbooks": all_names,
     }
+    payload["counts"] = _counts(payload)
+    return payload
 
 
 def _print_text(payload: dict[str, object]) -> None:
@@ -171,7 +239,6 @@ def _print_text(payload: dict[str, object]) -> None:
             print(f"  {n}")
     else:
         print("  (none)")
-
     print("")
     print("Legacy bootcamp flows:")
     if isinstance(legacy, list) and legacy:
@@ -179,65 +246,81 @@ def _print_text(payload: dict[str, object]) -> None:
             print(f"  {n}")
     else:
         print("  (none)")
-
     if isinstance(aliases, dict) and aliases:
         print("")
         print("Aliases:")
-        for a, c in sorted(aliases.items()):
-            print(f"  {a} -> {c}")
-
+        for k, v in sorted(aliases.items()):
+            print(f"  {k} -> {v}")
     print("")
-    print("Run: sdetkit playbooks run <name> [-- <args>]")
+    print("Run: sdetkit playbooks run <name>")
+    print("Tip: these commands still run directly, e.g. sdetkit <name> --help")
 
 
-def _run_playbook(name: str, args: list[str]) -> int:
+def _cmd_list(ns: argparse.Namespace) -> int:
+    payload = _list_payload(
+        want_recommended=bool(getattr(ns, "recommended", False)),
+        want_legacy=bool(getattr(ns, "legacy", False)),
+        want_aliases=bool(getattr(ns, "aliases", False)),
+        search=getattr(ns, "search", None),
+    )
+
+    fmt = getattr(ns, "format", "text")
+    if fmt == "json":
+        sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
+        return 0
+
+    _print_text(payload)
+    return 0
+
+
+def _cmd_run(ns: argparse.Namespace) -> int:
     pkg_dir = _pkg_dir()
     cmd_to_mod, _alias_to_canonical = _build_registry(pkg_dir)
 
-    mod = cmd_to_mod.get(name)
-    if not mod:
-        print("playbooks: unknown name", file=sys.stderr)
+    name = getattr(ns, "name", "")
+    if not isinstance(name, str) or name not in cmd_to_mod:
+        sys.stderr.write("playbooks: unknown name\n")
         return 2
 
-    m = import_module(f"sdetkit.{mod}")
+    mod_name = cmd_to_mod[name]
+    m = import_module(f"sdetkit.{mod_name}")
     fn = getattr(m, "main", None)
     if not callable(fn):
-        print("playbooks: unknown name", file=sys.stderr)
+        sys.stderr.write("playbooks: unknown name\n")
         return 2
 
+    args = list(getattr(ns, "args", []) or [])
     if args and args[0] == "--":
         args = args[1:]
-    return int(fn(list(args)))
+    return int(fn(args))
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     if argv is None:
         argv = sys.argv[1:]
+    argv = list(argv)
+    if not argv:
+        argv = ["list"]
 
     p = argparse.ArgumentParser(prog="sdetkit playbooks")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    lp = sub.add_parser("list")
-    lp.add_argument("--format", choices=["text", "json"], default="text")
+    listp = sub.add_parser("list")
+    listp.add_argument("--format", choices=["text", "json"], default="text")
+    g = listp.add_mutually_exclusive_group()
+    g.add_argument("--recommended", action="store_true")
+    g.add_argument("--legacy", action="store_true")
+    g.add_argument("--aliases", action="store_true")
+    listp.add_argument("--search", default=None)
+    listp.set_defaults(_handler=_cmd_list)
 
-    rp = sub.add_parser("run")
-    rp.add_argument("name")
-    rp.add_argument("args", nargs=argparse.REMAINDER)
+    runp = sub.add_parser("run")
+    runp.add_argument("name")
+    runp.add_argument("args", nargs=argparse.REMAINDER)
+    runp.set_defaults(_handler=_cmd_run)
 
-    argv = list(argv)
-    if not argv:
-        argv = ["list"]
-    ns = p.parse_args(list(argv))
-
-    if ns.cmd == "list":
-        payload = _list_payload()
-        if ns.format == "json":
-            sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
-            return 0
-        _print_text(payload)
-        return 0
-
-    if ns.cmd == "run":
-        return _run_playbook(str(ns.name), list(ns.args))
-
-    return 2
+    ns = p.parse_args(argv)
+    h = getattr(ns, "_handler", None)
+    if not callable(h):
+        return 2
+    return int(h(ns))
