@@ -66,8 +66,9 @@ def _stable_json(data: dict[str, object]) -> str:
     return json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True) + "\n"
 
 
-def _baseline_snapshot_path(root: Path) -> Path:
-    return root / ".sdetkit" / "gate.fast.snapshot.json"
+def _baseline_snapshot_path(root: Path, profile: str) -> Path:
+    name = "gate.release.snapshot.json" if profile == "release" else "gate.fast.snapshot.json"
+    return root / ".sdetkit" / name
 
 
 def _read_text(path: Path) -> str:
@@ -438,13 +439,16 @@ def main(argv: list[str] | None = None) -> int:
         bp.add_argument("--path", default=None)
         bp.add_argument("--diff", action="store_true")
         bp.add_argument("--diff-context", type=int, default=3)
+        bp.add_argument("--profile", choices=["fast", "release"], default="fast")
         ns, extra = bp.parse_known_args(args0[1:])
         if extra and extra[0] == "--":
             extra = extra[1:]
 
         root = Path.cwd()
         snap = (
-            Path(ns.path) if isinstance(ns.path, str) and ns.path else _baseline_snapshot_path(root)
+            Path(ns.path)
+            if isinstance(ns.path, str) and ns.path
+            else _baseline_snapshot_path(root, ns.profile)
         )
         if not snap.is_absolute():
             snap = root / snap
@@ -455,7 +459,7 @@ def main(argv: list[str] | None = None) -> int:
 
         buf = io.StringIO()
         with redirect_stdout(buf):
-            rc_fast = main(["fast", "--format", "json"] + list(extra))
+            rc_fast = main([ns.profile, "--format", "json"] + list(extra))
         cur_text = buf.getvalue()
         if rc_fast != 0:
             return rc_fast
@@ -466,7 +470,7 @@ def main(argv: list[str] | None = None) -> int:
             cur_obj = None
 
         if isinstance(cur_obj, dict):
-            norm = _normalize_gate_payload(cur_obj)
+            norm = _normalize_gate_payload(cur_obj) if ns.profile == "fast" else cur_obj
             cur_text = _stable_json(norm)
 
         if ns.action == "write":
