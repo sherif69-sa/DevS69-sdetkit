@@ -22,12 +22,14 @@ mode="${1:-all}"
 shift || true
 
 skip_docs=0
+run_network=0
 for arg in "$@"; do
   case "$arg" in
     --skip-docs) skip_docs=1 ;;
+    --run-network) run_network=1 ;;
     *)
       echo "unknown option: $arg" >&2
-      echo "usage: $0 {all|quick} [--skip-docs]" >&2
+      echo "usage: $0 {all|quick} [--skip-docs] [--run-network]" >&2
       exit 2
       ;;
   esac
@@ -52,6 +54,10 @@ run_types() {
 }
 
 run_tests() {
+  if [[ "$run_network" -eq 1 ]]; then
+    python3 -m pytest -q -o addopts=
+    return 0
+  fi
   python3 -m pytest -q
 }
 
@@ -81,7 +87,7 @@ case "$mode" in
     run_docs
     ;;
   *)
-    echo "usage: $0 {all|quick} [--skip-docs]" >&2
+    echo "usage: $0 {all|quick} [--skip-docs] [--run-network]" >&2
     exit 2
     ;;
 esac
