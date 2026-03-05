@@ -81,3 +81,12 @@ def test_gate_baseline_check_includes_diff_when_requested(
     assert "snapshot drift detected" in data["snapshot_diff_summary"]
     assert isinstance(data.get("snapshot_diff"), str)
     assert data["snapshot_diff"].startswith("--- snapshot\n+++ current\n")
+
+
+def test_gate_baseline_release_profile_writes_release_snapshot(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    rc = gate.main(["baseline", "write", "--profile", "release", "--", "--dry-run"])
+    assert rc == 0
+    snap = tmp_path / ".sdetkit" / "gate.release.snapshot.json"
+    assert snap.exists()
+    json.loads(snap.read_text(encoding="utf-8"))
