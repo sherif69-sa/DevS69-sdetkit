@@ -100,6 +100,11 @@ def main(argv: list[str] | None = None) -> int:
     if ns.cmd == "check":
         for item in regressions:
             sys.stdout.write(json.dumps(item, sort_keys=True) + "\n")
+        if ns.fail_on == "security":
+            security_only = [
+                item for item in regressions if item.get("type") == "security_rule_increase"
+            ]
+            return 1 if security_only else 0
         return 1 if regressions else 0
 
     payload = {"baseline": baseline.as_posix(), "regressions": regressions}

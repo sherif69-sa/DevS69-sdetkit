@@ -340,6 +340,20 @@ def _format_release_text(payload: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _normalize_release_steps(steps: list[dict[str, Any]], root: Path) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for step in steps:
+        cleaned: dict[str, Any] = dict(step)
+        cleaned.pop("duration_ms", None)
+        cleaned.pop("stdout", None)
+        cleaned.pop("stderr", None)
+        step_cmd = cleaned.get("cmd")
+        if isinstance(step_cmd, list):
+            cleaned["cmd"] = _normalize_release_cmd([str(t) for t in step_cmd], root)
+        normalized.append(cleaned)
+    return normalized
+
+
 def _run_release(ns: argparse.Namespace) -> int:
     root = Path(ns.root).resolve()
     doctor_cmd = [sys.executable, "-m", "sdetkit", "doctor", "--release", "--format", "json"]
@@ -391,10 +405,7 @@ def _run_release(ns: argparse.Namespace) -> int:
             steps.append({"id": step_id, **_run(cmd, cwd=root)})
 
     failed = [s["id"] for s in steps if not s.get("ok", False)]
-    for step in steps:
-        step_cmd = step.get("cmd")
-        if isinstance(step_cmd, list):
-            step["cmd"] = _normalize_release_cmd([str(t) for t in step_cmd], root)
+    steps = _normalize_release_steps(steps, root)
 
     payload = {
         "profile": "release",
