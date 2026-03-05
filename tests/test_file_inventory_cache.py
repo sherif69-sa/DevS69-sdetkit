@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Sequence
 from pathlib import Path
+
+import pytest
 
 from sdetkit.repo import _FileInventoryCache
 
@@ -58,7 +61,7 @@ def test_file_inventory_cache_hit_and_invalidation(tmp_path: Path) -> None:
     assert "pkg/c.py" in paths4
 
 
-def _inv_paths(inv: list[object]) -> list[str]:
+def _inv_paths(inv: Sequence[object]) -> list[str]:
     out: list[str] = []
     for fi in inv:
         out.append(str(getattr(fi, "path", getattr(fi, "rel_path", ""))))
@@ -173,3 +176,102 @@ def test_file_inventory_cache_add_file_detected_when_dir_mtime_is_unchanged(tmp_
 
     updated = c.get_inventory(repo)
     assert "pkg/new.py" in _inv_paths(updated)
+
+
+def test_repo_helpers_and_fileinfo_type_guards(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sdetkit import repo as repo_mod
+
+    assert repo_mod._safe_snippet("short") == "<redacted>"
+    assert repo_mod._safe_snippet("abcdefghijk") == "abc...ijk"
+    assert repo_mod._shannon_entropy("") == 0.0
+
+    with pytest.raises(TypeError):
+        repo_mod.FileInfo.from_dict({"path": 1, "mtime_ns": 1, "size": 1})
+    with pytest.raises(TypeError):
+        repo_mod.FileInfo.from_dict({"path": "a", "mtime_ns": "1", "size": 1})
+    with pytest.raises(TypeError):
+        repo_mod.FileInfo.from_dict({"path": "a", "mtime_ns": 1, "size": "1"})
+    with pytest.raises(TypeError):
+        repo_mod.FileInfo.from_dict({"path": "a", "mtime_ns": 1, "size": 1, "ctime_ns": "1"})
+
+    info = repo_mod.FileInfo.from_dict({"path": "a.py", "mtime_ns": 1, "size": 2})
+    assert info.rel_path == "a.py"
+    assert info.to_dict()["ctime_ns"] == -1
+
+    class _Proc:
+        def __init__(self, returncode: int, stdout: str) -> None:
+            self.returncode = returncode
+            self.stdout = stdout
+
+    monkeypatch.setattr(repo_mod.subprocess, "run", lambda *a, **k: _Proc(0, "abc123\n"))
+    assert repo_mod._git_commit_sha(tmp_path) == "abc123"
+
+    monkeypatch.setattr(repo_mod.subprocess, "run", lambda *a, **k: _Proc(1, ""))
+    assert repo_mod._git_commit_sha(tmp_path) is None
+
+    def _boom(*_a, **_k):
+        raise OSError("no git")
+
+    monkeypatch.setattr(repo_mod.subprocess, "run", _boom)
+    assert repo_mod._git_commit_sha(tmp_path) is None
+    assert repo_mod._changed_files(tmp_path, "HEAD~1") == set()
+
+
+def test_iter_files_and_load_cache_invalid_shapes(tmp_path: Path) -> None:
+    from sdetkit import repo as repo_mod
+
+    root = tmp_path / "repo"
+    root.mkdir()
+    _write(root / "ok.py", "print('ok')\n")
+    _write(root / ".coverage", "x")
+    _write(root / "node_modules" / "skip.js", "x")
+    _write(root / "pkg.egg-info" / "PKG-INFO", "x")
+
+    files = repo_mod._iter_files(root)
+    rels = [f.relative_to(root).as_posix() for f in files]
+    assert rels == ["ok.py"]
+
+    cache = repo_mod._FileInventoryCache(tmp_path / "cache")
+    cache_path = cache._path_for_root(root)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+    for payload in [
+        [],
+        "bad",
+        {"schema_version": 2, "dirs": [], "files": []},
+        {"schema_version": 1, "dirs": "bad", "files": []},
+        {"schema_version": 1, "dirs": [], "files": "bad"},
+        {"schema_version": 1, "dirs": ["x"], "files": []},
+        {"schema_version": 1, "dirs": [{"path": 1, "mtime_ns": 1}], "files": []},
+        {"schema_version": 1, "dirs": [{"path": ".", "mtime_ns": 1}], "files": ["x"]},
+    ]:
+        cache_path.write_text(json.dumps(payload), encoding="utf-8")
+        assert cache._load_cache(cache_path) is None
+
+
+def test_cache_validate_and_digest_variants(tmp_path: Path) -> None:
+    from sdetkit import repo as repo_mod
+
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    _write(repo_root / "pkg" / "a.py", "print('a')\n")
+
+    cache = repo_mod._FileInventoryCache(tmp_path / "cache")
+    cache.get_inventory(repo_root)
+
+    assert cache._validate_dirs(repo_root, {"missing": 0}) is False
+    assert cache._validate_files(repo_root, [repo_mod.FileInfo("missing.py", 1, 1, -1)]) is False
+
+    one = cache.digest_for(repo_root)
+    two = cache.digest_for(repo_root)
+    assert one == two
+
+    digest_missing = cache.digest_for(repo_root, "does/not/exist.py")
+    assert isinstance(digest_missing, str)
+    assert len(digest_missing) == 64
+
+    tree_digest = cache.digest_for(repo_root, "__repo_tree__")
+    assert isinstance(tree_digest, str)
+    assert len(tree_digest) == 64

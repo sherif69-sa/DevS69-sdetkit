@@ -1,15 +1,25 @@
 # SDETKit
 
+![CI](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main)
+![Quality](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main)
+![Security](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/security.yml/badge.svg?branch=main)
+![Repo Audit](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
+![Pages](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
+
 SDETKit is a production-oriented SDET + DevOps toolkit for auditing repositories, running deterministic API checks, enforcing policy gates, and generating release/readiness evidence. It is designed for team adoption: stable outputs, explicit exit codes, CI-friendly commands, and safety-minded defaults.
 
 ## Install
 
 Runtime install (minimal dependencies):
-- `python -m pip install sdetkit`
+- `python -m pip install .`
 
 Developer install (all tooling, pinned toolchain):
 - `bash scripts/bootstrap.sh`
 - `source .venv/bin/activate`
+
+Optional extras:
+- `python -m pip install .[dev]` (includes `pre-commit`)
+- `python -m pip install .[test]` (includes `hypothesis` and test runners)
 
 ## Quickstart
 
@@ -26,6 +36,34 @@ Developer install (all tooling, pinned toolchain):
 
 - Run the full local quality gate (same as CI):
   - `bash quality.sh all`
+
+## DevOps Quickstart
+
+### Local (WSL2/Linux)
+```bash
+python -m pip install .
+python -m sdetkit gate fast
+python -m sdetkit baseline check --format json
+python -m sdetkit gate release
+```
+
+### GitHub Actions
+Use the existing workflow entrypoint command in your job:
+```yaml
+- name: Install
+  run: python -m pip install .[dev,test]
+- name: CI gate
+  run: bash ci.sh quick --skip-docs
+```
+
+### Jenkins
+See ready-to-copy references under `examples/ci/jenkins/` (for example `examples/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`).
+
+### Docker
+```bash
+docker build -t sdetkit .
+docker run --rm -v "$PWD:/work" -w /work sdetkit python -m sdetkit gate fast
+```
 
 ## Tooling overview
 
@@ -60,10 +98,10 @@ SDETKit aims to be safe by default:
 
 ## CI usage
 
-Recommended CI entrypoint:
-- `bash quality.sh all`
+Recommended CI entrypoint (single reproducible command):
+- `bash ci.sh quick --skip-docs`
 
-This runs formatting/linting, typing, and tests using the repo's pinned tooling.
+This runs the same fast checks CI relies on (format/lint/type/tests) while keeping docs builds opt-in.
 
 ### Security gate budgets (new)
 
@@ -77,6 +115,8 @@ Tip: pair `security scan --format sarif` (for code scanning upload) with `securi
 
 - Build docs locally:
   - `mkdocs build -s`
+- Determinism checklist:
+  - `docs/determinism-checklist.md`
 
 ## Contributing
 

@@ -4,7 +4,7 @@ import json
 import os
 from pathlib import Path
 
-from sdetkit import cli
+import sdetkit.cli as cli
 
 
 def _run(args: list[str]) -> int:
@@ -242,3 +242,85 @@ def test_security_scan_ignores_uuid_and_hex_digests(tmp_path: Path, capsys) -> N
     data = json.loads(out)
     findings = data.get("findings", [])
     assert not any(f.get("rule_id") == "SEC_HIGH_ENTROPY_STRING" for f in findings)
+
+
+def test_security_baseline_requires_output(tmp_path: Path, capsys) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "app.py").write_text("import os\nos.system('x')\n", encoding="utf-8")
+
+    rc = _run(["baseline", "--root", str(tmp_path)])
+    assert rc == 2
+    assert "requires --output" in capsys.readouterr().err
+
+
+def test_security_enforce_threshold_and_report_scan_json(tmp_path: Path, capsys) -> None:
+    scan_json = tmp_path / "scan.json"
+    payload = {
+        "findings": [
+            {
+                "rule_id": "SEC_OS_SYSTEM",
+                "severity": "error",
+                "path": "a.py",
+                "line": 1,
+                "column": 1,
+                "message": "m",
+                "fingerprint": "fp",
+            }
+        ],
+        "sbom": {"components": [{"name": "x"}]},
+    }
+    scan_json.write_text(json.dumps(payload), encoding="utf-8")
+
+    rc = _run(
+        [
+            "enforce",
+            "--scan-json",
+            str(scan_json),
+            "--max-total",
+            "0",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 1
+    out = json.loads(capsys.readouterr().out)
+    assert out["ok"] is False
+
+    rc = _run(["enforce", "--scan-json", str(scan_json), "--max-total", "-1"])
+    assert rc == 2
+
+    sbom_out = tmp_path / "sbom.json"
+    rc = _run(
+        [
+            "report",
+            "--scan-json",
+            str(scan_json),
+            "--format",
+            "json",
+            "--sbom-output",
+            str(sbom_out),
+        ]
+    )
+    assert rc == 0
+    assert sbom_out.exists()
+
+
+def test_security_fix_apply_and_run_ruff_paths(tmp_path: Path, monkeypatch, capsys) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+    target = src / "mod.py"
+    target.write_text(
+        "import yaml\nyaml.load(x)\nimport requests\nrequests.get(url)\n", encoding="utf-8"
+    )
+
+    monkeypatch.setattr("sdetkit.security_gate._run_ruff_fix", lambda _root: (True, "ruff fixed"))
+
+    rc = _run(["fix", "--root", str(tmp_path), "--apply", "--run-ruff", "--timeout", "3"])
+    assert rc == 0
+    out = capsys.readouterr().out.lower()
+    assert "ruff-fix applied" in out
+    assert "files changed" in out
+    txt = target.read_text(encoding="utf-8")
+    assert "safe_load" in txt
+    assert "timeout=3" in txt

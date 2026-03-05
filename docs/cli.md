@@ -57,7 +57,7 @@ Examples:
 - `sdetkit ci validate-templates --format json --strict`
 - `sdetkit ci validate-templates --root . --format text --strict`
 
-Validates the required GitLab/Jenkins/Tekton reference templates under `templates/ci/`.
+Validates the required GitLab/Jenkins/Tekton reference templates under `examples/ci/` (compatibility symlink remains at `templates/ci/`).
 
 ## onboarding
 

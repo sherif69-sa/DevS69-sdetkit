@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 import httpx
+import pytest
 
 from sdetkit import apiget, cli
 
@@ -131,3 +132,81 @@ def test_verbose_keeps_user_agent_when_user_provided(monkeypatch, capsys):
     assert rc == 0
     low = out.err.lower()
     assert "user-agent: mine" in low
+
+
+def test_apiget_allow_scheme_insecure_and_query_errors(monkeypatch, capsys):
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"ok": True}, request=request)
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setattr(apiget.httpx, "Client", _client_factory(transport))
+
+    rc = cli.main(
+        [
+            "apiget",
+            "file://example.test/x",
+            "--allow-scheme",
+            "file",
+            "--insecure",
+            "--expect",
+            "dict",
+        ]
+    )
+    out = capsys.readouterr()
+    assert rc == 0
+    assert "tls verification disabled" in out.err.lower()
+
+    with pytest.raises(SystemExit):
+        cli.main(["apiget", "https://example.test/x", "--query", "bad", "--expect", "dict"])
+
+
+def test_apiget_exception_handlers_timeout_circuit_and_value(monkeypatch, capsys):
+    class _FakeClient:
+        def __init__(self, *_a, **_k):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_a):
+            return False
+
+    class _RaisesTimeout:
+        def __init__(self, *_a, **_k):
+            pass
+
+        def get_json_any(self, *_a, **_k):
+            raise TimeoutError("x")
+
+    class _RaisesCircuit:
+        def __init__(self, *_a, **_k):
+            pass
+
+        def get_json_any(self, *_a, **_k):
+            raise apiget.CircuitOpenError("open")
+
+    class _RaisesValue:
+        def __init__(self, *_a, **_k):
+            pass
+
+        def get_json_any(self, *_a, **_k):
+            raise ValueError("bad json")
+
+    monkeypatch.setattr(apiget.httpx, "Client", _FakeClient)
+    monkeypatch.setattr(apiget, "SdetHttpClient", _RaisesTimeout)
+    rc = cli.main(["apiget", "https://example.test/x", "--verbose", "--expect", "any"])
+    err = capsys.readouterr().err.lower()
+    assert rc == 2
+    assert "request timed out" in err
+
+    monkeypatch.setattr(apiget, "SdetHttpClient", _RaisesCircuit)
+    rc = cli.main(["apiget", "https://example.test/x", "--verbose", "--expect", "any"])
+    err = capsys.readouterr().err.lower()
+    assert rc == 2
+    assert "circuit open" in err
+
+    monkeypatch.setattr(apiget, "SdetHttpClient", _RaisesValue)
+    rc = cli.main(["apiget", "https://example.test/x", "--verbose", "--expect", "any"])
+    err = capsys.readouterr().err.lower()
+    assert rc == 1
+    assert "bad json" in err

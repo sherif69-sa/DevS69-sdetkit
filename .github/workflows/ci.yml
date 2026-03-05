@@ -50,7 +50,7 @@ jobs:
           path: report.json
 
   fast-ci:
-    name: Fast CI lane
+    name: Fast CI lane (ci.sh quick)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -62,23 +62,36 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install project + dev/test extras
+        run: python -m pip install -e .[dev,test]
+
+      - name: Canonical fast gate
+        run: bash ci.sh quick --skip-docs
+
+  ci-demo-60s:
+    name: 60-second CI demo artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project
+        run: python -m pip install -e .
+
+      - name: Run deterministic demo
         run: |
-          python -m pip install -e .[dev,test]
+          mkdir -p build
+          python -m sdetkit demo --format json > build/ci-demo.json
 
-      - name: Ruff format check
-        run: python -m ruff format --check .
-
-      - name: Ruff lint
-        run: python -m ruff check .
-
-      - name: Mypy
-        run: python -m mypy --config-file pyproject.toml src
-
-      - name: Community standards baseline
-        run: python scripts/check_community_standards.py
-
-      - name: Unit tests (fast)
-        run: python -m pytest -q
+      - name: Upload demo artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: ci-demo-json
+          path: build/ci-demo.json
 
   package-validate:
     name: Build + twine check

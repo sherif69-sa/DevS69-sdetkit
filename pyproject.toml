@@ -118,6 +118,7 @@ runner = "PYTHONPATH=src pytest -q --ignore=mutants"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "-m 'not network'"
 markers = [
   "network: allow real network access for this test",
 ]
