@@ -1,10 +1,10 @@
 # SDETKit
 
-![CI](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main)
-![Quality](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main)
-![Security](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/security.yml/badge.svg?branch=main)
-![Repo Audit](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
-![Pages](https://github.com/DevS69/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
+![CI](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg?branch=main)
+![Quality](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg?branch=main)
+![Security](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml/badge.svg?branch=main)
+![Repo Audit](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
+![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
 
 SDETKit is a production-oriented SDET + DevOps toolkit for auditing repositories, running deterministic API checks, enforcing policy gates, and generating release/readiness evidence. It is designed for team adoption: stable outputs, explicit exit codes, CI-friendly commands, and safety-minded defaults.
 
@@ -34,7 +34,9 @@ Optional extras:
   - `python -m sdetkit apiget --help`
   - `python -m sdetkit cassette-get --help`
 
-- Run the full local quality gate (same as CI):
+- Run the fast CI-equivalent gate:
+  - `bash ci.sh quick --skip-docs`
+- Run the full local quality gate:
   - `bash quality.sh all`
 
 ## DevOps Quickstart
@@ -99,6 +101,9 @@ SDETKit aims to be safe by default:
 ## CI usage
 
 Recommended CI entrypoint (single reproducible command):
+
+Opt-in network tests:
+- `bash ci.sh quick --skip-docs --run-network`
 - `bash ci.sh quick --skip-docs`
 
 This runs the same fast checks CI relies on (format/lint/type/tests) while keeping docs builds opt-in.
