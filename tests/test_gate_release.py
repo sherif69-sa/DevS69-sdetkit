@@ -34,6 +34,9 @@ def test_gate_release_runs_expected_commands(monkeypatch, tmp_path: Path, capsys
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
+    assert "duration_ms" not in payload["steps"][0]
+    assert "stdout" not in payload["steps"][0]
+    assert "stderr" not in payload["steps"][0]
     assert [step["id"] for step in payload["steps"]] == [
         "doctor_release",
         "playbooks_validate",
@@ -58,6 +61,22 @@ def test_gate_release_passes_playbook_selection_flags(monkeypatch, tmp_path: Pat
     assert rc == 0
     _ = json.loads(capsys.readouterr().out)
     assert calls[1][3:] == ["playbooks", "validate", "--legacy", "--format", "json"]
+
+
+def test_gate_release_passes_playbooks_all_selection(monkeypatch, tmp_path: Path, capsys) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        calls.append(cmd)
+        return {"cmd": cmd, "rc": 0, "ok": True, "duration_ms": 1, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(["release", "--format", "json", "--playbooks-all"])
+    assert rc == 0
+    _ = json.loads(capsys.readouterr().out)
+    assert calls[1][3:] == ["playbooks", "validate", "--all", "--format", "json"]
 
 
 def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys) -> None:

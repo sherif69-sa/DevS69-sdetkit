@@ -669,6 +669,8 @@ Useful flags (`gate fast`): `--root`, `--format`, `--out`/`--output`, `--strict`
 
 Useful flags (`gate release`): `--root`, `--format`, `--out`/`--output`, `--dry-run`, `--release-full`, `--playbooks-all`, `--playbooks-legacy`, `--playbooks-aliases`, `--playbook-name` (repeatable).
 
+Release JSON output is deterministic for CI/baseline usage: it normalizes repo paths and omits volatile runtime fields.
+
 Note: `gate fast` uses a default smoke pytest subset for speed. Use `--full-pytest` or explicit `--pytest-args` to run the full test suite.
 
 ### Baselines: show drift diff

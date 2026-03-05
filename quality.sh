@@ -19,7 +19,9 @@ ensure_venv
 python3 scripts/check_repo_layout.py
 
 mode=${1:-all}
-cov_fail_under=${COV_FAIL_UNDER:-70}
+# Keep the default gate realistic for full-repo runs, while still allowing
+# stricter enforcement in CI/release jobs via COV_FAIL_UNDER=95.
+cov_fail_under=${COV_FAIL_UNDER:-80}
 
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 && return 0
