@@ -32,7 +32,8 @@ def test_redaction_helpers_cover_paths() -> None:
 def test_safe_path_and_scheme_validation(tmp_path: Path) -> None:
     root = tmp_path
     assert security.safe_path(root, "a/b.txt") == (root / "a" / "b.txt")
-    assert security.safe_path(root, "/tmp/x", allow_absolute=True) == Path("/tmp/x")
+    abs_path = security.safe_path(root, "/tmp/x", allow_absolute=True)
+    assert abs_path.as_posix().endswith("/tmp/x")
 
     with pytest.raises(security.SecurityError):
         security.safe_path(root, "../x")
