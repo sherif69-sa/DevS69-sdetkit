@@ -51,7 +51,8 @@ def _normalize_gate_payload(payload: dict[str, object]) -> dict[str, object]:
                         if isinstance(tok, str):
                             if root_str and (tok == root_str or tok.startswith(root_str + "/")):
                                 tok = tok.replace(root_str, "<repo>", 1)
-                            if tok.startswith("/") and tok.rsplit("/", 1)[-1].startswith("python"):
+                            base = tok.rsplit("/", 1)[-1]
+                            if "/" in tok and base.startswith("python"):
                                 tok = "python"
                         new_cmd.append(tok)
                     sd["cmd"] = new_cmd
@@ -282,7 +283,10 @@ def _run_fast(ns: argparse.Namespace) -> int:
     }
 
     if ns.format == "json":
-        rendered = json.dumps(payload, sort_keys=True) + "\n"
+        if getattr(ns, "stable_json", False):
+            rendered = _stable_json(_normalize_gate_payload(payload))
+        else:
+            rendered = json.dumps(payload, sort_keys=True) + "\n"
     elif ns.format == "md":
         rendered = _format_md(payload)
     else:
@@ -535,6 +539,7 @@ def main(argv: list[str] | None = None) -> int:
     fast.add_argument("--root", default=".")
     fast.add_argument("--format", choices=["text", "json", "md"], default="text")
     fast.add_argument("--out", "--output", default=None)
+    fast.add_argument("--stable-json", action="store_true")
     fast.add_argument("--strict", action="store_true")
     fast.add_argument("--list-steps", action="store_true")
     fast.add_argument("--only", default=None)

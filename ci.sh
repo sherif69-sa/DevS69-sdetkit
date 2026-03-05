@@ -23,13 +23,30 @@ shift || true
 
 skip_docs=0
 run_network=0
-for arg in "$@"; do
-  case "$arg" in
-    --skip-docs) skip_docs=1 ;;
-    --run-network) run_network=1 ;;
+artifact_dir=""
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    --skip-docs)
+      skip_docs=1
+      shift
+      ;;
+    --run-network)
+      run_network=1
+      shift
+      ;;
+    --artifact-dir)
+      if [[ "${2:-}" == "" ]]; then
+        echo "missing value for --artifact-dir" >&2
+        echo "usage: $0 {all|quick} [--skip-docs] [--run-network] [--artifact-dir DIR]" >&2
+        exit 2
+      fi
+      artifact_dir="$2"
+      shift 2
+      ;;
     *)
-      echo "unknown option: $arg" >&2
-      echo "usage: $0 {all|quick} [--skip-docs] [--run-network]" >&2
+      echo "unknown option: $1" >&2
+      echo "usage: $0 {all|quick} [--skip-docs] [--run-network] [--artifact-dir DIR]" >&2
       exit 2
       ;;
   esac
@@ -41,24 +58,26 @@ if [[ "${VIRTUAL_ENV:-}" == "" ]]; then
   exit 2
 fi
 
-run_format() {
-  python3 -m ruff format --check .
-}
-
-run_lint() {
-  python3 -m ruff check .
-}
-
-run_types() {
-  python3 -m mypy src
-}
-
-run_tests() {
+run_gate_fast() {
+  gate_args=()
   if [[ "$run_network" -eq 1 ]]; then
-    python3 -m pytest -q -o addopts=
-    return 0
+    gate_args+=(--pytest-args "-q -o addopts=")
   fi
-  python3 -m pytest -q
+
+  set +e
+  rc=0
+  if [[ "${artifact_dir}" != "" ]]; then
+    mkdir -p "$artifact_dir"
+    python3 -m sdetkit gate fast --format json --stable-json --out "$artifact_dir/gate-fast.json" "${gate_args[@]}"
+    rc=$?
+  fi
+  python3 -m sdetkit gate fast "${gate_args[@]}"
+  rc2=$?
+  if [[ "$rc2" -ne 0 ]]; then
+    rc=$rc2
+  fi
+  set -e
+  return "$rc"
 }
 
 run_docs() {
@@ -74,20 +93,14 @@ run_docs() {
 
 case "$mode" in
   quick)
-    run_format
-    run_lint
-    run_types
-    run_tests
+    run_gate_fast
     ;;
   all)
-    run_format
-    run_lint
-    run_types
-    run_tests
+    run_gate_fast
     run_docs
     ;;
   *)
-    echo "usage: $0 {all|quick} [--skip-docs] [--run-network]" >&2
+    echo "usage: $0 {all|quick} [--skip-docs] [--run-network] [--artifact-dir DIR]" >&2
     exit 2
     ;;
 esac

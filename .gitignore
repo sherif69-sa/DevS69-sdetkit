@@ -31,6 +31,10 @@ doctor.json
 
 # local tooling
 .sdetkit/
+!.sdetkit/
+.sdetkit/*
+!.sdetkit/gate.fast.snapshot.json
+!.sdetkit/gate.release.snapshot.json
 
 # docs build output
 site/

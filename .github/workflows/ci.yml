@@ -72,11 +72,19 @@ jobs:
 
       - name: Canonical fast gate (offline default)
         if: ${{ github.event.inputs.run_network_tests != 'true' }}
-        run: bash ci.sh quick --skip-docs
+        run: bash ci.sh quick --skip-docs --artifact-dir build
 
       - name: Canonical fast gate (with network tests)
         if: ${{ github.event.inputs.run_network_tests == 'true' }}
-        run: bash ci.sh quick --skip-docs --run-network
+        run: bash ci.sh quick --skip-docs --run-network --artifact-dir build
+
+      - name: Upload gate-fast artifact
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: gate-fast
+          path: build/gate-fast.json
+          if-no-files-found: warn
 
   ci-demo-60s:
     name: 60-second CI demo artifact

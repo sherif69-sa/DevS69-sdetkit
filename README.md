@@ -106,7 +106,7 @@ Opt-in network tests:
 - `bash ci.sh quick --skip-docs --run-network`
 - `bash ci.sh quick --skip-docs`
 
-This runs the same fast checks CI relies on (format/lint/type/tests) while keeping docs builds opt-in.
+This wraps `python -m sdetkit gate fast` (fast profile uses a small pytest subset) while keeping docs builds opt-in.
 
 ### Security gate budgets (new)
 
