@@ -64,3 +64,44 @@ def test_main_cli_dispatches_docs_navigation(capsys):
     assert rc == 0
     out = capsys.readouterr().out
     assert "Day 11 docs navigation tune-up" in out
+
+
+def test_docs_navigation_extract_quick_jump_missing_end_returns_empty():
+    text = f"hello {docs_navigation._QUICK_JUMP_START} still-open"
+    assert docs_navigation._extract_quick_jump(text) == ""
+
+
+def test_docs_navigation_write_defaults_noop_when_already_clean(tmp_path):
+    (tmp_path / "docs").mkdir(parents=True)
+    (tmp_path / "docs/index.md").write_text("# Documentation Home\n", encoding="utf-8")
+
+    first = docs_navigation._write_defaults(tmp_path)
+    assert first == ["docs/index.md"]
+
+    second = docs_navigation._write_defaults(tmp_path)
+    assert second == []
+
+
+def test_docs_navigation_markdown_output_file_written(tmp_path, capsys):
+    (tmp_path / "docs").mkdir(parents=True)
+    content = (
+        "# Documentation Home\n\n"
+        + docs_navigation._DAY11_QUICK_JUMP_BLOCK
+        + "\n\n"
+        + docs_navigation._DAY11_SECTION_HEADER
+        + "\n\n"
+        + docs_navigation._DAY11_JOURNEYS_BLOCK
+        + "\n"
+    )
+    (tmp_path / "docs/index.md").write_text(content, encoding="utf-8")
+
+    out_path = tmp_path / "out.md"
+    rc = docs_navigation.main(
+        ["--root", str(tmp_path), "--format", "markdown", "--output", str(out_path), "--strict"]
+    )
+    assert rc == 0
+
+    written = out_path.read_text(encoding="utf-8")
+    assert "# Day 11 docs navigation tune-up" in written
+    assert "## Missing docs navigation content" in written
+    assert "- none" in written

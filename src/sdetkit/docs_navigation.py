@@ -85,7 +85,10 @@ def _replace_or_append_block(
     start = text.find(start_marker)
     end = text.find(end_marker, start) if start >= 0 else -1
     if start >= 0 and end >= 0:
-        updated = text[:start] + block + text[end + len(end_marker) :]
+        tail = text[end + len(end_marker) :]
+        if block.endswith("\n") and tail.startswith("\n"):
+            tail = tail[1:]
+        updated = text[:start] + block + tail
         return updated, updated != text
     updated = text.rstrip() + ("\n\n" if text.strip() else "") + block
     return updated, updated != text
