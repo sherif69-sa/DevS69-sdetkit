@@ -1,33 +1,100 @@
 <div class="hero-panel" markdown>
 
+<div class="hero-badges" markdown>
+
+<span class="pill">Deterministic by design</span>
+<span class="pill">CI-ready workflows</span>
+<span class="pill">Audit-friendly evidence</span>
+
+</div>
+
 # DevS69 SDETKit
 
-Ship trusted software faster with deterministic SDET + DevOps workflows: repository diagnostics, API validation, policy gates, and release evidence packs.
+Build, validate, and release software with confidence using a polished SDET + DevOps toolkit that keeps quality, security, and traceability aligned from local runs to production pipelines.
 
 <div class="hero-actions" markdown>
 
 [Get started](#fast-start){ .md-button .md-button--primary }
 [Open command reference](cli.md){ .md-button }
+[See release evidence](evidence.md){ .md-button }
+
+</div>
+
+<div class="hero-stats" markdown>
+
+- **Single toolkit** for quality + security + release readiness
+- **Deterministic output** with CI-safe exit codes and repeatability
+- **Actionable docs** for SDETs, DevOps, and engineering leads
 
 </div>
 
 </div>
 
-<div class="kpi-strip" markdown>
+## Why teams choose SDETKit
 
-- **Deterministic by default** — stable output and CI-safe exit codes.
-- **Release ready** — quality, security, and governance gates in one toolkit.
-- **Operator friendly** — practical commands, docs, and artifacts for handoffs.
+<div class="grid cards feature-grid" markdown>
+
+- [**Repository diagnostics**](doctor.md)
+  Continuously detect hygiene, policy, and reliability gaps with clear remediation guidance.
+
+- [**Deterministic API validation**](api.md)
+  Run and replay checks with cassettes for reproducible, low-flake test behavior.
+
+- [**Policy + security enforcement**](security-gate.md)
+  Enforce release budgets and quality constraints before they turn into production risk.
+
+- [**Release evidence packs**](evidence.md)
+  Produce machine-readable artifacts for audits, governance reviews, and handoffs.
+
+- [**Patch-safe workflows**](patch-harness.md)
+  Apply controlled updates with validations that reduce merge and rollback risk.
+
+- [**Production readiness controls**](production-readiness.md)
+  Standardize CI lanes, quality gates, and release decisions with confidence.
 
 </div>
 
-## Product vision
+## Delivery flow (arranged by outcome)
 
-SDETKit is built for teams that need to move quickly **without sacrificing trust**. The platform centers on three outcomes:
+<div class="process-grid" markdown>
 
-1. **Reliability** — repeatable checks from laptop to CI.
-2. **Readiness** — objective go/no-go evidence for release decisions.
-3. **Adoption UX** — role-based onboarding and clear workflows.
+<div class="process-step" markdown>
+
+### 1) Diagnose
+Run repository health checks and baseline policy posture.
+
+`python -m sdetkit doctor --help`
+
+</div>
+
+<div class="process-step" markdown>
+
+### 2) Validate
+Execute deterministic test and API verification workflows.
+
+`bash ci.sh quick --skip-docs`
+
+</div>
+
+<div class="process-step" markdown>
+
+### 3) Enforce
+Apply quality and security budgets as go/no-go release controls.
+
+`python -m sdetkit security enforce --help`
+
+</div>
+
+<div class="process-step" markdown>
+
+### 4) Evidence
+Generate artifacts to support traceable release approvals.
+
+`python -m sdetkit evidence --help`
+
+</div>
+
+</div>
 
 ## Fast start
 
@@ -37,34 +104,10 @@ python3 -m venv .venv
 bash ci.sh quick --skip-docs
 ```
 
-!!! tip "First 10-minute path"
-    Run **CLI help** → **Doctor** → **Gate fast** to validate environment, repository hygiene, and baseline quality posture.
+!!! tip "10-minute onboarding path"
+    Follow this sequence for the fastest adoption: **CLI help** → **Doctor** → **Gate fast** → **Evidence export**.
 
-## Platform capabilities
-
-<div class="grid cards" markdown>
-
-- [**Repository diagnostics**](doctor.md)
-  Detect hygiene, policy, and reliability gaps with actionable remediation guidance.
-
-- [**Deterministic API validation**](api.md)
-  Execute and replay API checks with cassettes for stable test behavior.
-
-- [**Policy + security enforcement**](security-gate.md)
-  Enforce deterministic thresholds and prevent drift in quality/security posture.
-
-- [**Release evidence packs**](evidence.md)
-  Export machine-readable artifacts for audits, handoffs, and governance reviews.
-
-- [**Patch-safe change workflows**](patch-harness.md)
-  Apply controlled updates with validation hooks to reduce merge risk.
-
-- [**Scalable delivery operations**](production-readiness.md)
-  Standardize CI lanes and release controls for enterprise-ready execution.
-
-</div>
-
-## UX-ready navigation by role
+## Role-based jump points
 
 <div class="grid cards" markdown>
 
@@ -79,9 +122,9 @@ bash ci.sh quick --skip-docs
 
 </div>
 
-## Readiness scorecard model
+## Readiness scorecard
 
-| Area | What good looks like | Primary command |
+| Area | Outcome target | Primary command |
 | --- | --- | --- |
 | Quality | CI-equivalent checks are green and reproducible | `bash ci.sh quick --skip-docs` |
 | Coverage | Coverage gate meets release threshold | `bash quality.sh cov` |
