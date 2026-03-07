@@ -130,6 +130,18 @@ def test_security_gate_helper_paths_and_rendering(tmp_path: Path) -> None:
     assert "sbom components" in sg._render(loaded, "text", new_only=loaded, sbom=sbom).lower()
 
 
+def test_inject_requests_timeout_skips_invalid_ast_offsets(monkeypatch: pytest.MonkeyPatch) -> None:
+    text = "requests.get(url)\n"
+    tree = ast.parse(text)
+    call = next(node for node in ast.walk(tree) if isinstance(node, ast.Call))
+    call.end_col_offset = -1
+
+    monkeypatch.setattr(sg.ast, "parse", lambda _text: tree)
+
+    injected = sg._inject_requests_timeout(text, 9)
+    assert injected == text
+
+
 def test_security_gate_fix_and_dep_helpers(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     req = tmp_path / "requirements.txt"
     req.write_text("filelock==3.18.0\npyyaml==5.4\n", encoding="utf-8")

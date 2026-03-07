@@ -1156,9 +1156,18 @@ def _inject_requests_timeout(text: str, timeout: int) -> str:
             continue
         if lineno >= len(line_offsets) or end_lineno >= len(line_offsets):
             continue
+        if col_offset < 0 or end_col_offset < 0:
+            continue
+
+        line_span = line_offsets[lineno] - line_offsets[lineno - 1]
+        end_line_span = line_offsets[end_lineno] - line_offsets[end_lineno - 1]
+        if col_offset > line_span or end_col_offset > end_line_span:
+            continue
 
         start = line_offsets[lineno - 1] + col_offset
         end = line_offsets[end_lineno - 1] + end_col_offset
+        if start < 0 or end > len(text) or end <= start:
+            continue
         call_text = text[start:end]
         if not call_text.endswith(")"):
             continue

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import ast
 import json
 from pathlib import Path
+
+import pytest
 
 from sdetkit import premium_gate_engine as eng
 
@@ -139,6 +142,19 @@ def test_auto_fix_applies_supported_security_rules(tmp_path: Path) -> None:
     assert "timeout=10" in new_text
     assert "shell=False" in new_text
     assert "yaml.safe_load(" in new_text
+
+
+def test_autofix_timeout_skips_invalid_ast_offsets(monkeypatch: pytest.MonkeyPatch) -> None:
+    text = "import requests\nrequests.get(url)\n"
+    tree = ast.parse(text)
+    call = next(node for node in ast.walk(tree) if isinstance(node, ast.Call))
+    call.end_lineno = None
+
+    monkeypatch.setattr(eng.ast, "parse", lambda _text: tree)
+
+    patched, changed = eng._autofix_timeout(text)
+    assert patched == text
+    assert changed is False
 
 
 def test_main_auto_fix_adds_manual_followup_recommendation(tmp_path: Path, capsys) -> None:
