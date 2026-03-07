@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import http.server
 import json
-import re
 import sqlite3
 import subprocess
 import sys
@@ -366,18 +366,55 @@ def _knowledge_recommendations(
 
 
 def _autofix_timeout(text: str) -> tuple[str, bool]:
-    changed = False
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return text, False
 
-    def repl(match: re.Match[str]) -> str:
-        nonlocal changed
-        call = match.group(0)
-        if "timeout=" in call:
-            return call
-        changed = True
-        return call[:-1] + ", timeout=10)"
+    request_methods = {"get", "post", "put", "delete", "patch", "head", "options"}
+    line_offsets: list[int] = [0]
+    running = 0
+    for line in text.splitlines(keepends=True):
+        running += len(line)
+        line_offsets.append(running)
 
-    pattern = re.compile(r"requests\.(?:get|post|put|delete|patch|head|options)\([^\n\)]*\)")
-    return pattern.sub(repl, text), changed
+    edits: list[tuple[int, int, str]] = []
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (
+            isinstance(func, ast.Attribute)
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "requests"
+            and func.attr in request_methods
+        ):
+            continue
+        if any(k.arg == "timeout" for k in node.keywords if k.arg):
+            continue
+        if not (
+            hasattr(node, "lineno")
+            and hasattr(node, "col_offset")
+            and hasattr(node, "end_lineno")
+            and hasattr(node, "end_col_offset")
+        ):
+            continue
+
+        start = line_offsets[node.lineno - 1] + node.col_offset
+        end = line_offsets[node.end_lineno - 1] + node.end_col_offset
+        call_text = text[start:end]
+        if not call_text.endswith(")"):
+            continue
+        edits.append((start, end, call_text[:-1] + ", timeout=10)"))
+
+    if not edits:
+        return text, False
+
+    patched = text
+    for start, end, replacement in sorted(edits, key=lambda item: item[0], reverse=True):
+        patched = patched[:start] + replacement + patched[end:]
+    return patched, patched != text
 
 
 def _autofix_shell_true(text: str) -> tuple[str, bool]:

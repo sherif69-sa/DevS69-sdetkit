@@ -1115,15 +1115,49 @@ def _fix_yaml_safe_load(path: Path) -> bool:
 
 
 def _inject_requests_timeout(text: str, timeout: int) -> str:
-    lines = text.splitlines()
-    for idx, line in enumerate(lines):
-        if "requests." not in line or "timeout=" in line:
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return text
+
+    request_methods = {"get", "post", "put", "patch", "delete", "head", "request"}
+
+    line_offsets: list[int] = [0]
+    running = 0
+    for line in text.splitlines(keepends=True):
+        running += len(line)
+        line_offsets.append(running)
+
+    edits: list[tuple[int, int, str]] = []
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
             continue
-        m = re.search(r"requests\.(get|post|put|patch|delete|head|request)\((.*)\)", line)
-        if not m:
+        func = node.func
+        if not (
+            isinstance(func, ast.Attribute)
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "requests"
+            and func.attr in request_methods
+        ):
             continue
-        lines[idx] = line[:-1] + f", timeout={timeout})"
-    return "\n".join(lines) + ("\n" if text.endswith("\n") else "")
+        if any(k.arg == "timeout" for k in node.keywords if k.arg):
+            continue
+
+        start = line_offsets[node.lineno - 1] + node.col_offset
+        end = line_offsets[node.end_lineno - 1] + node.end_col_offset
+        call_text = text[start:end]
+        if not call_text.endswith(")"):
+            continue
+        edits.append((start, end, call_text[:-1] + f", timeout={timeout})"))
+
+    if not edits:
+        return text
+
+    patched = text
+    for start, end, replacement in sorted(edits, key=lambda item: item[0], reverse=True):
+        patched = patched[:start] + replacement + patched[end:]
+    return patched
 
 
 def _fix_requests_timeout(path: Path, timeout: int) -> bool:

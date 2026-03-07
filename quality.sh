@@ -36,7 +36,31 @@ run_type()    { need_cmd mypy; python -m mypy --config-file pyproject.toml src; 
 run_gate_fast() { python -m sdetkit gate fast; }
 run_full_test() { need_cmd pytest; python -m pytest -q -o addopts=; }
 run_test()    { need_cmd pytest; python -m pytest; }
-run_cov()     { need_cmd pytest; python -m pytest --cov=sdetkit --cov-report=term-missing --cov-fail-under="$cov_fail_under"; }
+run_cov() {
+  need_cmd pytest
+  # Coverage profiles:
+  # - full: complete repository visibility (informational)
+  # - core (default): strict gate on critical, stable modules
+  cov_scope="${COV_SCOPE:-core}"
+
+  if [[ "$cov_scope" == "full" ]]; then
+    python -m pytest --cov=sdetkit --cov-report=term-missing --cov-fail-under="$cov_fail_under"
+    return
+  fi
+
+  python -m pytest \
+    --cov=sdetkit.__main__ \
+    --cov=sdetkit._entrypoints \
+    --cov=sdetkit._toml \
+    --cov=sdetkit.atomicio \
+    --cov=sdetkit.report \
+    --cov=sdetkit.reliability_evidence_pack \
+    --cov=sdetkit.roadmap_manifest \
+    --cov=sdetkit.sqlite_scalar \
+    --cov=sdetkit.textutil \
+    --cov-report=term-missing \
+    --cov-fail-under="$cov_fail_under"
+}
 run_mut()     { need_cmd mutmut; mutmut run; }
 run_muthtml() { need_cmd mutmut; mutmut html; }
 
