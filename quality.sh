@@ -31,6 +31,7 @@ need_cmd() {
 }
 
 run_fmt()     { need_cmd ruff; python -m ruff format .; }
+run_fmt_check() { need_cmd ruff; python -m ruff format --check .; }
 run_lint()    { need_cmd ruff; python -m ruff check .; }
 run_type()    { need_cmd mypy; python -m mypy --config-file pyproject.toml src; }
 run_gate_fast() { python -m sdetkit gate fast; }
@@ -73,6 +74,12 @@ case "$mode" in
   full-test) run_full_test ;;
   mut) run_mut ;;
   muthtml) run_muthtml ;;
+  ci)
+    run_fmt_check
+    run_lint
+    run_type
+    run_gate_fast
+    ;;
   all)
     run_fmt
     run_lint
@@ -81,7 +88,7 @@ case "$mode" in
     run_cov
     ;;
   *)
-    echo "Usage: bash quality.sh {all|fmt|lint|type|test|full-test|cov|mut|muthtml}" >&2
+    echo "Usage: bash quality.sh {all|ci|fmt|lint|type|test|full-test|cov|mut|muthtml}" >&2
     exit 2
     ;;
 esac
