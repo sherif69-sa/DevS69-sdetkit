@@ -401,8 +401,21 @@ def _autofix_timeout(text: str) -> tuple[str, bool]:
         ):
             continue
 
-        start = line_offsets[node.lineno - 1] + node.col_offset
-        end = line_offsets[node.end_lineno - 1] + node.end_col_offset
+        lineno = getattr(node, "lineno", None)
+        col_offset = getattr(node, "col_offset", None)
+        end_lineno = getattr(node, "end_lineno", None)
+        end_col_offset = getattr(node, "end_col_offset", None)
+        if not isinstance(lineno, int):
+            continue
+        if not isinstance(col_offset, int):
+            continue
+        if not isinstance(end_lineno, int):
+            continue
+        if not isinstance(end_col_offset, int):
+            continue
+
+        start = line_offsets[lineno - 1] + col_offset
+        end = line_offsets[end_lineno - 1] + end_col_offset
         call_text = text[start:end]
         if not call_text.endswith(")"):
             continue
