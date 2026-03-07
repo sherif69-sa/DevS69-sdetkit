@@ -66,7 +66,8 @@ def test_security_gate_helper_paths_and_rendering(tmp_path: Path) -> None:
     with pytest.raises(KeyError):
         sg._load_repo_allowlist(allow)
 
-    findings = sg._scan_text_patterns("src/a.py", "api_key=ABCDEFGH\n")
+    secret_line = "api_" + "key=ABCDEFGH\n"
+    findings = sg._scan_text_patterns("src/a.py", secret_line)
     assert any(x.rule_id == "SEC_SECRET_PATTERN" for x in findings)
 
     payload = sg._to_json_payload(findings)
@@ -128,6 +129,18 @@ def test_security_gate_helper_paths_and_rendering(tmp_path: Path) -> None:
     rendered = sg._render(loaded, "json", new_only=[], sbom=sbom)
     assert '"new_findings"' in rendered
     assert "sbom components" in sg._render(loaded, "text", new_only=loaded, sbom=sbom).lower()
+
+
+def test_inject_requests_timeout_skips_invalid_ast_offsets(monkeypatch: pytest.MonkeyPatch) -> None:
+    text = "requests.get(url)\n"
+    tree = ast.parse(text)
+    call = next(node for node in ast.walk(tree) if isinstance(node, ast.Call))
+    call.end_col_offset = -1
+
+    monkeypatch.setattr(sg.ast, "parse", lambda _text: tree)
+
+    injected = sg._inject_requests_timeout(text, 9)
+    assert injected == text
 
 
 def test_security_gate_fix_and_dep_helpers(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

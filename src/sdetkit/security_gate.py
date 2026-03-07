@@ -1144,8 +1144,30 @@ def _inject_requests_timeout(text: str, timeout: int) -> str:
         if any(k.arg == "timeout" for k in node.keywords if k.arg):
             continue
 
-        start = line_offsets[node.lineno - 1] + node.col_offset
-        end = line_offsets[node.end_lineno - 1] + node.end_col_offset
+        lineno = getattr(node, "lineno", None)
+        col_offset = getattr(node, "col_offset", None)
+        end_lineno = getattr(node, "end_lineno", None)
+        end_col_offset = getattr(node, "end_col_offset", None)
+        if not isinstance(lineno, int) or not isinstance(col_offset, int):
+            continue
+        if not isinstance(end_lineno, int) or not isinstance(end_col_offset, int):
+            continue
+        if lineno <= 0 or end_lineno <= 0:
+            continue
+        if lineno >= len(line_offsets) or end_lineno >= len(line_offsets):
+            continue
+        if col_offset < 0 or end_col_offset < 0:
+            continue
+
+        line_span = line_offsets[lineno] - line_offsets[lineno - 1]
+        end_line_span = line_offsets[end_lineno] - line_offsets[end_lineno - 1]
+        if col_offset > line_span or end_col_offset > end_line_span:
+            continue
+
+        start = line_offsets[lineno - 1] + col_offset
+        end = line_offsets[end_lineno - 1] + end_col_offset
+        if start < 0 or end > len(text) or end <= start:
+            continue
         call_text = text[start:end]
         if not call_text.endswith(")"):
             continue

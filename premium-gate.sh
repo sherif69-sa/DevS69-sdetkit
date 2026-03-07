@@ -204,7 +204,7 @@ run_plan() {
     return
   fi
 
-  run_step "quality" "Head-1 Foundation & Quality" "Quality" "bash quality.sh"
+  run_step "quality" "Head-1 Foundation & Quality" "Quality" "bash quality.sh ci"
 
   if [[ "$MODE" == "full" ]]; then
     run_step "ruff_format" "Head-2 Source Truth & Style" "Ruff (format check)" "python3 -m ruff format --check ."
