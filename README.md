@@ -130,6 +130,13 @@ docker build -t sdetkit .
 docker run --rm -v "$PWD:/work" -w /work sdetkit python -m sdetkit gate fast
 ```
 
+## Continuous upgrade lane
+
+```bash
+python -m sdetkit day90-phase3-wrap-publication-closeout --format json --strict
+python -m sdetkit day91-continuous-upgrade-closeout --format json --strict
+```
+
 ## Documentation
 
 - Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
