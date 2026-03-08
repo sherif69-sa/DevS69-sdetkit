@@ -16,6 +16,26 @@ SDETKit is designed as an **execution layer for trusted delivery**:
 - **Readiness by default**: quality, security, and release controls in one workflow.
 - **Adoption-focused UX**: clear command groups, practical docs, and role-based paths.
 
+## Product direction (next 30 days)
+
+To evolve this repository into a focused product, we are prioritizing one primary use-case:
+
+- **Release Confidence Engine for SDET/DevOps teams**
+- Goal: provide deterministic, repeatable evidence that a repository is safe to ship.
+
+Start with the focused strategy checklist:
+
+- `docs/product-strategy.md`
+
+Fast path to run the "release confidence" workflow:
+
+```bash
+bash ci.sh quick --skip-docs
+bash quality.sh cov
+python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+python -m sdetkit gate release
+```
+
 ## Installation
 
 ### Runtime install

@@ -138,6 +138,7 @@ nav:
       - Plugins, rule packs, and fix-audit: plugins-and-fix.md
       - PR automation for audit auto-fixes: pr-automation.md
   - Strategy:
+      - Product strategy (release confidence): product-strategy.md
       - Enterprise + regulated workflow: use-cases-enterprise-regulated.md
       - Startup + small-team workflow: use-cases-startup-small-team.md
       - Production S-class tier blueprint for the next 90-day boost: production-s-class-90-day-boost.md
