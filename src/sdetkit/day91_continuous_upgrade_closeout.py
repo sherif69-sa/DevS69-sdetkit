@@ -57,12 +57,15 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Next-cycle roadmap draft captured from Day 91 outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
-    '"plan_id"',
-    '"contributors"',
-    '"upgrade_channels"',
-    '"baseline"',
-    '"target"',
-    '"owner"',
+    "plan_id",
+    "contributors",
+    "upgrade_channels",
+    "baseline",
+    "target",
+    "owner",
+    "rollback_owner",
+    "confidence_floor",
+    "cadence_days",
 ]
 
 _DAY91_DEFAULT_PAGE = """# Day 91 \u2014 Continuous upgrade closeout lane
@@ -137,6 +140,60 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
+def _validate_plan_contract(
+    plan_data: dict[str, Any],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    missing_keys = [key for key in _REQUIRED_DATA_KEYS if key not in plan_data]
+
+    trajectory_issues: list[str] = []
+    baseline = plan_data.get("baseline") if isinstance(plan_data.get("baseline"), dict) else {}
+    target = plan_data.get("target") if isinstance(plan_data.get("target"), dict) else {}
+
+    if not baseline:
+        trajectory_issues.append("baseline: missing or not an object")
+    if not target:
+        trajectory_issues.append("target: missing or not an object")
+
+    for metric, baseline_value in baseline.items():
+        target_value = target.get(metric)
+        if isinstance(baseline_value, (int, float)):
+            if not isinstance(target_value, (int, float)):
+                trajectory_issues.append(f"{metric}: missing numeric target")
+            elif target_value < baseline_value:
+                trajectory_issues.append(
+                    f"{metric}: target {target_value} below baseline {baseline_value}"
+                )
+
+    owner_issues: list[str] = []
+    for owner_field in ("owner", "rollback_owner"):
+        value = plan_data.get(owner_field)
+        if not isinstance(value, str) or not value.strip():
+            owner_issues.append(f"{owner_field}: missing owner assignment")
+
+    hygiene_issues: list[str] = []
+    contributors = plan_data.get("contributors")
+    if not isinstance(contributors, list) or not contributors:
+        hygiene_issues.append("contributors: must contain at least one contributor")
+    elif not all(isinstance(item, str) and item.strip() for item in contributors):
+        hygiene_issues.append("contributors: every contributor must be a non-empty string")
+
+    channels = plan_data.get("upgrade_channels")
+    if not isinstance(channels, list) or not channels:
+        hygiene_issues.append("upgrade_channels: must contain at least one lane")
+    elif not all(isinstance(item, str) and item.strip() for item in channels):
+        hygiene_issues.append("upgrade_channels: every channel must be a non-empty string")
+
+    confidence_floor = plan_data.get("confidence_floor")
+    if not isinstance(confidence_floor, (int, float)) or not (0 <= confidence_floor <= 1):
+        hygiene_issues.append("confidence_floor: must be a number between 0 and 1")
+
+    cadence_days = plan_data.get("cadence_days")
+    if not isinstance(cadence_days, int) or cadence_days <= 0:
+        hygiene_issues.append("cadence_days: must be a positive integer")
+
+    return missing_keys, trajectory_issues, owner_issues, hygiene_issues
+
+
 def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
@@ -165,13 +222,13 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
     missing_quality_lines = [line for line in _REQUIRED_QUALITY_LINES if line not in page_text]
     missing_board_items = [item for item in _REQUIRED_DELIVERY_BOARD_LINES if item not in page_text]
 
-    plan_text = _read_text(root / _PLAN_PATH)
-    missing_plan_keys = [key for key in _REQUIRED_DATA_KEYS if key not in plan_text]
+    plan_data = _load_json(root / _PLAN_PATH)
+    missing_plan_keys, plan_trajectory_issues, plan_owner_issues, plan_hygiene_issues = _validate_plan_contract(plan_data)
 
     checks: list[dict[str, Any]] = [
         {
             "check_id": "readme_day91_command",
-            "weight": 7,
+            "weight": 5,
             "passed": ("day91-continuous-upgrade-closeout" in readme_text),
             "evidence": "README day91 command lane",
         },
@@ -256,9 +313,27 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
         },
         {
             "check_id": "evidence_plan_data_present",
-            "weight": 10,
+            "weight": 4,
             "passed": not missing_plan_keys,
             "evidence": missing_plan_keys or _PLAN_PATH,
+        },
+        {
+            "check_id": "evidence_plan_targets_non_regressive",
+            "weight": 4,
+            "passed": not plan_trajectory_issues,
+            "evidence": plan_trajectory_issues or "target metrics are non-regressive",
+        },
+        {
+            "check_id": "evidence_plan_owner_coverage",
+            "weight": 2,
+            "passed": not plan_owner_issues,
+            "evidence": plan_owner_issues or "owner + rollback owner assigned",
+        },
+        {
+            "check_id": "evidence_plan_hygiene",
+            "weight": 2,
+            "passed": not plan_hygiene_issues,
+            "evidence": plan_hygiene_issues or "contributors/channels/confidence/cadence validated",
         },
     ]
 
@@ -295,6 +370,30 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
         misses.append("Day 91 continuous upgrade dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/day91-continuous-upgrade-plan.json to restore required keys."
+        )
+
+    if not plan_trajectory_issues:
+        wins.append("Day 91 target metrics are non-regressive against baseline metrics.")
+    else:
+        misses.append("Day 91 target metrics regress against baseline metrics.")
+        handoff_actions.append(
+            "Adjust docs/roadmap/plans/day91-continuous-upgrade-plan.json target metrics so each numeric target is >= baseline."
+        )
+
+    if not plan_owner_issues:
+        wins.append("Day 91 owner coverage includes both execution and rollback ownership.")
+    else:
+        misses.append("Day 91 owner coverage is missing execution and/or rollback ownership.")
+        handoff_actions.append(
+            "Assign both owner and rollback_owner in docs/roadmap/plans/day91-continuous-upgrade-plan.json."
+        )
+
+    if not plan_hygiene_issues:
+        wins.append("Day 91 plan hygiene checks passed for contributors/channels/confidence/cadence.")
+    else:
+        misses.append("Day 91 plan hygiene checks failed for contributors/channels/confidence/cadence.")
+        handoff_actions.append(
+            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/day91-continuous-upgrade-plan.json."
         )
 
     if not failed and not critical_failures:
