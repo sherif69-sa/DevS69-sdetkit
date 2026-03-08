@@ -1,0 +1,14 @@
+{
+  "plan_id": "day91-continuous-upgrade-001",
+  "contributors": ["maintainers", "release-ops", "docs-ops"],
+  "upgrade_channels": ["readme", "docs-index", "cli-lanes"],
+  "baseline": {
+    "strict_pass_rate": 0.9,
+    "doc_link_coverage": 0.88
+  },
+  "target": {
+    "strict_pass_rate": 1.0,
+    "doc_link_coverage": 0.97
+  },
+  "owner": "release-ops"
+}

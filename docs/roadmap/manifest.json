@@ -466,6 +466,12 @@
       "plan_path": "docs/roadmap/phase3/plans/day90-phase3-wrap-publication-plan.json",
       "report_path": "docs/roadmap/reports/day-90-big-upgrade-report.md",
       "report_title": "Day 90 big upgrade report"
+    },
+    {
+      "day": 91,
+      "plan_path": "docs/roadmap/phase3/plans/day91-continuous-upgrade-plan.json",
+      "report_path": "docs/roadmap/reports/day-91-big-upgrade-report.md",
+      "report_title": "Day 91 big upgrade report"
     }
   ]
 }

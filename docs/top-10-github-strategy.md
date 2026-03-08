@@ -270,6 +270,7 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 - **Day 89 — Next-cycle planning:** draft next 90-day strategy from validated learnings.
 - **Day 89 — Final review:** package wins, misses, and corrective actions.
 - **Day 90 — Phase-3 wrap + publication:** ship final 90-day report and publish next-cycle roadmap.
+- **Day 91 — Continuous upgrade closeout lane:** convert Day 90 publication outputs into deterministic continuous-improvement execution.
 
 #### Phase-3 weekly deliverables (must ship)
 
