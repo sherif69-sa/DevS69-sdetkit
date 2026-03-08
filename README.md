@@ -26,6 +26,7 @@ To evolve this repository into a focused product, we are prioritizing one primar
 Start with the focused strategy checklist:
 
 - `docs/product-strategy.md`
+- `docs/global-production-transformation-playbook.md`
 
 Fast path to run the "release confidence" workflow:
 
@@ -61,10 +62,18 @@ python -m pip install .[test]
 ## 2-minute quickstart
 
 ```bash
+bash scripts/ready_to_use.sh quick
+```
+
+Manual equivalent:
+
+```bash
 python -m sdetkit --help
 python -m sdetkit doctor --help
 bash ci.sh quick --skip-docs
 ```
+
+Ready-to-use guide: `docs/ready-to-use.md`
 
 For full docs UX, open: <https://sherif69-sa.github.io/DevS69-sdetkit/>.
 
