@@ -147,6 +147,7 @@ python -m sdetkit day91-continuous-upgrade-closeout --format json --strict
 python -m sdetkit day92-continuous-upgrade-cycle2-closeout --format json --strict
 python -m sdetkit day93-continuous-upgrade-cycle3-closeout --format json --strict
 python -m sdetkit day94-continuous-upgrade-cycle4-closeout --format json --strict
+python -m sdetkit day95-continuous-upgrade-cycle5-closeout --format json --strict
 ```
 
 ## Documentation
