@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from sdetkit import triage_templates
 
 
@@ -47,7 +49,7 @@ def test_markdown_export_writes_day9_artifact(tmp_path: Path) -> None:
     )
     assert rc == 0
     text = out.read_text(encoding="utf-8")
-    assert "# Day 9 contribution templates health" in text
+    assert "# Contribution templates health" in text
     assert "`config`" in text
 
 
@@ -72,3 +74,30 @@ def test_strict_mode_fails_on_missing_requirements(tmp_path: Path) -> None:
 
     rc = triage_templates.main(["--root", str(tmp_path), "--strict"])
     assert rc == 1
+
+
+def test_triage_templates_help_describes_product_surface(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        triage_templates.main(["--help"])
+    assert excinfo.value.code == 0
+    out = capsys.readouterr().out
+    normalized = " ".join(out.split())
+    assert "usage: sdetkit triage-templates" in normalized
+    assert "--format {text,markdown,json}" in out
+    assert (
+        "Validate issue, pull request, and config templates for fast maintainer triage."
+        in normalized
+    )
+    assert "Optional file path to also write the rendered triage templates report." in normalized
+
+
+def test_triage_templates_markdown_output_is_structured(tmp_path: Path, capsys):
+    _seed_templates(tmp_path)
+    rc = triage_templates.main(["--root", str(tmp_path), "--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "# Contribution templates health" in out
+    assert "| Template | Coverage | Status | Path |" in out
+    assert "## Missing checks" in out
+    assert "## Triage SLA targets" in out
+    assert "## Recovery actions" in out

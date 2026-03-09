@@ -344,4 +344,4 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 - **Day 93 — Continuous upgrade cycle #3 closeout lane:** extend continuous-upgrade execution with Day 92 evidence and cycle-3 handoff controls.
 - **Day 94 — Continuous upgrade cycle #4 closeout lane:** continue continuous-upgrade execution with Day 93 evidence and cycle-4 handoff controls.
 - **Day 95 — Continuous upgrade cycle #5 closeout lane:** continue continuous-upgrade execution with Day 94 evidence and cycle-5 handoff controls.
-- **Day 96 — Continuous upgrade cycle #6 closeout lane:** continue continuous-upgrade execution with Day 95 evidence and cycle-6 handoff controls.
+- **Day 97 — Continuous upgrade cycle #7 closeout lane:** continue continuous-upgrade execution with Day 95 evidence and cycle-7 handoff controls.

@@ -327,7 +327,7 @@ def write_default_templates(root: str = ".") -> list[str]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 9 contribution templates health",
+        "Contribution templates health",
         f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
         "",
     ]
@@ -356,7 +356,7 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Day 9 contribution templates health",
+        "# Contribution templates health",
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         "",
@@ -391,11 +391,20 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdetkit triage-templates",
-        description="Run Day 9 contribution template triage checks.",
+        description="Validate issue, pull request, and config templates for fast maintainer triage.",
     )
-    p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
+    p.add_argument(
+        "--format",
+        choices=["text", "markdown", "json"],
+        default="text",
+        help="Output format.",
+    )
     p.add_argument("--root", default=".", help="Repository root to inspect.")
-    p.add_argument("--output", default="", help="Optional output file path.")
+    p.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered triage templates report.",
+    )
     p.add_argument(
         "--strict", action="store_true", help="Return non-zero if any requirement is missing."
     )

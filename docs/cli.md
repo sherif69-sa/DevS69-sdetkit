@@ -157,22 +157,22 @@ See: day-8-ultra-upgrade-report.md (legacy history).
 
 ## triage-templates
 
-Builds Day 9 contribution-template health output to harden issue/PR intake and speed maintainer triage.
+Validates issue, pull request, and config templates to speed maintainer triage.
 
 Examples:
 
-- `sdetkit triage-templates --format text --strict`
+- `sdetkit triage-templates --format text`
 - `sdetkit triage-templates --format json`
 - `sdetkit triage-templates --write-defaults --format json --strict`
-- `sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md`
+- `sdetkit triage-templates --format markdown --output triage-templates.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
 
-`--strict` returns non-zero if required Day 9 triage checks are missing from bug/feature/PR templates or `.github/ISSUE_TEMPLATE/config.yml`.
+`--strict` returns non-zero if required triage checks are missing from bug, feature, pull request, or issue-template config files.
 
-`--write-defaults` writes a hardened baseline for bug/feature/PR/config templates, then re-runs validation in the same command.
+`--write-defaults` writes a hardened baseline for bug, feature, pull request, and config templates before validation.
 
-See: day-9-ultra-upgrade-report.md
+See: day-9-ultra-upgrade-report.md (legacy history).
 
 ## first-contribution
 

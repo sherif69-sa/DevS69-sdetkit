@@ -1,0 +1,25 @@
+{
+  "plan_id": "day97-continuous-upgrade-cycle7-001",
+  "contributors": [
+    "maintainers",
+    "release-ops",
+    "docs-ops"
+  ],
+  "upgrade_channels": [
+    "readme",
+    "docs-index",
+    "cli-lanes"
+  ],
+  "baseline": {
+    "strict_pass_rate": 0.9,
+    "doc_link_coverage": 0.88
+  },
+  "target": {
+    "strict_pass_rate": 1.0,
+    "doc_link_coverage": 0.97
+  },
+  "owner": "release-ops",
+  "rollback_owner": "incident-ops",
+  "confidence_floor": 0.9,
+  "cadence_days": 7
+}
