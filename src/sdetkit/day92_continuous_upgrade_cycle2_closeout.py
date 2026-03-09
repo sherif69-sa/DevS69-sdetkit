@@ -11,9 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-day92-continuous-upgrade-cycle2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY91_SUMMARY_PATH = "docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-continuous-upgrade-closeout-summary.json"
-_DAY91_BOARD_PATH = (
-    "docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-delivery-board.md"
-)
+_DAY91_BOARD_PATH = "docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/day92-continuous-upgrade-cycle2-plan.json"
 _SECTION_HEADER = "# Day 92 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -146,8 +144,10 @@ def _validate_plan_contract(
     missing_keys = [key for key in _REQUIRED_DATA_KEYS if key not in plan_data]
 
     trajectory_issues: list[str] = []
-    baseline = plan_data.get("baseline") if isinstance(plan_data.get("baseline"), dict) else {}
-    target = plan_data.get("target") if isinstance(plan_data.get("target"), dict) else {}
+    baseline_raw = plan_data.get("baseline")
+    baseline = baseline_raw if isinstance(baseline_raw, dict) else {}
+    target_raw = plan_data.get("target")
+    target = target_raw if isinstance(target_raw, dict) else {}
 
     if not baseline:
         trajectory_issues.append("baseline: missing or not an object")
@@ -223,7 +223,9 @@ def build_day92_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[s
     missing_board_items = [item for item in _REQUIRED_DELIVERY_BOARD_LINES if item not in page_text]
 
     plan_data = _load_json(root / _PLAN_PATH)
-    missing_plan_keys, plan_trajectory_issues, plan_owner_issues, plan_hygiene_issues = _validate_plan_contract(plan_data)
+    missing_plan_keys, plan_trajectory_issues, plan_owner_issues, plan_hygiene_issues = (
+        _validate_plan_contract(plan_data)
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -389,9 +391,13 @@ def build_day92_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[s
         )
 
     if not plan_hygiene_issues:
-        wins.append("Day 92 plan hygiene checks passed for contributors/channels/confidence/cadence.")
+        wins.append(
+            "Day 92 plan hygiene checks passed for contributors/channels/confidence/cadence."
+        )
     else:
-        misses.append("Day 92 plan hygiene checks failed for contributors/channels/confidence/cadence.")
+        misses.append(
+            "Day 92 plan hygiene checks failed for contributors/channels/confidence/cadence."
+        )
         handoff_actions.append(
             "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/day92-continuous-upgrade-cycle2-plan.json."
         )
@@ -458,7 +464,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "day92-continuous-upgrade-cycle2-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day92-continuous-upgrade-cycle2-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "day92-continuous-upgrade-cycle2-closeout-summary.md", _render_text(payload) + "\n"
+    )
     _write(target / "day92-evidence-brief.md", "# Day 92 continuous upgrade brief\n")
     _write(target / "day92-continuous-upgrade-plan.md", "# Day 92 continuous upgrade plan\n")
     _write(

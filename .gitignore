@@ -42,3 +42,5 @@ site/
 # Local CI/gate scratch
 sdet_check.json
 src/sdetkit.egg-info/
+
+.tmp/

@@ -257,7 +257,7 @@ def _print_text(payload: dict[str, object]) -> None:
     else:
         print("  (none)")
     print("")
-    print("Legacy bootcamp flows:")
+    print("Incubator workflows:")
     if isinstance(legacy, list) and legacy:
         for n in legacy:
             print(f"  {n}")

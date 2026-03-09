@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-delivery-board.md"
+        root
+        / "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -123,7 +124,9 @@ def test_day93_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-cycle3-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-cycle3-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-cycle3-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/day93-pack/day93-evidence-brief.md").exists()
     assert (tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-plan.md").exists()
     assert (tmp_path / "artifacts/day93-pack/day93-upgrade-template-upgrade-ledger.json").exists()
