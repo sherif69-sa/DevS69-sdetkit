@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from sdetkit import weekly_review
 
 
@@ -127,3 +129,25 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
     assert (pack / "day21-kpi-scorecard.json").exists()
     assert (pack / "day21-contributor-response-plan.md").exists()
     assert (pack / "day21-release-narrative-brief.md").exists()
+
+
+def test_weekly_review_help_describes_product_surface(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        weekly_review.main(["--help"])
+    assert excinfo.value.code == 0
+    out = capsys.readouterr().out
+    normalized = " ".join(out.split())
+    assert "usage: sdetkit weekly-review" in normalized
+    assert "--format {text,json,markdown}" in out
+    normalized = " ".join(out.split())
+    assert "Optional file path to also write the rendered weekly review report." in normalized
+
+
+def test_weekly_review_markdown_output_is_structured(capsys):
+    rc = weekly_review.main(["--week", "1", "--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "# Day 7 Weekly Review #1" in out
+    assert "## What shipped (Day 1-6)" in out
+    assert "## KPI movement" in out
+    assert "## Next-week focus" in out

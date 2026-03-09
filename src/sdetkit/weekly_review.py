@@ -530,7 +530,8 @@ def _emit_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str]:
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="sdetkit weekly-review", description="Generate day-based weekly review summaries."
+        prog="sdetkit weekly-review",
+        description="Generate weekly review summaries with shipped scope, KPI movement, and next-week focus.",
     )
     p.add_argument("--root", default=".", help="Repository root path.")
     p.add_argument(
@@ -560,8 +561,17 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Return non-zero if shipped coverage is incomplete (or growth signals are missing for week 2/3).",
     )
-    p.add_argument("--format", choices=["text", "json", "markdown"], default="text")
-    p.add_argument("--output", default=None, help="Optional output path for the report.")
+    p.add_argument(
+        "--format",
+        choices=["text", "json", "markdown"],
+        default="text",
+        help="Output format.",
+    )
+    p.add_argument(
+        "--output",
+        default=None,
+        help="Optional file path to also write the rendered weekly review report.",
+    )
     return p
 
 
