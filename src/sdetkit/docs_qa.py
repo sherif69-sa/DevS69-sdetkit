@@ -169,9 +169,37 @@ def run_docs_qa(root: Path) -> Report:
     return Report(files_checked=len(markdown_files), links_checked=links_checked, issues=issues)
 
 
+def _render_markdown(report: Report) -> str:
+    lines = [
+        "# Docs QA report",
+        "",
+        "## Summary",
+        "",
+        f"- Files checked: {report.files_checked}",
+        f"- Internal markdown links checked: {report.links_checked}",
+        f"- Status: {'pass' if report.ok else 'fail'}",
+        "",
+        "## Issues",
+        "",
+    ]
+    if report.issues:
+        lines.extend(
+            [
+                "| File | Line | Message |",
+                "| --- | ---: | --- |",
+            ]
+        )
+        for item in report.issues:
+            message = item.message.replace("|", "\\|")
+            lines.append(f"| `{item.file}` | {item.line} | {message} |")
+    else:
+        lines.append("- None")
+    return "\n".join(lines) + "\n"
+
+
 def _render_text(report: Report) -> str:
     lines = [
-        "# Day 6 conversion QA report",
+        "Docs QA report",
         f"- files checked: {report.files_checked}",
         f"- internal markdown links checked: {report.links_checked}",
         f"- status: {'pass' if report.ok else 'fail'}",
@@ -186,11 +214,21 @@ def _render_text(report: Report) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="sdetkit docs-qa", description="Validate README/docs markdown links and anchors."
+        prog="sdetkit docs-qa",
+        description="Validate markdown links and heading anchors across README.md and docs/.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
-    parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
-    parser.add_argument("--output", default=None, help="Optional output path for generated report.")
+    parser.add_argument(
+        "--format",
+        choices=["text", "json", "markdown"],
+        default="text",
+        help="Output format.",
+    )
+    parser.add_argument(
+        "--output",
+        default=None,
+        help="Optional file path to also write the rendered QA report.",
+    )
     ns = parser.parse_args(argv)
 
     report = run_docs_qa(Path(ns.root).resolve())
@@ -203,6 +241,8 @@ def main(argv: list[str] | None = None) -> int:
             "issues": [item.__dict__ for item in report.issues],
         }
         rendered = json.dumps(payload, indent=2) + "\n"
+    elif ns.format == "markdown":
+        rendered = _render_markdown(report)
     else:
         rendered = _render_text(report)
 

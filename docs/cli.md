@@ -107,17 +107,17 @@ See: day-3-ultra-upgrade-report.md (legacy history).
 
 ## docs-qa
 
-Runs Day 6 conversion QA against markdown links and heading anchors in `README.md` and `docs/`, including reference-style links and duplicate-heading anchors.
+Validates markdown links and heading anchors across `README.md` and `docs/`, including reference-style links and duplicate-heading anchors.
 
 Examples:
 
 - `sdetkit docs-qa --format text`
 - `sdetkit docs-qa --format json`
-- `sdetkit docs-qa --format markdown --output docs/artifacts/day6-conversion-qa-sample.md`
+- `sdetkit docs-qa --format markdown --output docs-qa.md`
 
-Useful flags: `--root`, `--week`, `--signals-file`, `--previous-signals-file`, `--emit-pack-dir`, `--strict`, `--format`, `--output`.
+Useful flags: `--root`, `--format`, `--output`.
 
-See: day-6-ultra-upgrade-report.md
+See: day-6-ultra-upgrade-report.md (legacy history).
 
 
 
