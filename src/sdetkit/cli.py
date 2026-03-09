@@ -527,16 +527,25 @@ def main(argv: Sequence[str] | None = None) -> int:
 Command groups:
 
   Core workflows:
+    kv
+    apiget
     doctor
+    patch
+    cassette-get
     repo
+    dev
     gate
     security
     evidence
+    maintenance
+    agent
 
   Extensions:
     ci
     report
+    proof
     docs-qa
+    docs-nav
     policy
 
   Playbooks:
@@ -553,6 +562,9 @@ Command groups:
     gitlab-ci-quickstart
     quality-contribution-delta
     reliability-evidence-pack
+    release-readiness-board
+    release-narrative
+    trust-signal-upgrade
     faq-objections
     community-activation
     external-contribution-push
