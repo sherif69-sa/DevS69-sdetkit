@@ -65,7 +65,10 @@ _PLATFORM_SETUP = {
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="sdetkit onboarding")
+    p = argparse.ArgumentParser(
+        prog="sdetkit onboarding",
+        description="Render role-based onboarding guidance and cross-platform setup snippets.",
+    )
     p.add_argument(
         "--role",
         choices=["all", *_ROLE_PLAYBOOK.keys()],
@@ -82,12 +85,12 @@ def _build_parser() -> argparse.ArgumentParser:
         "--platform",
         choices=["all", *_PLATFORM_SETUP.keys()],
         default="all",
-        help="Platform-specific setup snippets to print.",
+        help="Cross-platform setup snippets to print.",
     )
     p.add_argument(
         "--output",
         default="",
-        help="Optional file path to also write the rendered onboarding output.",
+        help="Optional file path to also write the rendered onboarding guide.",
     )
     return p
 

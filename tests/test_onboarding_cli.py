@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from sdetkit import cli, onboarding
 
 
@@ -60,3 +62,13 @@ def test_onboarding_writes_output_file(tmp_path, capsys):
     written = out_file.read_text(encoding="utf-8")
     assert "| Role | First command | Next action |" in written
     assert written.rstrip("\n") == stdout.rstrip("\n")
+
+
+def test_onboarding_help_describes_product_surface(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        onboarding.main(["--help"])
+    assert excinfo.value.code == 0
+    out = capsys.readouterr().out
+    assert "Render role-based onboarding guidance and cross-platform setup snippets." in out
+    assert "--platform {all,linux,macos,windows}" in out
+    assert "Cross-platform setup snippets to print." in out
