@@ -395,10 +395,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not argv:
         argv = ["list"]
 
-    p = argparse.ArgumentParser(prog="sdetkit playbooks")
+    p = argparse.ArgumentParser(
+        prog="sdetkit playbooks",
+        description="Discover, run, and validate recommended playbooks and incubator workflows.",
+    )
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    listp = sub.add_parser("list")
+    listp = sub.add_parser(
+        "list",
+        help="List recommended playbooks, incubator workflows, and aliases.",
+        description="List recommended playbooks, incubator workflows, and aliases.",
+    )
     listp.add_argument("--format", choices=["text", "json"], default="text")
     g = listp.add_mutually_exclusive_group()
     g.add_argument("--recommended", action="store_true")
@@ -407,12 +414,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     listp.add_argument("--search", default=None)
     listp.set_defaults(_handler=_cmd_list)
 
-    runp = sub.add_parser("run")
+    runp = sub.add_parser(
+        "run",
+        help="Run a playbook by catalog name.",
+        description="Run a playbook by catalog name.",
+    )
     runp.add_argument("name")
     runp.add_argument("args", nargs=argparse.REMAINDER)
     runp.set_defaults(_handler=_cmd_run)
 
-    validatep = sub.add_parser("validate")
+    validatep = sub.add_parser(
+        "validate",
+        help="Validate that selected playbooks are importable and expose callable main().",
+        description="Validate that selected playbooks are importable and expose callable main().",
+    )
     validatep.add_argument("--format", choices=["text", "json"], default="text")
     group = validatep.add_mutually_exclusive_group()
     group.add_argument("--recommended", action="store_true")

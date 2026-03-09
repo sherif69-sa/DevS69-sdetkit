@@ -690,22 +690,24 @@ When a baseline check fails, you can request a deterministic unified diff betwee
   python -m sdetkit doctor baseline check --diff
   python -m sdetkit gate baseline check --diff
 
-### Playbooks and legacy study flows
+### Playbooks and incubator workflows
 
-Some legacy "dayXX-*" and case-study flows are available under the playbooks group to keep the main CLI focused.
+The `playbooks` group is the catalog surface for recommended playbooks, incubator workflows, and stable aliases.
 
-- List hidden playbooks:
+- List recommended playbooks, incubator workflows, and aliases:
 
-  python -m sdetkit playbooks
+      python -m sdetkit playbooks
+      python -m sdetkit playbooks list --format json
 
-- Run a playbook:
+- Run one by catalog name:
 
-  python -m sdetkit playbooks run day28-weekly-review -- --root . --format text
+      python -m sdetkit playbooks run onboarding
+      python -m sdetkit playbooks run day28-weekly-review -- --root . --format text
 
-- Validate playbooks are importable and expose callable `main()`:
+- Validate selected playbooks are importable and expose callable `main()`:
 
-  python -m sdetkit playbooks validate --recommended --format json
-  python -m sdetkit playbooks validate --legacy --format json
-  python -m sdetkit playbooks validate --name onboarding --name weekly-review --format json
+      python -m sdetkit playbooks validate --recommended --format json
+      python -m sdetkit playbooks validate --legacy --format json
+      python -m sdetkit playbooks validate --name onboarding --name weekly-review --format json
 
-- Legacy direct names still work, but prefer playbooks run for discoverability.
+- Direct top-level names still work, but prefer `playbooks` for discovery and `playbooks run` for explicit execution.
