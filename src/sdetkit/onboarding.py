@@ -82,7 +82,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--platform",
         choices=["all", *_PLATFORM_SETUP.keys()],
         default="all",
-        help="Platform-specific setup snippets for Day 5 onboarding.",
+        help="Platform-specific setup snippets to print.",
     )
     p.add_argument(
         "--output",
@@ -104,7 +104,9 @@ def _as_json(role: str, platform: str) -> str:
         payload = {name: details for name, details in _ROLE_PLAYBOOK.items()}
     else:
         payload = {role: _ROLE_PLAYBOOK[role]}
-    payload["day5_platform_setup"] = _platform_payload(platform)
+    setup = _platform_payload(platform)
+    payload["platform_setup"] = setup
+    payload["day5_platform_setup"] = setup
     return json.dumps(payload, indent=2, sort_keys=True)
 
 
@@ -117,7 +119,7 @@ def _as_markdown(role: str, platform: str) -> str:
             f"| {details['label']} | `{details['first_command']}` | {details['next_action']} |"
         )
     rows.append("")
-    rows.append("## Day 5 platform onboarding snippets")
+    rows.append("## Platform setup snippets")
     rows.append("")
     for key, details in _PLATFORM_SETUP.items():
         if platform != "all" and platform != key:
@@ -128,12 +130,12 @@ def _as_markdown(role: str, platform: str) -> str:
         rows.extend(details["commands"])
         rows.append("```")
         rows.append("")
-    rows.append("Quick start: [README quick start](../README.md#quick-start)")
+    rows.append("Quick start: [Docs fast start](../index.md#fast-start)")
     return "\n".join(rows)
 
 
 def _as_text(role: str, platform: str) -> str:
-    lines = ["Day 1 onboarding paths", ""]
+    lines = ["Onboarding paths", ""]
     for key, details in _ROLE_PLAYBOOK.items():
         if role != "all" and role != key:
             continue
@@ -142,7 +144,7 @@ def _as_text(role: str, platform: str) -> str:
         lines.append(f"  next : {details['next_action']}")
         lines.append(f"  docs : {', '.join(details['docs'])}")
         lines.append("")
-    lines.extend(["Day 5 platform onboarding snippets", ""])
+    lines.extend(["Platform setup snippets", ""])
     for key, details in _PLATFORM_SETUP.items():
         if platform != "all" and platform != key:
             continue
@@ -150,7 +152,7 @@ def _as_text(role: str, platform: str) -> str:
         for cmd in details["commands"]:
             lines.append(f"  {cmd}")
         lines.append("")
-    lines.append("Start here: README quick start -> #quick-start")
+    lines.append("Start here: docs/index.md -> Fast start")
     return "\n".join(lines)
 
 

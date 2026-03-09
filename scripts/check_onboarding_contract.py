@@ -1,58 +1,65 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
-README = Path("README.md")
-REQUIRED_SNIPPETS = [
-    "## 🔥 Day 1 ultra upgrade pack",
-    "sdetkit doctor --format markdown",
-    "sdetkit repo audit --format markdown",
-    "sdetkit security --format markdown",
-    "docs/day-1-ultra-upgrade-report.md",
+ARTIFACT = Path("docs/artifacts/day1-onboarding-sample.md")
+REPORT = Path("docs/day-1-ultra-upgrade-report.md")
+
+REQUIRED_ARTIFACT_SNIPPETS = [
+    "| Role | First command | Next action |",
+    "SDET / QA engineer",
+    "Platform / DevOps engineer",
+    "Security / compliance lead",
+    "Engineering manager / tech lead",
+    "Quick start:",
 ]
+
+REQUIRED_REPORT_SNIPPETS = [
+    "`src/sdetkit/onboarding.py`",
+    "`tests/test_onboarding_cli.py`",
+    "`scripts/check_onboarding_contract.py`",
+    "`docs/artifacts/day1-onboarding-sample.md`",
+    "`python -m sdetkit onboarding --format markdown --output docs/artifacts/day1-onboarding-sample.md`",
+    "`python scripts/check_onboarding_contract.py`",
+]
+
 REQUIRED_DOC_PATHS = [
+    "docs/doctor.md",
     "docs/repo-audit.md",
     "docs/github-action.md",
     "docs/security.md",
     "docs/policy-and-baselines.md",
     "docs/automation-os.md",
-    "docs/day-1-ultra-upgrade-report.md",
+    "docs/repo-tour.md",
 ]
 
 
-def _day1_section(text: str) -> str:
-    start = text.find("## 🔥 Day 1 ultra upgrade pack")
-    if start == -1:
-        return ""
-    remainder = text[start:]
-    m = re.search(r"\n## ", remainder[1:])
-    if not m:
-        return remainder
-    return remainder[: m.start() + 1]
-
-
 def main() -> int:
-    if not README.exists():
-        print("README.md missing", file=sys.stderr)
-        return 2
-
-    text = README.read_text(encoding="utf-8")
-    section = _day1_section(text)
     errors: list[str] = []
 
-    for snippet in REQUIRED_SNIPPETS:
-        if snippet not in text:
-            errors.append(f"missing snippet: {snippet}")
+    if not ARTIFACT.exists():
+        errors.append(f"missing artifact: {ARTIFACT}")
+        artifact_text = ""
+    else:
+        artifact_text = ARTIFACT.read_text(encoding="utf-8")
 
-    if not section:
-        errors.append("missing Day 1 ultra section")
+    if not REPORT.exists():
+        errors.append(f"missing report: {REPORT}")
+        report_text = ""
+    else:
+        report_text = REPORT.read_text(encoding="utf-8")
+
+    for snippet in REQUIRED_ARTIFACT_SNIPPETS:
+        if snippet not in artifact_text:
+            errors.append(f"missing artifact snippet: {snippet}")
+
+    for snippet in REQUIRED_REPORT_SNIPPETS:
+        if snippet not in report_text:
+            errors.append(f"missing report snippet: {snippet}")
 
     for rel_path in REQUIRED_DOC_PATHS:
-        if rel_path not in section:
-            errors.append(f"missing Day 1 link: {rel_path}")
         if not Path(rel_path).exists():
             errors.append(f"missing docs link target: {rel_path}")
 
