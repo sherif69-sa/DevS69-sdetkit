@@ -63,9 +63,6 @@ _REQUIRED_DATA_KEYS = [
     "baseline",
     "target",
     "owner",
-    "rollback_owner",
-    "confidence_floor",
-    "cadence_days",
 ]
 
 _DAY91_DEFAULT_PAGE = """# Day 91 \u2014 Continuous upgrade closeout lane
@@ -167,10 +164,15 @@ def _validate_plan_contract(
                 )
 
     owner_issues: list[str] = []
-    for owner_field in ("owner", "rollback_owner"):
-        value = plan_data.get(owner_field)
-        if not isinstance(value, str) or not value.strip():
-            owner_issues.append(f"{owner_field}: missing owner assignment")
+    owner_value = plan_data.get("owner")
+    if not isinstance(owner_value, str) or not owner_value.strip():
+        owner_issues.append("owner: missing owner assignment")
+
+    rollback_owner = plan_data.get("rollback_owner")
+    if rollback_owner is not None and (
+        not isinstance(rollback_owner, str) or not rollback_owner.strip()
+    ):
+        owner_issues.append("rollback_owner: missing owner assignment")
 
     hygiene_issues: list[str] = []
     contributors = plan_data.get("contributors")
@@ -185,11 +187,11 @@ def _validate_plan_contract(
     elif not all(isinstance(item, str) and item.strip() for item in channels):
         hygiene_issues.append("upgrade_channels: every channel must be a non-empty string")
 
-    confidence_floor = plan_data.get("confidence_floor")
+    confidence_floor = plan_data.get("confidence_floor", 0.8)
     if not isinstance(confidence_floor, (int, float)) or not (0 <= confidence_floor <= 1):
         hygiene_issues.append("confidence_floor: must be a number between 0 and 1")
 
-    cadence_days = plan_data.get("cadence_days")
+    cadence_days = plan_data.get("cadence_days", 7)
     if not isinstance(cadence_days, int) or cadence_days <= 0:
         hygiene_issues.append("cadence_days: must be a positive integer")
 
