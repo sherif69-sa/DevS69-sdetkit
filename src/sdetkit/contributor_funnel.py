@@ -142,10 +142,19 @@ def validate_backlog(backlog: list[dict[str, Any]]) -> list[str]:
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdetkit contributor-funnel",
-        description="Generate Day 8 contributor funnel good-first-issue backlog.",
+        description="Generate curated good-first-issue backlog with acceptance criteria and optional issue-pack export.",
     )
-    p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
-    p.add_argument("--output", default="", help="Optional output file path.")
+    p.add_argument(
+        "--format",
+        choices=["text", "markdown", "json"],
+        default="text",
+        help="Output format.",
+    )
+    p.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered contributor funnel report.",
+    )
     p.add_argument(
         "--area",
         choices=["all", "docs", "tests"],
@@ -166,7 +175,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _render_text(backlog: list[dict[str, Any]]) -> str:
-    lines = ["Day 8 contributor funnel backlog", ""]
+    lines = ["Contributor funnel backlog", ""]
     for issue in backlog:
         lines.append(f"[{issue['id']}] {issue['title']}")
         lines.append(f"  area: {issue['area']} | estimate: {issue['estimate']}")
@@ -179,7 +188,7 @@ def _render_text(backlog: list[dict[str, Any]]) -> str:
 
 def _render_markdown(backlog: list[dict[str, Any]]) -> str:
     lines = [
-        "# Day 8 contributor funnel backlog",
+        "# Contributor funnel backlog",
         "",
         "| ID | Title | Area | Estimate | Acceptance criteria |",
         "| --- | --- | --- | --- | --- |",
@@ -192,7 +201,7 @@ def _render_markdown(backlog: list[dict[str, Any]]) -> str:
     lines.extend(
         [
             "",
-            "## Day 8 execution notes",
+            "## Execution notes",
             "",
             "- Label each item as `good first issue` and include a mentoring contact in the issue body.",
             "- Keep acceptance criteria testable so first-time contributors can self-validate before opening a PR.",

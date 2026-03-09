@@ -140,20 +140,20 @@ See: day-7-ultra-upgrade-report.md and day-21-ultra-upgrade-report.md (legacy hi
 
 ## contributor-funnel
 
-Builds Day 8 contributor funnel output with 10 curated good-first-issue tasks and explicit acceptance criteria.
+Builds contributor funnel backlog with curated good-first-issue tasks and explicit acceptance criteria.
 
 Examples:
 
-- `sdetkit contributor-funnel --format text --strict`
+- `sdetkit contributor-funnel --format text`
 - `sdetkit contributor-funnel --format json`
-- `sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md`
-- `sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/day8-issue-pack`
+- `sdetkit contributor-funnel --format markdown --output contributor-funnel.md`
+- `sdetkit contributor-funnel --area docs --issue-pack-dir issue-pack`
 
 Useful flags: `--format`, `--output`, `--area`, `--issue-pack-dir`, `--strict`.
 
 `--strict` validates the full Day 8 backlog contract (10 issues, each with at least 3 acceptance criteria) and returns non-zero if it drifts.
 
-See: day-8-ultra-upgrade-report.md
+See: day-8-ultra-upgrade-report.md (legacy history).
 
 ## triage-templates
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from sdetkit import contributor_funnel
 
 
@@ -29,7 +31,7 @@ def test_markdown_output_and_issue_pack_written(tmp_path: Path) -> None:
     )
     assert rc == 0
     text = out.read_text(encoding="utf-8")
-    assert "# Day 8 contributor funnel backlog" in text
+    assert "# Contributor funnel backlog" in text
     assert "`GFI-10`" in text
     files = sorted(p.name for p in pack_dir.glob("*.md"))
     assert files[0] == "gfi-01.md"
@@ -44,3 +46,27 @@ def test_area_filter_returns_subset() -> None:
     assert tests_only
     assert all(item["area"] == "docs" for item in docs_only)
     assert all(item["area"] == "tests" for item in tests_only)
+
+
+def test_contributor_funnel_help_describes_product_surface(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        contributor_funnel.main(["--help"])
+    assert excinfo.value.code == 0
+    out = capsys.readouterr().out
+    normalized = " ".join(out.split())
+    assert "usage: sdetkit contributor-funnel" in normalized
+    assert "--format {text,markdown,json}" in out
+    assert (
+        "Generate curated good-first-issue backlog with acceptance criteria and optional issue-pack export."
+        in normalized
+    )
+    assert "Optional file path to also write the rendered contributor funnel report." in normalized
+
+
+def test_contributor_funnel_markdown_output_is_structured(capsys):
+    rc = contributor_funnel.main(["--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "# Contributor funnel backlog" in out
+    assert "| ID | Title | Area | Estimate | Acceptance criteria |" in out
+    assert "## Execution notes" in out
