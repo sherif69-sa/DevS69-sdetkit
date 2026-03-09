@@ -14,7 +14,7 @@ Use this sequence to establish an enterprise guardrail baseline:
 
 ```bash
 python -m sdetkit repo audit . --profile enterprise --format json
-python -m sdetkit security report --format text
+python -m sdetkit security check --root . --baseline tools/security.baseline.json --format text
 python -m sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json
 python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py
 python scripts/check_day13_enterprise_use_case_contract.py

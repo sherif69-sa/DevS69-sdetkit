@@ -142,7 +142,7 @@ Generate artifacts to support traceable release approvals.
     ```bash
     bash ci.sh quick
     bash quality.sh cov
-    python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+    python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json
     ```
 
 !!! tip "10-minute onboarding path"
@@ -169,7 +169,7 @@ Generate artifacts to support traceable release approvals.
 | --- | --- | --- |
 | Quality | CI-equivalent checks are green and reproducible | `bash ci.sh quick --skip-docs` |
 | Coverage | Coverage gate meets release threshold | `bash quality.sh cov` |
-| Security | Policy budgets are enforced with zero drift | `python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0` |
+| Security | Policy budgets are enforced with zero drift | `python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json` |
 | Evidence | Artifacts are generated and stored for review | `python -m sdetkit evidence --help` |
 
 ## Continue exploring

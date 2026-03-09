@@ -6,6 +6,8 @@ The `sdetkit security` command provides an offline-first, deterministic security
 
 - `python -m sdetkit security scan`
   - offline by default; runs secret scan, risky-pattern scan, offline dependency vuln scan, and CycloneDX SBOM generation.
+- `python -m sdetkit security baseline --root . --output tools/security.baseline.json`
+- `python -m sdetkit security check --root . --baseline tools/security.baseline.json --format text`
 - `python -m sdetkit security report --format sarif --output build/security.sarif`
   - exports SARIF 2.1.0 with stable rule IDs and remediation help text.
 - `python -m sdetkit security check --baseline tools/security.baseline.json`

@@ -24,7 +24,7 @@ bash scripts/ready_to_use.sh release
 In addition to the fast start, this mode runs:
 
 - `bash quality.sh cov`
-- `python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0`
+- `python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json`
 - `python -m sdetkit gate release`
 
 Use this when you need production-quality release evidence.

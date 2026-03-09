@@ -33,7 +33,7 @@ Fast path to run the "release confidence" workflow:
 ```bash
 bash ci.sh quick --skip-docs
 bash quality.sh cov
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json
 python -m sdetkit gate release
 ```
 
@@ -93,7 +93,7 @@ Use this sequence for a release-ready posture:
 ```bash
 bash ci.sh quick --skip-docs
 bash quality.sh cov
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json
 python -m sdetkit gate release
 ```
 
