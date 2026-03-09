@@ -92,17 +92,17 @@ See: day-2-ultra-upgrade-report.md (legacy history).
 
 ## proof
 
-Renders a Day 3 proof pack for doctor, repo audit, and security evidence capture.
+Renders a reusable proof pack for doctor, repo audit, and security evidence capture.
 
 Examples:
 
 - `sdetkit proof --format text`
 - `sdetkit proof --execute --strict --format text`
-- `sdetkit proof --execute --strict --format markdown --output docs/artifacts/day3-proof-sample.md`
+- `sdetkit proof --execute --strict --format markdown --output proof.md`
 
 Useful flags: `--execute`, `--timeout-seconds`, `--strict`.
 
-See: day-3-ultra-upgrade-report.md
+See: day-3-ultra-upgrade-report.md (legacy history).
 
 
 ## docs-qa

@@ -7,7 +7,7 @@ def test_proof_default_text_contains_steps(capsys):
     rc = proof.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 3 proof pack" in out
+    assert "Proof pack" in out
     assert "Doctor proof snapshot" in out
     assert "Repo audit proof snapshot" in out
     assert "Security proof snapshot" in out
@@ -17,14 +17,14 @@ def test_proof_json_machine_readable(capsys):
     rc = proof.main(["--format", "json"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["name"] == "day3-proof-pack"
+    assert payload["name"] == "proof-pack"
     assert len(payload["steps"]) == 3
 
 
 def test_cli_dispatches_proof(capsys):
     rc = cli.main(["proof", "--format", "text"])
     assert rc == 0
-    assert "Day 3 boost hints" in capsys.readouterr().out
+    assert "Proof tips" in capsys.readouterr().out
 
 
 def test_proof_execute_strict_failure(monkeypatch, capsys):

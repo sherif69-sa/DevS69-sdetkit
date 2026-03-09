@@ -15,7 +15,7 @@ _DAY3_PROOF_FLOW = [
         "step": "Doctor proof snapshot",
         "command": "python -m sdetkit doctor --format text",
         "expected": ["doctor score:", "recommendations:"],
-        "purpose": "Captures repo health evidence for the Day 3 proof pack.",
+        "purpose": "Captures repo health evidence for a reusable proof pack.",
     },
     {
         "artifact": "repo-audit-proof",
@@ -35,8 +35,8 @@ _DAY3_PROOF_FLOW = [
 
 _DAY3_HINTS = [
     "Capture terminal screenshots immediately after each successful proof command.",
-    "Use --strict in CI to enforce that all three Day 3 proof snapshots are valid.",
-    "Use --format markdown --output docs/artifacts/day3-proof-sample.md to publish a shareable evidence bundle.",
+    "Use --strict in CI to enforce that all three proof snapshots are valid.",
+    "Use --format markdown --output proof.md to publish a shareable evidence bundle.",
 ]
 
 
@@ -111,7 +111,7 @@ def _execute_flow(timeout_seconds: float) -> list[dict[str, object]]:
 
 
 def _as_text(execution: list[dict[str, object]]) -> str:
-    lines = ["Day 3 proof pack", ""]
+    lines = ["Proof pack", ""]
     for item in _DAY3_PROOF_FLOW:
         lines.append(f"[{item['step']}]")
         lines.append(f"  artifact : {item['artifact']}")
@@ -134,7 +134,7 @@ def _as_text(execution: list[dict[str, object]]) -> str:
                 lines.append(f"  error: {err}")
         lines.append("")
 
-    lines.append("Day 3 boost hints")
+    lines.append("Proof tips")
     for hint in _DAY3_HINTS:
         lines.append(f"- {hint}")
     return "\n".join(lines) + "\n"
@@ -142,7 +142,7 @@ def _as_text(execution: list[dict[str, object]]) -> str:
 
 def _as_markdown(execution: list[dict[str, object]]) -> str:
     lines = [
-        "# Day 3 proof pack",
+        "# Proof pack",
         "",
         "| Artifact | Step | Command | Expected snippets | Purpose |",
         "| --- | --- | --- | --- | --- |",
@@ -171,7 +171,7 @@ def _as_markdown(execution: list[dict[str, object]]) -> str:
                 f"| `{result['artifact']}` | {result['status']} | {result['exit_code']} | {result['duration_seconds']} | {missing} | {error} |"
             )
 
-    lines.extend(["", "## Day 3 boost hints", ""])
+    lines.extend(["", "## Proof tips", ""])
     for hint in _DAY3_HINTS:
         lines.append(f"- {hint}")
     return "\n".join(lines) + "\n"
@@ -179,7 +179,7 @@ def _as_markdown(execution: list[dict[str, object]]) -> str:
 
 def _as_json(execution: list[dict[str, object]]) -> str:
     payload = {
-        "name": "day3-proof-pack",
+        "name": "proof-pack",
         "steps": _DAY3_PROOF_FLOW,
         "execution": execution,
         "hints": _DAY3_HINTS,
