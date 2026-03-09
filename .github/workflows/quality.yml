@@ -27,19 +27,14 @@ jobs:
             requirements-test.txt
             requirements-docs.txt
 
-      - name: Install
+      - name: Install project + quality tooling
         run: |
-          python -m pip install -r requirements-test.txt -r requirements-docs.txt
-          python -m pip install pre-commit==4.5.1
-      - name: Install (deps)
-        run: |
-          python -m pip install -e .
+          python -m pip install -e .[dev,test,docs]
       - name: Doctor (ASCII)
         run: |
           python -m sdetkit.doctor --ascii
       - name: Lint
         run: |
-          python -m pip install pre-commit==4.5.1
           python -m pre_commit run -a
 
       - name: Tests
