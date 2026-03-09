@@ -7,12 +7,12 @@ def test_onboarding_default_text_lists_all_roles(capsys):
     rc = onboarding.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 1 onboarding paths" in out
+    assert "Onboarding paths" in out
     assert "SDET / QA engineer" in out
     assert "Platform / DevOps engineer" in out
     assert "Security / compliance lead" in out
     assert "Engineering manager / tech lead" in out
-    assert "Day 5 platform onboarding snippets" in out
+    assert "Platform setup snippets" in out
 
 
 def test_onboarding_role_markdown_focuses_single_role(capsys):
@@ -30,7 +30,9 @@ def test_onboarding_json_is_machine_readable(capsys):
     data = json.loads(capsys.readouterr().out)
     assert "security" in data
     assert data["security"]["first_command"] == "sdetkit security --format markdown"
-    assert "windows" in data["day5_platform_setup"]
+    assert "platform_setup" in data
+    assert "windows" in data["platform_setup"]
+    assert data["platform_setup"] == data["day5_platform_setup"]
 
 
 def test_onboarding_platform_filter_renders_selected_os(capsys):

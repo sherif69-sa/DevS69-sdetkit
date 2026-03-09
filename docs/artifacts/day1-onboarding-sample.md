@@ -5,4 +5,33 @@
 | Security / compliance lead | `sdetkit security --format markdown` | Apply policy controls from `docs/security.md` and `docs/policy-and-baselines.md`. |
 | Engineering manager / tech lead | `sdetkit doctor --format markdown` | Standardize team workflows using `docs/automation-os.md` and `docs/repo-tour.md`. |
 
-Quick start: [Repo audit quick start](../repo-audit.md#quick-start)
+## Platform setup snippets
+
+### Linux (bash)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-test.txt -e .
+python -m sdetkit doctor --format text
+```
+
+### macOS (zsh/bash)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-test.txt -e .
+python -m sdetkit doctor --format text
+```
+
+### Windows (PowerShell)
+
+```bash
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-test.txt -e .
+python -m sdetkit doctor --format text
+```
+
+Quick start: [Docs fast start](../index.md#fast-start)
