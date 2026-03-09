@@ -77,17 +77,17 @@ See: day-1-ultra-upgrade-report.md and day-5-ultra-upgrade-report.md
 
 ## demo
 
-Renders a Day 2 copy/paste walkthrough for fast product demos.
+Renders a copy/paste workflow for fast, shareable product demos.
 
 Examples:
 
 - `sdetkit demo --execute --format text`
-- `sdetkit demo --execute --format markdown --output docs/artifacts/day2-demo-sample.md`
+- `sdetkit demo --execute --format markdown --output demo.md`
 - `sdetkit demo --format json`
 
 Useful flags: `--execute`, `--timeout-seconds`, `--fail-fast`, `--target-seconds`.
 
-See: day-2-ultra-upgrade-report.md
+See: day-2-ultra-upgrade-report.md (legacy history).
 
 
 ## proof

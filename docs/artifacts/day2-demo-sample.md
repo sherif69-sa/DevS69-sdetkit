@@ -1,4 +1,4 @@
-# Day 2 demo path (target: ~60 seconds)
+# Demo path (target: ~60 seconds)
 
 | Step | Command | Expected output snippets | Outcome |
 |---|---|---|---|
@@ -20,10 +20,10 @@
 - Target: `60.0s`
 - Within target: `yes`
 
-## Closeout hints
+## Demo tips
 
-- Use --execute when recording a live Day 2 walkthrough so each step is validated.
-- Use --format markdown --output docs/artifacts/day2-demo-closeout.md to save a shareable run artifact.
+- Use --execute when recording a live product demo so each step is validated.
+- Use --format markdown --output demo.md to save a shareable run artifact.
 - If a snippet check fails, rerun a single command manually and compare output with the expected markers.
 
-Related docs: [Repo audit quick start](../repo-audit.md#quick-start), [repo audit](../repo-audit.md).
+Related docs: [Docs fast start](../index.md#fast-start), [repo audit](../repo-audit.md).

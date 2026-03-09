@@ -40,8 +40,8 @@ _DEMO_FLOW = [
 ]
 
 _HINTS = [
-    "Use --execute when recording a live Day 2 walkthrough so each step is validated.",
-    "Use --format markdown --output docs/artifacts/day2-demo-closeout.md to save a shareable run artifact.",
+    "Use --execute when recording a live product demo so each step is validated.",
+    "Use --format markdown --output demo.md to save a shareable run artifact.",
     "If a snippet check fails, rerun a single command manually and compare output with the expected markers.",
 ]
 
@@ -153,7 +153,7 @@ def _execution_summary(
 
 
 def _as_text(execution_results: list[dict[str, object]], target_seconds: float) -> str:
-    lines = ["Day 2 demo path (target: ~60 seconds)", ""]
+    lines = ["Demo path (target: ~60 seconds)", ""]
     for item in _DEMO_FLOW:
         lines.append(f"[{item['step']}]")
         lines.append(f"  run     : {item['command']}")
@@ -180,7 +180,7 @@ def _as_text(execution_results: list[dict[str, object]], target_seconds: float) 
         )
         lines.append("")
 
-    lines.append("Closeout hints")
+    lines.append("Demo tips")
     for hint in _HINTS:
         lines.append(f"- {hint}")
     return "\n".join(lines)
@@ -188,7 +188,7 @@ def _as_text(execution_results: list[dict[str, object]], target_seconds: float) 
 
 def _as_markdown(execution_results: list[dict[str, object]], target_seconds: float) -> str:
     rows = [
-        "# Day 2 demo path (target: ~60 seconds)",
+        "# Demo path (target: ~60 seconds)",
         "",
         "| Step | Command | Expected output snippets | Outcome |",
         "|---|---|---|---|",
@@ -225,11 +225,11 @@ def _as_markdown(execution_results: list[dict[str, object]], target_seconds: flo
             ]
         )
 
-    rows.extend(["", "## Closeout hints", ""])
+    rows.extend(["", "## Demo tips", ""])
     rows.extend(f"- {hint}" for hint in _HINTS)
     rows.append("")
     rows.append(
-        "Related docs: [README quick start](../README.md#quick-start), [repo audit](repo-audit.md)."
+        "Related docs: [Docs fast start](../index.md#fast-start), [repo audit](../repo-audit.md)."
     )
     return "\n".join(rows)
 
@@ -237,7 +237,7 @@ def _as_markdown(execution_results: list[dict[str, object]], target_seconds: flo
 def _as_json(execution_results: list[dict[str, object]], target_seconds: float) -> str:
     return json.dumps(
         {
-            "name": "day2-demo-path",
+            "name": "demo-path",
             "steps": _DEMO_FLOW,
             "execution": execution_results,
             "sla": _execution_summary(execution_results, target_seconds),
