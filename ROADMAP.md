@@ -1,33 +1,36 @@
 # Roadmap
 
-This repo is a long-term SDET bootcamp project. The goal is to grow it into a practical toolkit + training track.
+DevS69 SDETKit is an open-source release confidence toolkit for SDET, QA, and DevOps teams.
 
-## Now (stabilize)
+The current priority is to make the core workflow clean, trustworthy, and easy to adopt for real repositories.
 
-- Keep CI green (quality, pages, releases, mutation tests)
-- Improve docs (examples, recipes, troubleshooting)
-- Add more CLI examples and realistic test scenarios
+## Now (stabilize core)
 
-## Next (features)
+- Keep CI green and deterministic
+- Improve first-run experience and onboarding
+- Strengthen release confidence workflows and evidence outputs
+- Improve docs with practical examples, recipes, and troubleshooting
 
-- `apiget`:
-  - Better pagination strategies (cursor/offset/link-header recipes)
-  - More observability hooks (trace/request-id)
-  - More failure-mode tests (timeouts, retries, bad JSON, partial pages)
-- `kv`:
-  - More input edge cases and strict/relaxed modes
+## Next (product quality)
 
-## Later (professional polish)
+- sharpen the core commands:
+  - `doctor`
+  - `repo`
+  - `gate`
+  - `security`
+  - `evidence`
+- add more realistic repo validation scenarios
+- improve CI integration examples
+- publish example outputs and proof assets
 
-- More modules:
-  - contract testing helpers
-  - test data builders/factories
-  - logging/metrics helpers
-- More exercises:
-  - kata tasks with progressive difficulty
-  - mutation-test "killers" as training objectives
+## Later (extensions)
+
+- custom integrations
+- private policy packs
+- hosted dashboards or managed services
+- advanced enterprise reporting
 
 ## Release plan
 
-- v0.x: ship improvements frequently while APIs are still flexible
-- v1.0: lock in stable CLI/API once patterns are proven
+- v1.x: stabilize and improve the public workflow
+- future majors: expand carefully without bloating the core

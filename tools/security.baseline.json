@@ -1,4 +1,21 @@
 {
-  "entries": [],
+  "entries": [
+    {
+      "fingerprint": "6b6a043fa9ea4c03494cebe9",
+      "line": 245,
+      "message": "high-entropy string literal detected.",
+      "path": "src/sdetkit/day92_continuous_upgrade_cycle2_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn"
+    },
+    {
+      "fingerprint": "33131d9c2ef60322eff7f7ad",
+      "line": 245,
+      "message": "high-entropy string literal detected.",
+      "path": "src/sdetkit/day93_continuous_upgrade_cycle3_closeout.py",
+      "rule_id": "SEC_HIGH_ENTROPY_STRING",
+      "severity": "warn"
+    }
+  ],
   "version": 1
 }

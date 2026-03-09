@@ -8,8 +8,8 @@ version = "1.0.2"
 requires-python = ">=3.11"
 readme = "README.md"
 description = "Developer productivity and QA automation toolkit: CLI utilities, quality gates, and testable modules."
-license = "LicenseRef-DevS69"
-license-files = ["LICENSE", "COMMERCIAL_LICENSE.md"]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 keywords = ["sdet", "testing", "qa", "automation", "cli", "devtools", "quality-gates"]
 authors = [{ name = "DevS69 contributors" }]
 maintainers = [{ name = "DevS69 maintainers" }]

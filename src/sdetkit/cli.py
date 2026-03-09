@@ -526,34 +526,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     help_epilog = """\
 Command groups:
 
-  Core:
-    kv
-    apiget
-    cassette-get
+  Core workflows:
     doctor
-    gate
-    ci
-    patch
     repo
-    dev
-    report
-    maintenance
-    agent
+    gate
     security
-    ops
-    notify
-
-  Docs and governance:
-    docs-qa
-    docs-nav
-    roadmap
-    policy
     evidence
-    release-narrative
-    release-readiness-board
-    trust-signal-upgrade
 
-  Playbooks and examples:
+  Extensions:
+    ci
+    report
+    docs-qa
+    policy
+
+  Playbooks:
     onboarding
     weekly-review
     proof
@@ -586,7 +572,7 @@ Run: sdetkit playbooks
     sub = p.add_subparsers(dest="cmd", required=True, metavar="command")
     bsl = sub.add_parser("baseline")
     bsl.add_argument("args", nargs=argparse.REMAINDER)
-    sub.add_parser("playbooks", help="List playbooks and legacy flows")
+    sub.add_parser("playbooks", help="List playbooks and incubator workflows")
     kv = sub.add_parser("kv")
     kv.add_argument("args", nargs=argparse.REMAINDER)
 

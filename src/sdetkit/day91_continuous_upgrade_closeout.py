@@ -146,8 +146,10 @@ def _validate_plan_contract(
     missing_keys = [key for key in _REQUIRED_DATA_KEYS if key not in plan_data]
 
     trajectory_issues: list[str] = []
-    baseline = plan_data.get("baseline") if isinstance(plan_data.get("baseline"), dict) else {}
-    target = plan_data.get("target") if isinstance(plan_data.get("target"), dict) else {}
+    baseline_raw = plan_data.get("baseline")
+    baseline = baseline_raw if isinstance(baseline_raw, dict) else {}
+    target_raw = plan_data.get("target")
+    target = target_raw if isinstance(target_raw, dict) else {}
 
     if not baseline:
         trajectory_issues.append("baseline: missing or not an object")
@@ -223,7 +225,9 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
     missing_board_items = [item for item in _REQUIRED_DELIVERY_BOARD_LINES if item not in page_text]
 
     plan_data = _load_json(root / _PLAN_PATH)
-    missing_plan_keys, plan_trajectory_issues, plan_owner_issues, plan_hygiene_issues = _validate_plan_contract(plan_data)
+    missing_plan_keys, plan_trajectory_issues, plan_owner_issues, plan_hygiene_issues = (
+        _validate_plan_contract(plan_data)
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -389,9 +393,13 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
         )
 
     if not plan_hygiene_issues:
-        wins.append("Day 91 plan hygiene checks passed for contributors/channels/confidence/cadence.")
+        wins.append(
+            "Day 91 plan hygiene checks passed for contributors/channels/confidence/cadence."
+        )
     else:
-        misses.append("Day 91 plan hygiene checks failed for contributors/channels/confidence/cadence.")
+        misses.append(
+            "Day 91 plan hygiene checks failed for contributors/channels/confidence/cadence."
+        )
         handoff_actions.append(
             "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/day91-continuous-upgrade-plan.json."
         )

@@ -166,4 +166,4 @@ Before opening a PR, prefer running `bash quality.sh full-test` when feasible.
 
 ## License
 
-Distributed under project licensing in `LICENSE` and `COMMERCIAL_LICENSE.md`.
+Distributed under the Apache-2.0 license. See `LICENSE` and `ENTERPRISE_OFFERINGS.md`.
