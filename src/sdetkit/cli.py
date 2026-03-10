@@ -451,43 +451,43 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] in {"partner-outreach-closeout", "day80-partner-outreach-closeout"}:
         return day80_partner_outreach_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day81-growth-campaign-closeout":
+    if argv and argv[0] in {"growth-campaign-closeout", "day81-growth-campaign-closeout"}:
         return day81_growth_campaign_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day82-integration-feedback-closeout":
+    if argv and argv[0] in {"integration-feedback-closeout", "day82-integration-feedback-closeout"}:
         return day82_integration_feedback_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day83-trust-faq-expansion-closeout":
+    if argv and argv[0] in {"trust-faq-expansion-closeout", "day83-trust-faq-expansion-closeout"}:
         return day83_trust_faq_expansion_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day84-evidence-narrative-closeout":
+    if argv and argv[0] in {"evidence-narrative-closeout", "day84-evidence-narrative-closeout"}:
         return day84_evidence_narrative_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day85-release-prioritization-closeout":
+    if argv and argv[0] in {"release-prioritization-closeout", "day85-release-prioritization-closeout"}:
         return day85_release_prioritization_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day86-launch-readiness-closeout":
+    if argv and argv[0] in {"launch-readiness-closeout", "day86-launch-readiness-closeout"}:
         return day86_launch_readiness_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day87-governance-handoff-closeout":
+    if argv and argv[0] in {"governance-handoff-closeout", "day87-governance-handoff-closeout"}:
         return day87_governance_handoff_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day88-governance-priorities-closeout":
+    if argv and argv[0] in {"governance-priorities-closeout", "day88-governance-priorities-closeout"}:
         return day88_governance_priorities_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day89-governance-scale-closeout":
+    if argv and argv[0] in {"governance-scale-closeout", "day89-governance-scale-closeout"}:
         return day89_governance_scale_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day90-phase3-wrap-publication-closeout":
+    if argv and argv[0] in {"phase3-wrap-publication-closeout", "day90-phase3-wrap-publication-closeout"}:
         return day90_phase3_wrap_publication_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day91-continuous-upgrade-closeout":
+    if argv and argv[0] in {"continuous-upgrade-closeout", "day91-continuous-upgrade-closeout"}:
         return day91_continuous_upgrade_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day92-continuous-upgrade-cycle2-closeout":
+    if argv and argv[0] in {"continuous-upgrade-cycle2-closeout", "day92-continuous-upgrade-cycle2-closeout"}:
         return day92_continuous_upgrade_cycle2_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day93-continuous-upgrade-cycle3-closeout":
+    if argv and argv[0] in {"continuous-upgrade-cycle3-closeout", "day93-continuous-upgrade-cycle3-closeout"}:
         return day93_continuous_upgrade_cycle3_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "day94-continuous-upgrade-cycle4-closeout":
@@ -884,31 +884,44 @@ Run: sdetkit playbooks
     d79.add_argument("args", nargs=argparse.REMAINDER)
     d80 = sub.add_parser("partner-outreach-closeout", aliases=["day80-partner-outreach-closeout"])
     d80.add_argument("args", nargs=argparse.REMAINDER)
-    d81 = sub.add_parser("day81-growth-campaign-closeout")
+    d81 = sub.add_parser("growth-campaign-closeout", aliases=["day81-growth-campaign-closeout"])
+    d81.set_defaults(cmd="day81-growth-campaign-closeout")
     d81.add_argument("args", nargs=argparse.REMAINDER)
-    d82 = sub.add_parser("day82-integration-feedback-closeout")
+    d82 = sub.add_parser("integration-feedback-closeout", aliases=["day82-integration-feedback-closeout"])
+    d82.set_defaults(cmd="day82-integration-feedback-closeout")
     d82.add_argument("args", nargs=argparse.REMAINDER)
-    d83 = sub.add_parser("day83-trust-faq-expansion-closeout")
+    d83 = sub.add_parser("trust-faq-expansion-closeout", aliases=["day83-trust-faq-expansion-closeout"])
+    d83.set_defaults(cmd="day83-trust-faq-expansion-closeout")
     d83.add_argument("args", nargs=argparse.REMAINDER)
-    d84 = sub.add_parser("day84-evidence-narrative-closeout")
+    d84 = sub.add_parser("evidence-narrative-closeout", aliases=["day84-evidence-narrative-closeout"])
+    d84.set_defaults(cmd="day84-evidence-narrative-closeout")
     d84.add_argument("args", nargs=argparse.REMAINDER)
-    d85 = sub.add_parser("day85-release-prioritization-closeout")
+    d85 = sub.add_parser("release-prioritization-closeout", aliases=["day85-release-prioritization-closeout"])
+    d85.set_defaults(cmd="day85-release-prioritization-closeout")
     d85.add_argument("args", nargs=argparse.REMAINDER)
-    d86 = sub.add_parser("day86-launch-readiness-closeout")
+    d86 = sub.add_parser("launch-readiness-closeout", aliases=["day86-launch-readiness-closeout"])
+    d86.set_defaults(cmd="day86-launch-readiness-closeout")
     d86.add_argument("args", nargs=argparse.REMAINDER)
-    d87 = sub.add_parser("day87-governance-handoff-closeout")
+    d87 = sub.add_parser("governance-handoff-closeout", aliases=["day87-governance-handoff-closeout"])
+    d87.set_defaults(cmd="day87-governance-handoff-closeout")
     d87.add_argument("args", nargs=argparse.REMAINDER)
-    d88 = sub.add_parser("day88-governance-priorities-closeout")
+    d88 = sub.add_parser("governance-priorities-closeout", aliases=["day88-governance-priorities-closeout"])
+    d88.set_defaults(cmd="day88-governance-priorities-closeout")
     d88.add_argument("args", nargs=argparse.REMAINDER)
-    d89 = sub.add_parser("day89-governance-scale-closeout")
+    d89 = sub.add_parser("governance-scale-closeout", aliases=["day89-governance-scale-closeout"])
+    d89.set_defaults(cmd="day89-governance-scale-closeout")
     d89.add_argument("args", nargs=argparse.REMAINDER)
-    d90 = sub.add_parser("day90-phase3-wrap-publication-closeout")
+    d90 = sub.add_parser("phase3-wrap-publication-closeout", aliases=["day90-phase3-wrap-publication-closeout"])
+    d90.set_defaults(cmd="day90-phase3-wrap-publication-closeout")
     d90.add_argument("args", nargs=argparse.REMAINDER)
-    d91 = sub.add_parser("day91-continuous-upgrade-closeout")
+    d91 = sub.add_parser("continuous-upgrade-closeout", aliases=["day91-continuous-upgrade-closeout"])
+    d91.set_defaults(cmd="day91-continuous-upgrade-closeout")
     d91.add_argument("args", nargs=argparse.REMAINDER)
-    d92 = sub.add_parser("day92-continuous-upgrade-cycle2-closeout")
+    d92 = sub.add_parser("continuous-upgrade-cycle2-closeout", aliases=["day92-continuous-upgrade-cycle2-closeout"])
+    d92.set_defaults(cmd="day92-continuous-upgrade-cycle2-closeout")
     d92.add_argument("args", nargs=argparse.REMAINDER)
-    d93 = sub.add_parser("day93-continuous-upgrade-cycle3-closeout")
+    d93 = sub.add_parser("continuous-upgrade-cycle3-closeout", aliases=["day93-continuous-upgrade-cycle3-closeout"])
+    d93.set_defaults(cmd="day93-continuous-upgrade-cycle3-closeout")
     d93.add_argument("args", nargs=argparse.REMAINDER)
     d94 = sub.add_parser("day94-continuous-upgrade-cycle4-closeout")
     d94.add_argument("args", nargs=argparse.REMAINDER)

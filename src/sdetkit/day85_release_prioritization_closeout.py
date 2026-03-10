@@ -15,23 +15,23 @@ _DAY84_BOARD_PATH = "docs/artifacts/day84-evidence-narrative-closeout-pack/day84
 _PLAN_PATH = "docs/roadmap/plans/day85-release-prioritization-plan.json"
 _SECTION_HEADER = "# Day 85 \u2014 Release prioritization closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 85 matters",
+    "## Why Release Prioritization Closeout matters",
     "## Required inputs (Day 84)",
-    "## Day 85 command lane",
+    "## Command lane",
     "## Release prioritization contract",
     "## Release prioritization quality checklist",
-    "## Day 85 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day85-release-prioritization-closeout --format json --strict",
-    "python -m sdetkit day85-release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict",
-    "python -m sdetkit day85-release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit release-prioritization-closeout --format json --strict",
+    "python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict",
+    "python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict",
     "python scripts/check_day85_release_prioritization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day85-release-prioritization-closeout --format json --strict",
-    "python -m sdetkit day85-release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict",
+    "python -m sdetkit release-prioritization-closeout --format json --strict",
+    "python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict",
     "python scripts/check_day85_release_prioritization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -67,7 +67,7 @@ _DAY85_DEFAULT_PAGE = """# Day 85 \u2014 Release prioritization closeout lane
 
 Day 85 closes with a major upgrade that converts Day 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
 
-## Why Day 85 matters
+## Why Release Prioritization Closeout matters
 
 - Converts Day 84 evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -79,12 +79,12 @@ Day 85 closes with a major upgrade that converts Day 84 evidence narrative outco
 - `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md`
 - `docs/roadmap/plans/day85-release-prioritization-plan.json`
 
-## Day 85 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day85-release-prioritization-closeout --format json --strict
-python -m sdetkit day85-release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict
-python -m sdetkit day85-release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict
+python -m sdetkit release-prioritization-closeout --format json --strict
+python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict
+python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict
 python scripts/check_day85_release_prioritization_closeout_contract.py
 ```
 
@@ -103,7 +103,7 @@ python scripts/check_day85_release_prioritization_closeout_contract.py
 - [ ] Scorecard captures release prioritization adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 85 delivery board
+## Delivery board
 
 - [ ] Day 85 evidence brief committed
 - [ ] Day 85 release prioritization plan committed
@@ -302,7 +302,7 @@ def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str,
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day85-release-prioritization-closeout",
+        "name": "release-prioritization-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

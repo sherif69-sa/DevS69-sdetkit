@@ -97,7 +97,7 @@ def test_day92_json(tmp_path: Path, capsys) -> None:
     rc = d92.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day92-continuous-upgrade-cycle2-closeout"
+    assert out["name"] == "continuous-upgrade-cycle2-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -173,7 +173,7 @@ def test_day92_strict_fails_without_day91(tmp_path: Path) -> None:
 def test_day92_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day92-continuous-upgrade-cycle2-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["continuous-upgrade-cycle2-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Day 92 continuous upgrade closeout summary" in capsys.readouterr().out

@@ -15,23 +15,23 @@ _DAY86_BOARD_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-d
 _PLAN_PATH = "docs/roadmap/plans/day87-governance-handoff-plan.json"
 _SECTION_HEADER = "# Day 87 \u2014 Governance handoff closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 87 matters",
+    "## Why Governance Handoff Closeout matters",
     "## Required inputs (Day 86)",
-    "## Day 87 command lane",
+    "## Command lane",
     "## Governance handoff contract",
     "## Governance handoff quality checklist",
-    "## Day 87 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day87-governance-handoff-closeout --format json --strict",
-    "python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict",
-    "python -m sdetkit day87-governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit governance-handoff-closeout --format json --strict",
+    "python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict",
+    "python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict",
     "python scripts/check_day87_governance_handoff_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day87-governance-handoff-closeout --format json --strict",
-    "python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict",
+    "python -m sdetkit governance-handoff-closeout --format json --strict",
+    "python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict",
     "python scripts/check_day87_governance_handoff_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -67,7 +67,7 @@ _DAY87_DEFAULT_PAGE = """# Day 87 \u2014 Governance handoff closeout lane
 
 Day 87 closes with a major upgrade that converts Day 86 launch readiness outcomes into a deterministic governance handoff operating lane.
 
-## Why Day 87 matters
+## Why Governance Handoff Closeout matters
 
 - Converts Day 86 launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -79,12 +79,12 @@ Day 87 closes with a major upgrade that converts Day 86 launch readiness outcome
 - `docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md`
 - `docs/roadmap/plans/day87-governance-handoff-plan.json`
 
-## Day 87 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day87-governance-handoff-closeout --format json --strict
-python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict
-python -m sdetkit day87-governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit governance-handoff-closeout --format json --strict
+python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict
+python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict
 python scripts/check_day87_governance_handoff_closeout_contract.py
 ```
 
@@ -103,7 +103,7 @@ python scripts/check_day87_governance_handoff_closeout_contract.py
 - [ ] Scorecard captures governance handoff adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 87 delivery board
+## Delivery board
 
 - [ ] Day 87 evidence brief committed
 - [ ] Day 87 governance handoff plan committed
@@ -302,7 +302,7 @@ def build_day87_governance_handoff_closeout_summary(root: Path) -> dict[str, Any
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day87-governance-handoff-closeout",
+        "name": "governance-handoff-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

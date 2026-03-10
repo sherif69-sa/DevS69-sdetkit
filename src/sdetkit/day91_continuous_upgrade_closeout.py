@@ -17,23 +17,23 @@ _DAY90_BOARD_PATH = (
 _PLAN_PATH = "docs/roadmap/plans/day91-continuous-upgrade-plan.json"
 _SECTION_HEADER = "# Day 91 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 91 matters",
+    "## Why Continuous Upgrade Closeout matters",
     "## Required inputs (Day 90)",
-    "## Day 91 command lane",
+    "## Command lane",
     "## Continuous upgrade contract",
     "## Continuous upgrade quality checklist",
-    "## Day 91 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day91-continuous-upgrade-closeout --format json --strict",
-    "python -m sdetkit day91-continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict",
-    "python -m sdetkit day91-continuous-upgrade-closeout --execute --evidence-dir docs/artifacts/day91-continuous-upgrade-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout --execute --evidence-dir docs/artifacts/day91-continuous-upgrade-closeout-pack/evidence --format json --strict",
     "python scripts/check_day91_continuous_upgrade_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day91-continuous-upgrade-closeout --format json --strict",
-    "python -m sdetkit day91-continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict",
     "python scripts/check_day91_continuous_upgrade_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY91_DEFAULT_PAGE = """# Day 91 \u2014 Continuous upgrade closeout lane
 
 Day 91 closes with a major upgrade that converts Day 90 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
-## Why Day 91 matters
+## Why Continuous Upgrade Closeout matters
 
 - Converts Day 90 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -81,12 +81,12 @@ Day 91 closes with a major upgrade that converts Day 90 governance scale outcome
 - `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md`
 - `docs/roadmap/plans/day91-continuous-upgrade-plan.json`
 
-## Day 91 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day91-continuous-upgrade-closeout --format json --strict
-python -m sdetkit day91-continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict
-python -m sdetkit day91-continuous-upgrade-closeout --execute --evidence-dir docs/artifacts/day91-continuous-upgrade-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-closeout --format json --strict
+python -m sdetkit continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-closeout --execute --evidence-dir docs/artifacts/day91-continuous-upgrade-closeout-pack/evidence --format json --strict
 python scripts/check_day91_continuous_upgrade_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day91_continuous_upgrade_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 91 delivery board
+## Delivery board
 
 - [ ] Day 91 evidence brief committed
 - [ ] Day 91 continuous upgrade plan committed
@@ -413,7 +413,7 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day91-continuous-upgrade-closeout",
+        "name": "continuous-upgrade-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

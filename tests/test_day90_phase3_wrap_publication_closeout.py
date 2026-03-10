@@ -92,7 +92,7 @@ def test_day90_json(tmp_path: Path, capsys) -> None:
     rc = d90.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day90-phase3-wrap-publication-closeout"
+    assert out["name"] == "phase3-wrap-publication-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -142,7 +142,7 @@ def test_day90_strict_fails_without_day89(tmp_path: Path) -> None:
 def test_day90_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day90-phase3-wrap-publication-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["phase3-wrap-publication-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Day 90 phase-3 wrap publication closeout summary" in capsys.readouterr().out

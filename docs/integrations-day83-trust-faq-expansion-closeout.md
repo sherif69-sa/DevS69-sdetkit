@@ -1,8 +1,8 @@
-# Day 83 — Trust FAQ expansion loop closeout lane
+# Trust FAQ Expansion Closeout — Trust FAQ expansion loop closeout lane
 
 Day 83 closes with a major upgrade that folds Day 82 integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
 
-## Why Day 83 matters
+## Why Trust FAQ Expansion Closeout matters
 
 - Turns Day 82 integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 83 closes with a major upgrade that folds Day 82 integration feedback outcom
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md`
 - `docs/roadmap/plans/day83-trust-faq-expansion-plan.json`
 
-## Day 83 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day83-trust-faq-expansion-closeout --format json --strict
-python -m sdetkit day83-trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict
-python -m sdetkit day83-trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit trust-faq-expansion-closeout --format json --strict
+python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict
+python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence --format json --strict
 python scripts/check_day83_trust_faq_expansion_closeout_contract.py
 ```
+
+Legacy alias: `day83-trust-faq-expansion-closeout` remains supported for compatibility.
 
 ## Trust FAQ expansion contract
 
@@ -38,7 +40,7 @@ python scripts/check_day83_trust_faq_expansion_closeout_contract.py
 - [ ] Scorecard captures trust FAQ adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes trust brief, FAQ expansion plan, template diffs, escalation ledger, KPI scorecard, and execution log
 
-## Day 83 delivery board
+## Delivery board
 
 - [ ] Day 83 trust FAQ brief committed
 - [ ] Day 83 trust FAQ expansion plan committed
@@ -48,7 +50,7 @@ python scripts/check_day83_trust_faq_expansion_closeout_contract.py
 
 ## Scoring model
 
-Day 83 weighted score (0-100):
+Trust FAQ Expansion Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Day 82 continuity baseline quality (35)

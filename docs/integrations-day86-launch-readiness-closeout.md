@@ -1,8 +1,8 @@
-# Day 86 — Launch readiness closeout lane
+# Launch Readiness Closeout — Launch readiness closeout lane
 
 Day 86 closes with a major upgrade that converts Day 85 release prioritization outcomes into a deterministic launch readiness operating lane.
 
-## Why Day 86 matters
+## Why Launch Readiness Closeout matters
 
 - Converts Day 85 release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 86 closes with a major upgrade that converts Day 85 release prioritization o
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md`
 - `docs/roadmap/plans/day86-launch-readiness-plan.json`
 
-## Day 86 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day86-launch-readiness-closeout --format json --strict
-python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict
-python -m sdetkit day86-launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict
+python -m sdetkit launch-readiness-closeout --format json --strict
+python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict
+python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict
 python scripts/check_day86_launch_readiness_closeout_contract.py
 ```
+
+Legacy alias: `day86-launch-readiness-closeout` remains supported for compatibility.
 
 ## Launch readiness contract
 
@@ -38,7 +40,7 @@ python scripts/check_day86_launch_readiness_closeout_contract.py
 - [ ] Scorecard captures launch readiness adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 86 delivery board
+## Delivery board
 
 - [ ] Day 86 evidence brief committed
 - [ ] Day 86 launch readiness plan committed

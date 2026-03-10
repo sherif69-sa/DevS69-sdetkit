@@ -1,8 +1,8 @@
-# Day 85 — Release prioritization closeout lane
+# Release Prioritization Closeout — Release prioritization closeout lane
 
 Day 85 closes with a major upgrade that converts Day 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
 
-## Why Day 85 matters
+## Why Release Prioritization Closeout matters
 
 - Converts Day 84 evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 85 closes with a major upgrade that converts Day 84 evidence narrative outco
 - `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md`
 - `docs/roadmap/plans/day85-release-prioritization-plan.json`
 
-## Day 85 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day85-release-prioritization-closeout --format json --strict
-python -m sdetkit day85-release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict
-python -m sdetkit day85-release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict
+python -m sdetkit release-prioritization-closeout --format json --strict
+python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict
+python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict
 python scripts/check_day85_release_prioritization_closeout_contract.py
 ```
+
+Legacy alias: `day85-release-prioritization-closeout` remains supported for compatibility.
 
 ## Release prioritization contract
 
@@ -38,7 +40,7 @@ python scripts/check_day85_release_prioritization_closeout_contract.py
 - [ ] Scorecard captures release prioritization adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 85 delivery board
+## Delivery board
 
 - [ ] Day 85 evidence brief committed
 - [ ] Day 85 release prioritization plan committed

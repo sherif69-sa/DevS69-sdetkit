@@ -17,23 +17,23 @@ _DAY81_BOARD_PATH = "docs/artifacts/day81-growth-campaign-closeout-pack/day81-de
 _PLAN_PATH = "docs/roadmap/plans/day82-integration-feedback-plan.json"
 _SECTION_HEADER = "# Day 82 \u2014 Integration feedback loop closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 82 matters",
+    "## Why Integration Feedback Closeout matters",
     "## Required inputs (Day 81)",
-    "## Day 82 command lane",
+    "## Command lane",
     "## Integration feedback contract",
     "## Integration feedback quality checklist",
-    "## Day 82 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day82-integration-feedback-closeout --format json --strict",
-    "python -m sdetkit day82-integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict",
-    "python -m sdetkit day82-integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-feedback-closeout --format json --strict",
+    "python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict",
+    "python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict",
     "python scripts/check_day82_integration_feedback_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day82-integration-feedback-closeout --format json --strict",
-    "python -m sdetkit day82-integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict",
+    "python -m sdetkit integration-feedback-closeout --format json --strict",
+    "python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict",
     "python scripts/check_day82_integration_feedback_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY82_DEFAULT_PAGE = """# Day 82 \u2014 Integration feedback loop closeout lane
 
 Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes into docs/template upgrades and community touchpoint execution.
 
-## Why Day 82 matters
+## Why Integration Feedback Closeout matters
 
 - Turns Day 81 growth campaign outcomes into deterministic integration feedback loops across docs, templates, and community operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -81,12 +81,12 @@ Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes in
 - `docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md`
 - `docs/roadmap/plans/day82-integration-feedback-plan.json`
 
-## Day 82 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day82-integration-feedback-closeout --format json --strict
-python -m sdetkit day82-integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict
-python -m sdetkit day82-integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-feedback-closeout --format json --strict
+python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict
+python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict
 python scripts/check_day82_integration_feedback_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day82_integration_feedback_closeout_contract.py
 - [ ] Scorecard captures docs adoption delta, community engagement delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, feedback plan, template diffs, office-hours ledger, KPI scorecard, and execution log
 
-## Day 82 delivery board
+## Delivery board
 
 - [ ] Day 82 integration brief committed
 - [ ] Day 82 integration feedback plan committed
@@ -115,7 +115,7 @@ python scripts/check_day82_integration_feedback_closeout_contract.py
 
 ## Scoring model
 
-Day 82 weighted score (0-100):
+Integration Feedback Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Day 81 continuity baseline quality (35)
@@ -312,7 +312,7 @@ def build_day82_integration_feedback_closeout_summary(root: Path) -> dict[str, A
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day82-integration-feedback-closeout",
+        "name": "integration-feedback-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

@@ -15,23 +15,23 @@ _DAY89_BOARD_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-d
 _PLAN_PATH = "docs/roadmap/plans/day90-phase3-wrap-publication-plan.json"
 _SECTION_HEADER = "# Day 90 \u2014 Phase-3 wrap publication closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 90 matters",
+    "## Why Phase3 Wrap Publication Closeout matters",
     "## Required inputs (Day 89)",
-    "## Day 90 command lane",
+    "## Command lane",
     "## Phase-3 wrap publication contract",
     "## Phase-3 wrap publication quality checklist",
-    "## Day 90 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day90-phase3-wrap-publication-closeout --format json --strict",
-    "python -m sdetkit day90-phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict",
-    "python -m sdetkit day90-phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict",
     "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day90-phase3-wrap-publication-closeout --format json --strict",
-    "python -m sdetkit day90-phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict",
     "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -67,7 +67,7 @@ _DAY90_DEFAULT_PAGE = """# Day 90 \u2014 Phase-3 wrap publication closeout lane
 
 Day 90 closes with a major upgrade that converts Day 89 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
-## Why Day 90 matters
+## Why Phase3 Wrap Publication Closeout matters
 
 - Converts Day 89 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -79,12 +79,12 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 - `docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md`
 - `docs/roadmap/plans/day90-phase3-wrap-publication-plan.json`
 
-## Day 90 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day90-phase3-wrap-publication-closeout --format json --strict
-python -m sdetkit day90-phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict
-python -m sdetkit day90-phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict
+python -m sdetkit phase3-wrap-publication-closeout --format json --strict
+python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict
+python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict
 python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 ```
 
@@ -103,7 +103,7 @@ python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 - [ ] Scorecard captures phase-3 wrap publication adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 90 delivery board
+## Delivery board
 
 - [ ] Day 90 evidence brief committed
 - [ ] Day 90 phase-3 wrap publication plan committed
@@ -304,7 +304,7 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day90-phase3-wrap-publication-closeout",
+        "name": "phase3-wrap-publication-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

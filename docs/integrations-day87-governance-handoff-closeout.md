@@ -1,8 +1,8 @@
-# Day 87 — Governance handoff closeout lane
+# Governance Handoff Closeout — Governance handoff closeout lane
 
 Day 87 closes with a major upgrade that converts Day 86 launch readiness outcomes into a deterministic governance handoff operating lane.
 
-## Why Day 87 matters
+## Why Governance Handoff Closeout matters
 
 - Converts Day 86 launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 87 closes with a major upgrade that converts Day 86 launch readiness outcome
 - `docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md`
 - `docs/roadmap/plans/day87-governance-handoff-plan.json`
 
-## Day 87 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day87-governance-handoff-closeout --format json --strict
-python -m sdetkit day87-governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict
-python -m sdetkit day87-governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit governance-handoff-closeout --format json --strict
+python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict
+python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict
 python scripts/check_day87_governance_handoff_closeout_contract.py
 ```
+
+Legacy alias: `day87-governance-handoff-closeout` remains supported for compatibility.
 
 ## Governance handoff contract
 
@@ -38,7 +40,7 @@ python scripts/check_day87_governance_handoff_closeout_contract.py
 - [ ] Scorecard captures governance handoff adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 87 delivery board
+## Delivery board
 
 - [ ] Day 87 evidence brief committed
 - [ ] Day 87 governance handoff plan committed

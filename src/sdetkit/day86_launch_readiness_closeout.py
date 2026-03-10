@@ -17,23 +17,23 @@ _DAY85_BOARD_PATH = (
 _PLAN_PATH = "docs/roadmap/plans/day86-launch-readiness-plan.json"
 _SECTION_HEADER = "# Day 86 \u2014 Launch readiness closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 86 matters",
+    "## Why Launch Readiness Closeout matters",
     "## Required inputs (Day 85)",
-    "## Day 86 command lane",
+    "## Command lane",
     "## Launch readiness contract",
     "## Launch readiness quality checklist",
-    "## Day 86 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day86-launch-readiness-closeout --format json --strict",
-    "python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict",
-    "python -m sdetkit day86-launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit launch-readiness-closeout --format json --strict",
+    "python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict",
+    "python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict",
     "python scripts/check_day86_launch_readiness_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day86-launch-readiness-closeout --format json --strict",
-    "python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict",
+    "python -m sdetkit launch-readiness-closeout --format json --strict",
+    "python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict",
     "python scripts/check_day86_launch_readiness_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY86_DEFAULT_PAGE = """# Day 86 \u2014 Launch readiness closeout lane
 
 Day 86 closes with a major upgrade that converts Day 85 release prioritization outcomes into a deterministic launch readiness operating lane.
 
-## Why Day 86 matters
+## Why Launch Readiness Closeout matters
 
 - Converts Day 85 release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -81,12 +81,12 @@ Day 86 closes with a major upgrade that converts Day 85 release prioritization o
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md`
 - `docs/roadmap/plans/day86-launch-readiness-plan.json`
 
-## Day 86 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day86-launch-readiness-closeout --format json --strict
-python -m sdetkit day86-launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict
-python -m sdetkit day86-launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict
+python -m sdetkit launch-readiness-closeout --format json --strict
+python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict
+python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict
 python scripts/check_day86_launch_readiness_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day86_launch_readiness_closeout_contract.py
 - [ ] Scorecard captures launch readiness adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 86 delivery board
+## Delivery board
 
 - [ ] Day 86 evidence brief committed
 - [ ] Day 86 launch readiness plan committed
@@ -304,7 +304,7 @@ def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day86-launch-readiness-closeout",
+        "name": "launch-readiness-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

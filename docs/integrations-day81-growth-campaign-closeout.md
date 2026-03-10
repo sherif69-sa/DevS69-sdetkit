@@ -1,8 +1,8 @@
-# Day 81 — Growth campaign closeout lane
+# Growth Campaign Closeout — Growth campaign closeout lane
 
 Day 81 closes with a major upgrade that converts Day 80 partner outreach outcomes into a growth-campaign execution pack.
 
-## Why Day 81 matters
+## Why Growth Campaign Closeout matters
 
 - Turns Day 80 partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -14,14 +14,16 @@ Day 81 closes with a major upgrade that converts Day 80 partner outreach outcome
 - `docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md`
 - `docs/roadmap/plans/day81-growth-campaign-plan.json`
 
-## Day 81 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day81-growth-campaign-closeout --format json --strict
-python -m sdetkit day81-growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict
-python -m sdetkit day81-growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict
+python -m sdetkit growth-campaign-closeout --format json --strict
+python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict
+python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict
 python scripts/check_day81_growth_campaign_closeout_contract.py
 ```
+
+Legacy alias: `day81-growth-campaign-closeout` remains supported for compatibility.
 
 ## Growth campaign contract
 
@@ -38,7 +40,7 @@ python scripts/check_day81_growth_campaign_closeout_contract.py
 - [ ] Scorecard captures campaign score delta, partner carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, campaign plan, execution ledger, KPI scorecard, and execution log
 
-## Day 81 delivery board
+## Delivery board
 
 - [ ] Day 81 integration brief committed
 - [ ] Day 81 growth campaign plan committed
@@ -48,7 +50,7 @@ python scripts/check_day81_growth_campaign_closeout_contract.py
 
 ## Scoring model
 
-Day 81 weighted score (0-100):
+Growth Campaign Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Day 80 continuity baseline quality (35)

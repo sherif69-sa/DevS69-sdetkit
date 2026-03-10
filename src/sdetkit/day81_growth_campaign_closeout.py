@@ -15,23 +15,23 @@ _DAY80_BOARD_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-d
 _PLAN_PATH = "docs/roadmap/plans/day81-growth-campaign-plan.json"
 _SECTION_HEADER = "# Day 81 \u2014 Growth campaign closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 81 matters",
+    "## Why Growth Campaign Closeout matters",
     "## Required inputs (Day 80)",
-    "## Day 81 command lane",
+    "## Command lane",
     "## Growth campaign contract",
     "## Growth campaign quality checklist",
-    "## Day 81 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day81-growth-campaign-closeout --format json --strict",
-    "python -m sdetkit day81-growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict",
-    "python -m sdetkit day81-growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit growth-campaign-closeout --format json --strict",
+    "python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict",
+    "python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict",
     "python scripts/check_day81_growth_campaign_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day81-growth-campaign-closeout --format json --strict",
-    "python -m sdetkit day81-growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict",
+    "python -m sdetkit growth-campaign-closeout --format json --strict",
+    "python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict",
     "python scripts/check_day81_growth_campaign_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -67,7 +67,7 @@ _DAY81_DEFAULT_PAGE = """# Day 81 \u2014 Growth campaign closeout lane
 
 Day 81 closes with a major upgrade that converts Day 80 partner outreach outcomes into a growth-campaign execution pack.
 
-## Why Day 81 matters
+## Why Growth Campaign Closeout matters
 
 - Turns Day 80 partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -79,12 +79,12 @@ Day 81 closes with a major upgrade that converts Day 80 partner outreach outcome
 - `docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md`
 - `docs/roadmap/plans/day81-growth-campaign-plan.json`
 
-## Day 81 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day81-growth-campaign-closeout --format json --strict
-python -m sdetkit day81-growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict
-python -m sdetkit day81-growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict
+python -m sdetkit growth-campaign-closeout --format json --strict
+python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict
+python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict
 python scripts/check_day81_growth_campaign_closeout_contract.py
 ```
 
@@ -103,7 +103,7 @@ python scripts/check_day81_growth_campaign_closeout_contract.py
 - [ ] Scorecard captures campaign score delta, partner carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, campaign plan, execution ledger, KPI scorecard, and execution log
 
-## Day 81 delivery board
+## Delivery board
 
 - [ ] Day 81 integration brief committed
 - [ ] Day 81 growth campaign plan committed
@@ -113,7 +113,7 @@ python scripts/check_day81_growth_campaign_closeout_contract.py
 
 ## Scoring model
 
-Day 81 weighted score (0-100):
+Growth Campaign Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Day 80 continuity baseline quality (35)
@@ -303,7 +303,7 @@ def build_day81_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day81-growth-campaign-closeout",
+        "name": "growth-campaign-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

@@ -94,7 +94,7 @@ def test_day89_json(tmp_path: Path, capsys) -> None:
     rc = d89.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day89-governance-scale-closeout"
+    assert out["name"] == "governance-scale-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -139,6 +139,6 @@ def test_day89_strict_fails_without_day88(tmp_path: Path) -> None:
 
 def test_day89_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day89-governance-scale-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["governance-scale-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 89 governance scale closeout summary" in capsys.readouterr().out

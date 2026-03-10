@@ -94,7 +94,7 @@ def test_day86_json(tmp_path: Path, capsys) -> None:
     rc = d86.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day86-launch-readiness-closeout"
+    assert out["name"] == "launch-readiness-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -139,6 +139,6 @@ def test_day86_strict_fails_without_day85(tmp_path: Path) -> None:
 
 def test_day86_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day86-launch-readiness-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["launch-readiness-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 86 launch readiness closeout summary" in capsys.readouterr().out

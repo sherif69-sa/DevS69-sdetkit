@@ -1,8 +1,8 @@
-# Day 82 — Integration feedback loop closeout lane
+# Integration Feedback Closeout — Integration feedback loop closeout lane
 
 Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes into docs/template upgrades and community touchpoint execution.
 
-## Why Day 82 matters
+## Why Integration Feedback Closeout matters
 
 - Turns Day 81 growth campaign outcomes into deterministic integration feedback loops across docs, templates, and community operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes in
 - `docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md`
 - `docs/roadmap/plans/day82-integration-feedback-plan.json`
 
-## Day 82 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day82-integration-feedback-closeout --format json --strict
-python -m sdetkit day82-integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict
-python -m sdetkit day82-integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-feedback-closeout --format json --strict
+python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict
+python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict
 python scripts/check_day82_integration_feedback_closeout_contract.py
 ```
+
+Legacy alias: `day82-integration-feedback-closeout` remains supported for compatibility.
 
 ## Integration feedback contract
 
@@ -38,7 +40,7 @@ python scripts/check_day82_integration_feedback_closeout_contract.py
 - [ ] Scorecard captures docs adoption delta, community engagement delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, feedback plan, template diffs, office-hours ledger, KPI scorecard, and execution log
 
-## Day 82 delivery board
+## Delivery board
 
 - [ ] Day 82 integration brief committed
 - [ ] Day 82 integration feedback plan committed
@@ -48,7 +50,7 @@ python scripts/check_day82_integration_feedback_closeout_contract.py
 
 ## Scoring model
 
-Day 82 weighted score (0-100):
+Integration Feedback Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
 - Day 81 continuity baseline quality (35)

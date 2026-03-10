@@ -1,8 +1,8 @@
-# Day 88 — Governance priorities closeout lane
+# Governance Priorities Closeout — Governance priorities closeout lane
 
 Day 88 closes with a major upgrade that converts Day 87 governance handoff outcomes into a deterministic governance priorities operating lane.
 
-## Why Day 88 matters
+## Why Governance Priorities Closeout matters
 
 - Converts Day 87 governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 88 closes with a major upgrade that converts Day 87 governance handoff outco
 - `docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md`
 - `docs/roadmap/plans/day88-governance-priorities-plan.json`
 
-## Day 88 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day88-governance-priorities-closeout --format json --strict
-python -m sdetkit day88-governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict
-python -m sdetkit day88-governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict
+python -m sdetkit governance-priorities-closeout --format json --strict
+python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict
+python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict
 python scripts/check_day88_governance_priorities_closeout_contract.py
 ```
+
+Legacy alias: `day88-governance-priorities-closeout` remains supported for compatibility.
 
 ## Governance priorities contract
 
@@ -38,7 +40,7 @@ python scripts/check_day88_governance_priorities_closeout_contract.py
 - [ ] Scorecard captures governance priorities adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 88 delivery board
+## Delivery board
 
 - [ ] Day 88 evidence brief committed
 - [ ] Day 88 governance priorities plan committed

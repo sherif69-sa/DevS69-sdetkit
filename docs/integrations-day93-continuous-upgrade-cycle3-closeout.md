@@ -1,8 +1,8 @@
-# Day 93 — Continuous upgrade closeout lane
+# Continuous Upgrade Cycle3 Closeout — Continuous upgrade closeout lane
 
 Day 93 starts the next cycle by converting Day 92 publication outcomes into a deterministic continuous-upgrade lane.
 
-## Why Day 93 matters
+## Why Continuous Upgrade Cycle3 Closeout matters
 
 - Converts Day 92 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 93 starts the next cycle by converting Day 92 publication outcomes into a de
 - `docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-delivery-board.md`
 - `docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json`
 
-## Day 93 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day93-continuous-upgrade-cycle3-closeout --format json --strict
-python -m sdetkit day93-continuous-upgrade-cycle3-closeout --emit-pack-dir docs/artifacts/day93-continuous-upgrade-cycle3-closeout-pack --format json --strict
-python -m sdetkit day93-continuous-upgrade-cycle3-closeout --execute --evidence-dir docs/artifacts/day93-continuous-upgrade-cycle3-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-cycle3-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle3-closeout --emit-pack-dir docs/artifacts/day93-continuous-upgrade-cycle3-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle3-closeout --execute --evidence-dir docs/artifacts/day93-continuous-upgrade-cycle3-closeout-pack/evidence --format json --strict
 python scripts/check_day93_continuous_upgrade_cycle3_closeout_contract.py
 ```
+
+Legacy alias: `day93-continuous-upgrade-cycle3-closeout` remains supported for compatibility.
 
 ## Continuous upgrade contract
 
@@ -38,7 +40,7 @@ python scripts/check_day93_continuous_upgrade_cycle3_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 93 delivery board
+## Delivery board
 
 - [ ] Day 93 evidence brief committed
 - [ ] Day 93 continuous upgrade plan committed

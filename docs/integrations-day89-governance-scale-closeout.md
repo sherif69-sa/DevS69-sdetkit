@@ -1,8 +1,8 @@
-# Day 89 — Governance scale closeout lane
+# Governance Scale Closeout — Governance scale closeout lane
 
 Day 89 closes with a major upgrade that converts Day 88 governance handoff outcomes into a deterministic governance scale operating lane.
 
-## Why Day 89 matters
+## Why Governance Scale Closeout matters
 
 - Converts Day 88 governance handoff outcomes into reusable governance scale decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 89 closes with a major upgrade that converts Day 88 governance handoff outco
 - `docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md`
 - `docs/roadmap/plans/day89-governance-scale-plan.json`
 
-## Day 89 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day89-governance-scale-closeout --format json --strict
-python -m sdetkit day89-governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict
-python -m sdetkit day89-governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict
+python -m sdetkit governance-scale-closeout --format json --strict
+python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict
+python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict
 python scripts/check_day89_governance_scale_closeout_contract.py
 ```
+
+Legacy alias: `day89-governance-scale-closeout` remains supported for compatibility.
 
 ## Governance scale contract
 
@@ -38,7 +40,7 @@ python scripts/check_day89_governance_scale_closeout_contract.py
 - [ ] Scorecard captures governance scale adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 89 delivery board
+## Delivery board
 
 - [ ] Day 89 evidence brief committed
 - [ ] Day 89 governance scale plan committed

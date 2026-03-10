@@ -15,23 +15,23 @@ _DAY91_BOARD_PATH = "docs/artifacts/day91-continuous-upgrade-closeout-pack/day91
 _PLAN_PATH = "docs/roadmap/plans/day92-continuous-upgrade-cycle2-plan.json"
 _SECTION_HEADER = "# Day 92 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 92 matters",
+    "## Why Continuous Upgrade Cycle 2 Closeout matters",
     "## Required inputs (Day 91)",
-    "## Day 92 command lane",
+    "## Command lane",
     "## Continuous upgrade contract",
     "## Continuous upgrade quality checklist",
-    "## Day 92 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day92-continuous-upgrade-cycle2-closeout --format json --strict",
-    "python -m sdetkit day92-continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict",
-    "python -m sdetkit day92-continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict",
     "python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day92-continuous-upgrade-cycle2-closeout --format json --strict",
-    "python -m sdetkit day92-continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict",
     "python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -70,7 +70,7 @@ _DAY92_DEFAULT_PAGE = """# Day 92 \u2014 Continuous upgrade closeout lane
 
 Day 92 closes with a major upgrade that converts Day 91 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
-## Why Day 92 matters
+## Why Continuous Upgrade Cycle 2 Closeout matters
 
 - Converts Day 91 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -82,12 +82,12 @@ Day 92 closes with a major upgrade that converts Day 91 governance scale outcome
 - `docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-delivery-board.md`
 - `docs/roadmap/plans/day92-continuous-upgrade-cycle2-plan.json`
 
-## Day 92 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day92-continuous-upgrade-cycle2-closeout --format json --strict
-python -m sdetkit day92-continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict
-python -m sdetkit day92-continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
 python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
 ```
 
@@ -106,7 +106,7 @@ python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 92 delivery board
+## Delivery board
 
 - [ ] Day 92 evidence brief committed
 - [ ] Day 92 continuous upgrade plan committed
@@ -409,7 +409,7 @@ def build_day92_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[s
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day92-continuous-upgrade-cycle2-closeout",
+        "name": "continuous-upgrade-cycle2-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

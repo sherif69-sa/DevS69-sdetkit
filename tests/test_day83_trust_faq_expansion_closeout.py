@@ -92,7 +92,7 @@ def test_day83_json(tmp_path: Path, capsys) -> None:
     rc = d83.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day83-trust-faq-expansion-closeout"
+    assert out["name"] == "trust-faq-expansion-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -142,7 +142,7 @@ def test_day83_strict_fails_without_day82(tmp_path: Path) -> None:
 def test_day83_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day83-trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Day 83 trust FAQ expansion closeout summary" in capsys.readouterr().out

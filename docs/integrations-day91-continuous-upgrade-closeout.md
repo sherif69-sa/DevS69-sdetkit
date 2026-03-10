@@ -1,8 +1,8 @@
-# Day 91 — Continuous upgrade closeout lane
+# Continuous Upgrade Closeout — Continuous upgrade closeout lane
 
 Day 91 starts the next cycle by converting Day 90 publication outcomes into a deterministic continuous-upgrade lane.
 
-## Why Day 91 matters
+## Why Continuous Upgrade Closeout matters
 
 - Converts Day 90 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 91 starts the next cycle by converting Day 90 publication outcomes into a de
 - `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md`
 - `docs/roadmap/plans/day91-continuous-upgrade-plan.json`
 
-## Day 91 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day91-continuous-upgrade-closeout --format json --strict
-python -m sdetkit day91-continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict
-python -m sdetkit day91-continuous-upgrade-closeout --execute --evidence-dir docs/artifacts/day91-continuous-upgrade-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-closeout --format json --strict
+python -m sdetkit continuous-upgrade-closeout --emit-pack-dir docs/artifacts/day91-continuous-upgrade-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-closeout --execute --evidence-dir docs/artifacts/day91-continuous-upgrade-closeout-pack/evidence --format json --strict
 python scripts/check_day91_continuous_upgrade_closeout_contract.py
 ```
+
+Legacy alias: `day91-continuous-upgrade-closeout` remains supported for compatibility.
 
 ## Continuous upgrade contract
 
@@ -38,7 +40,7 @@ python scripts/check_day91_continuous_upgrade_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 91 delivery board
+## Delivery board
 
 - [ ] Day 91 evidence brief committed
 - [ ] Day 91 continuous upgrade plan committed

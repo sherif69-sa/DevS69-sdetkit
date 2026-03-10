@@ -17,23 +17,23 @@ _DAY88_BOARD_PATH = (
 _PLAN_PATH = "docs/roadmap/plans/day89-governance-scale-plan.json"
 _SECTION_HEADER = "# Day 89 \u2014 Governance scale closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 89 matters",
+    "## Why Governance Scale Closeout matters",
     "## Required inputs (Day 88)",
-    "## Day 89 command lane",
+    "## Command lane",
     "## Governance scale contract",
     "## Governance scale quality checklist",
-    "## Day 89 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day89-governance-scale-closeout --format json --strict",
-    "python -m sdetkit day89-governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict",
-    "python -m sdetkit day89-governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit governance-scale-closeout --format json --strict",
+    "python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict",
+    "python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict",
     "python scripts/check_day89_governance_scale_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day89-governance-scale-closeout --format json --strict",
-    "python -m sdetkit day89-governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict",
+    "python -m sdetkit governance-scale-closeout --format json --strict",
+    "python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict",
     "python scripts/check_day89_governance_scale_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY89_DEFAULT_PAGE = """# Day 89 \u2014 Governance scale closeout lane
 
 Day 89 closes with a major upgrade that converts Day 88 governance handoff outcomes into a deterministic governance scale operating lane.
 
-## Why Day 89 matters
+## Why Governance Scale Closeout matters
 
 - Converts Day 88 governance handoff outcomes into reusable governance scale decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -81,12 +81,12 @@ Day 89 closes with a major upgrade that converts Day 88 governance handoff outco
 - `docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md`
 - `docs/roadmap/plans/day89-governance-scale-plan.json`
 
-## Day 89 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day89-governance-scale-closeout --format json --strict
-python -m sdetkit day89-governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict
-python -m sdetkit day89-governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict
+python -m sdetkit governance-scale-closeout --format json --strict
+python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict
+python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict
 python scripts/check_day89_governance_scale_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day89_governance_scale_closeout_contract.py
 - [ ] Scorecard captures governance scale adoption delta, objection deflection delta, confidence, and rollback owner
 - [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 89 delivery board
+## Delivery board
 
 - [ ] Day 89 evidence brief committed
 - [ ] Day 89 governance scale plan committed
@@ -304,7 +304,7 @@ def build_day89_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day89-governance-scale-closeout",
+        "name": "governance-scale-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",

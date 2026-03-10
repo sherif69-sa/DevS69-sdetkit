@@ -1,8 +1,8 @@
-# Day 92 — Continuous upgrade closeout lane
+# Continuous Upgrade Cycle 2 Closeout — Continuous upgrade closeout lane
 
 Day 92 starts the next cycle by converting Day 91 publication outcomes into a deterministic continuous-upgrade lane.
 
-## Why Day 92 matters
+## Why Continuous Upgrade Cycle 2 Closeout matters
 
 - Converts Day 91 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
@@ -14,14 +14,16 @@ Day 92 starts the next cycle by converting Day 91 publication outcomes into a de
 - `docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-delivery-board.md`
 - `docs/roadmap/plans/day92-continuous-upgrade-cycle2-plan.json`
 
-## Day 92 command lane
+## Command lane
 
 ```bash
-python -m sdetkit day92-continuous-upgrade-cycle2-closeout --format json --strict
-python -m sdetkit day92-continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict
-python -m sdetkit day92-continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
 python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
 ```
+
+Legacy alias: `day92-continuous-upgrade-cycle2-closeout` remains supported for compatibility.
 
 ## Continuous upgrade contract
 
@@ -38,7 +40,7 @@ python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 92 delivery board
+## Delivery board
 
 - [ ] Day 92 evidence brief committed
 - [ ] Day 92 continuous upgrade plan committed

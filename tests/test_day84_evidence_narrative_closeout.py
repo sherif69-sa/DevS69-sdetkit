@@ -92,7 +92,7 @@ def test_day84_json(tmp_path: Path, capsys) -> None:
     rc = d84.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day84-evidence-narrative-closeout"
+    assert out["name"] == "evidence-narrative-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -140,7 +140,7 @@ def test_day84_strict_fails_without_day83(tmp_path: Path) -> None:
 def test_day84_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day84-evidence-narrative-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["evidence-narrative-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Day 84 evidence narrative closeout summary" in capsys.readouterr().out

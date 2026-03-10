@@ -92,7 +92,7 @@ def test_day81_json(tmp_path: Path, capsys) -> None:
     rc = d81.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day81-growth-campaign-closeout"
+    assert out["name"] == "growth-campaign-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -136,6 +136,6 @@ def test_day81_strict_fails_without_day80(tmp_path: Path) -> None:
 
 def test_day81_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day81-growth-campaign-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["growth-campaign-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 81 growth campaign closeout summary" in capsys.readouterr().out
