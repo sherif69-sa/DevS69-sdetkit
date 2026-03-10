@@ -680,6 +680,32 @@ Useful flags: `--root`, `--readme`, `--docs-index`, `--top10`, `--baseline`, `--
 
 See: day-27-ultra-upgrade-report.md (legacy history).
 
+
+## expansion-automation
+
+Builds an expansion-automation report by combining upstream scale-lane handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day41-expansion-automation --format text`
+- `sdetkit day41-expansion-automation --format json --strict`
+- `sdetkit day41-expansion-automation --write-defaults --format json --strict`
+- `sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict`
+- `sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict`
+- `sdetkit day41-expansion-automation --format markdown --output expansion-automation-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream scale-lane summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default expansion-automation integration page before validation.
+
+`--emit-pack-dir` writes a expansion-automation pack bundle containing summary JSON, summary markdown, expansion plan markdown, automation matrix CSV, expansion KPI scorecard JSON, execution log markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the expansion-automation validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
 ## security
 
 Examples (scan once, reuse results):
