@@ -176,22 +176,23 @@ See: day-9-ultra-upgrade-report.md (legacy history).
 
 ## first-contribution
 
-Builds Day 10 first-contribution checklist output and validates that `CONTRIBUTING.md` contains the guided path from fork to PR.
+Builds a first-contribution checklist report and validates that `CONTRIBUTING.md` contains the guided path from fork to pull request.
 
 Examples:
 
-- `sdetkit first-contribution --format text --strict`
+- `sdetkit first-contribution`
 - `sdetkit first-contribution --format json`
 - `sdetkit first-contribution --write-defaults --format json --strict`
-- `sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md`
+- `sdetkit first-contribution --format markdown --output first-contribution.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
 
-`--strict` returns non-zero if required Day 10 checklist content or required command snippets are missing from `CONTRIBUTING.md`.
+`--strict` returns non-zero if required checklist content or required command snippets are missing from `CONTRIBUTING.md`.
 
-`--write-defaults` writes a default Day 10 checklist block to `CONTRIBUTING.md` if missing, then re-validates in the same run.
+`--write-defaults` writes a default first-contribution checklist block to `CONTRIBUTING.md` if missing, then re-validates in the same run.
 
-See: day-10-ultra-upgrade-report.md
+See: day-10-ultra-upgrade-report.md (legacy history).
+
 
 ## docs-nav
 

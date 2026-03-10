@@ -56,11 +56,20 @@ mkdocs build
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdetkit first-contribution",
-        description="Render and validate the Day 10 first-contribution checklist.",
+        description="Render and validate a first-contribution checklist report.",
     )
-    p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
+    p.add_argument(
+        "--format",
+        choices=["text", "markdown", "json"],
+        default="text",
+        help="Output format.",
+    )
     p.add_argument("--root", default=".", help="Repository root where CONTRIBUTING.md lives.")
-    p.add_argument("--output", default="", help="Optional output file path.")
+    p.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered first-contribution report.",
+    )
     p.add_argument(
         "--strict",
         action="store_true",
@@ -69,7 +78,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Write Day 10 checklist block into CONTRIBUTING.md if missing, then validate again.",
+        help="Write a default first-contribution checklist block into CONTRIBUTING.md if missing, then validate again.",
     )
     return p
 
@@ -130,34 +139,34 @@ def build_first_contribution_status(root: str = ".") -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 10 first-contribution checklist",
-        f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
+        "First contribution checklist report",
+        f"Score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
         "",
-        "checklist:",
+        "Checklist:",
     ]
     for idx, item in enumerate(payload["checklist"], start=1):
         lines.append(f"{idx}. {item}")
-    lines.extend(["", "required commands:"])
+    lines.extend(["", "Required commands:"])
     for cmd in payload["required_commands"]:
         lines.append(f"- {cmd}")
-    lines.extend(["", f"guide: {payload['guide']}"])
+    lines.extend(["", f"Guide file: {payload['guide']}"])
     if payload["missing"]:
-        lines.append("missing guide content:")
+        lines.append("Guide coverage gaps:")
         for item in payload["missing"]:
             lines.append(f"- {item}")
     else:
-        lines.append("missing guide content: none")
-    lines.extend(["", "actions:"])
-    lines.append(f"- open guide: {payload['actions']['open_guide']}")
-    lines.append(f"- validate: {payload['actions']['validate']}")
-    lines.append(f"- write defaults: {payload['actions']['write_defaults']}")
-    lines.append(f"- export artifact: {payload['actions']['artifact']}")
+        lines.append("Guide coverage gaps: none")
+    lines.extend(["", "Actions:"])
+    lines.append(f"- Open guide: {payload['actions']['open_guide']}")
+    lines.append(f"- Validate: {payload['actions']['validate']}")
+    lines.append(f"- Write defaults: {payload['actions']['write_defaults']}")
+    lines.append(f"- Export artifact: {payload['actions']['artifact']}")
     return "\n".join(lines) + "\n"
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Day 10 first-contribution checklist",
+        "# First contribution checklist report",
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         f"- Guide file: `{payload['guide']}`",
@@ -169,17 +178,17 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- [ ] {item}")
     lines.extend(["", "## Required command sequence", "", "```bash"])
     lines.extend(payload["required_commands"])
-    lines.extend(["```", "", "## Missing guide content", ""])
+    lines.extend(["```", "", "## Guide coverage gaps", ""])
     if payload["missing"]:
         for item in payload["missing"]:
             lines.append(f"- `{item}`")
     else:
         lines.append("- none")
     lines.extend(["", "## Actions", ""])
-    lines.append(f"- `{payload['actions']['open_guide']}`")
-    lines.append(f"- `{payload['actions']['validate']}`")
-    lines.append(f"- `{payload['actions']['write_defaults']}`")
-    lines.append(f"- `{payload['actions']['artifact']}`")
+    lines.append(f"- Open guide: `{payload['actions']['open_guide']}`")
+    lines.append(f"- Validate: `{payload['actions']['validate']}`")
+    lines.append(f"- Write defaults: `{payload['actions']['write_defaults']}`")
+    lines.append(f"- Export artifact: `{payload['actions']['artifact']}`")
     return "\n".join(lines) + "\n"
 
 

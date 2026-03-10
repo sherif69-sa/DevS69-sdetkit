@@ -1,15 +1,41 @@
 import json
+import re
 
 from sdetkit import cli, first_contribution
+
+
+def _normalize_ws(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def test_first_contribution_default_text(capsys):
     rc = first_contribution.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 10 first-contribution checklist" in out
+    assert "First contribution checklist report" in out
     assert "Create and activate a virtual environment" in out
-    assert "required commands:" in out
+    assert "Required commands:" in out
+    assert "Guide file:" in out
+
+
+def test_first_contribution_help_output_is_productized():
+    out = _normalize_ws(first_contribution._build_parser().format_help())
+    assert "Render and validate a first-contribution checklist report." in out
+    assert "--format {text,markdown,json} Output format." in out
+    assert "--output OUTPUT" in out
+    assert "Optional file path to also write the rendered" in out
+
+
+def test_first_contribution_markdown_output_uses_productized_headings(capsys):
+    rc = first_contribution.main(["--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "# First contribution checklist report" in out
+    assert "## Checklist" in out
+    assert "## Required command sequence" in out
+    assert "## Guide coverage gaps" in out
+    assert "## Actions" in out
+    assert "- Open guide: `docs/contributing.md`" in out
 
 
 def test_first_contribution_json_and_strict_success(capsys):
@@ -26,7 +52,7 @@ def test_first_contribution_strict_fails_when_content_missing(tmp_path, capsys):
     rc = first_contribution.main(["--root", str(tmp_path), "--strict"])
     assert rc == 1
     out = capsys.readouterr().out
-    assert "missing guide content:" in out
+    assert "Guide coverage gaps:" in out
 
 
 def test_first_contribution_write_defaults_recovers_missing_file(tmp_path, capsys):
@@ -44,4 +70,4 @@ def test_main_cli_dispatches_first_contribution(capsys):
     rc = cli.main(["first-contribution", "--format", "text"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 10 first-contribution checklist" in out
+    assert "First contribution checklist report" in out
