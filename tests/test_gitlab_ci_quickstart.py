@@ -1,13 +1,43 @@
 import json
+import re
 
 from sdetkit import cli, gitlab_ci_quickstart
+
+
+def _normalize_ws(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def test_day16_quickstart_default_text(capsys):
     rc = gitlab_ci_quickstart.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 16 GitLab CI quickstart" in out
+    assert "GitLab CI quickstart report" in out
+    assert "Required sections:" in out
+    assert "Page:" in out
+
+
+def test_day16_quickstart_help_output_is_productized():
+    out = _normalize_ws(gitlab_ci_quickstart._build_parser().format_help())
+    assert "Render and validate a GitLab CI quickstart report." in out
+    assert "--format {text,markdown,json} Output format." in out
+    assert "--output OUTPUT" in out
+    assert "Optional file path to also write the rendered" in out
+    assert "GitLab CI quickstart report." in out
+
+
+def test_day16_quickstart_markdown_output_uses_productized_headings(capsys):
+    rc = gitlab_ci_quickstart.main(["--format", "markdown", "--variant", "strict"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "# GitLab CI quickstart report" in out
+    assert "## Required sections" in out
+    assert "## Required commands" in out
+    assert "## Selected pipeline" in out
+    assert "## Quickstart coverage gaps" in out
+    assert "## Actions" in out
+    assert "strict-gate:" in out
+    assert "- Open page: `docs/integrations-gitlab-ci-quickstart.md`" in out
 
 
 def test_day16_quickstart_json_and_strict_success(capsys):
@@ -34,7 +64,7 @@ def test_day16_quickstart_strict_fails_when_content_missing(tmp_path, capsys):
     )
     rc = gitlab_ci_quickstart.main(["--root", str(tmp_path), "--strict"])
     assert rc == 1
-    assert "missing checks:" in capsys.readouterr().out
+    assert "Quickstart coverage gaps:" in capsys.readouterr().out
 
 
 def test_day16_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys):
@@ -126,7 +156,7 @@ def test_day16_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp
 def test_main_cli_dispatches_day16_quickstart(capsys):
     rc = cli.main(["gitlab-ci-quickstart", "--format", "text"])
     assert rc == 0
-    assert "Day 16 GitLab CI quickstart" in capsys.readouterr().out
+    assert "GitLab CI quickstart report" in capsys.readouterr().out
 
 
 def test_day16_quickstart_bootstrap_pipeline_writes_selected_variant(tmp_path, capsys):
