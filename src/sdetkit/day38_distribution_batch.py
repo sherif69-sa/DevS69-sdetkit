@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day38-distribution-batch.md"
+_PAGE_PATH = "docs/integrations-distribution-batch.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY37_SUMMARY_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
 _DAY37_BOARD_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
@@ -201,8 +201,8 @@ def build_day38_distribution_batch_summary(
         {
             "check_id": "readme_day38_link",
             "weight": 8,
-            "passed": "docs/integrations-day38-distribution-batch.md" in readme_text,
-            "evidence": "docs/integrations-day38-distribution-batch.md",
+            "passed": "docs/integrations-distribution-batch.md" in readme_text,
+            "evidence": "docs/integrations-distribution-batch.md",
         },
         {
             "check_id": "readme_day38_command",
@@ -215,9 +215,9 @@ def build_day38_distribution_batch_summary(
             "weight": 8,
             "passed": (
                 "day-38-big-upgrade-report.md" in docs_index_text
-                and "integrations-day38-distribution-batch.md" in docs_index_text
+                and "integrations-distribution-batch.md" in docs_index_text
             ),
-            "evidence": "day-38-big-upgrade-report.md + integrations-day38-distribution-batch.md",
+            "evidence": "day-38-big-upgrade-report.md + integrations-distribution-batch.md",
         },
         {
             "check_id": "top10_day38_alignment",
@@ -409,16 +409,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day38-channel-plan.csv",
         "channel,post_id,experiment_winner,docs_cta,command_cta,owner,window_utc,kpi_target\n"
-        "github,gh-01,exp-01,README:docs/integrations-day37-experiment-lane.md,python -m sdetkit day37-experiment-lane --format json,community-owner,2026-03-03T15:00:00Z,ctr:+2%\n"
+        "github,gh-01,exp-01,README:docs/integrations-experiment-lane.md,python -m sdetkit day37-experiment-lane --format json,community-owner,2026-03-03T15:00:00Z,ctr:+2%\n"
         "linkedin,li-01,exp-02,docs/index.md#day-37-big-upgrades,python -m sdetkit day36-distribution-closeout --format json,growth-owner,2026-03-03T12:00:00Z,visitors:+8%\n"
-        "newsletter,nl-01,exp-03,docs/integrations-day37-experiment-lane.md,python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json,pm-owner,2026-03-04T09:00:00Z,replies:+1.5%\n",
+        "newsletter,nl-01,exp-03,docs/integrations-experiment-lane.md,python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json,pm-owner,2026-03-04T09:00:00Z,replies:+1.5%\n",
     )
     _write(
         target / "day38-post-copy.md",
         "# Day 38 post copy pack\n\n"
         "## GitHub post\n"
         "- Hook: Day 37 experiment winners are now live as a repeatable distribution flow.\n"
-        "- CTA docs: `docs/integrations-day37-experiment-lane.md`\n"
+        "- CTA docs: `docs/integrations-experiment-lane.md`\n"
         "- CTA command: `python -m sdetkit day37-experiment-lane --format json --strict`\n\n"
         "## LinkedIn post\n"
         "- Hook: We translated controlled growth learnings into a deterministic posting batch.\n"
@@ -426,7 +426,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- CTA command: `python -m sdetkit day38-distribution-batch --format json --strict`\n\n"
         "## Newsletter blurb\n"
         "- Hook: Day 38 moves from experiments to coordinated execution with quality guardrails.\n"
-        "- CTA docs: `docs/integrations-day38-distribution-batch.md`\n"
+        "- CTA docs: `docs/integrations-distribution-batch.md`\n"
         "- CTA command: `python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`\n",
     )
     _write(

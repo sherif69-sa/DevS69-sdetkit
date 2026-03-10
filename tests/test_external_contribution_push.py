@@ -23,7 +23,7 @@ def _seed(root: Path) -> None:
     )
 
 
-def test_day26_external_contribution_push_json(tmp_path: Path, capsys) -> None:
+def test_external_contribution_push_json(tmp_path: Path, capsys) -> None:
     _seed(tmp_path)
 
     rc = ecp.main(["--root", str(tmp_path), "--format", "json"])
@@ -34,7 +34,7 @@ def test_day26_external_contribution_push_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] == 100.0
 
 
-def test_day26_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed(tmp_path)
 
     rc = ecp.main(
@@ -60,7 +60,7 @@ def test_day26_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day26-pack/evidence/day26-execution-summary.json").exists()
 
 
-def test_day26_strict_fails_when_sections_missing(tmp_path: Path) -> None:
+def test_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed(tmp_path)
     (tmp_path / "docs/integrations-external-contribution-push.md").write_text(
         "# External contribution push (Day 26)\n", encoding="utf-8"
@@ -71,7 +71,7 @@ def test_day26_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day26_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed(tmp_path)
 
     rc = cli.main(["external-contribution-push", "--root", str(tmp_path), "--format", "text"])

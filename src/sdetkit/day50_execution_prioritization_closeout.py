@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day50-execution-prioritization-closeout.md"
+_PAGE_PATH = "docs/integrations-execution-prioritization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY49_SUMMARY_PATH = (
     "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
@@ -201,8 +201,8 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
         {
             "check_id": "readme_day50_link",
             "weight": 8,
-            "passed": "docs/integrations-day50-execution-prioritization-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day50-execution-prioritization-closeout.md",
+            "passed": "docs/integrations-execution-prioritization-closeout.md" in readme_text,
+            "evidence": "docs/integrations-execution-prioritization-closeout.md",
         },
         {
             "check_id": "readme_day50_command",
@@ -215,9 +215,9 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
             "weight": 8,
             "passed": (
                 "day-50-big-upgrade-report.md" in docs_index_text
-                and "integrations-day50-execution-prioritization-closeout.md" in docs_index_text
+                and "integrations-execution-prioritization-closeout.md" in docs_index_text
             ),
-            "evidence": "day-50-big-upgrade-report.md + integrations-day50-execution-prioritization-closeout.md",
+            "evidence": "day-50-big-upgrade-report.md + integrations-execution-prioritization-closeout.md",
         },
         {
             "check_id": "top10_day50_alignment",
@@ -401,7 +401,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day50-risk-register.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "execution-prioritization-floor,qa-lead,docs-owner,2026-03-18T10:00:00Z,docs/integrations-day50-execution-prioritization-closeout.md,python -m sdetkit day50-execution-prioritization-closeout --format json --strict,failed-checks:0,priority-drift\n",
+        "execution-prioritization-floor,qa-lead,docs-owner,2026-03-18T10:00:00Z,docs/integrations-execution-prioritization-closeout.md,python -m sdetkit day50-execution-prioritization-closeout --format json --strict,failed-checks:0,priority-drift\n",
     )
     _write(
         target / "day50-execution-prioritization-kpi-scorecard.json",

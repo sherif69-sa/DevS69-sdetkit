@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day79-scale-upgrade-closeout.md"
+_PAGE_PATH = "docs/integrations-scale-upgrade-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY78_SUMMARY_PATH = "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json"
 _DAY78_BOARD_PATH = (
     "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day79-scale-upgrade-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/scale-upgrade-plan.json"
 _SECTION_HEADER = "# Day 79 \u2014 Scale upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 79 matters",
@@ -79,7 +79,7 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 
 - `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json`
 - `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md`
-- `docs/roadmap/plans/day79-scale-upgrade-plan.json`
+- `docs/roadmap/plans/scale-upgrade-plan.json`
 
 ## Day 79 command lane
 
@@ -179,9 +179,9 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-79-big-upgrade-report.md" in docs_index_text
-                and "integrations-day79-scale-upgrade-closeout.md" in docs_index_text
+                and "integrations-scale-upgrade-closeout.md" in docs_index_text
             ),
-            "evidence": "day-79-big-upgrade-report.md + integrations-day79-scale-upgrade-closeout.md",
+            "evidence": "day-79-big-upgrade-report.md + integrations-scale-upgrade-closeout.md",
         },
         {
             "check_id": "top10_day79_alignment",
@@ -293,7 +293,7 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 79 scale upgrade dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day79-scale-upgrade-plan.json to restore required keys."
+            "Update docs/roadmap/plans/scale-upgrade-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

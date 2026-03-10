@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day53-docs-loop-closeout.md"
+_PAGE_PATH = "docs/integrations-docs-loop-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY52_SUMMARY_PATH = (
     "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
@@ -201,8 +201,8 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day53_link",
             "weight": 8,
-            "passed": "docs/integrations-day53-docs-loop-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day53-docs-loop-closeout.md",
+            "passed": "docs/integrations-docs-loop-closeout.md" in readme_text,
+            "evidence": "docs/integrations-docs-loop-closeout.md",
         },
         {
             "check_id": "readme_day53_command",
@@ -215,9 +215,9 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-53-big-upgrade-report.md" in docs_index_text
-                and "integrations-day53-docs-loop-closeout.md" in docs_index_text
+                and "integrations-docs-loop-closeout.md" in docs_index_text
             ),
-            "evidence": "day-53-big-upgrade-report.md + integrations-day53-docs-loop-closeout.md",
+            "evidence": "day-53-big-upgrade-report.md + integrations-docs-loop-closeout.md",
         },
         {
             "check_id": "top10_day53_alignment",
@@ -394,7 +394,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day53-cross-link-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "docs-loop-floor,qa-lead,docs-owner,2026-03-20T10:00:00Z,docs/integrations-day53-docs-loop-closeout.md,python -m sdetkit docs-loop-closeout --format json --strict,failed-checks:0,link-drift\n",
+        "docs-loop-floor,qa-lead,docs-owner,2026-03-20T10:00:00Z,docs/integrations-docs-loop-closeout.md,python -m sdetkit docs-loop-closeout --format json --strict,failed-checks:0,link-drift\n",
     )
     _write(
         target / "day53-docs-loop-kpi-scorecard.json",

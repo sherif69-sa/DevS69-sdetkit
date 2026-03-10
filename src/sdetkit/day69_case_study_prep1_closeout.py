@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day69-case-study-prep1-closeout.md"
+_PAGE_PATH = "docs/integrations-case-study-prep1-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY68_SUMMARY_PATH = "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json"
 _DAY68_BOARD_PATH = (
     "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md"
 )
-_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day69-reliability-case-study.json"
+_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/reliability-case-study.json"
 _SECTION_HEADER = "# Day 69 \u2014 Case-study prep #1 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Case Study Prep1 Closeout matters",
@@ -79,7 +79,7 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json`
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
-- `docs/roadmap/plans/day69-reliability-case-study.json`
+- `docs/roadmap/plans/reliability-case-study.json`
 
 ## Case Study Prep1 Closeout command lane (Legacy Day 69)
 
@@ -184,9 +184,9 @@ def build_day69_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-69-big-upgrade-report.md" in docs_index_text
-                and "integrations-day69-case-study-prep1-closeout.md" in docs_index_text
+                and "integrations-case-study-prep1-closeout.md" in docs_index_text
             ),
-            "evidence": "day-69-big-upgrade-report.md + integrations-day69-case-study-prep1-closeout.md",
+            "evidence": "day-69-big-upgrade-report.md + integrations-case-study-prep1-closeout.md",
         },
         {
             "check_id": "top10_day69_alignment",
@@ -302,7 +302,7 @@ def build_day69_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 69 reliability case-study dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day69-reliability-case-study.json to restore required keys."
+            "Update docs/roadmap/plans/reliability-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day37-experiment-lane.md"
+_PAGE_PATH = "docs/integrations-experiment-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY36_SUMMARY_PATH = (
     "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
@@ -203,8 +203,8 @@ def build_day37_experiment_lane_summary(
         {
             "check_id": "readme_day37_link",
             "weight": 8,
-            "passed": "docs/integrations-day37-experiment-lane.md" in readme_text,
-            "evidence": "docs/integrations-day37-experiment-lane.md",
+            "passed": "docs/integrations-experiment-lane.md" in readme_text,
+            "evidence": "docs/integrations-experiment-lane.md",
         },
         {
             "check_id": "readme_day37_command",
@@ -217,9 +217,9 @@ def build_day37_experiment_lane_summary(
             "weight": 8,
             "passed": (
                 "day-37-big-upgrade-report.md" in docs_index_text
-                and "integrations-day37-experiment-lane.md" in docs_index_text
+                and "integrations-experiment-lane.md" in docs_index_text
             ),
-            "evidence": "day-37-big-upgrade-report.md + integrations-day37-experiment-lane.md",
+            "evidence": "day-37-big-upgrade-report.md + integrations-experiment-lane.md",
         },
         {
             "check_id": "top10_day37_alignment",

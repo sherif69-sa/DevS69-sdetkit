@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day29-phase1-hardening.md"
+_PAGE_PATH = "docs/integrations-phase1-hardening.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _SECTION_HEADER = "# Day 29 \u2014 Phase-1 hardening"
 _REQUIRED_SECTIONS = [
@@ -104,10 +104,8 @@ def build_day29_phase1_hardening_summary(
         "README.md": readme_text,
         "docs/index.md": docs_index_text,
         "docs/top-10-github-strategy.md": top10_text,
-        "docs/integrations-day29-phase1-hardening.md": page_text,
-        "docs/integrations-day28-weekly-review.md": _read(
-            root / "docs/integrations-day28-weekly-review.md"
-        ),
+        "docs/integrations-phase1-hardening.md": page_text,
+        "docs/integrations-weekly-review.md": _read(root / "docs/integrations-weekly-review.md"),
     }
     stale_hits: dict[str, list[str]] = {}
     for path, text in scanned_files.items():
@@ -137,8 +135,8 @@ def build_day29_phase1_hardening_summary(
         {
             "check_id": "readme_day29_link",
             "weight": 12,
-            "passed": "docs/integrations-day29-phase1-hardening.md" in readme_text,
-            "evidence": "docs/integrations-day29-phase1-hardening.md",
+            "passed": "docs/integrations-phase1-hardening.md" in readme_text,
+            "evidence": "docs/integrations-phase1-hardening.md",
         },
         {
             "check_id": "docs_index_day29_links",
@@ -147,10 +145,10 @@ def build_day29_phase1_hardening_summary(
                 token in docs_index_text
                 for token in [
                     "day-29-ultra-upgrade-report.md",
-                    "integrations-day29-phase1-hardening.md",
+                    "integrations-phase1-hardening.md",
                 ]
             ),
-            "evidence": "day-29-ultra-upgrade-report.md + integrations-day29-phase1-hardening.md",
+            "evidence": "day-29-ultra-upgrade-report.md + integrations-phase1-hardening.md",
         },
         {
             "check_id": "top10_day29_alignment",

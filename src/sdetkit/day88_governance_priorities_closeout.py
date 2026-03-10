@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day88-governance-priorities-closeout.md"
+_PAGE_PATH = "docs/integrations-governance-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY87_SUMMARY_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
 _DAY87_BOARD_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md"
-_PLAN_PATH = "docs/roadmap/plans/day88-governance-priorities-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/governance-priorities-plan.json"
 _SECTION_HEADER = "# Day 88 \u2014 Governance priorities closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Governance Priorities Closeout matters",
@@ -77,7 +77,7 @@ Day 88 closes with a major upgrade that converts Day 87 governance handoff outco
 
 - `docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json`
 - `docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md`
-- `docs/roadmap/plans/day88-governance-priorities-plan.json`
+- `docs/roadmap/plans/governance-priorities-plan.json`
 
 ## Command lane
 
@@ -178,9 +178,9 @@ def build_day88_governance_priorities_closeout_summary(root: Path) -> dict[str, 
             "weight": 8,
             "passed": (
                 "day-88-big-upgrade-report.md" in docs_index_text
-                and "integrations-day88-governance-priorities-closeout.md" in docs_index_text
+                and "integrations-governance-priorities-closeout.md" in docs_index_text
             ),
-            "evidence": "day-88-big-upgrade-report.md + integrations-day88-governance-priorities-closeout.md",
+            "evidence": "day-88-big-upgrade-report.md + integrations-governance-priorities-closeout.md",
         },
         {
             "check_id": "top10_day88_alignment",
@@ -292,7 +292,7 @@ def build_day88_governance_priorities_closeout_summary(root: Path) -> dict[str, 
     else:
         misses.append("Day 88 governance priorities dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day88-governance-priorities-plan.json to restore required keys."
+            "Update docs/roadmap/plans/governance-priorities-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

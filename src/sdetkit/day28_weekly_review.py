@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day28-weekly-review.md"
+_PAGE_PATH = "docs/integrations-weekly-review.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _SECTION_HEADER = "# Weekly review #4 (Day 28)"
 _REQUIRED_SECTIONS = [
@@ -146,8 +146,8 @@ def build_day28_weekly_review_summary(
             "check_id": "readme_day28_link",
             "category": "discoverability",
             "weight": 10,
-            "passed": "docs/integrations-day28-weekly-review.md" in readme_text,
-            "evidence": "docs/integrations-day28-weekly-review.md",
+            "passed": "docs/integrations-weekly-review.md" in readme_text,
+            "evidence": "docs/integrations-weekly-review.md",
         },
         {
             "check_id": "docs_index_day28_link",

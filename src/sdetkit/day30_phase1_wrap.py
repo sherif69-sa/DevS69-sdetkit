@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day30-phase1-wrap.md"
+_PAGE_PATH = "docs/integrations-phase1-wrap.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
 _REQUIRED_SECTIONS = [
@@ -148,8 +148,8 @@ def build_day30_phase1_wrap_summary(
         {
             "check_id": "readme_day30_link",
             "weight": 10,
-            "passed": "docs/integrations-day30-phase1-wrap.md" in readme_text,
-            "evidence": "docs/integrations-day30-phase1-wrap.md",
+            "passed": "docs/integrations-phase1-wrap.md" in readme_text,
+            "evidence": "docs/integrations-phase1-wrap.md",
         },
         {
             "check_id": "readme_day30_command",
@@ -162,9 +162,9 @@ def build_day30_phase1_wrap_summary(
             "weight": 10,
             "passed": (
                 "day-30-ultra-upgrade-report.md" in docs_index_text
-                and "integrations-day30-phase1-wrap.md" in docs_index_text
+                and "integrations-phase1-wrap.md" in docs_index_text
             ),
-            "evidence": "day-30-ultra-upgrade-report.md + integrations-day30-phase1-wrap.md",
+            "evidence": "day-30-ultra-upgrade-report.md + integrations-phase1-wrap.md",
         },
         {
             "check_id": "top10_day30_alignment",

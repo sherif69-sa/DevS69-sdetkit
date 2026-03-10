@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day76-contributor-recognition-closeout.md"
+_PAGE_PATH = "docs/integrations-contributor-recognition-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY75_SUMMARY_PATH = "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
 _DAY75_BOARD_PATH = (
     "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day76-contributor-recognition-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/contributor-recognition-plan.json"
 _SECTION_HEADER = "# Day 76 \u2014 Contributor recognition closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 76 matters",
@@ -79,7 +79,7 @@ Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes i
 
 - `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json`
 - `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md`
-- `docs/roadmap/plans/day76-contributor-recognition-plan.json`
+- `docs/roadmap/plans/contributor-recognition-plan.json`
 
 ## Day 76 command lane
 
@@ -184,9 +184,9 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
             "weight": 8,
             "passed": (
                 "day-76-big-upgrade-report.md" in docs_index_text
-                and "integrations-day76-contributor-recognition-closeout.md" in docs_index_text
+                and "integrations-contributor-recognition-closeout.md" in docs_index_text
             ),
-            "evidence": "day-76-big-upgrade-report.md + integrations-day76-contributor-recognition-closeout.md",
+            "evidence": "day-76-big-upgrade-report.md + integrations-contributor-recognition-closeout.md",
         },
         {
             "check_id": "top10_day76_alignment",
@@ -300,7 +300,7 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
     else:
         misses.append("Day 76 contributor recognition dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day76-contributor-recognition-plan.json to restore required keys."
+            "Update docs/roadmap/plans/contributor-recognition-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

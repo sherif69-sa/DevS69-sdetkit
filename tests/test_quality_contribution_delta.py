@@ -16,7 +16,7 @@ def _normalize_ws(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def test_day17_delta_text_output_is_productized(tmp_path, capsys):
+def test_delta_text_output_is_productized(tmp_path, capsys):
     current, previous = _write_signals(
         tmp_path,
         '{"traffic": 2200, "stars": 112, "discussions": 31, "blocker_fixes": 9}\n',
@@ -44,7 +44,7 @@ def test_day17_delta_text_output_is_productized(tmp_path, capsys):
     assert "Actions:" in out
 
 
-def test_day17_delta_help_output_is_productized():
+def test_delta_help_output_is_productized():
     out = _normalize_ws(quality_contribution_delta._build_parser().format_help())
     assert "Build a quality contribution delta report." in out
     assert "--format {text,json,markdown} Output format." in out
@@ -52,7 +52,7 @@ def test_day17_delta_help_output_is_productized():
     assert "Optional file path to also write the rendered" in out
 
 
-def test_day17_delta_markdown_output_uses_productized_headings(tmp_path, capsys):
+def test_delta_markdown_output_uses_productized_headings(tmp_path, capsys):
     current, previous = _write_signals(
         tmp_path,
         '{"traffic": 2200, "stars": 112, "discussions": 31, "blocker_fixes": 9}\n',
@@ -82,7 +82,7 @@ def test_day17_delta_markdown_output_uses_productized_headings(tmp_path, capsys)
     assert "## Actions" in out
 
 
-def test_day17_delta_default_json(tmp_path, capsys):
+def test_delta_default_json(tmp_path, capsys):
     current, previous = _write_signals(
         tmp_path,
         '{"traffic": 2200, "stars": 112, "discussions": 31, "blocker_fixes": 9}\n',
@@ -110,7 +110,7 @@ def test_day17_delta_default_json(tmp_path, capsys):
     assert "stability_score" in data["quality"]
 
 
-def test_day17_emit_pack(tmp_path, capsys):
+def test_emit_pack(tmp_path, capsys):
     current, previous = _write_signals(
         tmp_path,
         '{"traffic": 2200, "stars": 112, "discussions": 31, "blocker_fixes": 9}\n',
@@ -136,7 +136,7 @@ def test_day17_emit_pack(tmp_path, capsys):
     assert len(data["pack_files"]) == 4
 
 
-def test_day17_strict_fails_on_negative_delta(tmp_path, capsys):
+def test_strict_fails_on_negative_delta(tmp_path, capsys):
     current, previous = _write_signals(
         tmp_path,
         '{"traffic": 1750, "stars": 89, "discussions": 20, "blocker_fixes": 6}\n',
@@ -161,7 +161,7 @@ def test_day17_strict_fails_on_negative_delta(tmp_path, capsys):
     assert len(data["strict_failures"]) >= 1
 
 
-def test_day17_cli_dispatch(tmp_path, capsys):
+def test_cli_dispatch(tmp_path, capsys):
     current, previous = _write_signals(
         tmp_path,
         '{"traffic": 2200, "stars": 112, "discussions": 31, "blocker_fixes": 9}\n',

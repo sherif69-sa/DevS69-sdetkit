@@ -23,7 +23,7 @@ lint:
     - . .venv/bin/activate
     - bash quality.sh lint
     - bash quality.sh type
-    - python -m pytest -q tests/test_day66_integration_expansion2_closeout.py
+    - python -m pytest -q tests/test_integration_expansion2_closeout.py
 
 integration-matrix:
   stage: test

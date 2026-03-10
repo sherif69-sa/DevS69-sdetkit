@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day48-objection-closeout.md"
+_PAGE_PATH = "docs/integrations-objection-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY47_SUMMARY_PATH = (
     "docs/artifacts/day47-reliability-closeout-pack/day47-reliability-closeout-summary.json"
@@ -197,8 +197,8 @@ def build_day48_objection_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day48_link",
             "weight": 8,
-            "passed": "docs/integrations-day48-objection-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day48-objection-closeout.md",
+            "passed": "docs/integrations-objection-closeout.md" in readme_text,
+            "evidence": "docs/integrations-objection-closeout.md",
         },
         {
             "check_id": "readme_day48_command",
@@ -211,9 +211,9 @@ def build_day48_objection_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-48-big-upgrade-report.md" in docs_index_text
-                and "integrations-day48-objection-closeout.md" in docs_index_text
+                and "integrations-objection-closeout.md" in docs_index_text
             ),
-            "evidence": "day-48-big-upgrade-report.md + integrations-day48-objection-closeout.md",
+            "evidence": "day-48-big-upgrade-report.md + integrations-objection-closeout.md",
         },
         {
             "check_id": "top10_day48_alignment",
@@ -392,7 +392,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day48-faq-objection-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "objection-floor,qa-lead,docs-owner,2026-03-16T10:00:00Z,docs/integrations-day48-objection-closeout.md,python -m sdetkit day48-objection-closeout --format json --strict,failed-checks:0,faq-drift\n",
+        "objection-floor,qa-lead,docs-owner,2026-03-16T10:00:00Z,docs/integrations-objection-closeout.md,python -m sdetkit day48-objection-closeout --format json --strict,failed-checks:0,faq-drift\n",
     )
     _write(
         target / "day48-objection-kpi-scorecard.json",

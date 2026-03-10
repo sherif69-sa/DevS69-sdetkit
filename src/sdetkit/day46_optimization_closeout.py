@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day46-optimization-closeout.md"
+_PAGE_PATH = "docs/integrations-optimization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY45_SUMMARY_PATH = (
     "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"
@@ -197,8 +197,8 @@ def build_day46_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day46_link",
             "weight": 8,
-            "passed": "docs/integrations-day46-optimization-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day46-optimization-closeout.md",
+            "passed": "docs/integrations-optimization-closeout.md" in readme_text,
+            "evidence": "docs/integrations-optimization-closeout.md",
         },
         {
             "check_id": "readme_day46_command",
@@ -211,9 +211,9 @@ def build_day46_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-46-big-upgrade-report.md" in docs_index_text
-                and "integrations-day46-optimization-closeout.md" in docs_index_text
+                and "integrations-optimization-closeout.md" in docs_index_text
             ),
-            "evidence": "day-46-big-upgrade-report.md + integrations-day46-optimization-closeout.md",
+            "evidence": "day-46-big-upgrade-report.md + integrations-optimization-closeout.md",
         },
         {
             "check_id": "top10_day46_alignment",
@@ -394,7 +394,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day46-bottleneck-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "optimization-floor,qa-lead,platform-owner,2026-03-14T10:00:00Z,docs/integrations-day46-optimization-closeout.md,python -m sdetkit day46-optimization-closeout --format json --strict,failed-checks:0,reliability-drift\n",
+        "optimization-floor,qa-lead,platform-owner,2026-03-14T10:00:00Z,docs/integrations-optimization-closeout.md,python -m sdetkit day46-optimization-closeout --format json --strict,failed-checks:0,reliability-drift\n",
     )
     _write(
         target / "day46-optimization-kpi-scorecard.json",

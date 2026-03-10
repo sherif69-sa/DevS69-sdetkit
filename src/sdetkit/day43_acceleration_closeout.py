@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day43-acceleration-closeout.md"
+_PAGE_PATH = "docs/integrations-acceleration-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY42_SUMMARY_PATH = (
     "docs/artifacts/day42-optimization-closeout-pack/day42-optimization-closeout-summary.json"
@@ -198,8 +198,8 @@ def build_day43_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day43_link",
             "weight": 8,
-            "passed": "docs/integrations-day43-acceleration-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day43-acceleration-closeout.md",
+            "passed": "docs/integrations-acceleration-closeout.md" in readme_text,
+            "evidence": "docs/integrations-acceleration-closeout.md",
         },
         {
             "check_id": "readme_day43_command",
@@ -212,9 +212,9 @@ def build_day43_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-43-big-upgrade-report.md" in docs_index_text
-                and "integrations-day43-acceleration-closeout.md" in docs_index_text
+                and "integrations-acceleration-closeout.md" in docs_index_text
             ),
-            "evidence": "day-43-big-upgrade-report.md + integrations-day43-acceleration-closeout.md",
+            "evidence": "day-43-big-upgrade-report.md + integrations-acceleration-closeout.md",
         },
         {
             "check_id": "top10_day43_alignment",
@@ -395,7 +395,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day43-growth-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-day43-acceleration-closeout.md,python -m sdetkit day43-acceleration-closeout --format json --strict,failed-checks:0,baseline-drift\n",
+        "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-acceleration-closeout.md,python -m sdetkit day43-acceleration-closeout --format json --strict,failed-checks:0,baseline-drift\n",
     )
     _write(
         target / "day43-acceleration-kpi-scorecard.json",

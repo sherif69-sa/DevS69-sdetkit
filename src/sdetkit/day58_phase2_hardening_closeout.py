@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day58-phase2-hardening-closeout.md"
+_PAGE_PATH = "docs/integrations-phase2-hardening-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY57_SUMMARY_PATH = (
     "docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json"
@@ -186,9 +186,9 @@ def build_day58_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-58-big-upgrade-report.md" in docs_index_text
-                and "integrations-day58-phase2-hardening-closeout.md" in docs_index_text
+                and "integrations-phase2-hardening-closeout.md" in docs_index_text
             ),
-            "evidence": "day-58-big-upgrade-report.md + integrations-day58-phase2-hardening-closeout.md",
+            "evidence": "day-58-big-upgrade-report.md + integrations-phase2-hardening-closeout.md",
         },
         {
             "check_id": "top10_day58_alignment",

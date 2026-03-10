@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day36-distribution-closeout.md"
+_PAGE_PATH = "docs/integrations-distribution-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY35_SUMMARY_PATH = (
     "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
@@ -203,8 +203,8 @@ def build_day36_distribution_closeout_summary(
         {
             "check_id": "readme_day36_link",
             "weight": 8,
-            "passed": "docs/integrations-day36-distribution-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day36-distribution-closeout.md",
+            "passed": "docs/integrations-distribution-closeout.md" in readme_text,
+            "evidence": "docs/integrations-distribution-closeout.md",
         },
         {
             "check_id": "readme_day36_command",
@@ -217,9 +217,9 @@ def build_day36_distribution_closeout_summary(
             "weight": 8,
             "passed": (
                 "day-36-big-upgrade-report.md" in docs_index_text
-                and "integrations-day36-distribution-closeout.md" in docs_index_text
+                and "integrations-distribution-closeout.md" in docs_index_text
             ),
-            "evidence": "day-36-big-upgrade-report.md + integrations-day36-distribution-closeout.md",
+            "evidence": "day-36-big-upgrade-report.md + integrations-distribution-closeout.md",
         },
         {
             "check_id": "top10_day36_alignment",

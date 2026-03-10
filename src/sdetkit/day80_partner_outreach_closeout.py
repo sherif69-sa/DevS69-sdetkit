@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day80-partner-outreach-closeout.md"
+_PAGE_PATH = "docs/integrations-partner-outreach-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY79_SUMMARY_PATH = (
     "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json"
 )
 _DAY79_BOARD_PATH = "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md"
-_PLAN_PATH = "docs/roadmap/plans/day80-partner-outreach-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/partner-outreach-plan.json"
 _SECTION_HEADER = "# Day 80 \u2014 Partner outreach closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 80 matters",
@@ -79,7 +79,7 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 
 - `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json`
 - `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md`
-- `docs/roadmap/plans/day80-partner-outreach-plan.json`
+- `docs/roadmap/plans/partner-outreach-plan.json`
 
 ## Day 80 command lane
 
@@ -185,9 +185,9 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-80-big-upgrade-report.md" in docs_index_text
-                and "integrations-day80-partner-outreach-closeout.md" in docs_index_text
+                and "integrations-partner-outreach-closeout.md" in docs_index_text
             ),
-            "evidence": "day-80-big-upgrade-report.md + integrations-day80-partner-outreach-closeout.md",
+            "evidence": "day-80-big-upgrade-report.md + integrations-partner-outreach-closeout.md",
         },
         {
             "check_id": "top10_day80_alignment",
@@ -299,7 +299,7 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 80 partner outreach dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day80-partner-outreach-plan.json to restore required keys."
+            "Update docs/roadmap/plans/partner-outreach-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

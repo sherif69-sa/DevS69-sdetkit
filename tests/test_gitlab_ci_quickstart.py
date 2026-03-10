@@ -8,7 +8,7 @@ def _normalize_ws(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def test_day16_quickstart_default_text(capsys):
+def test_quickstart_default_text(capsys):
     rc = gitlab_ci_quickstart.main([])
     assert rc == 0
     out = capsys.readouterr().out
@@ -17,7 +17,7 @@ def test_day16_quickstart_default_text(capsys):
     assert "Page:" in out
 
 
-def test_day16_quickstart_help_output_is_productized():
+def test_quickstart_help_output_is_productized():
     out = _normalize_ws(gitlab_ci_quickstart._build_parser().format_help())
     assert "Render and validate a GitLab CI quickstart report." in out
     assert "--format {text,markdown,json} Output format." in out
@@ -26,7 +26,7 @@ def test_day16_quickstart_help_output_is_productized():
     assert "GitLab CI quickstart report." in out
 
 
-def test_day16_quickstart_markdown_output_uses_productized_headings(capsys):
+def test_quickstart_markdown_output_uses_productized_headings(capsys):
     rc = gitlab_ci_quickstart.main(["--format", "markdown", "--variant", "strict"])
     assert rc == 0
     out = capsys.readouterr().out
@@ -40,7 +40,7 @@ def test_day16_quickstart_markdown_output_uses_productized_headings(capsys):
     assert "- Open page: `docs/integrations-gitlab-ci-quickstart.md`" in out
 
 
-def test_day16_quickstart_json_and_strict_success(capsys):
+def test_quickstart_json_and_strict_success(capsys):
     rc = gitlab_ci_quickstart.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
@@ -49,7 +49,7 @@ def test_day16_quickstart_json_and_strict_success(capsys):
     assert data["total_checks"] == 19
 
 
-def test_day16_quickstart_variant_switches_pipeline(capsys):
+def test_quickstart_variant_switches_pipeline(capsys):
     rc = gitlab_ci_quickstart.main(["--format", "json", "--variant", "strict", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
@@ -57,7 +57,7 @@ def test_day16_quickstart_variant_switches_pipeline(capsys):
     assert "strict-gate:" in data["selected_pipeline"]
 
 
-def test_day16_quickstart_strict_fails_when_content_missing(tmp_path, capsys):
+def test_quickstart_strict_fails_when_content_missing(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
         "# Placeholder\n", encoding="utf-8"
@@ -67,7 +67,7 @@ def test_day16_quickstart_strict_fails_when_content_missing(tmp_path, capsys):
     assert "Quickstart coverage gaps:" in capsys.readouterr().out
 
 
-def test_day16_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys):
+def test_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys):
     rc = gitlab_ci_quickstart.main(
         ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
     )
@@ -77,7 +77,7 @@ def test_day16_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys)
     assert data["touched_files"] == ["docs/integrations-gitlab-ci-quickstart.md"]
 
 
-def test_day16_quickstart_emit_pack(tmp_path, capsys):
+def test_quickstart_emit_pack(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
         gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
@@ -99,7 +99,7 @@ def test_day16_quickstart_emit_pack(tmp_path, capsys):
     assert "docs/artifacts/day16-gitlab-pack/day16-sdetkit-strict.yml" in data["pack_files"]
 
 
-def test_day16_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
+def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
         gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
@@ -131,7 +131,7 @@ def test_day16_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys)
     assert (tmp_path / "docs/evidence/day16-execution-summary.json").exists()
 
 
-def test_day16_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path, capsys):
+def test_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
         gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
@@ -159,7 +159,7 @@ def test_main_cli_dispatches_day16_quickstart(capsys):
     assert "GitLab CI quickstart report" in capsys.readouterr().out
 
 
-def test_day16_quickstart_bootstrap_pipeline_writes_selected_variant(tmp_path, capsys):
+def test_quickstart_bootstrap_pipeline_writes_selected_variant(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
         gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"

@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day85-release-prioritization-closeout.md"
+_PAGE_PATH = "docs/integrations-release-prioritization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY84_SUMMARY_PATH = "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json"
 _DAY84_BOARD_PATH = "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md"
-_PLAN_PATH = "docs/roadmap/plans/day85-release-prioritization-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/release-prioritization-plan.json"
 _SECTION_HEADER = "# Day 85 \u2014 Release prioritization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Release Prioritization Closeout matters",
@@ -77,7 +77,7 @@ Day 85 closes with a major upgrade that converts Day 84 evidence narrative outco
 
 - `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json`
 - `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md`
-- `docs/roadmap/plans/day85-release-prioritization-plan.json`
+- `docs/roadmap/plans/release-prioritization-plan.json`
 
 ## Command lane
 
@@ -178,9 +178,9 @@ def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str,
             "weight": 8,
             "passed": (
                 "day-85-big-upgrade-report.md" in docs_index_text
-                and "integrations-day85-release-prioritization-closeout.md" in docs_index_text
+                and "integrations-release-prioritization-closeout.md" in docs_index_text
             ),
-            "evidence": "day-85-big-upgrade-report.md + integrations-day85-release-prioritization-closeout.md",
+            "evidence": "day-85-big-upgrade-report.md + integrations-release-prioritization-closeout.md",
         },
         {
             "check_id": "top10_day85_alignment",
@@ -292,7 +292,7 @@ def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str,
     else:
         misses.append("Day 85 release prioritization dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day85-release-prioritization-plan.json to restore required keys."
+            "Update docs/roadmap/plans/release-prioritization-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

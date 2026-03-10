@@ -27,7 +27,7 @@ def _write_page(root: Path) -> None:
     path.write_text(rrb._DAY19_DEFAULT_PAGE, encoding="utf-8")
 
 
-def test_day19_board_builds_json(tmp_path: Path, capsys) -> None:
+def test_board_builds_json(tmp_path: Path, capsys) -> None:
     day18, day14 = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
@@ -51,7 +51,7 @@ def test_day19_board_builds_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["release_score"] >= 90
 
 
-def test_day19_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
+def test_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
     day18, day14 = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
@@ -80,7 +80,7 @@ def test_day19_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day19-pack/evidence/day19-execution-summary.json").exists()
 
 
-def test_day19_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     day18, day14 = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
@@ -101,7 +101,7 @@ def test_day19_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "Day 19 release readiness board" in capsys.readouterr().out
 
 
-def test_day19_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
+def test_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
     day18 = tmp_path / "day18.json"
     day14 = tmp_path / "day14.json"
     day18.write_text(
