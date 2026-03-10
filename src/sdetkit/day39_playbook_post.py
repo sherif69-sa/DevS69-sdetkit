@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day39-playbook-post.md"
+_PAGE_PATH = "docs/integrations-playbook-post.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY38_SUMMARY_PATH = (
     "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
@@ -203,8 +203,8 @@ def build_day39_playbook_post_summary(
         {
             "check_id": "readme_day39_link",
             "weight": 8,
-            "passed": "docs/integrations-day39-playbook-post.md" in readme_text,
-            "evidence": "docs/integrations-day39-playbook-post.md",
+            "passed": "docs/integrations-playbook-post.md" in readme_text,
+            "evidence": "docs/integrations-playbook-post.md",
         },
         {
             "check_id": "readme_day39_command",
@@ -217,9 +217,9 @@ def build_day39_playbook_post_summary(
             "weight": 8,
             "passed": (
                 "day-39-big-upgrade-report.md" in docs_index_text
-                and "integrations-day39-playbook-post.md" in docs_index_text
+                and "integrations-playbook-post.md" in docs_index_text
             ),
-            "evidence": "day-39-big-upgrade-report.md + integrations-day39-playbook-post.md",
+            "evidence": "day-39-big-upgrade-report.md + integrations-playbook-post.md",
         },
         {
             "check_id": "top10_day39_alignment",
@@ -422,7 +422,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day39-rollout-plan.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
-        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-day39-playbook-post.md,python -m sdetkit day39-playbook-post --format json --strict,completion:+5%\n"
+        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-playbook-post.md,python -m sdetkit day39-playbook-post --format json --strict,completion:+5%\n"
         "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-39-big-upgrade-report.md,python scripts/check_day39_playbook_post_contract.py,adoption:+7%\n"
         "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict,ctr:+2%\n",
     )

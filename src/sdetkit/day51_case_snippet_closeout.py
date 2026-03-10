@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day51-case-snippet-closeout.md"
+_PAGE_PATH = "docs/integrations-case-snippet-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY50_SUMMARY_PATH = "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
 _DAY50_BOARD_PATH = (
@@ -201,8 +201,8 @@ def build_day51_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day51_link",
             "weight": 8,
-            "passed": "docs/integrations-day51-case-snippet-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day51-case-snippet-closeout.md",
+            "passed": "docs/integrations-case-snippet-closeout.md" in readme_text,
+            "evidence": "docs/integrations-case-snippet-closeout.md",
         },
         {
             "check_id": "readme_day51_command",
@@ -215,9 +215,9 @@ def build_day51_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-51-big-upgrade-report.md" in docs_index_text
-                and "integrations-day51-case-snippet-closeout.md" in docs_index_text
+                and "integrations-case-snippet-closeout.md" in docs_index_text
             ),
-            "evidence": "day-51-big-upgrade-report.md + integrations-day51-case-snippet-closeout.md",
+            "evidence": "day-51-big-upgrade-report.md + integrations-case-snippet-closeout.md",
         },
         {
             "check_id": "top10_day51_alignment",
@@ -396,7 +396,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day51-proof-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "case-snippet-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-day51-case-snippet-closeout.md,python -m sdetkit case-snippet-closeout --format json --strict,failed-checks:0,narrative-drift\n",
+        "case-snippet-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-case-snippet-closeout.md,python -m sdetkit case-snippet-closeout --format json --strict,failed-checks:0,narrative-drift\n",
     )
     _write(
         target / "day51-case-snippet-kpi-scorecard.json",

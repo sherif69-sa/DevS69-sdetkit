@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day35-kpi-instrumentation.md"
+_PAGE_PATH = "docs/integrations-kpi-instrumentation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY34_SUMMARY_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json"
 _DAY34_BOARD_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-delivery-board.md"
@@ -201,8 +201,8 @@ def build_day35_kpi_instrumentation_summary(
         {
             "check_id": "readme_day35_link",
             "weight": 8,
-            "passed": "docs/integrations-day35-kpi-instrumentation.md" in readme_text,
-            "evidence": "docs/integrations-day35-kpi-instrumentation.md",
+            "passed": "docs/integrations-kpi-instrumentation.md" in readme_text,
+            "evidence": "docs/integrations-kpi-instrumentation.md",
         },
         {
             "check_id": "readme_day35_command",
@@ -215,9 +215,9 @@ def build_day35_kpi_instrumentation_summary(
             "weight": 8,
             "passed": (
                 "day-35-big-upgrade-report.md" in docs_index_text
-                and "integrations-day35-kpi-instrumentation.md" in docs_index_text
+                and "integrations-kpi-instrumentation.md" in docs_index_text
             ),
-            "evidence": "day-35-big-upgrade-report.md + integrations-day35-kpi-instrumentation.md",
+            "evidence": "day-35-big-upgrade-report.md + integrations-kpi-instrumentation.md",
         },
         {
             "check_id": "top10_day35_alignment",

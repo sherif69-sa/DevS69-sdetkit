@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day78-ecosystem-priorities-closeout.md"
+_PAGE_PATH = "docs/integrations-ecosystem-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY77_SUMMARY_PATH = "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json"
 _DAY77_BOARD_PATH = (
     "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day78-ecosystem-priorities-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/ecosystem-priorities-plan.json"
 _SECTION_HEADER = "# Day 78 \u2014 Ecosystem priorities closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 78 matters",
@@ -79,7 +79,7 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 
 - `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json`
 - `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md`
-- `docs/roadmap/plans/day78-ecosystem-priorities-plan.json`
+- `docs/roadmap/plans/ecosystem-priorities-plan.json`
 
 ## Day 78 command lane
 
@@ -181,9 +181,9 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
             "weight": 8,
             "passed": (
                 "day-78-big-upgrade-report.md" in docs_index_text
-                and "integrations-day78-ecosystem-priorities-closeout.md" in docs_index_text
+                and "integrations-ecosystem-priorities-closeout.md" in docs_index_text
             ),
-            "evidence": "day-78-big-upgrade-report.md + integrations-day78-ecosystem-priorities-closeout.md",
+            "evidence": "day-78-big-upgrade-report.md + integrations-ecosystem-priorities-closeout.md",
         },
         {
             "check_id": "top10_day78_alignment",
@@ -295,7 +295,7 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
     else:
         misses.append("Day 78 ecosystem priorities dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day78-ecosystem-priorities-plan.json to restore required keys."
+            "Update docs/roadmap/plans/ecosystem-priorities-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

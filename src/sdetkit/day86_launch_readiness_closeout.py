@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day86-launch-readiness-closeout.md"
+_PAGE_PATH = "docs/integrations-launch-readiness-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY85_SUMMARY_PATH = "docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json"
 _DAY85_BOARD_PATH = (
     "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day86-launch-readiness-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/launch-readiness-plan.json"
 _SECTION_HEADER = "# Day 86 \u2014 Launch readiness closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Launch Readiness Closeout matters",
@@ -79,7 +79,7 @@ Day 86 closes with a major upgrade that converts Day 85 release prioritization o
 
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json`
 - `docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md`
-- `docs/roadmap/plans/day86-launch-readiness-plan.json`
+- `docs/roadmap/plans/launch-readiness-plan.json`
 
 ## Command lane
 
@@ -180,9 +180,9 @@ def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-86-big-upgrade-report.md" in docs_index_text
-                and "integrations-day86-launch-readiness-closeout.md" in docs_index_text
+                and "integrations-launch-readiness-closeout.md" in docs_index_text
             ),
-            "evidence": "day-86-big-upgrade-report.md + integrations-day86-launch-readiness-closeout.md",
+            "evidence": "day-86-big-upgrade-report.md + integrations-launch-readiness-closeout.md",
         },
         {
             "check_id": "top10_day86_alignment",
@@ -294,7 +294,7 @@ def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 86 launch readiness dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day86-launch-readiness-plan.json to restore required keys."
+            "Update docs/roadmap/plans/launch-readiness-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

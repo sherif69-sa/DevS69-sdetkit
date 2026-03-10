@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day70-case-study-prep2-closeout.md"
+_PAGE_PATH = "docs/integrations-case-study-prep2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY69_SUMMARY_PATH = "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json"
 _DAY69_BOARD_PATH = "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md"
-_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day70-triage-speed-case-study.json"
+_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/triage-speed-case-study.json"
 _SECTION_HEADER = "# Day 70 \u2014 Case-study prep #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Case Study Prep 2 Closeout matters",
@@ -77,7 +77,7 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 
 - `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json`
 - `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md`
-- `docs/roadmap/plans/day70-triage-speed-case-study.json`
+- `docs/roadmap/plans/triage-speed-case-study.json`
 
 ## Case Study Prep 2 Closeout command lane (Legacy Day 70)
 
@@ -182,9 +182,9 @@ def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-70-big-upgrade-report.md" in docs_index_text
-                and "integrations-day70-case-study-prep2-closeout.md" in docs_index_text
+                and "integrations-case-study-prep2-closeout.md" in docs_index_text
             ),
-            "evidence": "day-70-big-upgrade-report.md + integrations-day70-case-study-prep2-closeout.md",
+            "evidence": "day-70-big-upgrade-report.md + integrations-case-study-prep2-closeout.md",
         },
         {
             "check_id": "top10_day70_alignment",
@@ -300,7 +300,7 @@ def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 70 triage-speed case-study dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day70-triage-speed-case-study.json to restore required keys."
+            "Update docs/roadmap/plans/triage-speed-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:

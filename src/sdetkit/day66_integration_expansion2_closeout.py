@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day66-integration-expansion2-closeout.md"
+_PAGE_PATH = "docs/integrations-integration-expansion2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY65_SUMMARY_PATH = (
     "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
@@ -189,9 +189,9 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
             "weight": 8,
             "passed": (
                 "day-66-big-upgrade-report.md" in docs_index_text
-                and "integrations-day66-integration-expansion2-closeout.md" in docs_index_text
+                and "integrations-integration-expansion2-closeout.md" in docs_index_text
             ),
-            "evidence": "day-66-big-upgrade-report.md + integrations-day66-integration-expansion2-closeout.md",
+            "evidence": "day-66-big-upgrade-report.md + integrations-integration-expansion2-closeout.md",
         },
         {
             "check_id": "top10_day66_alignment",

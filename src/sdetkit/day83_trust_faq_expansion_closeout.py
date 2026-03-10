@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day83-trust-faq-expansion-closeout.md"
+_PAGE_PATH = "docs/integrations-trust-faq-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY82_SUMMARY_PATH = "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
 _DAY82_BOARD_PATH = (
     "docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day83-trust-faq-expansion-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/trust-faq-expansion-plan.json"
 _SECTION_HEADER = "# Day 83 \u2014 Trust FAQ expansion loop closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Trust FAQ Expansion Closeout matters",
@@ -79,7 +79,7 @@ Day 83 closes with a major upgrade that folds Day 82 integration feedback outcom
 
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json`
 - `docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md`
-- `docs/roadmap/plans/day83-trust-faq-expansion-plan.json`
+- `docs/roadmap/plans/trust-faq-expansion-plan.json`
 
 ## Command lane
 
@@ -188,9 +188,9 @@ def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, An
             "weight": 8,
             "passed": (
                 "day-83-big-upgrade-report.md" in docs_index_text
-                and "integrations-day83-trust-faq-expansion-closeout.md" in docs_index_text
+                and "integrations-trust-faq-expansion-closeout.md" in docs_index_text
             ),
-            "evidence": "day-83-big-upgrade-report.md + integrations-day83-trust-faq-expansion-closeout.md",
+            "evidence": "day-83-big-upgrade-report.md + integrations-trust-faq-expansion-closeout.md",
         },
         {
             "check_id": "top10_day83_alignment",
@@ -302,7 +302,7 @@ def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, An
     else:
         misses.append("Day 83 trust FAQ expansion dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day83-trust-faq-expansion-plan.json to restore required keys."
+            "Update docs/roadmap/plans/trust-faq-expansion-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day31-phase2-kickoff.md"
+_PAGE_PATH = "docs/integrations-phase2-kickoff.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY30_SUMMARY_PATH = "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
 _DAY30_BACKLOG_PATH = "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
@@ -186,8 +186,8 @@ def build_day31_phase2_kickoff_summary(
         {
             "check_id": "readme_day31_link",
             "weight": 8,
-            "passed": "docs/integrations-day31-phase2-kickoff.md" in readme_text,
-            "evidence": "docs/integrations-day31-phase2-kickoff.md",
+            "passed": "docs/integrations-phase2-kickoff.md" in readme_text,
+            "evidence": "docs/integrations-phase2-kickoff.md",
         },
         {
             "check_id": "readme_day31_command",
@@ -200,9 +200,9 @@ def build_day31_phase2_kickoff_summary(
             "weight": 8,
             "passed": (
                 "day-31-ultra-upgrade-report.md" in docs_index_text
-                and "integrations-day31-phase2-kickoff.md" in docs_index_text
+                and "integrations-phase2-kickoff.md" in docs_index_text
             ),
-            "evidence": "day-31-ultra-upgrade-report.md + integrations-day31-phase2-kickoff.md",
+            "evidence": "day-31-ultra-upgrade-report.md + integrations-phase2-kickoff.md",
         },
         {
             "check_id": "top10_day31_alignment",

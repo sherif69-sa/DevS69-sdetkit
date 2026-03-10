@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day40-scale-lane.md"
+_PAGE_PATH = "docs/integrations-scale-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY39_SUMMARY_PATH = "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
 _DAY39_BOARD_PATH = "docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md"
@@ -201,8 +201,8 @@ def build_day40_scale_lane_summary(
         {
             "check_id": "readme_day40_link",
             "weight": 8,
-            "passed": "docs/integrations-day40-scale-lane.md" in readme_text,
-            "evidence": "docs/integrations-day40-scale-lane.md",
+            "passed": "docs/integrations-scale-lane.md" in readme_text,
+            "evidence": "docs/integrations-scale-lane.md",
         },
         {
             "check_id": "readme_day40_command",
@@ -215,9 +215,9 @@ def build_day40_scale_lane_summary(
             "weight": 8,
             "passed": (
                 "day-40-big-upgrade-report.md" in docs_index_text
-                and "integrations-day40-scale-lane.md" in docs_index_text
+                and "integrations-scale-lane.md" in docs_index_text
             ),
-            "evidence": "day-40-big-upgrade-report.md + integrations-day40-scale-lane.md",
+            "evidence": "day-40-big-upgrade-report.md + integrations-scale-lane.md",
         },
         {
             "check_id": "top10_day40_alignment",
@@ -418,7 +418,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day40-channel-matrix.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
-        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-day40-scale-lane.md,python -m sdetkit day40-scale-lane --format json --strict,completion:+5%\n"
+        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-scale-lane.md,python -m sdetkit day40-scale-lane --format json --strict,completion:+5%\n"
         "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-40-big-upgrade-report.md,python scripts/check_day40_scale_lane_contract.py,adoption:+7%\n"
         "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict,ctr:+2%\n",
     )

@@ -22,7 +22,7 @@ def _seed(root: Path) -> None:
     )
 
 
-def test_day25_community_activation_json(tmp_path: Path, capsys) -> None:
+def test_community_activation_json(tmp_path: Path, capsys) -> None:
     _seed(tmp_path)
 
     rc = ca.main(["--root", str(tmp_path), "--format", "json"])
@@ -33,7 +33,7 @@ def test_day25_community_activation_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] == 100.0
 
 
-def test_day25_community_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_community_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed(tmp_path)
 
     rc = ca.main(
@@ -59,7 +59,7 @@ def test_day25_community_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day25-pack/evidence/day25-execution-summary.json").exists()
 
 
-def test_day25_community_strict_fails_when_sections_missing(tmp_path: Path) -> None:
+def test_community_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed(tmp_path)
     (tmp_path / "docs/integrations-community-activation.md").write_text(
         "# Community activation (Day 25)\n", encoding="utf-8"
@@ -70,7 +70,7 @@ def test_day25_community_strict_fails_when_sections_missing(tmp_path: Path) -> N
     assert rc == 1
 
 
-def test_day25_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed(tmp_path)
 
     rc = cli.main(["community-activation", "--root", str(tmp_path), "--format", "text"])

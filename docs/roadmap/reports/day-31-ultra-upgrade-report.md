@@ -10,7 +10,7 @@
 ## Validation lane
 
 ```bash
-python -m pytest -q tests/test_day31_phase2_kickoff.py tests/test_cli_help_lists_subcommands.py
+python -m pytest -q tests/test_phase2_kickoff.py tests/test_cli_help_lists_subcommands.py
 python scripts/check_day31_phase2_kickoff_contract.py
 python -m sdetkit day31-phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict
 python -m sdetkit day31-phase2-kickoff --execute --evidence-dir docs/artifacts/day31-phase2-pack/evidence --format json --strict

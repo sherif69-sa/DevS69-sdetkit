@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day52-narrative-closeout.md"
+_PAGE_PATH = "docs/integrations-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY51_SUMMARY_PATH = (
     "docs/artifacts/day51-case-snippet-closeout-pack/day51-case-snippet-closeout-summary.json"
@@ -201,8 +201,8 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day52_link",
             "weight": 8,
-            "passed": "docs/integrations-day52-narrative-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day52-narrative-closeout.md",
+            "passed": "docs/integrations-narrative-closeout.md" in readme_text,
+            "evidence": "docs/integrations-narrative-closeout.md",
         },
         {
             "check_id": "readme_day52_command",
@@ -215,9 +215,9 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-52-big-upgrade-report.md" in docs_index_text
-                and "integrations-day52-narrative-closeout.md" in docs_index_text
+                and "integrations-narrative-closeout.md" in docs_index_text
             ),
-            "evidence": "day-52-big-upgrade-report.md + integrations-day52-narrative-closeout.md",
+            "evidence": "day-52-big-upgrade-report.md + integrations-narrative-closeout.md",
         },
         {
             "check_id": "top10_day52_alignment",
@@ -394,7 +394,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day52-proof-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "narrative-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-day52-narrative-closeout.md,python -m sdetkit narrative-closeout --format json --strict,failed-checks:0,narrative-drift\n",
+        "narrative-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-narrative-closeout.md,python -m sdetkit narrative-closeout --format json --strict,failed-checks:0,narrative-drift\n",
     )
     _write(
         target / "day52-narrative-kpi-scorecard.json",

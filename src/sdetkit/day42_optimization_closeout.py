@@ -8,38 +8,38 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day42-optimization-closeout.md"
+_PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY41_SUMMARY_PATH = (
     "docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json"
 )
 _DAY41_BOARD_PATH = "docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md"
-_SECTION_HEADER = "# Day 42 \u2014 Optimization closeout lane"
+_SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 42 matters",
+    "## Why Optimization Closeout Foundation matters",
     "## Required inputs (Day 41)",
-    "## Day 42 command lane",
+    "## Optimization Closeout Foundation command lane",
     "## Optimization closeout contract",
     "## Optimization quality checklist",
-    "## Day 42 delivery board",
+    "## Optimization Closeout Foundation delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day42-optimization-closeout --format json --strict",
-    "python -m sdetkit day42-optimization-closeout --emit-pack-dir docs/artifacts/day42-optimization-closeout-pack --format json --strict",
-    "python -m sdetkit day42-optimization-closeout --execute --evidence-dir docs/artifacts/day42-optimization-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit optimization-closeout-foundation --format json --strict",
+    "python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict",
+    "python -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/optimization-closeout-foundation-pack/evidence --format json --strict",
     "python scripts/check_day42_optimization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day42-optimization-closeout --format json --strict",
-    "python -m sdetkit day42-optimization-closeout --emit-pack-dir docs/artifacts/day42-optimization-closeout-pack --format json --strict",
+    "python -m sdetkit optimization-closeout-foundation --format json --strict",
+    "python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict",
     "python scripts/check_day42_optimization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 42 optimization lane execution and KPI follow-up.",
-    "The Day 42 optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.",
-    "Every Day 42 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 42 closeout records optimization learnings and Day 43 acceleration priorities.",
+    "Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.",
+    "The Optimization Closeout Foundation optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.",
+    "Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    "Optimization Closeout Foundation closeout records optimization learnings and Day 43 acceleration priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes optimization summary, remediation matrix, and rollback strategy",
@@ -49,18 +49,18 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes optimization plan, remediation matrix, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 42 optimization plan draft committed",
-    "- [ ] Day 42 review notes captured with owner + backup",
-    "- [ ] Day 42 remediation matrix exported",
-    "- [ ] Day 42 KPI scorecard snapshot exported",
-    "- [ ] Day 43 acceleration priorities drafted from Day 42 learnings",
+    "- [ ] Optimization Closeout Foundation optimization plan draft committed",
+    "- [ ] Optimization Closeout Foundation review notes captured with owner + backup",
+    "- [ ] Optimization Closeout Foundation remediation matrix exported",
+    "- [ ] Optimization Closeout Foundation KPI scorecard snapshot exported",
+    "- [ ] Day 43 acceleration priorities drafted from Optimization Closeout Foundation learnings",
 ]
 
-_DAY42_DEFAULT_PAGE = """# Day 42 \u2014 Optimization closeout lane
+_DAY42_DEFAULT_PAGE = """# Optimization Closeout Foundation \u2014 Optimization closeout lane
 
-Day 42 closes with a major optimization upgrade that converts Day 41 expansion evidence into deterministic improvement loops.
+Optimization Closeout Foundation closes with a major optimization upgrade that converts Day 41 expansion evidence into deterministic improvement loops.
 
-## Why Day 42 matters
+## Why Optimization Closeout Foundation matters
 
 - Converts Day 41 expansion proof into remediation-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
@@ -71,21 +71,21 @@ Day 42 closes with a major optimization upgrade that converts Day 41 expansion e
 - `docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json`
 - `docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md`
 
-## Day 42 command lane
+## Optimization Closeout Foundation command lane
 
 ```bash
-python -m sdetkit day42-optimization-closeout --format json --strict
-python -m sdetkit day42-optimization-closeout --emit-pack-dir docs/artifacts/day42-optimization-closeout-pack --format json --strict
-python -m sdetkit day42-optimization-closeout --execute --evidence-dir docs/artifacts/day42-optimization-closeout-pack/evidence --format json --strict
+python -m sdetkit optimization-closeout-foundation --format json --strict
+python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict
+python -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/optimization-closeout-foundation-pack/evidence --format json --strict
 python scripts/check_day42_optimization_closeout_contract.py
 ```
 
 ## Optimization closeout contract
 
-- Single owner + backup reviewer are assigned for Day 42 optimization lane execution and KPI follow-up.
-- The Day 42 optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.
-- Every Day 42 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 42 closeout records optimization learnings and Day 43 acceleration priorities.
+- Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.
+- The Optimization Closeout Foundation optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.
+- Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Optimization Closeout Foundation closeout records optimization learnings and Day 43 acceleration priorities.
 
 ## Optimization quality checklist
 
@@ -95,17 +95,17 @@ python scripts/check_day42_optimization_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes optimization plan, remediation matrix, KPI scorecard, and execution log
 
-## Day 42 delivery board
+## Optimization Closeout Foundation delivery board
 
-- [ ] Day 42 optimization plan draft committed
-- [ ] Day 42 review notes captured with owner + backup
-- [ ] Day 42 remediation matrix exported
-- [ ] Day 42 KPI scorecard snapshot exported
-- [ ] Day 43 acceleration priorities drafted from Day 42 learnings
+- [ ] Optimization Closeout Foundation optimization plan draft committed
+- [ ] Optimization Closeout Foundation review notes captured with owner + backup
+- [ ] Optimization Closeout Foundation remediation matrix exported
+- [ ] Optimization Closeout Foundation KPI scorecard snapshot exported
+- [ ] Day 43 acceleration priorities drafted from Optimization Closeout Foundation learnings
 
 ## Scoring model
 
-Day 42 weighted score (0-100):
+Optimization Closeout Foundation weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -144,7 +144,7 @@ def _load_day41(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 41" in text, "Day 42" in text
+    return len(items), "Day 41" in text, "Optimization Closeout Foundation" in text
 
 
 def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
@@ -198,29 +198,29 @@ def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day42_link",
             "weight": 8,
-            "passed": "docs/integrations-day42-optimization-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day42-optimization-closeout.md",
+            "passed": "docs/integrations-optimization-closeout-foundation.md" in readme_text,
+            "evidence": "docs/integrations-optimization-closeout-foundation.md",
         },
         {
             "check_id": "readme_day42_command",
             "weight": 4,
-            "passed": "day42-optimization-closeout" in readme_text,
-            "evidence": "day42-optimization-closeout",
+            "passed": "optimization-closeout-foundation" in readme_text,
+            "evidence": "optimization-closeout-foundation",
         },
         {
             "check_id": "docs_index_day42_links",
             "weight": 8,
             "passed": (
                 "day-42-big-upgrade-report.md" in docs_index_text
-                and "integrations-day42-optimization-closeout.md" in docs_index_text
+                and "integrations-optimization-closeout-foundation.md" in docs_index_text
             ),
-            "evidence": "day-42-big-upgrade-report.md + integrations-day42-optimization-closeout.md",
+            "evidence": "day-42-big-upgrade-report.md + integrations-optimization-closeout-foundation.md",
         },
         {
             "check_id": "top10_day42_alignment",
             "weight": 5,
-            "passed": ("Day 42" in top10_text and "Day 43" in top10_text),
-            "evidence": "Day 42 + Day 43 strategy chain",
+            "passed": ("Optimization Closeout Foundation" in top10_text and "Day 43" in top10_text),
+            "evidence": "Optimization Closeout Foundation + Day 43 strategy chain",
         },
         {
             "check_id": "day41_summary_present",
@@ -291,7 +291,7 @@ def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 41 strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 41 expansion automation command and restore strict pass baseline before Day 42 lock."
+            "Re-run Day 41 expansion automation command and restore strict pass baseline before Optimization Closeout Foundation lock."
         )
 
     if board_count >= 5 and board_has_day41 and board_has_day42:
@@ -303,7 +303,7 @@ def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "Day 41 delivery board integrity is incomplete (needs >=5 items and Day 41/42 anchors)."
         )
         handoff_actions.append(
-            "Repair Day 41 delivery board entries to include Day 41 and Day 42 anchors."
+            "Repair Day 41 delivery board entries to include Day 41 and Optimization Closeout Foundation anchors."
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -315,16 +315,16 @@ def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "Optimization contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 42 optimization contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all Optimization Closeout Foundation optimization contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 42 optimization closeout lane is fully complete and ready for Day 43 acceleration lane."
+            "Optimization Closeout Foundation optimization closeout lane is fully complete and ready for Day 43 acceleration lane."
         )
 
     return {
-        "name": "day42-optimization-closeout",
+        "name": "optimization-closeout-foundation",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -358,7 +358,7 @@ def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 42 optimization closeout summary",
+        "Optimization Closeout Foundation optimization closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -385,17 +385,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
     _write(
-        target / "day42-optimization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+        target / "optimization-closeout-foundation-summary.json",
+        json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day42-optimization-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "optimization-closeout-foundation-summary.md", _render_text(payload) + "\n")
     _write(
         target / "day42-optimization-plan.md",
-        "# Day 42 Optimization Plan\n\n- Objective: close Day 42 with measurable quality and throughput gains.\n",
+        "# Optimization Closeout Foundation Optimization Plan\n\n- Objective: close Optimization Closeout Foundation with measurable quality and throughput gains.\n",
     )
     _write(
         target / "day42-remediation-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-day42-optimization-closeout.md,python -m sdetkit day42-optimization-closeout --format json --strict,failed-checks:0,baseline-drift\n",
+        "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-optimization-closeout-foundation.md,python -m sdetkit optimization-closeout-foundation --format json --strict,failed-checks:0,baseline-drift\n",
     )
     _write(
         target / "day42-optimization-kpi-scorecard.json",
@@ -417,15 +418,19 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "day42-execution-log.md",
-        "# Day 42 Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 43 acceleration priorities.\n",
+        "# Optimization Closeout Foundation Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 43 acceleration priorities.\n",
     )
     _write(
         target / "day42-delivery-board.md",
-        "# Day 42 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# Optimization Closeout Foundation Delivery Board\n\n"
+        + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES)
+        + "\n",
     )
     _write(
         target / "day42-validation-commands.md",
-        "# Day 42 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Optimization Closeout Foundation Validation Commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
     )
 
 
@@ -453,7 +458,9 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 42 optimization closeout checks")
+    parser = argparse.ArgumentParser(
+        description="Optimization Closeout Foundation optimization closeout checks"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -481,7 +488,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day42-optimization-closeout-pack/evidence")
+            else Path("docs/artifacts/optimization-closeout-foundation-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

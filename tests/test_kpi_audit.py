@@ -41,7 +41,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day27_kpi_audit_json(tmp_path: Path, capsys) -> None:
+def test_kpi_audit_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = kpa.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -50,7 +50,7 @@ def test_day27_kpi_audit_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 90
 
 
-def test_day27_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = kpa.main(
         [
@@ -75,7 +75,7 @@ def test_day27_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day27-pack/evidence/day27-execution-summary.json").exists()
 
 
-def test_day27_strict_fails_when_sections_missing(tmp_path: Path) -> None:
+def test_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/integrations-kpi-audit.md").write_text(
         "# KPI audit (Day 27)\n", encoding="utf-8"
@@ -84,7 +84,7 @@ def test_day27_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day27_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["kpi-audit", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

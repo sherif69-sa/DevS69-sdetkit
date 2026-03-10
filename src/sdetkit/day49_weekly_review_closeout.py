@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day49-weekly-review-closeout.md"
+_PAGE_PATH = "docs/integrations-weekly-review-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY48_SUMMARY_PATH = (
     "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json"
@@ -25,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day49-weekly-review-closeout --format json --strict",
-    "python -m sdetkit day49-weekly-review-closeout --emit-pack-dir docs/artifacts/day49-weekly-review-closeout-pack --format json --strict",
-    "python -m sdetkit day49-weekly-review-closeout --execute --evidence-dir docs/artifacts/day49-weekly-review-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit weekly-review-closeout --format json --strict",
+    "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-pack --format json --strict",
+    "python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-pack/evidence --format json --strict",
     "python scripts/check_day49_weekly_review_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day49-weekly-review-closeout --format json --strict",
-    "python -m sdetkit day49-weekly-review-closeout --emit-pack-dir docs/artifacts/day49-weekly-review-closeout-pack --format json --strict",
+    "python -m sdetkit weekly-review-closeout --format json --strict",
+    "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-pack --format json --strict",
     "python scripts/check_day49_weekly_review_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -74,9 +74,9 @@ Day 49 closes with a major weekly-review upgrade that converts Day 48 objection 
 ## Day 49 command lane
 
 ```bash
-python -m sdetkit day49-weekly-review-closeout --format json --strict
-python -m sdetkit day49-weekly-review-closeout --emit-pack-dir docs/artifacts/day49-weekly-review-closeout-pack --format json --strict
-python -m sdetkit day49-weekly-review-closeout --execute --evidence-dir docs/artifacts/day49-weekly-review-closeout-pack/evidence --format json --strict
+python -m sdetkit weekly-review-closeout --format json --strict
+python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-pack --format json --strict
+python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-pack/evidence --format json --strict
 python scripts/check_day49_weekly_review_closeout_contract.py
 ```
 
@@ -197,23 +197,23 @@ def build_day49_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day49_link",
             "weight": 8,
-            "passed": "docs/integrations-day49-weekly-review-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day49-weekly-review-closeout.md",
+            "passed": "docs/integrations-weekly-review-closeout.md" in readme_text,
+            "evidence": "docs/integrations-weekly-review-closeout.md",
         },
         {
             "check_id": "readme_day49_command",
             "weight": 4,
-            "passed": "day49-weekly-review-closeout" in readme_text,
-            "evidence": "day49-weekly-review-closeout",
+            "passed": "weekly-review-closeout" in readme_text,
+            "evidence": "weekly-review-closeout",
         },
         {
             "check_id": "docs_index_day49_links",
             "weight": 8,
             "passed": (
                 "day-49-big-upgrade-report.md" in docs_index_text
-                and "integrations-day49-weekly-review-closeout.md" in docs_index_text
+                and "integrations-weekly-review-closeout.md" in docs_index_text
             ),
-            "evidence": "day-49-big-upgrade-report.md + integrations-day49-weekly-review-closeout.md",
+            "evidence": "day-49-big-upgrade-report.md + integrations-weekly-review-closeout.md",
         },
         {
             "check_id": "top10_day49_alignment",
@@ -324,7 +324,7 @@ def build_day49_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
     return {
         "name": "day49-advanced-weekly-review-control-tower",
-        "legacy_name": "day49-weekly-review-closeout",
+        "legacy_name": "weekly-review-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -384,10 +384,8 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(
-        target / "day49-weekly-review-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
-    _write(target / "day49-weekly-review-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "weekly-review-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "weekly-review-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "day49-weekly-review-brief.md",
         "# Day 49 Weekly Review Brief\n\n- Objective: close Day 49 with measurable weekly-review discipline and prioritized execution gains.\n",
@@ -395,7 +393,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day49-weekly-review-risk-register.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "weekly-review-floor,qa-lead,docs-owner,2026-03-17T10:00:00Z,docs/integrations-day49-weekly-review-closeout.md,python -m sdetkit day49-weekly-review-closeout --format json --strict,failed-checks:0,priority-drift\n",
+        "weekly-review-floor,qa-lead,docs-owner,2026-03-17T10:00:00Z,docs/integrations-weekly-review-closeout.md,python -m sdetkit weekly-review-closeout --format json --strict,failed-checks:0,priority-drift\n",
     )
     _write(
         target / "day49-weekly-review-kpi-scorecard.json",
@@ -508,7 +506,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day49-weekly-review-closeout-pack/evidence")
+            else Path("docs/artifacts/weekly-review-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

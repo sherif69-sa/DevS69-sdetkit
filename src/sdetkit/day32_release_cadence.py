@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day32-release-cadence.md"
+_PAGE_PATH = "docs/integrations-release-cadence.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY31_SUMMARY_PATH = "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
 _DAY31_BOARD_PATH = "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
@@ -201,8 +201,8 @@ def build_day32_release_cadence_summary(
         {
             "check_id": "readme_day32_link",
             "weight": 8,
-            "passed": "docs/integrations-day32-release-cadence.md" in readme_text,
-            "evidence": "docs/integrations-day32-release-cadence.md",
+            "passed": "docs/integrations-release-cadence.md" in readme_text,
+            "evidence": "docs/integrations-release-cadence.md",
         },
         {
             "check_id": "readme_day32_command",
@@ -215,9 +215,9 @@ def build_day32_release_cadence_summary(
             "weight": 8,
             "passed": (
                 "day-32-ultra-upgrade-report.md" in docs_index_text
-                and "integrations-day32-release-cadence.md" in docs_index_text
+                and "integrations-release-cadence.md" in docs_index_text
             ),
-            "evidence": "day-32-ultra-upgrade-report.md + integrations-day32-release-cadence.md",
+            "evidence": "day-32-ultra-upgrade-report.md + integrations-release-cadence.md",
         },
         {
             "check_id": "top10_day32_alignment",

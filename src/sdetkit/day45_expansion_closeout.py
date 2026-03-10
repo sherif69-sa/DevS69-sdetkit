@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day45-expansion-closeout.md"
+_PAGE_PATH = "docs/integrations-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY44_SUMMARY_PATH = "docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json"
 _DAY44_BOARD_PATH = "docs/artifacts/day44-scale-closeout-pack/day44-delivery-board.md"
@@ -196,8 +196,8 @@ def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day45_link",
             "weight": 8,
-            "passed": "docs/integrations-day45-expansion-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day45-expansion-closeout.md",
+            "passed": "docs/integrations-expansion-closeout.md" in readme_text,
+            "evidence": "docs/integrations-expansion-closeout.md",
         },
         {
             "check_id": "readme_day45_command",
@@ -210,9 +210,9 @@ def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-45-big-upgrade-report.md" in docs_index_text
-                and "integrations-day45-expansion-closeout.md" in docs_index_text
+                and "integrations-expansion-closeout.md" in docs_index_text
             ),
-            "evidence": "day-45-big-upgrade-report.md + integrations-day45-expansion-closeout.md",
+            "evidence": "day-45-big-upgrade-report.md + integrations-expansion-closeout.md",
         },
         {
             "check_id": "top10_day45_alignment",
@@ -391,7 +391,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day45-growth-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "expansion-floor,qa-lead,platform-owner,2026-03-13T10:00:00Z,docs/integrations-day45-expansion-closeout.md,python -m sdetkit day45-expansion-closeout --format json --strict,failed-checks:0,handoff-drift\n",
+        "expansion-floor,qa-lead,platform-owner,2026-03-13T10:00:00Z,docs/integrations-expansion-closeout.md,python -m sdetkit day45-expansion-closeout --format json --strict,failed-checks:0,handoff-drift\n",
     )
     _write(
         target / "day45-expansion-kpi-scorecard.json",

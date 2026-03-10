@@ -28,7 +28,7 @@ def _write_day20_page(root: Path) -> None:
     path.write_text(rn._DAY20_DEFAULT_PAGE, encoding="utf-8")
 
 
-def test_day20_release_narrative_json(tmp_path: Path, capsys) -> None:
+def test_release_narrative_json(tmp_path: Path, capsys) -> None:
     summary = _write_day19_summary(tmp_path)
     _write_day20_page(tmp_path)
 
@@ -49,7 +49,7 @@ def test_day20_release_narrative_json(tmp_path: Path, capsys) -> None:
     assert out["score"] == 100.0
 
 
-def test_day20_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
     summary = _write_day19_summary(tmp_path)
     _write_day20_page(tmp_path)
 
@@ -77,7 +77,7 @@ def test_day20_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day20-pack/evidence/day20-execution-summary.json").exists()
 
 
-def test_day20_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> None:
+def test_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> None:
     summary = _write_day19_summary(tmp_path, gate_status="warn", score=83)
     _write_day20_page(tmp_path)
 
@@ -95,7 +95,7 @@ def test_day20_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path
     assert rc == 1
 
 
-def test_day20_release_narrative_strict_gate_fails_when_docs_contract_missing(
+def test_release_narrative_strict_gate_fails_when_docs_contract_missing(
     tmp_path: Path,
 ) -> None:
     summary = _write_day19_summary(tmp_path)
@@ -117,7 +117,7 @@ def test_day20_release_narrative_strict_gate_fails_when_docs_contract_missing(
     assert rc == 1
 
 
-def test_day20_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     summary = _write_day19_summary(tmp_path)
     _write_day20_page(tmp_path)
 

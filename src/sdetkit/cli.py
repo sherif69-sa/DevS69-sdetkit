@@ -1322,7 +1322,7 @@ Run: sdetkit playbooks
     if ns.cmd in {"integration-expansion-closeout", "day64-integration-expansion-closeout"}:
         return day64_integration_expansion_closeout.main(ns.args)
 
-    if ns.cmd in {"day65-weekly-review-closeout"}:
+    if ns.cmd in {"weekly-review-closeout-cycle2", "day65-weekly-review-closeout"}:
         return day65_weekly_review_closeout.main(ns.args)
 
     if ns.cmd in {"integration-expansion2-closeout", "day66-integration-expansion2-closeout"}:

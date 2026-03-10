@@ -43,7 +43,7 @@ def _write_page(root: Path) -> None:
     page.write_text(rep._DAY18_DEFAULT_PAGE, encoding="utf-8")
 
 
-def test_day18_pack_builds_json(tmp_path: Path, capsys) -> None:
+def test_pack_builds_json(tmp_path: Path, capsys) -> None:
     day15, day16, day17 = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
@@ -70,7 +70,7 @@ def test_day18_pack_builds_json(tmp_path: Path, capsys) -> None:
     assert out["score"] == 100.0
 
 
-def test_day18_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
+def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
     day15, day16, day17 = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
@@ -101,7 +101,7 @@ def test_day18_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day18-pack/evidence/day18-execution-summary.json").exists()
 
 
-def test_day18_write_defaults(tmp_path: Path) -> None:
+def test_write_defaults(tmp_path: Path) -> None:
     day15, day16, day17 = _write_inputs(tmp_path)
     rc = rep.main(
         [
@@ -122,7 +122,7 @@ def test_day18_write_defaults(tmp_path: Path) -> None:
     assert (tmp_path / "docs/integrations-reliability-evidence-pack.md").exists()
 
 
-def test_day18_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     day15, day16, day17 = _write_inputs(tmp_path)
     _write_page(tmp_path)
 

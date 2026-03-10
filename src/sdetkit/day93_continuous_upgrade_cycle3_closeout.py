@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day93-continuous-upgrade-cycle3-closeout.md"
+_PAGE_PATH = "docs/integrations-continuous-upgrade-cycle3-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY92_SUMMARY_PATH = "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-continuous-upgrade-cycle2-closeout-summary.json"
 _DAY92_BOARD_PATH = (
     "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle3-plan.json"
 _SECTION_HEADER = "# Day 93 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Continuous Upgrade Cycle3 Closeout matters",
@@ -82,7 +82,7 @@ Day 93 closes with a major upgrade that converts Day 92 governance scale outcome
 
 - `docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-continuous-upgrade-cycle2-closeout-summary.json`
 - `docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-delivery-board.md`
-- `docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json`
+- `docs/roadmap/plans/continuous-upgrade-cycle3-plan.json`
 
 ## Command lane
 
@@ -241,9 +241,9 @@ def build_day93_continuous_upgrade_cycle3_closeout_summary(root: Path) -> dict[s
             "weight": 8,
             "passed": (
                 "day-93-big-upgrade-report.md" in docs_index_text
-                and "integrations-day93-continuous-upgrade-cycle3-closeout.md" in docs_index_text
+                and "integrations-continuous-upgrade-cycle3-closeout.md" in docs_index_text
             ),
-            "evidence": "day-93-big-upgrade-report.md + integrations-day93-continuous-upgrade-cycle3-closeout.md",
+            "evidence": "day-93-big-upgrade-report.md + integrations-continuous-upgrade-cycle3-closeout.md",
         },
         {
             "check_id": "top10_day93_alignment",
@@ -373,7 +373,7 @@ def build_day93_continuous_upgrade_cycle3_closeout_summary(root: Path) -> dict[s
     else:
         misses.append("Day 93 continuous upgrade dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json to restore required keys."
+            "Update docs/roadmap/plans/continuous-upgrade-cycle3-plan.json to restore required keys."
         )
 
     if not plan_trajectory_issues:
@@ -381,7 +381,7 @@ def build_day93_continuous_upgrade_cycle3_closeout_summary(root: Path) -> dict[s
     else:
         misses.append("Day 93 target metrics regress against baseline metrics.")
         handoff_actions.append(
-            "Adjust docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json target metrics so each numeric target is >= baseline."
+            "Adjust docs/roadmap/plans/continuous-upgrade-cycle3-plan.json target metrics so each numeric target is >= baseline."
         )
 
     if not plan_owner_issues:
@@ -389,7 +389,7 @@ def build_day93_continuous_upgrade_cycle3_closeout_summary(root: Path) -> dict[s
     else:
         misses.append("Day 93 owner coverage is missing execution and/or rollback ownership.")
         handoff_actions.append(
-            "Assign both owner and rollback_owner in docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json."
+            "Assign both owner and rollback_owner in docs/roadmap/plans/continuous-upgrade-cycle3-plan.json."
         )
 
     if not plan_hygiene_issues:
@@ -401,7 +401,7 @@ def build_day93_continuous_upgrade_cycle3_closeout_summary(root: Path) -> dict[s
             "Day 93 plan hygiene checks failed for contributors/channels/confidence/cadence."
         )
         handoff_actions.append(
-            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/day93-continuous-upgrade-cycle3-plan.json."
+            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/continuous-upgrade-cycle3-plan.json."
         )
 
     if not failed and not critical_failures:

@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day91-continuous-upgrade-closeout.md"
+_PAGE_PATH = "docs/integrations-continuous-upgrade-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY90_SUMMARY_PATH = "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
 _DAY90_BOARD_PATH = (
     "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day91-continuous-upgrade-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-plan.json"
 _SECTION_HEADER = "# Day 91 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Continuous Upgrade Closeout matters",
@@ -79,7 +79,7 @@ Day 91 closes with a major upgrade that converts Day 90 governance scale outcome
 
 - `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json`
 - `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md`
-- `docs/roadmap/plans/day91-continuous-upgrade-plan.json`
+- `docs/roadmap/plans/continuous-upgrade-plan.json`
 
 ## Command lane
 
@@ -243,9 +243,9 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
             "weight": 8,
             "passed": (
                 "day-91-big-upgrade-report.md" in docs_index_text
-                and "integrations-day91-continuous-upgrade-closeout.md" in docs_index_text
+                and "integrations-continuous-upgrade-closeout.md" in docs_index_text
             ),
-            "evidence": "day-91-big-upgrade-report.md + integrations-day91-continuous-upgrade-closeout.md",
+            "evidence": "day-91-big-upgrade-report.md + integrations-continuous-upgrade-closeout.md",
         },
         {
             "check_id": "top10_day91_alignment",
@@ -375,7 +375,7 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
     else:
         misses.append("Day 91 continuous upgrade dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day91-continuous-upgrade-plan.json to restore required keys."
+            "Update docs/roadmap/plans/continuous-upgrade-plan.json to restore required keys."
         )
 
     if not plan_trajectory_issues:
@@ -383,7 +383,7 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
     else:
         misses.append("Day 91 target metrics regress against baseline metrics.")
         handoff_actions.append(
-            "Adjust docs/roadmap/plans/day91-continuous-upgrade-plan.json target metrics so each numeric target is >= baseline."
+            "Adjust docs/roadmap/plans/continuous-upgrade-plan.json target metrics so each numeric target is >= baseline."
         )
 
     if not plan_owner_issues:
@@ -391,7 +391,7 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
     else:
         misses.append("Day 91 owner coverage is missing execution and/or rollback ownership.")
         handoff_actions.append(
-            "Assign both owner and rollback_owner in docs/roadmap/plans/day91-continuous-upgrade-plan.json."
+            "Assign both owner and rollback_owner in docs/roadmap/plans/continuous-upgrade-plan.json."
         )
 
     if not plan_hygiene_issues:
@@ -403,7 +403,7 @@ def build_day91_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any
             "Day 91 plan hygiene checks failed for contributors/channels/confidence/cadence."
         )
         handoff_actions.append(
-            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/day91-continuous-upgrade-plan.json."
+            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/continuous-upgrade-plan.json."
         )
 
     if not failed and not critical_failures:

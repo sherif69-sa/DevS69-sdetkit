@@ -48,7 +48,7 @@ def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:
         (workflows / name).write_text("name: test\n", encoding="utf-8")
 
 
-def test_day22_trust_signal_json(tmp_path: Path, capsys) -> None:
+def test_trust_signal_json(tmp_path: Path, capsys) -> None:
     _write_repo_basics(tmp_path)
     _write_day22_page(tmp_path)
 
@@ -61,7 +61,7 @@ def test_day22_trust_signal_json(tmp_path: Path, capsys) -> None:
     assert out["score"] == 100.0
 
 
-def test_day22_trust_signal_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_trust_signal_emit_pack_and_execute(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
     _write_day22_page(tmp_path)
 
@@ -87,7 +87,7 @@ def test_day22_trust_signal_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day22-pack/evidence/day22-execution-summary.json").exists()
 
 
-def test_day22_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Path) -> None:
+def test_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
     path = tmp_path / "docs/integrations-trust-signal-upgrade.md"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -97,7 +97,7 @@ def test_day22_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Pa
     assert rc == 1
 
 
-def test_day22_trust_signal_strict_fails_when_critical_check_missing(tmp_path: Path) -> None:
+def test_trust_signal_strict_fails_when_critical_check_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
     _write_day22_page(tmp_path)
     (tmp_path / ".github/workflows/security.yml").unlink()
@@ -106,7 +106,7 @@ def test_day22_trust_signal_strict_fails_when_critical_check_missing(tmp_path: P
     assert rc == 1
 
 
-def test_day22_trust_signal_score_reduces_when_policy_link_missing(tmp_path: Path) -> None:
+def test_trust_signal_score_reduces_when_policy_link_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path, include_policy_link=False)
     _write_day22_page(tmp_path)
 
@@ -115,7 +115,7 @@ def test_day22_trust_signal_score_reduces_when_policy_link_missing(tmp_path: Pat
     assert payload["policy_checks"]["policy_baseline_exists"] is False
 
 
-def test_day22_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _write_repo_basics(tmp_path)
     _write_day22_page(tmp_path)
 

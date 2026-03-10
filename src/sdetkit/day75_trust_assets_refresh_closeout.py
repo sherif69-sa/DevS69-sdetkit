@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day75-trust-assets-refresh-closeout.md"
+_PAGE_PATH = "docs/integrations-trust-assets-refresh-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY74_SUMMARY_PATH = "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json"
 _DAY74_BOARD_PATH = (
     "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md"
 )
-_TRUST_PLAN_PATH = "docs/roadmap/plans/day75-trust-assets-refresh-plan.json"
+_TRUST_PLAN_PATH = "docs/roadmap/plans/trust-assets-refresh-plan.json"
 _SECTION_HEADER = "# Day 75 \u2014 Trust assets refresh closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 75 matters",
@@ -79,7 +79,7 @@ Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into 
 
 - `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json`
 - `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md`
-- `docs/roadmap/plans/day75-trust-assets-refresh-plan.json`
+- `docs/roadmap/plans/trust-assets-refresh-plan.json`
 
 ## Day 75 command lane
 
@@ -184,9 +184,9 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
             "weight": 8,
             "passed": (
                 "day-75-big-upgrade-report.md" in docs_index_text
-                and "integrations-day75-trust-assets-refresh-closeout.md" in docs_index_text
+                and "integrations-trust-assets-refresh-closeout.md" in docs_index_text
             ),
-            "evidence": "day-75-big-upgrade-report.md + integrations-day75-trust-assets-refresh-closeout.md",
+            "evidence": "day-75-big-upgrade-report.md + integrations-trust-assets-refresh-closeout.md",
         },
         {
             "check_id": "top10_day75_alignment",
@@ -300,7 +300,7 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
     else:
         misses.append("Day 75 trust assets refresh dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day75-trust-assets-refresh-plan.json to restore required keys."
+            "Update docs/roadmap/plans/trust-assets-refresh-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day60-phase2-wrap-handoff-closeout.md"
+_PAGE_PATH = "docs/integrations-phase2-wrap-handoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY58_SUMMARY_PATH = (
     "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json"
@@ -177,9 +177,9 @@ def build_day60_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, An
             "weight": 8,
             "passed": (
                 "day-60-big-upgrade-report.md" in docs_index_text
-                and "integrations-day60-phase2-wrap-handoff-closeout.md" in docs_index_text
+                and "integrations-phase2-wrap-handoff-closeout.md" in docs_index_text
             ),
-            "evidence": "day-60-big-upgrade-report.md + integrations-day60-phase2-wrap-handoff-closeout.md",
+            "evidence": "day-60-big-upgrade-report.md + integrations-phase2-wrap-handoff-closeout.md",
         },
         {
             "check_id": "top10_day60_alignment",

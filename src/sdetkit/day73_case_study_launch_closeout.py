@@ -8,11 +8,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day73-case-study-launch-closeout.md"
+_PAGE_PATH = "docs/integrations-case-study-launch-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY72_SUMMARY_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
 _DAY72_BOARD_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md"
-_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day73-published-case-study.json"
+_CASE_STUDY_DATA_PATH = "docs/roadmap/plans/published-case-study.json"
 _SECTION_HEADER = "# Day 73 \u2014 Case-study launch closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 73 matters",
@@ -77,7 +77,7 @@ Day 73 closes with a major upgrade that turns Day 72 publication-quality prep in
 
 - `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json`
 - `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md`
-- `docs/roadmap/plans/day73-published-case-study.json`
+- `docs/roadmap/plans/published-case-study.json`
 
 ## Day 73 command lane
 
@@ -185,9 +185,9 @@ def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]
             "weight": 8,
             "passed": (
                 "day-73-big-upgrade-report.md" in docs_index_text
-                and "integrations-day73-case-study-launch-closeout.md" in docs_index_text
+                and "integrations-case-study-launch-closeout.md" in docs_index_text
             ),
-            "evidence": "day-73-big-upgrade-report.md + integrations-day73-case-study-launch-closeout.md",
+            "evidence": "day-73-big-upgrade-report.md + integrations-case-study-launch-closeout.md",
         },
         {
             "check_id": "top10_day73_alignment",
@@ -301,7 +301,7 @@ def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]
     else:
         misses.append("Day 73 published case-study dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day73-published-case-study.json to restore required keys."
+            "Update docs/roadmap/plans/published-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:

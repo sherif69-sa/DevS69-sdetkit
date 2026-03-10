@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day82-integration-feedback-closeout.md"
+_PAGE_PATH = "docs/integrations-integration-feedback-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY81_SUMMARY_PATH = (
     "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
 )
 _DAY81_BOARD_PATH = "docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md"
-_PLAN_PATH = "docs/roadmap/plans/day82-integration-feedback-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/integration-feedback-plan.json"
 _SECTION_HEADER = "# Day 82 \u2014 Integration feedback loop closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Feedback Closeout matters",
@@ -79,7 +79,7 @@ Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes in
 
 - `docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json`
 - `docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md`
-- `docs/roadmap/plans/day82-integration-feedback-plan.json`
+- `docs/roadmap/plans/integration-feedback-plan.json`
 
 ## Command lane
 
@@ -188,9 +188,9 @@ def build_day82_integration_feedback_closeout_summary(root: Path) -> dict[str, A
             "weight": 8,
             "passed": (
                 "day-82-big-upgrade-report.md" in docs_index_text
-                and "integrations-day82-integration-feedback-closeout.md" in docs_index_text
+                and "integrations-integration-feedback-closeout.md" in docs_index_text
             ),
-            "evidence": "day-82-big-upgrade-report.md + integrations-day82-integration-feedback-closeout.md",
+            "evidence": "day-82-big-upgrade-report.md + integrations-integration-feedback-closeout.md",
         },
         {
             "check_id": "top10_day82_alignment",
@@ -302,7 +302,7 @@ def build_day82_integration_feedback_closeout_summary(root: Path) -> dict[str, A
     else:
         misses.append("Day 82 integration feedback dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day82-integration-feedback-plan.json to restore required keys."
+            "Update docs/roadmap/plans/integration-feedback-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

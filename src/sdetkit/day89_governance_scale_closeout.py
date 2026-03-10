@@ -8,13 +8,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day89-governance-scale-closeout.md"
+_PAGE_PATH = "docs/integrations-governance-scale-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY88_SUMMARY_PATH = "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json"
 _DAY88_BOARD_PATH = (
     "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md"
 )
-_PLAN_PATH = "docs/roadmap/plans/day89-governance-scale-plan.json"
+_PLAN_PATH = "docs/roadmap/plans/governance-scale-plan.json"
 _SECTION_HEADER = "# Day 89 \u2014 Governance scale closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Governance Scale Closeout matters",
@@ -79,7 +79,7 @@ Day 89 closes with a major upgrade that converts Day 88 governance handoff outco
 
 - `docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json`
 - `docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md`
-- `docs/roadmap/plans/day89-governance-scale-plan.json`
+- `docs/roadmap/plans/governance-scale-plan.json`
 
 ## Command lane
 
@@ -180,9 +180,9 @@ def build_day89_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-89-big-upgrade-report.md" in docs_index_text
-                and "integrations-day89-governance-scale-closeout.md" in docs_index_text
+                and "integrations-governance-scale-closeout.md" in docs_index_text
             ),
-            "evidence": "day-89-big-upgrade-report.md + integrations-day89-governance-scale-closeout.md",
+            "evidence": "day-89-big-upgrade-report.md + integrations-governance-scale-closeout.md",
         },
         {
             "check_id": "top10_day89_alignment",
@@ -294,7 +294,7 @@ def build_day89_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 89 governance scale dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/day89-governance-scale-plan.json to restore required keys."
+            "Update docs/roadmap/plans/governance-scale-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:

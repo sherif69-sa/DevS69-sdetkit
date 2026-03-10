@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-day47-reliability-closeout.md"
+_PAGE_PATH = "docs/integrations-reliability-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY46_SUMMARY_PATH = (
     "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json"
@@ -197,8 +197,8 @@ def build_day47_reliability_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day47_link",
             "weight": 8,
-            "passed": "docs/integrations-day47-reliability-closeout.md" in readme_text,
-            "evidence": "docs/integrations-day47-reliability-closeout.md",
+            "passed": "docs/integrations-reliability-closeout.md" in readme_text,
+            "evidence": "docs/integrations-reliability-closeout.md",
         },
         {
             "check_id": "readme_day47_command",
@@ -211,9 +211,9 @@ def build_day47_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 8,
             "passed": (
                 "day-47-big-upgrade-report.md" in docs_index_text
-                and "integrations-day47-reliability-closeout.md" in docs_index_text
+                and "integrations-reliability-closeout.md" in docs_index_text
             ),
-            "evidence": "day-47-big-upgrade-report.md + integrations-day47-reliability-closeout.md",
+            "evidence": "day-47-big-upgrade-report.md + integrations-reliability-closeout.md",
         },
         {
             "check_id": "top10_day47_alignment",
@@ -392,7 +392,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day47-incident-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "reliability-floor,qa-lead,platform-owner,2026-03-15T10:00:00Z,docs/integrations-day47-reliability-closeout.md,python -m sdetkit day47-reliability-closeout --format json --strict,failed-checks:0,reliability-drift\n",
+        "reliability-floor,qa-lead,platform-owner,2026-03-15T10:00:00Z,docs/integrations-reliability-closeout.md,python -m sdetkit day47-reliability-closeout --format json --strict,failed-checks:0,reliability-drift\n",
     )
     _write(
         target / "day47-reliability-kpi-scorecard.json",
