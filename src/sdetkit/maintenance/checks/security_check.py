@@ -173,8 +173,8 @@ def run(ctx: MaintenanceContext) -> CheckResult:
     ]
 
     fix_details: dict[str, object] | None = None
-    auto_fix_enabled = ctx.env.get("SDETKIT_MAINTENANCE_SECURITY_AUTOFIX", "1") != "0"
-    if not initial_ok and (ctx.fix or auto_fix_enabled):
+    auto_fix_enabled = ctx.fix or ctx.env.get("SDETKIT_MAINTENANCE_SECURITY_AUTOFIX", "0") != "0"
+    if not initial_ok and auto_fix_enabled:
         fix_run = run_cmd(
             [ctx.python_exe, "-m", "sdetkit", "security", "fix", "--apply"],
             cwd=ctx.repo_root,

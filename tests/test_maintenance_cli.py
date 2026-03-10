@@ -346,8 +346,7 @@ def test_security_check_requires_repeated_failure(tmp_path: Path, monkeypatch) -
     calls = iter(
         [
             Result(0, json.dumps({"findings": [{"severity": "warn", "rule_id": "SEC_X"}]})),
-            Result(0, "security fix complete; files changed: 0\n"),
-            Result(0, json.dumps({"findings": []})),
+            Result(0, json.dumps({"findings": [{"severity": "warn", "rule_id": "SEC_X"}]})),
         ]
     )
 
@@ -363,7 +362,10 @@ def test_security_check_requires_repeated_failure(tmp_path: Path, monkeypatch) -
 
     out = security_check.run(ctx)
     assert out.ok is True
-    assert out.summary == "security check recovered after auto-fix/retry"
+    assert (
+        out.summary
+        == "security check found non-repeated warnings (recorded for next run); top rule: SEC_X"
+    )
 
 
 def test_security_check_fix_mode_applies_fix_before_follow_up(tmp_path: Path, monkeypatch) -> None:
@@ -464,7 +466,7 @@ def test_security_check_repeated_fingerprint_fails(tmp_path: Path, monkeypatch) 
     assert "reproduced" in out.summary
 
 
-def test_security_check_autofix_runs_without_fix_flag(tmp_path: Path, monkeypatch) -> None:
+def test_security_check_autofix_runs_when_env_enabled(tmp_path: Path, monkeypatch) -> None:
     class Result:
         def __init__(self, returncode: int, stdout: str = "", stderr: str = "") -> None:
             self.returncode = returncode
@@ -490,7 +492,7 @@ def test_security_check_autofix_runs_without_fix_flag(tmp_path: Path, monkeypatc
         python_exe=sys.executable,
         mode="full",
         fix=False,
-        env={},
+        env={"SDETKIT_MAINTENANCE_SECURITY_AUTOFIX": "1"},
         logger=object(),
     )
 
