@@ -116,6 +116,6 @@ def test_day45_strict_fails_when_day44_inputs_missing(tmp_path: Path) -> None:
 
 def test_day45_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day45-expansion-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["expansion-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 45 expansion closeout summary" in capsys.readouterr().out

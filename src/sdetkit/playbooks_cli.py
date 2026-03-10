@@ -64,6 +64,29 @@ RESERVED_NAMES: set[str] = (
 _DAY_PREFIX = re.compile(r"^day\d+_")
 _DAY_CLOSEOUT = re.compile(r"^day\d+_(.+_closeout)$")
 
+# Stable product lanes promoted from Day 41-50 naming.
+_PRODUCT_CANONICAL_BY_DAY_MODULE: dict[str, str] = {
+    "day41_expansion_automation": "expansion-automation",
+    # Day 42 and Day 46 would both collide on optimization-closeout.
+    "day42_optimization_closeout": "optimization-closeout-foundation",
+    "day43_acceleration_closeout": "acceleration-closeout",
+    "day44_scale_closeout": "scale-closeout",
+    "day45_expansion_closeout": "expansion-closeout",
+    "day46_optimization_closeout": "optimization-closeout",
+    "day47_reliability_closeout": "reliability-closeout",
+    "day48_objection_closeout": "objection-closeout",
+    "day49_weekly_review_closeout": "weekly-review-closeout",
+    "day50_execution_prioritization_closeout": "execution-prioritization-closeout",
+}
+
+
+
+_DISABLED_DAY_CLOSEOUT_ALIAS_MODULES: set[str] = {
+    "day42_optimization_closeout",
+}
+_DISABLED_DAY_GENERIC_ALIAS_MODULES: set[str] = {
+    "day42_optimization_closeout",
+}
 
 def _cmd_to_mod(cmd: str) -> str:
     return cmd.replace("-", "_")
@@ -135,15 +158,19 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
             cmd_to_mod[cmd] = mod
 
     for mod in _discover_legacy_modules(pkg_dir):
-        canonical = _mod_to_cmd(mod)
+        canonical = _PRODUCT_CANONICAL_BY_DAY_MODULE.get(mod, _mod_to_cmd(mod))
         cmd_to_mod[canonical] = mod
 
-        alias = _alias_for_day_closeout(mod)
+        day_cmd = _mod_to_cmd(mod)
+        if day_cmd != canonical and day_cmd not in alias_to_canonical:
+            alias_to_canonical[day_cmd] = canonical
+
+        alias = None if mod in _DISABLED_DAY_CLOSEOUT_ALIAS_MODULES else _alias_for_day_closeout(mod)
         if alias and alias not in cmd_to_mod:
             cmd_to_mod[alias] = mod
             alias_to_canonical[alias] = canonical
 
-        generic_alias = _alias_for_day_module(mod)
+        generic_alias = None if mod in _DISABLED_DAY_GENERIC_ALIAS_MODULES else _alias_for_day_module(mod)
         if generic_alias and generic_alias not in cmd_to_mod:
             cmd_to_mod[generic_alias] = mod
             alias_to_canonical[generic_alias] = canonical

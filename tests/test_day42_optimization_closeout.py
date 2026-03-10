@@ -120,6 +120,6 @@ def test_day42_strict_fails_when_day41_inputs_missing(tmp_path: Path) -> None:
 
 def test_day42_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day42-optimization-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["optimization-closeout-foundation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 42 optimization closeout summary" in capsys.readouterr().out

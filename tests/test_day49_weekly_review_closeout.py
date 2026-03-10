@@ -116,7 +116,7 @@ def test_day49_strict_fails_when_day48_inputs_missing(tmp_path: Path) -> None:
 
 def test_day49_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day49-weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 49 advanced weekly review control tower summary" in capsys.readouterr().out
 

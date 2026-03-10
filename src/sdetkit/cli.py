@@ -316,34 +316,47 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day40-scale-lane":
         return day40_scale_lane.main(list(argv[1:]))
 
+    if argv and argv[0] == "expansion-automation":
+        return day41_expansion_automation.main(list(argv[1:]))
     if argv and argv[0] == "day41-expansion-automation":
         return day41_expansion_automation.main(list(argv[1:]))
 
-    if argv and argv[0] == "day42-optimization-closeout":
+    if argv and argv[0] in {"optimization-closeout-foundation", "day42-optimization-closeout"}:
         return day42_optimization_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "acceleration-closeout":
+        return day43_acceleration_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day43-acceleration-closeout":
         return day43_acceleration_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "scale-closeout":
+        return day44_scale_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day44-scale-closeout":
         return day44_scale_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "expansion-closeout":
+        return day45_expansion_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day45-expansion-closeout":
         return day45_expansion_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day46-optimization-closeout":
+    if argv and argv[0] in {"optimization-closeout", "day46-optimization-closeout"}:
         return day46_optimization_closeout.main(list(argv[1:]))
 
+    if argv and argv[0] == "reliability-closeout":
+        return day47_reliability_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day47-reliability-closeout":
         return day47_reliability_closeout.main(list(argv[1:]))
+    if argv and argv[0] == "objection-closeout":
+        return day48_objection_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day48-objection-closeout":
         return day48_objection_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
+        "weekly-review-closeout",
         "day49-weekly-review-closeout",
         "day49-advanced-weekly-review-control-tower",
     }:
         return day49_weekly_review_closeout.main(list(argv[1:]))
-    if argv and argv[0] == "day50-execution-prioritization-closeout":
+    if argv and argv[0] in {"execution-prioritization-closeout", "day50-execution-prioritization-closeout"}:
         return day50_execution_prioritization_closeout.main(list(argv[1:]))
     if argv and argv[0] == "day51-case-snippet-closeout":
         return day51_case_snippet_closeout.main(list(argv[1:]))
@@ -703,32 +716,52 @@ Run: sdetkit playbooks
     d40 = sub.add_parser("day40-scale-lane")
     d40.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa41 = sub.add_parser("expansion-automation")
+    pa41.add_argument("args", nargs=argparse.REMAINDER)
     d41 = sub.add_parser("day41-expansion-automation")
     d41.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa42 = sub.add_parser("optimization-closeout-foundation")
+    pa42.add_argument("args", nargs=argparse.REMAINDER)
     d42 = sub.add_parser("day42-optimization-closeout")
     d42.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa43 = sub.add_parser("acceleration-closeout")
+    pa43.add_argument("args", nargs=argparse.REMAINDER)
     d43 = sub.add_parser("day43-acceleration-closeout")
     d43.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa44 = sub.add_parser("scale-closeout")
+    pa44.add_argument("args", nargs=argparse.REMAINDER)
     d44 = sub.add_parser("day44-scale-closeout")
     d44.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa45 = sub.add_parser("expansion-closeout")
+    pa45.add_argument("args", nargs=argparse.REMAINDER)
     d45 = sub.add_parser("day45-expansion-closeout")
     d45.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa46 = sub.add_parser("optimization-closeout")
+    pa46.add_argument("args", nargs=argparse.REMAINDER)
     d46 = sub.add_parser("day46-optimization-closeout")
     d46.add_argument("args", nargs=argparse.REMAINDER)
 
+    pa47 = sub.add_parser("reliability-closeout")
+    pa47.add_argument("args", nargs=argparse.REMAINDER)
     d47 = sub.add_parser("day47-reliability-closeout")
     d47.add_argument("args", nargs=argparse.REMAINDER)
+    pa48 = sub.add_parser("objection-closeout")
+    pa48.add_argument("args", nargs=argparse.REMAINDER)
     d48 = sub.add_parser("day48-objection-closeout")
     d48.add_argument("args", nargs=argparse.REMAINDER)
+    pa49 = sub.add_parser("weekly-review-closeout")
+    pa49.add_argument("args", nargs=argparse.REMAINDER)
     d49 = sub.add_parser("day49-weekly-review-closeout")
     d49.add_argument("args", nargs=argparse.REMAINDER)
     d49_adv = sub.add_parser("day49-advanced-weekly-review-control-tower")
     d49_adv.add_argument("args", nargs=argparse.REMAINDER)
+    pa50 = sub.add_parser("execution-prioritization-closeout")
+    pa50.add_argument("args", nargs=argparse.REMAINDER)
     d50 = sub.add_parser("day50-execution-prioritization-closeout")
     d50.add_argument("args", nargs=argparse.REMAINDER)
     d51 = sub.add_parser("day51-case-snippet-closeout")
@@ -1065,31 +1098,31 @@ Run: sdetkit playbooks
     if ns.cmd == "day40-scale-lane":
         return day40_scale_lane.main(ns.args)
 
-    if ns.cmd == "day41-expansion-automation":
+    if ns.cmd in {"expansion-automation", "day41-expansion-automation"}:
         return day41_expansion_automation.main(ns.args)
 
-    if ns.cmd == "day42-optimization-closeout":
+    if ns.cmd in {"optimization-closeout-foundation", "day42-optimization-closeout"}:
         return day42_optimization_closeout.main(ns.args)
 
-    if ns.cmd == "day43-acceleration-closeout":
+    if ns.cmd in {"acceleration-closeout", "day43-acceleration-closeout"}:
         return day43_acceleration_closeout.main(ns.args)
 
-    if ns.cmd == "day44-scale-closeout":
+    if ns.cmd in {"scale-closeout", "day44-scale-closeout"}:
         return day44_scale_closeout.main(ns.args)
 
-    if ns.cmd == "day45-expansion-closeout":
+    if ns.cmd in {"expansion-closeout", "day45-expansion-closeout"}:
         return day45_expansion_closeout.main(ns.args)
 
-    if ns.cmd == "day46-optimization-closeout":
+    if ns.cmd in {"optimization-closeout", "day46-optimization-closeout"}:
         return day46_optimization_closeout.main(ns.args)
 
-    if ns.cmd == "day47-reliability-closeout":
+    if ns.cmd in {"reliability-closeout", "day47-reliability-closeout"}:
         return day47_reliability_closeout.main(ns.args)
-    if ns.cmd == "day48-objection-closeout":
+    if ns.cmd in {"objection-closeout", "day48-objection-closeout"}:
         return day48_objection_closeout.main(ns.args)
-    if ns.cmd in {"day49-weekly-review-closeout", "day49-advanced-weekly-review-control-tower"}:
+    if ns.cmd in {"weekly-review-closeout", "day49-weekly-review-closeout", "day49-advanced-weekly-review-control-tower"}:
         return day49_weekly_review_closeout.main(ns.args)
-    if ns.cmd == "day50-execution-prioritization-closeout":
+    if ns.cmd in {"execution-prioritization-closeout", "day50-execution-prioritization-closeout"}:
         return day50_execution_prioritization_closeout.main(ns.args)
     if ns.cmd == "day51-case-snippet-closeout":
         return day51_case_snippet_closeout.main(ns.args)
