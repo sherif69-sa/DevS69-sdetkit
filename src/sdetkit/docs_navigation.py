@@ -45,11 +45,20 @@ _DAY11_JOURNEYS_BLOCK = """### Day 11 top journeys
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdetkit docs-nav",
-        description="Render and validate Day 11 docs navigation one-click journeys from docs home.",
+        description="Render and validate a docs-navigation report.",
     )
-    p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
+    p.add_argument(
+        "--format",
+        choices=["text", "markdown", "json"],
+        default="text",
+        help="Output format.",
+    )
     p.add_argument("--root", default=".", help="Repository root where docs/index.md lives.")
-    p.add_argument("--output", default="", help="Optional output file path.")
+    p.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered docs-navigation report.",
+    )
     p.add_argument(
         "--strict",
         action="store_true",
@@ -58,7 +67,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Repair Day 11 quick-jump + top-journey baseline content in docs/index.md, then validate again.",
+        help="Repair the quick-jump and top-journey baseline content in docs/index.md, then validate again.",
     )
     return p
 
@@ -185,34 +194,34 @@ def build_docs_navigation_status(root: str = ".") -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 11 docs navigation tune-up",
-        f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
+        "Docs navigation report",
+        f"Score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
         "",
-        "top journeys:",
+        "Top journeys:",
     ]
     for idx, item in enumerate(payload["journeys"], start=1):
         lines.append(f"{idx}. {item}")
-    lines.extend(["", "required links:"])
+    lines.extend(["", "Required one-click links:"])
     for link in payload["required_links"]:
         lines.append(f"- {link}")
-    lines.extend(["", f"docs home: {payload['docs_index']}"])
+    lines.extend(["", f"Docs home: {payload['docs_index']}"])
     if payload["missing"]:
-        lines.append("missing docs navigation content:")
+        lines.append("Docs coverage gaps:")
         for item in payload["missing"]:
             lines.append(f"- {item}")
     else:
-        lines.append("missing docs navigation content: none")
-    lines.extend(["", "actions:"])
-    lines.append(f"- open docs home: {payload['actions']['open_docs_home']}")
-    lines.append(f"- validate: {payload['actions']['validate']}")
-    lines.append(f"- write defaults: {payload['actions']['write_defaults']}")
-    lines.append(f"- export artifact: {payload['actions']['artifact']}")
+        lines.append("Docs coverage gaps: none")
+    lines.extend(["", "Actions:"])
+    lines.append(f"- Open docs home: {payload['actions']['open_docs_home']}")
+    lines.append(f"- Validate: {payload['actions']['validate']}")
+    lines.append(f"- Write defaults: {payload['actions']['write_defaults']}")
+    lines.append(f"- Export artifact: {payload['actions']['artifact']}")
     return "\n".join(lines) + "\n"
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Day 11 docs navigation tune-up",
+        "# Docs navigation report",
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         f"- Docs home: `{payload['docs_index']}`",
@@ -225,17 +234,17 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(["", "## Required one-click links", ""])
     for item in payload["required_links"]:
         lines.append(f"- `{item}`")
-    lines.extend(["", "## Missing docs navigation content", ""])
+    lines.extend(["", "## Docs coverage gaps", ""])
     if payload["missing"]:
         for item in payload["missing"]:
             lines.append(f"- `{item}`")
     else:
         lines.append("- none")
     lines.extend(["", "## Actions", ""])
-    lines.append(f"- `{payload['actions']['open_docs_home']}`")
-    lines.append(f"- `{payload['actions']['validate']}`")
-    lines.append(f"- `{payload['actions']['write_defaults']}`")
-    lines.append(f"- `{payload['actions']['artifact']}`")
+    lines.append(f"- Open docs home: `{payload['actions']['open_docs_home']}`")
+    lines.append(f"- Validate: `{payload['actions']['validate']}`")
+    lines.append(f"- Write defaults: `{payload['actions']['write_defaults']}`")
+    lines.append(f"- Export artifact: `{payload['actions']['artifact']}`")
     return "\n".join(lines) + "\n"
 
 

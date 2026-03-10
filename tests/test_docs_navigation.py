@@ -1,14 +1,40 @@
 import json
+import re
 
 from sdetkit import cli, docs_navigation
+
+
+def _normalize_ws(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def test_docs_navigation_default_text(capsys):
     rc = docs_navigation.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 11 docs navigation tune-up" in out
-    assert "top journeys:" in out
+    assert "Docs navigation report" in out
+    assert "Top journeys:" in out
+    assert "Docs home:" in out
+
+
+def test_docs_navigation_help_output_is_productized():
+    out = _normalize_ws(docs_navigation._build_parser().format_help())
+    assert "Render and validate a docs-navigation report." in out
+    assert "--format {text,markdown,json} Output format." in out
+    assert "--output OUTPUT" in out
+    assert "Optional file path to also write the rendered" in out
+
+
+def test_docs_navigation_markdown_output_uses_productized_headings(capsys):
+    rc = docs_navigation.main(["--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "# Docs navigation report" in out
+    assert "## Top journeys" in out
+    assert "## Required one-click links" in out
+    assert "## Docs coverage gaps" in out
+    assert "## Actions" in out
+    assert "- Open docs home: `docs/index.md`" in out
 
 
 def test_docs_navigation_json_and_strict_success(capsys):
@@ -27,7 +53,7 @@ def test_docs_navigation_strict_fails_when_content_missing(tmp_path, capsys):
     rc = docs_navigation.main(["--root", str(tmp_path), "--strict"])
     assert rc == 1
     out = capsys.readouterr().out
-    assert "missing docs navigation content:" in out
+    assert "Docs coverage gaps:" in out
 
 
 def test_docs_navigation_write_defaults_recovers_missing_quick_jump(tmp_path, capsys):
@@ -63,7 +89,7 @@ def test_main_cli_dispatches_docs_navigation(capsys):
     rc = cli.main(["docs-nav", "--format", "text"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 11 docs navigation tune-up" in out
+    assert "Docs navigation report" in out
 
 
 def test_docs_navigation_extract_quick_jump_missing_end_returns_empty():
@@ -102,6 +128,6 @@ def test_docs_navigation_markdown_output_file_written(tmp_path, capsys):
     assert rc == 0
 
     written = out_path.read_text(encoding="utf-8")
-    assert "# Day 11 docs navigation tune-up" in written
-    assert "## Missing docs navigation content" in written
+    assert "# Docs navigation report" in written
+    assert "## Docs coverage gaps" in written
     assert "- none" in written

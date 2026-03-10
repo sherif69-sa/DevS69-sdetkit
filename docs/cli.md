@@ -196,22 +196,23 @@ See: day-10-ultra-upgrade-report.md (legacy history).
 
 ## docs-nav
 
-Builds Day 11 docs-navigation status and validates one-click journey links from `docs/index.md`.
+Builds a docs-navigation report and validates one-click journey links from `docs/index.md`.
 
 Examples:
 
-- `sdetkit docs-nav --format text --strict`
+- `sdetkit docs-nav`
 - `sdetkit docs-nav --format json`
 - `sdetkit docs-nav --write-defaults --format json --strict`
-- `sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md`
+- `sdetkit docs-nav --format markdown --output docs-nav.md`
 
-Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`.
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`.
 
-`--strict` returns non-zero if required Day 11 journey links/content are missing from `docs/index.md`.
+`--strict` returns non-zero if required journey links or required docs-navigation content are missing from `docs/index.md`.
 
-`--write-defaults` repairs the quick-jump nav block, restores the Day 11 top-journey section when missing, and then validates again.
+`--write-defaults` repairs the quick-jump block and restores the top-journey section when missing, then validates again.
 
-See: day-11-ultra-upgrade-report.md
+See: day-11-ultra-upgrade-report.md (legacy history).
+
 
 ## startup-use-case
 
