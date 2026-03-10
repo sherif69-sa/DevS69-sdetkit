@@ -122,11 +122,20 @@ This writes a structured `day13-execution-summary.json` and one per-command log 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit enterprise-use-case",
-        description="Render and validate the Day 13 enterprise/regulated use-case landing page.",
+        description="Render and validate an enterprise use-case report.",
     )
-    parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")
+    parser.add_argument(
+        "--format",
+        choices=["text", "markdown", "json"],
+        default="text",
+        help="Output format.",
+    )
     parser.add_argument("--root", default=".", help="Repository root where docs live.")
-    parser.add_argument("--output", default="", help="Optional output file path.")
+    parser.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered enterprise use-case report.",
+    )
     parser.add_argument(
         "--strict",
         action="store_true",
@@ -135,22 +144,22 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Write or repair the Day 13 enterprise use-case page before validation.",
+        help="Write or repair the enterprise use-case page before validation.",
     )
     parser.add_argument(
         "--emit-pack-dir",
         default="",
-        help="Optional path to emit a Day 13 enterprise operating pack (checklist, CI recipe, controls register).",
+        help="Optional directory to also write the enterprise operating pack.",
     )
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="Run the required Day 13 command sequence and capture pass/fail details.",
+        help="Run the required enterprise command sequence and capture pass/fail details.",
     )
     parser.add_argument(
         "--evidence-dir",
         default="",
-        help="Optional output directory for execution summary JSON and command logs.",
+        help="Optional directory to also write execution summary JSON and command logs.",
     )
     parser.add_argument(
         "--timeout-sec",
@@ -352,44 +361,50 @@ def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 13 enterprise use-case page",
-        f"score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
+        "Enterprise use-case report",
+        f"Score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
         "",
-        f"page: {payload['page']}",
+        f"Page: {payload['page']}",
         "",
-        "required sections:",
+        "Required sections:",
     ]
     for idx, item in enumerate(payload["required_sections"], start=1):
         lines.append(f"{idx}. {item}")
-    lines.extend(["", "required commands:"])
+    lines.extend(["", "Required commands:"])
     for cmd in payload["required_commands"]:
         lines.append(f"- {cmd}")
     if payload.get("execution"):
-        lines.extend(["", "execution summary:"])
+        lines.extend(["", "Execution summary:"])
         exec_data = payload["execution"]
-        lines.append(f"- passed: {exec_data['passed_commands']}/{exec_data['total_commands']}")
-        lines.append(f"- failed: {exec_data['failed_commands']}")
+        lines.append(f"- Passed: {exec_data['passed_commands']}/{exec_data['total_commands']}")
+        lines.append(f"- Failed: {exec_data['failed_commands']}")
     if payload.get("evidence_files"):
-        lines.extend(["", "evidence files:"])
+        lines.extend(["", "Evidence files:"])
         for item in payload["evidence_files"]:
             lines.append(f"- {item}")
     if payload.get("pack_files"):
-        lines.extend(["", "emitted pack files:"])
+        lines.extend(["", "Emitted pack files:"])
         for item in payload["pack_files"]:
             lines.append(f"- {item}")
     if payload["missing"]:
-        lines.append("")
-        lines.append("missing use-case content:")
+        lines.extend(["", "Use-case coverage gaps:"])
         for item in payload["missing"]:
             lines.append(f"- {item}")
     else:
-        lines.extend(["", "missing use-case content: none"])
+        lines.extend(["", "Use-case coverage gaps: none"])
+    lines.extend(["", "Actions:"])
+    lines.append(f"- Open page: {payload['actions']['open_page']}")
+    lines.append(f"- Validate: {payload['actions']['validate']}")
+    lines.append(f"- Write defaults: {payload['actions']['write_defaults']}")
+    lines.append(f"- Export artifact: {payload['actions']['artifact']}")
+    lines.append(f"- Emit pack: {payload['actions']['emit_pack']}")
+    lines.append(f"- Execute: {payload['actions']['execute']}")
     return "\n".join(lines) + "\n"
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Day 13 enterprise use-case page",
+        "# Enterprise use-case report",
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         f"- Page: `{payload['page']}`",
@@ -417,19 +432,19 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         lines.extend(["", "## Emitted pack files", ""])
         for item in payload["pack_files"]:
             lines.append(f"- `{item}`")
-    lines.extend(["", "## Missing use-case content", ""])
+    lines.extend(["", "## Use-case coverage gaps", ""])
     if payload["missing"]:
         for item in payload["missing"]:
             lines.append(f"- `{item}`")
     else:
         lines.append("- none")
     lines.extend(["", "## Actions", ""])
-    lines.append(f"- `{payload['actions']['open_page']}`")
-    lines.append(f"- `{payload['actions']['validate']}`")
-    lines.append(f"- `{payload['actions']['write_defaults']}`")
-    lines.append(f"- `{payload['actions']['artifact']}`")
-    lines.append(f"- `{payload['actions']['emit_pack']}`")
-    lines.append(f"- `{payload['actions']['execute']}`")
+    lines.append(f"- Open page: `{payload['actions']['open_page']}`")
+    lines.append(f"- Validate: `{payload['actions']['validate']}`")
+    lines.append(f"- Write defaults: `{payload['actions']['write_defaults']}`")
+    lines.append(f"- Export artifact: `{payload['actions']['artifact']}`")
+    lines.append(f"- Emit pack: `{payload['actions']['emit_pack']}`")
+    lines.append(f"- Execute: `{payload['actions']['execute']}`")
     return "\n".join(lines) + "\n"
 
 
