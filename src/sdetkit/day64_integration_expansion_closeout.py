@@ -17,23 +17,23 @@ _DAY63_BOARD_PATH = (
 _WORKFLOW_PATH = ".github/workflows/day64-advanced-github-actions-reference.yml"
 _SECTION_HEADER = "# Day 64 \u2014 Integration expansion #1 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 64 matters",
+    "## Why Integration Expansion Closeout matters",
     "## Required inputs (Day 63)",
-    "## Day 64 command lane",
+    "## Integration Expansion Closeout command lane (Legacy Day 64)",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Day 64 delivery board",
+    "## Integration Expansion Closeout delivery board (Legacy Day 64)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day64-integration-expansion-closeout --format json --strict",
-    "python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
-    "python -m sdetkit day64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict",
     "python scripts/check_day64_integration_expansion_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day64-integration-expansion-closeout --format json --strict",
-    "python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
     "python scripts/check_day64_integration_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -70,7 +70,7 @@ _DAY64_DEFAULT_PAGE = """# Day 64 \u2014 Integration expansion #1 closeout lane
 
 Day 64 closes with a major integration upgrade that turns Day 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
-## Why Day 64 matters
+## Why Integration Expansion Closeout matters
 
 - Converts Day 63 contributor activation into reusable CI automation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -81,12 +81,12 @@ Day 64 closes with a major integration upgrade that turns Day 63 onboarding mome
 - `docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json`
 - `docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md`
 
-## Day 64 command lane
+## Integration Expansion Closeout command lane (Legacy Day 64)
 
 ```bash
-python -m sdetkit day64-integration-expansion-closeout --format json --strict
-python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
-python -m sdetkit day64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion-closeout --format json --strict
+python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
+python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
 python scripts/check_day64_integration_expansion_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day64_integration_expansion_closeout_contract.py
 - [ ] Scorecard captures workflow pass-rate, median runtime, cache hit-rate, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log
 
-## Day 64 delivery board
+## Integration Expansion Closeout delivery board (Legacy Day 64)
 
 - [ ] Day 64 integration brief committed
 - [ ] Day 64 advanced workflow blueprint published
@@ -315,7 +315,7 @@ def build_day64_integration_expansion_closeout_summary(root: Path) -> dict[str, 
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day64-integration-expansion-closeout",
+        "name": "integration-expansion-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -350,7 +350,7 @@ def build_day64_integration_expansion_closeout_summary(root: Path) -> dict[str, 
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 64 integration expansion closeout summary",
+        "Integration Expansion Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

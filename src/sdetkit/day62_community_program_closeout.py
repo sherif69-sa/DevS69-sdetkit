@@ -16,23 +16,23 @@ _DAY61_SUMMARY_PATH = (
 _DAY61_BOARD_PATH = "docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md"
 _SECTION_HEADER = "# Day 62 \u2014 Community program setup closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 62 matters",
+    "## Why Community Program Closeout matters",
     "## Required inputs (Day 61)",
-    "## Day 62 command lane",
+    "## Community Program Closeout command lane (Legacy Day 62)",
     "## Community program execution contract",
     "## Community program quality checklist",
-    "## Day 62 delivery board",
+    "## Community Program Closeout delivery board (Legacy Day 62)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day62-community-program-closeout --format json --strict",
-    "python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
-    "python -m sdetkit day62-community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit community-program-closeout --format json --strict",
+    "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
+    "python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict",
     "python scripts/check_day62_community_program_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day62-community-program-closeout --format json --strict",
-    "python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
+    "python -m sdetkit community-program-closeout --format json --strict",
+    "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
     "python scripts/check_day62_community_program_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -60,7 +60,7 @@ _DAY62_DEFAULT_PAGE = """# Day 62 \u2014 Community program setup closeout lane
 
 Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a deterministic community operations lane.
 
-## Why Day 62 matters
+## Why Community Program Closeout matters
 
 - Converts Day 61 trust baseline into repeatable office-hours and participation loops.
 - Protects community trust outcomes with ownership, command proof, and moderation rollback guardrails.
@@ -71,12 +71,12 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 - `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json`
 - `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md`
 
-## Day 62 command lane
+## Community Program Closeout command lane (Legacy Day 62)
 
 ```bash
-python -m sdetkit day62-community-program-closeout --format json --strict
-python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
-python -m sdetkit day62-community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
+python -m sdetkit community-program-closeout --format json --strict
+python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
+python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
 python scripts/check_day62_community_program_closeout_contract.py
 ```
 
@@ -95,7 +95,7 @@ python scripts/check_day62_community_program_closeout_contract.py
 - [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner
 - [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log
 
-## Day 62 delivery board
+## Community Program Closeout delivery board (Legacy Day 62)
 
 - [ ] Day 62 community launch brief committed
 - [ ] Day 62 office-hours cadence published
@@ -299,7 +299,7 @@ def build_day62_community_program_closeout_summary(root: Path) -> dict[str, Any]
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day62-community-program-closeout",
+        "name": "community-program-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -333,7 +333,7 @@ def build_day62_community_program_closeout_summary(root: Path) -> dict[str, Any]
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 62 community program closeout summary",
+        "Community Program Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

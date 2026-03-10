@@ -15,23 +15,23 @@ _DAY69_BOARD_PATH = "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-d
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day70-triage-speed-case-study.json"
 _SECTION_HEADER = "# Day 70 \u2014 Case-study prep #2 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 70 matters",
+    "## Why Case Study Prep 2 Closeout matters",
     "## Required inputs (Day 69)",
-    "## Day 70 command lane",
+    "## Case Study Prep 2 Closeout command lane (Legacy Day 70)",
     "## Case-study prep contract",
     "## Case-study quality checklist",
-    "## Day 70 delivery board",
+    "## Case Study Prep 2 Closeout delivery board (Legacy Day 70)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day70-case-study-prep2-closeout --format json --strict",
-    "python -m sdetkit day70-case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict",
-    "python -m sdetkit day70-case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit case-study-prep2-closeout --format json --strict",
+    "python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict",
     "python scripts/check_day70_case_study_prep2_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day70-case-study-prep2-closeout --format json --strict",
-    "python -m sdetkit day70-case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep2-closeout --format json --strict",
+    "python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict",
     "python scripts/check_day70_case_study_prep2_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -67,7 +67,7 @@ _DAY70_DEFAULT_PAGE = """# Day 70 \u2014 Case-study prep #2 closeout lane
 
 Day 70 closes with a major upgrade that turns Day 69 integration outputs into a measurable triage-speed case-study prep pack.
 
-## Why Day 70 matters
+## Why Case Study Prep 2 Closeout matters
 
 - Converts Day 69 implementation signals into before/after triage-speed evidence.
 - Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.
@@ -79,12 +79,12 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 - `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md`
 - `docs/roadmap/plans/day70-triage-speed-case-study.json`
 
-## Day 70 command lane
+## Case Study Prep 2 Closeout command lane (Legacy Day 70)
 
 ```bash
-python -m sdetkit day70-case-study-prep2-closeout --format json --strict
-python -m sdetkit day70-case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict
-python -m sdetkit day70-case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep2-closeout --format json --strict
+python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict
+python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict
 python scripts/check_day70_case_study_prep2_closeout_contract.py
 ```
 
@@ -103,7 +103,7 @@ python scripts/check_day70_case_study_prep2_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Day 70 delivery board
+## Case Study Prep 2 Closeout delivery board (Legacy Day 70)
 
 - [ ] Day 70 integration brief committed
 - [ ] Day 70 triage-speed case-study narrative published
@@ -310,7 +310,7 @@ def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day70-case-study-prep2-closeout",
+        "name": "case-study-prep2-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -345,7 +345,7 @@ def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 70 case-study prep #2 closeout summary",
+        "Case Study Prep 2 Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

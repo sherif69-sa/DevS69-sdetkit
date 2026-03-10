@@ -76,7 +76,7 @@ def test_day69_json(tmp_path: Path, capsys) -> None:
     rc = d69.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day69-case-study-prep1-closeout"
+    assert out["name"] == "case-study-prep1-closeout"
     assert out["summary"]["strict_pass"] is True
 
 
@@ -113,6 +113,8 @@ def test_day69_strict_fails_without_day68_summary(tmp_path: Path) -> None:
 
 def test_day69_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day69-case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 69 case-study prep #1 closeout summary" in capsys.readouterr().out
+    alias_rc = cli.main(["day69-case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"])
+    assert alias_rc == 0
+    assert "Case Study Prep1 Closeout summary" in capsys.readouterr().out

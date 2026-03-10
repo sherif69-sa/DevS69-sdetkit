@@ -1,8 +1,10 @@
-# Day 64 — Integration expansion #1 closeout lane
+# Integration Expansion Closeout (Legacy Day 64) — Integration expansion #1 closeout lane
+
+> Legacy alias: `day64-integration-expansion-closeout` remains supported; prefer `integration-expansion-closeout` in active usage.
 
 Day 64 closes with a major integration upgrade that turns Day 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
-## Why Day 64 matters
+## Why Integration Expansion Closeout matters
 
 - Converts Day 63 contributor activation into reusable CI automation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -13,12 +15,12 @@ Day 64 closes with a major integration upgrade that turns Day 63 onboarding mome
 - `docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json`
 - `docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md`
 
-## Day 64 command lane
+## Integration Expansion Closeout command lane (Legacy Day 64)
 
 ```bash
-python -m sdetkit day64-integration-expansion-closeout --format json --strict
-python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
-python -m sdetkit day64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion-closeout --format json --strict
+python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
+python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
 python scripts/check_day64_integration_expansion_closeout_contract.py
 ```
 
@@ -37,7 +39,7 @@ python scripts/check_day64_integration_expansion_closeout_contract.py
 - [ ] Scorecard captures workflow pass-rate, median runtime, cache hit-rate, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log
 
-## Day 64 delivery board
+## Integration Expansion Closeout delivery board (Legacy Day 64)
 
 - [ ] Day 64 integration brief committed
 - [ ] Day 64 advanced workflow blueprint published

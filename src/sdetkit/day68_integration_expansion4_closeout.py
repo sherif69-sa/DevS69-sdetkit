@@ -17,23 +17,23 @@ _DAY67_BOARD_PATH = (
 _REFERENCE_PATH = "templates/ci/tekton/day68-self-hosted-reference.yaml"
 _SECTION_HEADER = "# Day 68 \u2014 Integration expansion #4 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 68 matters",
+    "## Why Integration Expansion4 Closeout matters",
     "## Required inputs (Day 67)",
-    "## Day 68 command lane",
+    "## Integration Expansion4 Closeout command lane (Legacy Day 68)",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Day 68 delivery board",
+    "## Integration Expansion4 Closeout delivery board (Legacy Day 68)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day68-integration-expansion4-closeout --format json --strict",
-    "python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict",
-    "python -m sdetkit day68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-expansion4-closeout --format json --strict",
+    "python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict",
     "python scripts/check_day68_integration_expansion4_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day68-integration-expansion4-closeout --format json --strict",
-    "python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion4-closeout --format json --strict",
+    "python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict",
     "python scripts/check_day68_integration_expansion4_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY68_DEFAULT_PAGE = """# Day 68 \u2014 Integration expansion #4 closeout lane
 
 Day 68 closes with a major integration upgrade that converts Day 67 outputs into a self-hosted enterprise Tekton reference.
 
-## Why Day 68 matters
+## Why Integration Expansion4 Closeout matters
 
 - Converts Day 67 governance outputs into reusable self-hosted implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -81,12 +81,12 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 - `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md`
 - `templates/ci/tekton/day68-self-hosted-reference.yaml`
 
-## Day 68 command lane
+## Integration Expansion4 Closeout command lane (Legacy Day 68)
 
 ```bash
-python -m sdetkit day68-integration-expansion4-closeout --format json --strict
-python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict
-python -m sdetkit day68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion4-closeout --format json --strict
+python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict
+python -m sdetkit integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict
 python scripts/check_day68_integration_expansion4_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day68_integration_expansion4_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, queue saturation, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, self-hosted blueprint, policy plan, KPI scorecard, and execution log
 
-## Day 68 delivery board
+## Integration Expansion4 Closeout delivery board (Legacy Day 68)
 
 - [ ] Day 68 integration brief committed
 - [ ] Day 68 self-hosted enterprise pipeline blueprint published
@@ -317,7 +317,7 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day68-integration-expansion4-closeout",
+        "name": "integration-expansion4-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -352,7 +352,7 @@ def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str,
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 68 integration expansion #4 closeout summary",
+        "Integration Expansion4 Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

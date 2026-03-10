@@ -1,8 +1,10 @@
-# Day 68 — Integration expansion #4 closeout lane
+# Integration Expansion4 Closeout (Legacy Day 68) — Integration expansion #4 closeout lane
+
+> Legacy alias: `day68-integration-expansion4-closeout` remains supported; prefer `integration-expansion4-closeout` in active usage.
 
 Day 68 closes with a major integration upgrade that converts Day 67 outputs into a self-hosted enterprise Tekton reference.
 
-## Why Day 68 matters
+## Why Integration Expansion4 Closeout matters
 
 - Converts Day 67 governance outputs into reusable self-hosted implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -14,12 +16,12 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 - `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md`
 - `templates/ci/tekton/day68-self-hosted-reference.yaml`
 
-## Day 68 command lane
+## Integration Expansion4 Closeout command lane (Legacy Day 68)
 
 ```bash
-python -m sdetkit day68-integration-expansion4-closeout --format json --strict
-python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict
-python -m sdetkit day68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion4-closeout --format json --strict
+python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict
+python -m sdetkit integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict
 python scripts/check_day68_integration_expansion4_closeout_contract.py
 ```
 
@@ -38,7 +40,7 @@ python scripts/check_day68_integration_expansion4_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, queue saturation, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, self-hosted blueprint, policy plan, KPI scorecard, and execution log
 
-## Day 68 delivery board
+## Integration Expansion4 Closeout delivery board (Legacy Day 68)
 
 - [ ] Day 68 integration brief committed
 - [ ] Day 68 self-hosted enterprise pipeline blueprint published

@@ -1,8 +1,10 @@
-# Day 63 — Contributor onboarding activation closeout lane
+# Onboarding Activation Closeout (Legacy Day 63) — Contributor onboarding activation closeout lane
+
+> Legacy alias: `day63-onboarding-activation-closeout` remains supported; prefer `onboarding-activation-closeout` in active usage.
 
 Day 63 closes with a major onboarding activation upgrade that turns Day 62 community operations evidence into deterministic contributor activation, ownership handoffs, and roadmap voting execution.
 
-## Why Day 63 matters
+## Why Onboarding Activation Closeout matters
 
 - Converts Day 62 community momentum into repeatable onboarding and mentor ownership loops.
 - Protects onboarding outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -13,12 +15,12 @@ Day 63 closes with a major onboarding activation upgrade that turns Day 62 commu
 - `docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json`
 - `docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md`
 
-## Day 63 command lane
+## Onboarding Activation Closeout command lane (Legacy Day 63)
 
 ```bash
-python -m sdetkit day63-onboarding-activation-closeout --format json --strict
-python -m sdetkit day63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit day63-onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict
+python -m sdetkit onboarding-activation-closeout --format json --strict
+python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict
+python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict
 python scripts/check_day63_onboarding_activation_closeout_contract.py
 ```
 
@@ -37,7 +39,7 @@ python scripts/check_day63_onboarding_activation_closeout_contract.py
 - [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner
 - [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log
 
-## Day 63 delivery board
+## Onboarding Activation Closeout delivery board (Legacy Day 63)
 
 - [ ] Day 63 onboarding launch brief committed
 - [ ] Day 63 orientation script + ownership matrix published

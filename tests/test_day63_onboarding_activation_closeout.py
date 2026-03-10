@@ -76,7 +76,7 @@ def test_day63_json(tmp_path: Path, capsys) -> None:
     rc = d63.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day63-onboarding-activation-closeout"
+    assert out["name"] == "onboarding-activation-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -129,4 +129,4 @@ def test_day63_cli_dispatch(tmp_path: Path, capsys) -> None:
         ["day63-onboarding-activation-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
-    assert "Day 63 onboarding activation closeout summary" in capsys.readouterr().out
+    assert "Onboarding Activation Closeout summary" in capsys.readouterr().out

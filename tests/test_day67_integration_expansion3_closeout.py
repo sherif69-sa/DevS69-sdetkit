@@ -103,7 +103,7 @@ def test_day67_json(tmp_path: Path, capsys) -> None:
     rc = d67.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day67-integration-expansion3-closeout"
+    assert out["name"] == "integration-expansion3-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -155,4 +155,4 @@ def test_day67_cli_dispatch(tmp_path: Path, capsys) -> None:
         ["day67-integration-expansion3-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
-    assert "Day 67 integration expansion #3 closeout summary" in capsys.readouterr().out
+    assert "Integration Expansion3 Closeout summary" in capsys.readouterr().out

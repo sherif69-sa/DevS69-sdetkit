@@ -1,8 +1,10 @@
-# Day 61 — Phase-3 kickoff execution closeout lane
+# Phase3 Kickoff Closeout (Legacy Day 61) — Phase-3 kickoff execution closeout lane
+
+> Legacy alias: `day61-phase3-kickoff-closeout` remains supported; prefer `phase3-kickoff-closeout` in active usage.
 
 Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence into a strict baseline for ecosystem + trust execution.
 
-## Why Day 61 matters
+## Why Phase3 Kickoff Closeout matters
 
 - Converts Day 60 closeout evidence into repeatable Phase-3 execution loops.
 - Protects trust outcomes with ownership, command proof, and KPI rollback guardrails.
@@ -13,12 +15,12 @@ Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence 
 - `docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json`
 - `docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md`
 
-## Day 61 command lane
+## Phase3 Kickoff Closeout command lane (Legacy Day 61)
 
 ```bash
-python -m sdetkit day61-phase3-kickoff-closeout --format json --strict
-python -m sdetkit day61-phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict
-python -m sdetkit day61-phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence --format json --strict
+python -m sdetkit phase3-kickoff-closeout --format json --strict
+python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict
+python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence --format json --strict
 python scripts/check_day61_phase3_kickoff_closeout_contract.py
 ```
 
@@ -37,7 +39,7 @@ python scripts/check_day61_phase3_kickoff_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each trust KPI
 - [ ] Artifact pack includes kickoff brief, trust ledger, KPI scorecard, and execution log
 
-## Day 61 delivery board
+## Phase3 Kickoff Closeout delivery board (Legacy Day 61)
 
 - [ ] Day 61 Phase-3 kickoff brief committed
 - [ ] Day 61 kickoff reviewed with owner + backup

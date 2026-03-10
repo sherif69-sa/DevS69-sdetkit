@@ -76,7 +76,7 @@ def test_day62_json(tmp_path: Path, capsys) -> None:
     rc = d62.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day62-community-program-closeout"
+    assert out["name"] == "community-program-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -123,6 +123,8 @@ def test_day62_strict_fails_without_day61(tmp_path: Path) -> None:
 
 def test_day62_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day62-community-program-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["community-program-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 62 community program closeout summary" in capsys.readouterr().out
+    alias_rc = cli.main(["day62-community-program-closeout", "--root", str(tmp_path), "--format", "text"])
+    assert alias_rc == 0
+    assert "Community Program Closeout summary" in capsys.readouterr().out

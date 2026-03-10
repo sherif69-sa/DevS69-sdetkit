@@ -104,7 +104,7 @@ def test_day64_json(tmp_path: Path, capsys) -> None:
     rc = d64.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day64-integration-expansion-closeout"
+    assert out["name"] == "integration-expansion-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -156,4 +156,4 @@ def test_day64_cli_dispatch(tmp_path: Path, capsys) -> None:
         ["day64-integration-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
-    assert "Day 64 integration expansion closeout summary" in capsys.readouterr().out
+    assert "Integration Expansion Closeout summary" in capsys.readouterr().out

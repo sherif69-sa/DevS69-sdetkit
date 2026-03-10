@@ -82,7 +82,7 @@ def test_day65_json(tmp_path: Path, capsys) -> None:
     rc = d65.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day65-weekly-review-closeout"
+    assert out["name"] == "weekly-review-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -126,6 +126,8 @@ def test_day65_strict_fails_without_day64(tmp_path: Path) -> None:
 
 def test_day65_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day65-weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 65 weekly review closeout summary" in capsys.readouterr().out
+    alias_rc = cli.main(["day65-weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
+    assert alias_rc == 0
+    assert "Weekly Review Closeout summary" in capsys.readouterr().out

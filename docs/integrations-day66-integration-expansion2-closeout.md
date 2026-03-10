@@ -1,8 +1,10 @@
-# Day 66 — Integration expansion #2 closeout lane
+# Integration Expansion 2 Closeout (Legacy Day 66) — Integration expansion #2 closeout lane
+
+> Legacy alias: `day66-integration-expansion2-closeout` remains supported; prefer `integration-expansion2-closeout` in active usage.
 
 Day 66 closes with a major integration upgrade that converts Day 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
 
-## Why Day 66 matters
+## Why Integration Expansion 2 Closeout matters
 
 - Converts Day 65 governance outputs into reusable GitLab CI implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -14,12 +16,12 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 - `docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md`
 - `templates/ci/gitlab/day66-advanced-reference.yml`
 
-## Day 66 command lane
+## Integration Expansion 2 Closeout command lane (Legacy Day 66)
 
 ```bash
-python -m sdetkit day66-integration-expansion2-closeout --format json --strict
-python -m sdetkit day66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
-python -m sdetkit day66-integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion2-closeout --format json --strict
+python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
+python -m sdetkit integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict
 python scripts/check_day66_integration_expansion2_closeout_contract.py
 ```
 
@@ -38,7 +40,7 @@ python scripts/check_day66_integration_expansion2_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, pipeline blueprint, matrix plan, KPI scorecard, and execution log
 
-## Day 66 delivery board
+## Integration Expansion 2 Closeout delivery board (Legacy Day 66)
 
 - [ ] Day 66 integration brief committed
 - [ ] Day 66 advanced GitLab pipeline blueprint published

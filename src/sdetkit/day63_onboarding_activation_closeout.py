@@ -14,23 +14,23 @@ _DAY62_SUMMARY_PATH = "docs/artifacts/day62-community-program-closeout-pack/day6
 _DAY62_BOARD_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
 _SECTION_HEADER = "# Day 63 \u2014 Contributor onboarding activation closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 63 matters",
+    "## Why Onboarding Activation Closeout matters",
     "## Required inputs (Day 62)",
-    "## Day 63 command lane",
+    "## Onboarding Activation Closeout command lane (Legacy Day 63)",
     "## Onboarding activation contract",
     "## Onboarding quality checklist",
-    "## Day 63 delivery board",
+    "## Onboarding Activation Closeout delivery board (Legacy Day 63)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day63-onboarding-activation-closeout --format json --strict",
-    "python -m sdetkit day63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict",
-    "python -m sdetkit day63-onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict",
     "python scripts/check_day63_onboarding_activation_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day63-onboarding-activation-closeout --format json --strict",
-    "python -m sdetkit day63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict",
     "python scripts/check_day63_onboarding_activation_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -58,7 +58,7 @@ _DAY63_DEFAULT_PAGE = """# Day 63 \u2014 Contributor onboarding activation close
 
 Day 63 ships a major onboarding-activation upgrade that converts Day 62 community program evidence into deterministic onboarding ownership and roadmap-voting loops.
 
-## Why Day 63 matters
+## Why Onboarding Activation Closeout matters
 
 - Converts Day 62 community trust baseline into repeatable onboarding activation and mentor ownership loops.
 - Protects contributor onboarding outcomes with ownership, command proof, and rollback guardrails.
@@ -69,12 +69,12 @@ Day 63 ships a major onboarding-activation upgrade that converts Day 62 communit
 - `docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json`
 - `docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md`
 
-## Day 63 command lane
+## Onboarding Activation Closeout command lane (Legacy Day 63)
 
 ```bash
-python -m sdetkit day63-onboarding-activation-closeout --format json --strict
-python -m sdetkit day63-onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit day63-onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict
+python -m sdetkit onboarding-activation-closeout --format json --strict
+python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict
+python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict
 python scripts/check_day63_onboarding_activation_closeout_contract.py
 ```
 
@@ -93,7 +93,7 @@ python scripts/check_day63_onboarding_activation_closeout_contract.py
 - [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner
 - [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log
 
-## Day 63 delivery board
+## Onboarding Activation Closeout delivery board (Legacy Day 63)
 
 - [ ] Day 63 onboarding launch brief committed
 - [ ] Day 63 orientation script + ownership matrix published
@@ -299,7 +299,7 @@ def build_day63_onboarding_activation_closeout_summary(root: Path) -> dict[str, 
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day63-onboarding-activation-closeout",
+        "name": "onboarding-activation-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -333,7 +333,7 @@ def build_day63_onboarding_activation_closeout_summary(root: Path) -> dict[str, 
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 63 onboarding activation closeout summary",
+        "Onboarding Activation Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

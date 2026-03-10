@@ -17,23 +17,23 @@ _DAY65_BOARD_PATH = "docs/artifacts/day65-weekly-review-closeout-pack/day65-deli
 _GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 66 matters",
+    "## Why Integration Expansion 2 Closeout matters",
     "## Required inputs (Day 65)",
-    "## Day 66 command lane",
+    "## Integration Expansion 2 Closeout command lane (Legacy Day 66)",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Day 66 delivery board",
+    "## Integration Expansion 2 Closeout delivery board (Legacy Day 66)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day66-integration-expansion2-closeout --format json --strict",
-    "python -m sdetkit day66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict",
-    "python -m sdetkit day66-integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-expansion2-closeout --format json --strict",
+    "python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict",
     "python scripts/check_day66_integration_expansion2_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day66-integration-expansion2-closeout --format json --strict",
-    "python -m sdetkit day66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion2-closeout --format json --strict",
+    "python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict",
     "python scripts/check_day66_integration_expansion2_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY66_DEFAULT_PAGE = """# Day 66 \u2014 Integration expansion #2 closeout lane
 
 Day 66 closes with a major integration upgrade that converts Day 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
 
-## Why Day 66 matters
+## Why Integration Expansion 2 Closeout matters
 
 - Converts Day 65 governance outputs into reusable GitLab CI implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -81,12 +81,12 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 - `docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md`
 - `templates/ci/gitlab/day66-advanced-reference.yml`
 
-## Day 66 command lane
+## Integration Expansion 2 Closeout command lane (Legacy Day 66)
 
 ```bash
-python -m sdetkit day66-integration-expansion2-closeout --format json --strict
-python -m sdetkit day66-integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
-python -m sdetkit day66-integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion2-closeout --format json --strict
+python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
+python -m sdetkit integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict
 python scripts/check_day66_integration_expansion2_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day66_integration_expansion2_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, pipeline blueprint, matrix plan, KPI scorecard, and execution log
 
-## Day 66 delivery board
+## Integration Expansion 2 Closeout delivery board (Legacy Day 66)
 
 - [ ] Day 66 integration brief committed
 - [ ] Day 66 advanced GitLab pipeline blueprint published
@@ -317,7 +317,7 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day66-integration-expansion2-closeout",
+        "name": "integration-expansion2-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -352,7 +352,7 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 66 integration expansion #2 closeout summary",
+        "Integration Expansion 2 Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

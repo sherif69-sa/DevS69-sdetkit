@@ -17,23 +17,23 @@ _DAY66_BOARD_PATH = (
 _JENKINS_PATH = "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
 _SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 67 matters",
+    "## Why Integration Expansion3 Closeout matters",
     "## Required inputs (Day 66)",
-    "## Day 67 command lane",
+    "## Integration Expansion3 Closeout command lane (Legacy Day 67)",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Day 67 delivery board",
+    "## Integration Expansion3 Closeout delivery board (Legacy Day 67)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day67-integration-expansion3-closeout --format json --strict",
-    "python -m sdetkit day67-integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict",
-    "python -m sdetkit day67-integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict",
     "python scripts/check_day67_integration_expansion3_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day67-integration-expansion3-closeout --format json --strict",
-    "python -m sdetkit day67-integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict",
     "python scripts/check_day67_integration_expansion3_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY67_DEFAULT_PAGE = """# Day 67 \u2014 Integration expansion #3 closeout lane
 
 Day 67 closes with a major integration upgrade that converts Day 66 integration outputs into an advanced Jenkins reference pipeline.
 
-## Why Day 67 matters
+## Why Integration Expansion3 Closeout matters
 
 - Converts Day 66 governance outputs into reusable Jenkins implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -81,12 +81,12 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 - `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md`
 - `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
-## Day 67 command lane
+## Integration Expansion3 Closeout command lane (Legacy Day 67)
 
 ```bash
-python -m sdetkit day67-integration-expansion3-closeout --format json --strict
-python -m sdetkit day67-integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
-python -m sdetkit day67-integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion3-closeout --format json --strict
+python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
+python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
 python scripts/check_day67_integration_expansion3_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day67_integration_expansion3_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log
 
-## Day 67 delivery board
+## Integration Expansion3 Closeout delivery board (Legacy Day 67)
 
 - [ ] Day 67 integration brief committed
 - [ ] Day 67 advanced Jenkins pipeline blueprint published
@@ -317,7 +317,7 @@ def build_day67_integration_expansion3_closeout_summary(root: Path) -> dict[str,
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day67-integration-expansion3-closeout",
+        "name": "integration-expansion3-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -352,7 +352,7 @@ def build_day67_integration_expansion3_closeout_summary(root: Path) -> dict[str,
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 67 integration expansion #3 closeout summary",
+        "Integration Expansion3 Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

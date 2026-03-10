@@ -17,23 +17,23 @@ _DAY64_BOARD_PATH = (
 _DAY64_WORKFLOW_PATH = ".github/workflows/day64-advanced-github-actions-reference.yml"
 _SECTION_HEADER = "# Day 65 \u2014 Weekly review #9 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 65 matters",
+    "## Why Weekly Review Closeout matters",
     "## Required inputs (Day 64)",
-    "## Day 65 command lane",
+    "## Weekly Review Closeout command lane (Legacy Day 65)",
     "## Weekly review contract",
     "## Weekly review quality checklist",
-    "## Day 65 delivery board",
+    "## Weekly Review Closeout delivery board (Legacy Day 65)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day65-weekly-review-closeout --format json --strict",
-    "python -m sdetkit day65-weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict",
-    "python -m sdetkit day65-weekly-review-closeout --execute --evidence-dir docs/artifacts/day65-weekly-review-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit weekly-review-closeout --format json --strict",
+    "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict",
+    "python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/day65-weekly-review-closeout-pack/evidence --format json --strict",
     "python scripts/check_day65_weekly_review_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day65-weekly-review-closeout --format json --strict",
-    "python -m sdetkit day65-weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict",
+    "python -m sdetkit weekly-review-closeout --format json --strict",
+    "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict",
     "python scripts/check_day65_weekly_review_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -61,7 +61,7 @@ _DAY65_DEFAULT_PAGE = """# Day 65 \u2014 Weekly review #9 closeout lane
 
 Day 65 closes with a major weekly review upgrade that converts Day 64 integration execution evidence into strict KPI governance and a deterministic Day 66 handoff.
 
-## Why Day 65 matters
+## Why Weekly Review Closeout matters
 
 - Consolidates Day 64 integration expansion signals into a high-confidence weekly KPI baseline.
 - Protects momentum with strict review contract coverage, runnable commands, and rollback safeguards.
@@ -73,12 +73,12 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 - `docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md`
 - `.github/workflows/day64-advanced-github-actions-reference.yml`
 
-## Day 65 command lane
+## Weekly Review Closeout command lane (Legacy Day 65)
 
 ```bash
-python -m sdetkit day65-weekly-review-closeout --format json --strict
-python -m sdetkit day65-weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict
-python -m sdetkit day65-weekly-review-closeout --execute --evidence-dir docs/artifacts/day65-weekly-review-closeout-pack/evidence --format json --strict
+python -m sdetkit weekly-review-closeout --format json --strict
+python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/day65-weekly-review-closeout-pack --format json --strict
+python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/day65-weekly-review-closeout-pack/evidence --format json --strict
 python scripts/check_day65_weekly_review_closeout_contract.py
 ```
 
@@ -97,7 +97,7 @@ python scripts/check_day65_weekly_review_closeout_contract.py
 - [ ] Scorecard captures pass-rate trend, reliability incidents, contributor signal quality, and recovery owner
 - [ ] Artifact pack includes weekly brief, KPI dashboard, decision register, risk ledger, and execution log
 
-## Day 65 delivery board
+## Weekly Review Closeout delivery board (Legacy Day 65)
 
 - [ ] Day 65 weekly brief committed
 - [ ] Day 65 KPI dashboard snapshot exported
@@ -306,7 +306,7 @@ def build_day65_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day65-weekly-review-closeout",
+        "name": "weekly-review-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -341,7 +341,7 @@ def build_day65_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 65 weekly review closeout summary",
+        "Weekly Review Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

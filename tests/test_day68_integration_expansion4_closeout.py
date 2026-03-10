@@ -71,7 +71,7 @@ def test_day68_json_strict(tmp_path: Path, capsys) -> None:
     rc = d68.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["name"] == "day68-integration-expansion4-closeout"
+    assert payload["name"] == "integration-expansion4-closeout"
     assert payload["summary"]["activation_score"] >= 95
 
 
@@ -115,7 +115,7 @@ def test_day68_strict_fails_without_day67_summary(tmp_path: Path) -> None:
 def test_day68_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day68-integration-expansion4-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["integration-expansion4-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
-    assert "Day 68 integration expansion #4 closeout summary" in capsys.readouterr().out
+    assert "Integration Expansion4 Closeout summary" in capsys.readouterr().out

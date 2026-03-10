@@ -388,34 +388,34 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] in {"phase2-wrap-handoff-closeout", "day60-phase2-wrap-handoff-closeout"}:
         return day60_phase2_wrap_handoff_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day61-phase3-kickoff-closeout":
+    if argv and argv[0] in {"phase3-kickoff-closeout", "day61-phase3-kickoff-closeout"}:
         return day61_phase3_kickoff_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day62-community-program-closeout":
+    if argv and argv[0] in {"community-program-closeout", "day62-community-program-closeout"}:
         return day62_community_program_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day63-onboarding-activation-closeout":
+    if argv and argv[0] in {"onboarding-activation-closeout", "day63-onboarding-activation-closeout"}:
         return day63_onboarding_activation_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day64-integration-expansion-closeout":
+    if argv and argv[0] in {"integration-expansion-closeout", "day64-integration-expansion-closeout"}:
         return day64_integration_expansion_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day65-weekly-review-closeout":
+    if argv and argv[0] in {"weekly-review-closeout", "day65-weekly-review-closeout"}:
         return day65_weekly_review_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day66-integration-expansion2-closeout":
+    if argv and argv[0] in {"integration-expansion2-closeout", "day66-integration-expansion2-closeout"}:
         return day66_integration_expansion2_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day67-integration-expansion3-closeout":
+    if argv and argv[0] in {"integration-expansion3-closeout", "day67-integration-expansion3-closeout"}:
         return day67_integration_expansion3_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day68-integration-expansion4-closeout":
+    if argv and argv[0] in {"integration-expansion4-closeout", "day68-integration-expansion4-closeout"}:
         return day68_integration_expansion4_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day69-case-study-prep1-closeout":
+    if argv and argv[0] in {"case-study-prep1-closeout", "day69-case-study-prep1-closeout"}:
         return day69_case_study_prep1_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day70-case-study-prep2-closeout":
+    if argv and argv[0] in {"case-study-prep2-closeout", "day70-case-study-prep2-closeout"}:
         return day70_case_study_prep2_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "day71-case-study-prep3-closeout":
@@ -814,34 +814,44 @@ Run: sdetkit playbooks
     d60 = sub.add_parser("day60-phase2-wrap-handoff-closeout")
     d60.add_argument("args", nargs=argparse.REMAINDER)
 
-    d61 = sub.add_parser("day61-phase3-kickoff-closeout")
+    d61 = sub.add_parser("phase3-kickoff-closeout", aliases=["day61-phase3-kickoff-closeout"])
+    d61.set_defaults(cmd="phase3-kickoff-closeout")
     d61.add_argument("args", nargs=argparse.REMAINDER)
 
-    d62 = sub.add_parser("day62-community-program-closeout")
+    d62 = sub.add_parser("community-program-closeout", aliases=["day62-community-program-closeout"])
+    d62.set_defaults(cmd="community-program-closeout")
     d62.add_argument("args", nargs=argparse.REMAINDER)
 
-    d63 = sub.add_parser("day63-onboarding-activation-closeout")
+    d63 = sub.add_parser("onboarding-activation-closeout", aliases=["day63-onboarding-activation-closeout"])
+    d63.set_defaults(cmd="onboarding-activation-closeout")
     d63.add_argument("args", nargs=argparse.REMAINDER)
 
-    d64 = sub.add_parser("day64-integration-expansion-closeout")
+    d64 = sub.add_parser("integration-expansion-closeout", aliases=["day64-integration-expansion-closeout"])
+    d64.set_defaults(cmd="integration-expansion-closeout")
     d64.add_argument("args", nargs=argparse.REMAINDER)
 
-    d65 = sub.add_parser("day65-weekly-review-closeout")
+    d65 = sub.add_parser("weekly-review-closeout", aliases=["day65-weekly-review-closeout"])
+    d65.set_defaults(cmd="weekly-review-closeout")
     d65.add_argument("args", nargs=argparse.REMAINDER)
 
-    d66 = sub.add_parser("day66-integration-expansion2-closeout")
+    d66 = sub.add_parser("integration-expansion2-closeout", aliases=["day66-integration-expansion2-closeout"])
+    d66.set_defaults(cmd="integration-expansion2-closeout")
     d66.add_argument("args", nargs=argparse.REMAINDER)
 
-    d67 = sub.add_parser("day67-integration-expansion3-closeout")
+    d67 = sub.add_parser("integration-expansion3-closeout", aliases=["day67-integration-expansion3-closeout"])
+    d67.set_defaults(cmd="integration-expansion3-closeout")
     d67.add_argument("args", nargs=argparse.REMAINDER)
 
-    d68 = sub.add_parser("day68-integration-expansion4-closeout")
+    d68 = sub.add_parser("integration-expansion4-closeout", aliases=["day68-integration-expansion4-closeout"])
+    d68.set_defaults(cmd="integration-expansion4-closeout")
     d68.add_argument("args", nargs=argparse.REMAINDER)
 
-    d69 = sub.add_parser("day69-case-study-prep1-closeout")
+    d69 = sub.add_parser("case-study-prep1-closeout", aliases=["day69-case-study-prep1-closeout"])
+    d69.set_defaults(cmd="case-study-prep1-closeout")
     d69.add_argument("args", nargs=argparse.REMAINDER)
 
-    d70 = sub.add_parser("day70-case-study-prep2-closeout")
+    d70 = sub.add_parser("case-study-prep2-closeout", aliases=["day70-case-study-prep2-closeout"])
+    d70.set_defaults(cmd="case-study-prep2-closeout")
     d70.add_argument("args", nargs=argparse.REMAINDER)
     d71 = sub.add_parser("day71-case-study-prep3-closeout")
     d71.add_argument("args", nargs=argparse.REMAINDER)
@@ -1179,34 +1189,34 @@ Run: sdetkit playbooks
     if ns.cmd in {"phase2-wrap-handoff-closeout", "day60-phase2-wrap-handoff-closeout"}:
         return day60_phase2_wrap_handoff_closeout.main(ns.args)
 
-    if ns.cmd == "day61-phase3-kickoff-closeout":
+    if ns.cmd in {"phase3-kickoff-closeout", "day61-phase3-kickoff-closeout"}:
         return day61_phase3_kickoff_closeout.main(ns.args)
 
-    if ns.cmd == "day62-community-program-closeout":
+    if ns.cmd in {"community-program-closeout", "day62-community-program-closeout"}:
         return day62_community_program_closeout.main(ns.args)
 
-    if ns.cmd == "day63-onboarding-activation-closeout":
+    if ns.cmd in {"onboarding-activation-closeout", "day63-onboarding-activation-closeout"}:
         return day63_onboarding_activation_closeout.main(ns.args)
 
-    if ns.cmd == "day64-integration-expansion-closeout":
+    if ns.cmd in {"integration-expansion-closeout", "day64-integration-expansion-closeout"}:
         return day64_integration_expansion_closeout.main(ns.args)
 
-    if ns.cmd == "day65-weekly-review-closeout":
+    if ns.cmd in {"weekly-review-closeout", "day65-weekly-review-closeout"}:
         return day65_weekly_review_closeout.main(ns.args)
 
-    if ns.cmd == "day66-integration-expansion2-closeout":
+    if ns.cmd in {"integration-expansion2-closeout", "day66-integration-expansion2-closeout"}:
         return day66_integration_expansion2_closeout.main(ns.args)
 
-    if ns.cmd == "day67-integration-expansion3-closeout":
+    if ns.cmd in {"integration-expansion3-closeout", "day67-integration-expansion3-closeout"}:
         return day67_integration_expansion3_closeout.main(ns.args)
 
-    if ns.cmd == "day68-integration-expansion4-closeout":
+    if ns.cmd in {"integration-expansion4-closeout", "day68-integration-expansion4-closeout"}:
         return day68_integration_expansion4_closeout.main(ns.args)
 
-    if ns.cmd == "day69-case-study-prep1-closeout":
+    if ns.cmd in {"case-study-prep1-closeout", "day69-case-study-prep1-closeout"}:
         return day69_case_study_prep1_closeout.main(ns.args)
 
-    if ns.cmd == "day70-case-study-prep2-closeout":
+    if ns.cmd in {"case-study-prep2-closeout", "day70-case-study-prep2-closeout"}:
         return day70_case_study_prep2_closeout.main(ns.args)
 
     if ns.cmd == "day71-case-study-prep3-closeout":

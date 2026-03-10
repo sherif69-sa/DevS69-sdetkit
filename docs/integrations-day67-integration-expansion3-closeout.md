@@ -1,8 +1,10 @@
-# Day 67 — Integration expansion #3 closeout lane
+# Integration Expansion3 Closeout (Legacy Day 67) — Integration expansion #3 closeout lane
+
+> Legacy alias: `day67-integration-expansion3-closeout` remains supported; prefer `integration-expansion3-closeout` in active usage.
 
 Day 67 closes with a major integration upgrade that converts Day 66 integration outputs into an advanced Jenkins reference pipeline.
 
-## Why Day 67 matters
+## Why Integration Expansion3 Closeout matters
 
 - Converts Day 66 governance outputs into reusable Jenkins implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
@@ -14,12 +16,12 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 - `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md`
 - `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
-## Day 67 command lane
+## Integration Expansion3 Closeout command lane (Legacy Day 67)
 
 ```bash
-python -m sdetkit day67-integration-expansion3-closeout --format json --strict
-python -m sdetkit day67-integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
-python -m sdetkit day67-integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion3-closeout --format json --strict
+python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
+python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
 python scripts/check_day67_integration_expansion3_closeout_contract.py
 ```
 
@@ -38,7 +40,7 @@ python scripts/check_day67_integration_expansion3_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log
 
-## Day 67 delivery board
+## Integration Expansion3 Closeout delivery board (Legacy Day 67)
 
 - [ ] Day 67 integration brief committed
 - [ ] Day 67 advanced Jenkins pipeline blueprint published

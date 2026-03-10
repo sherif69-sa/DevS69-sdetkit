@@ -17,23 +17,23 @@ _DAY68_BOARD_PATH = (
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/day69-reliability-case-study.json"
 _SECTION_HEADER = "# Day 69 \u2014 Case-study prep #1 closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 69 matters",
+    "## Why Case Study Prep1 Closeout matters",
     "## Required inputs (Day 68)",
-    "## Day 69 command lane",
+    "## Case Study Prep1 Closeout command lane (Legacy Day 69)",
     "## Case-study prep contract",
     "## Case-study quality checklist",
-    "## Day 69 delivery board",
+    "## Case Study Prep1 Closeout delivery board (Legacy Day 69)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day69-case-study-prep1-closeout --format json --strict",
-    "python -m sdetkit day69-case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict",
-    "python -m sdetkit day69-case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict",
     "python scripts/check_day69_case_study_prep1_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day69-case-study-prep1-closeout --format json --strict",
-    "python -m sdetkit day69-case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict",
     "python scripts/check_day69_case_study_prep1_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -69,7 +69,7 @@ _DAY69_DEFAULT_PAGE = """# Day 69 \u2014 Case-study prep #1 closeout lane
 
 Day 69 closes with a major upgrade that turns Day 68 integration outputs into a measurable reliability case-study prep pack.
 
-## Why Day 69 matters
+## Why Case Study Prep1 Closeout matters
 
 - Converts Day 68 implementation signals into before/after reliability evidence.
 - Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.
@@ -81,12 +81,12 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
 - `docs/roadmap/plans/day69-reliability-case-study.json`
 
-## Day 69 command lane
+## Case Study Prep1 Closeout command lane (Legacy Day 69)
 
 ```bash
-python -m sdetkit day69-case-study-prep1-closeout --format json --strict
-python -m sdetkit day69-case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict
-python -m sdetkit day69-case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep1-closeout --format json --strict
+python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict
+python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict
 python scripts/check_day69_case_study_prep1_closeout_contract.py
 ```
 
@@ -105,7 +105,7 @@ python scripts/check_day69_case_study_prep1_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Day 69 delivery board
+## Case Study Prep1 Closeout delivery board (Legacy Day 69)
 
 - [ ] Day 69 integration brief committed
 - [ ] Day 69 reliability case-study narrative published
@@ -312,7 +312,7 @@ def build_day69_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day69-case-study-prep1-closeout",
+        "name": "case-study-prep1-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -347,7 +347,7 @@ def build_day69_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 69 case-study prep #1 closeout summary",
+        "Case Study Prep1 Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",

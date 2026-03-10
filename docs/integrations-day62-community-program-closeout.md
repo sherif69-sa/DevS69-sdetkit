@@ -1,8 +1,10 @@
-# Day 62 — Community program setup closeout lane
+# Community Program Closeout (Legacy Day 62) — Community program setup closeout lane
+
+> Legacy alias: `day62-community-program-closeout` remains supported; prefer `community-program-closeout` in active usage.
 
 Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
 
-## Why Day 62 matters
+## Why Community Program Closeout matters
 
 - Converts Day 61 closeout evidence into repeatable community operations loops.
 - Protects trust outcomes with ownership, command proof, and moderation rollback guardrails.
@@ -13,12 +15,12 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 - `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json`
 - `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md`
 
-## Day 62 command lane
+## Community Program Closeout command lane (Legacy Day 62)
 
 ```bash
-python -m sdetkit day62-community-program-closeout --format json --strict
-python -m sdetkit day62-community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
-python -m sdetkit day62-community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
+python -m sdetkit community-program-closeout --format json --strict
+python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
+python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
 python scripts/check_day62_community_program_closeout_contract.py
 ```
 
@@ -37,7 +39,7 @@ python scripts/check_day62_community_program_closeout_contract.py
 - [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner
 - [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log
 
-## Day 62 delivery board
+## Community Program Closeout delivery board (Legacy Day 62)
 
 - [ ] Day 62 community launch brief committed
 - [ ] Day 62 office-hours cadence published
