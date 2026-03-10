@@ -182,11 +182,6 @@ def _resolve_non_day_playbook_alias(cmd: str) -> str:
     if cmd in alias_to_canonical and cmd in cmd_to_mod and not cmd.startswith("day"):
         return alias_to_canonical[cmd]
 
-    if cmd in cmd_to_mod and cmd not in alias_to_canonical:
-        mod = cmd_to_mod[cmd]
-        if isinstance(mod, str) and mod.startswith("day"):
-            return mod.replace("_", "-")
-
     return cmd
 
 
@@ -286,40 +281,40 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] in {"weekly-review-lane", "day28-weekly-review"}:
         return day28_weekly_review.main(list(argv[1:]))
 
-    if argv and argv[0] in {"phase1-hardening", "day29-phase1-hardening"}:
+    if argv and argv[0] == "phase1-hardening":
         return day29_phase1_hardening.main(list(argv[1:]))
 
-    if argv and argv[0] in {"phase1-wrap", "day30-phase1-wrap"}:
+    if argv and argv[0] == "phase1-wrap":
         return day30_phase1_wrap.main(list(argv[1:]))
 
-    if argv and argv[0] in {"phase2-kickoff", "day31-phase2-kickoff"}:
+    if argv and argv[0] == "phase2-kickoff":
         return day31_phase2_kickoff.main(list(argv[1:]))
 
-    if argv and argv[0] in {"release-cadence", "day32-release-cadence"}:
+    if argv and argv[0] == "release-cadence":
         return day32_release_cadence.main(list(argv[1:]))
 
-    if argv and argv[0] in {"demo-asset", "day33-demo-asset"}:
+    if argv and argv[0] == "demo-asset":
         return day33_demo_asset.main(list(argv[1:]))
 
-    if argv and argv[0] in {"demo-asset2", "day34-demo-asset2"}:
+    if argv and argv[0] == "demo-asset2":
         return day34_demo_asset2.main(list(argv[1:]))
 
-    if argv and argv[0] in {"kpi-instrumentation", "day35-kpi-instrumentation"}:
+    if argv and argv[0] == "kpi-instrumentation":
         return day35_kpi_instrumentation.main(list(argv[1:]))
 
-    if argv and argv[0] in {"distribution-closeout", "day36-distribution-closeout"}:
+    if argv and argv[0] == "distribution-closeout":
         return day36_distribution_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"experiment-lane", "day37-experiment-lane"}:
+    if argv and argv[0] == "experiment-lane":
         return day37_experiment_lane.main(list(argv[1:]))
 
-    if argv and argv[0] in {"distribution-batch", "day38-distribution-batch"}:
+    if argv and argv[0] == "distribution-batch":
         return day38_distribution_batch.main(list(argv[1:]))
 
-    if argv and argv[0] in {"playbook-post", "day39-playbook-post"}:
+    if argv and argv[0] == "playbook-post":
         return day39_playbook_post.main(list(argv[1:]))
 
-    if argv and argv[0] in {"scale-lane", "day40-scale-lane"}:
+    if argv and argv[0] == "scale-lane":
         return day40_scale_lane.main(list(argv[1:]))
 
     if argv and argv[0] == "expansion-automation":
@@ -735,51 +730,51 @@ Run: sdetkit playbooks
     dwr.set_defaults(cmd="weekly-review-lane")
     dwr.add_argument("args", nargs=argparse.REMAINDER)
 
-    d29 = sub.add_parser("phase1-hardening", aliases=["day29-phase1-hardening"])
+    d29 = sub.add_parser("phase1-hardening")
     d29.set_defaults(cmd="phase1-hardening")
     d29.add_argument("args", nargs=argparse.REMAINDER)
 
-    d30 = sub.add_parser("phase1-wrap", aliases=["day30-phase1-wrap"])
+    d30 = sub.add_parser("phase1-wrap")
     d30.set_defaults(cmd="phase1-wrap")
     d30.add_argument("args", nargs=argparse.REMAINDER)
 
-    d31 = sub.add_parser("phase2-kickoff", aliases=["day31-phase2-kickoff"])
+    d31 = sub.add_parser("phase2-kickoff")
     d31.set_defaults(cmd="phase2-kickoff")
     d31.add_argument("args", nargs=argparse.REMAINDER)
 
-    d32 = sub.add_parser("release-cadence", aliases=["day32-release-cadence"])
+    d32 = sub.add_parser("release-cadence")
     d32.set_defaults(cmd="release-cadence")
     d32.add_argument("args", nargs=argparse.REMAINDER)
 
-    d33 = sub.add_parser("demo-asset", aliases=["day33-demo-asset"])
+    d33 = sub.add_parser("demo-asset")
     d33.set_defaults(cmd="demo-asset")
     d33.add_argument("args", nargs=argparse.REMAINDER)
 
-    d34 = sub.add_parser("demo-asset2", aliases=["day34-demo-asset2"])
+    d34 = sub.add_parser("demo-asset2")
     d34.set_defaults(cmd="demo-asset2")
     d34.add_argument("args", nargs=argparse.REMAINDER)
 
-    d35 = sub.add_parser("kpi-instrumentation", aliases=["day35-kpi-instrumentation"])
+    d35 = sub.add_parser("kpi-instrumentation")
     d35.set_defaults(cmd="kpi-instrumentation")
     d35.add_argument("args", nargs=argparse.REMAINDER)
 
-    d36 = sub.add_parser("distribution-closeout", aliases=["day36-distribution-closeout"])
+    d36 = sub.add_parser("distribution-closeout")
     d36.set_defaults(cmd="distribution-closeout")
     d36.add_argument("args", nargs=argparse.REMAINDER)
 
-    d37 = sub.add_parser("experiment-lane", aliases=["day37-experiment-lane"])
+    d37 = sub.add_parser("experiment-lane")
     d37.set_defaults(cmd="experiment-lane")
     d37.add_argument("args", nargs=argparse.REMAINDER)
 
-    d38 = sub.add_parser("distribution-batch", aliases=["day38-distribution-batch"])
+    d38 = sub.add_parser("distribution-batch")
     d38.set_defaults(cmd="distribution-batch")
     d38.add_argument("args", nargs=argparse.REMAINDER)
 
-    d39 = sub.add_parser("playbook-post", aliases=["day39-playbook-post"])
+    d39 = sub.add_parser("playbook-post")
     d39.set_defaults(cmd="playbook-post")
     d39.add_argument("args", nargs=argparse.REMAINDER)
 
-    d40 = sub.add_parser("scale-lane", aliases=["day40-scale-lane"])
+    d40 = sub.add_parser("scale-lane")
     d40.set_defaults(cmd="scale-lane")
     d40.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -1220,41 +1215,17 @@ Run: sdetkit playbooks
     if ns.cmd == "day28-weekly-review":
         return day28_weekly_review.main(ns.args)
 
-    if ns.cmd == "day29-phase1-hardening":
-        return day29_phase1_hardening.main(ns.args)
 
-    if ns.cmd == "day30-phase1-wrap":
-        return day30_phase1_wrap.main(ns.args)
 
-    if ns.cmd == "day31-phase2-kickoff":
-        return day31_phase2_kickoff.main(ns.args)
 
-    if ns.cmd == "day32-release-cadence":
-        return day32_release_cadence.main(ns.args)
 
-    if ns.cmd == "day33-demo-asset":
-        return day33_demo_asset.main(ns.args)
 
-    if ns.cmd == "day34-demo-asset2":
-        return day34_demo_asset2.main(ns.args)
 
-    if ns.cmd == "day35-kpi-instrumentation":
-        return day35_kpi_instrumentation.main(ns.args)
 
-    if ns.cmd == "day36-distribution-closeout":
-        return day36_distribution_closeout.main(ns.args)
 
-    if ns.cmd == "day37-experiment-lane":
-        return day37_experiment_lane.main(ns.args)
 
-    if ns.cmd == "day38-distribution-batch":
-        return day38_distribution_batch.main(ns.args)
 
-    if ns.cmd == "day39-playbook-post":
-        return day39_playbook_post.main(ns.args)
 
-    if ns.cmd == "day40-scale-lane":
-        return day40_scale_lane.main(ns.args)
 
     if ns.cmd in {"expansion-automation", "day41-expansion-automation"}:
         return day41_expansion_automation.main(ns.args)

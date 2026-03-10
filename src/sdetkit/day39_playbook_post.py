@@ -25,15 +25,15 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day39-playbook-post --format json --strict",
-    "python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict",
-    "python -m sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict",
-    "python scripts/check_day39_playbook_post_contract.py",
+    "python -m sdetkit playbook-post --format json --strict",
+    "python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict",
+    "python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict",
+    "python scripts/check_playbook_post_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day39-playbook-post --format json --strict",
-    "python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict",
-    "python scripts/check_day39_playbook_post_contract.py --skip-evidence",
+    "python -m sdetkit playbook-post --format json --strict",
+    "python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict",
+    "python scripts/check_playbook_post_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 39 playbook publication and metric follow-up.",
@@ -74,10 +74,10 @@ Day 39 publishes playbook post #1 that converts Day 38 distribution evidence int
 ## Day 39 command lane
 
 ```bash
-python -m sdetkit day39-playbook-post --format json --strict
-python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict
-python -m sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict
-python scripts/check_day39_playbook_post_contract.py
+python -m sdetkit playbook-post --format json --strict
+python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict
+python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict
+python scripts/check_playbook_post_contract.py
 ```
 
 ## Playbook publication contract
@@ -209,8 +209,8 @@ def build_day39_playbook_post_summary(
         {
             "check_id": "readme_day39_command",
             "weight": 4,
-            "passed": "day39-playbook-post" in readme_text,
-            "evidence": "day39-playbook-post",
+            "passed": "playbook-post" in readme_text,
+            "evidence": "playbook-post",
         },
         {
             "check_id": "docs_index_day39_links",
@@ -327,7 +327,7 @@ def build_day39_playbook_post_summary(
         wins.append("Day 39 playbook post #1 is fully complete and ready for Day 40 scale lane.")
 
     return {
-        "name": "day39-playbook-post",
+        "name": "playbook-post",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -422,15 +422,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day39-rollout-plan.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
-        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-playbook-post.md,python -m sdetkit day39-playbook-post --format json --strict,completion:+5%\n"
-        "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-39-big-upgrade-report.md,python scripts/check_day39_playbook_post_contract.py,adoption:+7%\n"
-        "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict,ctr:+2%\n",
+        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-playbook-post.md,python -m sdetkit playbook-post --format json --strict,completion:+5%\n"
+        "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-39-big-upgrade-report.md,python scripts/check_playbook_post_contract.py,adoption:+7%\n"
+        "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict,ctr:+2%\n",
     )
     _write(
         target / "day39-kpi-scorecard.json",
         json.dumps(
             {
-                "generated_for": "day39-playbook-post",
+                "generated_for": "playbook-post",
                 "metrics": [
                     {
                         "name": "playbook_read_completion",

@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-playbook-post.md\nday39-playbook-post\n",
+        "docs/integrations-playbook-post.md\nplaybook-post\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def test_day39_playbook_post_json(tmp_path: Path, capsys) -> None:
     rc = d39.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day39-playbook-post"
+    assert out["name"] == "playbook-post"
     assert out["summary"]["activation_score"] >= 95
 
 

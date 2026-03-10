@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added Day 39 closeout command: `python -m sdetkit day39-playbook-post`.
+- Added Day 39 closeout command: `python -m sdetkit playbook-post`.
 - Added strict continuity checks that require Day 38 strict-pass and board integrity.
 - Added Day 39 artifact outputs for playbook draft, rollout plan, KPI scorecard, execution log, and validation commands.
 
@@ -10,8 +10,8 @@
 
 ```bash
 python -m pytest -q tests/test_day39_playbook_post.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_day39_playbook_post_contract.py --skip-evidence
-python -m sdetkit day39-playbook-post --format json --strict
+python scripts/check_playbook_post_contract.py --skip-evidence
+python -m sdetkit playbook-post --format json --strict
 ```
 
 ## Day 40 handoff

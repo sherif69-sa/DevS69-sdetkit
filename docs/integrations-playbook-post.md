@@ -19,7 +19,7 @@ Day 39 publishes playbook post #1 that converts Day 38 distribution evidence int
 python -m sdetkit playbook-post --format json --strict
 python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict
 python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict
-python scripts/check_day39_playbook_post_contract.py
+python scripts/check_playbook_post_contract.py
 ```
 
 ## Playbook publication contract

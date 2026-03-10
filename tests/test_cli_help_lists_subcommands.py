@@ -73,7 +73,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     j = _json.loads(r3.stdout)
     assert "playbooks" in j
     assert "phase1-hardening" in j["playbooks"]
-    assert "day29-phase1-hardening" in j["playbooks"]
+    assert "day29-phase1-hardening" not in j["playbooks"]
     r2 = subprocess.run(
         [sys.executable, "-m", "sdetkit", "playbooks"],
         text=True,
@@ -84,7 +84,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "phase1-hardening" in out2
     assert "phase1-wrap" in out2
     assert "scale-closeout" in out2
-    assert "day29-phase1-hardening -> phase1-hardening" in out2
+    assert "day29-phase1-hardening -> phase1-hardening" not in out2
     assert "Run: sdetkit playbooks run <name>" in out2
 
 

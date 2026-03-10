@@ -8,7 +8,7 @@ from sdetkit import day39_playbook_post as d39
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 39 playbook post contract.")
+    parser = argparse.ArgumentParser(description="Validate playbook post contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

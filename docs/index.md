@@ -34,13 +34,13 @@ Build, validate, and release software with confidence using a polished SDET + De
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [🔒 Phase 3 Wrap Publication Closeout](integrations-phase3-wrap-publication-closeout.md) · [🔁 Continuous Upgrade Closeout](integrations-continuous-upgrade-closeout.md) · [🔁 Continuous Upgrade Cycle 2 Closeout](integrations-continuous-upgrade-cycle2-closeout.md) · [🔁 Continuous Upgrade Cycle 3 Closeout](integrations-continuous-upgrade-cycle3-closeout.md) · [🔁 Continuous Upgrade Cycle 4 Closeout](integrations-continuous-upgrade-cycle4-closeout.md) · [🔁 Continuous Upgrade Cycle 5 Closeout](integrations-continuous-upgrade-cycle5-closeout.md) · [🔁 Continuous Upgrade Cycle 7 Closeout](integrations-continuous-upgrade-cycle7-closeout.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy day reports](#legacy-day-reports)
+[⚡ Fast start](#fast-start) · [🔒 Phase 3 Wrap Publication Closeout](integrations-phase3-wrap-publication-closeout.md) · [🔁 Continuous Upgrade Closeout](integrations-continuous-upgrade-closeout.md) · [🔁 Continuous Upgrade Cycle 2 Closeout](integrations-continuous-upgrade-cycle2-closeout.md) · [🔁 Continuous Upgrade Cycle 3 Closeout](integrations-continuous-upgrade-cycle3-closeout.md) · [🔁 Continuous Upgrade Cycle 4 Closeout](integrations-continuous-upgrade-cycle4-closeout.md) · [🔁 Continuous Upgrade Cycle 5 Closeout](integrations-continuous-upgrade-cycle5-closeout.md) · [🔁 Continuous Upgrade Cycle 7 Closeout](integrations-continuous-upgrade-cycle7-closeout.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-day-reports)
 
 </div>
 
 ## Docs navigation upgrades (legacy docs navigation initiative)
 
-## Legacy day reports
+## Legacy reports
 
 Historical day reports remain available for audit/history traceability:
 
