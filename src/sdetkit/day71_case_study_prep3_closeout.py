@@ -24,14 +24,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day71-case-study-prep3-closeout --format json --strict",
-    "python -m sdetkit day71-case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict",
-    "python -m sdetkit day71-case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit case-study-prep3-closeout --format json --strict",
+    "python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict",
     "python scripts/check_day71_case_study_prep3_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day71-case-study-prep3-closeout --format json --strict",
-    "python -m sdetkit day71-case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep3-closeout --format json --strict",
+    "python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict",
     "python scripts/check_day71_case_study_prep3_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -82,9 +82,9 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 ## Day 71 command lane
 
 ```bash
-python -m sdetkit day71-case-study-prep3-closeout --format json --strict
-python -m sdetkit day71-case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict
-python -m sdetkit day71-case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep3-closeout --format json --strict
+python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict
+python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict
 python scripts/check_day71_case_study_prep3_closeout_contract.py
 ```
 
@@ -174,7 +174,7 @@ def build_day71_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day71_command",
             "weight": 7,
-            "passed": ("day71-case-study-prep3-closeout" in readme_text),
+            "passed": ("case-study-prep3-closeout" in readme_text),
             "evidence": "README day71 command lane",
         },
         {
@@ -310,7 +310,7 @@ def build_day71_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day71-case-study-prep3-closeout",
+        "name": "case-study-prep3-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -345,7 +345,7 @@ def build_day71_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 71 case-study prep #3 closeout summary",
+        "Case Study Prep3 Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -405,7 +405,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 71 case-study prep #3 closeout checks")
+    parser = argparse.ArgumentParser(description="Case Study Prep3 Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

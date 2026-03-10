@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-day79-scale-upgrade-closeout.md\nday79-scale-upgrade-closeout\n",
+        "docs/integrations-day79-scale-upgrade-closeout.md\nscale-upgrade-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -92,7 +92,7 @@ def test_day79_json(tmp_path: Path, capsys) -> None:
     rc = d79.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day79-scale-upgrade-closeout"
+    assert out["name"] == "scale-upgrade-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -136,6 +136,6 @@ def test_day79_strict_fails_without_day78(tmp_path: Path) -> None:
 
 def test_day79_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day79-scale-upgrade-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["scale-upgrade-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 79 scale upgrade closeout summary" in capsys.readouterr().out
+    assert "Scale Upgrade Closeout summary" in capsys.readouterr().out

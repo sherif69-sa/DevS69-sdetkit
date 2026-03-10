@@ -6,7 +6,7 @@ Close Day 73 with a high-signal case-study launch lane that upgrades Day 72 publ
 
 ## What shipped
 
-- New `day73-case-study-launch-closeout` CLI lane with strict scoring and Day 72 continuity validation.
+- New `case-study-launch-closeout` CLI lane with strict scoring and Day 72 continuity validation.
 - New Day 73 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 73 contract checker script for CI and local execution gating.
 - New published-case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
@@ -15,9 +15,9 @@ Close Day 73 with a high-signal case-study launch lane that upgrades Day 72 publ
 ## Validation flow
 
 ```bash
-python -m sdetkit day73-case-study-launch-closeout --format json --strict
-python -m sdetkit day73-case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict
-python -m sdetkit day73-case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-launch-closeout --format json --strict
+python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict
+python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict
 python scripts/check_day73_case_study_launch_closeout_contract.py
 ```
 

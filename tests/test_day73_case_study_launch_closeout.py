@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-day73-case-study-launch-closeout.md\nday73-case-study-launch-closeout\n",
+        "docs/integrations-day73-case-study-launch-closeout.md\ncase-study-launch-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -92,7 +92,7 @@ def test_day73_json(tmp_path: Path, capsys) -> None:
     rc = d73.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day73-case-study-launch-closeout"
+    assert out["name"] == "case-study-launch-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -138,6 +138,6 @@ def test_day73_strict_fails_without_day72(tmp_path: Path) -> None:
 
 def test_day73_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day73-case-study-launch-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["case-study-launch-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 73 case-study launch closeout summary" in capsys.readouterr().out
+    assert "Case Study Launch Closeout summary" in capsys.readouterr().out

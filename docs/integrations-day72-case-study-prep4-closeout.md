@@ -1,4 +1,6 @@
-# Day 72 — Case-study prep #4 closeout lane
+# Case Study Prep4 Closeout
+
+> Legacy mapping: Day 72 remains as history/compatibility alias `day72-case-study-prep4-closeout`. Use `python -m sdetkit case-study-prep4-closeout` as the stable command.
 
 Day 72 closes with a major upgrade that turns Day 71 escalation-quality outputs into a measurable publication-quality case-study launch pack.
 

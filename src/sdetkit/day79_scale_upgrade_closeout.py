@@ -26,14 +26,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day79-scale-upgrade-closeout --format json --strict",
-    "python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict",
-    "python -m sdetkit day79-scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit scale-upgrade-closeout --format json --strict",
+    "python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict",
+    "python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict",
     "python scripts/check_day79_scale_upgrade_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day79-scale-upgrade-closeout --format json --strict",
-    "python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict",
+    "python -m sdetkit scale-upgrade-closeout --format json --strict",
+    "python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict",
     "python scripts/check_day79_scale_upgrade_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -84,9 +84,9 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 ## Day 79 command lane
 
 ```bash
-python -m sdetkit day79-scale-upgrade-closeout --format json --strict
-python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict
-python -m sdetkit day79-scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict
+python -m sdetkit scale-upgrade-closeout --format json --strict
+python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict
+python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict
 python scripts/check_day79_scale_upgrade_closeout_contract.py
 ```
 
@@ -171,7 +171,7 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day79_command",
             "weight": 7,
-            "passed": ("day79-scale-upgrade-closeout" in readme_text),
+            "passed": ("scale-upgrade-closeout" in readme_text),
             "evidence": "README day79 command lane",
         },
         {
@@ -303,7 +303,7 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day79-scale-upgrade-closeout",
+        "name": "scale-upgrade-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -338,7 +338,7 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 79 scale upgrade closeout summary",
+        "Scale Upgrade Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -402,7 +402,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 79 scale upgrade closeout checks")
+    parser = argparse.ArgumentParser(description="Scale Upgrade Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

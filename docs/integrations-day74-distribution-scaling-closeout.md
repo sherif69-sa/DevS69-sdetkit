@@ -1,4 +1,6 @@
-# Day 74 — Distribution scaling closeout lane
+# Distribution Scaling Closeout
+
+> Legacy mapping: Day 74 remains as history/compatibility alias `day74-distribution-scaling-closeout`. Use `python -m sdetkit distribution-scaling-closeout` as the stable command.
 
 Day 74 closes with a major upgrade that turns Day 73 published case-study outcomes into a scalable distribution execution pack with governance safeguards.
 

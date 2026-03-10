@@ -26,14 +26,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day77-community-touchpoint-closeout --format json --strict",
-    "python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict",
-    "python -m sdetkit day77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit community-touchpoint-closeout --format json --strict",
+    "python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict",
+    "python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict",
     "python scripts/check_day77_community_touchpoint_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day77-community-touchpoint-closeout --format json --strict",
-    "python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict",
+    "python -m sdetkit community-touchpoint-closeout --format json --strict",
+    "python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict",
     "python scripts/check_day77_community_touchpoint_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -84,9 +84,9 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 ## Day 77 command lane
 
 ```bash
-python -m sdetkit day77-community-touchpoint-closeout --format json --strict
-python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit day77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
+python -m sdetkit community-touchpoint-closeout --format json --strict
+python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
+python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
 python scripts/check_day77_community_touchpoint_closeout_contract.py
 ```
 
@@ -173,7 +173,7 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
         {
             "check_id": "readme_day77_command",
             "weight": 7,
-            "passed": ("day77-community-touchpoint-closeout" in readme_text),
+            "passed": ("community-touchpoint-closeout" in readme_text),
             "evidence": "README day77 command lane",
         },
         {
@@ -307,7 +307,7 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day77-community-touchpoint-closeout",
+        "name": "community-touchpoint-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -342,7 +342,7 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 77 community touchpoint closeout summary",
+        "Community Touchpoint Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -407,7 +407,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 77 community touchpoint closeout checks")
+    parser = argparse.ArgumentParser(description="Community Touchpoint Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

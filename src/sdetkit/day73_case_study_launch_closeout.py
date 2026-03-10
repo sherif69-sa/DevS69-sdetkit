@@ -176,7 +176,7 @@ def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]
             "weight": 7,
             "passed": (
                 "case-study-launch-closeout" in readme_text
-                or "day73-case-study-launch-closeout" in readme_text
+                or "case-study-launch-closeout" in readme_text
             ),
             "evidence": "README day73 command lane",
         },
@@ -311,7 +311,7 @@ def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day73-case-study-launch-closeout",
+        "name": "case-study-launch-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -346,7 +346,7 @@ def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 73 case-study launch closeout summary",
+        "Case Study Launch Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -406,7 +406,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 73 case-study launch closeout checks")
+    parser = argparse.ArgumentParser(description="Case Study Launch Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

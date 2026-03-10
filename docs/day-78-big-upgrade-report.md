@@ -6,7 +6,7 @@ Close Day 78 with a high-signal ecosystem-priorities lane that upgrades Day 77 c
 
 ### What shipped
 
-- New `day78-ecosystem-priorities-closeout` CLI lane with strict scoring and Day 77 continuity validation.
+- New `ecosystem-priorities-closeout` CLI lane with strict scoring and Day 77 continuity validation.
 - New Day 78 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 78 contract checker script for CI and local execution gating.
 - New `docs/roadmap/plans/day78-ecosystem-priorities-plan.json` baseline dataset scaffold for ecosystem execution planning.
@@ -14,9 +14,9 @@ Close Day 78 with a high-signal ecosystem-priorities lane that upgrades Day 77 c
 ### Command lane
 
 ```bash
-python -m sdetkit day78-ecosystem-priorities-closeout --format json --strict
-python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit day78-ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict
 python scripts/check_day78_ecosystem_priorities_closeout_contract.py
 ```
 

@@ -1,4 +1,6 @@
-# Day 76 — Contributor recognition closeout lane
+# Contributor Recognition Closeout
+
+> Legacy mapping: Day 76 remains as history/compatibility alias `day76-contributor-recognition-closeout`. Use `python -m sdetkit contributor-recognition-closeout` as the stable command.
 
 Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes into a contributor-recognition execution pack.
 

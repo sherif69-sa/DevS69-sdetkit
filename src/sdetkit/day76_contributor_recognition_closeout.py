@@ -175,7 +175,7 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
             "weight": 7,
             "passed": (
                 "contributor-recognition-closeout" in readme_text
-                or "day76-contributor-recognition-closeout" in readme_text
+                or "contributor-recognition-closeout" in readme_text
             ),
             "evidence": "README day76 command lane",
         },
@@ -310,7 +310,7 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day76-contributor-recognition-closeout",
+        "name": "contributor-recognition-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -345,7 +345,7 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 76 contributor recognition closeout summary",
+        "Contributor Recognition Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -414,7 +414,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 76 contributor recognition closeout checks")
+    parser = argparse.ArgumentParser(description="Contributor Recognition Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

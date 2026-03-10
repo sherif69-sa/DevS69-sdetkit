@@ -176,7 +176,7 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
             "weight": 7,
             "passed": (
                 "distribution-scaling-closeout" in readme_text
-                or "day74-distribution-scaling-closeout" in readme_text
+                or "distribution-scaling-closeout" in readme_text
             ),
             "evidence": "README day74 command lane",
         },
@@ -311,7 +311,7 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day74-distribution-scaling-closeout",
+        "name": "distribution-scaling-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -346,7 +346,7 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 74 distribution scaling closeout summary",
+        "Distribution Scaling Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -408,7 +408,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 74 distribution scaling closeout checks")
+    parser = argparse.ArgumentParser(description="Distribution Scaling Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

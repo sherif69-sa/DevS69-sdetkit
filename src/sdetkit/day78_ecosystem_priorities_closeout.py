@@ -26,14 +26,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day78-ecosystem-priorities-closeout --format json --strict",
-    "python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict",
-    "python -m sdetkit day78-ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict",
     "python scripts/check_day78_ecosystem_priorities_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day78-ecosystem-priorities-closeout --format json --strict",
-    "python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict",
     "python scripts/check_day78_ecosystem_priorities_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -84,9 +84,9 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 ## Day 78 command lane
 
 ```bash
-python -m sdetkit day78-ecosystem-priorities-closeout --format json --strict
-python -m sdetkit day78-ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit day78-ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict
 python scripts/check_day78_ecosystem_priorities_closeout_contract.py
 ```
 
@@ -173,7 +173,7 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
         {
             "check_id": "readme_day78_command",
             "weight": 7,
-            "passed": ("day78-ecosystem-priorities-closeout" in readme_text),
+            "passed": ("ecosystem-priorities-closeout" in readme_text),
             "evidence": "README day78 command lane",
         },
         {
@@ -305,7 +305,7 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day78-ecosystem-priorities-closeout",
+        "name": "ecosystem-priorities-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -340,7 +340,7 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 78 ecosystem priorities closeout summary",
+        "Ecosystem Priorities Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -403,7 +403,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 78 ecosystem priorities closeout checks")
+    parser = argparse.ArgumentParser(description="Ecosystem Priorities Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

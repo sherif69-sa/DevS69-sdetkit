@@ -418,37 +418,37 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "day70-case-study-prep2-closeout":
         return day70_case_study_prep2_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day71-case-study-prep3-closeout":
+    if argv and argv[0] in {"case-study-prep3-closeout", "day71-case-study-prep3-closeout"}:
         return day71_case_study_prep3_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"day72-case-study-prep4-closeout", "case-study-prep4-closeout"}:
+    if argv and argv[0] in {"case-study-prep4-closeout", "day72-case-study-prep4-closeout"}:
         return day72_case_study_prep4_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"day73-case-study-launch-closeout", "case-study-launch-closeout"}:
+    if argv and argv[0] in {"case-study-launch-closeout", "day73-case-study-launch-closeout"}:
         return day73_case_study_launch_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"day74-distribution-scaling-closeout", "distribution-scaling-closeout"}:
+    if argv and argv[0] in {"distribution-scaling-closeout", "day74-distribution-scaling-closeout"}:
         return day74_distribution_scaling_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"day75-trust-assets-refresh-closeout", "trust-assets-refresh-closeout"}:
+    if argv and argv[0] in {"trust-assets-refresh-closeout", "day75-trust-assets-refresh-closeout"}:
         return day75_trust_assets_refresh_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {
-        "day76-contributor-recognition-closeout",
         "contributor-recognition-closeout",
+        "day76-contributor-recognition-closeout",
     }:
         return day76_contributor_recognition_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day77-community-touchpoint-closeout":
+    if argv and argv[0] in {"community-touchpoint-closeout", "day77-community-touchpoint-closeout"}:
         return day77_community_touchpoint_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day78-ecosystem-priorities-closeout":
+    if argv and argv[0] in {"ecosystem-priorities-closeout", "day78-ecosystem-priorities-closeout"}:
         return day78_ecosystem_priorities_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day79-scale-upgrade-closeout":
+    if argv and argv[0] in {"scale-upgrade-closeout", "day79-scale-upgrade-closeout"}:
         return day79_scale_upgrade_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day80-partner-outreach-closeout":
+    if argv and argv[0] in {"partner-outreach-closeout", "day80-partner-outreach-closeout"}:
         return day80_partner_outreach_closeout.main(list(argv[1:]))
 
     if argv and argv[0] == "day81-growth-campaign-closeout":
@@ -843,36 +843,36 @@ Run: sdetkit playbooks
 
     d70 = sub.add_parser("day70-case-study-prep2-closeout")
     d70.add_argument("args", nargs=argparse.REMAINDER)
-    d71 = sub.add_parser("day71-case-study-prep3-closeout")
+    d71 = sub.add_parser("case-study-prep3-closeout", aliases=["day71-case-study-prep3-closeout"])
     d71.add_argument("args", nargs=argparse.REMAINDER)
     d72 = sub.add_parser("case-study-prep4-closeout", aliases=["day72-case-study-prep4-closeout"])
-    d72.set_defaults(cmd="day72-case-study-prep4-closeout")
+    d72.set_defaults(cmd="case-study-prep4-closeout")
     d72.add_argument("args", nargs=argparse.REMAINDER)
     d73 = sub.add_parser("case-study-launch-closeout", aliases=["day73-case-study-launch-closeout"])
-    d73.set_defaults(cmd="day73-case-study-launch-closeout")
+    d73.set_defaults(cmd="case-study-launch-closeout")
     d73.add_argument("args", nargs=argparse.REMAINDER)
     d74 = sub.add_parser(
         "distribution-scaling-closeout", aliases=["day74-distribution-scaling-closeout"]
     )
-    d74.set_defaults(cmd="day74-distribution-scaling-closeout")
+    d74.set_defaults(cmd="distribution-scaling-closeout")
     d74.add_argument("args", nargs=argparse.REMAINDER)
     d75 = sub.add_parser(
         "trust-assets-refresh-closeout", aliases=["day75-trust-assets-refresh-closeout"]
     )
-    d75.set_defaults(cmd="day75-trust-assets-refresh-closeout")
+    d75.set_defaults(cmd="trust-assets-refresh-closeout")
     d75.add_argument("args", nargs=argparse.REMAINDER)
     d76 = sub.add_parser(
         "contributor-recognition-closeout", aliases=["day76-contributor-recognition-closeout"]
     )
-    d76.set_defaults(cmd="day76-contributor-recognition-closeout")
+    d76.set_defaults(cmd="contributor-recognition-closeout")
     d76.add_argument("args", nargs=argparse.REMAINDER)
-    d77 = sub.add_parser("day77-community-touchpoint-closeout")
+    d77 = sub.add_parser("community-touchpoint-closeout", aliases=["day77-community-touchpoint-closeout"])
     d77.add_argument("args", nargs=argparse.REMAINDER)
-    d78 = sub.add_parser("day78-ecosystem-priorities-closeout")
+    d78 = sub.add_parser("ecosystem-priorities-closeout", aliases=["day78-ecosystem-priorities-closeout"])
     d78.add_argument("args", nargs=argparse.REMAINDER)
-    d79 = sub.add_parser("day79-scale-upgrade-closeout")
+    d79 = sub.add_parser("scale-upgrade-closeout", aliases=["day79-scale-upgrade-closeout"])
     d79.add_argument("args", nargs=argparse.REMAINDER)
-    d80 = sub.add_parser("day80-partner-outreach-closeout")
+    d80 = sub.add_parser("partner-outreach-closeout", aliases=["day80-partner-outreach-closeout"])
     d80.add_argument("args", nargs=argparse.REMAINDER)
     d81 = sub.add_parser("day81-growth-campaign-closeout")
     d81.add_argument("args", nargs=argparse.REMAINDER)
@@ -1209,34 +1209,34 @@ Run: sdetkit playbooks
     if ns.cmd == "day70-case-study-prep2-closeout":
         return day70_case_study_prep2_closeout.main(ns.args)
 
-    if ns.cmd == "day71-case-study-prep3-closeout":
+    if ns.cmd == "case-study-prep3-closeout":
         return day71_case_study_prep3_closeout.main(ns.args)
 
-    if ns.cmd == "day72-case-study-prep4-closeout":
+    if ns.cmd == "case-study-prep4-closeout":
         return day72_case_study_prep4_closeout.main(ns.args)
 
-    if ns.cmd == "day73-case-study-launch-closeout":
+    if ns.cmd == "case-study-launch-closeout":
         return day73_case_study_launch_closeout.main(ns.args)
 
-    if ns.cmd == "day74-distribution-scaling-closeout":
+    if ns.cmd == "distribution-scaling-closeout":
         return day74_distribution_scaling_closeout.main(ns.args)
 
-    if ns.cmd == "day75-trust-assets-refresh-closeout":
+    if ns.cmd == "trust-assets-refresh-closeout":
         return day75_trust_assets_refresh_closeout.main(ns.args)
 
-    if ns.cmd == "day76-contributor-recognition-closeout":
+    if ns.cmd == "contributor-recognition-closeout":
         return day76_contributor_recognition_closeout.main(ns.args)
 
-    if ns.cmd == "day77-community-touchpoint-closeout":
+    if ns.cmd == "community-touchpoint-closeout":
         return day77_community_touchpoint_closeout.main(ns.args)
 
-    if ns.cmd == "day78-ecosystem-priorities-closeout":
+    if ns.cmd == "ecosystem-priorities-closeout":
         return day78_ecosystem_priorities_closeout.main(ns.args)
 
-    if ns.cmd == "day79-scale-upgrade-closeout":
+    if ns.cmd == "scale-upgrade-closeout":
         return day79_scale_upgrade_closeout.main(ns.args)
 
-    if ns.cmd == "day80-partner-outreach-closeout":
+    if ns.cmd == "partner-outreach-closeout":
         return day80_partner_outreach_closeout.main(ns.args)
 
     if ns.cmd == "day81-growth-campaign-closeout":

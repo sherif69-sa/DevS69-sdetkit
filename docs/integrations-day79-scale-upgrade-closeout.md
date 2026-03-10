@@ -1,4 +1,6 @@
-# Day 79 — Scale upgrade closeout lane
+# Scale Upgrade Closeout
+
+> Legacy mapping: Day 79 remains as history/compatibility alias `day79-scale-upgrade-closeout`. Use `python -m sdetkit scale-upgrade-closeout` as the stable command.
 
 Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
 
@@ -17,9 +19,9 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 ## Day 79 command lane
 
 ```bash
-python -m sdetkit day79-scale-upgrade-closeout --format json --strict
-python -m sdetkit day79-scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict
-python -m sdetkit day79-scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict
+python -m sdetkit scale-upgrade-closeout --format json --strict
+python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict
+python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict
 python scripts/check_day79_scale_upgrade_closeout_contract.py
 ```
 

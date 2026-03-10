@@ -65,7 +65,7 @@ def test_day76_json(tmp_path: Path, capsys) -> None:
     rc = d76.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day76-contributor-recognition-closeout"
+    assert out["name"] == "contributor-recognition-closeout"
     assert out["summary"]["strict_pass"] is True
 
 
@@ -106,4 +106,4 @@ def test_day76_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["contributor-recognition-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 76 contributor recognition closeout summary" in capsys.readouterr().out
+    assert "Contributor Recognition Closeout summary" in capsys.readouterr().out

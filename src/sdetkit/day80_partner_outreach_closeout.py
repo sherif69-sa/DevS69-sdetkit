@@ -26,14 +26,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day80-partner-outreach-closeout --format json --strict",
-    "python -m sdetkit day80-partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict",
-    "python -m sdetkit day80-partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit partner-outreach-closeout --format json --strict",
+    "python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict",
+    "python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict",
     "python scripts/check_day80_partner_outreach_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day80-partner-outreach-closeout --format json --strict",
-    "python -m sdetkit day80-partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict",
+    "python -m sdetkit partner-outreach-closeout --format json --strict",
+    "python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict",
     "python scripts/check_day80_partner_outreach_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -84,9 +84,9 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 ## Day 80 command lane
 
 ```bash
-python -m sdetkit day80-partner-outreach-closeout --format json --strict
-python -m sdetkit day80-partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict
-python -m sdetkit day80-partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict
+python -m sdetkit partner-outreach-closeout --format json --strict
+python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict
+python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict
 python scripts/check_day80_partner_outreach_closeout_contract.py
 ```
 
@@ -177,7 +177,7 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day80_command",
             "weight": 7,
-            "passed": ("day80-partner-outreach-closeout" in readme_text),
+            "passed": ("partner-outreach-closeout" in readme_text),
             "evidence": "README day80 command lane",
         },
         {
@@ -309,7 +309,7 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day80-partner-outreach-closeout",
+        "name": "partner-outreach-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -344,7 +344,7 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 80 partner outreach closeout summary",
+        "Partner Outreach Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -407,7 +407,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 80 partner outreach closeout checks")
+    parser = argparse.ArgumentParser(description="Partner Outreach Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

@@ -1,4 +1,6 @@
-# Day 77 — Community touchpoint closeout lane
+# Community Touchpoint Closeout
+
+> Legacy mapping: Day 77 remains as history/compatibility alias `day77-community-touchpoint-closeout`. Use `python -m sdetkit community-touchpoint-closeout` as the stable command.
 
 Day 77 closes with a major upgrade that converts Day 76 contributor-recognition outcomes into a community-touchpoint execution pack.
 
@@ -17,9 +19,9 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 ## Day 77 command lane
 
 ```bash
-python -m sdetkit day77-community-touchpoint-closeout --format json --strict
-python -m sdetkit day77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit day77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
+python -m sdetkit community-touchpoint-closeout --format json --strict
+python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
+python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
 python scripts/check_day77_community_touchpoint_closeout_contract.py
 ```
 

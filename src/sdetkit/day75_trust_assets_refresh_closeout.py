@@ -175,7 +175,7 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
             "weight": 7,
             "passed": (
                 "trust-assets-refresh-closeout" in readme_text
-                or "day75-trust-assets-refresh-closeout" in readme_text
+                or "trust-assets-refresh-closeout" in readme_text
             ),
             "evidence": "README day75 command lane",
         },
@@ -310,7 +310,7 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day75-trust-assets-refresh-closeout",
+        "name": "trust-assets-refresh-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -345,7 +345,7 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 75 trust assets refresh closeout summary",
+        "Trust Assets Refresh Closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -405,7 +405,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 75 trust assets refresh closeout checks")
+    parser = argparse.ArgumentParser(description="Trust Assets Refresh Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

@@ -1,4 +1,6 @@
-# Day 80 — Partner outreach closeout lane
+# Partner Outreach Closeout
+
+> Legacy mapping: Day 80 remains as history/compatibility alias `day80-partner-outreach-closeout`. Use `python -m sdetkit partner-outreach-closeout` as the stable command.
 
 Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a partner-outreach execution pack.
 
@@ -17,9 +19,9 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 ## Day 80 command lane
 
 ```bash
-python -m sdetkit day80-partner-outreach-closeout --format json --strict
-python -m sdetkit day80-partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict
-python -m sdetkit day80-partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict
+python -m sdetkit partner-outreach-closeout --format json --strict
+python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict
+python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict
 python scripts/check_day80_partner_outreach_closeout_contract.py
 ```
 

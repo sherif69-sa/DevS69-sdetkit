@@ -4,7 +4,7 @@ Day 79 delivers a closeout-grade scale upgrade lane that promotes Day 78 ecosyst
 
 ## What shipped
 
-- New command: `python -m sdetkit day79-scale-upgrade-closeout`.
+- New command: `python -m sdetkit scale-upgrade-closeout`.
 - New integration guide: `docs/integrations-day79-scale-upgrade-closeout.md`.
 - New contract checker: `python scripts/check_day79_scale_upgrade_closeout_contract.py`.
 - New artifact schema emitted via `--emit-pack-dir` and deterministic evidence via `--execute`.

@@ -6,7 +6,7 @@ Close Day 75 with a high-signal trust-assets refresh lane that upgrades Day 74 d
 
 ### What shipped
 
-- New `day75-trust-assets-refresh-closeout` CLI lane with strict scoring and Day 74 continuity validation.
+- New `trust-assets-refresh-closeout` CLI lane with strict scoring and Day 74 continuity validation.
 - New Day 75 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 75 contract checker script for CI and local execution gating.
 - New `docs/roadmap/plans/day75-trust-assets-refresh-plan.json` baseline dataset scaffold for trust refresh execution planning.
@@ -14,9 +14,9 @@ Close Day 75 with a high-signal trust-assets refresh lane that upgrades Day 74 d
 ### Command lane
 
 ```bash
-python -m sdetkit day75-trust-assets-refresh-closeout --format json --strict
-python -m sdetkit day75-trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack --format json --strict
-python -m sdetkit day75-trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack/evidence --format json --strict
+python -m sdetkit trust-assets-refresh-closeout --format json --strict
+python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack --format json --strict
+python -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack/evidence --format json --strict
 python scripts/check_day75_trust_assets_refresh_closeout_contract.py
 ```
 

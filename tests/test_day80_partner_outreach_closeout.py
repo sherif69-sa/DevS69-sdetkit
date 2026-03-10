@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-day80-partner-outreach-closeout.md\nday80-partner-outreach-closeout\n",
+        "docs/integrations-day80-partner-outreach-closeout.md\npartner-outreach-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -92,7 +92,7 @@ def test_day80_json(tmp_path: Path, capsys) -> None:
     rc = d80.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day80-partner-outreach-closeout"
+    assert out["name"] == "partner-outreach-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -136,6 +136,6 @@ def test_day80_strict_fails_without_day79(tmp_path: Path) -> None:
 
 def test_day80_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day80-partner-outreach-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["partner-outreach-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 80 partner outreach closeout summary" in capsys.readouterr().out
+    assert "Partner Outreach Closeout summary" in capsys.readouterr().out

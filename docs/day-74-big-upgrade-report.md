@@ -6,7 +6,7 @@ Close Day 74 with a high-signal distribution scaling lane that upgrades Day 73 p
 
 ### What shipped
 
-- New `day74-distribution-scaling-closeout` CLI lane with strict scoring and Day 73 continuity validation.
+- New `distribution-scaling-closeout` CLI lane with strict scoring and Day 73 continuity validation.
 - New Day 74 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 74 contract checker script for CI and local execution gating.
 - New `docs/roadmap/plans/day74-distribution-scaling-plan.json` baseline dataset scaffold for Day 74 distribution execution planning.
@@ -14,9 +14,9 @@ Close Day 74 with a high-signal distribution scaling lane that upgrades Day 73 p
 ### Command lane
 
 ```bash
-python -m sdetkit day74-distribution-scaling-closeout --format json --strict
-python -m sdetkit day74-distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict
-python -m sdetkit day74-distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict
+python -m sdetkit distribution-scaling-closeout --format json --strict
+python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict
+python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict
 python scripts/check_day74_distribution_scaling_closeout_contract.py
 ```
 
