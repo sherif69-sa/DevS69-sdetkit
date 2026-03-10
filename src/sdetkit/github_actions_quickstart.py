@@ -164,11 +164,20 @@ python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifa
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit github-actions-quickstart",
-        description="Render and validate the Day 15 GitHub Actions quickstart integration recipe.",
+        description="Render and validate a GitHub Actions quickstart report.",
     )
-    parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")
+    parser.add_argument(
+        "--format",
+        choices=["text", "markdown", "json"],
+        default="text",
+        help="Output format.",
+    )
     parser.add_argument("--root", default=".", help="Repository root where docs live.")
-    parser.add_argument("--output", default="", help="Optional output file path.")
+    parser.add_argument(
+        "--output",
+        default="",
+        help="Optional file path to also write the rendered GitHub Actions quickstart report.",
+    )
     parser.add_argument(
         "--strict",
         action="store_true",
@@ -177,26 +186,28 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Write or repair the Day 15 quickstart page before validation.",
+        help="Write or repair the GitHub Actions quickstart page before validation.",
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help="Optional path to emit a Day 15 quickstart pack."
+        "--emit-pack-dir",
+        default="",
+        help="Optional directory to also write the GitHub Actions quickstart pack.",
     )
     parser.add_argument(
         "--variant",
         choices=["minimal", "strict", "nightly"],
         default="minimal",
-        help="Workflow variant for markdown/text snippets.",
+        help="Workflow variant to render in the report.",
     )
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="Run Day 15 command sequence and capture pass/fail details.",
+        help="Run the required GitHub Actions command sequence and capture pass/fail details.",
     )
     parser.add_argument(
         "--evidence-dir",
         default="",
-        help="Optional output directory for execution summary JSON and command logs.",
+        help="Optional directory to also write execution summary JSON and command logs.",
     )
     parser.add_argument(
         "--timeout-sec",
@@ -405,11 +416,22 @@ def main(argv: list[str] | None = None) -> int:
         "page": _PAGE_PATH,
         "variant": args.variant,
         "selected_workflow": _workflow_content(args.variant),
+        "required_sections": list(_REQUIRED_SECTIONS),
+        "required_commands": list(_REQUIRED_COMMANDS),
         "passed_checks": passed,
         "total_checks": total,
         "score": score,
         "missing": missing,
         "touched_files": touched,
+        "actions": {
+            "open_page": _PAGE_PATH,
+            "validate": "sdetkit github-actions-quickstart --format json --strict",
+            "validate_strict_variant": "sdetkit github-actions-quickstart --format json --variant strict --strict",
+            "write_defaults": "sdetkit github-actions-quickstart --write-defaults --format json --strict",
+            "artifact": "sdetkit github-actions-quickstart --format markdown --variant strict --output docs/artifacts/day15-github-actions-quickstart-sample.md",
+            "emit_pack": "sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict",
+            "execute": "sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict",
+        },
     }
 
     if args.emit_pack_dir:
@@ -440,40 +462,99 @@ def main(argv: list[str] | None = None) -> int:
         rendered = json.dumps(payload, indent=2) + "\n"
     elif args.format == "markdown":
         lines = [
-            "# Day 15 GitHub Actions quickstart",
+            "# GitHub Actions quickstart report",
             "",
-            f"- Page: `{_PAGE_PATH}`",
-            f"- Variant: `{args.variant}`",
-            f"- Score: **{score}** ({passed}/{total})",
+            f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
+            f"- Page: `{payload['page']}`",
+            f"- Variant: `{payload['variant']}`",
+            "",
+            "## Required sections",
+            "",
         ]
-        if missing:
-            lines.append("- Missing:")
-            lines.extend(f"  - `{item}`" for item in missing)
+        for item in payload["required_sections"]:
+            lines.append(f"- `{item}`")
+        lines.extend(["", "## Required commands", "", "```bash"])
+        lines.extend(payload["required_commands"])
+        lines.extend(["```", "", "## Selected workflow", "", "```yaml"])
+        lines.extend(str(payload["selected_workflow"]).rstrip().splitlines())
+        lines.extend(["```"])
+        if payload.get("execution"):
+            exec_data = payload["execution"]
+            lines.extend(["", "## Execution summary", ""])
+            lines.append(
+                f"- Passed commands: **{exec_data['passed_commands']}**/{exec_data['total_commands']}"
+            )
+            lines.append(f"- Failed commands: **{exec_data['failed_commands']}**")
+        if payload.get("evidence_files"):
+            lines.extend(["", "## Evidence files", ""])
+            for item in payload["evidence_files"]:
+                lines.append(f"- `{item}`")
+        if payload.get("pack_files"):
+            lines.extend(["", "## Emitted pack files", ""])
+            for item in payload["pack_files"]:
+                lines.append(f"- `{item}`")
+        lines.extend(["", "## Quickstart coverage gaps", ""])
+        if payload["missing"]:
+            for item in payload["missing"]:
+                lines.append(f"- `{item}`")
         else:
-            lines.append("- Missing: none \u2705")
-
-        lines.extend(
-            [
-                "",
-                "## Commands",
-                "",
-                "```bash",
-                "sdetkit github-actions-quickstart --format text --strict",
-                "sdetkit github-actions-quickstart --format json --variant strict --strict",
-                "sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict",
-                "sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict",
-                "```",
-            ]
+            lines.append("- none")
+        lines.extend(["", "## Actions", ""])
+        lines.append(f"- Open page: `{payload['actions']['open_page']}`")
+        lines.append(f"- Validate: `{payload['actions']['validate']}`")
+        lines.append(
+            f"- Validate strict variant: `{payload['actions']['validate_strict_variant']}`"
         )
+        lines.append(f"- Write defaults: `{payload['actions']['write_defaults']}`")
+        lines.append(f"- Export artifact: `{payload['actions']['artifact']}`")
+        lines.append(f"- Emit pack: `{payload['actions']['emit_pack']}`")
+        lines.append(f"- Execute: `{payload['actions']['execute']}`")
         rendered = "\n".join(lines) + "\n"
     else:
-        rendered = (
-            "Day 15 GitHub Actions quickstart\n"
-            f"page: {_PAGE_PATH}\n"
-            f"variant: {args.variant}\n"
-            f"score: {score} ({passed}/{total})\n"
-            f"missing checks: {len(missing)}\n"
-        )
+        lines = [
+            "GitHub Actions quickstart report",
+            f"Score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
+            "",
+            f"Page: {payload['page']}",
+            f"Variant: {payload['variant']}",
+            "",
+            "Required sections:",
+        ]
+        for idx, item in enumerate(payload["required_sections"], start=1):
+            lines.append(f"{idx}. {item}")
+        lines.extend(["", "Required commands:"])
+        for cmd in payload["required_commands"]:
+            lines.append(f"- {cmd}")
+        lines.extend(["", "Selected workflow:", ""])
+        lines.extend(str(payload["selected_workflow"]).rstrip().splitlines())
+        if payload.get("execution"):
+            exec_data = payload["execution"]
+            lines.extend(["", "Execution summary:"])
+            lines.append(f"- Passed: {exec_data['passed_commands']}/{exec_data['total_commands']}")
+            lines.append(f"- Failed: {exec_data['failed_commands']}")
+        if payload.get("evidence_files"):
+            lines.extend(["", "Evidence files:"])
+            for item in payload["evidence_files"]:
+                lines.append(f"- {item}")
+        if payload.get("pack_files"):
+            lines.extend(["", "Emitted pack files:"])
+            for item in payload["pack_files"]:
+                lines.append(f"- {item}")
+        if payload["missing"]:
+            lines.extend(["", "Quickstart coverage gaps:"])
+            for item in payload["missing"]:
+                lines.append(f"- {item}")
+        else:
+            lines.extend(["", "Quickstart coverage gaps: none"])
+        lines.extend(["", "Actions:"])
+        lines.append(f"- Open page: {payload['actions']['open_page']}")
+        lines.append(f"- Validate: {payload['actions']['validate']}")
+        lines.append(f"- Validate strict variant: {payload['actions']['validate_strict_variant']}")
+        lines.append(f"- Write defaults: {payload['actions']['write_defaults']}")
+        lines.append(f"- Export artifact: {payload['actions']['artifact']}")
+        lines.append(f"- Emit pack: {payload['actions']['emit_pack']}")
+        lines.append(f"- Execute: {payload['actions']['execute']}")
+        rendered = "\n".join(lines) + "\n"
 
     if args.output:
         Path(args.output).write_text(rendered, encoding="utf-8")

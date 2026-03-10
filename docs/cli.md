@@ -266,31 +266,30 @@ See: day-13-ultra-upgrade-report.md (legacy history).
 
 ## github-actions-quickstart
 
-Builds Day 15 GitHub Actions quickstart status and validates required integration sections, workflow variants, and execution evidence workflow.
+Builds a GitHub Actions quickstart report and validates required integration sections, workflow variants, and execution evidence workflow.
 
 Examples:
 
-- `sdetkit github-actions-quickstart --format text --strict`
-- `sdetkit github-actions-quickstart --format json --variant strict --strict`
+- `sdetkit github-actions-quickstart`
+- `sdetkit github-actions-quickstart --format json --variant strict`
 - `sdetkit github-actions-quickstart --write-defaults --format json --strict`
-- `sdetkit github-actions-quickstart --format markdown --variant strict --output docs/artifacts/day15-github-actions-quickstart-sample.md`
+- `sdetkit github-actions-quickstart --format markdown --variant strict --output github-actions-quickstart.md`
 - `sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict`
 - `sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict`
 
 Useful flags: `--root`, `--format`, `--output`, `--strict`, `--write-defaults`, `--emit-pack-dir`, `--variant`, `--execute`, `--evidence-dir`, `--timeout-sec`.
 
-`--strict` returns non-zero if required Day 15 quickstart sections or command snippets are missing from `docs/integrations-github-actions-quickstart.md`.
+`--strict` returns non-zero if required quickstart sections, workflow variants, or command snippets are missing from `docs/integrations-github-actions-quickstart.md`.
 
-`--write-defaults` writes a hardened Day 15 quickstart page if missing/incomplete, then validates again.
+`--write-defaults` writes or repairs the GitHub Actions quickstart page before validation.
 
-`--emit-pack-dir` writes a Day 15 integration pack containing checklist, minimal/strict/nightly workflows, distribution plan, and validation commands.
+`--emit-pack-dir` writes a GitHub Actions pack bundle containing checklist, minimal/strict/nightly workflows, distribution plan, and validation commands.
 
-`--execute` runs Day 15 command chain and captures pass/fail output.
+`--execute` runs the required GitHub Actions command chain and captures pass/fail details.
 
 `--evidence-dir` writes `day15-execution-summary.json` plus per-command log files for CI incident triage and closeout handoff.
 
-See: day-15-ultra-upgrade-report.md
-
+See: day-15-ultra-upgrade-report.md (legacy history).
 
 ## gitlab-ci-quickstart
 
