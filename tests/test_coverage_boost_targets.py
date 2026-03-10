@@ -178,4 +178,4 @@ def test_cli_alias_resolver_fallback_and_hit(monkeypatch: pytest.MonkeyPatch) ->
 
 def test_cli_alias_resolver_real_non_day_day_module_alias() -> None:
     resolved = cli._resolve_non_day_playbook_alias("phase1-hardening")
-    assert resolved == "day29-phase1-hardening"
+    assert resolved == "phase1-hardening"

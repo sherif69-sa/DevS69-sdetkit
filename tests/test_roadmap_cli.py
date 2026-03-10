@@ -30,7 +30,7 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
 
     assert len(entries) == 1
     assert entries[0].report_path == "docs/roadmap/reports/day01-report.md"
-    assert entries[0].plan_path == "docs/roadmap/phase3/plans/plan.json"
+    assert entries[0].plan_path == "docs/roadmap/phase3/plans/day01-plan.json"
 
 
 def test_load_manifest_handles_dot_prefixed_plan_candidates(tmp_path: Path, monkeypatch) -> None:

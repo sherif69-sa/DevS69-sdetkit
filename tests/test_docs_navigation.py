@@ -44,7 +44,7 @@ def test_docs_navigation_json_and_strict_success(capsys):
     assert data["name"] == "day11-docs-navigation"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 12
-    assert any(check["id"] == "day11-top-journeys-header" for check in data["checks"])
+    assert any(check["id"] == "day11-upgrade-section" for check in data["checks"])
 
 
 def test_docs_navigation_strict_fails_when_content_missing(tmp_path, capsys):
@@ -70,8 +70,8 @@ def test_docs_navigation_write_defaults_recovers_missing_quick_jump(tmp_path, ca
     assert data["touched_files"] == ["docs/index.md"]
     assert data["passed_checks"] == data["total_checks"]
     repaired = (tmp_path / "docs/index.md").read_text(encoding="utf-8")
-    assert "[🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md)" in repaired
-    assert "### Day 11 top journeys" in repaired
+    assert "[🧭 Repo tour](repo-tour.md)" in repaired
+    assert "### Top journeys" in repaired
 
 
 def test_docs_navigation_write_defaults_bootstraps_missing_docs_index(tmp_path, capsys):

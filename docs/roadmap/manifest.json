@@ -337,173 +337,141 @@
     },
     {
       "day": 69,
-      "plan_path": "docs/roadmap/phase3/plans/reliability-case-study.json",
       "report_path": "docs/roadmap/reports/day-69-big-upgrade-report.md",
       "report_title": "Day 69 big upgrade report"
     },
     {
       "day": 70,
-      "plan_path": "docs/roadmap/phase3/plans/triage-speed-case-study.json",
       "report_path": "docs/roadmap/reports/day-70-big-upgrade-report.md",
       "report_title": "Day 70 big upgrade report"
     },
     {
       "day": 71,
-      "plan_path": "docs/roadmap/phase3/plans/escalation-quality-case-study.json",
       "report_path": "docs/roadmap/reports/day-71-big-upgrade-report.md",
       "report_title": "Day 71 big upgrade report"
     },
     {
       "day": 72,
-      "plan_path": "docs/roadmap/phase3/plans/publication-quality-case-study.json",
       "report_path": "docs/roadmap/reports/day-72-big-upgrade-report.md",
       "report_title": "Day 72 big upgrade report"
     },
     {
       "day": 73,
-      "plan_path": "docs/roadmap/phase3/plans/published-case-study.json",
       "report_path": "docs/roadmap/reports/day-73-big-upgrade-report.md",
       "report_title": "Day 73 big upgrade report"
     },
     {
       "day": 74,
-      "plan_path": "docs/roadmap/phase3/plans/distribution-scaling-plan.json",
       "report_path": "docs/roadmap/reports/day-74-big-upgrade-report.md",
       "report_title": "Day 74 big upgrade report"
     },
     {
       "day": 75,
-      "plan_path": "docs/roadmap/phase3/plans/trust-assets-refresh-plan.json",
       "report_path": "docs/roadmap/reports/day-75-big-upgrade-report.md",
       "report_title": "Day 75 big upgrade report"
     },
     {
       "day": 76,
-      "plan_path": "docs/roadmap/phase3/plans/contributor-recognition-plan.json",
       "report_path": "docs/roadmap/reports/day-76-big-upgrade-report.md",
       "report_title": "Day 76 big upgrade report"
     },
     {
       "day": 77,
-      "plan_path": "docs/roadmap/phase3/plans/community-touchpoint-plan.json",
       "report_path": "docs/roadmap/reports/day-77-big-upgrade-report.md",
       "report_title": "Day 77 big upgrade report"
     },
     {
       "day": 78,
-      "plan_path": "docs/roadmap/phase3/plans/ecosystem-priorities-plan.json",
       "report_path": "docs/roadmap/reports/day-78-big-upgrade-report.md",
       "report_title": "Day 78 big upgrade report"
     },
     {
       "day": 79,
-      "plan_path": "docs/roadmap/phase3/plans/scale-upgrade-plan.json",
       "report_path": "docs/roadmap/reports/day-79-big-upgrade-report.md",
       "report_title": "Day 79 big upgrade report"
     },
     {
       "day": 80,
-      "plan_path": "docs/roadmap/phase3/plans/partner-outreach-plan.json",
       "report_path": "docs/roadmap/reports/day-80-big-upgrade-report.md",
       "report_title": "Day 80 Big Upgrade Report"
     },
     {
       "day": 81,
-      "plan_path": "docs/roadmap/phase3/plans/growth-campaign-plan.json",
       "report_path": "docs/roadmap/reports/day-81-big-upgrade-report.md",
       "report_title": "Day 81 Big Upgrade Report"
     },
     {
       "day": 82,
-      "plan_path": "docs/roadmap/phase3/plans/integration-feedback-plan.json",
       "report_path": "docs/roadmap/reports/day-82-big-upgrade-report.md",
       "report_title": "Day 82 Big Upgrade Report"
     },
     {
       "day": 83,
-      "plan_path": "docs/roadmap/phase3/plans/trust-faq-expansion-plan.json",
       "report_path": "docs/roadmap/reports/day-83-big-upgrade-report.md",
       "report_title": "Day 83 Big Upgrade Report"
     },
     {
       "day": 84,
-      "plan_path": "docs/roadmap/phase3/plans/evidence-narrative-plan.json",
       "report_path": "docs/roadmap/reports/day-84-big-upgrade-report.md",
       "report_title": "Day 84 big upgrade report"
     },
     {
       "day": 85,
-      "plan_path": "docs/roadmap/phase3/plans/release-prioritization-plan.json",
       "report_path": "docs/roadmap/reports/day-85-big-upgrade-report.md",
       "report_title": "Day 85 big upgrade report"
     },
     {
       "day": 86,
-      "plan_path": "docs/roadmap/phase3/plans/launch-readiness-plan.json",
       "report_path": "docs/roadmap/reports/day-86-big-upgrade-report.md",
       "report_title": "Day 86 big upgrade report"
     },
     {
       "day": 87,
-      "plan_path": "docs/roadmap/phase3/plans/governance-handoff-plan.json",
       "report_path": "docs/roadmap/reports/day-87-big-upgrade-report.md",
       "report_title": "Day 87 big upgrade report"
     },
     {
       "day": 88,
-      "plan_path": "docs/roadmap/phase3/plans/governance-priorities-plan.json",
       "report_path": "docs/roadmap/reports/day-88-big-upgrade-report.md",
       "report_title": "Day 88 big upgrade report"
     },
     {
       "day": 89,
-      "plan_path": "docs/roadmap/phase3/plans/governance-scale-plan.json",
       "report_path": "docs/roadmap/reports/day-89-big-upgrade-report.md",
       "report_title": "Day 89 big upgrade report"
     },
     {
       "day": 90,
-      "plan_path": "docs/roadmap/phase3/plans/phase3-wrap-publication-plan.json",
       "report_path": "docs/roadmap/reports/day-90-big-upgrade-report.md",
       "report_title": "Day 90 big upgrade report"
     },
     {
       "day": 91,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-plan.json",
       "report_path": "docs/roadmap/reports/day-91-big-upgrade-report.md",
       "report_title": "Day 91 big upgrade report"
     },
     {
       "day": 92,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-cycle2-plan.json",
       "report_path": "docs/roadmap/reports/day-92-big-upgrade-report.md",
       "report_title": "Day 92 big upgrade report"
     },
     {
       "day": 93,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-cycle3-plan.json",
       "report_path": "docs/roadmap/reports/day-93-big-upgrade-report.md",
       "report_title": "Day 93 big upgrade report"
     },
     {
-      "day": 94,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-cycle4-plan.json"
-    },
-    {
       "day": 95,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-cycle5-plan.json",
       "report_path": "docs/roadmap/reports/day-95-big-upgrade-report.md",
       "report_title": "Day 95 big upgrade report"
     },
     {
       "day": 96,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-cycle6-plan.json",
       "report_path": "docs/roadmap/reports/day-96-big-upgrade-report.md",
       "report_title": "Day 96 big upgrade report"
     },
     {
       "day": 97,
-      "plan_path": "docs/roadmap/phase3/plans/continuous-upgrade-cycle7-plan.json",
       "report_path": "docs/roadmap/reports/day-97-big-upgrade-report.md",
       "report_title": "Day 97 big upgrade report"
     }

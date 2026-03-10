@@ -14,12 +14,12 @@ _REQUIRED_LINKS = [
     "[\U0001f6e0 CLI commands](cli.md)",
     "[\U0001fa7a Doctor checks](doctor.md)",
     "[\U0001f91d Contribute](contributing.md)",
-    "[\u2705 Day 10 ultra report](day-10-ultra-upgrade-report.md)",
-    "[\U0001f9ed Day 11 ultra report](day-11-ultra-upgrade-report.md)",
+    "[\U0001f9ed Repo tour](repo-tour.md)",
+    "[\U0001f4e6 Legacy reports](#legacy-reports)",
 ]
 
-_DAY11_SECTION_HEADER = "## Day 11 ultra upgrades (docs navigation tune-up)"
-_DAY11_JOURNEYS_HEADER = "### Day 11 top journeys"
+_DAY11_SECTION_HEADER = "## Legacy reports"
+_DAY11_JOURNEYS_HEADER = "### Top journeys"
 
 _TOP_JOURNEYS = [
     "Run first command in under 60 seconds",
@@ -29,12 +29,12 @@ _TOP_JOURNEYS = [
 
 _DAY11_QUICK_JUMP_BLOCK = """<div class=\"quick-jump\" markdown>
 
-[\u26a1 Fast start](#fast-start) \u00b7 [\U0001f680 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) \u00b7 [\u2705 Day 10 ultra report](day-10-ultra-upgrade-report.md) \u00b7 [\U0001f9ed Day 11 ultra report](day-11-ultra-upgrade-report.md) \u00b7 [\U0001f9ed Repo tour](repo-tour.md) \u00b7 [\U0001f4c8 Top-10 strategy](top-10-github-strategy.md) \u00b7 [\U0001f916 AgentOS](agentos-foundation.md) \u00b7 [\U0001f373 Cookbook](agentos-cookbook.md) \u00b7 [\U0001f6e0 CLI commands](cli.md) \u00b7 [\U0001fa7a Doctor checks](doctor.md) \u00b7 [\U0001f91d Contribute](contributing.md)
+[\u26a1 Fast start](#fast-start) \u00b7 [\U0001f512 Phase 3 Wrap Publication Closeout](integrations-phase3-wrap-publication-closeout.md) \u00b7 [\U0001f501 Continuous Upgrade Closeout](integrations-continuous-upgrade-closeout.md) \u00b7 [\U0001f9ed Repo tour](repo-tour.md) \u00b7 [\U0001f4c8 Top-10 strategy](top-10-github-strategy.md) \u00b7 [\U0001f916 AgentOS](agentos-foundation.md) \u00b7 [\U0001f373 Cookbook](agentos-cookbook.md) \u00b7 [\U0001f6e0 CLI commands](cli.md) \u00b7 [\U0001fa7a Doctor checks](doctor.md) \u00b7 [\U0001f91d Contribute](contributing.md) \u00b7 [\U0001f4e6 Legacy reports](#legacy-reports)
 
 </div>
 """
 
-_DAY11_JOURNEYS_BLOCK = """### Day 11 top journeys
+_DAY11_JOURNEYS_BLOCK = """### Top journeys
 
 - Run first command in under 60 seconds
 - Validate docs links and anchors before publishing
