@@ -23,7 +23,6 @@ python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/a
 python scripts/check_day88_governance_priorities_closeout_contract.py
 ```
 
-Legacy alias: `day88-governance-priorities-closeout` remains supported for compatibility.
 
 ## Governance priorities contract
 

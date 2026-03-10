@@ -23,7 +23,6 @@ python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifa
 python scripts/check_day89_governance_scale_closeout_contract.py
 ```
 
-Legacy alias: `day89-governance-scale-closeout` remains supported for compatibility.
 
 ## Governance scale contract
 

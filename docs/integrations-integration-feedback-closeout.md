@@ -23,7 +23,6 @@ python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/ar
 python scripts/check_day82_integration_feedback_closeout_contract.py
 ```
 
-Legacy alias: `day82-integration-feedback-closeout` remains supported for compatibility.
 
 ## Integration feedback contract
 

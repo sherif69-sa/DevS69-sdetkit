@@ -1,6 +1,5 @@
-# Onboarding Activation Closeout (Legacy Day 63) — Contributor onboarding activation closeout lane
+# Onboarding Activation Closeout (legacy) — Contributor onboarding activation closeout lane
 
-> Legacy alias: `day63-onboarding-activation-closeout` remains supported; prefer `onboarding-activation-closeout` in active usage.
 
 Day 63 closes with a major onboarding activation upgrade that turns Day 62 community operations evidence into deterministic contributor activation, ownership handoffs, and roadmap voting execution.
 
@@ -15,7 +14,7 @@ Day 63 closes with a major onboarding activation upgrade that turns Day 62 commu
 - `docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json`
 - `docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md`
 
-## Onboarding Activation Closeout command lane (Legacy Day 63)
+## Onboarding Activation Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit onboarding-activation-closeout --format json --strict
@@ -39,7 +38,7 @@ python scripts/check_day63_onboarding_activation_closeout_contract.py
 - [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner
 - [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log
 
-## Onboarding Activation Closeout delivery board (Legacy Day 63)
+## Onboarding Activation Closeout delivery board (legacy)
 
 - [ ] Day 63 onboarding launch brief committed
 - [ ] Day 63 orientation script + ownership matrix published

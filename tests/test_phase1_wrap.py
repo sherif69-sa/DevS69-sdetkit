@@ -92,6 +92,6 @@ def test_day30_strict_fails_when_inputs_missing(tmp_path: Path) -> None:
 
 def test_day30_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day30-phase1-wrap", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["phase1-wrap", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 30 phase-1 wrap summary" in capsys.readouterr().out

@@ -1,6 +1,5 @@
-# Integration Expansion3 Closeout (Legacy Day 67) — Integration expansion #3 closeout lane
+# Integration Expansion3 Closeout (legacy) — Integration expansion #3 closeout lane
 
-> Legacy alias: `day67-integration-expansion3-closeout` remains supported; prefer `integration-expansion3-closeout` in active usage.
 
 Day 67 closes with a major integration upgrade that converts Day 66 integration outputs into an advanced Jenkins reference pipeline.
 
@@ -16,7 +15,7 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 - `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md`
 - `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
-## Integration Expansion3 Closeout command lane (Legacy Day 67)
+## Integration Expansion3 Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit integration-expansion3-closeout --format json --strict
@@ -40,7 +39,7 @@ python scripts/check_day67_integration_expansion3_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion3 Closeout delivery board (Legacy Day 67)
+## Integration Expansion3 Closeout delivery board (legacy)
 
 - [ ] Day 67 integration brief committed
 - [ ] Day 67 advanced Jenkins pipeline blueprint published

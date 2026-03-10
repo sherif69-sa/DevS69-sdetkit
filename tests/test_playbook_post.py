@@ -119,6 +119,6 @@ def test_day39_strict_fails_when_day38_inputs_missing(tmp_path: Path) -> None:
 
 def test_day39_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day39-playbook-post", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["playbook-post", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 39 playbook post summary" in capsys.readouterr().out

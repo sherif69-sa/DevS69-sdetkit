@@ -159,7 +159,7 @@ def test_apigetcli_help():
 
 def test_product_lane_alias_resolves_to_canonical(capsys):
     with pytest.raises(SystemExit) as excinfo:
-        cli.main(["day29-phase1-hardening", "--help"])
+        cli.main(["phase1-hardening", "--help"])
     assert excinfo.value.code == 0
     out = capsys.readouterr().out
     assert "Day 29 phase-1 hardening scorer" in out

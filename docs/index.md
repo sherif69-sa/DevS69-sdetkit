@@ -38,7 +38,7 @@ Build, validate, and release software with confidence using a polished SDET + De
 
 </div>
 
-## Docs navigation upgrades (legacy Day 11 initiative)
+## Docs navigation upgrades (legacy docs navigation initiative)
 
 ## Legacy day reports
 

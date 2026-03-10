@@ -121,6 +121,6 @@ def test_day33_strict_fails_when_day32_board_is_not_ready(tmp_path: Path) -> Non
 
 def test_day33_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day33-demo-asset", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["demo-asset", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 33 demo asset summary" in capsys.readouterr().out

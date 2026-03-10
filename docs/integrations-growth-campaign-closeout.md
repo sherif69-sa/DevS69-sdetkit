@@ -23,7 +23,6 @@ python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifac
 python scripts/check_day81_growth_campaign_closeout_contract.py
 ```
 
-Legacy alias: `day81-growth-campaign-closeout` remains supported for compatibility.
 
 ## Growth campaign contract
 

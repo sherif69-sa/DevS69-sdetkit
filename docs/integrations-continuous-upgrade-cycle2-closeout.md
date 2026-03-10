@@ -23,7 +23,6 @@ python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir do
 python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
 ```
 
-Legacy alias: `day92-continuous-upgrade-cycle2-closeout` remains supported for compatibility.
 
 ## Continuous upgrade contract
 

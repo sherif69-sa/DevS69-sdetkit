@@ -23,7 +23,6 @@ python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/art
 python scripts/check_day83_trust_faq_expansion_closeout_contract.py
 ```
 
-Legacy alias: `day83-trust-faq-expansion-closeout` remains supported for compatibility.
 
 ## Trust FAQ expansion contract
 

@@ -129,6 +129,6 @@ def test_day37_strict_fails_when_day36_board_is_not_ready(tmp_path: Path) -> Non
 
 def test_day37_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day37-experiment-lane", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["experiment-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 37 experiment lane summary" in capsys.readouterr().out

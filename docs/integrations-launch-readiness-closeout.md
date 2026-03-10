@@ -23,7 +23,6 @@ python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifa
 python scripts/check_day86_launch_readiness_closeout_contract.py
 ```
 
-Legacy alias: `day86-launch-readiness-closeout` remains supported for compatibility.
 
 ## Launch readiness contract
 

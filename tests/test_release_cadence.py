@@ -121,6 +121,6 @@ def test_day32_strict_fails_when_day31_board_is_not_ready(tmp_path: Path) -> Non
 
 def test_day32_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day32-release-cadence", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["release-cadence", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 32 release cadence summary" in capsys.readouterr().out

@@ -18,7 +18,7 @@ Day 95 starts the next cycle by converting Day 94 publication outcomes into a de
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle5-closeout --format json --strict
-python -m sdetkit day95-continuous-upgrade-cycle5-closeout --format json --strict  # legacy alias
+python -m sdetkit continuous-upgrade-cycle5-closeout --format json --strict  # legacy alias
 python -m sdetkit continuous-upgrade-cycle5-closeout --emit-pack-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle5-closeout --execute --evidence-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/evidence --format json --strict
 python scripts/check_day95_continuous_upgrade_cycle5_closeout_contract.py
@@ -26,7 +26,7 @@ python scripts/check_day95_continuous_upgrade_cycle5_closeout_contract.py
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy Day 95).
+- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy).
 - The Day 95 lane references Day 94 outcomes, controls, and trust continuity signals.
 - Every Day 95 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Day 95 closeout records continuous upgrade outputs, report publication status, and backlog inputs.

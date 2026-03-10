@@ -1,4 +1,4 @@
-# Weekly Review Closeout (Legacy Day 65) — Weekly review #9 closeout lane
+# Weekly Review Closeout (legacy) — Weekly review #9 closeout lane
 
 > Legacy alias: `weekly-review-closeout-cycle2` remains supported; prefer `weekly-review-closeout` in active usage.
 
@@ -16,7 +16,7 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 - `docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md`
 - `.github/workflows/day64-advanced-github-actions-reference.yml`
 
-## Weekly Review Closeout command lane (Legacy Day 65)
+## Weekly Review Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit weekly-review-closeout --format json --strict
@@ -40,7 +40,7 @@ python scripts/check_day65_weekly_review_closeout_contract.py
 - [ ] Scorecard captures pass-rate trend, reliability incidents, contributor signal quality, and recovery owner
 - [ ] Artifact pack includes weekly brief, KPI dashboard, decision register, risk ledger, and execution log
 
-## Weekly Review Closeout delivery board (Legacy Day 65)
+## Weekly Review Closeout delivery board (legacy)
 
 - [ ] Day 65 weekly brief committed
 - [ ] Day 65 KPI dashboard snapshot exported

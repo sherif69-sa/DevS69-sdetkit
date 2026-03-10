@@ -23,7 +23,6 @@ python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/arti
 python scripts/check_day84_evidence_narrative_closeout_contract.py
 ```
 
-Legacy alias: `day84-evidence-narrative-closeout` remains supported for compatibility.
 
 ## Evidence narrative contract
 

@@ -688,17 +688,11 @@ Builds an expansion-automation report by combining upstream scale-lane handoff a
 Examples:
 
 - `sdetkit expansion-automation --format text`
-- `sdetkit day41-expansion-automation --format text` (legacy alias)
 - `sdetkit expansion-automation --format json --strict`
-- `sdetkit day41-expansion-automation --format json --strict` (legacy alias)
 - `sdetkit expansion-automation --write-defaults --format json --strict`
-- `sdetkit day41-expansion-automation --write-defaults --format json --strict` (legacy alias)
 - `sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict`
-- `sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict` (legacy alias)
 - `sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict`
-- `sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict` (legacy alias)
 - `sdetkit expansion-automation --format markdown --output expansion-automation-report.md`
-- `sdetkit day41-expansion-automation --format markdown --output expansion-automation-report.md` (legacy alias)
 
 Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
 

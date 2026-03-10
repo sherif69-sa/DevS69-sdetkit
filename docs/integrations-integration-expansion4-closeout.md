@@ -1,6 +1,5 @@
-# Integration Expansion4 Closeout (Legacy Day 68) — Integration expansion #4 closeout lane
+# Integration Expansion4 Closeout (legacy) — Integration expansion #4 closeout lane
 
-> Legacy alias: `day68-integration-expansion4-closeout` remains supported; prefer `integration-expansion4-closeout` in active usage.
 
 Day 68 closes with a major integration upgrade that converts Day 67 outputs into a self-hosted enterprise Tekton reference.
 
@@ -16,7 +15,7 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 - `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md`
 - `templates/ci/tekton/day68-self-hosted-reference.yaml`
 
-## Integration Expansion4 Closeout command lane (Legacy Day 68)
+## Integration Expansion4 Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit integration-expansion4-closeout --format json --strict
@@ -40,7 +39,7 @@ python scripts/check_day68_integration_expansion4_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, queue saturation, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, self-hosted blueprint, policy plan, KPI scorecard, and execution log
 
-## Integration Expansion4 Closeout delivery board (Legacy Day 68)
+## Integration Expansion4 Closeout delivery board (legacy)
 
 - [ ] Day 68 integration brief committed
 - [ ] Day 68 self-hosted enterprise pipeline blueprint published

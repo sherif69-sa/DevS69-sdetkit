@@ -121,6 +121,6 @@ def test_day35_strict_fails_when_day34_board_is_not_ready(tmp_path: Path) -> Non
 
 def test_day35_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day35-kpi-instrumentation", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["kpi-instrumentation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 35 KPI instrumentation summary" in capsys.readouterr().out

@@ -18,7 +18,7 @@ Continuous Upgrade Cycle 6 continues the next-cycle motion by converting prior c
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle6-closeout --format json --strict
-python -m sdetkit day96-continuous-upgrade-cycle6-closeout --format json --strict  # legacy alias
+python -m sdetkit continuous-upgrade-cycle6-closeout --format json --strict  # legacy alias
 python -m sdetkit continuous-upgrade-cycle6-closeout --emit-pack-dir docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle6-closeout --execute --evidence-dir docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack/evidence --format json --strict
 python scripts/check_day96_continuous_upgrade_cycle6_closeout_contract.py
@@ -26,7 +26,7 @@ python scripts/check_day96_continuous_upgrade_cycle6_closeout_contract.py
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy Day 96).
+- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy).
 - The Day 96 lane references Day 95 outcomes, controls, and trust continuity signals.
 - Every Day 96 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Day 96 closeout records continuous upgrade outputs, report publication status, and backlog inputs.

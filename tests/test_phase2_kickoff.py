@@ -123,6 +123,6 @@ def test_day31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> 
 
 def test_day31_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day31-phase2-kickoff", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["phase2-kickoff", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 31 phase-2 kickoff summary" in capsys.readouterr().out

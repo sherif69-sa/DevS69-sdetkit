@@ -112,6 +112,6 @@ def test_day40_strict_fails_when_day39_inputs_missing(tmp_path: Path) -> None:
 
 def test_day40_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day40-scale-lane", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["scale-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 40 scale lane summary" in capsys.readouterr().out

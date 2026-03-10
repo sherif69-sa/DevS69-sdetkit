@@ -1,6 +1,5 @@
-# Integration Expansion 2 Closeout (Legacy Day 66) — Integration expansion #2 closeout lane
+# Integration Expansion 2 Closeout (legacy) — Integration expansion #2 closeout lane
 
-> Legacy alias: `day66-integration-expansion2-closeout` remains supported; prefer `integration-expansion2-closeout` in active usage.
 
 Day 66 closes with a major integration upgrade that converts Day 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
 
@@ -16,7 +15,7 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 - `docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md`
 - `templates/ci/gitlab/day66-advanced-reference.yml`
 
-## Integration Expansion 2 Closeout command lane (Legacy Day 66)
+## Integration Expansion 2 Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit integration-expansion2-closeout --format json --strict
@@ -40,7 +39,7 @@ python scripts/check_day66_integration_expansion2_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, pipeline blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion 2 Closeout delivery board (Legacy Day 66)
+## Integration Expansion 2 Closeout delivery board (legacy)
 
 - [ ] Day 66 integration brief committed
 - [ ] Day 66 advanced GitLab pipeline blueprint published

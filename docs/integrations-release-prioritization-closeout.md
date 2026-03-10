@@ -23,7 +23,6 @@ python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/
 python scripts/check_day85_release_prioritization_closeout_contract.py
 ```
 
-Legacy alias: `day85-release-prioritization-closeout` remains supported for compatibility.
 
 ## Release prioritization contract
 

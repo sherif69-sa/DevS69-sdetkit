@@ -23,7 +23,6 @@ python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs
 python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 ```
 
-Legacy alias: `day90-phase3-wrap-publication-closeout` remains supported for compatibility.
 
 ## Phase-3 wrap publication contract
 

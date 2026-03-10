@@ -18,7 +18,7 @@ Continuous Upgrade Cycle 7 continues the next-cycle motion by converting prior c
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict
-python -m sdetkit day97-continuous-upgrade-cycle7-closeout --format json --strict  # legacy alias
+python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict  # legacy alias
 python -m sdetkit continuous-upgrade-cycle7-closeout --emit-pack-dir docs/artifacts/day97-continuous-upgrade-cycle7-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle7-closeout --execute --evidence-dir docs/artifacts/day97-continuous-upgrade-cycle7-closeout-pack/evidence --format json --strict
 python scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py
@@ -26,7 +26,7 @@ python scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy Day 97).
+- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy).
 - The Day 97 lane references Day 95 outcomes, controls, and trust continuity signals.
 - Every Day 97 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Day 97 closeout records continuous upgrade outputs, report publication status, and backlog inputs.

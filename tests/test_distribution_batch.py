@@ -125,6 +125,6 @@ def test_day38_strict_fails_when_day37_board_is_not_ready(tmp_path: Path) -> Non
 
 def test_day38_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day38-distribution-batch", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["distribution-batch", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 38 distribution batch summary" in capsys.readouterr().out

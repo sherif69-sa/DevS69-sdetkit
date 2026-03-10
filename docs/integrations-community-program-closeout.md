@@ -1,6 +1,5 @@
-# Community Program Closeout (Legacy Day 62) — Community program setup closeout lane
+# Community Program Closeout (legacy) — Community program setup closeout lane
 
-> Legacy alias: `day62-community-program-closeout` remains supported; prefer `community-program-closeout` in active usage.
 
 Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
 
@@ -15,7 +14,7 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 - `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json`
 - `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md`
 
-## Community Program Closeout command lane (Legacy Day 62)
+## Community Program Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit community-program-closeout --format json --strict
@@ -39,7 +38,7 @@ python scripts/check_day62_community_program_closeout_contract.py
 - [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner
 - [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log
 
-## Community Program Closeout delivery board (Legacy Day 62)
+## Community Program Closeout delivery board (legacy)
 
 - [ ] Day 62 community launch brief committed
 - [ ] Day 62 office-hours cadence published

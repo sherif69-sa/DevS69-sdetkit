@@ -1,6 +1,5 @@
-# Case Study Prep 2 Closeout (Legacy Day 70) — Case-study prep #2 closeout lane
+# Case Study Prep 2 Closeout (legacy) — Case-study prep #2 closeout lane
 
-> Legacy alias: `day70-case-study-prep2-closeout` remains supported; prefer `case-study-prep2-closeout` in active usage.
 
 Day 70 closes with a major upgrade that turns Day 69 integration outputs into a measurable triage-speed case-study prep pack.
 
@@ -16,7 +15,7 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 - `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md`
 - `docs/roadmap/plans/triage-speed-case-study.json`
 
-## Case Study Prep 2 Closeout command lane (Legacy Day 70)
+## Case Study Prep 2 Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit case-study-prep2-closeout --format json --strict
@@ -40,7 +39,7 @@ python scripts/check_day70_case_study_prep2_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Case Study Prep 2 Closeout delivery board (Legacy Day 70)
+## Case Study Prep 2 Closeout delivery board (legacy)
 
 - [ ] Day 70 integration brief committed
 - [ ] Day 70 triage-speed case-study narrative published

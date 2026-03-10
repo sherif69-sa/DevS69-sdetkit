@@ -86,6 +86,6 @@ def test_day29_strict_fails_when_sections_missing(tmp_path: Path) -> None:
 
 def test_day29_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day29-phase1-hardening", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["phase1-hardening", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 29 phase-1 hardening summary" in capsys.readouterr().out

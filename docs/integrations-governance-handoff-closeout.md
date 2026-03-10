@@ -23,7 +23,6 @@ python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/arti
 python scripts/check_day87_governance_handoff_closeout_contract.py
 ```
 
-Legacy alias: `day87-governance-handoff-closeout` remains supported for compatibility.
 
 ## Governance handoff contract
 

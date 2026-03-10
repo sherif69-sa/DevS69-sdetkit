@@ -23,7 +23,6 @@ python -m sdetkit continuous-upgrade-closeout --execute --evidence-dir docs/arti
 python scripts/check_day91_continuous_upgrade_closeout_contract.py
 ```
 
-Legacy alias: `day91-continuous-upgrade-closeout` remains supported for compatibility.
 
 ## Continuous upgrade contract
 

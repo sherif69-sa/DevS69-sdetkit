@@ -1,6 +1,5 @@
-# Phase3 Kickoff Closeout (Legacy Day 61) — Phase-3 kickoff execution closeout lane
+# Phase3 Kickoff Closeout (legacy) — Phase-3 kickoff execution closeout lane
 
-> Legacy alias: `day61-phase3-kickoff-closeout` remains supported; prefer `phase3-kickoff-closeout` in active usage.
 
 Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence into a strict baseline for ecosystem + trust execution.
 
@@ -15,7 +14,7 @@ Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence 
 - `docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json`
 - `docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md`
 
-## Phase3 Kickoff Closeout command lane (Legacy Day 61)
+## Phase3 Kickoff Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit phase3-kickoff-closeout --format json --strict
@@ -39,7 +38,7 @@ python scripts/check_day61_phase3_kickoff_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each trust KPI
 - [ ] Artifact pack includes kickoff brief, trust ledger, KPI scorecard, and execution log
 
-## Phase3 Kickoff Closeout delivery board (Legacy Day 61)
+## Phase3 Kickoff Closeout delivery board (legacy)
 
 - [ ] Day 61 Phase-3 kickoff brief committed
 - [ ] Day 61 kickoff reviewed with owner + backup

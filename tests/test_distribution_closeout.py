@@ -128,6 +128,6 @@ def test_day36_strict_fails_when_day35_board_is_not_ready(tmp_path: Path) -> Non
 
 def test_day36_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day36-distribution-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["distribution-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 36 community distribution summary" in capsys.readouterr().out

@@ -169,27 +169,6 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
 
         cmd_to_mod[canonical] = mod
 
-        day_cmd = _mod_to_cmd(mod)
-        if day_cmd != canonical:
-            if day_cmd not in cmd_to_mod:
-                cmd_to_mod[day_cmd] = mod
-            if day_cmd not in alias_to_canonical:
-                alias_to_canonical[day_cmd] = canonical
-
-        alias = (
-            None if mod in _DISABLED_DAY_CLOSEOUT_ALIAS_MODULES else _alias_for_day_closeout(mod)
-        )
-        if alias and alias not in cmd_to_mod:
-            cmd_to_mod[alias] = mod
-            alias_to_canonical[alias] = canonical
-
-        generic_alias = (
-            None if mod in _DISABLED_DAY_GENERIC_ALIAS_MODULES else _alias_for_day_module(mod)
-        )
-        if generic_alias and generic_alias not in cmd_to_mod:
-            cmd_to_mod[generic_alias] = mod
-            alias_to_canonical[generic_alias] = canonical
-
     return cmd_to_mod, alias_to_canonical
 
 
