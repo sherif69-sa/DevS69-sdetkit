@@ -738,7 +738,7 @@ Examples:
 - `sdetkit gate release --dry-run --format json`
 - `sdetkit gate release --format json`
 - `sdetkit gate release --playbooks-legacy --format json`
-- `sdetkit gate release --playbook-name day28-weekly-review --playbook-name day29-phase1-hardening --format json`
+- `sdetkit gate release --playbook-name weekly-review-lane --playbook-name phase1-hardening --format json`
 
 Useful flags (`gate fast`): `--root`, `--format`, `--out`/`--output`, `--strict`, `--fix`, `--fix-only`, `--list-steps`, `--only`, `--skip`, `--no-doctor`, `--no-ci-templates`, `--no-ruff`, `--no-mypy`, `--no-pytest`, `--mypy-args`, `--pytest-args`, `--full-pytest`.
 

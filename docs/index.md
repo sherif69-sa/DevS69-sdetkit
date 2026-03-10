@@ -34,11 +34,25 @@ Build, validate, and release software with confidence using a polished SDET + De
 
 <div class="quick-jump" markdown>
 
-[⚡ Fast start](#fast-start) · [📦 Legacy Day 90 report](day-90-big-upgrade-report.md) · [🔒 Phase3 Wrap Publication Closeout lane](integrations-day90-phase3-wrap-publication-closeout.md) · [📦 Legacy Day 91 report](day-91-big-upgrade-report.md) · [🔁 Continuous Upgrade Closeout lane](integrations-day91-continuous-upgrade-closeout.md) · [📦 Legacy Day 92 report](day-92-big-upgrade-report.md) · [🔁 Continuous Upgrade Cycle 2 Closeout lane](integrations-day92-continuous-upgrade-cycle2-closeout.md) · [📦 Legacy Day 93 report](day-93-big-upgrade-report.md) · [🔁 Continuous Upgrade Cycle3 Closeout lane](integrations-day93-continuous-upgrade-cycle3-closeout.md) · [📦 Legacy Day 94 report](day-94-big-upgrade-report.md) · [🔁 Continuous Upgrade Cycle 4 lane](integrations-day94-continuous-upgrade-cycle4-closeout.md) · [📦 Legacy Day 95 report](day-95-big-upgrade-report.md) · [🔁 Continuous Upgrade Cycle 5 lane](integrations-day95-continuous-upgrade-cycle5-closeout.md) · [📦 Legacy Day 97 report](day-97-big-upgrade-report.md) · [🔁 Continuous Upgrade Cycle 7 lane](integrations-day97-continuous-upgrade-cycle7-closeout.md) · [🚀 Phase-1 daily plan](top-10-github-strategy.md#phase-1-days-1-30-positioning-conversion-daily-execution) · [✅ Legacy Day 10 ultra report](day-10-ultra-upgrade-report.md) · [🧭 Legacy Day 11 ultra report](day-11-ultra-upgrade-report.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md)
+[⚡ Fast start](#fast-start) · [🔒 Phase 3 Wrap Publication Closeout](integrations-day90-phase3-wrap-publication-closeout.md) · [🔁 Continuous Upgrade Closeout](integrations-day91-continuous-upgrade-closeout.md) · [🔁 Continuous Upgrade Cycle 2 Closeout](integrations-day92-continuous-upgrade-cycle2-closeout.md) · [🔁 Continuous Upgrade Cycle 3 Closeout](integrations-day93-continuous-upgrade-cycle3-closeout.md) · [🔁 Continuous Upgrade Cycle 4 Closeout](integrations-day94-continuous-upgrade-cycle4-closeout.md) · [🔁 Continuous Upgrade Cycle 5 Closeout](integrations-day95-continuous-upgrade-cycle5-closeout.md) · [🔁 Continuous Upgrade Cycle 7 Closeout](integrations-day97-continuous-upgrade-cycle7-closeout.md) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy day reports](#legacy-day-reports)
 
 </div>
 
-## Docs navigation upgrades (legacy: Day 11)
+## Docs navigation upgrades (legacy Day 11 initiative)
+
+## Legacy day reports
+
+Historical day reports remain available for audit/history traceability:
+
+- [Day 90 report](day-90-big-upgrade-report.md)
+- [Day 91 report](day-91-big-upgrade-report.md)
+- [Day 92 report](day-92-big-upgrade-report.md)
+- [Day 93 report](day-93-big-upgrade-report.md)
+- [Day 94 report](day-94-big-upgrade-report.md)
+- [Day 95 report](day-95-big-upgrade-report.md)
+- [Day 97 report](day-97-big-upgrade-report.md)
+- [Day 10 ultra report](day-10-ultra-upgrade-report.md)
+- [Day 11 ultra report](day-11-ultra-upgrade-report.md)
 
 ### Top journeys
 

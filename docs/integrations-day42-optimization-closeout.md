@@ -16,9 +16,9 @@ Day 42 closes the lane with a major optimization upgrade that converts Day 41 ex
 ## Day 42 command lane
 
 ```bash
-python -m sdetkit day42-optimization-closeout --format json --strict
-python -m sdetkit day42-optimization-closeout --emit-pack-dir docs/artifacts/day42-optimization-closeout-pack --format json --strict
-python -m sdetkit day42-optimization-closeout --execute --evidence-dir docs/artifacts/day42-optimization-closeout-pack/evidence --format json --strict
+python -m sdetkit optimization-closeout-foundation --format json --strict
+python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/day42-optimization-closeout-pack --format json --strict
+python -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/day42-optimization-closeout-pack/evidence --format json --strict
 python scripts/check_day42_optimization_closeout_contract.py
 ```
 

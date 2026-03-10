@@ -283,43 +283,43 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "kpi-audit":
         return kpi_audit.main(list(argv[1:]))
 
-    if argv and argv[0] == "day28-weekly-review":
+    if argv and argv[0] in {"weekly-review-lane", "day28-weekly-review"}:
         return day28_weekly_review.main(list(argv[1:]))
 
-    if argv and argv[0] == "day29-phase1-hardening":
+    if argv and argv[0] in {"phase1-hardening", "day29-phase1-hardening"}:
         return day29_phase1_hardening.main(list(argv[1:]))
 
-    if argv and argv[0] == "day30-phase1-wrap":
+    if argv and argv[0] in {"phase1-wrap", "day30-phase1-wrap"}:
         return day30_phase1_wrap.main(list(argv[1:]))
 
-    if argv and argv[0] == "day31-phase2-kickoff":
+    if argv and argv[0] in {"phase2-kickoff", "day31-phase2-kickoff"}:
         return day31_phase2_kickoff.main(list(argv[1:]))
 
-    if argv and argv[0] == "day32-release-cadence":
+    if argv and argv[0] in {"release-cadence", "day32-release-cadence"}:
         return day32_release_cadence.main(list(argv[1:]))
 
-    if argv and argv[0] == "day33-demo-asset":
+    if argv and argv[0] in {"demo-asset", "day33-demo-asset"}:
         return day33_demo_asset.main(list(argv[1:]))
 
-    if argv and argv[0] == "day34-demo-asset2":
+    if argv and argv[0] in {"demo-asset2", "day34-demo-asset2"}:
         return day34_demo_asset2.main(list(argv[1:]))
 
-    if argv and argv[0] == "day35-kpi-instrumentation":
+    if argv and argv[0] in {"kpi-instrumentation", "day35-kpi-instrumentation"}:
         return day35_kpi_instrumentation.main(list(argv[1:]))
 
-    if argv and argv[0] == "day36-distribution-closeout":
+    if argv and argv[0] in {"distribution-closeout", "day36-distribution-closeout"}:
         return day36_distribution_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "day37-experiment-lane":
+    if argv and argv[0] in {"experiment-lane", "day37-experiment-lane"}:
         return day37_experiment_lane.main(list(argv[1:]))
 
-    if argv and argv[0] == "day38-distribution-batch":
+    if argv and argv[0] in {"distribution-batch", "day38-distribution-batch"}:
         return day38_distribution_batch.main(list(argv[1:]))
 
-    if argv and argv[0] == "day39-playbook-post":
+    if argv and argv[0] in {"playbook-post", "day39-playbook-post"}:
         return day39_playbook_post.main(list(argv[1:]))
 
-    if argv and argv[0] == "day40-scale-lane":
+    if argv and argv[0] in {"scale-lane", "day40-scale-lane"}:
         return day40_scale_lane.main(list(argv[1:]))
 
     if argv and argv[0] == "expansion-automation":
@@ -412,7 +412,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     }:
         return day64_integration_expansion_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"day65-weekly-review-closeout"}:
+    if argv and argv[0] in {"weekly-review-closeout-cycle2", "day65-weekly-review-closeout"}:
         return day65_weekly_review_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {
@@ -731,43 +731,56 @@ Run: sdetkit playbooks
     kpa = sub.add_parser("kpi-audit")
     kpa.add_argument("args", nargs=argparse.REMAINDER)
 
-    dwr = sub.add_parser("day28-weekly-review")
+    dwr = sub.add_parser("weekly-review-lane", aliases=["day28-weekly-review"])
+    dwr.set_defaults(cmd="weekly-review-lane")
     dwr.add_argument("args", nargs=argparse.REMAINDER)
 
-    d29 = sub.add_parser("day29-phase1-hardening")
+    d29 = sub.add_parser("phase1-hardening", aliases=["day29-phase1-hardening"])
+    d29.set_defaults(cmd="phase1-hardening")
     d29.add_argument("args", nargs=argparse.REMAINDER)
 
-    d30 = sub.add_parser("day30-phase1-wrap")
+    d30 = sub.add_parser("phase1-wrap", aliases=["day30-phase1-wrap"])
+    d30.set_defaults(cmd="phase1-wrap")
     d30.add_argument("args", nargs=argparse.REMAINDER)
 
-    d31 = sub.add_parser("day31-phase2-kickoff")
+    d31 = sub.add_parser("phase2-kickoff", aliases=["day31-phase2-kickoff"])
+    d31.set_defaults(cmd="phase2-kickoff")
     d31.add_argument("args", nargs=argparse.REMAINDER)
 
-    d32 = sub.add_parser("day32-release-cadence")
+    d32 = sub.add_parser("release-cadence", aliases=["day32-release-cadence"])
+    d32.set_defaults(cmd="release-cadence")
     d32.add_argument("args", nargs=argparse.REMAINDER)
 
-    d33 = sub.add_parser("day33-demo-asset")
+    d33 = sub.add_parser("demo-asset", aliases=["day33-demo-asset"])
+    d33.set_defaults(cmd="demo-asset")
     d33.add_argument("args", nargs=argparse.REMAINDER)
 
-    d34 = sub.add_parser("day34-demo-asset2")
+    d34 = sub.add_parser("demo-asset2", aliases=["day34-demo-asset2"])
+    d34.set_defaults(cmd="demo-asset2")
     d34.add_argument("args", nargs=argparse.REMAINDER)
 
-    d35 = sub.add_parser("day35-kpi-instrumentation")
+    d35 = sub.add_parser("kpi-instrumentation", aliases=["day35-kpi-instrumentation"])
+    d35.set_defaults(cmd="kpi-instrumentation")
     d35.add_argument("args", nargs=argparse.REMAINDER)
 
-    d36 = sub.add_parser("day36-distribution-closeout")
+    d36 = sub.add_parser("distribution-closeout", aliases=["day36-distribution-closeout"])
+    d36.set_defaults(cmd="distribution-closeout")
     d36.add_argument("args", nargs=argparse.REMAINDER)
 
-    d37 = sub.add_parser("day37-experiment-lane")
+    d37 = sub.add_parser("experiment-lane", aliases=["day37-experiment-lane"])
+    d37.set_defaults(cmd="experiment-lane")
     d37.add_argument("args", nargs=argparse.REMAINDER)
 
-    d38 = sub.add_parser("day38-distribution-batch")
+    d38 = sub.add_parser("distribution-batch", aliases=["day38-distribution-batch"])
+    d38.set_defaults(cmd="distribution-batch")
     d38.add_argument("args", nargs=argparse.REMAINDER)
 
-    d39 = sub.add_parser("day39-playbook-post")
+    d39 = sub.add_parser("playbook-post", aliases=["day39-playbook-post"])
+    d39.set_defaults(cmd="playbook-post")
     d39.add_argument("args", nargs=argparse.REMAINDER)
 
-    d40 = sub.add_parser("day40-scale-lane")
+    d40 = sub.add_parser("scale-lane", aliases=["day40-scale-lane"])
+    d40.set_defaults(cmd="scale-lane")
     d40.add_argument("args", nargs=argparse.REMAINDER)
 
     pa41 = sub.add_parser("expansion-automation")
@@ -882,8 +895,8 @@ Run: sdetkit playbooks
     d64.set_defaults(cmd="integration-expansion-closeout")
     d64.add_argument("args", nargs=argparse.REMAINDER)
 
-    d65 = sub.add_parser("day65-weekly-review-closeout")
-    d65.set_defaults(cmd="day65-weekly-review-closeout")
+    d65 = sub.add_parser("weekly-review-closeout-cycle2", aliases=["day65-weekly-review-closeout"])
+    d65.set_defaults(cmd="weekly-review-closeout-cycle2")
     d65.add_argument("args", nargs=argparse.REMAINDER)
 
     d66 = sub.add_parser(
@@ -912,6 +925,7 @@ Run: sdetkit playbooks
     d70.set_defaults(cmd="case-study-prep2-closeout")
     d70.add_argument("args", nargs=argparse.REMAINDER)
     d71 = sub.add_parser("case-study-prep3-closeout", aliases=["day71-case-study-prep3-closeout"])
+    d71.set_defaults(cmd="case-study-prep3-closeout")
     d71.add_argument("args", nargs=argparse.REMAINDER)
     d72 = sub.add_parser("case-study-prep4-closeout", aliases=["day72-case-study-prep4-closeout"])
     d72.set_defaults(cmd="case-study-prep4-closeout")
@@ -947,63 +961,63 @@ Run: sdetkit playbooks
     d80 = sub.add_parser("partner-outreach-closeout", aliases=["day80-partner-outreach-closeout"])
     d80.add_argument("args", nargs=argparse.REMAINDER)
     d81 = sub.add_parser("growth-campaign-closeout", aliases=["day81-growth-campaign-closeout"])
-    d81.set_defaults(cmd="day81-growth-campaign-closeout")
+    d81.set_defaults(cmd="growth-campaign-closeout")
     d81.add_argument("args", nargs=argparse.REMAINDER)
     d82 = sub.add_parser(
         "integration-feedback-closeout", aliases=["day82-integration-feedback-closeout"]
     )
-    d82.set_defaults(cmd="day82-integration-feedback-closeout")
+    d82.set_defaults(cmd="integration-feedback-closeout")
     d82.add_argument("args", nargs=argparse.REMAINDER)
     d83 = sub.add_parser(
         "trust-faq-expansion-closeout", aliases=["day83-trust-faq-expansion-closeout"]
     )
-    d83.set_defaults(cmd="day83-trust-faq-expansion-closeout")
+    d83.set_defaults(cmd="trust-faq-expansion-closeout")
     d83.add_argument("args", nargs=argparse.REMAINDER)
     d84 = sub.add_parser(
         "evidence-narrative-closeout", aliases=["day84-evidence-narrative-closeout"]
     )
-    d84.set_defaults(cmd="day84-evidence-narrative-closeout")
+    d84.set_defaults(cmd="evidence-narrative-closeout")
     d84.add_argument("args", nargs=argparse.REMAINDER)
     d85 = sub.add_parser(
         "release-prioritization-closeout", aliases=["day85-release-prioritization-closeout"]
     )
-    d85.set_defaults(cmd="day85-release-prioritization-closeout")
+    d85.set_defaults(cmd="release-prioritization-closeout")
     d85.add_argument("args", nargs=argparse.REMAINDER)
     d86 = sub.add_parser("launch-readiness-closeout", aliases=["day86-launch-readiness-closeout"])
-    d86.set_defaults(cmd="day86-launch-readiness-closeout")
+    d86.set_defaults(cmd="launch-readiness-closeout")
     d86.add_argument("args", nargs=argparse.REMAINDER)
     d87 = sub.add_parser(
         "governance-handoff-closeout", aliases=["day87-governance-handoff-closeout"]
     )
-    d87.set_defaults(cmd="day87-governance-handoff-closeout")
+    d87.set_defaults(cmd="governance-handoff-closeout")
     d87.add_argument("args", nargs=argparse.REMAINDER)
     d88 = sub.add_parser(
         "governance-priorities-closeout", aliases=["day88-governance-priorities-closeout"]
     )
-    d88.set_defaults(cmd="day88-governance-priorities-closeout")
+    d88.set_defaults(cmd="governance-priorities-closeout")
     d88.add_argument("args", nargs=argparse.REMAINDER)
     d89 = sub.add_parser("governance-scale-closeout", aliases=["day89-governance-scale-closeout"])
-    d89.set_defaults(cmd="day89-governance-scale-closeout")
+    d89.set_defaults(cmd="governance-scale-closeout")
     d89.add_argument("args", nargs=argparse.REMAINDER)
     d90 = sub.add_parser(
         "phase3-wrap-publication-closeout", aliases=["day90-phase3-wrap-publication-closeout"]
     )
-    d90.set_defaults(cmd="day90-phase3-wrap-publication-closeout")
+    d90.set_defaults(cmd="phase3-wrap-publication-closeout")
     d90.add_argument("args", nargs=argparse.REMAINDER)
     d91 = sub.add_parser(
         "continuous-upgrade-closeout", aliases=["day91-continuous-upgrade-closeout"]
     )
-    d91.set_defaults(cmd="day91-continuous-upgrade-closeout")
+    d91.set_defaults(cmd="continuous-upgrade-closeout")
     d91.add_argument("args", nargs=argparse.REMAINDER)
     d92 = sub.add_parser(
         "continuous-upgrade-cycle2-closeout", aliases=["day92-continuous-upgrade-cycle2-closeout"]
     )
-    d92.set_defaults(cmd="day92-continuous-upgrade-cycle2-closeout")
+    d92.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
     d92.add_argument("args", nargs=argparse.REMAINDER)
     d93 = sub.add_parser(
         "continuous-upgrade-cycle3-closeout", aliases=["day93-continuous-upgrade-cycle3-closeout"]
     )
-    d93.set_defaults(cmd="day93-continuous-upgrade-cycle3-closeout")
+    d93.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
     d93.add_argument("args", nargs=argparse.REMAINDER)
     d94 = sub.add_parser(
         "continuous-upgrade-cycle4-closeout", aliases=["day94-continuous-upgrade-cycle4-closeout"]

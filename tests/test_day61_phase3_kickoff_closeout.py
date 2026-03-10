@@ -121,6 +121,8 @@ def test_day61_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(["day61-phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"])
+    alias_rc = cli.main(
+        ["day61-phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert alias_rc == 0
     assert "Phase3 Kickoff Closeout summary" in capsys.readouterr().out

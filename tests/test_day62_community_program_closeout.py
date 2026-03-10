@@ -125,6 +125,8 @@ def test_day62_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["community-program-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(["day62-community-program-closeout", "--root", str(tmp_path), "--format", "text"])
+    alias_rc = cli.main(
+        ["day62-community-program-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert alias_rc == 0
     assert "Community Program Closeout summary" in capsys.readouterr().out

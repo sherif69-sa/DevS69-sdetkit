@@ -16,9 +16,9 @@ Day 44 closes with a big scale upgrade that converts Day 43 acceleration evidenc
 ## Day 44 command lane
 
 ```bash
-python -m sdetkit day44-scale-closeout --format json --strict
-python -m sdetkit day44-scale-closeout --emit-pack-dir docs/artifacts/day44-scale-closeout-pack --format json --strict
-python -m sdetkit day44-scale-closeout --execute --evidence-dir docs/artifacts/day44-scale-closeout-pack/evidence --format json --strict
+python -m sdetkit scale-closeout --format json --strict
+python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/day44-scale-closeout-pack --format json --strict
+python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/day44-scale-closeout-pack/evidence --format json --strict
 python scripts/check_day44_scale_closeout_contract.py
 ```
 

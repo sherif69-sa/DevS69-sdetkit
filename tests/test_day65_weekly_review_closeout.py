@@ -128,6 +128,8 @@ def test_day65_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(["day65-weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
+    alias_rc = cli.main(
+        ["day65-weekly-review-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert alias_rc == 0
     assert "Weekly Review Closeout summary" in capsys.readouterr().out

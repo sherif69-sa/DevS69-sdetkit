@@ -16,9 +16,9 @@ Day 40 closes the lane with a scale-oriented upgrade that converts Day 39 public
 ## Day 40 command lane
 
 ```bash
-python -m sdetkit day40-scale-lane --format json --strict
-python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict
-python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict
+python -m sdetkit scale-lane --format json --strict
+python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict
+python -m sdetkit scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict
 python scripts/check_day40_scale_lane_contract.py
 ```
 

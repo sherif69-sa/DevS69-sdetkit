@@ -28,7 +28,9 @@ from sdetkit import cli
         ),
     ],
 )
-def test_canonical_and_legacy_commands_dispatch(monkeypatch, canonical: str, legacy: str, module_attr: str) -> None:
+def test_canonical_and_legacy_commands_dispatch(
+    monkeypatch, canonical: str, legacy: str, module_attr: str
+) -> None:
     calls: list[list[str]] = []
 
     def _fake_main(argv: list[str]) -> int:
