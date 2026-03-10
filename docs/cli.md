@@ -523,7 +523,7 @@ Useful flags: `--root`, `--day18-summary`, `--day14-summary`, `--min-release-sco
 
 ## release-narrative
 
-Builds Day 20 release storytelling from Day 19 release-readiness summary and changelog highlights.
+Builds a release narrative report by combining Day 19 posture and changelog inputs into one closeout view.
 
 Examples:
 
@@ -532,17 +532,19 @@ Examples:
 - `sdetkit release-narrative --write-defaults --format json --strict`
 - `sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict`
 - `sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict`
-- `sdetkit release-narrative --format markdown --output docs/artifacts/day20-release-narrative-sample.md`
+- `sdetkit release-narrative --format markdown --output release-narrative-report.md`
 
 Useful flags: `--root`, `--day19-summary`, `--changelog`, `--min-release-score`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--strict`, `--format`, `--output`.
 
-`--write-defaults` writes a hardened Day 20 integration page if missing/incomplete, then validates it.
+`--day19-summary` and `--changelog` point to the release-readiness JSON and changelog inputs used to build the narrative.
 
-`--emit-pack-dir` writes a Day 20 pack containing summary JSON, narrative markdown, audience blurbs, narrative channels, and validation commands.
+`--write-defaults` writes or repairs the default Day 20 integration page before validation.
 
-`--execute` runs the Day 20 command chain and emits an execution summary plus per-command logs for closeout evidence.
+`--emit-pack-dir` writes a release-narrative pack bundle containing summary JSON, narrative markdown, audience blurbs, channel posts, and validation commands.
 
-`--strict` returns non-zero if Day 20 required docs sections/commands are missing, release posture is not ready, or release score falls below `--min-release-score`.
+`--execute` runs the Day 20 validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when required docs content is missing, upstream release posture is not ready, the release score falls below `--min-release-score`, or execute mode detects failed commands.
 
 ## trust-signal-upgrade
 
