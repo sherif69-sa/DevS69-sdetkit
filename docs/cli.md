@@ -498,7 +498,7 @@ See: agentos-foundation.md, omnichannel-mcp-bridge.md, and automation-templates-
 
 ## release-readiness-board
 
-Builds Day 19 release-readiness evidence by combining Day 18 reliability summary and Day 14 weekly KPI summary.
+Builds a release-readiness report by combining Day 18 and Day 14 evidence inputs into one closeout view.
 
 Examples:
 
@@ -507,17 +507,19 @@ Examples:
 - `sdetkit release-readiness-board --write-defaults --format json --strict`
 - `sdetkit release-readiness-board --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict`
 - `sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict`
-- `sdetkit release-readiness-board --format markdown --output docs/artifacts/day19-release-readiness-board-sample.md`
+- `sdetkit release-readiness-board --format markdown --output release-readiness-report.md`
 
 Useful flags: `--root`, `--day18-summary`, `--day14-summary`, `--min-release-score`, `--write-defaults`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--timeout-sec`, `--strict`, `--format`, `--output`.
 
-`--write-defaults` writes a hardened Day 19 integration page if missing/incomplete, then validates it.
+`--day18-summary` and `--day14-summary` point to the reliability and KPI JSON inputs used to build the report.
 
-`--emit-pack-dir` writes a Day 19 pack containing summary JSON, scorecard markdown, closeout checklist markdown, and a validation commands file.
+`--write-defaults` writes or repairs the default Day 19 integration page before validation.
 
-`--execute` runs the Day 19 command chain and emits an execution summary plus per-command logs for closeout evidence.
+`--emit-pack-dir` writes a release-readiness pack bundle containing summary JSON, scorecard markdown, closeout checklist markdown, validation commands, and a release decision file.
 
-`--strict` returns non-zero if Day 19 required docs sections/commands are missing, strict gates are not green, or release score falls below `--min-release-score`.
+`--execute` runs the Day 19 validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when required docs content is missing, upstream strict gates are not all green, the release score falls below `--min-release-score`, or execute mode detects failed commands.
 
 ## release-narrative
 
