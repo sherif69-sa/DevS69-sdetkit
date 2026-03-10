@@ -680,6 +680,282 @@ Useful flags: `--root`, `--readme`, `--docs-index`, `--top10`, `--baseline`, `--
 
 See: day-27-ultra-upgrade-report.md (legacy history).
 
+
+## phase2-kickoff
+
+Builds a phase-2 kickoff report by combining upstream wrap handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day31-phase2-kickoff --format text`
+- `sdetkit day31-phase2-kickoff --format json --strict`
+- `sdetkit day31-phase2-kickoff --write-defaults --format json --strict`
+- `sdetkit day31-phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict`
+- `sdetkit day31-phase2-kickoff --execute --evidence-dir docs/artifacts/day31-phase2-pack/evidence --format json --strict`
+- `sdetkit day31-phase2-kickoff --format markdown --output day31-phase2-kickoff-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream handoff summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default phase-2 kickoff integration page before validation.
+
+`--emit-pack-dir` writes a phase-2 kickoff pack bundle containing summary JSON, summary markdown, baseline snapshot JSON, delivery board markdown, and validation commands.
+
+`--execute` runs the phase-2 kickoff validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## release-cadence
+
+Builds a release cadence report by combining upstream kickoff handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day32-release-cadence --format text`
+- `sdetkit day32-release-cadence --format json --strict`
+- `sdetkit day32-release-cadence --write-defaults --format json --strict`
+- `sdetkit day32-release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict`
+- `sdetkit day32-release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict`
+- `sdetkit day32-release-cadence --format markdown --output day32-release-cadence-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream kickoff summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default release cadence integration page before validation.
+
+`--emit-pack-dir` writes a release-cadence pack bundle containing summary JSON, summary markdown, cadence calendar JSON, changelog template markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the release cadence validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## demo-asset
+
+Builds a demo-asset production report by combining upstream release cadence handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day33-demo-asset --format text`
+- `sdetkit day33-demo-asset --format json --strict`
+- `sdetkit day33-demo-asset --write-defaults --format json --strict`
+- `sdetkit day33-demo-asset --emit-pack-dir docs/artifacts/day33-demo-asset-pack --format json --strict`
+- `sdetkit day33-demo-asset --execute --evidence-dir docs/artifacts/day33-demo-asset-pack/evidence --format json --strict`
+- `sdetkit day33-demo-asset --format markdown --output day33-demo-asset-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream release cadence summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default demo-asset integration page before validation.
+
+`--emit-pack-dir` writes a demo-asset pack bundle containing summary JSON, summary markdown, demo asset plan JSON, demo script markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the demo-asset validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## demo-asset2
+
+Builds a second demo-asset production report by combining upstream demo handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day34-demo-asset2 --format text`
+- `sdetkit day34-demo-asset2 --format json --strict`
+- `sdetkit day34-demo-asset2 --write-defaults --format json --strict`
+- `sdetkit day34-demo-asset2 --emit-pack-dir docs/artifacts/day34-demo-asset2-pack --format json --strict`
+- `sdetkit day34-demo-asset2 --execute --evidence-dir docs/artifacts/day34-demo-asset2-pack/evidence --format json --strict`
+- `sdetkit day34-demo-asset2 --format markdown --output day34-demo-asset2-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream demo-asset summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default demo-asset2 integration page before validation.
+
+`--emit-pack-dir` writes a demo-asset #2 pack bundle containing summary JSON, summary markdown, demo asset plan JSON, demo script markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the demo-asset2 validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## kpi-instrumentation
+
+Builds a KPI instrumentation report by combining upstream demo handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day35-kpi-instrumentation --format text`
+- `sdetkit day35-kpi-instrumentation --format json --strict`
+- `sdetkit day35-kpi-instrumentation --write-defaults --format json --strict`
+- `sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict`
+- `sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/day35-kpi-instrumentation-pack/evidence --format json --strict`
+- `sdetkit day35-kpi-instrumentation --format markdown --output day35-kpi-instrumentation-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream demo-asset #2 summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default KPI instrumentation integration page before validation.
+
+`--emit-pack-dir` writes a KPI instrumentation pack bundle containing summary JSON, summary markdown, KPI dictionary CSV, alert policy markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the KPI instrumentation validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## distribution-closeout
+
+Builds a distribution closeout report by combining upstream KPI instrumentation handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day36-distribution-closeout --format text`
+- `sdetkit day36-distribution-closeout --format json --strict`
+- `sdetkit day36-distribution-closeout --write-defaults --format json --strict`
+- `sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict`
+- `sdetkit day36-distribution-closeout --execute --evidence-dir docs/artifacts/day36-distribution-closeout-pack/evidence --format json --strict`
+- `sdetkit day36-distribution-closeout --format markdown --output day36-distribution-closeout-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream KPI instrumentation summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default distribution closeout integration page before validation.
+
+`--emit-pack-dir` writes a distribution closeout pack bundle containing summary JSON, summary markdown, distribution message kit markdown, launch plan CSV, experiment backlog markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the distribution closeout validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## experiment-lane
+
+Builds an experiment-lane report by combining upstream distribution closeout handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day37-experiment-lane --format text`
+- `sdetkit day37-experiment-lane --format json --strict`
+- `sdetkit day37-experiment-lane --write-defaults --format json --strict`
+- `sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict`
+- `sdetkit day37-experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict`
+- `sdetkit day37-experiment-lane --format markdown --output day37-experiment-lane-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream distribution closeout summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default experiment-lane integration page before validation.
+
+`--emit-pack-dir` writes an experiment-lane pack bundle containing summary JSON, summary markdown, experiment matrix CSV, hypothesis brief markdown, experiment scorecard JSON, decision log markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the experiment-lane validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## distribution-batch
+
+Builds a distribution batch report by combining upstream experiment-lane handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day38-distribution-batch --format text`
+- `sdetkit day38-distribution-batch --format json --strict`
+- `sdetkit day38-distribution-batch --write-defaults --format json --strict`
+- `sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`
+- `sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict`
+- `sdetkit day38-distribution-batch --format markdown --output day38-distribution-batch-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream experiment-lane summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default distribution-batch integration page before validation.
+
+`--emit-pack-dir` writes a distribution-batch pack bundle containing summary JSON, summary markdown, channel plan CSV, post copy markdown, KPI scorecard JSON, execution log markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the distribution-batch validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## playbook-post
+
+Builds a playbook post report by combining upstream distribution batch handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day39-playbook-post --format text`
+- `sdetkit day39-playbook-post --format json --strict`
+- `sdetkit day39-playbook-post --write-defaults --format json --strict`
+- `sdetkit day39-playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict`
+- `sdetkit day39-playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict`
+- `sdetkit day39-playbook-post --format markdown --output day39-playbook-post-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream distribution-batch summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default playbook-post integration page before validation.
+
+`--emit-pack-dir` writes a playbook-post pack bundle containing summary JSON, summary markdown, playbook draft markdown, rollout plan CSV, KPI scorecard JSON, execution log markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the playbook-post validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## scale-lane
+
+Builds a scale-lane report by combining upstream playbook post handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day40-scale-lane --format text`
+- `sdetkit day40-scale-lane --format json --strict`
+- `sdetkit day40-scale-lane --write-defaults --format json --strict`
+- `sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict`
+- `sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict`
+- `sdetkit day40-scale-lane --format markdown --output day40-scale-lane-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream playbook-post summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default scale-lane integration page before validation.
+
+`--emit-pack-dir` writes a scale-lane pack bundle containing summary JSON, summary markdown, scale plan markdown, channel matrix CSV, scale KPI scorecard JSON, execution log markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the scale-lane validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
+## expansion-automation
+
+Builds an expansion-automation report by combining upstream scale-lane handoff artifacts into one closeout view.
+
+Examples:
+
+- `sdetkit day41-expansion-automation --format text`
+- `sdetkit day41-expansion-automation --format json --strict`
+- `sdetkit day41-expansion-automation --write-defaults --format json --strict`
+- `sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict`
+- `sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict`
+- `sdetkit day41-expansion-automation --format markdown --output day41-expansion-automation-report.md`
+
+Useful flags: `--root`, `--format`, `--output`, `--strict`, `--emit-pack-dir`, `--execute`, `--evidence-dir`, `--write-defaults`.
+
+The report inputs come from the upstream scale-lane summary and delivery board under `--root`.
+
+`--write-defaults` writes or repairs the default expansion-automation integration page before validation.
+
+`--emit-pack-dir` writes an expansion-automation pack bundle containing summary JSON, summary markdown, expansion plan markdown, automation matrix CSV, expansion KPI scorecard JSON, execution log markdown, delivery board markdown, and validation commands.
+
+`--execute` runs the expansion-automation validation commands and writes execution logs into `--evidence-dir`.
+
+`--strict` returns non-zero when validation checks fail, upstream handoff inputs are missing or not strict-ready, or execute mode detects failed commands.
+
 ## security
 
 Examples (scan once, reuse results):
