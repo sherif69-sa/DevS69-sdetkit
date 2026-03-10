@@ -123,18 +123,22 @@ See: day-6-ultra-upgrade-report.md (legacy history).
 
 ## weekly-review
 
-Builds weekly review summaries with shipped scope, KPI movement, growth signals, and next-week focus.
+Builds a weekly review report by combining current and previous growth signal inputs into one closeout view.
 
 Examples:
 
 - `sdetkit weekly-review --week 1 --format text`
-- `sdetkit weekly-review --week 1 --format markdown --output weekly-review.md`
+- `sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output weekly-review-report.md`
 - `sdetkit weekly-review --week 2 --format json --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json`
 - `sdetkit weekly-review --week 3 --emit-pack-dir docs/artifacts/day21-weekly-pack --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict`
 
 Useful flags: `--root`, `--week`, `--signals-file`, `--previous-signals-file`, `--emit-pack-dir`, `--strict`, `--format`, `--output`.
 
-`--emit-pack-dir` writes week-specific closeout files for week 2 and week 3.
+`--signals-file` and `--previous-signals-file` point to the current and previous growth-signal JSON inputs used to build the review.
+
+`--emit-pack-dir` writes a weekly review pack bundle containing a closeout checklist, KPI scorecard, contributor response plan, and release narrative brief for week 2 and week 3.
+
+`--strict` returns non-zero when shipped coverage is incomplete or required growth signals are missing for week 2 or week 3.
 
 See: day-7-ultra-upgrade-report.md and day-21-ultra-upgrade-report.md (legacy history).
 
