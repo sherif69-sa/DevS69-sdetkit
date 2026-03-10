@@ -114,6 +114,6 @@ def test_day41_strict_fails_when_day40_inputs_missing(tmp_path: Path) -> None:
 
 def test_day41_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day41-expansion-automation", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["expansion-automation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 41 expansion automation summary" in capsys.readouterr().out

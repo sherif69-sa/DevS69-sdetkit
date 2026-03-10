@@ -120,6 +120,6 @@ def test_day47_strict_fails_when_day46_inputs_missing(tmp_path: Path) -> None:
 
 def test_day47_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(["day47-reliability-closeout", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["reliability-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 47 reliability closeout summary" in capsys.readouterr().out

@@ -127,7 +127,7 @@ def test_day50_strict_fails_when_day49_inputs_missing(tmp_path: Path) -> None:
 def test_day50_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day50-execution-prioritization-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["execution-prioritization-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Day 50 execution prioritization closeout summary" in capsys.readouterr().out
