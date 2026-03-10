@@ -114,8 +114,6 @@ def test_day68_strict_fails_without_day67_summary(tmp_path: Path) -> None:
 
 def test_day68_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["integration-expansion4-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["integration-expansion4-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Integration Expansion4 Closeout summary" in capsys.readouterr().out

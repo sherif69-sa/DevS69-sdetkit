@@ -140,8 +140,6 @@ def test_day74_strict_fails_without_day73(tmp_path: Path) -> None:
 
 def test_day74_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["distribution-scaling-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["distribution-scaling-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Distribution Scaling Closeout summary" in capsys.readouterr().out

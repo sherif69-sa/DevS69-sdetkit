@@ -66,6 +66,7 @@ _DAY_CLOSEOUT = re.compile(r"^day\d+_(.+_closeout)$")
 
 # Stable product lanes promoted from Day 41-50 naming.
 _PRODUCT_CANONICAL_BY_DAY_MODULE: dict[str, str] = {
+    "day28_weekly_review": "weekly-review-lane",
     "day41_expansion_automation": "expansion-automation",
     # Day 42 and Day 46 would both collide on optimization-closeout.
     "day42_optimization_closeout": "optimization-closeout-foundation",
@@ -77,6 +78,7 @@ _PRODUCT_CANONICAL_BY_DAY_MODULE: dict[str, str] = {
     "day48_objection_closeout": "objection-closeout",
     "day49_weekly_review_closeout": "weekly-review-closeout",
     "day50_execution_prioritization_closeout": "execution-prioritization-closeout",
+    "day65_weekly_review_closeout": "weekly-review-closeout-cycle2",
 }
 
 

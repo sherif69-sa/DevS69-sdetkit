@@ -16,9 +16,9 @@ Day 43 closes with a major acceleration upgrade that converts Day 42 optimizatio
 ## Day 43 command lane
 
 ```bash
-python -m sdetkit day43-acceleration-closeout --format json --strict
-python -m sdetkit day43-acceleration-closeout --emit-pack-dir docs/artifacts/day43-acceleration-closeout-pack --format json --strict
-python -m sdetkit day43-acceleration-closeout --execute --evidence-dir docs/artifacts/day43-acceleration-closeout-pack/evidence --format json --strict
+python -m sdetkit acceleration-closeout --format json --strict
+python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/day43-acceleration-closeout-pack --format json --strict
+python -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/day43-acceleration-closeout-pack/evidence --format json --strict
 python scripts/check_day43_acceleration_closeout_contract.py
 ```
 

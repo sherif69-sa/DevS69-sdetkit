@@ -141,8 +141,6 @@ def test_day83_strict_fails_without_day82(tmp_path: Path) -> None:
 
 def test_day83_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 83 trust FAQ expansion closeout summary" in capsys.readouterr().out

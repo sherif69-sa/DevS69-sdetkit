@@ -16,9 +16,9 @@ Day 48 closes with a major objection-handling upgrade that converts Day 47 relia
 ## Day 48 command lane
 
 ```bash
-python -m sdetkit day48-objection-closeout --format json --strict
-python -m sdetkit day48-objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict
-python -m sdetkit day48-objection-closeout --execute --evidence-dir docs/artifacts/day48-objection-closeout-pack/evidence --format json --strict
+python -m sdetkit objection-closeout --format json --strict
+python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict
+python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/day48-objection-closeout-pack/evidence --format json --strict
 python scripts/check_day48_objection_closeout_contract.py
 ```
 

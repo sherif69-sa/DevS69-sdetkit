@@ -115,6 +115,8 @@ def test_day69_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(["day69-case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"])
+    alias_rc = cli.main(
+        ["day69-case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
     assert alias_rc == 0
     assert "Case Study Prep1 Closeout summary" in capsys.readouterr().out

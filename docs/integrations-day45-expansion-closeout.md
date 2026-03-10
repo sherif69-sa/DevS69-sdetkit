@@ -16,9 +16,9 @@ Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence
 ## Day 45 command lane
 
 ```bash
-python -m sdetkit day45-expansion-closeout --format json --strict
-python -m sdetkit day45-expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict
-python -m sdetkit day45-expansion-closeout --execute --evidence-dir docs/artifacts/day45-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit expansion-closeout --format json --strict
+python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict
+python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/day45-expansion-closeout-pack/evidence --format json --strict
 python scripts/check_day45_expansion_closeout_contract.py
 ```
 

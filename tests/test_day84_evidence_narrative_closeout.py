@@ -139,8 +139,6 @@ def test_day84_strict_fails_without_day83(tmp_path: Path) -> None:
 
 def test_day84_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["evidence-narrative-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["evidence-narrative-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 84 evidence narrative closeout summary" in capsys.readouterr().out

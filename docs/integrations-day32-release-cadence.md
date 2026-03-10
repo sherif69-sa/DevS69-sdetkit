@@ -16,9 +16,9 @@ Day 32 converts Day 31 baseline goals into a repeatable release operating cadenc
 ## Day 32 command lane
 
 ```bash
-python -m sdetkit day32-release-cadence --format json --strict
-python -m sdetkit day32-release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict
-python -m sdetkit day32-release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict
+python -m sdetkit release-cadence --format json --strict
+python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict
+python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict
 python scripts/check_day32_release_cadence_contract.py
 ```
 

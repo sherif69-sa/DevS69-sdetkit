@@ -140,8 +140,6 @@ def test_day75_strict_fails_without_day74(tmp_path: Path) -> None:
 
 def test_day75_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["trust-assets-refresh-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["trust-assets-refresh-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Trust Assets Refresh Closeout summary" in capsys.readouterr().out

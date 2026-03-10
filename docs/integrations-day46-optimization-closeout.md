@@ -16,9 +16,9 @@ Day 46 closes with a major optimization upgrade that converts Day 45 expansion e
 ## Day 46 command lane
 
 ```bash
-python -m sdetkit day46-optimization-closeout --format json --strict
-python -m sdetkit day46-optimization-closeout --emit-pack-dir docs/artifacts/day46-optimization-closeout-pack --format json --strict
-python -m sdetkit day46-optimization-closeout --execute --evidence-dir docs/artifacts/day46-optimization-closeout-pack/evidence --format json --strict
+python -m sdetkit optimization-closeout --format json --strict
+python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/day46-optimization-closeout-pack --format json --strict
+python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/day46-optimization-closeout-pack/evidence --format json --strict
 python scripts/check_day46_optimization_closeout_contract.py
 ```
 
