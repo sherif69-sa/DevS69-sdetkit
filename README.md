@@ -58,6 +58,7 @@ Comparison and proof details: `docs/why-not-just-tools.md`
 ## How to navigate SDETKit
 
 - Adoption walkthrough: `docs/example-adoption-flow.md`
+- Real artifact output showcase: `docs/evidence-showcase.md`
 - Command taxonomy: `docs/command-taxonomy.md`
 - Release-confidence model and lanes: `docs/release-confidence.md`
 - CLI docs: `docs/cli.md`
