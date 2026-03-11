@@ -51,6 +51,21 @@ Use release mode when you want a stricter go/no-go decision before a release.
 
 Ready-to-use guide: `docs/ready-to-use.md`
 
+## Proof by scenario
+
+Want concrete examples before adopting?
+
+- See **3 realistic release-confidence scenarios** in `docs/examples.md`.
+- Each scenario includes: situation, command, representative output, and maintainer next action.
+
+```bash
+# quick confidence lane
+bash scripts/ready_to_use.sh quick
+
+# strict release lane
+bash scripts/ready_to_use.sh release
+```
+
 ---
 
 ## Who this is for
