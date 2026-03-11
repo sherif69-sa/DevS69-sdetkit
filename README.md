@@ -87,6 +87,7 @@ If you want to use SDETKit in a different repository, use the adopter-focused gu
 Want concrete examples before adopting?
 
 - See **3 realistic release-confidence scenarios** in `docs/examples.md`.
+- See a **representative first-run-to-release adoption walkthrough** in `docs/example-adoption-flow.md`.
 - Each scenario includes: situation, command, representative output, and maintainer next action.
 
 ```bash

@@ -78,6 +78,7 @@ python -m sdetkit gate release
 
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Adopt in your repository](adoption.md)
+- [Example adoption flow](example-adoption-flow.md)
 - [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Release-confidence examples](examples.md)
 - [Why not just separate tools? (system value)](why-not-just-tools.md)

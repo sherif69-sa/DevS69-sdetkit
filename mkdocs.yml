@@ -85,6 +85,7 @@ nav:
   - Quickstart: ready-to-use.md
   - Release confidence: release-confidence.md
   - Adopt in your repository: adoption.md
+  - Example adoption flow: example-adoption-flow.md
   - Adoption troubleshooting: adoption-troubleshooting.md
   - Remediation cookbook: remediation-cookbook.md
   - Examples: examples.md
