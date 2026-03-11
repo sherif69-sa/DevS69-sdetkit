@@ -50,6 +50,7 @@ bash scripts/ready_to_use.sh release
 - Capability map and command taxonomy: `docs/command-taxonomy.md`
 - Full CLI command reference: `docs/cli.md`
 - Representative adopter walkthrough: `docs/example-adoption-flow.md`
+- Scenario-based adoption examples: `docs/adoption-examples.md`
 
 ## Recommended expansion order
 
@@ -77,6 +78,7 @@ Comparison and proof details: `docs/why-not-just-tools.md`
 
 - Decision guide (fit + path + stop point): `docs/decision-guide.md`
 - Adoption walkthrough: `docs/example-adoption-flow.md`
+- Adoption scenarios: `docs/adoption-examples.md`
 - Real artifact output showcase: `docs/evidence-showcase.md`
 - Command taxonomy: `docs/command-taxonomy.md`
 - Release-confidence model and lanes: `docs/release-confidence.md`
@@ -224,6 +226,7 @@ Optional extras are only for specialized workflows (contributing, docs authoring
 For teams adopting SDETKit in another repository, start with:
 
 - `docs/adoption.md` for copy-paste local and GitHub Actions workflows.
+- `docs/adoption-examples.md` for practical rollout shapes by team/repo context.
 - `docs/recommended-ci-flow.md` for the recommended baseline CI shape (PR fast feedback, stricter `main`, release-oriented checks).
 - First gate: `python -m sdetkit gate fast`
 - Stricter rollout: security budgets + `python -m sdetkit gate release`

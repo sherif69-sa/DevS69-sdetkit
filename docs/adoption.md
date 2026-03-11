@@ -158,6 +158,7 @@ Use those artifacts first, then follow:
 
 - [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Remediation cookbook](remediation-cookbook.md)
+- [Adoption examples](adoption-examples.md)
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Release-confidence examples](examples.md)
 - [Production readiness command](production-readiness.md)

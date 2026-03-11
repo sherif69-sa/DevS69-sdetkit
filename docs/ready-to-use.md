@@ -68,6 +68,7 @@ Use this when you need production-quality release evidence.
 4. Run strict release checks (`bash scripts/ready_to_use.sh release` or security-enforce + `gate release`).
 5. Use [cli.md](cli.md) to discover core command families.
 6. Use [adoption.md](adoption.md) to roll the same path into CI.
+7. Pick a realistic rollout shape in [adoption-examples.md](adoption-examples.md).
 
 ## Next actions after setup
 
@@ -92,5 +93,6 @@ That guide includes:
 - Installation from GitHub
 - Copy-paste GitHub Actions workflows
 - A staged path from `gate fast` to stricter release gating
+- Scenario-based rollout examples in [adoption-examples.md](adoption-examples.md)
 
 If quick or release checks fail in an external adoption flow, use the [remediation cookbook](remediation-cookbook.md) for copy-paste next steps.

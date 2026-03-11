@@ -19,6 +19,7 @@ SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need
 [Open quickstart](ready-to-use.md){ .md-button }
 [Release confidence story](release-confidence.md){ .md-button }
 [Adopt in your repo](adoption.md){ .md-button }
+[Adoption examples](adoption-examples.md){ .md-button }
 [Adoption troubleshooting](adoption-troubleshooting.md){ .md-button }
 [See integrations](github-action.md){ .md-button }
 [See playbooks](global-production-transformation-playbook.md){ .md-button }
@@ -70,6 +71,7 @@ Use this sequence to keep rollout focused:
 2. **Strict release gate** via `bash scripts/ready_to_use.sh release`
 3. **Discover core commands** via [cli.md](cli.md)
 4. **External adoption** via [adoption.md](adoption.md)
+5. **Pick a rollout scenario** via [adoption-examples.md](adoption-examples.md)
 
 ## Flagship workflow (manual form)
 
