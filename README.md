@@ -6,111 +6,90 @@
 ![Repo Audit](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
 ![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
 
-SDETKit helps teams **prove release confidence** with deterministic checks and audit-friendly evidence.
+SDETKit is a layered **release-confidence and engineering-operations toolkit**. It helps teams move from scattered checks to deterministic workflows, evidence, and repeatable operator experience—so "ready to ship" is a verifiable decision, not a subjective one.
 
-## What this is (10-second version)
+## Why this exists
 
-SDETKit is a release-confidence toolkit.
+Most repositories accumulate separate scripts and tools, but the release decision still depends on manual interpretation. SDETKit provides a consistent command path from quick confidence to strict release gating, with machine-readable evidence and CI-safe outcomes.
 
-It gives teams one repeatable answer to: **"Is this repository ready to ship?"**
+## Start here
 
-If you want one command path from quick confidence to a strict release gate (with evidence you can review later), start here.
+Choose the path that matches where you are now:
 
-## The one thing this repo is best at
-
-SDETKit is centered on one flagship workflow: **release confidence gating**.
-
-Run one command sequence to answer: _"Is this repository ready to ship?"_
-
-```bash
-bash scripts/ready_to_use.sh release
-```
-
-This runs environment bootstrap + CI quick lane + coverage + security enforcement + release gate in a repeatable flow.
-
----
-
-## Start here (first 5 minutes)
-
-### 1) Run the fastest path (quick confidence)
+### 1) Evaluate a repository quickly
 
 ```bash
 bash scripts/ready_to_use.sh quick
 ```
 
-### 2) What to expect
+- Fast confidence check with deterministic pass/fail output.
+- Good first run before deeper enforcement.
+- Guide: `docs/ready-to-use.md`
 
-- Bootstraps a local virtual environment.
-- Verifies the CLI is healthy.
-- Runs `ci.sh quick --skip-docs`.
-- Prints a clear status and next step.
-
-### 3) Value proof
-
-If this command finishes, you have a working local gate path that mirrors CI expectations and gives deterministic pass/fail output.
-
-### 4) Move to strict release gate
+### 2) Run stricter release-confidence checks
 
 ```bash
 bash scripts/ready_to_use.sh release
 ```
 
-Use release mode when you want a stricter go/no-go decision before a release.
+- Runs a stricter go/no-go lane (quality + security + release gate flow).
+- Use before release decisions.
+- Overview: `docs/release-confidence.md`
 
-Ready-to-use guide: `docs/ready-to-use.md`
+### 3) Understand the broader system and command surface
 
-Release-confidence overview: `docs/release-confidence.md`
-
-## Core path (local and CI)
-
-Use this progression:
-
-1. **Quick confidence:** `bash scripts/ready_to_use.sh quick`
-2. **Strict release gate:** `bash scripts/ready_to_use.sh release`
-3. **Adopt in external repo:** `docs/adoption.md`
-
-This keeps the journey focused on release confidence first, then rollout.
-
-## Adopt in your own repository (external integration)
-
-Focused remediation playbooks: `docs/remediation-cookbook.md`
-
-If you want to use SDETKit in a different repository, use the adopter-focused guide:
-
-- `docs/adoption.md`
-- `docs/adoption-troubleshooting.md` for first-failure triage (what failed, what it means, what to do next).
-- Includes copy-paste local + CI integration patterns.
-- Shows a progressive path from lightweight `gate fast` to stricter release gating.
-
-## Proof by scenario
-
-Want concrete examples before adopting?
-
-- See **3 realistic release-confidence scenarios** in `docs/examples.md`.
-- See a **representative first-run-to-release adoption walkthrough** in `docs/example-adoption-flow.md`.
-- Each scenario includes: situation, command, representative output, and maintainer next action.
-
-```bash
-# quick confidence lane
-bash scripts/ready_to_use.sh quick
-
-# strict release lane
-bash scripts/ready_to_use.sh release
-```
-
----
+- Representative adopter walkthrough: `docs/example-adoption-flow.md`
+- Full command map: `docs/command-taxonomy.md`
+- CLI command reference: `docs/cli.md`
 
 ## Who this is for
 
-- **SDET / QA** teams that need reproducible quality gates.
-- **DevOps / platform** teams that want policy-aware release checks in CI.
-- **Maintainers** who need machine-readable evidence for release decisions.
+- **SDET / QA teams** that need reproducible quality and release gates.
+- **DevOps / platform teams** that want policy-aware checks in CI.
+- **Maintainers and release owners** who need evidence-backed release decisions.
 
-## What you get
+## Why not just separate tools?
 
-- Deterministic command behavior and CI-safe exit codes.
-- A structured release-confidence workflow instead of ad-hoc scripts.
-- Evidence-oriented outputs for review, governance, and handoffs.
+- Separate tools can run checks; SDETKit standardizes the operator workflow, output shape, and decision path so teams get repeatable release outcomes.
+- SDETKit keeps proof artifacts and governance-oriented outputs close to execution, instead of leaving integration and interpretation fully ad hoc.
+
+Comparison and proof details: `docs/why-not-just-tools.md`
+
+## How to navigate SDETKit
+
+- Adoption walkthrough: `docs/example-adoption-flow.md`
+- Command taxonomy: `docs/command-taxonomy.md`
+- Release-confidence model and lanes: `docs/release-confidence.md`
+- CLI docs: `docs/cli.md`
+- External repository adoption: `docs/adoption.md`
+- Troubleshooting first failures: `docs/adoption-troubleshooting.md`
+- Scenario-based proof examples: `docs/examples.md`
+
+Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
+
+## Core commands
+
+```bash
+# Fast confidence lane
+bash scripts/ready_to_use.sh quick
+
+# Strict release-confidence lane
+bash scripts/ready_to_use.sh release
+
+# Direct CLI gates
+python -m sdetkit gate fast
+python -m sdetkit gate release
+
+# Security budget enforcement
+python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+```
+
+Explore broader command domains (`doctor`, `repo`, `security`, `evidence`, `report`, `ops`):
+
+```bash
+python -m sdetkit --help
+python -m sdetkit playbooks
+```
 
 ## Installation
 
@@ -135,61 +114,6 @@ python -m pip install .[test]
 python -m pip install .[packaging]
 ```
 
-## Flagship workflow (manual form)
-
-If you want the release-confidence workflow step-by-step:
-
-```bash
-bash ci.sh quick --skip-docs
-bash quality.sh cov
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
-python -m sdetkit gate release
-```
-
-## Explore commands (core first)
-
-### Core release-confidence commands
-
-```bash
-bash scripts/ready_to_use.sh quick
-bash scripts/ready_to_use.sh release
-python -m sdetkit gate fast
-python -m sdetkit gate release
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
-```
-
-### Broader toolkit commands
-
-```bash
-python -m sdetkit --help
-python -m sdetkit playbooks
-```
-
-Command domains include `doctor`, `repo`, `security`, `evidence`, `report`, and `ops`.
-
-## Docs and contributor entry points
-
-- Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
-- Quickstart doc: `docs/ready-to-use.md`
-- System-value comparison: `docs/why-not-just-tools.md`
-- Contributing guide: `CONTRIBUTING.md`
-- First-time contributor quickstart: `docs/first-contribution-quickstart.md`
-- Starter work inventory: `docs/starter-work-inventory.md`
-- Maintainer starter-issue hygiene: `docs/maintainer-starter-issue-hygiene.md`
-- First contribution command: `python -m sdetkit first-contribution --format text --strict`
-
-## New contributors: fastest safe first PR
-
-If you already ran `bash scripts/ready_to_use.sh quick`, use this path to make a first contribution quickly.
-
-1. Read `docs/first-contribution-quickstart.md` and pick a small contribution type.
-2. Check `docs/starter-work-inventory.md` for concrete starter categories tied to this repo.
-3. Set up your environment with `bash scripts/bootstrap.sh`.
-4. Make one focused change (docs/example, test, lint fix, or CLI/docs alignment).
-5. Run `python -m pre_commit run -a` and `bash quality.sh cov` before opening a PR.
-
-If you cannot find a starter issue, use `docs/starter-work-inventory.md` and open a scoped proposal with the Feature request template, noting it is a first contribution.
-
 ## CI/CD integration
 
 For teams adopting SDETKit in another repository, start with:
@@ -203,9 +127,7 @@ For CI failure triage in this repository's GitHub Actions runs, inspect uploaded
 - `ci-gate-diagnostics` (`build/gate-fast.json`, `build/security-enforce.json`)
 - `release-diagnostics` (`build/release-preflight.json`)
 
-This keeps `failed_steps` and policy threshold outcomes easy to inspect without depending only on log scrolling.
-
-For an immediate "downloaded artifact -> next fix step" path, start at the **Artifact-to-action map** in `docs/adoption-troubleshooting.md`.
+For an immediate "downloaded artifact -> next fix step" path, use the artifact-to-action map in `docs/adoption-troubleshooting.md`.
 
 ### Jenkins
 
@@ -218,12 +140,19 @@ docker build -t sdetkit .
 docker run --rm -v "$PWD:/work" -w /work sdetkit python -m sdetkit gate fast
 ```
 
+## Contributor entry points
+
+- Contributing guide: `CONTRIBUTING.md`
+- First-time contributor quickstart: `docs/first-contribution-quickstart.md`
+- Starter work inventory: `docs/starter-work-inventory.md`
+- Maintainer starter-issue hygiene: `docs/maintainer-starter-issue-hygiene.md`
+- First contribution command: `python -m sdetkit first-contribution --format text --strict`
+
 ## Release posture note
 
 This repository is prepared for artifact build and release validation. Public PyPI publication depends on `PYPI_API_TOKEN` configuration and successful workflow execution; this README does not claim generally available PyPI distribution by default.
 
-For first-public-release and post-release external verification steps, follow `RELEASE.md` and `docs/releasing.md`.
-After real releases are verified externally, see `docs/release-verification.md` for published evidence records.
+For first-public-release and post-release external verification steps, follow `RELEASE.md` and `docs/releasing.md`. After real releases are verified externally, see `docs/release-verification.md` for published evidence records.
 
 ## License
 
