@@ -6,134 +6,79 @@
 ![Repo Audit](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
 ![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
 
-SDETKit is a layered **release-confidence and engineering-operations toolkit**. It helps teams move from scattered checks to deterministic workflows, evidence, and repeatable operator experience—so "ready to ship" is a verifiable decision, not a subjective one.
+SDETKit gives engineering teams **deterministic release-confidence checks and evidence** so shipping decisions are fast, consistent, and audit-ready.
 
 ## Why this exists
 
-Most repositories accumulate separate scripts and tools, but the release decision still depends on manual interpretation. SDETKit provides a consistent command path from quick confidence to strict release gating, with machine-readable evidence and CI-safe outcomes.
+Most teams can run tools; fewer teams can make a repeatable release decision. SDETKit defines a core command path that produces deterministic pass/fail outcomes plus evidence-backed outputs you can trust in local runs and CI.
 
-## Start here: core release-confidence path
+## Start here (core adoption path)
 
-If you're new to SDETKit, start with the **Stable/Core** shipping-readiness path first:
+For first-time adoption, focus on these five hero paths only:
 
-- Install first: see [Installation](#installation)
-- Verify install in under 60 seconds: see [Verify your install](#verify-your-install)
-- Then run the core path below (`quick` → `release`)
+1. **Install** → [Installation](#installation)
+2. **Gate fast** → `python -m sdetkit gate fast`
+3. **Gate release** → `python -m sdetkit gate release`
+4. **Doctor** → `python -m sdetkit doctor`
+5. **Evidence / report output** → `python -m sdetkit evidence --help` and `python -m sdetkit report --help`
 
-### 0) Decide if SDETKit is a fit
+### 0) Confirm product fit
 
 - Decision guide: `docs/decision-guide.md`
 
-### 1) Evaluate a repository quickly
+### 1) Install and verify
 
 ```bash
-bash scripts/ready_to_use.sh quick
+python -m pip install .
+python -m sdetkit --help
 ```
 
-- Fast confidence check with deterministic pass/fail output.
-- Good first run before deeper enforcement.
-- Guide: `docs/ready-to-use.md`
-
-### 2) Run stricter release-confidence checks
+### 2) Run the core gates
 
 ```bash
-bash scripts/ready_to_use.sh release
+python -m sdetkit gate fast
+python -m sdetkit gate release
 ```
 
-- Runs a stricter go/no-go lane (quality + security + release gate flow).
-- Use before release decisions.
-- Overview: `docs/release-confidence.md`
-
-### 3) Expand deliberately after core gates are working
-
-- Command-family contract and starting defaults: `docs/command-surface.md`
-- Capability map and command taxonomy: `docs/command-taxonomy.md`
-- Full CLI command reference: `docs/cli.md`
-- Representative adopter walkthrough: `docs/example-adoption-flow.md`
-- Scenario-based adoption examples: `docs/adoption-examples.md`
-
-## Recommended expansion order
-
-Keep first-time rollout focused to avoid identity drift:
-
-1. **Stable/Core:** run `quick` then `release` and confirm deterministic go/no-go output.
-2. **Integrations:** wire core checks into CI/platform flows after local confidence is established.
-3. **Playbooks:** add guided rollout/adoption lanes for team operating rhythms.
-4. **Experimental (transition-era):** use day/closeout material only when intentionally needed.
-
-## Who this is for
-
-- **SDET / QA teams** that need reproducible quality and release gates.
-- **DevOps / platform teams** that want policy-aware checks in CI.
-- **Maintainers and release owners** who need evidence-backed release decisions.
-
-## Why not just separate tools?
-
-- Separate tools can run checks; SDETKit standardizes the operator workflow, output shape, and decision path so teams get repeatable release outcomes.
-- SDETKit keeps proof artifacts and governance-oriented outputs close to execution, instead of leaving integration and interpretation fully ad hoc.
-
-Comparison and proof details: `docs/why-not-just-tools.md`
-
-## How to navigate SDETKit
-
-- Decision guide (fit + path + stop point): `docs/decision-guide.md`
-- Adoption walkthrough: `docs/example-adoption-flow.md`
-- Adoption scenarios: `docs/adoption-examples.md`
-- Real artifact output showcase: `docs/evidence-showcase.md`
-- Command taxonomy: `docs/command-taxonomy.md`
-- Release-confidence model and lanes: `docs/release-confidence.md`
-- CLI docs: `docs/cli.md`
-- External repository adoption: `docs/adoption.md`
-- Troubleshooting first failures: `docs/adoption-troubleshooting.md`
-- Compact first-failure triage (core path): `docs/first-failure-triage.md`
-- Scenario-based proof examples: `docs/examples.md`
-- Stability levels (current policy): `docs/stability-levels.md`
-- Versioning and support posture (current policy): `docs/versioning-and-support.md`
-- Integrations and extension boundary (current policy): `docs/integrations-and-extension-boundary.md`
-- Product boundary audit and taxonomy plan: `docs/productization-map.md`
-
-### Secondary and transition-era material
-
-Historical day/closeout pages remain available for compatibility, audit trails, and specialized programs. They are intentionally **not** the primary onboarding path for first-time adopters.
-
-Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
-
-## Stability levels (current policy)
-
-SDETKit uses four user-facing stability levels: **Stable/Core**, **Integrations**, **Playbooks**, and **Experimental**.
-
-- Start production rollout with **Stable/Core** release-confidence flows.
-- Add **Integrations** after validating platform-specific behavior.
-- Use **Playbooks** for guided adoption and operational lanes.
-- Treat **Experimental** lanes (including day/closeout families) as opt-in transition-era or advanced flows.
-
-Policy docs: `docs/stability-levels.md`, `docs/versioning-and-support.md`
-
-Boundary guidance: `docs/integrations-and-extension-boundary.md`
-
-## Core commands
+### 3) Validate environment health and output evidence
 
 ```bash
-# Fast confidence lane
-bash scripts/ready_to_use.sh quick
+python -m sdetkit doctor
+python -m sdetkit evidence --help
+python -m sdetkit report --help
+```
 
-# Strict release-confidence lane
+## Core commands (copy/paste)
+
+```bash
+# Optional wrapper lane in this repository
+bash scripts/ready_to_use.sh quick
 bash scripts/ready_to_use.sh release
 
-# Direct CLI gates
+# Core CLI gates
 python -m sdetkit gate fast
 python -m sdetkit gate release
 
-# Security budget enforcement
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+# Environment diagnostics
+python -m sdetkit doctor
+
+# Evidence and reporting surfaces
+python -m sdetkit evidence --help
+python -m sdetkit report --help
 ```
 
-Explore broader command domains (`doctor`, `repo`, `security`, `evidence`, `report`, `ops`):
+## Discover later (secondary)
 
-```bash
-python -m sdetkit --help
-python -m sdetkit playbooks
-```
+After the five hero paths are working, expand deliberately:
+
+- Release-confidence model: `docs/release-confidence.md`
+- CI rollout: `docs/recommended-ci-flow.md`, `docs/adoption.md`
+- Capability taxonomy and full CLI depth: `docs/command-taxonomy.md`, `docs/cli.md`
+- Integrations/playbooks/history: see docs portal navigation
+
+Historical and transition-era material remains available for compatibility and audit trails, but is intentionally secondary to core adoption.
+
+Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
 
 ## Installation
 

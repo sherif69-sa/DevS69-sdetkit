@@ -82,16 +82,14 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - Start here:
+  - Core path:
+      - Install (quickstart): ready-to-use.md
+      - Gate fast + gate release: release-confidence.md
+      - Doctor checks: doctor.md
+      - Evidence and reports: evidence-showcase.md
       - Decision guide: decision-guide.md
-      - Quickstart: ready-to-use.md
-      - Release confidence: release-confidence.md
-      - CLI (core-first entrypoint): cli.md
-      - Command surface inventory (stability-aware): command-surface.md
-      - Capability map and command taxonomy: command-taxonomy.md
-      - Stability levels (current policy): stability-levels.md
-      - Versioning and support posture (current policy): versioning-and-support.md
-  - Core release-confidence journeys:
+      - Choose your path: choose-your-path.md
+  - Adopt and scale:
       - Adopt in your repository: adoption.md
       - Recommended CI flow (baseline): recommended-ci-flow.md
       - Example adoption flow: example-adoption-flow.md
@@ -99,9 +97,24 @@ nav:
       - Adoption troubleshooting: adoption-troubleshooting.md
       - Sample outputs (first-run evidence): sample-outputs.md
       - Remediation cookbook: remediation-cookbook.md
-      - Evidence showcase: evidence-showcase.md
-      - Examples: examples.md
-  - Integrations (after core path):
+  - Command and reference:
+      - CLI reference: cli.md
+      - Command surface inventory: command-surface.md
+      - Capability map and command taxonomy: command-taxonomy.md
+      - API: api.md
+      - Repo Audit: repo-audit.md
+      - Security Gate: security-gate.md
+      - Security model: security-model.md
+      - Security hardening: security.md
+      - Policy-as-Code: policy.md
+      - Determinism checklist: determinism-checklist.md
+      - Determinism contract: determinism-contract.md
+      - CI Contract: ci-contract.md
+      - Evidence Pack: evidence.md
+      - Reporting and trends: reporting-and-trends.md
+      - Ops Control Plane: ops.md
+      - Tool server: tool-server.md
+  - Integrations and playbooks (discover later):
       - "GitHub Action: sdetkit repo audit": github-action.md
       - IDE + pre-commit integration: ide-and-precommit.md
       - n8n Integration (PR Webhook Automation): n8n.md
@@ -109,61 +122,27 @@ nav:
       - Plugins: plugins.md
       - Plugins, rule packs, and fix-audit: plugins-and-fix.md
       - PR automation for audit auto-fixes: pr-automation.md
-  - Playbooks (guided rollout):
       - Global production transformation playbook: global-production-transformation-playbook.md
       - First contribution quickstart: first-contribution-quickstart.md
       - Starter work inventory: starter-work-inventory.md
       - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
       - Contributing: contributing.md
-  - Reference and operations:
-      - API: api.md
-      - Automation OS: automation-os.md
-      - Automation templates engine: automation-templates-engine.md
-      - CI Contract: ci-contract.md
-      - Doctor: doctor.md
-      - Evidence Pack: evidence.md
-      - Ops Control Plane: ops.md
-      - Patch harness: patch-harness.md
-      - Performance and incremental mode: performance-and-incremental.md
-      - Reporting and trends: reporting-and-trends.md
-      - Repo Audit: repo-audit.md
-      - Repo init: repo-init.md
-      - Tool server: tool-server.md
-      - sqlite-utils empty-column troubleshooting: sqlite-utils-empty-column-troubleshooting.md
-      - Determinism checklist: determinism-checklist.md
-      - Determinism contract: determinism-contract.md
-      - Policy and baselines (sdetkit repo audit): policy-and-baselines.md
-      - Policy-as-Code: policy.md
-      - Premium Quality Gate Guidelines: premium-quality-gate.md
-      - Production readiness command (sdetkit production-readiness): production-readiness.md
-      - Security Gate: security-gate.md
-      - Security model: security-model.md
-      - Security suite (Phase 10): security-suite.md
-      - Security hardening: security.md
-      - Security code scanning follow-ups: security-code-scanning-followups.md
-  - Platform & governance:
-      - AgentOS cookbook: agentos-cookbook.md
-      - AgentOS foundation: agentos-foundation.md
-      - AgentOS productization blueprint: enterprise-productization-blueprint.md
+  - Strategy and governance:
+      - Why not just separate tools? (system value): why-not-just-tools.md
+      - Product strategy (release confidence): product-strategy.md
+      - Stability levels (current policy): stability-levels.md
+      - Versioning and support posture (current policy): versioning-and-support.md
+      - Integrations and extension boundary (current policy): integrations-and-extension-boundary.md
+      - Productization map: productization-map.md
       - Design notes: design.md
       - Governance and org packs: governance-and-org-packs.md
-      - License: license.md
-      - Monorepo + multi-project support: monorepo-projects.md
-      - Productization map: productization-map.md
       - Project structure: project-structure.md
       - Releasing sdetkit: releasing.md
       - Packaging/install/release-readiness audit: packaging-readiness-audit.md
       - Public release verification records: release-verification.md
       - Changelog: changelog.md
       - Roadmap: roadmap.md
-      - Repo tour (visual orientation): repo-tour.md
-  - Strategy:
-      - Why not just separate tools? (system value): why-not-just-tools.md
-      - Product strategy (release confidence): product-strategy.md
-      - Enterprise + regulated workflow: use-cases-enterprise-regulated.md
-      - Startup + small-team workflow: use-cases-startup-small-team.md
-      - Production S-class tier blueprint for the next 90-day boost: production-s-class-90-day-boost.md
-      - Top-10 GitHub Strategy for DevS69 sdetkit: top-10-github-strategy.md
+      - License: license.md
   - Live Views:
       - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
       - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
