@@ -56,6 +56,7 @@ python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.js
 
 Before changing your pipeline, check the focused troubleshooting matrix:
 
+- [First-failure triage](first-failure-triage.md) for the compact fix-first path across `gate fast` -> `security enforce` -> `gate release`.
 - [Adoption troubleshooting](adoption-troubleshooting.md) (start with the **Artifact-to-action map** section if you downloaded CI artifacts).
 - [Remediation cookbook](remediation-cookbook.md) for copy-paste next-step playbooks after common failures.
 - Helps decide whether to fix quality debt now, tune a threshold temporarily, or stay on a lighter command.
@@ -156,6 +157,7 @@ Use those artifacts first, then follow:
 
 ## Related docs
 
+- [First-failure triage](first-failure-triage.md)
 - [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Remediation cookbook](remediation-cookbook.md)
 - [Ready-to-use quickstart](ready-to-use.md)

@@ -83,6 +83,7 @@ Comparison and proof details: `docs/why-not-just-tools.md`
 - CLI docs: `docs/cli.md`
 - External repository adoption: `docs/adoption.md`
 - Troubleshooting first failures: `docs/adoption-troubleshooting.md`
+- Compact first-failure triage (core path): `docs/first-failure-triage.md`
 - Scenario-based proof examples: `docs/examples.md`
 - Stability levels (current policy): `docs/stability-levels.md`
 - Product boundary audit and taxonomy plan: `docs/productization-map.md`

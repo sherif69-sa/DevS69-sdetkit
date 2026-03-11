@@ -8,6 +8,8 @@ The goal is to decide quickly:
 - Should you fix code issues now, loosen policy temporarily, or run a lighter command?
 - What is the next sensible adoption step?
 
+For a shorter fix-first path across the core commands, start with [First-failure triage](first-failure-triage.md).
+
 ## Quick command intent map
 
 | Command | Primary purpose | Typical onboarding outcome |

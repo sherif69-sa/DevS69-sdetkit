@@ -50,5 +50,6 @@ For new users and adopters, use this sequence:
 
 - Quickstart: [ready-to-use.md](ready-to-use.md)
 - External rollout: [adoption.md](adoption.md)
-- First-failure triage: [adoption-troubleshooting.md](adoption-troubleshooting.md)
+- First-failure triage (compact): [first-failure-triage.md](first-failure-triage.md)
+- Expanded troubleshooting: [adoption-troubleshooting.md](adoption-troubleshooting.md)
 - Practical scenarios: [examples.md](examples.md)
