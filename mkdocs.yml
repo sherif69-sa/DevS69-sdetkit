@@ -122,6 +122,7 @@ nav:
       - Security code scanning follow-ups: security-code-scanning-followups.md
   - Platform & Governance:
       - AgentOS productization blueprint: enterprise-productization-blueprint.md
+      - First contribution quickstart: first-contribution-quickstart.md
       - Contributing: contributing.md
       - Design notes: design.md
       - Governance and org packs: governance-and-org-packs.md

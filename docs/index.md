@@ -68,5 +68,6 @@ python -m sdetkit gate release
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Release-confidence examples](examples.md)
 - [Repo tour](repo-tour.md)
+- [First contribution quickstart](first-contribution-quickstart.md)
 - [Contributing](contributing.md)
 - [Full command reference](cli.md)

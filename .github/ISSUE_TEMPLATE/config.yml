@@ -6,3 +6,6 @@ contact_links:
   - name: Questions / discussion
     url: https://github.com/sherif69-sa/DevS69-sdetkit/discussions
     about: Please ask and answer questions here.
+  - name: First contribution quickstart
+    url: https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/docs/first-contribution-quickstart.md
+    about: New contributor? Start here for setup, validation, and first PR scope.

@@ -1,27 +1,21 @@
 # Contributing
 
-Use the repository root guide (`CONTRIBUTING.md`) for the full contributor workflow.
+For the complete workflow, use the repository guide: [`CONTRIBUTING.md`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CONTRIBUTING.md).
 
-## Day 10 first-contribution checklist
+If this is your first external PR, start here first: [First contribution quickstart](first-contribution-quickstart.md).
 
-Generate a guided checklist from clone to PR:
+## Generate the Day 10 checklist
 
 ```bash
-sdetkit first-contribution --format text --strict
-sdetkit first-contribution --write-defaults --format json --strict
-sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md
+python -m sdetkit first-contribution --format text --strict
+python -m sdetkit first-contribution --write-defaults --format json --strict
+python -m sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md
 ```
 
-Quick start:
+## Baseline contributor validation commands
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -U pip
-bash scripts/bootstrap.sh
-. .venv/bin/activate
-pre-commit install
-pre-commit run -a
+python -m pre_commit run -a
 bash quality.sh cov
 mkdocs build
 ```

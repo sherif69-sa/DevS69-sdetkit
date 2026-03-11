@@ -10,47 +10,58 @@ Thanks for helping improve **sdetkit**.
 
 ---
 
-## 0) Day 10 first-contribution checklist
+## Start here (first external contribution)
 
-Use this guided path from local clone to first merged PR:
+If this is your first PR to this repository, use this shortest safe path:
 
-- [ ] Fork the repository and clone your fork locally.
-- [ ] Create and activate a virtual environment.
-- [ ] Install editable dependencies for dev/test/docs.
-- [ ] Create a branch named `feat/<topic>` or `fix/<topic>`.
-- [ ] Run focused tests for changed modules before committing.
-- [ ] Run full quality gates (`pre-commit`, `quality.sh`, docs build) before opening a PR.
-- [ ] Open a PR using the repository template and include test evidence.
+1. **Set up locally**
+   ```bash
+   bash scripts/bootstrap.sh
+   source .venv/bin/activate
+   ```
+2. **Choose one small contribution type** from [Starter contribution types](#starter-contribution-types).
+3. **Make one focused change** and keep the PR scope small.
+4. **Validate before push**:
+   ```bash
+   python -m pre_commit run -a
+   bash quality.sh cov
+   ```
+5. **Open a PR** using `.github/PULL_REQUEST_TEMPLATE.md` and include the commands you ran.
 
-Recommended shell sequence:
+For a condensed version, see `docs/first-contribution-quickstart.md`.
+
+## Starter contribution types
+
+Use these when you want a realistic first PR without deep project context:
+
+- **Docs/example improvements**: clarify command wording, tighten examples, or fix broken internal doc links in `docs/` and `README.md`.
+- **Small tests**: add or extend targeted tests under `tests/` for existing CLI behavior.
+- **Lint/type hygiene fixes**: fix Ruff or mypy findings without changing behavior.
+- **Workflow/docs polish**: improve contributor/developer docs or issue-template clarity.
+- **CLI/docs alignment**: update docs when command names/options drift from actual CLI output.
+
+If you are unsure where to start, run:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .[dev,test,docs]
-pre-commit run -a
-bash quality.sh cov
-mkdocs build
+python -m sdetkit first-contribution --format text --strict
 ```
 
-## Contribution flow
+## Where to find starter work
 
-1. Fork and create a focused branch.
-2. Implement changes with tests and documentation as needed.
-3. Run local quality gates.
-4. Open a pull request with clear context and impact.
+- Look for open issues labelled **`good first issue`**, **`documentation`**, **`tests`**, or **`needs-triage`**.
+- If no issue fits, open a small scoped feature request (use `.github/ISSUE_TEMPLATE/feature_request.yml`) and mention it is a first contribution.
+- Prefer changes that can be reviewed in one pass and validated with existing commands.
 
-## 1) Local development setup
+## Local development setup
 
 ```bash
-cd ~/DevS69-sdetkit
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -U pip
 python -m pip install -e .[dev,test,docs]
 ```
 
-## 2) Enable pre-commit hooks
+## Enable pre-commit hooks
 
 ```bash
 pre-commit install
@@ -58,7 +69,7 @@ python -m ruff format --check .
 python -m pre_commit run -a
 ```
 
-## 3) Run quality gates locally
+## Validate changes before opening a PR
 
 Use the same commands expected by CI:
 
@@ -71,33 +82,31 @@ python -m twine check dist/*
 mkdocs build
 ```
 
-## 4) Common day-to-day commands
+For docs-only updates, run at least:
 
 ```bash
-ruff format .
-ruff check .
-mypy src
-pytest -q
+python -m pre_commit run -a
+mkdocs build
 ```
 
-## 5) Pull request checklist
+## Pull request checklist
 
 Reference: [docs/premium-quality-gate.md](docs/premium-quality-gate.md)
 
-- [ ] `pre-commit run -a` passes.
-- [ ] `bash quality.sh cov` passes.
-- [ ] `python -m build` and `python -m twine check dist/*` pass.
+- [ ] `python -m pre_commit run -a` passes.
+- [ ] `bash quality.sh cov` passes (or explain why not run).
+- [ ] `python -m build` and `python -m twine check dist/*` pass for packaging-impacting changes.
 - [ ] `mkdocs build` passes for docs changes.
 - [ ] `CHANGELOG.md` updated if behavior changed.
 
-## 6) Commit guidance
+## Commit guidance
 
 - Keep commits focused and easy to review.
 - Include tests for behavior changes.
 - Prefer typed public APIs and clear error messages.
 - Write commit messages that describe **what changed** and **why**.
 
-## 7) PR quality tips (recommended)
+## PR quality tips (recommended)
 
 - Add before/after snippets for docs UX changes.
 - Mention affected commands/workflows.
