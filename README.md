@@ -16,6 +16,10 @@ Most repositories accumulate separate scripts and tools, but the release decisio
 
 If you're new to SDETKit, start with the **Stable/Core** shipping-readiness path first:
 
+- Install first: see [Installation](#installation)
+- Verify install in under 60 seconds: see [Verify your install](#verify-your-install)
+- Then run the core path below (`quick` → `release`)
+
 ### 0) Decide if SDETKit is a fit
 
 - Decision guide: `docs/decision-guide.md`
@@ -175,6 +179,45 @@ You can combine extras as needed, for example:
 ```bash
 python -m pip install .[dev,test,docs]
 ```
+
+## Verify your install
+
+Run this short check immediately after installation:
+
+```bash
+python -m sdetkit --help
+python -m sdetkit gate --help
+```
+
+Expected result: both commands print usage/help text and exit successfully.
+
+Then run the first real release-confidence signal:
+
+```bash
+bash scripts/ready_to_use.sh quick
+```
+
+If you installed SDETKit in another repository (without this repo's scripts), use:
+
+```bash
+python -m sdetkit gate fast
+```
+
+## Recommended first 10 minutes
+
+1. Install SDETKit (local clone or GitHub URL).
+2. Verify CLI availability with `python -m sdetkit --help`.
+3. Run quick confidence: `bash scripts/ready_to_use.sh quick` (or `python -m sdetkit gate fast` in external repos).
+4. Run strict release checks: `bash scripts/ready_to_use.sh release`.
+5. Review command families in `docs/cli.md` and staged rollout guidance in `docs/adoption.md`.
+
+What works without optional extras:
+
+- Core gate commands (`gate fast`, `gate release`)
+- Security budget enforcement (`security enforce`)
+- Stable/Core quickstart wrapper (`scripts/ready_to_use.sh` in this repository)
+
+Optional extras are only for specialized workflows (contributing, docs authoring, packaging validation, notifier integrations).
 
 ## CI/CD integration
 

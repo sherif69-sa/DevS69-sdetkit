@@ -2,6 +2,26 @@
 
 Use this guide when you want a practical start to release confidence without learning the entire repository first.
 
+## Install SDETKit
+
+Choose the path that matches your context:
+
+- In this repository (local clone): `python -m pip install .`
+- In an external repository: `python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"`
+
+Optional extras (`dev`, `test`, `docs`, `packaging`, `telegram`, `whatsapp`) are not required for the core release-confidence path.
+
+## Verify your install
+
+Run this right after installation:
+
+```bash
+python -m sdetkit --help
+python -m sdetkit gate --help
+```
+
+Expected result: both commands print help text and exit with code `0`.
+
 ## Fast start (recommended, under 5 minutes)
 
 ```bash
@@ -14,6 +34,12 @@ What this does:
 2. Verifies the SDETKit CLI is available.
 3. Runs the CI quick lane.
 4. Leaves you with a working repo and a clear next step.
+
+If you are in another repository (without this repo's helper scripts), use:
+
+```bash
+python -m sdetkit gate fast
+```
 
 ## Full release-confidence start
 
@@ -33,6 +59,15 @@ Use this when you need production-quality release evidence.
 
 - Exit code `0`: setup/checks completed successfully.
 - Non-zero exit code: setup or checks failed; review the command output and fix the first failing step.
+
+## Recommended first 10 minutes
+
+1. Install SDETKit.
+2. Verify install with `python -m sdetkit --help`.
+3. Run quick confidence (`bash scripts/ready_to_use.sh quick` or `python -m sdetkit gate fast`).
+4. Run strict release checks (`bash scripts/ready_to_use.sh release` or security-enforce + `gate release`).
+5. Use [cli.md](cli.md) to discover core command families.
+6. Use [adoption.md](adoption.md) to roll the same path into CI.
 
 ## Next actions after setup
 
