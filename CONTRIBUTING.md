@@ -143,4 +143,3 @@ pre-commit run -a
 bash quality.sh cov
 mkdocs build
 ```
-
