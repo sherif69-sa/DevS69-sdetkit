@@ -2,6 +2,8 @@
 
 ## Start with these core release-confidence commands
 
+Need a fast model of where commands belong before diving into the full list? See [Capability map and command taxonomy](command-taxonomy.md).
+
 Use this primary path first:
 
 1. **Quick confidence:** `sdetkit gate fast`

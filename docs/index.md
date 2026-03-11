@@ -86,6 +86,7 @@ python -m sdetkit gate release
 - [First contribution quickstart](first-contribution-quickstart.md)
 - [Contributing](contributing.md)
 - [Full command reference](cli.md)
+- [Capability map and command taxonomy](command-taxonomy.md)
 
 <div class="quick-jump" markdown>
 
