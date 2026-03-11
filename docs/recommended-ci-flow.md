@@ -2,6 +2,8 @@
 
 This page is the **recommended baseline** for operationalizing SDETKit in GitHub Actions with minimal friction.
 
+For a compact reviewer/operator read path over CI artifacts, see [CI artifact walkthrough](ci-artifact-walkthrough.md).
+
 It is intentionally small and derived from this repository's current CI/release patterns in:
 
 - `.github/workflows/ci.yml`

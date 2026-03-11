@@ -1,5 +1,7 @@
 # Sample outputs (representative first-run evidence)
 
+Need a compact “what this artifact means and what to do next” map? See [CI artifact walkthrough](ci-artifact-walkthrough.md).
+
 Use this page to quickly see what a **realistic first run** can look like on the Stable/Core path.
 
 These snippets are **representative/illustrative** and based on documented outputs already used in this repository (not customer production screenshots).

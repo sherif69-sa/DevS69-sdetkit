@@ -1,5 +1,7 @@
 # Adopt SDETKit in your repository
 
+For a compact reviewer/operator artifact decode after CI runs, use [CI artifact walkthrough](ci-artifact-walkthrough.md).
+
 This page is for teams using SDETKit **outside this repository**.
 
 It gives you a safe, copy-paste path from first run to stricter CI enforcement.

@@ -1,5 +1,7 @@
 # Release confidence with SDETKit
 
+Need a compact operator/reviewer decode of CI evidence files? Use the [CI artifact walkthrough](ci-artifact-walkthrough.md).
+
 SDETKit exists for one primary outcome: help teams make a release decision with deterministic checks and audit-friendly evidence.
 
 ## Core idea
