@@ -94,6 +94,7 @@ nav:
       - Adopt in your repository: adoption.md
       - Recommended CI flow (baseline): recommended-ci-flow.md
       - Example adoption flow: example-adoption-flow.md
+      - Adoption examples: adoption-examples.md
       - Adoption troubleshooting: adoption-troubleshooting.md
       - Remediation cookbook: remediation-cookbook.md
       - Evidence showcase: evidence-showcase.md
