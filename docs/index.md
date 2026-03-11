@@ -16,6 +16,7 @@ SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need
 
 [Start in 5 minutes](#start-in-5-minutes){ .md-button .md-button--primary }
 [Open quickstart](ready-to-use.md){ .md-button }
+[Adopt in your repo](adoption.md){ .md-button }
 [See examples](examples.md){ .md-button }
 [See evidence commands](evidence.md){ .md-button }
 
@@ -66,6 +67,7 @@ python -m sdetkit gate release
 ## Next steps
 
 - [Ready-to-use quickstart](ready-to-use.md)
+- [Adopt in your repository](adoption.md)
 - [Release-confidence examples](examples.md)
 - [Repo tour](repo-tour.md)
 - [First contribution quickstart](first-contribution-quickstart.md)

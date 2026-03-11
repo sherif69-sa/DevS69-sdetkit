@@ -41,3 +41,13 @@ Use this when you need production-quality release evidence.
 - Read strategy context:
   - `docs/product-strategy.md`
   - `docs/global-production-transformation-playbook.md`
+
+## Using this in another repository
+
+If you are integrating SDETKit into an external repo (not this one), use [Adopt SDETKit in your repository](adoption.md).
+
+That guide includes:
+
+- Installation from GitHub
+- Copy-paste GitHub Actions workflows
+- A staged path from `gate fast` to stricter release gating
