@@ -4,6 +4,8 @@ This page is for teams using SDETKit **outside this repository**.
 
 It gives you a safe, copy-paste path from first run to stricter CI enforcement.
 
+Need help choosing rollout order first? Use the compact [Choose your path guide](choose-your-path.md).
+
 ## What to install
 
 Until public package release is completed, install from GitHub:
@@ -159,6 +161,7 @@ Use those artifacts first, then follow:
 - [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Remediation cookbook](remediation-cookbook.md)
 - [Adoption examples](adoption-examples.md)
+- [Choose your path](choose-your-path.md)
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Release-confidence examples](examples.md)
 - [Production readiness command](production-readiness.md)
