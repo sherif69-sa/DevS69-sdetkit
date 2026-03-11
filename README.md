@@ -88,6 +88,7 @@ Comparison and proof details: `docs/why-not-just-tools.md`
 - Compact first-failure triage (core path): `docs/first-failure-triage.md`
 - Scenario-based proof examples: `docs/examples.md`
 - Stability levels (current policy): `docs/stability-levels.md`
+- Versioning and support posture (current policy): `docs/versioning-and-support.md`
 - Product boundary audit and taxonomy plan: `docs/productization-map.md`
 
 ### Secondary and transition-era material
@@ -105,7 +106,7 @@ SDETKit uses four user-facing stability levels: **Stable/Core**, **Integrations*
 - Use **Playbooks** for guided adoption and operational lanes.
 - Treat **Experimental** lanes (including day/closeout families) as opt-in transition-era or advanced flows.
 
-Policy doc: `docs/stability-levels.md`
+Policy docs: `docs/stability-levels.md`, `docs/versioning-and-support.md`
 
 ## Core commands
 

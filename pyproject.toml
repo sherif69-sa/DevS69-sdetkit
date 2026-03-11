@@ -37,6 +37,7 @@ Issues = "https://github.com/sherif69-sa/DevS69-sdetkit/issues"
 Releases = "https://github.com/sherif69-sa/DevS69-sdetkit/releases"
 Changelog = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CHANGELOG.md"
 "Release Process" = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/RELEASE.md"
+"Trust and Support Policy" = "https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/docs/versioning-and-support.md"
 
 [project.optional-dependencies]
 dev = [

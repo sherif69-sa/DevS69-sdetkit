@@ -52,4 +52,5 @@ This includes many day/cycle/closeout lanes. They remain available as transition
 See also:
 
 - [Productization map](productization-map.md)
+- [Versioning and support posture](versioning-and-support.md)
 - [Capability map and command taxonomy](command-taxonomy.md)

@@ -56,3 +56,4 @@ For new users and adopters, use this sequence:
 - Expanded troubleshooting: [adoption-troubleshooting.md](adoption-troubleshooting.md)
 - Practical scenarios: [examples.md](examples.md)
 - Compact representative outputs: [sample-outputs.md](sample-outputs.md)
+- Versioning and support posture: [versioning-and-support.md](versioning-and-support.md)

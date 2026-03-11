@@ -100,7 +100,7 @@ SDETKit documents command and workflow maturity with four levels: **Stable/Core*
 - **Playbooks** provide guided rollout lanes for adoption and operating practice.
 - **Experimental** includes transition-era/advanced day and closeout lanes; keep as opt-in with validation.
 
-Read the policy: [stability-levels.md](stability-levels.md)
+Read the policies: [stability-levels.md](stability-levels.md) and [versioning-and-support.md](versioning-and-support.md)
 
 ## Next steps (ordered by default path)
 
@@ -108,6 +108,7 @@ Read the policy: [stability-levels.md](stability-levels.md)
 - [Choose your path: compact rollout self-selection](choose-your-path.md)
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Release confidence model and lanes](release-confidence.md)
+- [Versioning and support posture](versioning-and-support.md)
 - [Adopt in your repository](adoption.md)
 - [Recommended CI flow (baseline)](recommended-ci-flow.md)
 - [Global production transformation playbook](global-production-transformation-playbook.md)

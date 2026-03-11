@@ -90,6 +90,7 @@ nav:
       - Command surface inventory (stability-aware): command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
       - Stability levels (current policy): stability-levels.md
+      - Versioning and support posture (current policy): versioning-and-support.md
   - Core release-confidence journeys:
       - Adopt in your repository: adoption.md
       - Recommended CI flow (baseline): recommended-ci-flow.md
