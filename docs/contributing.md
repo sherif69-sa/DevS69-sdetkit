@@ -3,6 +3,8 @@
 For the complete workflow, use the repository guide: [`CONTRIBUTING.md`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CONTRIBUTING.md).
 
 If this is your first external PR, start here first: [First contribution quickstart](first-contribution-quickstart.md).
+For real starter task categories, use [Starter work inventory](starter-work-inventory.md).
+Maintainers curating newcomer-ready issues can use [Maintainer starter-issue hygiene](maintainer-starter-issue-hygiene.md).
 
 ## Generate the Day 10 checklist
 

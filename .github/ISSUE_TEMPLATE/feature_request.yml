@@ -52,6 +52,28 @@ body:
     validations:
       required: true
 
+
+  - type: checkboxes
+    id: contributor-path
+    attributes:
+      label: Contribution path
+      description: Mark this if you are proposing starter-sized work.
+      options:
+        - label: This is scoped as a first contribution (small, reviewable in one PR).
+          required: false
+
+  - type: textarea
+    id: starter-scope
+    attributes:
+      label: Starter scope (for small contributions)
+      description: If this is first-contribution sized, describe a narrow scope and touched areas.
+      placeholder: |
+        - Expected size: one workflow or small file group
+        - Planned files/areas:
+        - Out of scope:
+    validations:
+      required: false
+
   - type: textarea
     id: alternatives
     attributes:

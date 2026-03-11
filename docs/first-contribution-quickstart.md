@@ -20,7 +20,7 @@ python -m pip install -e .[dev,test,docs]
 
 ## 2) Pick a realistic first contribution type
 
-Choose one:
+Use `docs/starter-work-inventory.md` for concrete categories mapped to this repo, then choose one:
 
 1. **Docs/example polish** (`README.md`, `docs/`)
    - Clarify command wording.
@@ -58,8 +58,9 @@ mkdocs build
 
 ## 5) Need help finding starter work?
 
-- Search issues for labels like `good first issue`, `documentation`, `tests`, and `needs-triage`.
-- If nothing fits, open a scoped proposal with `.github/ISSUE_TEMPLATE/feature_request.yml` and mention it is your first contribution.
+- Search issues for labels like `good first issue`, `help wanted`, `documentation`, `tests`, and `needs-triage`.
+- If nothing fits, choose a safe category from `docs/starter-work-inventory.md`.
+- Open a scoped proposal with `.github/ISSUE_TEMPLATE/feature_request.yml` and mention it is your first contribution.
 
 ## Optional helper command
 

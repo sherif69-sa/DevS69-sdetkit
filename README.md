@@ -129,6 +129,8 @@ Command domains include `doctor`, `repo`, `security`, `evidence`, `report`, and 
 - Quickstart doc: `docs/ready-to-use.md`
 - Contributing guide: `CONTRIBUTING.md`
 - First-time contributor quickstart: `docs/first-contribution-quickstart.md`
+- Starter work inventory: `docs/starter-work-inventory.md`
+- Maintainer starter-issue hygiene: `docs/maintainer-starter-issue-hygiene.md`
 - First contribution command: `python -m sdetkit first-contribution --format text --strict`
 
 ## New contributors: fastest safe first PR
@@ -136,11 +138,12 @@ Command domains include `doctor`, `repo`, `security`, `evidence`, `report`, and 
 If you already ran `bash scripts/ready_to_use.sh quick`, use this path to make a first contribution quickly.
 
 1. Read `docs/first-contribution-quickstart.md` and pick a small contribution type.
-2. Set up your environment with `bash scripts/bootstrap.sh`.
-3. Make one focused change (docs/example, test, lint fix, or CLI/docs alignment).
-4. Run `python -m pre_commit run -a` and `bash quality.sh cov` before opening a PR.
+2. Check `docs/starter-work-inventory.md` for concrete starter categories tied to this repo.
+3. Set up your environment with `bash scripts/bootstrap.sh`.
+4. Make one focused change (docs/example, test, lint fix, or CLI/docs alignment).
+5. Run `python -m pre_commit run -a` and `bash quality.sh cov` before opening a PR.
 
-If you cannot find a starter issue, open a scoped proposal using the Feature request template and state that it is a first contribution.
+If you cannot find a starter issue, use `docs/starter-work-inventory.md` and open a scoped proposal with the Feature request template, noting it is a first contribution.
 
 ## CI/CD integration
 

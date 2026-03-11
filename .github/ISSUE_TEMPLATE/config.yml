@@ -9,3 +9,7 @@ contact_links:
   - name: First contribution quickstart
     url: https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/docs/first-contribution-quickstart.md
     about: New contributor? Start here for setup, validation, and first PR scope.
+
+  - name: Starter work inventory
+    url: https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/docs/starter-work-inventory.md
+    about: Concrete first-contribution categories mapped to this repository.

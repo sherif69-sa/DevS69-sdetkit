@@ -29,6 +29,7 @@ If this is your first PR to this repository, use this shortest safe path:
 5. **Open a PR** using `.github/PULL_REQUEST_TEMPLATE.md` and include the commands you ran.
 
 For a condensed version, see `docs/first-contribution-quickstart.md`.
+For concrete, repo-grounded starter categories, use `docs/starter-work-inventory.md`.
 
 ## Starter contribution types
 
@@ -48,9 +49,17 @@ python -m sdetkit first-contribution --format text --strict
 
 ## Where to find starter work
 
-- Look for open issues labelled **`good first issue`**, **`documentation`**, **`tests`**, or **`needs-triage`**.
-- If no issue fits, open a small scoped feature request (use `.github/ISSUE_TEMPLATE/feature_request.yml`) and mention it is a first contribution.
+- Look for open issues labelled **`good first issue`**, **`help wanted`**, **`documentation`**, **`tests`**, or **`needs-triage`**.
+- If no issue fits, pick a safe path from `docs/starter-work-inventory.md`.
+- Open a small scoped feature request (use `.github/ISSUE_TEMPLATE/feature_request.yml`) and mark it as first-contribution sized.
 - Prefer changes that can be reviewed in one pass and validated with existing commands.
+
+### Starter-label expectations
+
+- **`good first issue`**: scoped to one workflow/file group, clear acceptance criteria, no deep architecture context required.
+- **`help wanted`**: useful but may require more context; still includes explicit acceptance criteria.
+- **`documentation` / `tests`**: indicate domain so contributors can filter by skill.
+- **`needs-triage`**: intake state only; move to specific labels after maintainers confirm scope.
 
 ## Local development setup
 
