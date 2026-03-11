@@ -4,6 +4,8 @@ Use this page after your **first failed SDETKit command** in an external reposit
 
 It is intentionally compact: identify the failed step, run the safest next command, fix one class of issue, rerun.
 
+If you came from a downloaded GitHub Actions artifact, first map file -> next section in [Adoption troubleshooting](adoption-troubleshooting.md#artifact-to-action-map-open-this-first-after-download), then use the matching playbook here.
+
 ## 0) Start with machine-readable failure output
 
 ```bash

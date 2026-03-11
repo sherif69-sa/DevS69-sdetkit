@@ -171,6 +171,8 @@ For CI failure triage in this repository's GitHub Actions runs, inspect uploaded
 
 This keeps `failed_steps` and policy threshold outcomes easy to inspect without depending only on log scrolling.
 
+For an immediate "downloaded artifact -> next fix step" path, start at the **Artifact-to-action map** in `docs/adoption-troubleshooting.md`.
+
 ### Jenkins
 
 See `examples/ci/jenkins/`.

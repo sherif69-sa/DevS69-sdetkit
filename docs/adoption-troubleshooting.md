@@ -29,6 +29,21 @@ If you are diagnosing a failed GitHub Actions run, download CI artifacts first:
 
 These files make `failed_steps` and threshold outcomes inspectable without scrolling long logs.
 
+## Artifact-to-action map (open this first after download)
+
+Use this table when you already downloaded artifacts and want the fastest next step.
+
+| Downloaded artifact | File to open first | Fields/signals to inspect first | Usually means | Go next |
+| --- | --- | --- | --- | --- |
+| `ci-gate-diagnostics` | `build/gate-fast.json` | `ok`, `failed_steps`, then `steps[]` entries (`id`, `ok`, `rc`) | Fast CI lane failed in one or more concrete checks (lint/type/tests/doctor/templates) | This page's matrix below, then [Remediation cookbook](remediation-cookbook.md#1-gate-fast-failed-on-ruff) section matching the first failed step |
+| `ci-gate-diagnostics` | `build/security-enforce.json` | `ok`, `counts`, `exceeded`, `limits` | Security threshold check is above current configured budget (commonly `info`) | [Remediation cookbook: security enforce failed due to strict thresholds](remediation-cookbook.md#4-security-enforce-failed-due-to-strict-thresholds) |
+| `release-diagnostics` | `build/release-preflight.json` | `ok`, `version`, `tag`, `pyproject`, `changelog` | Release metadata preflight passed for the resolved tag/version/changelog files | If later release steps fail, continue with release workflow logs and [Remediation cookbook: gate release / doctor --release failed](remediation-cookbook.md#5-gate-release--doctor---release-failed) |
+
+Practical order for `ci-gate-diagnostics`:
+
+1. Open `build/gate-fast.json` first (actionable `failed_steps` list).
+2. Then open `build/security-enforce.json` (budget posture: `counts` vs `limits`).
+
 ## Troubleshooting matrix
 
 | What you see | Usually means | What to do next | Stay lightweight vs tighten later |
