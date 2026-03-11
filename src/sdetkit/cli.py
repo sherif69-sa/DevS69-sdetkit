@@ -598,52 +598,45 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "trust-signal-upgrade":
         return trust_signal_upgrade.main(list(argv[1:]))
 
+    help_description = """\
+SDETKit helps teams prove release confidence with deterministic checks and
+audit-friendly evidence.
+
+Start here:
+  1) Quick confidence: sdetkit gate fast
+  2) Strict release gate: sdetkit gate release
+  3) External adoption/rollout: sdetkit playbooks
+"""
+
     help_epilog = """\
 Command groups:
 
-  Core workflows:
-    kv
-    apiget
-    doctor
-    patch
-    cassette-get
-    repo
-    dev
-    gate
-    security
-    evidence
-    maintenance
-    agent
+  Core release confidence:
+    gate                Quick confidence and strict release gate entry points.
+    doctor              Deterministic health checks for repo/release readiness.
+    security            Security policy checks and enforcement.
+    evidence            Generate audit-friendly evidence artifacts.
+    playbooks           Discover and run guided rollout/adoption flows.
 
-  Extensions:
-    ci
-    report
-    proof
-    docs-qa
-    docs-nav
-    policy
+  Core engineering workflows:
+    kv                  Parse key=value input to JSON.
+    apiget              Deterministic API capture with cassette support.
+    patch               Apply controlled text patches.
+    repo / dev          Repo automation workflows and dev shortcuts.
+    cassette-get        Deterministic HTTP capture/replay helper.
+    maintenance         Repo maintenance automation.
+    agent               Agent workflow helpers.
 
-  Playbooks:
-    onboarding
-    weekly-review
-    proof
-    demo
-    first-contribution
-    contributor-funnel
-    triage-templates
-    startup-use-case
-    enterprise-use-case
-    github-actions-quickstart
-    gitlab-ci-quickstart
-    quality-contribution-delta
-    reliability-evidence-pack
-    release-readiness-board
-    release-narrative
-    trust-signal-upgrade
-    faq-objections
-    community-activation
-    external-contribution-push
-    kpi-audit
+  Advanced and extensions:
+    ci, report, proof, docs-qa, docs-nav, policy, ops, notify, roadmap
+
+  Playbook highlights:
+    onboarding, weekly-review, demo, first-contribution, contributor-funnel,
+    triage-templates, startup-use-case, enterprise-use-case,
+    github-actions-quickstart, gitlab-ci-quickstart, quality-contribution-delta,
+    reliability-evidence-pack, release-readiness-board, release-narrative,
+    trust-signal-upgrade, faq-objections, community-activation,
+    external-contribution-push, kpi-audit
 
 Run: sdetkit playbooks
   to list additional playbook flows hidden from the main --help output.
@@ -652,78 +645,88 @@ Run: sdetkit playbooks
     p = argparse.ArgumentParser(
         prog="sdetkit",
         add_help=True,
+        description=help_description,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=help_epilog,
     )
     p.add_argument("--version", action="version", version=_tool_version())
-    sub = p.add_subparsers(dest="cmd", required=True, metavar="command")
+    sub = p.add_subparsers(
+        dest="cmd",
+        required=True,
+        metavar="command",
+        title="commands",
+        description="Run `sdetkit <command> --help` for command-specific guidance.",
+    )
     bsl = sub.add_parser("baseline")
     bsl.add_argument("args", nargs=argparse.REMAINDER)
-    sub.add_parser("playbooks", help="List playbooks and incubator workflows")
-    kv = sub.add_parser("kv")
+    sub.add_parser(
+        "playbooks",
+        help="Discover and run adoption/rollout playbooks",
+    )
+    kv = sub.add_parser("kv", help="Parse key=value input into JSON")
     kv.add_argument("args", nargs=argparse.REMAINDER)
 
-    ag = sub.add_parser("apiget")
+    ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
 
-    doc = sub.add_parser("doctor")
+    doc = sub.add_parser("doctor", help="Deterministic repo and release-readiness checks")
     doc.add_argument("args", nargs=argparse.REMAINDER)
 
-    gt = sub.add_parser("gate")
+    gt = sub.add_parser("gate", help="Quick confidence and strict release gate checks")
     gt.add_argument("args", nargs=argparse.REMAINDER)
 
-    ci = sub.add_parser("ci")
+    ci = sub.add_parser("ci", help="CI template and pipeline validation")
     ci.add_argument("args", nargs=argparse.REMAINDER)
 
-    pg = sub.add_parser("patch")
+    pg = sub.add_parser("patch", help="Apply controlled file/text patches")
     pg.add_argument("args", nargs=argparse.REMAINDER)
 
-    cg = sub.add_parser("cassette-get")
+    cg = sub.add_parser("cassette-get", help="Record/replay HTTP captures for deterministic checks")
     cg.add_argument("args", nargs=argparse.REMAINDER)
 
-    rp = sub.add_parser("repo")
+    rp = sub.add_parser("repo", help="Repository automation tasks")
     rp.add_argument("args", nargs=argparse.REMAINDER)
 
-    dv = sub.add_parser("dev")
+    dv = sub.add_parser("dev", help="Shortcut to `repo dev` workflows")
     dv.add_argument("args", nargs=argparse.REMAINDER)
 
-    rpt = sub.add_parser("report")
+    rpt = sub.add_parser("report", help="Reporting workflows and output packs")
     rpt.add_argument("args", nargs=argparse.REMAINDER)
 
-    mnt = sub.add_parser("maintenance")
+    mnt = sub.add_parser("maintenance", help="Maintenance automation and cleanup")
     mnt.add_argument("args", nargs=argparse.REMAINDER)
 
-    agt = sub.add_parser("agent")
+    agt = sub.add_parser("agent", help="Agent-centric automation workflows")
     agt.add_argument("args", nargs=argparse.REMAINDER)
 
-    sec = sub.add_parser("security")
+    sec = sub.add_parser("security", help="Security policy checks and enforcement")
     sec.add_argument("args", nargs=argparse.REMAINDER)
 
-    osp = sub.add_parser("ops")
+    osp = sub.add_parser("ops", help="Operational control-plane workflows")
     osp.add_argument("args", nargs=argparse.REMAINDER)
 
-    ntf = sub.add_parser("notify")
+    ntf = sub.add_parser("notify", help="Notification adapters and delivery workflows")
     ntf.add_argument("args", nargs=argparse.REMAINDER)
 
-    plc = sub.add_parser("policy")
+    plc = sub.add_parser("policy", help="Policy evaluation and helper commands")
     plc.add_argument("args", nargs=argparse.REMAINDER)
 
-    evd = sub.add_parser("evidence")
+    evd = sub.add_parser("evidence", help="Generate audit-friendly release evidence")
     evd.add_argument("args", nargs=argparse.REMAINDER)
 
-    onb = sub.add_parser("onboarding")
+    onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
-    otu = sub.add_parser("onboarding-time-upgrade")
+    otu = sub.add_parser("onboarding-time-upgrade", help="Onboarding-time improvement playbook")
     otu.add_argument("args", nargs=argparse.REMAINDER)
 
-    cau = sub.add_parser("community-activation")
+    cau = sub.add_parser("community-activation", help="Community activation rollout playbook")
     cau.add_argument("args", nargs=argparse.REMAINDER)
 
-    ecp = sub.add_parser("external-contribution-push")
+    ecp = sub.add_parser("external-contribution-push", help="External contribution rollout playbook")
     ecp.add_argument("args", nargs=argparse.REMAINDER)
 
-    kpa = sub.add_parser("kpi-audit")
+    kpa = sub.add_parser("kpi-audit", help="KPI audit and tracking playbook")
     kpa.add_argument("args", nargs=argparse.REMAINDER)
 
     dwr = sub.add_parser("weekly-review-lane", aliases=["day28-weekly-review"])
