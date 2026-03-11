@@ -87,6 +87,18 @@ These remain available intentionally, but are not the first stop for new adopter
 - Use **Playbooks** for guided rollout and adoption programs.
 - Use **Experimental** lanes intentionally and with explicit validation.
 
+## Public surface contract (source of truth)
+
+The major command-family contract is defined in:
+
+- `src/sdetkit/public_surface_contract.py`
+
+Maintainer guidance:
+
+- Keep this contract focused on **major top-level families only** (not every subcommand).
+- Update this contract first when a family-level productization decision changes (role, stability tier, first-time recommendation, or transition-era/legacy posture).
+- Keep CLI/docs discoverability text aligned by sourcing summary text from this contract where practical.
+
 ## Related references
 
 - [CLI reference](cli.md)

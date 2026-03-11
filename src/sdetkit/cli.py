@@ -114,6 +114,7 @@ from . import (
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .security_gate import main as security_main
+from .public_surface_contract import render_root_help_groups
 
 
 def _tool_version() -> str:
@@ -218,41 +219,7 @@ Start here:
   3) [Playbooks] Guided rollout: sdetkit playbooks
 """
 
-    help_epilog = """\
-Command groups:
-
-  Stable/Core release confidence:
-    gate                Quick confidence and strict release gate entry points.
-    doctor              Deterministic health checks for repo/release readiness.
-    security            Security policy checks and enforcement.
-    evidence            Generate audit-friendly evidence artifacts.
-    playbooks           Discover and run guided rollout/adoption flows.
-
-  Stable/Core engineering workflows:
-    kv                  Parse key=value input to JSON.
-    apiget              Deterministic API capture with cassette support.
-    patch               Apply controlled text patches.
-    repo / dev          Repo automation workflows and dev shortcuts.
-    cassette-get        Deterministic HTTP capture/replay helper.
-    maintenance         Repo maintenance automation.
-    agent               Agent workflow helpers.
-
-  Integrations (environment-dependent extensions):
-    ci, report, proof, docs-qa, docs-nav, policy, ops, notify, roadmap
-
-  Playbooks (guided adoption lanes):
-    onboarding, weekly-review, demo, first-contribution, contributor-funnel,
-    triage-templates, startup-use-case, enterprise-use-case,
-    github-actions-quickstart, gitlab-ci-quickstart, quality-contribution-delta,
-    reliability-evidence-pack, release-readiness-board, release-narrative,
-    trust-signal-upgrade, faq-objections, community-activation,
-    external-contribution-push, kpi-audit
-
-Run: sdetkit playbooks
-  to list additional playbook flows hidden from the main --help output.
-
-Experimental note: many day/closeout lanes remain available as transition-era flows.
-"""
+    help_epilog = render_root_help_groups()
 
     p = argparse.ArgumentParser(
         prog="sdetkit",
