@@ -170,6 +170,7 @@ Command domains include `doctor`, `repo`, `security`, `evidence`, `report`, and 
 
 - Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
 - Quickstart doc: `docs/ready-to-use.md`
+- System-value comparison: `docs/why-not-just-tools.md`
 - Contributing guide: `CONTRIBUTING.md`
 - First-time contributor quickstart: `docs/first-contribution-quickstart.md`
 - Starter work inventory: `docs/starter-work-inventory.md`
