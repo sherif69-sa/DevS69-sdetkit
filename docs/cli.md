@@ -7,9 +7,10 @@ For a stability-aware entrypoint and command inventory, see [command-surface.md]
 
 Use this primary path first:
 
-1. **Quick confidence:** `sdetkit gate fast`
-2. **Strict release gate:** `sdetkit gate release`
-3. **External adoption/rollout:** `sdetkit playbooks`
+1. **Verify CLI install:** `sdetkit --help` then `sdetkit gate --help`
+2. **Quick confidence:** `sdetkit gate fast`
+3. **Strict release gate:** `sdetkit gate release`
+4. **External adoption/rollout:** follow [adoption.md](adoption.md)
 
 Related script wrappers:
 
@@ -17,6 +18,8 @@ Related script wrappers:
 - `bash scripts/ready_to_use.sh release`
 - `sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0`
 
+
+For a script-first onboarding path, see [ready-to-use.md](ready-to-use.md).
 
 ## Recommended expansion after core
 

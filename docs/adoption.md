@@ -18,6 +18,13 @@ For CI and local development parity:
 python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git#egg=sdetkit[dev,test]"
 ```
 
+Verify CLI wiring before running gates:
+
+```bash
+python -m sdetkit --help
+python -m sdetkit gate --help
+```
+
 ## Start small: local quick confidence
 
 Run this first in your own repository root:

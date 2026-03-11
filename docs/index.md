@@ -29,9 +29,15 @@ SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need
 
 </div>
 
-<a id="fast-start"></a>
+## Fast start
 
-## Start here: Stable/Core release-confidence path
+### Start here: Stable/Core release-confidence path
+
+New to SDETKit? Use this order for the first run:
+
+1. Install SDETKit from source or GitHub URL (see [ready-to-use.md](ready-to-use.md)).
+2. Verify CLI availability (see [Verify your install](ready-to-use.md#verify-your-install)).
+3. Run the flagship workflow below (`quick` then `release`).
 
 Run the flagship workflow:
 
@@ -62,7 +68,8 @@ Use this sequence to keep rollout focused:
 
 1. **Quick confidence** via `bash scripts/ready_to_use.sh quick`
 2. **Strict release gate** via `bash scripts/ready_to_use.sh release`
-3. **External adoption** via [adoption.md](adoption.md)
+3. **Discover core commands** via [cli.md](cli.md)
+4. **External adoption** via [adoption.md](adoption.md)
 
 ## Flagship workflow (manual form)
 
@@ -114,6 +121,7 @@ Read the policy: [stability-levels.md](stability-levels.md)
 
 - [⚡ Fast start](#fast-start)
 - [🛠 CLI commands](cli.md)
+- [✅ Verify install first](ready-to-use.md#verify-your-install)
 - [🩺 Doctor checks](doctor.md)
 - [🤝 Contribute](contributing.md)
 - [🧭 Repo tour](repo-tour.md)
