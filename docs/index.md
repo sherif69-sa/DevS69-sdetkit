@@ -2,193 +2,69 @@
 
 <div class="hero-badges" markdown>
 
+<span class="pill">Release-confidence focused</span>
 <span class="pill">Deterministic by design</span>
-<span class="pill">CI-ready workflows</span>
-<span class="pill">Audit-friendly evidence</span>
+<span class="pill">Audit-friendly outputs</span>
 
 </div>
 
 # DevS69 SDETKit
 
-Build, validate, and release software with confidence using a polished SDET + DevOps toolkit that keeps quality, security, and traceability aligned from local runs to production pipelines.
+SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need a repeatable answer to: **"is this repo ready to ship?"**
 
 <div class="hero-actions" markdown>
 
-[Get started](#fast-start){ .md-button .md-button--primary }
-[Open command reference](cli.md){ .md-button }
-[See release evidence](evidence.md){ .md-button }
-
-</div>
-
-<div class="hero-stats" markdown>
-
-- **Single toolkit** for quality + security + release readiness
-- **Deterministic output** with CI-safe exit codes and repeatability
-- **Actionable docs** for SDETs, DevOps, and engineering leads
+[Start in 5 minutes](#start-in-5-minutes){ .md-button .md-button--primary }
+[Open quickstart](ready-to-use.md){ .md-button }
+[See evidence commands](evidence.md){ .md-button }
 
 </div>
 
 </div>
 
+## Start in 5 minutes
 
+Run the flagship workflow:
 
-<div class="quick-jump" markdown>
-
-[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
-
-</div>
-
-## Docs navigation upgrades (legacy docs navigation initiative)
-
-## Legacy reports
-
-Historical day reports remain available for audit/history traceability:
-
-- Day 90 report (stored under excluded historical artifacts)
-- Day 91 report (stored under excluded historical artifacts)
-- Day 92 report (stored under excluded historical artifacts)
-- Day 93 report (stored under excluded historical artifacts)
-- Day 94 report (stored under excluded historical artifacts)
-- Day 95 report (stored under excluded historical artifacts)
-- Day 97 report (stored under excluded historical artifacts)
-- Day 10 ultra report (stored under excluded historical artifacts)
-- Day 11 ultra report (stored under excluded historical artifacts)
-
-### Top journeys
-
-- Run first command in under 60 seconds
-- Validate docs links and anchors before publishing
-- Ship a first contribution with deterministic quality gates
-
-## Platform architecture at a glance
-
-```mermaid
-flowchart LR
-    A[Code + Policy Inputs] --> B[Doctor + Audit]
-    B --> C[CI Quick / Full Lanes]
-    C --> D[Security + Quality Gates]
-    D --> E[Evidence Pack + Reports]
-    E --> F[Release Decision]
-
-    style B fill:#3b82f633,stroke:#3b82f6
-    style D fill:#14b8a633,stroke:#14b8a6
-    style E fill:#a855f733,stroke:#a855f7
+```bash
+bash scripts/ready_to_use.sh quick
 ```
 
-## Why teams choose SDETKit
+Then run the stricter release gate:
 
-<div class="grid cards feature-grid" markdown>
+```bash
+bash scripts/ready_to_use.sh release
+```
 
-- [**Repository diagnostics**](doctor.md)
-  Continuously detect hygiene, policy, and reliability gaps with clear remediation guidance.
+### What happens
 
-- [**Deterministic API validation**](api.md)
-  Run and replay checks with cassettes for reproducible, low-flake test behavior.
+1. Bootstrap a local environment.
+2. Validate CLI health.
+3. Run CI-style checks.
+4. (Release mode) enforce security policy budgets and run the release gate.
 
-- [**Policy + security enforcement**](security-gate.md)
-  Enforce release budgets and quality constraints before they turn into production risk.
+### What proves value quickly
 
-- [**Release evidence packs**](evidence.md)
-  Produce machine-readable artifacts for audits, governance reviews, and handoffs.
+You get deterministic pass/fail output and a clear go/no-go signal you can reuse in local and CI workflows.
 
-- [**Patch-safe workflows**](patch-harness.md)
-  Apply controlled updates with validations that reduce merge and rollback risk.
+## Flagship workflow (manual form)
 
-- [**Production readiness controls**](production-readiness.md)
-  Standardize CI lanes, quality gates, and release decisions with confidence.
+```bash
+bash ci.sh quick --skip-docs
+bash quality.sh cov
+python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+python -m sdetkit gate release
+```
 
-</div>
+## Who should start where
 
-## Delivery flow (arranged by outcome)
+- **SDET / QA:** [Doctor](doctor.md) and [CLI](cli.md)
+- **DevOps / platform:** [Production readiness](production-readiness.md) and [Security gate](security-gate.md)
+- **Maintainers:** [Evidence](evidence.md) and [Releasing](releasing.md)
 
-<div class="process-grid" markdown>
+## Next steps
 
-<div class="process-step" markdown>
-
-### 1) Diagnose
-Run repository health checks and baseline policy posture.
-
-`python -m sdetkit doctor --help`
-
-</div>
-
-<div class="process-step" markdown>
-
-### 2) Validate
-Execute deterministic test and API verification workflows.
-
-`bash ci.sh quick --skip-docs`
-
-</div>
-
-<div class="process-step" markdown>
-
-### 3) Enforce
-Apply quality and security budgets as go/no-go release controls.
-
-`python -m sdetkit security enforce --help`
-
-</div>
-
-<div class="process-step" markdown>
-
-### 4) Evidence
-Generate artifacts to support traceable release approvals.
-
-`python -m sdetkit evidence --help`
-
-</div>
-
-</div>
-
-## Fast start
-
-=== "Local setup"
-
-    ```bash
-    python3 -m venv .venv
-    ./.venv/bin/python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
-    bash ci.sh quick --skip-docs
-    ```
-
-=== "CI-style path"
-
-    ```bash
-    bash ci.sh quick
-    bash quality.sh cov
-    python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json
-    ```
-
-!!! tip "10-minute onboarding path"
-    Follow this sequence for the fastest adoption: **CLI help** → **Doctor** → **Gate fast** → **Evidence export**.
-
-## Role-based jump points
-
-<div class="grid cards" markdown>
-
-- **SDET / QA engineers**
-  Start with [CLI](cli.md), [Doctor](doctor.md), and [API](api.md).
-
-- **Platform / DevOps teams**
-  Start with [Production readiness](production-readiness.md), [Security gate](security-gate.md), and [Patch harness](patch-harness.md).
-
-- **Tech leads / maintainers**
-  Start with [Repo tour](repo-tour.md), [Project structure](project-structure.md), and [Design](design.md).
-
-</div>
-
-## Readiness scorecard
-
-| Area | Outcome target | Primary command |
-| --- | --- | --- |
-| Quality | CI-equivalent checks are green and reproducible | `bash ci.sh quick --skip-docs` |
-| Coverage | Coverage gate meets release threshold | `bash quality.sh cov` |
-| Security | Policy budgets are enforced with zero drift | `python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json` |
-| Evidence | Artifacts are generated and stored for review | `python -m sdetkit evidence --help` |
-
-## Continue exploring
-
+- [Ready-to-use quickstart](ready-to-use.md)
 - [Repo tour](repo-tour.md)
 - [Contributing](contributing.md)
-- [Security policy](security.md)
-- [Releasing](releasing.md)
+- [Full command reference](cli.md)

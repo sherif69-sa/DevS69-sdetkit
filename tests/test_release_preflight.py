@@ -4,7 +4,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 SCRIPT = Path("scripts/release_preflight.py").resolve()
 
 

@@ -6,36 +6,64 @@
 ![Repo Audit](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
 ![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
 
-Production-ready SDET + DevOps toolkit for deterministic diagnostics, API validation, policy gates, and release evidence.
+SDETKit helps **SDET, QA, and DevOps teams prove release confidence** with deterministic local/CI checks and audit-friendly evidence.
 
-## Product vision
+## The one thing this repo is best at
 
-SDETKit is designed as an **execution layer for trusted delivery**:
+SDETKit is centered on one flagship workflow: **release confidence gating**.
 
-- **Reliability first**: deterministic outputs, explicit exit codes, CI-safe behavior.
-- **Readiness by default**: quality, security, and release controls in one workflow.
-- **Adoption-focused UX**: clear command groups, practical docs, and role-based paths.
-
-## Product direction (next 30 days)
-
-To evolve this repository into a focused product, we are prioritizing one primary use-case:
-
-- **Release Confidence Engine for SDET/DevOps teams**
-- Goal: provide deterministic, repeatable evidence that a repository is safe to ship.
-
-Start with the focused strategy checklist:
-
-- `docs/product-strategy.md`
-- `docs/global-production-transformation-playbook.md`
-
-Fast path to run the "release confidence" workflow:
+Run one command sequence to answer: _"Is this repository ready to ship?"_
 
 ```bash
-bash ci.sh quick --skip-docs
-bash quality.sh cov
-python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json
-python -m sdetkit gate release
+bash scripts/ready_to_use.sh release
 ```
+
+This runs environment bootstrap + CI quick lane + coverage + security enforcement + release gate in a repeatable flow.
+
+---
+
+## Start here (first 5 minutes)
+
+### 1) Run the fastest path
+
+```bash
+bash scripts/ready_to_use.sh quick
+```
+
+### 2) What to expect
+
+- Bootstraps a local virtual environment.
+- Verifies the CLI is healthy.
+- Runs `ci.sh quick --skip-docs`.
+- Prints a clear status and next step.
+
+### 3) Value proof
+
+If this command finishes, you have a working local gate path that mirrors CI expectations and gives deterministic pass/fail output.
+
+### 4) Next command
+
+```bash
+bash scripts/ready_to_use.sh release
+```
+
+Use release mode when you want a stricter go/no-go decision before a release.
+
+Ready-to-use guide: `docs/ready-to-use.md`
+
+---
+
+## Who this is for
+
+- **SDET / QA** teams that need reproducible quality gates.
+- **DevOps / platform** teams that want policy-aware release checks in CI.
+- **Maintainers** who need machine-readable evidence for release decisions.
+
+## What you get
+
+- Deterministic command behavior and CI-safe exit codes.
+- A structured release-confidence workflow instead of ad-hoc scripts.
+- Evidence-oriented outputs for review, governance, and handoffs.
 
 ## Installation
 
@@ -57,97 +85,35 @@ source .venv/bin/activate
 ```bash
 python -m pip install .[dev]
 python -m pip install .[test]
-```
-
-```bash
 python -m pip install .[packaging]
 ```
 
-### Build distributable artifacts
+## Flagship workflow (manual form)
 
-```bash
-python -m pip install .[packaging]
-rm -rf dist build
-python -m build
-```
-
-### Validate package artifacts (local release gate)
-
-```bash
-make package-validate
-```
-
-This validates wheel/sdist build, metadata (`twine check`), wheel contents, and a smoke install of the built wheel (`sdetkit --help`).
-
-### Maintainer release preflight
-
-```bash
-make release-preflight
-```
-
-This is the recommended local release check before creating/pushing a release tag. It validates release metadata (`pyproject.toml`, `CHANGELOG.md`, optional tag format), runs `doctor --release`, and validates build artifacts.
-
-> Current posture: repository is prepared for artifact build and release execution validation; public PyPI publication depends on `PYPI_API_TOKEN` configuration and successful workflow execution, and is not claimed as generally available from this README.
-
-## 2-minute quickstart
-
-```bash
-bash scripts/ready_to_use.sh quick
-```
-
-Manual equivalent:
-
-```bash
-python -m sdetkit --help
-python -m sdetkit doctor --help
-bash ci.sh quick --skip-docs
-```
-
-Ready-to-use guide: `docs/ready-to-use.md`
-
-For full docs UX, open: <https://sherif69-sa.github.io/DevS69-sdetkit/>.
-
-Troubleshooting note for sqlite-utils schema inference edge-cases: `docs/sqlite-utils-empty-column-troubleshooting.md`
-
-## Role-based starting paths
-
-| Role | Start here | Why |
-| --- | --- | --- |
-| SDET / QA | `python -m sdetkit doctor --help` | Validate local/repo health quickly. |
-| DevOps / Platform | `python -m sdetkit gate fast` | Run CI-equivalent quality lane locally. |
-| Security / Governance | `python -m sdetkit security --help` | Apply policy and budget controls deterministically. |
-| Maintainers | `python -m sdetkit evidence --help` | Generate and review release evidence artifacts. |
-
-## Readiness model
-
-Use this sequence for a release-ready posture:
+If you want the release-confidence workflow step-by-step:
 
 ```bash
 bash ci.sh quick --skip-docs
 bash quality.sh cov
-python -m sdetkit security check --root . --baseline tools/security.baseline.json --format json
+python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
 python -m sdetkit gate release
 ```
 
-## UX-focused command architecture
-
-Core domains:
-
-- `doctor`: repository and environment diagnostics
-- `repo`: repository audit + reporting
-- `apiget` / `cassette-get`: deterministic API checks and replays
-- `security`: policy/security workflows and budget enforcement
-- `report`: deterministic report generation
-- `ops` / `notify`: operations and communication automation
-- `docs-qa` / `docs-nav`: docs health and navigation integrity
-- `evidence` / `roadmap`: governance and planning support
-
-List all commands:
+## Explore core commands
 
 ```bash
 python -m sdetkit --help
 python -m sdetkit playbooks
 ```
+
+Command domains include `doctor`, `repo`, `security`, `evidence`, `report`, and `ops`.
+
+## Docs and contributor entry points
+
+- Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
+- Quickstart doc: `docs/ready-to-use.md`
+- Contributing guide: `CONTRIBUTING.md`
+- First contribution command: `python -m sdetkit first-contribution --format text --strict`
 
 ## CI/CD integration
 
@@ -162,7 +128,7 @@ python -m sdetkit playbooks
 
 ### Jenkins
 
-See `examples/ci/jenkins/` (for example `jenkins-advanced-reference.Jenkinsfile`).
+See `examples/ci/jenkins/`.
 
 ### Docker
 
@@ -171,33 +137,9 @@ docker build -t sdetkit .
 docker run --rm -v "$PWD:/work" -w /work sdetkit python -m sdetkit gate fast
 ```
 
-## Continuous upgrade lane
+## Release posture note
 
-```bash
-python -m sdetkit phase3-wrap-publication-closeout --format json --strict
-python -m sdetkit continuous-upgrade-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle3-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle5-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict
-```
-
-## Documentation
-
-- Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
-- Local build: `mkdocs build -s`
-- Determinism checklist: `docs/determinism-checklist.md`
-
-## Contributing
-
-```bash
-bash scripts/bootstrap.sh
-source .venv/bin/activate
-bash quality.sh cov
-```
-
-Before opening a PR, prefer running `bash quality.sh full-test` when feasible.
+This repository is prepared for artifact build and release validation. Public PyPI publication depends on `PYPI_API_TOKEN` configuration and successful workflow execution; this README does not claim generally available PyPI distribution by default.
 
 ## License
 
