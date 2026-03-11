@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 import tomllib
@@ -46,7 +47,13 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--tag", help="Release tag to validate (example: v1.0.2)")
     parser.add_argument("--pyproject", default="pyproject.toml")
     parser.add_argument("--changelog", default="CHANGELOG.md")
+    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--out", help="Optional path for JSON output (requires --format json)")
     args = parser.parse_args(argv[1:])
+
+    if args.out and args.format != "json":
+        print("release preflight failed: --out requires --format json", file=sys.stderr)
+        return 2
 
     pyproject = Path(args.pyproject)
     changelog = Path(args.changelog)
@@ -59,6 +66,24 @@ def main(argv: list[str]) -> int:
     except (FileNotFoundError, tomllib.TOMLDecodeError, ValueError) as exc:
         print(f"release preflight failed: {exc}", file=sys.stderr)
         return 1
+
+    payload = {
+        "ok": True,
+        "version": version,
+        "tag": _normalize_tag(args.tag) if args.tag else None,
+        "pyproject": str(pyproject),
+        "changelog": str(changelog),
+    }
+
+    if args.format == "json":
+        text = json.dumps(payload, indent=2, sort_keys=True)
+        if args.out:
+            out_path = Path(args.out)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_text(f"{text}\n", encoding="utf-8")
+        else:
+            print(text)
+        return 0
 
     print(f"release preflight ok: version={version}")
     if args.tag:

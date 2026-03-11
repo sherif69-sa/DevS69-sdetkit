@@ -129,6 +129,24 @@ jobs:
 - Strict path: `python -m sdetkit security enforce ...` + `python -m sdetkit gate release`
 - Evidence artifact: `python -m sdetkit gate fast --format json --stable-json --out ...`
 
+## GitHub Actions artifact visibility (this repository pattern)
+
+When a CI gate fails, keep machine-readable outputs in predictable files and upload only the highest-signal diagnostics:
+
+- `build/gate-fast.json` → includes `failed_steps` for fast-gate triage.
+- `build/security-enforce.json` → shows threshold outcomes (`ok`, `counts`, `exceeded`).
+- `build/release-preflight.json` → shows release metadata preflight status (`ok`, `version`, `tag`).
+
+In GitHub Actions, these are uploaded as:
+
+- `ci-gate-diagnostics` (CI workflow)
+- `release-diagnostics` (Release workflow)
+
+Use those artifacts first, then follow:
+
+- [Adoption troubleshooting](adoption-troubleshooting.md)
+- [Remediation cookbook](remediation-cookbook.md)
+
 ## Related docs
 
 - [Adoption troubleshooting](adoption-troubleshooting.md)

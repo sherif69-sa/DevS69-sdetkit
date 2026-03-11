@@ -164,6 +164,13 @@ For teams adopting SDETKit in another repository, start with:
 - First gate: `python -m sdetkit gate fast`
 - Stricter rollout: security budgets + `python -m sdetkit gate release`
 
+For CI failure triage in this repository's GitHub Actions runs, inspect uploaded artifacts:
+
+- `ci-gate-diagnostics` (`build/gate-fast.json`, `build/security-enforce.json`)
+- `release-diagnostics` (`build/release-preflight.json`)
+
+This keeps `failed_steps` and policy threshold outcomes easy to inspect without depending only on log scrolling.
+
 ### Jenkins
 
 See `examples/ci/jenkins/`.

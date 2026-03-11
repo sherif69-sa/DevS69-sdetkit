@@ -22,6 +22,13 @@ If you already know what failed and just want the exact next commands, use:
 
 - [Remediation cookbook](remediation-cookbook.md)
 
+If you are diagnosing a failed GitHub Actions run, download CI artifacts first:
+
+- `ci-gate-diagnostics` (contains `build/gate-fast.json` and `build/security-enforce.json`)
+- `release-diagnostics` (contains `build/release-preflight.json`)
+
+These files make `failed_steps` and threshold outcomes inspectable without scrolling long logs.
+
 ## Troubleshooting matrix
 
 | What you see | Usually means | What to do next | Stay lightweight vs tighten later |
