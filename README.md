@@ -16,6 +16,10 @@ Most repositories accumulate separate scripts and tools, but the release decisio
 
 Choose the path that matches where you are now:
 
+### 0) Decide if SDETKit is a fit
+
+- Decision guide: `docs/decision-guide.md`
+
 ### 1) Evaluate a repository quickly
 
 ```bash
@@ -57,6 +61,7 @@ Comparison and proof details: `docs/why-not-just-tools.md`
 
 ## How to navigate SDETKit
 
+- Decision guide (fit + path + stop point): `docs/decision-guide.md`
 - Adoption walkthrough: `docs/example-adoption-flow.md`
 - Real artifact output showcase: `docs/evidence-showcase.md`
 - Command taxonomy: `docs/command-taxonomy.md`

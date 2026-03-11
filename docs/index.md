@@ -15,6 +15,7 @@ SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need
 <div class="hero-actions" markdown>
 
 [Start in 5 minutes](#fast-start){ .md-button .md-button--primary }
+[Decision guide](decision-guide.md){ .md-button }
 [Open quickstart](ready-to-use.md){ .md-button }
 [Release confidence story](release-confidence.md){ .md-button }
 [Adopt in your repo](adoption.md){ .md-button }
@@ -76,6 +77,7 @@ python -m sdetkit gate release
 
 ## Next steps
 
+- [Decision guide: is SDETKit right for you?](decision-guide.md)
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Adopt in your repository](adoption.md)
 - [Recommended CI flow (baseline)](recommended-ci-flow.md)
