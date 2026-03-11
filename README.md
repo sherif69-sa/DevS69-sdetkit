@@ -51,6 +51,14 @@ Use release mode when you want a stricter go/no-go decision before a release.
 
 Ready-to-use guide: `docs/ready-to-use.md`
 
+## Adopt in your own repository (external integration)
+
+If you want to use SDETKit in a different repository, use the adopter-focused guide:
+
+- `docs/adoption.md`
+- Includes copy-paste local + CI integration patterns.
+- Shows a progressive path from lightweight `gate fast` to stricter release gating.
+
 ## Proof by scenario
 
 Want concrete examples before adopting?
@@ -147,14 +155,11 @@ If you cannot find a starter issue, use `docs/starter-work-inventory.md` and ope
 
 ## CI/CD integration
 
-### GitHub Actions
+For teams adopting SDETKit in another repository, start with:
 
-```yaml
-- name: Install
-  run: python -m pip install .[dev,test]
-- name: CI gate
-  run: bash ci.sh quick --skip-docs
-```
+- `docs/adoption.md` for copy-paste local and GitHub Actions workflows.
+- First gate: `python -m sdetkit gate fast`
+- Stricter rollout: security budgets + `python -m sdetkit gate release`
 
 ### Jenkins
 

@@ -2,6 +2,8 @@
 
 These examples are short proof scenarios you can run (or compare against) to understand what SDETKit's flagship workflow looks like in practice.
 
+For copy-paste integration in an external repository, see [Adopt SDETKit in your repository](adoption.md).
+
 ## Scenario 1: "Is this repo basically healthy?" (quick confidence pass)
 
 **Situation**
