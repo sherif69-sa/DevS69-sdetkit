@@ -185,6 +185,518 @@ def _resolve_non_day_playbook_alias(cmd: str) -> str:
     return cmd
 
 
+
+
+
+def _add_passthrough_subcommand(
+    sub,
+    name: str,
+    *,
+    help_text: str | None = None,
+    aliases: list[str] | None = None,
+    default_cmd: str | None = None,
+):
+    kwargs: dict[str, object] = {}
+    if help_text is not None:
+        kwargs["help"] = help_text
+    if aliases:
+        kwargs["aliases"] = aliases
+    parser = sub.add_parser(name, **kwargs)
+    if default_cmd is not None:
+        parser.set_defaults(cmd=default_cmd)
+    parser.add_argument("args", nargs=argparse.REMAINDER)
+    return parser
+
+
+def _build_root_parser() -> tuple[argparse.ArgumentParser, object]:
+    help_description = """\
+SDETKit helps teams prove release confidence with deterministic checks and
+audit-friendly evidence.
+
+Start here:
+  1) Quick confidence: sdetkit gate fast
+  2) Strict release gate: sdetkit gate release
+  3) External adoption/rollout: sdetkit playbooks
+"""
+
+    help_epilog = """\
+Command groups:
+
+  Core release confidence:
+    gate                Quick confidence and strict release gate entry points.
+    doctor              Deterministic health checks for repo/release readiness.
+    security            Security policy checks and enforcement.
+    evidence            Generate audit-friendly evidence artifacts.
+    playbooks           Discover and run guided rollout/adoption flows.
+
+  Core engineering workflows:
+    kv                  Parse key=value input to JSON.
+    apiget              Deterministic API capture with cassette support.
+    patch               Apply controlled text patches.
+    repo / dev          Repo automation workflows and dev shortcuts.
+    cassette-get        Deterministic HTTP capture/replay helper.
+    maintenance         Repo maintenance automation.
+    agent               Agent workflow helpers.
+
+  Advanced and extensions:
+    ci, report, proof, docs-qa, docs-nav, policy, ops, notify, roadmap
+
+  Playbook highlights:
+    onboarding, weekly-review, demo, first-contribution, contributor-funnel,
+    triage-templates, startup-use-case, enterprise-use-case,
+    github-actions-quickstart, gitlab-ci-quickstart, quality-contribution-delta,
+    reliability-evidence-pack, release-readiness-board, release-narrative,
+    trust-signal-upgrade, faq-objections, community-activation,
+    external-contribution-push, kpi-audit
+
+Run: sdetkit playbooks
+  to list additional playbook flows hidden from the main --help output.
+"""
+
+    p = argparse.ArgumentParser(
+        prog="sdetkit",
+        add_help=True,
+        description=help_description,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=help_epilog,
+    )
+    p.add_argument("--version", action="version", version=_tool_version())
+    sub = p.add_subparsers(
+        dest="cmd",
+        required=True,
+        metavar="command",
+        title="commands",
+        description="Run `sdetkit <command> --help` for command-specific guidance.",
+    )
+    _add_passthrough_subcommand(sub, "baseline")
+    sub.add_parser(
+        "playbooks",
+        help="Discover and run adoption/rollout playbooks",
+    )
+    _add_passthrough_subcommand(sub, "kv", help_text="Parse key=value input into JSON")
+
+    ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
+    _add_apiget_args(ag)
+
+    _add_passthrough_subcommand(sub, "doctor", help_text="Deterministic repo and release-readiness checks")
+
+    _add_passthrough_subcommand(sub, "gate", help_text="Quick confidence and strict release gate checks")
+
+    _add_passthrough_subcommand(sub, "ci", help_text="CI template and pipeline validation")
+
+    _add_passthrough_subcommand(sub, "patch", help_text="Apply controlled file/text patches")
+
+    _add_passthrough_subcommand(sub, "cassette-get", help_text="Record/replay HTTP captures for deterministic checks")
+
+    _add_passthrough_subcommand(sub, "repo", help_text="Repository automation tasks")
+
+    _add_passthrough_subcommand(sub, "dev", help_text="Shortcut to `repo dev` workflows")
+
+    rpt = sub.add_parser("report", help="Reporting workflows and output packs")
+    rpt.add_argument("args", nargs=argparse.REMAINDER)
+
+    mnt = sub.add_parser("maintenance", help="Maintenance automation and cleanup")
+    mnt.add_argument("args", nargs=argparse.REMAINDER)
+
+    agt = sub.add_parser("agent", help="Agent-centric automation workflows")
+    agt.add_argument("args", nargs=argparse.REMAINDER)
+
+    sec = sub.add_parser("security", help="Security policy checks and enforcement")
+    sec.add_argument("args", nargs=argparse.REMAINDER)
+
+    osp = sub.add_parser("ops", help="Operational control-plane workflows")
+    osp.add_argument("args", nargs=argparse.REMAINDER)
+
+    ntf = sub.add_parser("notify", help="Notification adapters and delivery workflows")
+    ntf.add_argument("args", nargs=argparse.REMAINDER)
+
+    plc = sub.add_parser("policy", help="Policy evaluation and helper commands")
+    plc.add_argument("args", nargs=argparse.REMAINDER)
+
+    evd = sub.add_parser("evidence", help="Generate audit-friendly release evidence")
+    evd.add_argument("args", nargs=argparse.REMAINDER)
+
+    onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
+    onb.add_argument("args", nargs=argparse.REMAINDER)
+
+    otu = sub.add_parser("onboarding-time-upgrade", help="Onboarding-time improvement playbook")
+    otu.add_argument("args", nargs=argparse.REMAINDER)
+
+    cau = sub.add_parser("community-activation", help="Community activation rollout playbook")
+    cau.add_argument("args", nargs=argparse.REMAINDER)
+
+    ecp = sub.add_parser("external-contribution-push", help="External contribution rollout playbook")
+    ecp.add_argument("args", nargs=argparse.REMAINDER)
+
+    kpa = sub.add_parser("kpi-audit", help="KPI audit and tracking playbook")
+    kpa.add_argument("args", nargs=argparse.REMAINDER)
+
+    dwr = sub.add_parser("weekly-review-lane", aliases=["day28-weekly-review"])
+    dwr.set_defaults(cmd="weekly-review-lane")
+    dwr.add_argument("args", nargs=argparse.REMAINDER)
+
+    d29 = sub.add_parser("phase1-hardening")
+    d29.set_defaults(cmd="phase1-hardening")
+    d29.add_argument("args", nargs=argparse.REMAINDER)
+
+    d30 = sub.add_parser("phase1-wrap")
+    d30.set_defaults(cmd="phase1-wrap")
+    d30.add_argument("args", nargs=argparse.REMAINDER)
+
+    d31 = sub.add_parser("phase2-kickoff")
+    d31.set_defaults(cmd="phase2-kickoff")
+    d31.add_argument("args", nargs=argparse.REMAINDER)
+
+    d32 = sub.add_parser("release-cadence")
+    d32.set_defaults(cmd="release-cadence")
+    d32.add_argument("args", nargs=argparse.REMAINDER)
+
+    d33 = sub.add_parser("demo-asset")
+    d33.set_defaults(cmd="demo-asset")
+    d33.add_argument("args", nargs=argparse.REMAINDER)
+
+    d34 = sub.add_parser("demo-asset2")
+    d34.set_defaults(cmd="demo-asset2")
+    d34.add_argument("args", nargs=argparse.REMAINDER)
+
+    d35 = sub.add_parser("kpi-instrumentation")
+    d35.set_defaults(cmd="kpi-instrumentation")
+    d35.add_argument("args", nargs=argparse.REMAINDER)
+
+    d36 = sub.add_parser("distribution-closeout")
+    d36.set_defaults(cmd="distribution-closeout")
+    d36.add_argument("args", nargs=argparse.REMAINDER)
+
+    d37 = sub.add_parser("experiment-lane")
+    d37.set_defaults(cmd="experiment-lane")
+    d37.add_argument("args", nargs=argparse.REMAINDER)
+
+    d38 = sub.add_parser("distribution-batch")
+    d38.set_defaults(cmd="distribution-batch")
+    d38.add_argument("args", nargs=argparse.REMAINDER)
+
+    d39 = sub.add_parser("playbook-post")
+    d39.set_defaults(cmd="playbook-post")
+    d39.add_argument("args", nargs=argparse.REMAINDER)
+
+    d40 = sub.add_parser("scale-lane")
+    d40.set_defaults(cmd="scale-lane")
+    d40.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa41 = sub.add_parser("expansion-automation")
+    pa41.add_argument("args", nargs=argparse.REMAINDER)
+    d41 = sub.add_parser("day41-expansion-automation")
+    d41.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa42 = sub.add_parser("optimization-closeout-foundation")
+    pa42.add_argument("args", nargs=argparse.REMAINDER)
+    d42 = sub.add_parser("day42-optimization-closeout")
+    d42.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa43 = sub.add_parser("acceleration-closeout")
+    pa43.add_argument("args", nargs=argparse.REMAINDER)
+    d43 = sub.add_parser("day43-acceleration-closeout")
+    d43.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa44 = sub.add_parser("scale-closeout")
+    pa44.add_argument("args", nargs=argparse.REMAINDER)
+    d44 = sub.add_parser("day44-scale-closeout")
+    d44.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa45 = sub.add_parser("expansion-closeout")
+    pa45.add_argument("args", nargs=argparse.REMAINDER)
+    d45 = sub.add_parser("day45-expansion-closeout")
+    d45.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa46 = sub.add_parser("optimization-closeout")
+    pa46.add_argument("args", nargs=argparse.REMAINDER)
+    d46 = sub.add_parser("day46-optimization-closeout")
+    d46.add_argument("args", nargs=argparse.REMAINDER)
+
+    pa47 = sub.add_parser("reliability-closeout")
+    pa47.add_argument("args", nargs=argparse.REMAINDER)
+    d47 = sub.add_parser("day47-reliability-closeout")
+    d47.add_argument("args", nargs=argparse.REMAINDER)
+    pa48 = sub.add_parser("objection-closeout")
+    pa48.add_argument("args", nargs=argparse.REMAINDER)
+    d48 = sub.add_parser("day48-objection-closeout")
+    d48.add_argument("args", nargs=argparse.REMAINDER)
+    pa49 = sub.add_parser("weekly-review-closeout")
+    pa49.add_argument("args", nargs=argparse.REMAINDER)
+    d49 = sub.add_parser("day49-weekly-review-closeout")
+    d49.add_argument("args", nargs=argparse.REMAINDER)
+    d49_adv = sub.add_parser("day49-advanced-weekly-review-control-tower")
+    d49_adv.add_argument("args", nargs=argparse.REMAINDER)
+    pa50 = sub.add_parser("execution-prioritization-closeout")
+    pa50.add_argument("args", nargs=argparse.REMAINDER)
+    d50 = sub.add_parser("day50-execution-prioritization-closeout")
+    d50.add_argument("args", nargs=argparse.REMAINDER)
+    p51 = sub.add_parser("case-snippet-closeout")
+    p51.add_argument("args", nargs=argparse.REMAINDER)
+    d51 = sub.add_parser("day51-case-snippet-closeout")
+    d51.add_argument("args", nargs=argparse.REMAINDER)
+    p52 = sub.add_parser("narrative-closeout")
+    p52.add_argument("args", nargs=argparse.REMAINDER)
+    d52 = sub.add_parser("day52-narrative-closeout")
+    d52.add_argument("args", nargs=argparse.REMAINDER)
+
+    p53 = sub.add_parser("docs-loop-closeout")
+    p53.add_argument("args", nargs=argparse.REMAINDER)
+    d53 = sub.add_parser("day53-docs-loop-closeout")
+    d53.add_argument("args", nargs=argparse.REMAINDER)
+
+    p55 = sub.add_parser("contributor-activation-closeout")
+    p55.add_argument("args", nargs=argparse.REMAINDER)
+    d55 = sub.add_parser("day55-contributor-activation-closeout")
+    d55.add_argument("args", nargs=argparse.REMAINDER)
+
+    p56 = sub.add_parser("stabilization-closeout")
+    p56.add_argument("args", nargs=argparse.REMAINDER)
+    d56 = sub.add_parser("day56-stabilization-closeout")
+    d56.add_argument("args", nargs=argparse.REMAINDER)
+
+    p57 = sub.add_parser("kpi-deep-audit-closeout")
+    p57.add_argument("args", nargs=argparse.REMAINDER)
+    d57 = sub.add_parser("day57-kpi-deep-audit-closeout")
+    d57.add_argument("args", nargs=argparse.REMAINDER)
+
+    p58 = sub.add_parser("phase2-hardening-closeout")
+    p58.add_argument("args", nargs=argparse.REMAINDER)
+    d58 = sub.add_parser("day58-phase2-hardening-closeout")
+    d58.add_argument("args", nargs=argparse.REMAINDER)
+
+    p59 = sub.add_parser("phase3-preplan-closeout")
+    p59.add_argument("args", nargs=argparse.REMAINDER)
+    d59 = sub.add_parser("day59-phase3-preplan-closeout")
+    d59.add_argument("args", nargs=argparse.REMAINDER)
+
+    p60 = sub.add_parser("phase2-wrap-handoff-closeout")
+    p60.add_argument("args", nargs=argparse.REMAINDER)
+    d60 = sub.add_parser("day60-phase2-wrap-handoff-closeout")
+    d60.add_argument("args", nargs=argparse.REMAINDER)
+
+    d61 = sub.add_parser("phase3-kickoff-closeout", aliases=["day61-phase3-kickoff-closeout"])
+    d61.set_defaults(cmd="phase3-kickoff-closeout")
+    d61.add_argument("args", nargs=argparse.REMAINDER)
+
+    d62 = sub.add_parser("community-program-closeout", aliases=["day62-community-program-closeout"])
+    d62.set_defaults(cmd="community-program-closeout")
+    d62.add_argument("args", nargs=argparse.REMAINDER)
+
+    d63 = sub.add_parser(
+        "onboarding-activation-closeout", aliases=["day63-onboarding-activation-closeout"]
+    )
+    d63.set_defaults(cmd="onboarding-activation-closeout")
+    d63.add_argument("args", nargs=argparse.REMAINDER)
+
+    d64 = sub.add_parser(
+        "integration-expansion-closeout", aliases=["day64-integration-expansion-closeout"]
+    )
+    d64.set_defaults(cmd="integration-expansion-closeout")
+    d64.add_argument("args", nargs=argparse.REMAINDER)
+
+    d65 = sub.add_parser("weekly-review-closeout-cycle2", aliases=["day65-weekly-review-closeout"])
+    d65.set_defaults(cmd="weekly-review-closeout-cycle2")
+    d65.add_argument("args", nargs=argparse.REMAINDER)
+
+    d66 = sub.add_parser(
+        "integration-expansion2-closeout", aliases=["day66-integration-expansion2-closeout"]
+    )
+    d66.set_defaults(cmd="integration-expansion2-closeout")
+    d66.add_argument("args", nargs=argparse.REMAINDER)
+
+    d67 = sub.add_parser(
+        "integration-expansion3-closeout", aliases=["day67-integration-expansion3-closeout"]
+    )
+    d67.set_defaults(cmd="integration-expansion3-closeout")
+    d67.add_argument("args", nargs=argparse.REMAINDER)
+
+    d68 = sub.add_parser(
+        "integration-expansion4-closeout", aliases=["day68-integration-expansion4-closeout"]
+    )
+    d68.set_defaults(cmd="integration-expansion4-closeout")
+    d68.add_argument("args", nargs=argparse.REMAINDER)
+
+    d69 = sub.add_parser("case-study-prep1-closeout", aliases=["day69-case-study-prep1-closeout"])
+    d69.set_defaults(cmd="case-study-prep1-closeout")
+    d69.add_argument("args", nargs=argparse.REMAINDER)
+
+    d70 = sub.add_parser("case-study-prep2-closeout", aliases=["day70-case-study-prep2-closeout"])
+    d70.set_defaults(cmd="case-study-prep2-closeout")
+    d70.add_argument("args", nargs=argparse.REMAINDER)
+    d71 = sub.add_parser("case-study-prep3-closeout", aliases=["day71-case-study-prep3-closeout"])
+    d71.set_defaults(cmd="case-study-prep3-closeout")
+    d71.add_argument("args", nargs=argparse.REMAINDER)
+    d72 = sub.add_parser("case-study-prep4-closeout", aliases=["day72-case-study-prep4-closeout"])
+    d72.set_defaults(cmd="case-study-prep4-closeout")
+    d72.add_argument("args", nargs=argparse.REMAINDER)
+    d73 = sub.add_parser("case-study-launch-closeout", aliases=["day73-case-study-launch-closeout"])
+    d73.set_defaults(cmd="case-study-launch-closeout")
+    d73.add_argument("args", nargs=argparse.REMAINDER)
+    d74 = sub.add_parser(
+        "distribution-scaling-closeout", aliases=["day74-distribution-scaling-closeout"]
+    )
+    d74.set_defaults(cmd="distribution-scaling-closeout")
+    d74.add_argument("args", nargs=argparse.REMAINDER)
+    d75 = sub.add_parser(
+        "trust-assets-refresh-closeout", aliases=["day75-trust-assets-refresh-closeout"]
+    )
+    d75.set_defaults(cmd="trust-assets-refresh-closeout")
+    d75.add_argument("args", nargs=argparse.REMAINDER)
+    d76 = sub.add_parser(
+        "contributor-recognition-closeout", aliases=["day76-contributor-recognition-closeout"]
+    )
+    d76.set_defaults(cmd="contributor-recognition-closeout")
+    d76.add_argument("args", nargs=argparse.REMAINDER)
+    d77 = sub.add_parser(
+        "community-touchpoint-closeout", aliases=["day77-community-touchpoint-closeout"]
+    )
+    d77.add_argument("args", nargs=argparse.REMAINDER)
+    d78 = sub.add_parser(
+        "ecosystem-priorities-closeout", aliases=["day78-ecosystem-priorities-closeout"]
+    )
+    d78.add_argument("args", nargs=argparse.REMAINDER)
+    d79 = sub.add_parser("scale-upgrade-closeout", aliases=["day79-scale-upgrade-closeout"])
+    d79.add_argument("args", nargs=argparse.REMAINDER)
+    d80 = sub.add_parser("partner-outreach-closeout", aliases=["day80-partner-outreach-closeout"])
+    d80.add_argument("args", nargs=argparse.REMAINDER)
+    d81 = sub.add_parser("growth-campaign-closeout", aliases=["day81-growth-campaign-closeout"])
+    d81.set_defaults(cmd="growth-campaign-closeout")
+    d81.add_argument("args", nargs=argparse.REMAINDER)
+    d82 = sub.add_parser(
+        "integration-feedback-closeout", aliases=["day82-integration-feedback-closeout"]
+    )
+    d82.set_defaults(cmd="integration-feedback-closeout")
+    d82.add_argument("args", nargs=argparse.REMAINDER)
+    d83 = sub.add_parser(
+        "trust-faq-expansion-closeout", aliases=["day83-trust-faq-expansion-closeout"]
+    )
+    d83.set_defaults(cmd="trust-faq-expansion-closeout")
+    d83.add_argument("args", nargs=argparse.REMAINDER)
+    d84 = sub.add_parser(
+        "evidence-narrative-closeout", aliases=["day84-evidence-narrative-closeout"]
+    )
+    d84.set_defaults(cmd="evidence-narrative-closeout")
+    d84.add_argument("args", nargs=argparse.REMAINDER)
+    d85 = sub.add_parser(
+        "release-prioritization-closeout", aliases=["day85-release-prioritization-closeout"]
+    )
+    d85.set_defaults(cmd="release-prioritization-closeout")
+    d85.add_argument("args", nargs=argparse.REMAINDER)
+    d86 = sub.add_parser("launch-readiness-closeout", aliases=["day86-launch-readiness-closeout"])
+    d86.set_defaults(cmd="launch-readiness-closeout")
+    d86.add_argument("args", nargs=argparse.REMAINDER)
+    d87 = sub.add_parser(
+        "governance-handoff-closeout", aliases=["day87-governance-handoff-closeout"]
+    )
+    d87.set_defaults(cmd="governance-handoff-closeout")
+    d87.add_argument("args", nargs=argparse.REMAINDER)
+    d88 = sub.add_parser(
+        "governance-priorities-closeout", aliases=["day88-governance-priorities-closeout"]
+    )
+    d88.set_defaults(cmd="governance-priorities-closeout")
+    d88.add_argument("args", nargs=argparse.REMAINDER)
+    d89 = sub.add_parser("governance-scale-closeout", aliases=["day89-governance-scale-closeout"])
+    d89.set_defaults(cmd="governance-scale-closeout")
+    d89.add_argument("args", nargs=argparse.REMAINDER)
+    d90 = sub.add_parser(
+        "phase3-wrap-publication-closeout", aliases=["day90-phase3-wrap-publication-closeout"]
+    )
+    d90.set_defaults(cmd="phase3-wrap-publication-closeout")
+    d90.add_argument("args", nargs=argparse.REMAINDER)
+    d91 = sub.add_parser(
+        "continuous-upgrade-closeout", aliases=["day91-continuous-upgrade-closeout"]
+    )
+    d91.set_defaults(cmd="continuous-upgrade-closeout")
+    d91.add_argument("args", nargs=argparse.REMAINDER)
+    d92 = sub.add_parser(
+        "continuous-upgrade-cycle2-closeout", aliases=["day92-continuous-upgrade-cycle2-closeout"]
+    )
+    d92.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
+    d92.add_argument("args", nargs=argparse.REMAINDER)
+    d93 = sub.add_parser(
+        "continuous-upgrade-cycle3-closeout", aliases=["day93-continuous-upgrade-cycle3-closeout"]
+    )
+    d93.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
+    d93.add_argument("args", nargs=argparse.REMAINDER)
+    d94 = sub.add_parser(
+        "continuous-upgrade-cycle4-closeout", aliases=["day94-continuous-upgrade-cycle4-closeout"]
+    )
+    d94.set_defaults(cmd="continuous-upgrade-cycle4-closeout")
+    d94.add_argument("args", nargs=argparse.REMAINDER)
+    d95 = sub.add_parser(
+        "continuous-upgrade-cycle5-closeout", aliases=["day95-continuous-upgrade-cycle5-closeout"]
+    )
+    d95.set_defaults(cmd="continuous-upgrade-cycle5-closeout")
+    d95.add_argument("args", nargs=argparse.REMAINDER)
+    d96 = sub.add_parser(
+        "continuous-upgrade-cycle6-closeout", aliases=["day96-continuous-upgrade-cycle6-closeout"]
+    )
+    d96.set_defaults(cmd="continuous-upgrade-cycle6-closeout")
+    d96.add_argument("args", nargs=argparse.REMAINDER)
+    d97 = sub.add_parser(
+        "continuous-upgrade-cycle7-closeout", aliases=["day97-continuous-upgrade-cycle7-closeout"]
+    )
+    d97.set_defaults(cmd="continuous-upgrade-cycle7-closeout")
+    d97.add_argument("args", nargs=argparse.REMAINDER)
+
+    fqo = sub.add_parser("faq-objections")
+    fqo.add_argument("args", nargs=argparse.REMAINDER)
+
+    dmo = sub.add_parser("demo")
+    dmo.add_argument("args", nargs=argparse.REMAINDER)
+
+    fct = sub.add_parser("first-contribution")
+    fct.add_argument("args", nargs=argparse.REMAINDER)
+
+    ctf = sub.add_parser("contributor-funnel")
+    ctf.add_argument("args", nargs=argparse.REMAINDER)
+
+    prf = sub.add_parser("proof")
+    prf.add_argument("args", nargs=argparse.REMAINDER)
+
+    ttp = sub.add_parser("triage-templates")
+    ttp.add_argument("args", nargs=argparse.REMAINDER)
+
+    dqa = sub.add_parser("docs-qa")
+    dqa.add_argument("args", nargs=argparse.REMAINDER)
+
+    wrv = sub.add_parser("weekly-review")
+    wrv.add_argument("args", nargs=argparse.REMAINDER)
+
+    dnv = sub.add_parser("docs-nav")
+    dnv.add_argument("args", nargs=argparse.REMAINDER)
+    rdm = sub.add_parser("roadmap")
+    rdm.add_argument("args", nargs=argparse.REMAINDER)
+
+    suc = sub.add_parser("startup-use-case")
+    suc.add_argument("args", nargs=argparse.REMAINDER)
+
+    euc = sub.add_parser("enterprise-use-case")
+    euc.add_argument("args", nargs=argparse.REMAINDER)
+
+    gha = sub.add_parser("github-actions-quickstart")
+    gha.add_argument("args", nargs=argparse.REMAINDER)
+
+    glc = sub.add_parser("gitlab-ci-quickstart")
+    glc.add_argument("args", nargs=argparse.REMAINDER)
+
+    qcd = sub.add_parser("quality-contribution-delta")
+    qcd.add_argument("args", nargs=argparse.REMAINDER)
+
+    rep = sub.add_parser("reliability-evidence-pack")
+    rep.add_argument("args", nargs=argparse.REMAINDER)
+
+    rrb = sub.add_parser("release-readiness-board")
+    rrb.add_argument("args", nargs=argparse.REMAINDER)
+
+    rn = sub.add_parser("release-narrative")
+    rn.add_argument("args", nargs=argparse.REMAINDER)
+
+    tsu = sub.add_parser("trust-signal-upgrade")
+    tsu.add_argument("args", nargs=argparse.REMAINDER)
+    return p, sub
+
 def main(argv: Sequence[str] | None = None) -> int:
     import sys
 
@@ -598,501 +1110,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "trust-signal-upgrade":
         return trust_signal_upgrade.main(list(argv[1:]))
 
-    help_description = """\
-SDETKit helps teams prove release confidence with deterministic checks and
-audit-friendly evidence.
-
-Start here:
-  1) Quick confidence: sdetkit gate fast
-  2) Strict release gate: sdetkit gate release
-  3) External adoption/rollout: sdetkit playbooks
-"""
-
-    help_epilog = """\
-Command groups:
-
-  Core release confidence:
-    gate                Quick confidence and strict release gate entry points.
-    doctor              Deterministic health checks for repo/release readiness.
-    security            Security policy checks and enforcement.
-    evidence            Generate audit-friendly evidence artifacts.
-    playbooks           Discover and run guided rollout/adoption flows.
-
-  Core engineering workflows:
-    kv                  Parse key=value input to JSON.
-    apiget              Deterministic API capture with cassette support.
-    patch               Apply controlled text patches.
-    repo / dev          Repo automation workflows and dev shortcuts.
-    cassette-get        Deterministic HTTP capture/replay helper.
-    maintenance         Repo maintenance automation.
-    agent               Agent workflow helpers.
-
-  Advanced and extensions:
-    ci, report, proof, docs-qa, docs-nav, policy, ops, notify, roadmap
-
-  Playbook highlights:
-    onboarding, weekly-review, demo, first-contribution, contributor-funnel,
-    triage-templates, startup-use-case, enterprise-use-case,
-    github-actions-quickstart, gitlab-ci-quickstart, quality-contribution-delta,
-    reliability-evidence-pack, release-readiness-board, release-narrative,
-    trust-signal-upgrade, faq-objections, community-activation,
-    external-contribution-push, kpi-audit
-
-Run: sdetkit playbooks
-  to list additional playbook flows hidden from the main --help output.
-"""
-
-    p = argparse.ArgumentParser(
-        prog="sdetkit",
-        add_help=True,
-        description=help_description,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=help_epilog,
-    )
-    p.add_argument("--version", action="version", version=_tool_version())
-    sub = p.add_subparsers(
-        dest="cmd",
-        required=True,
-        metavar="command",
-        title="commands",
-        description="Run `sdetkit <command> --help` for command-specific guidance.",
-    )
-    bsl = sub.add_parser("baseline")
-    bsl.add_argument("args", nargs=argparse.REMAINDER)
-    sub.add_parser(
-        "playbooks",
-        help="Discover and run adoption/rollout playbooks",
-    )
-    kv = sub.add_parser("kv", help="Parse key=value input into JSON")
-    kv.add_argument("args", nargs=argparse.REMAINDER)
-
-    ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
-    _add_apiget_args(ag)
-
-    doc = sub.add_parser("doctor", help="Deterministic repo and release-readiness checks")
-    doc.add_argument("args", nargs=argparse.REMAINDER)
-
-    gt = sub.add_parser("gate", help="Quick confidence and strict release gate checks")
-    gt.add_argument("args", nargs=argparse.REMAINDER)
-
-    ci = sub.add_parser("ci", help="CI template and pipeline validation")
-    ci.add_argument("args", nargs=argparse.REMAINDER)
-
-    pg = sub.add_parser("patch", help="Apply controlled file/text patches")
-    pg.add_argument("args", nargs=argparse.REMAINDER)
-
-    cg = sub.add_parser("cassette-get", help="Record/replay HTTP captures for deterministic checks")
-    cg.add_argument("args", nargs=argparse.REMAINDER)
-
-    rp = sub.add_parser("repo", help="Repository automation tasks")
-    rp.add_argument("args", nargs=argparse.REMAINDER)
-
-    dv = sub.add_parser("dev", help="Shortcut to `repo dev` workflows")
-    dv.add_argument("args", nargs=argparse.REMAINDER)
-
-    rpt = sub.add_parser("report", help="Reporting workflows and output packs")
-    rpt.add_argument("args", nargs=argparse.REMAINDER)
-
-    mnt = sub.add_parser("maintenance", help="Maintenance automation and cleanup")
-    mnt.add_argument("args", nargs=argparse.REMAINDER)
-
-    agt = sub.add_parser("agent", help="Agent-centric automation workflows")
-    agt.add_argument("args", nargs=argparse.REMAINDER)
-
-    sec = sub.add_parser("security", help="Security policy checks and enforcement")
-    sec.add_argument("args", nargs=argparse.REMAINDER)
-
-    osp = sub.add_parser("ops", help="Operational control-plane workflows")
-    osp.add_argument("args", nargs=argparse.REMAINDER)
-
-    ntf = sub.add_parser("notify", help="Notification adapters and delivery workflows")
-    ntf.add_argument("args", nargs=argparse.REMAINDER)
-
-    plc = sub.add_parser("policy", help="Policy evaluation and helper commands")
-    plc.add_argument("args", nargs=argparse.REMAINDER)
-
-    evd = sub.add_parser("evidence", help="Generate audit-friendly release evidence")
-    evd.add_argument("args", nargs=argparse.REMAINDER)
-
-    onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
-    onb.add_argument("args", nargs=argparse.REMAINDER)
-
-    otu = sub.add_parser("onboarding-time-upgrade", help="Onboarding-time improvement playbook")
-    otu.add_argument("args", nargs=argparse.REMAINDER)
-
-    cau = sub.add_parser("community-activation", help="Community activation rollout playbook")
-    cau.add_argument("args", nargs=argparse.REMAINDER)
-
-    ecp = sub.add_parser("external-contribution-push", help="External contribution rollout playbook")
-    ecp.add_argument("args", nargs=argparse.REMAINDER)
-
-    kpa = sub.add_parser("kpi-audit", help="KPI audit and tracking playbook")
-    kpa.add_argument("args", nargs=argparse.REMAINDER)
-
-    dwr = sub.add_parser("weekly-review-lane", aliases=["day28-weekly-review"])
-    dwr.set_defaults(cmd="weekly-review-lane")
-    dwr.add_argument("args", nargs=argparse.REMAINDER)
-
-    d29 = sub.add_parser("phase1-hardening")
-    d29.set_defaults(cmd="phase1-hardening")
-    d29.add_argument("args", nargs=argparse.REMAINDER)
-
-    d30 = sub.add_parser("phase1-wrap")
-    d30.set_defaults(cmd="phase1-wrap")
-    d30.add_argument("args", nargs=argparse.REMAINDER)
-
-    d31 = sub.add_parser("phase2-kickoff")
-    d31.set_defaults(cmd="phase2-kickoff")
-    d31.add_argument("args", nargs=argparse.REMAINDER)
-
-    d32 = sub.add_parser("release-cadence")
-    d32.set_defaults(cmd="release-cadence")
-    d32.add_argument("args", nargs=argparse.REMAINDER)
-
-    d33 = sub.add_parser("demo-asset")
-    d33.set_defaults(cmd="demo-asset")
-    d33.add_argument("args", nargs=argparse.REMAINDER)
-
-    d34 = sub.add_parser("demo-asset2")
-    d34.set_defaults(cmd="demo-asset2")
-    d34.add_argument("args", nargs=argparse.REMAINDER)
-
-    d35 = sub.add_parser("kpi-instrumentation")
-    d35.set_defaults(cmd="kpi-instrumentation")
-    d35.add_argument("args", nargs=argparse.REMAINDER)
-
-    d36 = sub.add_parser("distribution-closeout")
-    d36.set_defaults(cmd="distribution-closeout")
-    d36.add_argument("args", nargs=argparse.REMAINDER)
-
-    d37 = sub.add_parser("experiment-lane")
-    d37.set_defaults(cmd="experiment-lane")
-    d37.add_argument("args", nargs=argparse.REMAINDER)
-
-    d38 = sub.add_parser("distribution-batch")
-    d38.set_defaults(cmd="distribution-batch")
-    d38.add_argument("args", nargs=argparse.REMAINDER)
-
-    d39 = sub.add_parser("playbook-post")
-    d39.set_defaults(cmd="playbook-post")
-    d39.add_argument("args", nargs=argparse.REMAINDER)
-
-    d40 = sub.add_parser("scale-lane")
-    d40.set_defaults(cmd="scale-lane")
-    d40.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa41 = sub.add_parser("expansion-automation")
-    pa41.add_argument("args", nargs=argparse.REMAINDER)
-    d41 = sub.add_parser("day41-expansion-automation")
-    d41.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa42 = sub.add_parser("optimization-closeout-foundation")
-    pa42.add_argument("args", nargs=argparse.REMAINDER)
-    d42 = sub.add_parser("day42-optimization-closeout")
-    d42.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa43 = sub.add_parser("acceleration-closeout")
-    pa43.add_argument("args", nargs=argparse.REMAINDER)
-    d43 = sub.add_parser("day43-acceleration-closeout")
-    d43.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa44 = sub.add_parser("scale-closeout")
-    pa44.add_argument("args", nargs=argparse.REMAINDER)
-    d44 = sub.add_parser("day44-scale-closeout")
-    d44.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa45 = sub.add_parser("expansion-closeout")
-    pa45.add_argument("args", nargs=argparse.REMAINDER)
-    d45 = sub.add_parser("day45-expansion-closeout")
-    d45.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa46 = sub.add_parser("optimization-closeout")
-    pa46.add_argument("args", nargs=argparse.REMAINDER)
-    d46 = sub.add_parser("day46-optimization-closeout")
-    d46.add_argument("args", nargs=argparse.REMAINDER)
-
-    pa47 = sub.add_parser("reliability-closeout")
-    pa47.add_argument("args", nargs=argparse.REMAINDER)
-    d47 = sub.add_parser("day47-reliability-closeout")
-    d47.add_argument("args", nargs=argparse.REMAINDER)
-    pa48 = sub.add_parser("objection-closeout")
-    pa48.add_argument("args", nargs=argparse.REMAINDER)
-    d48 = sub.add_parser("day48-objection-closeout")
-    d48.add_argument("args", nargs=argparse.REMAINDER)
-    pa49 = sub.add_parser("weekly-review-closeout")
-    pa49.add_argument("args", nargs=argparse.REMAINDER)
-    d49 = sub.add_parser("day49-weekly-review-closeout")
-    d49.add_argument("args", nargs=argparse.REMAINDER)
-    d49_adv = sub.add_parser("day49-advanced-weekly-review-control-tower")
-    d49_adv.add_argument("args", nargs=argparse.REMAINDER)
-    pa50 = sub.add_parser("execution-prioritization-closeout")
-    pa50.add_argument("args", nargs=argparse.REMAINDER)
-    d50 = sub.add_parser("day50-execution-prioritization-closeout")
-    d50.add_argument("args", nargs=argparse.REMAINDER)
-    p51 = sub.add_parser("case-snippet-closeout")
-    p51.add_argument("args", nargs=argparse.REMAINDER)
-    d51 = sub.add_parser("day51-case-snippet-closeout")
-    d51.add_argument("args", nargs=argparse.REMAINDER)
-    p52 = sub.add_parser("narrative-closeout")
-    p52.add_argument("args", nargs=argparse.REMAINDER)
-    d52 = sub.add_parser("day52-narrative-closeout")
-    d52.add_argument("args", nargs=argparse.REMAINDER)
-
-    p53 = sub.add_parser("docs-loop-closeout")
-    p53.add_argument("args", nargs=argparse.REMAINDER)
-    d53 = sub.add_parser("day53-docs-loop-closeout")
-    d53.add_argument("args", nargs=argparse.REMAINDER)
-
-    p55 = sub.add_parser("contributor-activation-closeout")
-    p55.add_argument("args", nargs=argparse.REMAINDER)
-    d55 = sub.add_parser("day55-contributor-activation-closeout")
-    d55.add_argument("args", nargs=argparse.REMAINDER)
-
-    p56 = sub.add_parser("stabilization-closeout")
-    p56.add_argument("args", nargs=argparse.REMAINDER)
-    d56 = sub.add_parser("day56-stabilization-closeout")
-    d56.add_argument("args", nargs=argparse.REMAINDER)
-
-    p57 = sub.add_parser("kpi-deep-audit-closeout")
-    p57.add_argument("args", nargs=argparse.REMAINDER)
-    d57 = sub.add_parser("day57-kpi-deep-audit-closeout")
-    d57.add_argument("args", nargs=argparse.REMAINDER)
-
-    p58 = sub.add_parser("phase2-hardening-closeout")
-    p58.add_argument("args", nargs=argparse.REMAINDER)
-    d58 = sub.add_parser("day58-phase2-hardening-closeout")
-    d58.add_argument("args", nargs=argparse.REMAINDER)
-
-    p59 = sub.add_parser("phase3-preplan-closeout")
-    p59.add_argument("args", nargs=argparse.REMAINDER)
-    d59 = sub.add_parser("day59-phase3-preplan-closeout")
-    d59.add_argument("args", nargs=argparse.REMAINDER)
-
-    p60 = sub.add_parser("phase2-wrap-handoff-closeout")
-    p60.add_argument("args", nargs=argparse.REMAINDER)
-    d60 = sub.add_parser("day60-phase2-wrap-handoff-closeout")
-    d60.add_argument("args", nargs=argparse.REMAINDER)
-
-    d61 = sub.add_parser("phase3-kickoff-closeout", aliases=["day61-phase3-kickoff-closeout"])
-    d61.set_defaults(cmd="phase3-kickoff-closeout")
-    d61.add_argument("args", nargs=argparse.REMAINDER)
-
-    d62 = sub.add_parser("community-program-closeout", aliases=["day62-community-program-closeout"])
-    d62.set_defaults(cmd="community-program-closeout")
-    d62.add_argument("args", nargs=argparse.REMAINDER)
-
-    d63 = sub.add_parser(
-        "onboarding-activation-closeout", aliases=["day63-onboarding-activation-closeout"]
-    )
-    d63.set_defaults(cmd="onboarding-activation-closeout")
-    d63.add_argument("args", nargs=argparse.REMAINDER)
-
-    d64 = sub.add_parser(
-        "integration-expansion-closeout", aliases=["day64-integration-expansion-closeout"]
-    )
-    d64.set_defaults(cmd="integration-expansion-closeout")
-    d64.add_argument("args", nargs=argparse.REMAINDER)
-
-    d65 = sub.add_parser("weekly-review-closeout-cycle2", aliases=["day65-weekly-review-closeout"])
-    d65.set_defaults(cmd="weekly-review-closeout-cycle2")
-    d65.add_argument("args", nargs=argparse.REMAINDER)
-
-    d66 = sub.add_parser(
-        "integration-expansion2-closeout", aliases=["day66-integration-expansion2-closeout"]
-    )
-    d66.set_defaults(cmd="integration-expansion2-closeout")
-    d66.add_argument("args", nargs=argparse.REMAINDER)
-
-    d67 = sub.add_parser(
-        "integration-expansion3-closeout", aliases=["day67-integration-expansion3-closeout"]
-    )
-    d67.set_defaults(cmd="integration-expansion3-closeout")
-    d67.add_argument("args", nargs=argparse.REMAINDER)
-
-    d68 = sub.add_parser(
-        "integration-expansion4-closeout", aliases=["day68-integration-expansion4-closeout"]
-    )
-    d68.set_defaults(cmd="integration-expansion4-closeout")
-    d68.add_argument("args", nargs=argparse.REMAINDER)
-
-    d69 = sub.add_parser("case-study-prep1-closeout", aliases=["day69-case-study-prep1-closeout"])
-    d69.set_defaults(cmd="case-study-prep1-closeout")
-    d69.add_argument("args", nargs=argparse.REMAINDER)
-
-    d70 = sub.add_parser("case-study-prep2-closeout", aliases=["day70-case-study-prep2-closeout"])
-    d70.set_defaults(cmd="case-study-prep2-closeout")
-    d70.add_argument("args", nargs=argparse.REMAINDER)
-    d71 = sub.add_parser("case-study-prep3-closeout", aliases=["day71-case-study-prep3-closeout"])
-    d71.set_defaults(cmd="case-study-prep3-closeout")
-    d71.add_argument("args", nargs=argparse.REMAINDER)
-    d72 = sub.add_parser("case-study-prep4-closeout", aliases=["day72-case-study-prep4-closeout"])
-    d72.set_defaults(cmd="case-study-prep4-closeout")
-    d72.add_argument("args", nargs=argparse.REMAINDER)
-    d73 = sub.add_parser("case-study-launch-closeout", aliases=["day73-case-study-launch-closeout"])
-    d73.set_defaults(cmd="case-study-launch-closeout")
-    d73.add_argument("args", nargs=argparse.REMAINDER)
-    d74 = sub.add_parser(
-        "distribution-scaling-closeout", aliases=["day74-distribution-scaling-closeout"]
-    )
-    d74.set_defaults(cmd="distribution-scaling-closeout")
-    d74.add_argument("args", nargs=argparse.REMAINDER)
-    d75 = sub.add_parser(
-        "trust-assets-refresh-closeout", aliases=["day75-trust-assets-refresh-closeout"]
-    )
-    d75.set_defaults(cmd="trust-assets-refresh-closeout")
-    d75.add_argument("args", nargs=argparse.REMAINDER)
-    d76 = sub.add_parser(
-        "contributor-recognition-closeout", aliases=["day76-contributor-recognition-closeout"]
-    )
-    d76.set_defaults(cmd="contributor-recognition-closeout")
-    d76.add_argument("args", nargs=argparse.REMAINDER)
-    d77 = sub.add_parser(
-        "community-touchpoint-closeout", aliases=["day77-community-touchpoint-closeout"]
-    )
-    d77.add_argument("args", nargs=argparse.REMAINDER)
-    d78 = sub.add_parser(
-        "ecosystem-priorities-closeout", aliases=["day78-ecosystem-priorities-closeout"]
-    )
-    d78.add_argument("args", nargs=argparse.REMAINDER)
-    d79 = sub.add_parser("scale-upgrade-closeout", aliases=["day79-scale-upgrade-closeout"])
-    d79.add_argument("args", nargs=argparse.REMAINDER)
-    d80 = sub.add_parser("partner-outreach-closeout", aliases=["day80-partner-outreach-closeout"])
-    d80.add_argument("args", nargs=argparse.REMAINDER)
-    d81 = sub.add_parser("growth-campaign-closeout", aliases=["day81-growth-campaign-closeout"])
-    d81.set_defaults(cmd="growth-campaign-closeout")
-    d81.add_argument("args", nargs=argparse.REMAINDER)
-    d82 = sub.add_parser(
-        "integration-feedback-closeout", aliases=["day82-integration-feedback-closeout"]
-    )
-    d82.set_defaults(cmd="integration-feedback-closeout")
-    d82.add_argument("args", nargs=argparse.REMAINDER)
-    d83 = sub.add_parser(
-        "trust-faq-expansion-closeout", aliases=["day83-trust-faq-expansion-closeout"]
-    )
-    d83.set_defaults(cmd="trust-faq-expansion-closeout")
-    d83.add_argument("args", nargs=argparse.REMAINDER)
-    d84 = sub.add_parser(
-        "evidence-narrative-closeout", aliases=["day84-evidence-narrative-closeout"]
-    )
-    d84.set_defaults(cmd="evidence-narrative-closeout")
-    d84.add_argument("args", nargs=argparse.REMAINDER)
-    d85 = sub.add_parser(
-        "release-prioritization-closeout", aliases=["day85-release-prioritization-closeout"]
-    )
-    d85.set_defaults(cmd="release-prioritization-closeout")
-    d85.add_argument("args", nargs=argparse.REMAINDER)
-    d86 = sub.add_parser("launch-readiness-closeout", aliases=["day86-launch-readiness-closeout"])
-    d86.set_defaults(cmd="launch-readiness-closeout")
-    d86.add_argument("args", nargs=argparse.REMAINDER)
-    d87 = sub.add_parser(
-        "governance-handoff-closeout", aliases=["day87-governance-handoff-closeout"]
-    )
-    d87.set_defaults(cmd="governance-handoff-closeout")
-    d87.add_argument("args", nargs=argparse.REMAINDER)
-    d88 = sub.add_parser(
-        "governance-priorities-closeout", aliases=["day88-governance-priorities-closeout"]
-    )
-    d88.set_defaults(cmd="governance-priorities-closeout")
-    d88.add_argument("args", nargs=argparse.REMAINDER)
-    d89 = sub.add_parser("governance-scale-closeout", aliases=["day89-governance-scale-closeout"])
-    d89.set_defaults(cmd="governance-scale-closeout")
-    d89.add_argument("args", nargs=argparse.REMAINDER)
-    d90 = sub.add_parser(
-        "phase3-wrap-publication-closeout", aliases=["day90-phase3-wrap-publication-closeout"]
-    )
-    d90.set_defaults(cmd="phase3-wrap-publication-closeout")
-    d90.add_argument("args", nargs=argparse.REMAINDER)
-    d91 = sub.add_parser(
-        "continuous-upgrade-closeout", aliases=["day91-continuous-upgrade-closeout"]
-    )
-    d91.set_defaults(cmd="continuous-upgrade-closeout")
-    d91.add_argument("args", nargs=argparse.REMAINDER)
-    d92 = sub.add_parser(
-        "continuous-upgrade-cycle2-closeout", aliases=["day92-continuous-upgrade-cycle2-closeout"]
-    )
-    d92.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
-    d92.add_argument("args", nargs=argparse.REMAINDER)
-    d93 = sub.add_parser(
-        "continuous-upgrade-cycle3-closeout", aliases=["day93-continuous-upgrade-cycle3-closeout"]
-    )
-    d93.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
-    d93.add_argument("args", nargs=argparse.REMAINDER)
-    d94 = sub.add_parser(
-        "continuous-upgrade-cycle4-closeout", aliases=["day94-continuous-upgrade-cycle4-closeout"]
-    )
-    d94.set_defaults(cmd="continuous-upgrade-cycle4-closeout")
-    d94.add_argument("args", nargs=argparse.REMAINDER)
-    d95 = sub.add_parser(
-        "continuous-upgrade-cycle5-closeout", aliases=["day95-continuous-upgrade-cycle5-closeout"]
-    )
-    d95.set_defaults(cmd="continuous-upgrade-cycle5-closeout")
-    d95.add_argument("args", nargs=argparse.REMAINDER)
-    d96 = sub.add_parser(
-        "continuous-upgrade-cycle6-closeout", aliases=["day96-continuous-upgrade-cycle6-closeout"]
-    )
-    d96.set_defaults(cmd="continuous-upgrade-cycle6-closeout")
-    d96.add_argument("args", nargs=argparse.REMAINDER)
-    d97 = sub.add_parser(
-        "continuous-upgrade-cycle7-closeout", aliases=["day97-continuous-upgrade-cycle7-closeout"]
-    )
-    d97.set_defaults(cmd="continuous-upgrade-cycle7-closeout")
-    d97.add_argument("args", nargs=argparse.REMAINDER)
-
-    fqo = sub.add_parser("faq-objections")
-    fqo.add_argument("args", nargs=argparse.REMAINDER)
-
-    dmo = sub.add_parser("demo")
-    dmo.add_argument("args", nargs=argparse.REMAINDER)
-
-    fct = sub.add_parser("first-contribution")
-    fct.add_argument("args", nargs=argparse.REMAINDER)
-
-    ctf = sub.add_parser("contributor-funnel")
-    ctf.add_argument("args", nargs=argparse.REMAINDER)
-
-    prf = sub.add_parser("proof")
-    prf.add_argument("args", nargs=argparse.REMAINDER)
-
-    ttp = sub.add_parser("triage-templates")
-    ttp.add_argument("args", nargs=argparse.REMAINDER)
-
-    dqa = sub.add_parser("docs-qa")
-    dqa.add_argument("args", nargs=argparse.REMAINDER)
-
-    wrv = sub.add_parser("weekly-review")
-    wrv.add_argument("args", nargs=argparse.REMAINDER)
-
-    dnv = sub.add_parser("docs-nav")
-    dnv.add_argument("args", nargs=argparse.REMAINDER)
-    rdm = sub.add_parser("roadmap")
-    rdm.add_argument("args", nargs=argparse.REMAINDER)
-
-    suc = sub.add_parser("startup-use-case")
-    suc.add_argument("args", nargs=argparse.REMAINDER)
-
-    euc = sub.add_parser("enterprise-use-case")
-    euc.add_argument("args", nargs=argparse.REMAINDER)
-
-    gha = sub.add_parser("github-actions-quickstart")
-    gha.add_argument("args", nargs=argparse.REMAINDER)
-
-    glc = sub.add_parser("gitlab-ci-quickstart")
-    glc.add_argument("args", nargs=argparse.REMAINDER)
-
-    qcd = sub.add_parser("quality-contribution-delta")
-    qcd.add_argument("args", nargs=argparse.REMAINDER)
-
-    rep = sub.add_parser("reliability-evidence-pack")
-    rep.add_argument("args", nargs=argparse.REMAINDER)
-
-    rrb = sub.add_parser("release-readiness-board")
-    rrb.add_argument("args", nargs=argparse.REMAINDER)
-
-    rn = sub.add_parser("release-narrative")
-    rn.add_argument("args", nargs=argparse.REMAINDER)
-
-    tsu = sub.add_parser("trust-signal-upgrade")
-    tsu.add_argument("args", nargs=argparse.REMAINDER)
+    p, sub = _build_root_parser()
 
     _hide_help_subcommands(sub)
 
