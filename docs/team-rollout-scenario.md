@@ -1,5 +1,9 @@
 # Team rollout scenario (local trial → CI pilot → release gate)
 
+**Use this page if:** you want a realistic staged scenario for organizational rollout conversations.
+
+**Canonical rollout instructions remain in:** [Adoption](adoption.md) and [Recommended CI flow](recommended-ci-flow.md).
+
 This is a recommended adoption flow based on SDETKit's current repository workflows and docs.
 
 It is a scenario, not a claim that a specific company already executed it.

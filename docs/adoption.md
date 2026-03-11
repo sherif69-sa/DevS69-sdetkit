@@ -1,177 +1,71 @@
-# Adopt SDETKit in your repository
+# Adopt SDETKit in your repository (canonical)
 
-For a compact reviewer/operator artifact decode after CI runs, use [CI artifact walkthrough](ci-artifact-walkthrough.md).
+**Use this page if:** you are introducing SDETKit to a team-owned repository and need a staged rollout plan.
 
-This page is for teams using SDETKit **outside this repository**.
+**Not this page:**
+- First solo run: [First run quickstart](ready-to-use.md)
+- CI workflow templates and branch policies: [Recommended CI flow (canonical)](recommended-ci-flow.md)
+- Artifact interpretation details: [CI artifact walkthrough (canonical)](ci-artifact-walkthrough.md)
 
-It gives you a safe, copy-paste path from first run to stricter CI enforcement.
+## Adoption objective
 
-Want to preview realistic command and artifact snippets first? See [Sample outputs](sample-outputs.md).
+Move from local confidence checks to repeatable team gates with machine-readable release evidence.
 
-Need help choosing rollout order first? Use the compact [Choose your path guide](choose-your-path.md).
+## Stage 0 — install and verify in target repo
 
-For current ecosystem boundaries (what stays core vs integration vs playbook vs experimental), see [integrations-and-extension-boundary.md](integrations-and-extension-boundary.md).
-
-## What to install
-
-For full install options (including `pipx` and `uv tool install`), see [Install SDETKit](install.md).
-
-Until public package release is completed, the recommended external install is from GitHub:
-
-```bash
-python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
-```
-
-For CI and local development parity:
-
-```bash
-python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git#egg=sdetkit[dev,test]"
-```
-
-Verify CLI wiring before running gates:
+Use [Install](install.md), then verify:
 
 ```bash
 python -m sdetkit --help
 python -m sdetkit gate --help
 ```
 
-## Start small: local quick confidence
-
-Run this first in your own repository root:
-
-```bash
-python -m sdetkit gate fast
-```
-
-This is a **signal-producing gate**, not a guaranteed-green onboarding command.
-
-- Exit code `0`: your current repo state passes the fast checks.
-- Non-zero exit code: one or more checks failed (for example lint/tests/type checks), which is expected if your repo is not yet aligned with the gate.
-
-Why this is the right first command:
-
-- Fast pass/fail signal with deterministic output.
-- Minimal integration overhead.
-- Good confidence before adding stricter gates.
-
-If it fails, treat the output as your integration backlog: fix the first failing check, then rerun.
-
-If you want a machine-readable artifact immediately:
+## Stage 1 — local proof in the team repo
 
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 ```
 
-## If a command fails on first adoption
+This is a signal-producing gate, not a guaranteed-green onboarding command.
 
-Before changing your pipeline, check the focused troubleshooting matrix:
-
-- [First-failure triage](first-failure-triage.md) for the compact fix-first path across `gate fast` -> `security enforce` -> `gate release`.
-- [Adoption troubleshooting](adoption-troubleshooting.md) (start with the **Artifact-to-action map** section if you downloaded CI artifacts).
-- [Remediation cookbook](remediation-cookbook.md) for copy-paste next-step playbooks after common failures.
-- Helps decide whether to fix quality debt now, tune a threshold temporarily, or stay on a lighter command.
-
-## Add a lightweight CI gate (copy/paste)
-
-Use this minimal GitHub Actions workflow in your repository.
-
-```yaml
-name: sdetkit-fast-gate
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  fast-gate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install SDETKit
-        run: python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
-      - name: Run fast gate
-        run: python -m sdetkit gate fast
-```
-
-## Graduate to stricter release gating
-
-After fast gate is stable in your repo, add stricter checks:
+## Stage 2 — baseline release confidence
 
 ```bash
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
-python -m sdetkit gate release
+python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
 ```
 
-Suggested rollout:
+Add security budgets once the team has agreement on thresholds:
 
-1. **Week 1**: local + CI `gate fast` only.
-2. **Week 2**: add security budgets in CI (start with a non-zero `--max-info` if needed).
-3. **Week 3+**: enforce `gate release` for release branches/tags.
-
-## CI pattern: fast on PR, strict on release branches
-
-```yaml
-name: sdetkit-progressive-gating
-
-on:
-  pull_request:
-  push:
-    branches: [main, release/**]
-
-jobs:
-  sdetkit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
-      - name: Always run fast gate
-        run: python -m sdetkit gate fast
-      - name: Strict release gate
-        if: startsWith(github.ref, 'refs/heads/release/')
-        run: |
-          python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
-          python -m sdetkit gate release
+```bash
+python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0 --out build/security-enforce.json
 ```
 
-## Command choices at a glance
+## Stage 3 — CI rollout (handoff)
 
-- Run first: `python -m sdetkit gate fast`
-- CI minimum: `python -m sdetkit gate fast`
-- Strict path: `python -m sdetkit security enforce ...` + `python -m sdetkit gate release`
-- Evidence artifact: `python -m sdetkit gate fast --format json --stable-json --out ...`
+Use [Recommended CI flow](recommended-ci-flow.md) as the canonical CI rollout source. It defines:
 
-## GitHub Actions artifact visibility (this repository pattern)
+- PR fast-gate baseline
+- main/release stricter gates
+- artifact upload conventions
+- progressive tightening without all-at-once friction
 
-When a CI gate fails, keep machine-readable outputs in predictable files and upload only the highest-signal diagnostics:
+## Team operating model
 
-- `build/gate-fast.json` → includes `failed_steps` for fast-gate triage.
-- `build/security-enforce.json` → shows threshold outcomes (`ok`, `counts`, `exceeded`).
-- `build/release-preflight.json` → shows release metadata preflight status (`ok`, `version`, `tag`).
+- PR lane: keep `gate fast` always on.
+- main/release lane: enforce agreed security budgets and release gates.
+- triage: use artifact-first flow via [CI artifact walkthrough](ci-artifact-walkthrough.md).
 
-In GitHub Actions, these are uploaded as:
+## If onboarding fails
 
-- `ci-gate-diagnostics` (CI workflow)
-- `release-diagnostics` (Release workflow)
+Use these in order:
 
-Use those artifacts first, then follow:
+1. [First-failure triage](first-failure-triage.md)
+2. [Adoption troubleshooting](adoption-troubleshooting.md)
+3. [Remediation cookbook](remediation-cookbook.md)
 
-- [Adoption troubleshooting](adoption-troubleshooting.md)
-- [Remediation cookbook](remediation-cookbook.md)
+## Related rollout pages
 
-## Related docs
-
-- [First-failure triage](first-failure-triage.md)
-- [Adoption troubleshooting](adoption-troubleshooting.md)
-- [Remediation cookbook](remediation-cookbook.md)
+- [Team rollout scenario](team-rollout-scenario.md)
+- [Example adoption flow](example-adoption-flow.md)
 - [Adoption examples](adoption-examples.md)
 - [Choose your path](choose-your-path.md)
-- [Ready-to-use quickstart](ready-to-use.md)
-- [Release-confidence examples](examples.md)
-- [Production readiness command](production-readiness.md)

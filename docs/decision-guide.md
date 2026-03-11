@@ -27,13 +27,14 @@ If these apply, run only the lightweight core lane first, then stop unless repea
 
 ## 3) First-time core path (recommended)
 
-Start with the five hero paths:
+Start with this core path:
 
-1. **Install** → [Ready-to-use quickstart](ready-to-use.md)
-2. **Gate fast** → `python -m sdetkit gate fast`
-3. **Gate release** → `python -m sdetkit gate release`
-4. **Doctor** → `python -m sdetkit doctor`
-5. **Evidence/report outputs** → [Evidence showcase](evidence-showcase.md), [Reporting and trends](reporting-and-trends.md)
+1. **Install** → [Install (canonical)](install.md)
+2. **First run** → [First run quickstart (canonical)](ready-to-use.md)
+3. **Gate fast** → `python -m sdetkit gate fast`
+4. **Gate release** → `python -m sdetkit gate release`
+5. **Doctor** → `python -m sdetkit doctor`
+6. **Evidence/report outputs** → [CI artifact walkthrough](ci-artifact-walkthrough.md), [Reporting and trends](reporting-and-trends.md)
 
 ## 4) Manual scattered workflow vs SDETKit workflow
 
@@ -61,7 +62,7 @@ Then keep using the core commands and return to broader docs only when integrati
 
 After confirming fit, choose exactly one lane to avoid doc sprawl:
 
-- **Beginner/core lane**: [Ready-to-use quickstart](ready-to-use.md) → [Release confidence](release-confidence.md) → [Doctor](doctor.md)
+- **Beginner/core lane**: [First run quickstart](ready-to-use.md) → [Release confidence](release-confidence.md) → [Doctor](doctor.md)
 - **Team adoption lane**: [Adoption](adoption.md) → [Example adoption flow](example-adoption-flow.md)
 - **CI lane**: [Recommended CI flow](recommended-ci-flow.md) → [CI contract](ci-contract.md)
 - **Advanced/extensions lane**: [CLI reference](cli.md), [API](api.md), [Plugins](plugins.md), [Tool server](tool-server.md)

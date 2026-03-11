@@ -2,6 +2,8 @@
 
 Use this page when a CI run is finished and you need the fastest **artifact-first** review path.
 
+This is the **canonical page for evidence/artifact interpretation**.
+
 Grounded in this repository's documented workflow/artifacts:
 
 - `ci-gate-diagnostics` upload bundle (`build/gate-fast.json`, `build/security-enforce.json`)

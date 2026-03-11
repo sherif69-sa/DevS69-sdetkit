@@ -1,8 +1,10 @@
 # Install SDETKit
 
-This page is the canonical install guide for external users.
+**Use this page if:** you need the canonical installation paths for local use, external repositories, or contributor setup.
 
-## Recommended install path (first-time users)
+**Next step:** after install, go to [First run quickstart (canonical)](ready-to-use.md).
+
+## Recommended install path (first-time and external users)
 
 Install directly from GitHub, then verify the CLI:
 
@@ -43,7 +45,7 @@ python -m pip install .
 python -m sdetkit --help
 ```
 
-## First run in an external repository
+## External repository usage (canonical handoff)
 
 From the root of the repository you want to gate:
 
@@ -52,9 +54,10 @@ python -m sdetkit gate fast
 python -m sdetkit gate release
 ```
 
-Start with `gate fast`, then add `gate release` when you want stricter release-confidence checks.
+Then continue with:
 
-For rollout patterns and CI examples, continue with [Adopt SDETKit in your repository](adoption.md).
+- [First run quickstart](ready-to-use.md) for the beginner lane.
+- [Adopt SDETKit in your repository](adoption.md) for team rollout and CI rollout.
 
 ## Development setup (this repository only)
 

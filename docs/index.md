@@ -4,7 +4,7 @@
 
 <span class="pill">Deterministic release-confidence checks</span>
 <span class="pill">Evidence-backed shipping decisions</span>
-<span class="pill">Core-first adoption path</span>
+<span class="pill">Curated rollout lanes</span>
 
 </div>
 
@@ -15,57 +15,65 @@ SDETKit gives engineering teams **deterministic release-confidence checks and ev
 <div class="hero-actions" markdown>
 
 [Install](install.md){ .md-button .md-button--primary }
-[Gate fast](release-confidence.md){ .md-button }
-[Gate release](release-confidence.md){ .md-button }
-[Doctor](doctor.md){ .md-button }
-[Evidence & reports](evidence-showcase.md){ .md-button }
+[First run](ready-to-use.md){ .md-button }
+[Adopt as a team](adoption.md){ .md-button }
+[CI lane](recommended-ci-flow.md){ .md-button }
 
 </div>
 
 </div>
 
-## Core path in 5 minutes
+## Choose one lane
 
-1. **Install and verify**
-   - [Install guide](install.md)
-2. **Gate fast**
-   ```bash
-   python -m sdetkit gate fast
-   ```
-3. **Gate release**
-   ```bash
-   python -m sdetkit gate release
-   ```
-4. **Run doctor checks**
-   ```bash
-   python -m sdetkit doctor
-   ```
-5. **Review evidence/report outputs**
-   - [Evidence showcase](evidence-showcase.md)
-   - [Reporting and trends](reporting-and-trends.md)
+### 1) Beginner / first-run lane
 
-## Why teams adopt SDETKit
+Use this if you are evaluating SDETKit or running it for the first time.
 
-- Deterministic gate outcomes instead of subjective interpretation.
-- Evidence-backed outputs to support release approvals.
-- One core path that works locally first, then scales into CI.
+1. [Choose your path](choose-your-path.md)
+2. [Install (canonical)](install.md)
+3. [First run quickstart (canonical)](ready-to-use.md)
+4. [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
 
-## Proof of value (start here)
+### 2) Team adoption lane
 
-- **Blank repo to value in 60 seconds**: [Fast demo path](blank-repo-to-value-60-seconds.md)
-- **Concrete evidence transformation**: [Before/after evidence example](before-after-evidence-example.md)
-- **Comparison framing**: [SDETKit vs ad hoc scripts and separate tools](sdetkit-vs-ad-hoc.md)
-- **Team rollout view**: [Team rollout scenario](team-rollout-scenario.md)
+Use this when you are rolling SDETKit into a real team workflow and repository standards.
 
-## Continue after the core path
+1. [Adopt in your repository (canonical)](adoption.md)
+2. [Team rollout scenario](team-rollout-scenario.md)
+3. [Adoption examples](adoption-examples.md)
+4. [Adoption troubleshooting](adoption-troubleshooting.md)
 
-Pick one lane based on your immediate need:
+### 3) CI / automation lane
 
-- **Team adoption lane**: [Adopt in your repository](adoption.md)
-- **CI and automation lane**: [Recommended CI flow](recommended-ci-flow.md)
-- **Advanced/extensions lane**: [Advanced and reference](cli.md)
-- **Rollout routing help**: [Decision guide](decision-guide.md), [Choose your path](choose-your-path.md)
+Use this when you need production CI behavior, artifact handling, and policy rollouts.
 
-## Archive and historical context
+1. [Recommended CI flow (canonical)](recommended-ci-flow.md)
+2. [CI artifact walkthrough (canonical evidence decode)](ci-artifact-walkthrough.md)
+3. [CI contract (reference)](ci-contract.md)
+4. [Reporting and trends](reporting-and-trends.md)
 
-Historical transition-era and day-by-day closeout material is preserved in [Archive and history](archive/index.md). Start there only if you need legacy implementation context or chronology.
+### 4) Advanced / extensions / reference lane
+
+Use this for command surface depth, extension boundaries, and integration architecture.
+
+- [CLI reference](cli.md)
+- [API](api.md)
+- [Plugins](plugins.md)
+- [Tool server](tool-server.md)
+- [Integrations and extension boundary](integrations-and-extension-boundary.md)
+
+### 5) Archive / history lane
+
+Use this only for historical transition context.
+
+- [Archive overview](archive/index.md)
+- [Transition-era material map](archive/transition-era-material.md)
+
+## Proof and comparison pages
+
+For product-value framing and artifact-oriented examples:
+
+- [SDETKit vs ad hoc scripts and separate tools](sdetkit-vs-ad-hoc.md)
+- [Before/after evidence example](before-after-evidence-example.md)
+- [Evidence showcase](evidence-showcase.md)
+- [Decision guide](decision-guide.md)

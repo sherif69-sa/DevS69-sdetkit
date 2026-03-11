@@ -1,5 +1,7 @@
 # SDETKit vs ad hoc scripts and separate tools
 
+**Use this page if:** you need the canonical comparison page for “why SDETKit vs ad hoc scripting”.
+
 Running separate tools is still valid. This comparison explains why teams adopt SDETKit when they need repeatable release decisions, not just command execution.
 
 ## Short answer
@@ -42,6 +44,8 @@ python -m sdetkit gate release --format json --stable-json --out build/release-p
 
 If this gives your team faster and clearer release decisions, adopt progressively; if not, keep your lighter ad hoc path.
 
-## Deep-dive reference
+## Where to go next
 
-For the longer system-value argument, see [Why not just run separate tools?](why-not-just-tools.md).
+- Ready to try it: [First run quickstart](ready-to-use.md).
+- Ready for rollout: [Adoption](adoption.md) and [Recommended CI flow](recommended-ci-flow.md).
+- For the longer system-value argument: [Why not just run separate tools?](why-not-just-tools.md).

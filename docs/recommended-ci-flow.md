@@ -1,6 +1,8 @@
 # Recommended CI flow for team adoption
 
-This page is the **recommended baseline** for operationalizing SDETKit in GitHub Actions with minimal friction.
+This page is the **canonical CI rollout guide** for operationalizing SDETKit in GitHub Actions with minimal friction.
+
+**Not this page:** first-time local users should start with [First run quickstart](ready-to-use.md); team onboarding should start with [Adoption](adoption.md).
 
 For a compact reviewer/operator read path over CI artifacts, see [CI artifact walkthrough](ci-artifact-walkthrough.md).
 

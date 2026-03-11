@@ -82,20 +82,17 @@ extra_javascript:
 
 nav:
   - Home: index.md
-  - Start here (core path):
-      - Install: install.md
-      - Install quickstart: ready-to-use.md
+  - Lane 1 — Beginner / first run:
+      - Choose your path (30-second router): choose-your-path.md
+      - Install (canonical): install.md
+      - First run quickstart (canonical): ready-to-use.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
-      - Gate fast + gate release: release-confidence.md
+      - Release confidence (core commands): release-confidence.md
       - Doctor checks: doctor.md
-      - Evidence and reports: evidence-showcase.md
-      - Before/after evidence example: before-after-evidence-example.md
-      - SDETKit vs ad hoc scripts and separate tools: sdetkit-vs-ad-hoc.md
-      - Team rollout scenario: team-rollout-scenario.md
-      - Decision guide: decision-guide.md
-      - Choose your path: choose-your-path.md
+      - Decision guide (is SDETKit a fit?): decision-guide.md
   - Team adoption:
-      - Adopt in your repository: adoption.md
+      - Adopt in your repository (canonical): adoption.md
+      - Team rollout scenario: team-rollout-scenario.md
       - Example adoption flow: example-adoption-flow.md
       - Adoption examples: adoption-examples.md
       - Adoption troubleshooting: adoption-troubleshooting.md
@@ -104,15 +101,19 @@ nav:
       - Starter work inventory: starter-work-inventory.md
       - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
   - CI and automation:
-      - Recommended CI flow (baseline): recommended-ci-flow.md
-      - CI contract: ci-contract.md
-      - CI artifact walkthrough: ci-artifact-walkthrough.md
+      - Recommended CI flow (canonical): recommended-ci-flow.md
+      - CI artifact walkthrough (canonical evidence decode): ci-artifact-walkthrough.md
+      - CI contract (reference): ci-contract.md
       - "GitHub Action: sdetkit repo audit": github-action.md
       - PR automation for audit auto-fixes: pr-automation.md
       - n8n integration (PR webhook automation): n8n.md
       - Reporting and trends: reporting-and-trends.md
       - Sample outputs (first-run evidence): sample-outputs.md
       - Remediation cookbook: remediation-cookbook.md
+  - Why and proof of value:
+      - SDETKit vs ad hoc scripts and separate tools (canonical comparison): sdetkit-vs-ad-hoc.md
+      - Before/after evidence example: before-after-evidence-example.md
+      - Evidence showcase: evidence-showcase.md
   - Advanced and reference:
       - CLI reference: cli.md
       - Command surface inventory: command-surface.md
@@ -125,13 +126,10 @@ nav:
       - Policy-as-Code: policy.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
-      - CI Contract: ci-contract.md
       - Evidence Pack: evidence.md
-      - Reporting and trends: reporting-and-trends.md
       - Ops Control Plane: ops.md
       - Tool server: tool-server.md
       - IDE + pre-commit integration: ide-and-precommit.md
-      - n8n Integration (PR Webhook Automation): n8n.md
       - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
       - Plugins: plugins.md
       - Plugins, rule packs, and fix-audit: plugins-and-fix.md

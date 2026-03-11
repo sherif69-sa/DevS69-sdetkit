@@ -1,5 +1,7 @@
 # Before/after evidence example
 
+**Use this page if:** you need a side-by-side comparison of review behavior before vs after SDETKit adoption.
+
 This page shows what changes when a team moves from ad hoc terminal checks to SDETKit evidence artifacts.
 
 No fabricated customer claims, no synthetic benchmark numbers—just command output shape and review behavior.
@@ -65,3 +67,9 @@ See exact examples in [Evidence showcase](evidence-showcase.md).
 4. Only then deep-dive into raw logs.
 
 This keeps release decisions deterministic and auditable without claiming perfect green runs.
+
+
+## Where to go next
+
+- For rollout steps: [Adoption](adoption.md) and [Recommended CI flow](recommended-ci-flow.md).
+- For artifact interpretation rules: [CI artifact walkthrough](ci-artifact-walkthrough.md).
