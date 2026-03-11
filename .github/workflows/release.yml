@@ -57,6 +57,12 @@ jobs:
             requirements-docs.txt
 
 
+      - name: Release metadata preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/release_preflight.py --tag "${{ steps.resolved.outputs.tag }}"
+
       - name: Verify tag matches package version
         shell: bash
         run: |
@@ -87,7 +93,7 @@ jobs:
           sdetkit --help
 
       - name: Publish to PyPI
-        if: ${{ env.PYPI_API_TOKEN != '' }}
+        if: ${{ secrets.PYPI_API_TOKEN != '' }}
         env:
           TWINE_USERNAME: __token__
           PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
@@ -97,6 +103,11 @@ jobs:
           set -euo pipefail
           python -m twine upload dist/*
 
+      - name: PyPI publish skipped (no PYPI_API_TOKEN configured)
+        if: ${{ secrets.PYPI_API_TOKEN == "" }}
+        shell: bash
+        run: |
+          echo "PyPI publish skipped: configure repository secret PYPI_API_TOKEN to enable upload."
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32  # v4.1.0

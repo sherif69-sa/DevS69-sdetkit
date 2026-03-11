@@ -79,7 +79,15 @@ make package-validate
 
 This validates wheel/sdist build, metadata (`twine check`), wheel contents, and a smoke install of the built wheel (`sdetkit --help`).
 
-> Current posture: repository is prepared for artifact build and validation; public PyPI publication depends on release workflow credentials/secrets and is not claimed as generally available from this README.
+### Maintainer release preflight
+
+```bash
+make release-preflight
+```
+
+This is the recommended local release check before creating/pushing a release tag. It validates release metadata (`pyproject.toml`, `CHANGELOG.md`, optional tag format), runs `doctor --release`, and validates build artifacts.
+
+> Current posture: repository is prepared for artifact build and release execution validation; public PyPI publication depends on `PYPI_API_TOKEN` configuration and successful workflow execution, and is not claimed as generally available from this README.
 
 ## 2-minute quickstart
 
