@@ -136,7 +136,7 @@ Boundary guidance: [integrations-and-extension-boundary.md](integrations-and-ext
 - [🩺 Doctor checks](doctor.md)
 - [🤝 Contribute](contributing.md)
 - [🧭 Repo tour](repo-tour.md)
-- [📦 Transition-era reports (secondary)](#legacy-reports)
+- [📦 Legacy reports](#legacy-reports)
 
 </div>
 

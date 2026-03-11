@@ -113,8 +113,8 @@ from . import (
 )
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
-from .security_gate import main as security_main
 from .public_surface_contract import render_root_help_groups
+from .security_gate import main as security_main
 
 
 def _tool_version() -> str:

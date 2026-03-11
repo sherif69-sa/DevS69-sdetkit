@@ -419,14 +419,14 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(
         prog="sdetkit playbooks",
-        description="Discover, run, and validate playbooks across Playbooks and Experimental (transition-era) lanes.",
+        description="Discover, run, and validate recommended playbooks and incubator workflows.",
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     listp = sub.add_parser(
         "list",
-        help="List recommended playbooks, Experimental workflows, and aliases.",
-        description="List recommended playbooks, Experimental workflows, and aliases.",
+        help="List recommended playbooks, incubator workflows, and aliases.",
+        description="List recommended playbooks, incubator workflows, and aliases.",
     )
     listp.add_argument("--format", choices=["text", "json"], default="text")
     g = listp.add_mutually_exclusive_group()

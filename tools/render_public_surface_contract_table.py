@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
-
-from sdetkit.public_surface_contract import PUBLIC_SURFACE_CONTRACT
 
 BEGIN = "<!-- BEGIN:PUBLIC_SURFACE_CONTRACT_TABLE -->"
 END = "<!-- END:PUBLIC_SURFACE_CONTRACT_TABLE -->"
@@ -24,6 +22,8 @@ def render_table() -> str:
         "| Command family | Purpose | Stability tier | First-time adopter default? | Transition-era / legacy-oriented? |",
         "|---|---|---|---|---|",
     ]
+    from sdetkit.public_surface_contract import PUBLIC_SURFACE_CONTRACT
+
     for family in PUBLIC_SURFACE_CONTRACT:
         lines.append(
             "| "
