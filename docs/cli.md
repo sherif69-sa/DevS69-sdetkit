@@ -1,4 +1,14 @@
 # CLI
+
+## Start with these core release-confidence commands
+
+- `bash scripts/ready_to_use.sh quick`
+- `bash scripts/ready_to_use.sh release`
+- `sdetkit gate fast`
+- `sdetkit gate release`
+- `sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0`
+
+## Broader command catalog
 - `sdetkit baseline write`
 - `sdetkit baseline check`
 - `sdetkit baseline check --format json`

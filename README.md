@@ -6,7 +6,15 @@
 ![Repo Audit](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
 ![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
 
-SDETKit helps **SDET, QA, and DevOps teams prove release confidence** with deterministic local/CI checks and audit-friendly evidence.
+SDETKit helps teams **prove release confidence** with deterministic checks and audit-friendly evidence.
+
+## What this is (10-second version)
+
+SDETKit is a release-confidence toolkit.
+
+It gives teams one repeatable answer to: **"Is this repository ready to ship?"**
+
+If you want one command path from quick confidence to a strict release gate (with evidence you can review later), start here.
 
 ## The one thing this repo is best at
 
@@ -24,7 +32,7 @@ This runs environment bootstrap + CI quick lane + coverage + security enforcemen
 
 ## Start here (first 5 minutes)
 
-### 1) Run the fastest path
+### 1) Run the fastest path (quick confidence)
 
 ```bash
 bash scripts/ready_to_use.sh quick
@@ -41,7 +49,7 @@ bash scripts/ready_to_use.sh quick
 
 If this command finishes, you have a working local gate path that mirrors CI expectations and gives deterministic pass/fail output.
 
-### 4) Next command
+### 4) Move to strict release gate
 
 ```bash
 bash scripts/ready_to_use.sh release
@@ -50,6 +58,18 @@ bash scripts/ready_to_use.sh release
 Use release mode when you want a stricter go/no-go decision before a release.
 
 Ready-to-use guide: `docs/ready-to-use.md`
+
+Release-confidence overview: `docs/release-confidence.md`
+
+## Core path (local and CI)
+
+Use this progression:
+
+1. **Quick confidence:** `bash scripts/ready_to_use.sh quick`
+2. **Strict release gate:** `bash scripts/ready_to_use.sh release`
+3. **Adopt in external repo:** `docs/adoption.md`
+
+This keeps the journey focused on release confidence first, then rollout.
 
 ## Adopt in your own repository (external integration)
 
@@ -125,7 +145,19 @@ python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --ma
 python -m sdetkit gate release
 ```
 
-## Explore core commands
+## Explore commands (core first)
+
+### Core release-confidence commands
+
+```bash
+bash scripts/ready_to_use.sh quick
+bash scripts/ready_to_use.sh release
+python -m sdetkit gate fast
+python -m sdetkit gate release
+python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
+```
+
+### Broader toolkit commands
 
 ```bash
 python -m sdetkit --help

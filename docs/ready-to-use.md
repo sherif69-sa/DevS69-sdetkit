@@ -1,8 +1,8 @@
 # Ready-to-use setup (start working in minutes)
 
-Use this guide when you want a practical, production-focused start without learning the entire repository first.
+Use this guide when you want a practical start to release confidence without learning the entire repository first.
 
-## Fast start (recommended)
+## Fast start (recommended, under 5 minutes)
 
 ```bash
 bash scripts/ready_to_use.sh quick
@@ -36,11 +36,17 @@ Use this when you need production-quality release evidence.
 
 ## Next actions after setup
 
+Follow the core path:
+
+1. `bash scripts/ready_to_use.sh quick`
+2. `bash scripts/ready_to_use.sh release`
+3. Adopt in another repository with [adoption.md](adoption.md)
+
+Then explore broader commands if needed:
+
 - Explore command groups: `python -m sdetkit --help`
 - See playbooks: `python -m sdetkit playbooks`
-- Read strategy context:
-  - `docs/product-strategy.md`
-  - `docs/global-production-transformation-playbook.md`
+- Read release-confidence narrative: [release-confidence.md](release-confidence.md)
 
 ## Using this in another repository
 

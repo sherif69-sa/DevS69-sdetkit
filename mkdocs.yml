@@ -1,5 +1,5 @@
 site_name: DevS69 SDETKit
-site_description: Production-ready SDET + DevOps toolkit with deterministic quality, security, and release workflows.
+site_description: Release-confidence toolkit with deterministic checks and audit-friendly evidence.
 site_url: https://sherif69-sa.github.io/DevS69-sdetkit/
 repo_name: sherif69-sa/DevS69-sdetkit
 repo_url: https://github.com/sherif69-sa/DevS69-sdetkit
@@ -83,6 +83,7 @@ extra_javascript:
 nav:
   - Home: index.md
   - Quickstart: ready-to-use.md
+  - Release confidence: release-confidence.md
   - Adopt in your repository: adoption.md
   - Adoption troubleshooting: adoption-troubleshooting.md
   - Remediation cookbook: remediation-cookbook.md

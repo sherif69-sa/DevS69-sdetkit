@@ -14,8 +14,9 @@ SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need
 
 <div class="hero-actions" markdown>
 
-[Start in 5 minutes](#start-in-5-minutes){ .md-button .md-button--primary }
+[Start in 5 minutes](#fast-start){ .md-button .md-button--primary }
 [Open quickstart](ready-to-use.md){ .md-button }
+[Release confidence story](release-confidence.md){ .md-button }
 [Adopt in your repo](adoption.md){ .md-button }
 [Adoption troubleshooting](adoption-troubleshooting.md){ .md-button }
 [See examples](examples.md){ .md-button }
@@ -25,7 +26,7 @@ SDETKit is a release confidence toolkit for SDET, QA, and DevOps teams that need
 
 </div>
 
-## Start in 5 minutes
+## Fast start
 
 Run the flagship workflow:
 
@@ -49,6 +50,14 @@ bash scripts/ready_to_use.sh release
 ### What proves value quickly
 
 You get deterministic pass/fail output and a clear go/no-go signal you can reuse in local and CI workflows.
+
+## Core path
+
+Use this sequence to keep rollout focused:
+
+1. **Quick confidence** via `bash scripts/ready_to_use.sh quick`
+2. **Strict release gate** via `bash scripts/ready_to_use.sh release`
+3. **External adoption** via [adoption.md](adoption.md)
 
 ## Flagship workflow (manual form)
 
@@ -75,3 +84,24 @@ python -m sdetkit gate release
 - [First contribution quickstart](first-contribution-quickstart.md)
 - [Contributing](contributing.md)
 - [Full command reference](cli.md)
+
+<div class="quick-jump" markdown>
+
+### Top journeys
+
+- Run first command in under 60 seconds
+- Validate docs links and anchors before publishing
+- Ship a first contribution with deterministic quality gates
+
+- [⚡ Fast start](#fast-start)
+- [🛠 CLI commands](cli.md)
+- [🩺 Doctor checks](doctor.md)
+- [🤝 Contribute](contributing.md)
+- [🧭 Repo tour](repo-tour.md)
+- [📦 Legacy reports](#legacy-reports)
+
+</div>
+
+## Legacy reports
+
+Historical day-by-day upgrade reports remain available for audit trails and prior initiative context.
