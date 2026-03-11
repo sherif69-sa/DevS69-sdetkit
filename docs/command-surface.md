@@ -6,15 +6,36 @@ SDETKit's flagship identity remains:
 
 This page is a discoverability map for the current CLI surface. It does not remove or rename commands, and it follows the stability policy in [stability-levels.md](stability-levels.md) plus boundaries from [productization-map.md](productization-map.md).
 
-## Start here (first-time adopters)
+## Command-family contract snapshot
 
-Use this order first:
+This compact table is sourced from `src/sdetkit/public_surface_contract.py` and covers major command families only.
 
-1. **[Stable/Core] Quick confidence**: `sdetkit gate fast`
-2. **[Stable/Core] Strict release gate**: `sdetkit gate release`
-3. **[Stable/Core] Readiness diagnostics**: `sdetkit doctor --all --json`
-4. **[Stable/Core] Security enforcement**: `sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0`
-5. **[Playbooks] Guided rollout discovery**: `sdetkit playbooks`
+<!-- BEGIN:PUBLIC_SURFACE_CONTRACT_TABLE -->
+
+| Command family | Purpose | Stability tier | First-time adopter default? | Transition-era / legacy-oriented? |
+|---|---|---|---|---|
+| `stable-core-release-confidence` | Primary release-confidence and shipping-readiness go/no-go path. | Stable/Core | Yes | No |
+| `stable-core-engineering-workflows` | Stable day-to-day engineering and repository utility workflows. | Stable/Core | Yes | No |
+| `integrations` | Environment-dependent connectors and delivery-system extensions. | Integrations | No | No |
+| `playbooks` | Guided adoption and rollout lanes for operational outcomes. | Playbooks | Yes | No |
+| `experimental-transition-lanes` | Transition-era and legacy-oriented lanes retained for compatibility. | Experimental | No | Yes |
+
+<!-- END:PUBLIC_SURFACE_CONTRACT_TABLE -->
+
+Maintainer sync:
+
+- Regenerate this table with `python tools/render_public_surface_contract_table.py`.
+- Use `python tools/render_public_surface_contract_table.py --check` in CI/pre-commit to keep docs and contract aligned.
+
+## Recommended starting points (first-time adopters)
+
+For release confidence and shipping readiness, start with the core path first:
+
+1. **Quick confidence gate (Stable/Core):** `sdetkit gate fast`
+2. **Strict release gate (Stable/Core):** `sdetkit gate release`
+3. **Readiness diagnostics (Stable/Core):** `sdetkit doctor --all --json`
+4. **Security enforcement (Stable/Core):** `sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0`
+5. **Guided rollout catalog (Playbooks):** `sdetkit playbooks`
 
 Wrapper equivalents:
 
