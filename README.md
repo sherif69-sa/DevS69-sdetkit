@@ -56,6 +56,7 @@ Ready-to-use guide: `docs/ready-to-use.md`
 If you want to use SDETKit in a different repository, use the adopter-focused guide:
 
 - `docs/adoption.md`
+- `docs/adoption-troubleshooting.md` for first-failure triage (what failed, what it means, what to do next).
 - Includes copy-paste local + CI integration patterns.
 - Shows a progressive path from lightweight `gate fast` to stricter release gating.
 

@@ -45,6 +45,14 @@ If you want a machine-readable artifact immediately:
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 ```
 
+## If a command fails on first adoption
+
+Before changing your pipeline, check the focused troubleshooting matrix:
+
+- [Adoption troubleshooting](adoption-troubleshooting.md)
+- Covers common `gate fast`, `security enforce`, and `gate release` failures.
+- Helps decide whether to fix quality debt now, tune a threshold temporarily, or stay on a lighter command.
+
 ## Add a lightweight CI gate (copy/paste)
 
 Use this minimal GitHub Actions workflow in your repository.
@@ -123,6 +131,7 @@ jobs:
 
 ## Related docs
 
+- [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Ready-to-use quickstart](ready-to-use.md)
 - [Release-confidence examples](examples.md)
 - [Production readiness command](production-readiness.md)
