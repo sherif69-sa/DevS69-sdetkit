@@ -2,6 +2,8 @@
 
 These examples are intentionally small and realistic.
 
+Need a quick self-selection shortcut first? Start with [Choose your path](choose-your-path.md).
+
 They use the existing Stable/Core command path for **release confidence / shipping readiness** and avoid unsupported integrations or "big bang" rollouts.
 
 ## 1) Solo maintainer with a small Python repository
@@ -110,3 +112,4 @@ python -m sdetkit gate release
 - [Adopt SDETKit in your repository](adoption.md)
 - [Example adoption flow](example-adoption-flow.md)
 - [Recommended CI flow](recommended-ci-flow.md)
+- [Choose your path](choose-your-path.md)

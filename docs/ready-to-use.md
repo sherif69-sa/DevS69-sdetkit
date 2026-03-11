@@ -2,6 +2,8 @@
 
 Use this guide when you want a practical start to release confidence without learning the entire repository first.
 
+If you need a 30-second rollout self-selection first, use [Choose your path](choose-your-path.md).
+
 ## Install SDETKit
 
 Choose the path that matches your context:
@@ -69,6 +71,7 @@ Use this when you need production-quality release evidence.
 5. Use [cli.md](cli.md) to discover core command families.
 6. Use [adoption.md](adoption.md) to roll the same path into CI.
 7. Pick a realistic rollout shape in [adoption-examples.md](adoption-examples.md).
+8. Use [choose-your-path.md](choose-your-path.md) when deciding rollout order across teams.
 
 ## Next actions after setup
 

@@ -2,6 +2,8 @@
 
 Use this page to make a fast, technical decision: **fit, first path, and stop point**.
 
+If you already know SDETKit is a fit and only need rollout selection, use [Choose your path](choose-your-path.md).
+
 SDETKit is a layered **release-confidence and engineering-operations toolkit**. It is strongest when you need deterministic checks, reusable evidence, and a repeatable operator workflow across local and CI usage.
 
 ## 1) Good-fit profile
