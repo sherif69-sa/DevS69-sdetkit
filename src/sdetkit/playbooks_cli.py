@@ -279,7 +279,7 @@ def _print_text(payload: dict[str, object]) -> None:
     else:
         print("  (none)")
     print("")
-    print("Incubator workflows:")
+    print("Experimental (transition-era) workflows:")
     if isinstance(legacy, list) and legacy:
         for n in legacy:
             print(f"  {n}")
@@ -419,14 +419,14 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(
         prog="sdetkit playbooks",
-        description="Discover, run, and validate recommended playbooks and incubator workflows.",
+        description="Discover, run, and validate playbooks across Playbooks and Experimental (transition-era) lanes.",
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     listp = sub.add_parser(
         "list",
-        help="List recommended playbooks, incubator workflows, and aliases.",
-        description="List recommended playbooks, incubator workflows, and aliases.",
+        help="List recommended playbooks, Experimental workflows, and aliases.",
+        description="List recommended playbooks, Experimental workflows, and aliases.",
     )
     listp.add_argument("--format", choices=["text", "json"], default="text")
     g = listp.add_mutually_exclusive_group()

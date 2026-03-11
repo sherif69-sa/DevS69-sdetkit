@@ -213,22 +213,22 @@ deterministic checks and audit-friendly evidence.
 Stability levels: Stable/Core, Integrations, Playbooks, Experimental.
 
 Start here:
-  1) Quick confidence: sdetkit gate fast
-  2) Strict release gate: sdetkit gate release
-  3) External adoption/rollout: sdetkit playbooks
+  1) [Stable/Core] Quick confidence: sdetkit gate fast
+  2) [Stable/Core] Strict release gate: sdetkit gate release
+  3) [Playbooks] Guided rollout: sdetkit playbooks
 """
 
     help_epilog = """\
 Command groups:
 
-  Core release confidence:
+  Stable/Core release confidence:
     gate                Quick confidence and strict release gate entry points.
     doctor              Deterministic health checks for repo/release readiness.
     security            Security policy checks and enforcement.
     evidence            Generate audit-friendly evidence artifacts.
     playbooks           Discover and run guided rollout/adoption flows.
 
-  Core engineering workflows:
+  Stable/Core engineering workflows:
     kv                  Parse key=value input to JSON.
     apiget              Deterministic API capture with cassette support.
     patch               Apply controlled text patches.
@@ -237,10 +237,10 @@ Command groups:
     maintenance         Repo maintenance automation.
     agent               Agent workflow helpers.
 
-  Integrations and extensions:
+  Integrations (environment-dependent extensions):
     ci, report, proof, docs-qa, docs-nav, policy, ops, notify, roadmap
 
-  Playbook highlights (supported, iterative):
+  Playbooks (guided adoption lanes):
     onboarding, weekly-review, demo, first-contribution, contributor-funnel,
     triage-templates, startup-use-case, enterprise-use-case,
     github-actions-quickstart, gitlab-ci-quickstart, quality-contribution-delta,
@@ -251,7 +251,7 @@ Command groups:
 Run: sdetkit playbooks
   to list additional playbook flows hidden from the main --help output.
 
-Note: many day/closeout lanes are still available as transition-era experimental flows.
+Experimental note: many day/closeout lanes remain available as transition-era flows.
 """
 
     p = argparse.ArgumentParser(

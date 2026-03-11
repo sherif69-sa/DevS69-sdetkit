@@ -101,6 +101,7 @@ Read the policy: [stability-levels.md](stability-levels.md)
 - [Contributing](contributing.md)
 - [Full command reference](cli.md)
 - [Capability map and command taxonomy](command-taxonomy.md)
+- [Command surface inventory (stability-aware)](command-surface.md)
 
 <div class="quick-jump" markdown>
 

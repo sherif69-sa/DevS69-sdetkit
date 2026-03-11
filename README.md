@@ -44,6 +44,7 @@ bash scripts/ready_to_use.sh release
 
 - Representative adopter walkthrough: `docs/example-adoption-flow.md`
 - Full command map: `docs/command-taxonomy.md`
+- Stability-aware command inventory: `docs/command-surface.md`
 - CLI command reference: `docs/cli.md`
 
 ## Who this is for

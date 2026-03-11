@@ -3,6 +3,7 @@
 ## Start with these core release-confidence commands
 
 Need a fast model of where commands belong before diving into the full list? See [Capability map and command taxonomy](command-taxonomy.md).
+For a stability-aware entrypoint and command inventory, see [command-surface.md](command-surface.md).
 
 Use this primary path first:
 

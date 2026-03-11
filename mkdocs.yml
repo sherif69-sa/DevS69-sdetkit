@@ -100,6 +100,7 @@ nav:
       - Automation templates engine: automation-templates-engine.md
       - CI Contract: ci-contract.md
       - CLI: cli.md
+      - Command surface inventory (stability-aware): command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
   - Stability levels (current policy): stability-levels.md
   - Live Views:
