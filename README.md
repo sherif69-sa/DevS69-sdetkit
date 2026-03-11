@@ -59,6 +59,28 @@ python -m pip install .[dev]
 python -m pip install .[test]
 ```
 
+```bash
+python -m pip install .[packaging]
+```
+
+### Build distributable artifacts
+
+```bash
+python -m pip install .[packaging]
+rm -rf dist build
+python -m build
+```
+
+### Validate package artifacts (local release gate)
+
+```bash
+make package-validate
+```
+
+This validates wheel/sdist build, metadata (`twine check`), wheel contents, and a smoke install of the built wheel (`sdetkit --help`).
+
+> Current posture: repository is prepared for artifact build and validation; public PyPI publication depends on release workflow credentials/secrets and is not claimed as generally available from this README.
+
 ## 2-minute quickstart
 
 ```bash
