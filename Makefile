@@ -1,6 +1,6 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: venv install test cov lint fmt type docs-serve docs-build
+.PHONY: venv install test cov lint fmt type docs-serve docs-build package-validate
 
 venv:
 	@test -x .venv/bin/python || python3 -m venv .venv
@@ -28,3 +28,7 @@ docs-serve: install
 
 docs-build: install
 	@bash -lc '. .venv/bin/activate && mkdocs build'
+
+
+package-validate: venv
+	@bash -lc 'set -euo pipefail; . .venv/bin/activate && python -m pip install -e .[packaging] && rm -rf dist build && python -m build && python -m twine check dist/* && python -m check_wheel_contents --ignore W009 dist/*.whl && python -m venv .venv-smoke && . .venv-smoke/bin/activate && python -m pip install --force-reinstall dist/*.whl && sdetkit --help'

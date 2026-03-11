@@ -20,12 +20,18 @@ Release tags must be `vX.Y.Z` and must match the package version. `CHANGELOG.md`
 2. Create a release tag `vX.Y.Z`.
 3. Run release validation locally:
    - `python -m sdetkit doctor --release --format md`
+   - `make package-validate`
+
+   Equivalent manual commands:
+   - `python -m pip install .[packaging]`
+   - `rm -rf dist build`
    - `python -m build`
    - `python -m twine check dist/*`
-   - `python -m pip install dist/*.whl`
+   - `python -m check_wheel_contents --ignore W009 dist/*.whl`
+   - `python -m pip install --force-reinstall dist/*.whl`
    - `sdetkit --help`
 4. Push the tag.
 5. Confirm GitHub Release workflow passed and artifacts are attached.
-6. Confirm publish job uploaded to PyPI.
+6. Confirm publish job uploaded to PyPI (only when `PYPI_API_TOKEN` is configured in repository secrets).
 7. Verify Dependency Audit workflow is green for the release commit/tag.
 8. (Optional) Generate and archive SBOM (`.github/workflows/sbom.yml`).

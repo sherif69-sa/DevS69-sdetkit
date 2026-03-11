@@ -68,8 +68,7 @@ jobs:
           COV_FAIL_UNDER: "95"
         run: |
           set -euo pipefail
-          python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
-          python -m pip install build==1.2.2.post1 twine==6.1.0
+          python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .[packaging]
           bash quality.sh cov
 
       - name: Build dist
@@ -78,6 +77,7 @@ jobs:
           set -euo pipefail
           python -m build
           python -m twine check dist/*
+          python -m check_wheel_contents --ignore W009 dist/*.whl
 
       - name: Wheel smoke test
         shell: bash
