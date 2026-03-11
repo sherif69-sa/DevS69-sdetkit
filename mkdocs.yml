@@ -101,6 +101,7 @@ nav:
       - CI Contract: ci-contract.md
       - CLI: cli.md
       - Capability map and command taxonomy: command-taxonomy.md
+  - Stability levels (current policy): stability-levels.md
   - Live Views:
       - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
       - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md

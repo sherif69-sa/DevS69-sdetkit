@@ -207,8 +207,10 @@ def _add_passthrough_subcommand(
 
 def _build_root_parser() -> tuple[argparse.ArgumentParser, object]:
     help_description = """\
-SDETKit helps teams prove release confidence with deterministic checks and
-audit-friendly evidence.
+SDETKit helps teams prove release confidence / shipping readiness with
+deterministic checks and audit-friendly evidence.
+
+Stability levels: Stable/Core, Integrations, Playbooks, Experimental.
 
 Start here:
   1) Quick confidence: sdetkit gate fast
@@ -235,10 +237,10 @@ Command groups:
     maintenance         Repo maintenance automation.
     agent               Agent workflow helpers.
 
-  Advanced and extensions:
+  Integrations and extensions:
     ci, report, proof, docs-qa, docs-nav, policy, ops, notify, roadmap
 
-  Playbook highlights:
+  Playbook highlights (supported, iterative):
     onboarding, weekly-review, demo, first-contribution, contributor-funnel,
     triage-templates, startup-use-case, enterprise-use-case,
     github-actions-quickstart, gitlab-ci-quickstart, quality-contribution-delta,
@@ -248,6 +250,8 @@ Command groups:
 
 Run: sdetkit playbooks
   to list additional playbook flows hidden from the main --help output.
+
+Note: many day/closeout lanes are still available as transition-era experimental flows.
 """
 
     p = argparse.ArgumentParser(

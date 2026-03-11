@@ -75,6 +75,17 @@ python -m sdetkit gate release
 - **DevOps / platform:** [Production readiness](production-readiness.md) and [Security gate](security-gate.md)
 - **Maintainers:** [Evidence](evidence.md) and [Releasing](releasing.md)
 
+## Stability levels
+
+SDETKit documents command and workflow maturity with four levels: **Stable/Core**, **Integrations**, **Playbooks**, and **Experimental**.
+
+- **Stable/Core** is the default production path for release confidence and shipping readiness.
+- **Integrations** extend core workflows into CI, notifications, and external systems.
+- **Playbooks** provide guided rollout lanes for adoption and operating practice.
+- **Experimental** includes transition-era/advanced day and closeout lanes; keep as opt-in with validation.
+
+Read the policy: [stability-levels.md](stability-levels.md)
+
 ## Next steps
 
 - [Decision guide: is SDETKit right for you?](decision-guide.md)
@@ -110,4 +121,4 @@ python -m sdetkit gate release
 
 ## Legacy reports
 
-Historical day-by-day upgrade reports remain available for audit trails and prior initiative context.
+Historical day-by-day upgrade reports remain available as transition-era context for audit trails and prior initiatives.

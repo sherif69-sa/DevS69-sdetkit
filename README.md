@@ -70,9 +70,21 @@ Comparison and proof details: `docs/why-not-just-tools.md`
 - External repository adoption: `docs/adoption.md`
 - Troubleshooting first failures: `docs/adoption-troubleshooting.md`
 - Scenario-based proof examples: `docs/examples.md`
+- Stability levels (current policy): `docs/stability-levels.md`
 - Product boundary audit and taxonomy plan: `docs/productization-map.md`
 
 Docs portal: <https://sherif69-sa.github.io/DevS69-sdetkit/>
+
+## Stability levels (current policy)
+
+SDETKit uses four user-facing stability levels: **Stable/Core**, **Integrations**, **Playbooks**, and **Experimental**.
+
+- Start production rollout with **Stable/Core** release-confidence flows.
+- Add **Integrations** after validating platform-specific behavior.
+- Use **Playbooks** for guided adoption and operational lanes.
+- Treat **Experimental** lanes (including day/closeout families) as opt-in transition-era or advanced flows.
+
+Policy doc: `docs/stability-levels.md`
 
 ## Core commands
 
