@@ -80,6 +80,7 @@ python -m sdetkit gate release
 - [Adopt in your repository](adoption.md)
 - [Adoption troubleshooting](adoption-troubleshooting.md)
 - [Release-confidence examples](examples.md)
+- [Why not just separate tools? (system value)](why-not-just-tools.md)
 - [Repo tour](repo-tour.md)
 - [First contribution quickstart](first-contribution-quickstart.md)
 - [Contributing](contributing.md)

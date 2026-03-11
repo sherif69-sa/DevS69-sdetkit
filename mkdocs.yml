@@ -149,6 +149,7 @@ nav:
       - Plugins, rule packs, and fix-audit: plugins-and-fix.md
       - PR automation for audit auto-fixes: pr-automation.md
   - Strategy:
+      - Why not just separate tools? (system value): why-not-just-tools.md
       - Product strategy (release confidence): product-strategy.md
       - Global production transformation playbook: global-production-transformation-playbook.md
       - Enterprise + regulated workflow: use-cases-enterprise-regulated.md
