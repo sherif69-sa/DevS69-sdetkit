@@ -243,6 +243,35 @@ def test_custom_example_and_tests_check(monkeypatch, tmp_path: Path) -> None:
     assert failed.summary == "pytest reported failures"
 
 
+def test_tests_check_retries_once_when_first_run_fails(monkeypatch, tmp_path: Path) -> None:
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="full",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    calls = {"count": 0}
+
+    def _run_cmd(_cmd, cwd):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            return SimpleNamespace(returncode=1, stdout="", stderr="flake")
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(tests_check, "run_cmd", _run_cmd)
+
+    result = tests_check.run(ctx)
+
+    assert result.ok is True
+    assert result.summary == "pytest passed after retry"
+    assert result.details["retries"] == 1
+    assert result.details["first_attempt"]["returncode"] == 1
+    assert calls["count"] == 2
+
+
 def test_render_markdown_escapes_table_breaking_content() -> None:
     report = {
         "ok": False,
