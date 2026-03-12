@@ -36,8 +36,6 @@ jobs:
             --verbose
             --no-progress
             --accept 200,429
-            --exclude-mail
-            --exclude-loopback
             --max-concurrency 12
             README.md docs/**/*.md
         env:
