@@ -35,6 +35,10 @@ CHECK_ORDER = [
     "ascii",
 ]
 
+SCHEMA_VERSION = "sdetkit.doctor.v2"
+EXIT_OK = 0
+EXIT_FAILED = 2
+
 SUPPORTED_POLICY_CHECKS = {
     "ascii",
     "stdlib_shadowing",
@@ -960,8 +964,9 @@ def main(argv: list[str] | None = None) -> int:
     if isinstance(getattr(ns, "apply_plan", None), str) and ns.apply_plan:
         if ns.apply_plan != plan.get("plan_id"):
             payload = {
+                "schema_version": SCHEMA_VERSION,
                 "ok": False,
-                "error": "plan_id_mismatch",
+                "error": {"code": "plan_id_mismatch", "message": "apply plan id does not match generated plan"},
                 "expected": plan.get("plan_id"),
                 "provided": ns.apply_plan,
                 "plan": plan,
@@ -971,7 +976,7 @@ def main(argv: list[str] | None = None) -> int:
                 Path(ns.out).write_text(rendered, encoding="utf-8")
             else:
                 sys.stdout.write(rendered)
-            return 2
+            return EXIT_FAILED
         plan_steps, plan_ok = _apply_plan(plan, root)
 
     if ns.all:
@@ -1016,6 +1021,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if data_treat_ok else 2
 
     data: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
         "python": _python_info(),
         "package": _package_info(),
         "checks": _baseline_checks(),
@@ -1408,7 +1414,7 @@ def main(argv: list[str] | None = None) -> int:
     if not gate_ok and not is_json:
         sys.stderr.write("doctor: problems found\n")
 
-    return 0 if gate_ok else 2
+    return EXIT_OK if gate_ok else EXIT_FAILED
 
 
 if __name__ == "__main__":

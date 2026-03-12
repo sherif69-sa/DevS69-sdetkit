@@ -1,66 +1,36 @@
 # Doctor
 
-`doctor` is a repo health command focused on practical, release-ready diagnostics.
+`doctor` is a deterministic readiness verifier for release confidence.
 
-Run it via:
+## Commands
 
-- `sdetkit doctor ...`
-- `python -m sdetkit doctor ...`
+- `sdetkit doctor --all --format json`
+- `sdetkit doctor --dev --ci --deps --clean-tree --repo --format md`
+- `sdetkit doctor --only pyproject --format json`
 
-Common usage:
+## Contract
 
-```bash
-sdetkit doctor --ascii
-sdetkit doctor --all
-sdetkit doctor --all --json
-```
+- JSON output includes `schema_version: sdetkit.doctor.v2`.
+- Stable check IDs and deterministic JSON ordering.
+- Explicit failure classification in JSON error payloads (for example: `plan_id_mismatch`).
+- Exit codes:
+  - `0`: all selected checks passed
+  - `2`: one or more selected checks failed, or contract mismatch in apply-plan flow
 
-## What it checks
+## Real-world depth
 
-- `--ascii`: scans `src/` and `tools/` for non-ASCII bytes.
-  - Skips `__pycache__/` and `.pyc` files.
-- `--ci`: verifies required workflow files exist and validates YAML with pre-commit `check-yaml`.
-- `--pre-commit`: validates pre-commit is installed and config is valid.
-- `--deps`: runs `pip check` to detect dependency issues.
-- `--clean-tree`: fails if `git status --porcelain` is not empty.
-- `--dev`: validates local dev setup including required tools and active virtual environment.
-- `--pyproject`: parses `pyproject.toml` early to catch TOML syntax issues before CI.
-- `--repo`: validates repo readiness (gate scripts exist, repo layout check script exists and passes, CI templates are present, and pre-commit includes ruff/ruff-format/mypy hooks).
+`doctor` checks production-relevant failure modes:
 
-Convenience flags:
+- toolchain availability and virtualenv posture
+- dependency graph consistency
+- repo cleanliness + release metadata
+- CI + governance file integrity
+- stdlib-shadowing and non-ASCII hygiene
 
-- `--all`: runs core checks in one command.
-- `--release`: release-oriented check pack (`--all` + pyproject validation).
+Each failing check includes actionable remediation (`fix`) and supporting evidence.
 
-## Dev UX highlights
+## Determinism
 
-For local delivery checks you can run:
-
-```bash
-sdetkit doctor --dev --ci --deps --clean-tree
-```
-
-This now warns clearly if no virtual environment is active and provides concrete remediation.
-
-## PR-ready output
-
-Use `--pr` to print a compact markdown report that can be pasted directly into a PR comment:
-
-```bash
-sdetkit doctor --dev --ci --deps --clean-tree --pr
-```
-
-Use `--json` when integrating with bots or custom automation.
-
-## Score and recommendations
-
-Every run computes a `score` (0–100) from enabled checks and generates actionable `recommendations`.
-
-- Human mode prints compact status + next steps.
-- PR mode prints concise markdown.
-- JSON mode includes `checks`, `score`, `recommendations`, and `ok`.
-
-## Output and exit codes
-
-- Exit code `0` means all enabled checks passed.
-- Non-zero means at least one enabled check failed.
+- Baseline snapshots are emitted with stable key ordering.
+- Check collections are explicitly ordered.
+- Snapshot diff output is normalized for reproducible CI gating.

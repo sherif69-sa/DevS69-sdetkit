@@ -28,7 +28,8 @@ def test_policy_check_fail_on_security_fails_on_security_regression(
     monkeypatch.chdir(tmp_path)
 
     base_payload = {
-        "version": 1,
+        "schema_version": "sdetkit.policy.v2",
+        "version": 2,
         "security": {"rule_counts": {}},
         "repo": {"summary": {}},
         "hygiene": {"non_ascii_files": [], "stdlib_shadowing": []},
@@ -40,7 +41,8 @@ def test_policy_check_fail_on_security_fails_on_security_regression(
         policy,
         "_snapshot",
         lambda _root: {
-            "version": 1,
+            "schema_version": "sdetkit.policy.v2",
+        "version": 2,
             "security": {"rule_counts": {"SECRET_GENERIC": 1}},
             "repo": {"summary": {}},
             "hygiene": {"non_ascii_files": [], "stdlib_shadowing": []},
@@ -65,7 +67,8 @@ def test_policy_diff_text_and_missing_baseline(tmp_path: Path, monkeypatch, caps
         policy,
         "_snapshot",
         lambda _root: {
-            "version": 1,
+            "schema_version": "sdetkit.policy.v2",
+        "version": 2,
             "security": {"rule_counts": {"SECRET_GENERIC": 2}},
             "repo": {"summary": {}},
             "hygiene": {"non_ascii_files": [], "stdlib_shadowing": []},
