@@ -5,11 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class CommandFamilyContract:
-    """Repo-specific contract for major public command families.
-
-    This contract is intentionally small and only covers top-level families.
-    It is used for discoverability surfaces (CLI/docs) during productization.
-    """
+    """Repo-specific contract for major public command families."""
 
     name: str
     role: str
@@ -21,12 +17,20 @@ class CommandFamilyContract:
 
 PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
-        name="stable-core-release-confidence",
-        role="Primary release-confidence and shipping-readiness go/no-go path.",
+        name="umbrella-kits",
+        role="Primary product surface for release confidence, test intelligence, integration assurance, and failure forensics.",
         stability_tier="Stable/Core",
         first_time_recommended=True,
         transition_legacy_oriented=False,
-        top_level_commands=("gate", "doctor", "security", "evidence", "playbooks"),
+        top_level_commands=("kits", "release", "intelligence", "integration", "forensics"),
+    ),
+    CommandFamilyContract(
+        name="compatibility-aliases",
+        role="Backward-compatible direct lanes preserved for existing automation and muscle memory.",
+        stability_tier="Stable/Compatibility",
+        first_time_recommended=False,
+        transition_legacy_oriented=False,
+        top_level_commands=("gate", "doctor", "security", "repo", "evidence", "report", "policy"),
     ),
     CommandFamilyContract(
         name="supporting-utilities-and-automation",
@@ -39,50 +43,22 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
             "dev",
             "maintenance",
             "ci",
-            "policy",
-            "report",
             "kv",
             "apiget",
             "cassette-get",
             "patch",
+            "ops",
+            "notify",
+            "agent",
         ),
-    ),
-    CommandFamilyContract(
-        name="integrations",
-        role="Environment-dependent connectors and delivery-system extensions.",
-        stability_tier="Integrations",
-        first_time_recommended=False,
-        transition_legacy_oriented=False,
-        top_level_commands=("ops", "notify", "agent", "docs-qa", "docs-nav", "roadmap"),
     ),
     CommandFamilyContract(
         name="playbooks",
         role="Guided adoption and rollout lanes for operational outcomes.",
         stability_tier="Playbooks",
-        first_time_recommended=True,
+        first_time_recommended=False,
         transition_legacy_oriented=False,
-        top_level_commands=(
-            "onboarding",
-            "weekly-review",
-            "first-contribution",
-            "contributor-funnel",
-            "triage-templates",
-            "startup-use-case",
-            "enterprise-use-case",
-            "demo",
-            "proof",
-            "quality-contribution-delta",
-            "reliability-evidence-pack",
-            "release-readiness-board",
-            "release-narrative",
-            "trust-signal-upgrade",
-            "faq-objections",
-            "community-activation",
-            "external-contribution-push",
-            "kpi-audit",
-            "github-actions-quickstart",
-            "gitlab-ci-quickstart",
-        ),
+        top_level_commands=("playbooks", "onboarding", "weekly-review", "first-contribution", "demo"),
     ),
     CommandFamilyContract(
         name="experimental-transition-lanes",
@@ -108,6 +84,6 @@ def render_root_help_groups() -> str:
         lines.append(f"    {family.role}")
         lines.append(f"    {', '.join(family.top_level_commands)}")
         lines.append("")
-    lines.append("Run: sdetkit playbooks")
-    lines.append("  to list additional playbook flows hidden from the main --help output.")
+    lines.append("Run: sdetkit kits list")
+    lines.append("  to discover umbrella kits first, then use compatibility aliases as needed.")
     return "\n".join(lines)

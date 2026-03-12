@@ -1,18 +1,22 @@
 # Umbrella architecture: SDETKit kits
 
-SDETKit now exposes four explicit kits under one umbrella CLI:
+SDETKit exposes one unified umbrella with four kits:
 
-- **Release Confidence Kit** (`sdetkit release ...`): gate, doctor, security, evidence, repo readiness.
-- **Test Intelligence Kit** (`sdetkit intelligence ...`): flake classification, deterministic env capture, impact summaries, mutation governance checks.
-- **Integration Assurance Kit** (`sdetkit integration ...`): profile-driven environment checks and compatibility summaries.
-- **Failure Forensics Kit** (`sdetkit forensics ...`): run-to-run compare and deterministic repro bundle generation.
+- **Release Confidence Kit** (`sdetkit release ...`)
+- **Test Intelligence Kit** (`sdetkit intelligence ...`)
+- **Integration Assurance Kit** (`sdetkit integration ...`)
+- **Failure Forensics Kit** (`sdetkit forensics ...`)
 
-## Product boundaries
+## Public-surface policy
 
-- **Stable/Core**: release, intelligence, integration, and existing direct commands (`gate`, `doctor`, `repo`, `security`, `evidence`).
-- **Experimental**: forensics bundle/compare lane is real and deterministic, but staged for expansion.
-- **Backward compatibility**: existing stable commands remain first-class; kit commands are additive grouping aliases.
+- Umbrella kits are the primary discovery and documentation surface.
+- Legacy direct commands remain stable compatibility aliases.
+- Supporting utilities are intentionally secondary in help/docs.
 
-## Deterministic artifact contracts
+## Contracts and determinism
 
-Every new kit command emits machine-readable JSON with `schema_version` and deterministic ordering.
+Kit commands emit deterministic machine-readable outputs with explicit `schema_version`, stable ordering, and exit code contracts.
+
+## Compatibility and migration
+
+Use `docs/migration-compatibility-note.md` for migration guidance and the current experimental summary.

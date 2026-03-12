@@ -1,45 +1,43 @@
 # DevS69 SDETKit
 
-DevS69 SDETKit is an operator-grade **release confidence + test intelligence platform**.
-It turns go/no-go decisions into deterministic, machine-readable contracts with actionable next steps.
+DevS69 SDETKit is a unified SDET platform for:
 
-## Flagship kits
+1. **release confidence**
+2. **test intelligence**
+3. **integration assurance**
+4. **failure forensics**
 
-- **Release Decision Kit** (`sdetkit release ...`)
-  - Gate, doctor, security, evidence, and repo governance for release decisions.
-- **Test Intelligence Kit** (`sdetkit intelligence ...`)
-  - Flake classification, impacted-tests mapping, deterministic env capture, failure fingerprinting, and mutation governance.
-- **Integration Assurance Kit** (`sdetkit integration ...`)
-  - Environment readiness profiles, integration matrix outputs, and cassette contract validation for replay safety.
-- **Failure Forensics Kit** (`sdetkit forensics ...`)
-  - Run-to-run regression analysis, stable fingerprints, deterministic repro bundles, and evidence-pack diffs.
+It turns CI and test signals into deterministic contracts, machine-readable artifacts, and clear go/no-go guidance.
+
+## Umbrella kits (primary surface)
+
+- **Release Confidence Kit** — `sdetkit release ...`
+- **Test Intelligence Kit** — `sdetkit intelligence ...`
+- **Integration Assurance Kit** — `sdetkit integration ...`
+- **Failure Forensics Kit** — `sdetkit forensics ...`
+- **Catalog** — `sdetkit kits list` / `sdetkit kits describe <kit>`
+
+## Hero commands
 
 ```bash
-python -m sdetkit kits list --format json
-```
-
-## Hero journeys
-
-```bash
+python -m sdetkit kits list
 python -m sdetkit release gate release
-python -m sdetkit intelligence flake classify --history examples/kits/intelligence/flake-history.json
 python -m sdetkit intelligence failure-fingerprint --failures examples/kits/intelligence/failures.json
 python -m sdetkit integration check --profile examples/kits/integration/profile.json
 python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
+python -m sdetkit forensics bundle --run examples/kits/forensics/run-b.json --output build/repro.zip
 ```
 
-## Product boundary
+## Sample artifacts
 
-Utilities remain for compatibility (`kv`, `apiget`, `cassette-get`, docs helpers), but they are **supporting surfaces** and no longer define the primary product path.
+- `examples/kits/intelligence/*`
+- `examples/kits/integration/profile.json`
+- `examples/kits/forensics/run-a.json`
+- `examples/kits/forensics/run-b.json`
 
 ## Backward compatibility
 
-Existing commands and aliases remain supported (`gate`, `doctor`, `security`, `repo`, `evidence`, `report`, etc.).
-Kit commands are additive product grouping aliases.
+Existing direct commands remain supported (`gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`, etc.).
+They are preserved compatibility lanes; umbrella kits are the primary discovery and product entrypoint.
 
-## Kit docs
-
-- `docs/kits/release-confidence.md`
-- `docs/kits/test-intelligence.md`
-- `docs/kits/integration-assurance.md`
-- `docs/kits/failure-forensics.md`
+See `docs/migration-compatibility-note.md` for migration and experimental-status notes.

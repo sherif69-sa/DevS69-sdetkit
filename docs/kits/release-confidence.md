@@ -1,4 +1,4 @@
-# Release Decision Kit
+# Release Confidence Kit
 
 ## Purpose
 Provide an opinionated go/no-go decision lane backed by deterministic evidence.

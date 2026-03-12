@@ -215,15 +215,16 @@ def _add_passthrough_subcommand(
 
 def _build_root_parser() -> tuple[argparse.ArgumentParser, object]:
     help_description = """\
-DevS69 SDETKit is an operator-grade platform for release decisions,
-deterministic evidence, test intelligence, integration assurance, and failure forensics.
+DevS69 SDETKit is an operator-grade SDET platform with four umbrella kits:
+release confidence, test intelligence, integration assurance, and failure forensics.
 
-Stability levels: Stable/Core, Integrations, Playbooks, Experimental.
+Stability levels: Stable/Core, Stable/Compatibility, Stable/Supporting, Playbooks, Experimental.
 
 Start here:
-  1) [Stable/Core] Quick confidence: sdetkit gate fast
-  2) [Stable/Core] Strict release gate: sdetkit gate release
-  3) [Playbooks] Guided rollout: sdetkit playbooks
+  1) [Stable/Core] Discover kits: sdetkit kits list
+  2) [Stable/Core] Release lane: sdetkit release gate fast
+  3) [Stable/Core] Test lane: sdetkit intelligence flake classify --history <history.json>
+  4) [Stable/Compatibility] Existing direct commands (gate/doctor/security/...) still work
 """
 
     help_epilog = render_root_help_groups()
@@ -248,25 +249,25 @@ Start here:
         "playbooks",
         help="Discover and run adoption/rollout playbooks",
     )
-    _add_passthrough_subcommand(sub, "kits", help_text="List umbrella SDET kits")
+    _add_passthrough_subcommand(sub, "kits", help_text="[Stable/Core] Umbrella kit catalog and kit details")
 
     _add_passthrough_subcommand(
-        sub, "release", help_text="Release Confidence Kit (gate/doctor/security/evidence)"
+        sub, "release", help_text="[Stable/Core] Release Confidence Kit (primary surface)"
     )
-    _add_passthrough_subcommand(sub, "intelligence", help_text="Test Intelligence Kit")
-    _add_passthrough_subcommand(sub, "integration", help_text="Integration Assurance Kit")
-    _add_passthrough_subcommand(sub, "forensics", help_text="Failure Forensics Kit")
+    _add_passthrough_subcommand(sub, "intelligence", help_text="[Stable/Core] Test Intelligence Kit (primary surface)")
+    _add_passthrough_subcommand(sub, "integration", help_text="[Stable/Core] Integration Assurance Kit (primary surface)")
+    _add_passthrough_subcommand(sub, "forensics", help_text="[Stable/Core] Failure Forensics Kit (experimental sublanes possible)")
     _add_passthrough_subcommand(sub, "kv", help_text="Utility: parse key=value input into JSON (supporting surface)")
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
 
     _add_passthrough_subcommand(
-        sub, "doctor", help_text="Deterministic repo and release-readiness checks"
+        sub, "doctor", help_text="[Stable/Compatibility] Deterministic repo and release-readiness checks"
     )
 
     _add_passthrough_subcommand(
-        sub, "gate", help_text="Quick confidence and strict release gate checks"
+        sub, "gate", help_text="[Stable/Compatibility] Quick confidence and strict release gate checks"
     )
 
     _add_passthrough_subcommand(sub, "ci", help_text="CI template and pipeline validation")
@@ -277,7 +278,7 @@ Start here:
         sub, "cassette-get", help_text="Utility: record/replay HTTP captures for deterministic checks"
     )
 
-    _add_passthrough_subcommand(sub, "repo", help_text="Repository automation tasks")
+    _add_passthrough_subcommand(sub, "repo", help_text="[Stable/Compatibility] Repository automation tasks")
 
     _add_passthrough_subcommand(sub, "dev", help_text="Shortcut to `repo dev` workflows")
 
@@ -290,7 +291,7 @@ Start here:
     agt = sub.add_parser("agent", help="Agent-centric automation workflows")
     agt.add_argument("args", nargs=argparse.REMAINDER)
 
-    sec = sub.add_parser("security", help="Security policy checks and enforcement")
+    sec = sub.add_parser("security", help="[Stable/Compatibility] Security policy checks and enforcement")
     sec.add_argument("args", nargs=argparse.REMAINDER)
 
     osp = sub.add_parser("ops", help="Operational control-plane workflows")
@@ -302,7 +303,7 @@ Start here:
     plc = sub.add_parser("policy", help="Policy evaluation and helper commands")
     plc.add_argument("args", nargs=argparse.REMAINDER)
 
-    evd = sub.add_parser("evidence", help="Generate audit-friendly release evidence")
+    evd = sub.add_parser("evidence", help="[Stable/Compatibility] Generate audit-friendly release evidence")
     evd.add_argument("args", nargs=argparse.REMAINDER)
 
     onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
