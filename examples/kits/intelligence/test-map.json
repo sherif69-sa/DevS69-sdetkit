@@ -1,0 +1,4 @@
+{
+  "src/app/auth.py": ["tests/test_auth.py::test_login", "tests/test_auth.py::test_mfa"],
+  "src/app/retry.py": ["tests/test_api.py::test_retry"]
+}

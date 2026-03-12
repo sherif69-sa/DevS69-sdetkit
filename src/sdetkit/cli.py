@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from collections.abc import Sequence
 from importlib import metadata
 
@@ -86,8 +87,12 @@ from . import (
     external_contribution_push,
     faq_objections,
     first_contribution,
+    forensics,
     github_actions_quickstart,
     gitlab_ci_quickstart,
+    integration,
+    intelligence,
+    kits,
     kpi_audit,
     kvcli,
     notify,
@@ -112,6 +117,7 @@ from . import (
     trust_signal_upgrade,
     weekly_review,
 )
+from . import gate as gate_cmd
 from .agent.cli import main as agent_main
 from .maintenance import main as maintenance_main
 from .public_surface_contract import render_root_help_groups
@@ -242,6 +248,14 @@ Start here:
         "playbooks",
         help="Discover and run adoption/rollout playbooks",
     )
+    _add_passthrough_subcommand(sub, "kits", help_text="List umbrella SDET kits")
+
+    _add_passthrough_subcommand(
+        sub, "release", help_text="Release Confidence Kit (gate/doctor/security/evidence)"
+    )
+    _add_passthrough_subcommand(sub, "intelligence", help_text="Test Intelligence Kit")
+    _add_passthrough_subcommand(sub, "integration", help_text="Integration Assurance Kit")
+    _add_passthrough_subcommand(sub, "forensics", help_text="Failure Forensics Kit")
     _add_passthrough_subcommand(sub, "kv", help_text="Parse key=value input into JSON")
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
@@ -1165,6 +1179,37 @@ def main(argv: Sequence[str] | None = None) -> int:
         _print_playbooks(sub)
 
         return 0
+
+    if ns.cmd == "kits":
+        return kits.main(ns.args)
+
+    if ns.cmd == "release":
+        if not ns.args:
+            sys.stderr.write("release error: expected subcommand (gate|doctor|security|evidence|repo)\n")
+            return 2
+        subcmd = ns.args[0]
+        rest = ns.args[1:]
+        if subcmd == "gate":
+            return gate_cmd.main(rest)
+        if subcmd == "doctor":
+            return doctor.main(rest)
+        if subcmd == "security":
+            return security_main(rest)
+        if subcmd == "evidence":
+            return evidence.main(rest)
+        if subcmd == "repo":
+            return repo.main(rest)
+        sys.stderr.write("release error: supported subcommands are gate|doctor|security|evidence|repo\n")
+        return 2
+
+    if ns.cmd == "intelligence":
+        return intelligence.main(ns.args)
+
+    if ns.cmd == "integration":
+        return integration.main(ns.args)
+
+    if ns.cmd == "forensics":
+        return forensics.main(ns.args)
 
     if ns.cmd == "kv":
         return kvcli.main(ns.args)
