@@ -66,6 +66,7 @@ SKIP_DIRS: frozenset[str] = frozenset(
 SKIP_FILES: frozenset[str] = frozenset({".coverage"})
 
 INVENTORY_STRICT_MAX_FILES_DEFAULT = 5000
+INVENTORY_STRICT_MAX_FILES_ENV = "SDETKIT_INVENTORY_STRICT_MAX_FILES"
 
 BIDI_HIDDEN_CODEPOINTS: frozenset[str] = frozenset(
     {
@@ -327,6 +328,19 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _resolve_inventory_strict_max_files(cli_value: int | None = None) -> int:
+    if cli_value is not None:
+        return max(0, int(cli_value))
+
+    strict_limit_raw = os.environ.get(INVENTORY_STRICT_MAX_FILES_ENV, "").strip()
+    if strict_limit_raw:
+        try:
+            return max(0, int(strict_limit_raw))
+        except ValueError:
+            return INVENTORY_STRICT_MAX_FILES_DEFAULT
+    return INVENTORY_STRICT_MAX_FILES_DEFAULT
+
+
 @dataclass(frozen=True)
 class FileInfo:
     path: str
@@ -379,8 +393,9 @@ def _inventory_for_root(repo_root: Path) -> list[FileInfo]:
 
 
 class _FileInventoryCache:
-    def __init__(self, root: Path) -> None:
+    def __init__(self, root: Path, *, strict_max_files: int | None = None) -> None:
         self.root = root
+        self.strict_max_files = strict_max_files
         self._stats: dict[str, int] = {"hits": 0, "misses": 0, "writes": 0, "invalidations": 0}
 
     def stats(self) -> dict[str, int]:
@@ -448,14 +463,7 @@ class _FileInventoryCache:
             if expected_ctime != -1 and int(getattr(st, "st_ctime_ns", 0)) != expected_ctime:
                 return False
 
-        strict_limit_raw = os.environ.get("SDETKIT_INVENTORY_STRICT_MAX_FILES", "").strip()
-        strict_limit = INVENTORY_STRICT_MAX_FILES_DEFAULT
-        if strict_limit_raw:
-            try:
-                strict_limit = max(0, int(strict_limit_raw))
-            except ValueError:
-                strict_limit = INVENTORY_STRICT_MAX_FILES_DEFAULT
-
+        strict_limit = _resolve_inventory_strict_max_files(self.strict_max_files)
         if len(files) > strict_limit:
             return True
 
@@ -1518,6 +1526,7 @@ def _plan_repo_fix_audit(
     cache_stats: bool,
     jobs: int,
     cache_strategy: str,
+    inventory_strict_max_files: int | None,
 ) -> tuple[list[Fix], list[str], dict[str, Any]]:
     payload = run_repo_audit(
         root,
@@ -1533,6 +1542,7 @@ def _plan_repo_fix_audit(
         cache_stats=cache_stats,
         jobs=jobs,
         cache_strategy=cache_strategy,
+        inventory_strict_max_files=inventory_strict_max_files,
     )
     baseline_path = safe_path(root, policy.baseline_path, allow_absolute=allow_absolute_path)
     baseline_doc = _load_repo_baseline(baseline_path)
@@ -1645,6 +1655,7 @@ def _run_repo_fix_audit(
     cache_stats: bool,
     jobs: int,
     cache_strategy: str,
+    inventory_strict_max_files: int | None,
 ) -> int:
     fixes, conflicts, _ = _plan_repo_fix_audit(
         root,
@@ -1663,6 +1674,7 @@ def _run_repo_fix_audit(
         cache_stats=cache_stats,
         jobs=jobs,
         cache_strategy=cache_strategy,
+        inventory_strict_max_files=inventory_strict_max_files,
     )
     if conflicts:
         for rel in conflicts:
@@ -2237,6 +2249,7 @@ def run_repo_audit(
     cache_stats: bool = False,
     jobs: int = 1,
     cache_strategy: str = "tree",
+    inventory_strict_max_files: int | None = None,
 ) -> dict[str, Any]:
     catalog = load_rule_catalog()
     selected_packs = packs or normalize_packs(profile, None)
@@ -2260,7 +2273,9 @@ def run_repo_audit(
 
     cache_enabled = not no_cache
     cache_root = root / cache_dir
-    inventory = _FileInventoryCache(cache_root)
+    inventory = _FileInventoryCache(
+        cache_root, strict_max_files=inventory_strict_max_files
+    )
     changed_tree = (
         _changed_tree(changed_files) if changed_only and incremental_used else changed_files
     )
@@ -3403,6 +3418,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--cache-stats", action="store_true")
     ap.add_argument("--cache-strategy", choices=["tree", "deps"], default="tree")
+    ap.add_argument("--inventory-strict-max-files", type=int, default=None)
     ap.add_argument("--jobs", type=int, default=1)
     ap.add_argument("--ide", choices=["vscode", "generic"], default=None)
     ap.add_argument("--ide-output", default=None)
@@ -3482,6 +3498,7 @@ def main(argv: list[str] | None = None) -> int:
     fxap.add_argument("--no-cache", action="store_true")
     fxap.add_argument("--cache-stats", action="store_true")
     fxap.add_argument("--cache-strategy", choices=["tree", "deps"], default="tree")
+    fxap.add_argument("--inventory-strict-max-files", type=int, default=None)
     fxap.add_argument("--jobs", type=int, default=1)
 
     prp = sub.add_parser("pr-fix")
@@ -3511,6 +3528,7 @@ def main(argv: list[str] | None = None) -> int:
     prp.add_argument("--no-cache", action="store_true")
     prp.add_argument("--cache-stats", action="store_true")
     prp.add_argument("--cache-strategy", choices=["tree", "deps"], default="tree")
+    prp.add_argument("--inventory-strict-max-files", type=int, default=None)
     prp.add_argument("--jobs", type=int, default=1)
 
     prp.add_argument("--branch", default="sdetkit/fix-audit")
@@ -3960,6 +3978,7 @@ def main(argv: list[str] | None = None) -> int:
                     cache_stats=bool(ns.cache_stats),
                     jobs=int(ns.jobs),
                     cache_strategy=str(ns.cache_strategy),
+                    inventory_strict_max_files=ns.inventory_strict_max_files,
                 )
                 original_findings = [
                     x for x in project_payload.get("findings", []) if isinstance(x, dict)
@@ -4107,6 +4126,7 @@ def main(argv: list[str] | None = None) -> int:
             cache_stats=bool(ns.cache_stats),
             jobs=int(ns.jobs),
             cache_strategy=str(ns.cache_strategy),
+            inventory_strict_max_files=ns.inventory_strict_max_files,
         )
         original_findings = [x for x in audit_payload.get("findings", []) if isinstance(x, dict)]
         try:
@@ -4328,6 +4348,7 @@ def main(argv: list[str] | None = None) -> int:
                     cache_stats=bool(ns.cache_stats),
                     jobs=int(ns.jobs),
                     cache_strategy=str(ns.cache_strategy),
+                    inventory_strict_max_files=ns.inventory_strict_max_files,
                 )
                 exit_code = max(exit_code, rc)
             return exit_code
@@ -4376,6 +4397,7 @@ def main(argv: list[str] | None = None) -> int:
             cache_stats=bool(ns.cache_stats),
             jobs=int(ns.jobs),
             cache_strategy=str(ns.cache_strategy),
+            inventory_strict_max_files=ns.inventory_strict_max_files,
         )
 
     if ns.repo_cmd == "pr-fix":
@@ -4444,6 +4466,7 @@ def main(argv: list[str] | None = None) -> int:
                     cache_stats=bool(ns.cache_stats),
                     jobs=int(ns.jobs),
                     cache_strategy=str(ns.cache_strategy),
+                    inventory_strict_max_files=ns.inventory_strict_max_files,
                 )
                 if conflicts:
                     for rel in conflicts:
@@ -4510,6 +4533,7 @@ def main(argv: list[str] | None = None) -> int:
                 cache_stats=bool(ns.cache_stats),
                 jobs=int(ns.jobs),
                 cache_strategy=str(ns.cache_strategy),
+                inventory_strict_max_files=ns.inventory_strict_max_files,
             )
             if conflicts:
                 for rel in conflicts:

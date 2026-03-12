@@ -159,8 +159,6 @@ def test_file_inventory_cache_remove_file_invalidates_and_updates(tmp_path: Path
     assert st3.get("invalidations", 0) >= st2.get("invalidations", 0) + 1
 
 
-
-
 def test_file_inventory_cache_skips_expensive_strict_scan_for_large_repos(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from sdetkit import repo as repo_mod
 
@@ -227,6 +225,19 @@ def test_file_inventory_cache_add_file_detected_when_dir_mtime_is_unchanged(tmp_
     updated = c.get_inventory(repo)
     assert "pkg/new.py" in _inv_paths(updated)
 
+
+def test_inventory_strict_max_files_resolution_prefers_cli_over_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    from sdetkit import repo as repo_mod
+
+    monkeypatch.setenv(repo_mod.INVENTORY_STRICT_MAX_FILES_ENV, "123")
+    assert repo_mod._resolve_inventory_strict_max_files(7) == 7
+    assert repo_mod._resolve_inventory_strict_max_files(None) == 123
+
+    monkeypatch.setenv(repo_mod.INVENTORY_STRICT_MAX_FILES_ENV, "bad")
+    assert (
+        repo_mod._resolve_inventory_strict_max_files(None)
+        == repo_mod.INVENTORY_STRICT_MAX_FILES_DEFAULT
+    )
 
 def test_repo_helpers_and_fileinfo_type_guards(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch

@@ -449,12 +449,12 @@ Tool-specific notes:
 
 ## `repo`
 
-- `sdetkit repo audit [PATH] [--profile default|enterprise] [--pack PACKS] [--org-pack PACK ...] [--format text|json|sarif] [--json-schema legacy|v1] [--output PATH] [--emit-run-record PATH] [--diff-against RUN.json] [--step-summary] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--all-projects] [--fail-strategy overall|per-project] [--sort] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--jobs N] [--force]`
+- `sdetkit repo audit [PATH] [--profile default|enterprise] [--pack PACKS] [--org-pack PACK ...] [--format text|json|sarif] [--json-schema legacy|v1] [--output PATH] [--emit-run-record PATH] [--diff-against RUN.json] [--step-summary] [--config PATH] [--baseline PATH] [--update-baseline] [--exclude GLOB ...] [--disable-rule RULE_ID ...] [--fail-on none|warn|error] [--all-projects] [--fail-strategy overall|per-project] [--sort] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--cache-strategy tree|deps] [--inventory-strict-max-files N] [--jobs N] [--force]`
 - `sdetkit repo audit ... [--ide vscode|generic] [--ide-output PATH] [--include-suppressed]`
 - `sdetkit repo baseline create [PATH] [--output BASELINE.json] [--profile default|enterprise] [--exclude GLOB ...]`
 - `sdetkit repo rules list [--profile default|enterprise] [--pack PACKS] [--org-pack PACK ...] [--json]`
-- `sdetkit repo fix-audit [PATH] [--profile ...] [--pack PACKS] [--org-pack PACK ...] [--project NAME|--all-projects] [--dry-run|--apply] [--diff] [--patch OUT.patch] [--sort] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--jobs N] [--force]`
-- `sdetkit repo pr-fix [PATH] [--profile ...] [--pack PACKS] [--project NAME|--all-projects] [--dry-run|--apply] [--branch BRANCH] [--force-branch] [--commit|--no-commit] [--base-ref REF] [--open-pr] [--repo OWNER/NAME] [--token-env GITHUB_TOKEN] [--title TITLE] [--body BODY|--body-file PATH] [--draft] [--labels a,b,c] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--jobs N]`
+- `sdetkit repo fix-audit [PATH] [--profile ...] [--pack PACKS] [--org-pack PACK ...] [--project NAME|--all-projects] [--dry-run|--apply] [--diff] [--patch OUT.patch] [--sort] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--cache-strategy tree|deps] [--inventory-strict-max-files N] [--jobs N] [--force]`
+- `sdetkit repo pr-fix [PATH] [--profile ...] [--pack PACKS] [--project NAME|--all-projects] [--dry-run|--apply] [--branch BRANCH] [--force-branch] [--commit|--no-commit] [--base-ref REF] [--open-pr] [--repo OWNER/NAME] [--token-env GITHUB_TOKEN] [--title TITLE] [--body BODY|--body-file PATH] [--draft] [--labels a,b,c] [--changed-only] [--since-ref REF] [--include-untracked|--no-include-untracked] [--include-staged|--no-include-staged] [--require-git] [--cache-dir PATH] [--no-cache] [--cache-stats] [--cache-strategy tree|deps] [--inventory-strict-max-files N] [--jobs N]`
 - `sdetkit repo baseline check [PATH] [--baseline BASELINE.json] [--fail-on none|warn|error] [--update] [--diff]`
 - `sdetkit repo policy lint [PATH] [--config PATH] [--format text|json] [--fail-on none|warn|error]`
 - `sdetkit repo policy export [PATH] [--config PATH] [--output FILE.json] [--include-expired]`
@@ -463,10 +463,16 @@ Tool-specific notes:
 - `sdetkit repo fix [PATH] [--check|--dry-run] [--diff] [--eol lf|crlf]`
 - `sdetkit repo init [PATH] [--profile default|enterprise] [--dry-run] [--apply] [--force] [--diff]`
 - Security-first defaults: safe paths, deterministic sorted outputs, and atomic writes.
+- `--inventory-strict-max-files` controls when expensive full-tree reconciliation runs during cache validation; default is `5000` files.
+- For automation, you can still set the environment variable `SDETKIT_INVENTORY_STRICT_MAX_FILES` (CLI flag takes precedence).
 
 Audit examples:
 
 - `sdetkit repo audit`
+- `sdetkit repo audit /path/to/random-repo --cache-strategy deps --inventory-strict-max-files 3000`
+- `sdetkit repo audit /path/to/random-repo --changed-only --since-ref origin/main`
+- `sdetkit repo fix-audit /path/to/random-repo --dry-run --inventory-strict-max-files 3000`
+- `sdetkit repo fix-audit /path/to/random-repo --apply --changed-only --since-ref origin/main`
 - `sdetkit repo audit --format json --out repo-audit.json --force`
 - `sdetkit repo ops --format json --output ops-report.json --force`
 - `sdetkit repo baseline create .`
