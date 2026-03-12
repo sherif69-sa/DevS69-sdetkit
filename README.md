@@ -5,6 +5,7 @@
 ![Security](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml/badge.svg?branch=main)
 ![Repo Audit](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/repo-audit.yml/badge.svg?branch=main)
 ![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg?branch=main)
+![Docs Link Check](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/docs-link-check.yml/badge.svg?branch=main)
 
 SDETKit gives engineering teams **deterministic release-confidence checks and evidence** so shipping decisions are fast, consistent, and audit-ready.
 

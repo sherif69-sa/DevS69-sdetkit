@@ -1,0 +1,44 @@
+name: Docs Link Check
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "docs/**"
+      - ".github/workflows/docs-link-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "docs/**"
+      - ".github/workflows/docs-link-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-link-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-link-check:
+    name: Validate Markdown links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run lychee link checker
+        uses: lycheeverse/lychee-action@d7664bf2a74d804a20dda8dc0af5ed1e41235ec6 # v2.6.1
+        with:
+          fail: true
+          args: >-
+            --verbose
+            --no-progress
+            --accept 200,429
+            --exclude-mail
+            --exclude-loopback
+            --max-concurrency 12
+            README.md docs/**/*.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
