@@ -50,7 +50,7 @@ jobs:
 
       - name: Upload repo audit artifact
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: repo-audit-report
           path: report.json
@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload CI gate diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: ci-gate-diagnostics
           path: |
@@ -117,7 +117,7 @@ jobs:
           python -m sdetkit demo --format json > build/ci-demo.json
 
       - name: Upload demo artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: ci-demo-json
           path: build/ci-demo.json
@@ -148,7 +148,7 @@ jobs:
         run: python -m check_wheel_contents --ignore W009 dist/*.whl
 
       - name: Upload dist artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: dist
           path: dist/*
@@ -163,7 +163,7 @@ jobs:
           python-version: "3.12"
 
       - name: Download dist artifacts
-        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3  # v8.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: dist
           path: dist
