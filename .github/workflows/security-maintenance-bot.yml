@@ -24,12 +24,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install gitleaks CLI
+        run: |
+          set -euo pipefail
+          version="8.24.2"
+          arch="linux_x64"
+          url="https://github.com/gitleaks/gitleaks/releases/download/v${version}/gitleaks_${version}_${arch}.tar.gz"
+          curl -fsSL "$url" -o /tmp/gitleaks.tar.gz
+          mkdir -p /tmp/gitleaks-bin
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp/gitleaks-bin gitleaks
+          chmod +x /tmp/gitleaks-bin/gitleaks
+          /tmp/gitleaks-bin/gitleaks version
+
       - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7  # v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_ENABLE_COMMENTS: "false"
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+        run: |
+          set -euo pipefail
+          /tmp/gitleaks-bin/gitleaks detect \
+            --source . \
+            --report-format sarif \
+            --report-path results.sarif \
+            --redact \
+            --exit-code 1
 
       - name: Check SARIF presence
         if: always()
