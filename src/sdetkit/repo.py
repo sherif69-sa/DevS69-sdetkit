@@ -2273,9 +2273,7 @@ def run_repo_audit(
 
     cache_enabled = not no_cache
     cache_root = root / cache_dir
-    inventory = _FileInventoryCache(
-        cache_root, strict_max_files=inventory_strict_max_files
-    )
+    inventory = _FileInventoryCache(cache_root, strict_max_files=inventory_strict_max_files)
     changed_tree = (
         _changed_tree(changed_files) if changed_only and incremental_used else changed_files
     )
