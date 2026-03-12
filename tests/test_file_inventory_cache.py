@@ -159,6 +159,56 @@ def test_file_inventory_cache_remove_file_invalidates_and_updates(tmp_path: Path
     assert st3.get("invalidations", 0) >= st2.get("invalidations", 0) + 1
 
 
+
+
+def test_file_inventory_cache_skips_expensive_strict_scan_for_large_repos(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from sdetkit import repo as repo_mod
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _write(repo / "pkg" / "a.py", "print('a')\n")
+
+    cache = repo_mod._FileInventoryCache(tmp_path / "cache")
+    inv = cache.get_inventory(repo)
+
+    monkeypatch.setenv("SDETKIT_INVENTORY_STRICT_MAX_FILES", "0")
+
+    called = {"count": 0}
+
+    def _explode(_root: Path) -> list[Path]:
+        called["count"] += 1
+        raise AssertionError("_iter_files should not be called when strict scan is disabled")
+
+    monkeypatch.setattr(repo_mod, "_iter_files", _explode)
+
+    assert cache._validate_files(repo, inv) is True
+    assert called["count"] == 0
+
+
+def test_file_inventory_cache_invalid_strict_scan_env_falls_back_to_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    from sdetkit import repo as repo_mod
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _write(repo / "pkg" / "a.py", "print('a')\n")
+
+    cache = repo_mod._FileInventoryCache(tmp_path / "cache")
+    inv = cache.get_inventory(repo)
+
+    monkeypatch.setenv("SDETKIT_INVENTORY_STRICT_MAX_FILES", "not-an-int")
+
+    called = {"count": 0}
+    original = repo_mod._iter_files
+
+    def _tracked(root: Path) -> list[Path]:
+        called["count"] += 1
+        return original(root)
+
+    monkeypatch.setattr(repo_mod, "_iter_files", _tracked)
+
+    assert cache._validate_files(repo, inv) is True
+    assert called["count"] >= 1
+
 def test_file_inventory_cache_add_file_detected_when_dir_mtime_is_unchanged(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()

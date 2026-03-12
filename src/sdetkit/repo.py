@@ -65,6 +65,8 @@ SKIP_DIRS: frozenset[str] = frozenset(
 
 SKIP_FILES: frozenset[str] = frozenset({".coverage"})
 
+INVENTORY_STRICT_MAX_FILES_DEFAULT = 5000
+
 BIDI_HIDDEN_CODEPOINTS: frozenset[str] = frozenset(
     {
         "\u200b",  # zero width space
@@ -445,6 +447,17 @@ class _FileInventoryCache:
             expected_ctime = int(getattr(f, "ctime_ns", -1))
             if expected_ctime != -1 and int(getattr(st, "st_ctime_ns", 0)) != expected_ctime:
                 return False
+
+        strict_limit_raw = os.environ.get("SDETKIT_INVENTORY_STRICT_MAX_FILES", "").strip()
+        strict_limit = INVENTORY_STRICT_MAX_FILES_DEFAULT
+        if strict_limit_raw:
+            try:
+                strict_limit = max(0, int(strict_limit_raw))
+            except ValueError:
+                strict_limit = INVENTORY_STRICT_MAX_FILES_DEFAULT
+
+        if len(files) > strict_limit:
+            return True
 
         current_paths = {fp.relative_to(repo_root).as_posix() for fp in _iter_files(repo_root)}
         if current_paths != expected_paths:
