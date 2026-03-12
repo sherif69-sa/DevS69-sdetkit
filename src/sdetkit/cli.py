@@ -107,6 +107,7 @@ from . import (
     report,
     roadmap,
     startup_use_case,
+    sdet_package,
     triage_templates,
     trust_signal_upgrade,
     weekly_review,
@@ -648,6 +649,9 @@ Start here:
     suc = sub.add_parser("startup-use-case")
     suc.add_argument("args", nargs=argparse.REMAINDER)
 
+    spk = sub.add_parser("sdet-package")
+    spk.add_argument("args", nargs=argparse.REMAINDER)
+
     euc = sub.add_parser("enterprise-use-case")
     euc.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -1063,6 +1067,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "startup-use-case":
         return startup_use_case.main(list(argv[1:]))
 
+    if argv and argv[0] == "sdet-package":
+        return sdet_package.main(list(argv[1:]))
+
     if argv and argv[0] == "enterprise-use-case":
         return enterprise_use_case.main(list(argv[1:]))
 
@@ -1406,6 +1413,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "startup-use-case":
         return startup_use_case.main(ns.args)
+
+    if ns.cmd == "sdet-package":
+        return sdet_package.main(ns.args)
 
     if ns.cmd == "enterprise-use-case":
         return enterprise_use_case.main(ns.args)
