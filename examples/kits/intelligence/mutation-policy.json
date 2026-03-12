@@ -1,0 +1,6 @@
+{
+  "minimum_score": 70,
+  "observed_score": 78,
+  "owners": ["qa-lead"],
+  "justification": "Core branch protected by mutation score budget"
+}

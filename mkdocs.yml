@@ -90,6 +90,12 @@ nav:
       - Release confidence (core commands): release-confidence.md
       - Doctor checks: doctor.md
       - Decision guide (is SDETKit a fit?): decision-guide.md
+  - Kits (umbrella):
+      - Umbrella architecture note: architecture/umbrella-kits.md
+      - Release Confidence Kit: kits/release-confidence.md
+      - Test Intelligence Kit: kits/test-intelligence.md
+      - Integration Assurance Kit: kits/integration-assurance.md
+      - Failure Forensics Kit: kits/failure-forensics.md
   - Team adoption:
       - Adopt in your repository (canonical): adoption.md
       - Team rollout scenario: team-rollout-scenario.md

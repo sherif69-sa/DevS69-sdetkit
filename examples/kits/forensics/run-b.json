@@ -1,0 +1,36 @@
+{
+  "schema_version": "sdetkit.audit.run.v1",
+  "profile": "default",
+  "packs": ["core"],
+  "fail_on": "none",
+  "findings": [
+    {
+      "fingerprint": "fp-auth",
+      "rule_id": "AUTH-001",
+      "severity": "error",
+      "message": "weak token",
+      "path": "src/auth.py",
+      "line": 9,
+      "tags": [],
+      "pack": "core",
+      "fixable": false,
+      "suppressed": false,
+      "suppression_reason": null
+    },
+    {
+      "fingerprint": "fp-cache",
+      "rule_id": "CACHE-002",
+      "severity": "warn",
+      "message": "cache fallback",
+      "path": "src/cache.py",
+      "line": 4,
+      "tags": [],
+      "pack": "core",
+      "fixable": true,
+      "suppressed": false,
+      "suppression_reason": null
+    }
+  ],
+  "aggregates": {"counts_by_severity": {"error": 1, "info": 0, "warn": 1}, "counts_suppressed": 0, "counts_fixable": 1},
+  "execution": {"incremental_used": false, "changed_file_count": 0}
+}

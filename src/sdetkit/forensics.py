@@ -1,0 +1,104 @@
+from __future__ import annotations
+
+import argparse
+import hashlib
+import io
+import json
+import sys
+import zipfile
+from pathlib import Path
+from typing import Any
+
+from .atomicio import canonical_json_bytes, canonical_json_dumps
+from .report import diff_runs, load_run_record
+from .security import SecurityError, safe_path
+
+
+def _compare(from_path: Path, to_path: Path) -> dict[str, Any]:
+    from_run = load_run_record(from_path)
+    to_run = load_run_record(to_path)
+    payload = diff_runs(from_run, to_run)
+    payload["schema_version"] = "sdetkit.forensics.compare.v1"
+    return payload
+
+
+def _bundle(run_path: Path, output_path: Path, include: list[str]) -> dict[str, Any]:
+    run = load_run_record(run_path)
+    manifest = {
+        "schema_version": "sdetkit.forensics.bundle-manifest.v1",
+        "run_sha256": hashlib.sha256(canonical_json_bytes(run)).hexdigest(),
+        "included_files": sorted(include),
+    }
+
+    with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        info = zipfile.ZipInfo("manifest.json")
+        info.date_time = (1980, 1, 1, 0, 0, 0)
+        info.compress_type = zipfile.ZIP_DEFLATED
+        zf.writestr(info, canonical_json_dumps(manifest))
+
+        run_info = zipfile.ZipInfo("run.json")
+        run_info.date_time = (1980, 1, 1, 0, 0, 0)
+        run_info.compress_type = zipfile.ZIP_DEFLATED
+        zf.writestr(run_info, canonical_json_dumps(run))
+
+        for file_name in sorted(include):
+            path = Path(file_name)
+            if not path.exists() or not path.is_file():
+                continue
+            data = path.read_bytes()
+            extra = zipfile.ZipInfo(f"extras/{path.name}")
+            extra.date_time = (1980, 1, 1, 0, 0, 0)
+            extra.compress_type = zipfile.ZIP_DEFLATED
+            zf.writestr(extra, data)
+
+    return {
+        "schema_version": "sdetkit.forensics.bundle.v1",
+        "bundle": str(output_path),
+        "manifest": manifest,
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="sdetkit forensics", description="Failure Forensics Kit")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    compare = sub.add_parser("compare", help="Compare two run records")
+    compare.add_argument("--from", dest="from_run", required=True)
+    compare.add_argument("--to", dest="to_run", required=True)
+    compare.add_argument("--fail-on", choices=["none", "warn", "error"], default="none")
+
+    bundle = sub.add_parser("bundle", help="Create deterministic repro/evidence bundle")
+    bundle.add_argument("--run", required=True)
+    bundle.add_argument("--output", required=True)
+    bundle.add_argument("--include", nargs="*", default=[])
+
+    ns = parser.parse_args(argv)
+    try:
+        if ns.cmd == "compare":
+            payload = _compare(
+                safe_path(Path.cwd(), ns.from_run, allow_absolute=True),
+                safe_path(Path.cwd(), ns.to_run, allow_absolute=True),
+            )
+            sys.stdout.write(canonical_json_dumps(payload))
+            new_error = [x for x in payload.get("new", []) if x.get("severity") == "error"]
+            new_warn = [x for x in payload.get("new", []) if x.get("severity") in {"warn", "error"}]
+            if ns.fail_on == "error" and new_error:
+                return 1
+            if ns.fail_on == "warn" and new_warn:
+                return 1
+            return 0
+
+        payload = _bundle(
+            safe_path(Path.cwd(), ns.run, allow_absolute=True),
+            safe_path(Path.cwd(), ns.output, allow_absolute=True),
+            list(ns.include),
+        )
+        sys.stdout.write(canonical_json_dumps(payload))
+        return 0
+    except (ValueError, OSError, SecurityError, json.JSONDecodeError) as exc:
+        sys.stderr.write(f"forensics error: {exc}\n")
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

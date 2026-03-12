@@ -1,0 +1,8 @@
+{
+  "name": "local-smoke",
+  "required_env": ["CI"],
+  "required_files": ["pyproject.toml"],
+  "services": [
+    {"name": "dummy-http", "port": 9, "expect": "closed"}
+  ]
+}
