@@ -70,6 +70,21 @@ def test_parse_kv_line_default_keeps_comment_tokens_and_fails():
         parse_kv_line("a=1 # trailing")
 
 
+def test_parse_kv_line_duplicate_policy_first_keeps_first_value():
+    out = parse_kv_line("a=1 a=2 b=3", duplicate_policy="first")
+    assert out == {"a": "1", "b": "3"}
+
+
+def test_parse_kv_line_duplicate_policy_error_raises():
+    with pytest.raises(ValueError, match="duplicate key: a"):
+        parse_kv_line("a=1 a=2", duplicate_policy="error")
+
+
+def test_parse_kv_line_duplicate_policy_bad_value_raises():
+    with pytest.raises(ValueError, match="bad duplicate policy"):
+        parse_kv_line("a=1", duplicate_policy="unknown")
+
+
 _key = st.text(
     alphabet=st.sampled_from(list(string.ascii_letters + string.digits + "_-")),
     min_size=1,

@@ -178,9 +178,33 @@ def test_build_comment_aware_parser_enables_comments_for_modern_parser():
     assert parser("a=1 # trailing") == {"a": "1"}
 
 
+def test_build_comment_aware_parser_passes_duplicate_policy_for_modern_parser():
+    import sdetkit.kvcli as kvcli
+
+    parser = kvcli._build_comment_aware_parser(
+        kvcli.parse_kv_line,
+        duplicate_policy="first",
+    )
+    assert parser("a=1 a=2") == {"a": "1"}
+
+
 def test_kvcli_runner_supports_timeout(tmp_path):
     p = run_kvcli("--text", "a=1", timeout=0.2)
     assert p.returncode == 0
+
+
+def test_kvcli_duplicates_first_keeps_first_value():
+    p = run_kvcli("--duplicates", "first", "--text", "a=1 a=2")
+    assert p.returncode == 0
+    assert p.stderr == ""
+    assert json.loads(p.stdout) == {"a": "1"}
+
+
+def test_kvcli_duplicates_error_fails_on_duplicate_key():
+    p = run_kvcli("--duplicates", "error", "--text", "a=1 a=2")
+    assert p.returncode == 2
+    assert p.stdout == ""
+    assert "invalid input" in p.stderr.lower()
 
 
 def test_kvcli_main_text_ok(capsys):

@@ -25,9 +25,29 @@ def _supports_allow_comments(parser: Callable[..., dict[str, str]]) -> bool:
     return False
 
 
+def _supports_duplicate_policy(parser: Callable[..., dict[str, str]]) -> bool:
+    try:
+        sig = inspect.signature(parser)
+    except (TypeError, ValueError):
+        return False
+
+    for param in sig.parameters.values():
+        if param.name == "duplicate_policy":
+            return True
+    return False
+
+
 def _build_comment_aware_parser(
     parser: Callable[..., dict[str, str]],
+    *,
+    duplicate_policy: str = "last",
 ) -> Callable[[str], dict[str, str]]:
+    if _supports_allow_comments(parser) and _supports_duplicate_policy(parser):
+        return lambda line: parser(
+            line,
+            allow_comments=True,
+            duplicate_policy=duplicate_policy,
+        )
     if _supports_allow_comments(parser):
         return lambda line: parser(line, allow_comments=True)
     return parser
@@ -38,6 +58,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--text", default=None)
     p.add_argument("--path", default=None)
     p.add_argument("--strict", action="store_true")
+    p.add_argument(
+        "--duplicates",
+        choices=("last", "first", "error"),
+        default="last",
+        help="duplicate key behavior: last wins, first wins, or error",
+    )
 
     ns = p.parse_args(argv)
 
@@ -54,7 +80,10 @@ def main(argv: list[str] | None = None) -> int:
     else:
         raw = sys.stdin.read()
 
-    parse_line = _build_comment_aware_parser(parse_kv_line)
+    parse_line = _build_comment_aware_parser(
+        parse_kv_line,
+        duplicate_policy=ns.duplicates,
+    )
 
     data: dict[str, str] = {}
     invalid_lines = 0
