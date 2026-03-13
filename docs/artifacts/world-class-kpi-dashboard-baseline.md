@@ -17,8 +17,8 @@ Machine-readable baseline: `docs/artifacts/world-class-kpi-dashboard-baseline.js
 
 | KPI | Definition | Target | Source command / artifact |
 | --- | --- | --- | --- |
-| Mainline unit+integration pass rate | Passed test jobs / total test jobs on default branch over rolling 30 days | `>= 99%` | CI run history and test summaries |
-| Change failure rate | Releases requiring rollback or hotfix / total releases in rolling 30 days | `< 5%` | Release board + changelog incidents |
+| Mainline unit+integration pass rate | Passed test jobs / total test jobs on default branch over rolling 30 cycles | `>= 99%` | CI run history and test summaries |
+| Change failure rate | Releases requiring rollback or hotfix / total releases in rolling 30 cycles | `< 5%` | Release board + changelog incidents |
 | MTTR for release regression | Time from regression detection to verified recovery | `< 60 minutes` | Incident timeline artifacts |
 | First successful local run | Time from clone to first successful `make test` for new contributor cohort | `< 30 minutes` | Onboarding diary samples |
 | PR cycle time | Median time from PR open to merge | `< 24 hours` | SCM analytics export |
@@ -34,7 +34,7 @@ Machine-readable baseline: `docs/artifacts/world-class-kpi-dashboard-baseline.js
 1. Collect weekly snapshots every Monday before quality review.
 2. Publish a markdown summary in `docs/artifacts/` for auditability.
 3. Store and update baseline metadata in `docs/artifacts/world-class-kpi-dashboard-baseline.json`.
-4. Keep raw exports (JSON/CSV) attached to CI artifacts for 90 days.
+4. Keep raw exports (JSON/CSV) attached to CI artifacts for 90 cycles.
 5. Escalate any KPI that breaches target for 2 consecutive snapshots.
 
 ## Dashboard rollout checklist

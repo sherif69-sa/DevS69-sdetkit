@@ -61,7 +61,7 @@ Day 34 closes the second demo-asset production lane, translating repository-audi
 ## Why Day 34 matters
 
 - Demonstrates a concrete trust workflow using `repo audit` signals.
-- Extends the media pipeline so release stories remain continuous across days.
+- Extends the media pipeline so release stories remain continuous across cycles.
 - Forces remediation-oriented framing so viewers can act immediately after watching.
 
 ## Required inputs (Day 33)

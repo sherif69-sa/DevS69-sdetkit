@@ -12,7 +12,7 @@ Build SDETKit into a real-time, worldwide resource that is:
 
 ## 90-day action plan
 
-## Phase 1 (Days 1-30): Normalize and productize existing materials
+## Phase 1 (Cycles 1-30): Normalize and productize existing materials
 
 ### 1) Inventory all daily artifacts by production value
 
@@ -44,7 +44,7 @@ Deliverable:
 
 - Contract checks for key closeout/production commands and docs references.
 
-## Phase 2 (Days 31-60): Scale trust and usability globally
+## Phase 2 (Cycles 31-60): Scale trust and usability globally
 
 ### 4) Build “no-learning” user experience layers
 
@@ -76,7 +76,7 @@ Deliverable:
 
 - Policy-as-code baseline and release narrative templates.
 
-## Phase 3 (Days 61-90): Turn adoption into repeatable operations
+## Phase 3 (Cycles 61-90): Turn adoption into repeatable operations
 
 ### 7) Productize usage telemetry (privacy-safe)
 

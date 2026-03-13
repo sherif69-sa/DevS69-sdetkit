@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
 _REQUIRED_SECTIONS = [
     "## Why Day 30 matters",
-    "## Required inputs (Days 27-29)",
+    "## Required inputs (Cycles 27-29)",
     "## Day 30 command lane",
     "## Scoring model",
     "## Locked Phase-2 backlog",
@@ -35,11 +35,11 @@ Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 e
 
 ## Why Day 30 matters
 
-- Consolidates readiness results from Days 27-29 into a single handoff packet.
+- Consolidates readiness results from Cycles 27-29 into a single handoff packet.
 - Prevents ambiguous next steps by publishing a deterministic Phase-2 backlog contract.
 - Produces an auditable launch artifact for maintainers and collaborators.
 
-## Required inputs (Days 27-29)
+## Required inputs (Cycles 27-29)
 
 - `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
 - `docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json`
@@ -60,7 +60,7 @@ Day 30 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability and strategy alignment (README/docs index/top-10): 25 points.
-- Input artifact availability (Days 27-29): 25 points.
+- Input artifact availability (Cycles 27-29): 25 points.
 - Locked Phase-2 backlog quality: 20 points.
 
 ## Locked Phase-2 backlog
@@ -217,7 +217,7 @@ def build_day30_phase1_wrap_summary(
     handoff_actions: list[str] = []
 
     if day27_ok and day28_ok and day29_ok:
-        wins.append(f"Days 27-29 closeout artifacts loaded successfully (avg={closeout_avg}).")
+        wins.append(f"Cycles 27-29 closeout artifacts loaded successfully (avg={closeout_avg}).")
     else:
         misses.append("One or more Day 27-29 artifacts are missing or malformed.")
         handoff_actions.append(
@@ -229,7 +229,7 @@ def build_day30_phase1_wrap_summary(
     else:
         misses.append("Phase-2 backlog checklist is incomplete (<8 items).")
         handoff_actions.append(
-            "Expand Phase-2 backlog checklist to include at least Days 31-38 action lines."
+            "Expand Phase-2 backlog checklist to include at least Cycles 31-38 action lines."
         )
 
     if score >= 90 and not critical_failures:

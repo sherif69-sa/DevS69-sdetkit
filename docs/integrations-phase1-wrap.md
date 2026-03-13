@@ -4,11 +4,11 @@ Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 e
 
 ## Why Day 30 matters
 
-- Consolidates readiness results from Days 27-29 into a single handoff packet.
+- Consolidates readiness results from Cycles 27-29 into a single handoff packet.
 - Prevents ambiguous next steps by publishing a deterministic Phase-2 backlog contract.
 - Produces an auditable launch artifact for maintainers and collaborators.
 
-## Required inputs (Days 27-29)
+## Required inputs (Cycles 27-29)
 
 - `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
 - `docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json`
@@ -29,7 +29,7 @@ Day 30 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability and strategy alignment (README/docs index/top-10): 25 points.
-- Input artifact availability (Days 27-29): 25 points.
+- Input artifact availability (Cycles 27-29): 25 points.
 - Locked Phase-2 backlog quality: 20 points.
 
 ## Locked Phase-2 backlog

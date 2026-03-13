@@ -2,7 +2,7 @@
 
 ## Day 21 big upgrade
 
-Day 21 ships **weekly review #3** so teams can objectively track conversion improvements and external contributor response across Days 15-20.
+Day 21 ships **weekly review #3** so teams can objectively track conversion improvements and external contributor response across Cycles 15-20.
 
 ## What shipped
 

@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _SECTION_HEADER = "# Weekly review #4 (Day 28)"
 _REQUIRED_SECTIONS = [
     "## Who should run Day 28",
-    "## Inputs from Days 25-27",
+    "## Inputs from Cycles 25-27",
     "## Closeout checklist",
     "## Scoring model",
     "## Evidence mode",
@@ -39,7 +39,7 @@ Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wi
 - DevRel/community operators validating that activation efforts converted to contributions.
 - Engineering managers requiring an auditable weekly checkpoint before handoff.
 
-## Inputs from Days 25-27
+## Inputs from Cycles 25-27
 
 - Day 25: `docs/artifacts/day25-community-pack/day25-community-summary.json`
 - Day 26: `docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json`
@@ -61,7 +61,7 @@ Day 28 weighted score (0-100):
 - Docs contract + command lane completeness: 40 points.
 - Discoverability links in README/docs index: 20 points.
 - Roadmap alignment and closeout language quality: 15 points.
-- Input artifact availability from Days 25-27: 25 points.
+- Input artifact availability from Cycles 25-27: 25 points.
 
 ## Evidence mode
 

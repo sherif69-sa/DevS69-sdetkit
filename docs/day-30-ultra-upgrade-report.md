@@ -20,5 +20,5 @@ python scripts/check_day30_phase1_wrap_contract.py
 
 - Day 30 score >= 90 with no critical failures.
 - README + docs index + strategy pages all advertise Day 30 wrap lane.
-- Days 27-29 summary artifacts are available and parsed.
+- Cycles 27-29 summary artifacts are available and parsed.
 - Phase-2 backlog list is locked with >=8 actionable checkpoints.

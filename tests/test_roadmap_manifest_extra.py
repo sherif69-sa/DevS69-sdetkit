@@ -32,7 +32,7 @@ def test_build_manifest_merges_reports_and_plans(tmp_path: Path) -> None:
 
     manifest = rm.build_manifest(repo_root=tmp_path)
     assert manifest == {
-        "days": [
+        "phases": [
             {
                 "day": 3,
                 "report_path": "docs/roadmap/reports/day-3-alpha-report.md",
@@ -85,7 +85,7 @@ def test_render_write_check_and_main_commands(tmp_path: Path, monkeypatch, capsy
 
     rendered = rm.render_manifest_json(repo_root=tmp_path)
     parsed = json.loads(rendered)
-    assert parsed["days"][0]["report_title"] == "R\u00e9port"
+    assert parsed["phases"][0]["report_title"] == "R\u00e9port"
     assert rendered.endswith("\n")
 
     out_path = rm.write_manifest(repo_root=tmp_path)

@@ -9,7 +9,7 @@ from typing import Any
 def _default_plan() -> list[dict[str, Any]]:
     return [
         {
-            "phase": "Phase 1 (Days 1-30)",
+            "phase": "Phase 1 (Cycles 1-30)",
             "theme": "Production foundation",
             "goals": [
                 "Stabilize CI quality gates with deterministic pass/fail criteria.",
@@ -23,12 +23,12 @@ def _default_plan() -> list[dict[str, Any]]:
             ],
             "kpis": {
                 "ci_success_rate": ">= 95%",
-                "critical_vulnerability_sla": "0 open > 7 days",
+                "critical_vulnerability_sla": "0 open > 7 cycles",
                 "mean_pr_review_time": "< 24h",
             },
         },
         {
-            "phase": "Phase 2 (Days 31-60)",
+            "phase": "Phase 2 (Cycles 31-60)",
             "theme": "Scale + reliability",
             "goals": [
                 "Harden integration and end-to-end testing with flaky-test tracking.",
@@ -47,7 +47,7 @@ def _default_plan() -> list[dict[str, Any]]:
             },
         },
         {
-            "phase": "Phase 3 (Days 61-90)",
+            "phase": "Phase 3 (Cycles 61-90)",
             "theme": "Governance + growth",
             "goals": [
                 "Institutionalize engineering governance and architecture decision records.",
@@ -62,7 +62,7 @@ def _default_plan() -> list[dict[str, Any]]:
             "kpis": {
                 "change_failure_rate": "< 10%",
                 "release_frequency": ">= weekly",
-                "onboarding_time": "< 7 days to first meaningful contribution",
+                "onboarding_time": "< 7 cycles to first meaningful contribution",
             },
         },
     ]
@@ -90,7 +90,7 @@ def _as_markdown(payload: dict[str, Any]) -> str:
         "",
         f"- **Repository:** {payload['repository']}",
         f"- **Start date:** {payload['start_date']}",
-        f"- **Duration:** {payload['duration_days']} days",
+        f"- **Duration:** {payload['duration_days']} cycles",
         "",
         "## Program quality gates",
         "",

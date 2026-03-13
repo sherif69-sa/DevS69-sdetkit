@@ -50,7 +50,7 @@ Checks include:
 
 - missing `owner` / `justification` (errors)
 - expired exceptions (warning)
-- exceptions too far in future (warning, default threshold 365 days via `lint_expiry_max_days`)
+- exceptions too far in future (warning, default threshold 365 cycles via `lint_expiry_max_days`)
 - duplicate allowlist scope tuples
 - unknown rule IDs in `disable_rules` and `severity_overrides`
 - unknown selected org packs

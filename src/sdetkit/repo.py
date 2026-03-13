@@ -2839,7 +2839,7 @@ def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[in
                         "message": f"allowlist[{idx}] expired on {item.expires}",
                     }
                 )
-            if (expires - today).days > policy.lint_expiry_max_days:
+            if (expires - today).total_seconds() > policy.lint_expiry_max_days * 86400:
                 warnings.append(
                     {
                         "code": "long_expiry",

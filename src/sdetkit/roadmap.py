@@ -42,7 +42,7 @@ def load_manifest() -> list[RoadmapEntry]:
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     out: list[RoadmapEntry] = []
 
-    for row in data.get("days", []):
+    for row in data.get("phases", []):
         day = int(row.get("day"))
         report_file = row.get("report_file")
         plan_file = row.get("plan_file")

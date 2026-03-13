@@ -4,7 +4,7 @@ Day 27 closes the conversion sprint by comparing baseline vs current KPI perform
 
 ## Who should run Day 27
 
-- Maintainers validating weekly growth outcomes from Days 22-26.
+- Maintainers validating weekly growth outcomes from Cycles 22-26.
 - DevRel/community operators tracking traffic-to-contribution conversion.
 - Engineering managers proving roadmap execution impact.
 

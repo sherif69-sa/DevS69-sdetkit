@@ -70,7 +70,7 @@ For each day `N` (Day 1…Day 90), execution must produce:
 
 ### Weekly quality gate
 
-Every 7 days, publish a weekly gate report with:
+Every 7 cycles, publish a weekly gate report with:
 
 - total diff shipped,
 - production outcomes unlocked,
@@ -90,7 +90,7 @@ Use this run protocol when you say "start day X":
 4. Publish daily report + open follow-up risks.
 5. Only then mark day complete and move to day X+1.
 
-### Phase 1 (Days 1-30): Positioning + conversion (daily execution)
+### Phase 1 (Cycles 1-30): Positioning + conversion (daily execution)
 
 This phase now runs as a **day-by-day operating plan**. When we say "work Day 1," we execute that day’s checklist in full and publish the artifacts before moving on.
 
@@ -100,7 +100,7 @@ This phase now runs as a **day-by-day operating plan**. When we say "work Day 1,
 - Every day must ship a production-grade capability upgrade, not messaging-only updates.
 - Minimum daily change target stays **+2000 to +5000 diff**, including code, tests, docs, and automation updates.
 - At least one of the day’s outputs must be directly runnable by users in real workflows.
-- Days that fail this gate are reopened and replaced with larger scoped upgrades before moving forward.
+- Cycles that fail this gate are reopened and replaced with larger scoped upgrades before moving forward.
 
 #### Day 1–30 sprint plan
 
@@ -151,7 +151,7 @@ This phase now runs as a **day-by-day operating plan**. When we say "work Day 1,
 - At least one external contributor PR by Day 30.
 - Measurable increase in stars/week and discussions/week by end of phase.
 
-### Phase 2 (Days 31-60): Adoption loops (daily execution)
+### Phase 2 (Cycles 31-60): Adoption loops (daily execution)
 
 Phase 2 converts early traction into repeatable growth loops. Each day ships one concrete asset that increases discoverability, trust, or reuse.
 
@@ -194,7 +194,7 @@ Phase 2 converts early traction into repeatable growth loops. Each day ships one
 - **Day 51 — Case snippet #1:** publish mini-case on reliability or quality gate value.
 - **Day 52 — Case snippet #2:** publish mini-case on security/ops workflow value.
 - **Day 53 — Docs loop optimization:** add stronger cross-links between demos, playbooks, and CLI docs.
-- **Day 54 — Re-engagement campaign:** promote best-performing assets from Days 33–53.
+- **Day 54 — Re-engagement campaign:** promote best-performing assets from Cycles 33–53.
 - **Day 55 — Contributor activation #2:** highlight advanced issues for repeat contributors.
 - **Day 56 — Stabilization closeout:** enforce deterministic follow-through, KPI recovery, and risk rollback proof.
 
@@ -215,7 +215,7 @@ Phase 2 converts early traction into repeatable growth loops. Each day ships one
 - Higher discussion volume from real users and integrators.
 - Reuse signals from templates/playbooks in downstream workflows.
 
-### Phase 3 (Days 61-90): Ecosystem + trust (daily execution)
+### Phase 3 (Cycles 61-90): Ecosystem + trust (daily execution)
 
 Phase 3 turns growth into durable ecosystem trust: stronger community rituals, deeper integrations, and proof-backed outcomes.
 

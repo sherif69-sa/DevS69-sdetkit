@@ -6,7 +6,7 @@
 
 ## Problem statement
 
-Week-two delivery (Days 8-13) was shippable, but maintainers still needed manual reporting for growth and blocker outcomes.
+Week-two delivery (Cycles 8-13) was shippable, but maintainers still needed manual reporting for growth and blocker outcomes.
 
 The previous Day 14 implementation only mirrored week-one coverage and did not enforce growth-signal completeness or produce structured closeout artifacts for handoff.
 

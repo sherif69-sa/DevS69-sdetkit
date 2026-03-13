@@ -20,7 +20,7 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
 
     (manifest_dir / "manifest.json").write_text(
         json.dumps(
-            {"days": [{"day": 1, "report_file": "day01-report.md", "plan_file": "day01-plan.json"}]}
+            {"phases": [{"day": 1, "report_file": "day01-report.md", "plan_file": "day01-plan.json"}]}
         ),
         encoding="utf-8",
     )
@@ -40,7 +40,7 @@ def test_load_manifest_handles_dot_prefixed_plan_candidates(tmp_path: Path, monk
     dot_plan = tmp_path / ".day02-plan.json"
     dot_plan.write_text("{}", encoding="utf-8")
     (manifest_dir / "manifest.json").write_text(
-        json.dumps({"days": [{"day": 2, "report_file": None, "plan_file": ".day02-plan.json"}]}),
+        json.dumps({"phases": [{"day": 2, "report_file": None, "plan_file": ".day02-plan.json"}]}),
         encoding="utf-8",
     )
 

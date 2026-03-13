@@ -1,5 +1,5 @@
 {
-  "days": [
+  "phases": [
     {
       "day": 1,
       "report_path": "docs/roadmap/reports/day-1-ultra-upgrade-report.md",

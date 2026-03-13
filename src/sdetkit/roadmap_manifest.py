@@ -76,8 +76,8 @@ def build_manifest(repo_root: Path | None = None) -> dict[str, Any]:
             if plan_title:
                 e["plan_title"] = plan_title
 
-    days = [items[k] for k in sorted(items)]
-    return {"days": days}
+    phase_entries = [items[k] for k in sorted(items)]
+    return {"phases": phase_entries}
 
 
 def render_manifest_json(repo_root: Path | None = None) -> str:
