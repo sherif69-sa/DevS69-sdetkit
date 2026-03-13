@@ -100,13 +100,13 @@
       "category": "governance",
       "evidence": "day-22-ultra-upgrade-report.md",
       "key": "docs_index_day22",
-      "passed": true,
+      "passed": false,
       "weight": 2
     }
   ],
   "governance_checks": {
     "ci_workflow": true,
-    "docs_index_day22": true,
+    "docs_index_day22": false,
     "pages_workflow": true,
     "security_workflow": true
   },
@@ -122,7 +122,8 @@
   },
   "recommendations": [
     "Restore missing trust badges in README so reliability status is visible at a glance.",
-    "Ensure policy documents exist and are linked from README governance references."
+    "Ensure policy documents exist and are linked from README governance references.",
+    "Keep CI/security/pages workflows and docs index trust references present for reviewers."
   ],
   "score": 100.0,
   "strict_failures": [],
@@ -133,7 +134,7 @@
         "total": 5
       },
       "governance": {
-        "passed": 4,
+        "passed": 3,
         "total": 4
       },
       "policy": {
@@ -144,11 +145,11 @@
     "critical_failures": [
       "security_doc_exists"
     ],
-    "failed_checks": 8,
+    "failed_checks": 9,
     "trust_label": "review",
-    "trust_score": 20.0,
+    "trust_score": 18.0,
     "weighted_points": {
-      "earned": 20,
+      "earned": 18,
       "total": 100
     }
   }
