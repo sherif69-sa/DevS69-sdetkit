@@ -1,0 +1,120 @@
+{
+  "program": "world-class-quality",
+  "dashboard": "world-class-kpi",
+  "version": "v1",
+  "snapshot_window": "rolling-30-day",
+  "review_cadence": "weekly",
+  "owners": {
+    "reliability": {
+      "primary": "QA Platform Lead",
+      "backup": "Release Manager"
+    },
+    "velocity": {
+      "primary": "Dev Experience Lead",
+      "backup": "Engineering Manager"
+    },
+    "trust_security": {
+      "primary": "Security Champion",
+      "backup": "QA Platform Lead"
+    },
+    "release_readiness": {
+      "primary": "Release Manager",
+      "backup": "QA Platform Lead"
+    }
+  },
+  "kpis": [
+    {
+      "id": "mainline_pass_rate",
+      "lane": "reliability",
+      "metric": "Mainline unit+integration pass rate",
+      "target": ">=99%",
+      "status": "baseline-defined",
+      "source": "CI run history and test summaries"
+    },
+    {
+      "id": "change_failure_rate",
+      "lane": "reliability",
+      "metric": "Change failure rate",
+      "target": "<5%",
+      "status": "baseline-defined",
+      "source": "Release board + changelog incidents"
+    },
+    {
+      "id": "release_regression_mttr",
+      "lane": "reliability",
+      "metric": "MTTR for release regression",
+      "target": "<60m",
+      "status": "baseline-defined",
+      "source": "Incident timeline artifacts"
+    },
+    {
+      "id": "first_successful_local_run",
+      "lane": "velocity",
+      "metric": "First successful local run",
+      "target": "<30m",
+      "status": "baseline-defined",
+      "source": "Onboarding diary samples"
+    },
+    {
+      "id": "pr_cycle_time",
+      "lane": "velocity",
+      "metric": "PR cycle time median",
+      "target": "<24h",
+      "status": "baseline-defined",
+      "source": "SCM analytics export"
+    },
+    {
+      "id": "doc_freshness_sla",
+      "lane": "velocity",
+      "metric": "Doc freshness SLA",
+      "target": "100%",
+      "status": "baseline-defined",
+      "source": "Docs PR labels + merged timestamps"
+    },
+    {
+      "id": "critical_vulns",
+      "lane": "trust_security",
+      "metric": "Critical vulns on default branch",
+      "target": "0",
+      "status": "baseline-defined",
+      "source": "Security scan reports"
+    },
+    {
+      "id": "security_drift_remediation",
+      "lane": "trust_security",
+      "metric": "Security drift remediation",
+      "target": "<72h",
+      "status": "baseline-defined",
+      "source": "Security baseline incidents"
+    },
+    {
+      "id": "evidence_pack_coverage",
+      "lane": "release_readiness",
+      "metric": "Release evidence pack coverage",
+      "target": "100%",
+      "status": "baseline-defined",
+      "source": "Release candidate artifact inventory"
+    },
+    {
+      "id": "rollback_rate",
+      "lane": "release_readiness",
+      "metric": "Rollback rate",
+      "target": "<2%",
+      "status": "baseline-defined",
+      "source": "Release notes + incident logs"
+    },
+    {
+      "id": "merge_ready_to_tag",
+      "lane": "release_readiness",
+      "metric": "Merge-ready to release tag",
+      "target": "<2h",
+      "status": "baseline-defined",
+      "source": "Release timeline"
+    }
+  ],
+  "next_actions": [
+    "Automate extraction for CI pass rate and PR cycle time.",
+    "Add an evidence-pack coverage check to the release workflow.",
+    "Backfill last 4 weeks of KPI values to establish trend lines."
+  ]
+}

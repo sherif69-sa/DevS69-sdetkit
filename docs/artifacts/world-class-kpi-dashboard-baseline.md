@@ -2,6 +2,8 @@
 
 This baseline is the first implementation pass for the "Stand up a KPI dashboard" item in the World-Class Quality Program.
 
+Machine-readable baseline: `docs/artifacts/world-class-kpi-dashboard-baseline.json`.
+
 ## Ownership
 
 | KPI lane | Primary owner | Backup owner | Review cadence |
@@ -27,12 +29,41 @@ This baseline is the first implementation pass for the "Stand up a KPI dashboard
 | Rollback rate | Rolled back releases / total releases | `< 2%` | Release notes + incident logs |
 | Merge-ready to release tag | Time from release-ready approval to tag creation | `< 2 hours` | Release timeline |
 
-## Data collection contract (v0)
+## Data collection contract (v1)
 
 1. Collect weekly snapshots every Monday before quality review.
 2. Publish a markdown summary in `docs/artifacts/` for auditability.
-3. Keep raw exports (JSON/CSV) attached to CI artifacts for 90 days.
-4. Escalate any KPI that breaches target for 2 consecutive snapshots.
+3. Store and update baseline metadata in `docs/artifacts/world-class-kpi-dashboard-baseline.json`.
+4. Keep raw exports (JSON/CSV) attached to CI artifacts for 90 days.
+5. Escalate any KPI that breaches target for 2 consecutive snapshots.
+
+## Dashboard rollout checklist
+
+- [x] Add first weekly snapshot artifact (`docs/artifacts/world-class-kpi-dashboard-weekly-2026-03-13.md`).
+- [ ] Automate CI pass-rate extraction from workflow history.
+- [ ] Automate PR cycle time extraction from SCM analytics export.
+- [ ] Wire release evidence-pack coverage into release preflight checks.
+- [ ] Backfill last 4 weeks of KPI values.
+
+## Snapshot generation command
+
+Generate the next weekly template from the machine-readable baseline:
+
+```bash
+python scripts/generate_world_class_kpi_snapshot.py --snapshot-date YYYY-MM-DD
+```
+
+To pre-fill KPI values and auto-calculate trend deltas from current + previous exported data:
+
+```bash
+python scripts/generate_world_class_kpi_snapshot.py \
+  --snapshot-date YYYY-MM-DD \
+  --metrics-json docs/artifacts/world-class-kpi-dashboard-metrics-sample.json \
+  --previous-metrics-json docs/artifacts/world-class-kpi-dashboard-previous-metrics-sample.json \
+  --strict-metrics \
+  --summary-json docs/artifacts/world-class-kpi-dashboard-weekly-YYYY-MM-DD-summary.json  # includes target_eval + target_eval_counts + breach_kpi_ids \
+  --fail-on-target-breach
+```
 
 ## Immediate next actions
 
