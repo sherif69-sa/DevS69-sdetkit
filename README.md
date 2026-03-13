@@ -41,3 +41,7 @@ Existing direct commands remain supported (`gate`, `doctor`, `security`, `repo`,
 They are preserved compatibility lanes; umbrella kits are the primary discovery and product entrypoint.
 
 See `docs/migration-compatibility-note.md` for migration and experimental-status notes.
+
+## Quality transformation
+
+For the execution blueprint to reach a world-class quality bar across all bundled offerings, see `docs/world-class-quality-program.md`.
