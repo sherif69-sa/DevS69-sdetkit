@@ -39,12 +39,16 @@ def _evaluate(profile: dict[str, Any]) -> dict[str, Any]:
 
     services = profile.get("services", [])
     if isinstance(services, list):
-        for svc in sorted((x for x in services if isinstance(x, dict)), key=lambda x: str(x.get("name"))):
+        for svc in sorted(
+            (x for x in services if isinstance(x, dict)), key=lambda x: str(x.get("name"))
+        ):
             name = str(svc.get("name", "service"))
             port = int(svc.get("port", 0))
             expect = str(svc.get("expect", "closed"))
             if port <= 0:
-                checks.append({"kind": "service", "name": name, "passed": False, "reason": "invalid-port"})
+                checks.append(
+                    {"kind": "service", "name": name, "passed": False, "reason": "invalid-port"}
+                )
                 continue
             open_now = _probe_tcp_localhost(port)
             passed = open_now if expect == "open" else (not open_now)

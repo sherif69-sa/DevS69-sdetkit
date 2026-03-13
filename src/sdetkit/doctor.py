@@ -966,7 +966,10 @@ def main(argv: list[str] | None = None) -> int:
             payload = {
                 "schema_version": SCHEMA_VERSION,
                 "ok": False,
-                "error": {"code": "plan_id_mismatch", "message": "apply plan id does not match generated plan"},
+                "error": {
+                    "code": "plan_id_mismatch",
+                    "message": "apply plan id does not match generated plan",
+                },
                 "expected": plan.get("plan_id"),
                 "provided": ns.apply_plan,
                 "plan": plan,

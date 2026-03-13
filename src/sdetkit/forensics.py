@@ -70,7 +70,10 @@ def _bundle(run_path: Path, output_path: Path, include: list[str]) -> dict[str, 
 
 
 def _bundle_diff(from_bundle: Path, to_bundle: Path) -> dict[str, Any]:
-    with zipfile.ZipFile(from_bundle, "r") as left_zip, zipfile.ZipFile(to_bundle, "r") as right_zip:
+    with (
+        zipfile.ZipFile(from_bundle, "r") as left_zip,
+        zipfile.ZipFile(to_bundle, "r") as right_zip,
+    ):
         left_names = set(left_zip.namelist())
         right_names = set(right_zip.namelist())
         added = sorted(right_names - left_names)

@@ -73,7 +73,9 @@ def test_intelligence_failure_mode_invalid_failures_file(tmp_path: Path) -> None
 
 
 def test_integration_and_forensics_contracts_and_bundle_determinism(tmp_path: Path) -> None:
-    integration = _run("integration", "check", "--profile", "examples/kits/integration/profile.json")
+    integration = _run(
+        "integration", "check", "--profile", "examples/kits/integration/profile.json"
+    )
     assert integration.returncode in {0, 1}
     integration_json = json.loads(integration.stdout)
     assert integration_json["schema_version"] == "sdetkit.integration.profile-check.v1"
@@ -86,7 +88,12 @@ def test_integration_and_forensics_contracts_and_bundle_determinism(tmp_path: Pa
                 "version": 1,
                 "interactions": [
                     {
-                        "request": {"method": "GET", "url": "https://example.com/ping", "body_b64": "", "headers": []},
+                        "request": {
+                            "method": "GET",
+                            "url": "https://example.com/ping",
+                            "body_b64": "",
+                            "headers": [],
+                        },
                         "response": {"status_code": 200, "headers": [], "body_b64": ""},
                     }
                 ],
@@ -130,7 +137,9 @@ def test_integration_and_forensics_contracts_and_bundle_determinism(tmp_path: Pa
         names = sorted(zf.namelist())
     assert names == ["manifest.json", "run.json"]
 
-    diff_same = _run("forensics", "bundle-diff", "--from-bundle", str(out1), "--to-bundle", str(out2))
+    diff_same = _run(
+        "forensics", "bundle-diff", "--from-bundle", str(out1), "--to-bundle", str(out2)
+    )
     assert diff_same.returncode == 0
     diff_same_json = json.loads(diff_same.stdout)
     assert diff_same_json["schema_version"] == "sdetkit.forensics.bundle-diff.v1"

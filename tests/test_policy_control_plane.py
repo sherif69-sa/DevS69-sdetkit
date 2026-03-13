@@ -68,15 +68,20 @@ def test_policy_check_json_with_waiver(tmp_path: Path, monkeypatch, capsys) -> N
         ),
         encoding="utf-8",
     )
-    assert policy.main([
-        "check",
-        "--baseline",
-        str(base),
-        "--waivers",
-        str(waivers),
-        "--format",
-        "json",
-    ]) == 0
+    assert (
+        policy.main(
+            [
+                "check",
+                "--baseline",
+                str(base),
+                "--waivers",
+                str(waivers),
+                "--format",
+                "json",
+            ]
+        )
+        == 0
+    )
     payload = json.loads(capsys.readouterr().out)
     assert payload["schema_version"] == "sdetkit.policy.v2"
     assert payload["ok"] is True

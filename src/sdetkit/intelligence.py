@@ -18,7 +18,7 @@ def _load_json(path: Path) -> Any:
 
 
 def _fingerprint(test_id: str, message: str) -> str:
-    return hashlib.sha256(f"{test_id}\n{message}".encode("utf-8")).hexdigest()[:16]
+    return hashlib.sha256(f"{test_id}\n{message}".encode()).hexdigest()[:16]
 
 
 def _cmd_flake_classify(history_path: Path, rerun_threshold: int) -> dict[str, Any]:
@@ -174,13 +174,17 @@ def _cmd_failure_fingerprint(failures_path: Path) -> dict[str, Any]:
         "failures": fingerprints,
         "summary": {
             "total": len(fingerprints),
-            "with_nondeterminism_hints": sum(1 for item in fingerprints if item["nondeterminism_hints"]),
+            "with_nondeterminism_hints": sum(
+                1 for item in fingerprints if item["nondeterminism_hints"]
+            ),
         },
     }
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="sdetkit intelligence", description="Test Intelligence Kit")
+    parser = argparse.ArgumentParser(
+        prog="sdetkit intelligence", description="Test Intelligence Kit"
+    )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     flake = sub.add_parser("flake", help="Flake classification from rerun history")

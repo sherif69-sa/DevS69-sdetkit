@@ -1,15 +1,23 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-from typing import Final
+from typing import Final, TypedDict
 
 from .atomicio import canonical_json_dumps
 
 SCHEMA_VERSION: Final[str] = "sdetkit.kits.catalog.v1"
 
-_KITS: Final[list[dict[str, object]]] = [
+
+class Kit(TypedDict):
+    id: str
+    slug: str
+    stability: str
+    summary: str
+    hero_commands: list[str]
+
+
+_KITS: Final[list[Kit]] = [
     {
         "id": "release-confidence",
         "slug": "release",
@@ -57,7 +65,7 @@ _KITS: Final[list[dict[str, object]]] = [
 ]
 
 
-def _resolve_kit(name: str) -> dict[str, object] | None:
+def _resolve_kit(name: str) -> Kit | None:
     needle = name.strip().lower()
     for item in _KITS:
         kit_id = str(item.get("id", "")).lower()
@@ -108,14 +116,17 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write("kits error: unexpected <kit> for list action\n")
         return 2
 
-    payload = list_payload()
+    kits_sorted = sorted(_KITS, key=lambda item: item["id"])
+    list_json_payload = {
+        "schema_version": SCHEMA_VERSION,
+        "kits": kits_sorted,
+    }
     if ns.format == "json":
-        sys.stdout.write(canonical_json_dumps(payload))
+        sys.stdout.write(canonical_json_dumps(list_json_payload))
         return 0
 
     print("SDETKit umbrella kits")
-    for kit in payload["kits"]:
-        assert isinstance(kit, dict)
+    for kit in kits_sorted:
         print(f"- {kit['id']} [{kit['stability']}]")
         print(f"  {kit['summary']}")
     return 0

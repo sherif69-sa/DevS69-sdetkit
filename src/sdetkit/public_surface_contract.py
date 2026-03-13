@@ -58,7 +58,13 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
         stability_tier="Playbooks",
         first_time_recommended=False,
         transition_legacy_oriented=False,
-        top_level_commands=("playbooks", "onboarding", "weekly-review", "first-contribution", "demo"),
+        top_level_commands=(
+            "playbooks",
+            "onboarding",
+            "weekly-review",
+            "first-contribution",
+            "demo",
+        ),
     ),
     CommandFamilyContract(
         name="experimental-transition-lanes",

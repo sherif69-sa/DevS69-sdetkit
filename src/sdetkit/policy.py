@@ -23,7 +23,10 @@ def _stable_json(payload: dict[str, Any]) -> str:
 
 
 def _error(code: str, message: str, *, detail: dict[str, Any] | None = None) -> dict[str, Any]:
-    out: dict[str, Any] = {"schema_version": SCHEMA_VERSION, "error": {"code": code, "message": message}}
+    out: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "error": {"code": code, "message": message},
+    }
     if detail:
         out["error"]["detail"] = detail
     return out
@@ -63,23 +66,40 @@ def _load_waivers(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]
     out: list[dict[str, Any]] = []
     for i, item in enumerate(waivers):
         if not isinstance(item, dict):
-            errs.append({"code": "waiver_item_invalid", "message": f"waivers[{i}] must be an object"})
+            errs.append(
+                {"code": "waiver_item_invalid", "message": f"waivers[{i}] must be an object"}
+            )
             continue
         required = ("type", "owner", "justification", "expires_on")
-        missing = [k for k in required if not isinstance(item.get(k), str) or not str(item.get(k)).strip()]
+        missing = [
+            k for k in required if not isinstance(item.get(k), str) or not str(item.get(k)).strip()
+        ]
         if missing:
-            errs.append({"code": "waiver_missing_required", "message": f"waivers[{i}] missing fields: {', '.join(missing)}"})
+            errs.append(
+                {
+                    "code": "waiver_missing_required",
+                    "message": f"waivers[{i}] missing fields: {', '.join(missing)}",
+                }
+            )
             continue
         try:
             expiry = dt.date.fromisoformat(str(item["expires_on"]))
         except ValueError:
-            errs.append({"code": "waiver_expiry_invalid", "message": f"waivers[{i}] has invalid expires_on"})
+            errs.append(
+                {"code": "waiver_expiry_invalid", "message": f"waivers[{i}] has invalid expires_on"}
+            )
             continue
         if expiry < dt.date.today():
             errs.append({"code": "waiver_expired", "message": f"waivers[{i}] is expired"})
             continue
-        if item.get("type") not in {"security_rule_increase", "new_non_ascii", "new_stdlib_shadowing"}:
-            errs.append({"code": "waiver_type_unknown", "message": f"waivers[{i}] has unsupported type"})
+        if item.get("type") not in {
+            "security_rule_increase",
+            "new_non_ascii",
+            "new_stdlib_shadowing",
+        }:
+            errs.append(
+                {"code": "waiver_type_unknown", "message": f"waivers[{i}] has unsupported type"}
+            )
             continue
         out.append(item)
     return out, errs
@@ -96,7 +116,11 @@ def _apply_waivers(
                 continue
             if w["type"] == "security_rule_increase" and w.get("rule_id") != reg.get("rule_id"):
                 continue
-            if w["type"] in {"new_non_ascii", "new_stdlib_shadowing"} and w.get("path") and w.get("path") != reg.get("path"):
+            if (
+                w["type"] in {"new_non_ascii", "new_stdlib_shadowing"}
+                and w.get("path")
+                and w.get("path") != reg.get("path")
+            ):
                 continue
             reg["waived"] = True
             reg["waiver"] = {
@@ -153,13 +177,17 @@ def main(argv: list[str] | None = None) -> int:
     cp = sub.add_parser("check")
     cp.add_argument("--baseline", default=".sdetkit/policies/baseline.json")
     cp.add_argument("--fail-on", choices=["any", "security"], default="any")
-    cp.add_argument("--waivers", default=None, help="JSON waiver file with owner/justification/expiry.")
+    cp.add_argument(
+        "--waivers", default=None, help="JSON waiver file with owner/justification/expiry."
+    )
     cp.add_argument("--format", choices=["text", "json"], default="text")
 
     dp = sub.add_parser("diff")
     dp.add_argument("--baseline", required=True)
     dp.add_argument("--format", choices=["text", "json", "sarif"], default="text")
-    dp.add_argument("--waivers", default=None, help="JSON waiver file with owner/justification/expiry.")
+    dp.add_argument(
+        "--waivers", default=None, help="JSON waiver file with owner/justification/expiry."
+    )
 
     ns = p.parse_args(argv)
     root = Path.cwd()
@@ -193,7 +221,11 @@ def main(argv: list[str] | None = None) -> int:
             "ok": False,
             "error": {"code": "waiver_validation_failed", "detail": waiver_errors},
         }
-        sys.stdout.write(_stable_json(payload) if getattr(ns, "format", "text") == "json" else "waiver validation failed\n")
+        sys.stdout.write(
+            _stable_json(payload)
+            if getattr(ns, "format", "text") == "json"
+            else "waiver validation failed\n"
+        )
         return EXIT_USAGE
 
     regressions_all, regressions_active = _apply_waivers(regressions, waivers)
@@ -219,7 +251,11 @@ def main(argv: list[str] | None = None) -> int:
             for item in regressions_all:
                 sys.stdout.write(json.dumps(item, sort_keys=True) + "\n")
         if ns.fail_on == "security":
-            return EXIT_REGRESSION if any(item.get("type") == "security_rule_increase" for item in regressions_active) else EXIT_OK
+            return (
+                EXIT_REGRESSION
+                if any(item.get("type") == "security_rule_increase" for item in regressions_active)
+                else EXIT_OK
+            )
         return EXIT_REGRESSION if regressions_active else EXIT_OK
 
     payload = {

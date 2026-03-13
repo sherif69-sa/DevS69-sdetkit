@@ -36,7 +36,10 @@ def _zip_deterministic(output: Path, files: list[Path], base: Path) -> None:
 def _load_manifest_from_zip(pack: Path) -> dict[str, Any]:
     with zipfile.ZipFile(pack, "r") as zf:
         payload = zf.read("manifest.json").decode("utf-8")
-    return json.loads(payload)
+    loaded: Any = json.loads(payload)
+    if not isinstance(loaded, dict):
+        return {}
+    return loaded
 
 
 def _pack(output: Path, *, redacted: bool) -> int:
@@ -57,7 +60,10 @@ def _pack(output: Path, *, redacted: bool) -> int:
             target.unlink()
 
     commands = [
-        (["python3", "-m", "sdetkit", "doctor", "--ascii", "--format", "json"], out_dir / "doctor.txt"),
+        (
+            ["python3", "-m", "sdetkit", "doctor", "--ascii", "--format", "json"],
+            out_dir / "doctor.txt",
+        ),
         (
             [
                 "python3",
@@ -157,7 +163,11 @@ def _pack(output: Path, *, redacted: bool) -> int:
 
 def _validate(pack: Path, *, format: str) -> int:
     if not pack.is_file():
-        payload = {"schema_version": SCHEMA_VERSION, "ok": False, "error": {"code": "pack_missing", "message": str(pack)}}
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "ok": False,
+            "error": {"code": "pack_missing", "message": str(pack)},
+        }
         if format == "json":
             sys.stdout.write(_stable_json(payload))
         else:
@@ -224,7 +234,11 @@ def main(argv: list[str] | None = None) -> int:
 
     pack = sub.add_parser("pack")
     pack.add_argument("--output", default=".sdetkit/out/evidence.zip")
-    pack.add_argument("--redacted", action="store_true", help="Mark pack as redacted in manifest provenance metadata.")
+    pack.add_argument(
+        "--redacted",
+        action="store_true",
+        help="Mark pack as redacted in manifest provenance metadata.",
+    )
 
     validate = sub.add_parser("validate")
     validate.add_argument("pack")

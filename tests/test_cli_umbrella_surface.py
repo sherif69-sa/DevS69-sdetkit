@@ -23,7 +23,12 @@ def test_kits_list_and_describe_contract() -> None:
     assert list_proc.returncode == 0
     payload = json.loads(list_proc.stdout)
     assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
-    assert [item["slug"] for item in payload["kits"]] == ["forensics", "integration", "release", "intelligence"]
+    assert [item["slug"] for item in payload["kits"]] == [
+        "forensics",
+        "integration",
+        "release",
+        "intelligence",
+    ]
 
     describe_proc = _run("kits", "describe", "release", "--format", "json")
     assert describe_proc.returncode == 0
