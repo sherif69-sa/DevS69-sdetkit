@@ -35,10 +35,12 @@ def _compare(from_path: Path, to_path: Path) -> dict[str, Any]:
 
 def _bundle(run_path: Path, output_path: Path, include: list[str]) -> dict[str, Any]:
     run = load_run_record(run_path)
+    extras: list[dict[str, Any]] = []
     manifest = {
         "schema_version": "sdetkit.forensics.bundle-manifest.v1",
         "run_sha256": hashlib.sha256(canonical_json_bytes(run)).hexdigest(),
         "included_files": sorted(include),
+        "extras": extras,
     }
 
     with zipfile.ZipFile(output_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
@@ -53,14 +55,35 @@ def _bundle(run_path: Path, output_path: Path, include: list[str]) -> dict[str, 
         zf.writestr(run_info, canonical_json_dumps(run))
 
         for file_name in sorted(include):
-            path = Path(file_name)
+            path = safe_path(Path.cwd(), file_name, allow_absolute=True)
             if not path.exists() or not path.is_file():
+                extras.append(
+                    {
+                        "requested": file_name,
+                        "stored": None,
+                        "status": "missing",
+                    }
+                )
                 continue
             data = path.read_bytes()
-            extra = zipfile.ZipInfo(f"extras/{path.name}")
+            if path.is_absolute():
+                sanitized = "_".join(path.parts[1:])
+            else:
+                sanitized = "_".join(path.parts)
+            archive_name = f"extras/{sanitized}"
+            extra = zipfile.ZipInfo(archive_name)
             extra.date_time = (1980, 1, 1, 0, 0, 0)
             extra.compress_type = zipfile.ZIP_DEFLATED
             zf.writestr(extra, data)
+            extras.append(
+                {
+                    "requested": file_name,
+                    "stored": archive_name,
+                    "status": "included",
+                    "sha256": hashlib.sha256(data).hexdigest(),
+                    "size_bytes": len(data),
+                }
+            )
 
     return {
         "schema_version": "sdetkit.forensics.bundle.v1",

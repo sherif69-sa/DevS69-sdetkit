@@ -160,6 +160,39 @@ def test_forensics_compare_fail_on_warn_exit_code() -> None:
     assert proc.returncode == 1
 
 
+def test_forensics_bundle_include_tracks_manifest_and_sanitizes_names(tmp_path: Path) -> None:
+    nested = tmp_path / "logs" / "session.txt"
+    nested.parent.mkdir(parents=True)
+    nested.write_text("failure details", encoding="utf-8")
+
+    output = tmp_path / "bundle.zip"
+    proc = _run(
+        "forensics",
+        "bundle",
+        "--run",
+        "examples/kits/forensics/run-b.json",
+        "--output",
+        str(output),
+        "--include",
+        str(nested),
+        str(tmp_path / "missing.log"),
+    )
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    extras = payload["manifest"]["extras"]
+    assert len(extras) == 2
+    included = [entry for entry in extras if entry["status"] == "included"]
+    missing = [entry for entry in extras if entry["status"] == "missing"]
+    assert len(included) == 1
+    assert len(missing) == 1
+    assert included[0]["stored"].startswith("extras/")
+    assert "/" not in included[0]["stored"].removeprefix("extras/")
+    assert missing[0]["stored"] is None
+
+    with zipfile.ZipFile(output) as zf:
+        assert included[0]["stored"] in zf.namelist()
+
+
 def test_release_alias_backward_compatibility() -> None:
     direct = _run("gate", "fast")
     via_release = _run("release", "gate", "fast")
