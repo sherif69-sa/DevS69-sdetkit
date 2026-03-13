@@ -1,0 +1,152 @@
+{
+  "program": "world-class-quality",
+  "dashboard": "world-class-kpi",
+  "snapshot_date": "2026-03-13",
+  "baseline_kpi_count": 11,
+  "provided_kpi_count": 0,
+  "coverage_ratio": 0.0,
+  "missing_kpi_ids": [
+    "mainline_pass_rate",
+    "change_failure_rate",
+    "release_regression_mttr",
+    "first_successful_local_run",
+    "pr_cycle_time",
+    "doc_freshness_sla",
+    "critical_vulns",
+    "security_drift_remediation",
+    "evidence_pack_coverage",
+    "rollback_rate",
+    "merge_ready_to_tag"
+  ],
+  "target_eval_counts": {
+    "meets_target": 0,
+    "below_target": 0,
+    "above_target": 0,
+    "unknown": 11
+  },
+  "output_markdown": "docs/artifacts/world-class-kpi-dashboard-weekly-2026-03-13.md",
+  "kpis": [
+    {
+      "id": "mainline_pass_rate",
+      "lane": "reliability",
+      "target": ">=99%",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "change_failure_rate",
+      "lane": "reliability",
+      "target": "<5%",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "release_regression_mttr",
+      "lane": "reliability",
+      "target": "<60m",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "first_successful_local_run",
+      "lane": "velocity",
+      "target": "<30m",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "pr_cycle_time",
+      "lane": "velocity",
+      "target": "<24h",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "doc_freshness_sla",
+      "lane": "velocity",
+      "target": "100%",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "critical_vulns",
+      "lane": "trust_security",
+      "target": "0",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "security_drift_remediation",
+      "lane": "trust_security",
+      "target": "<72h",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "evidence_pack_coverage",
+      "lane": "release_readiness",
+      "target": "100%",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "rollback_rate",
+      "lane": "release_readiness",
+      "target": "<2%",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    },
+    {
+      "id": "merge_ready_to_tag",
+      "lane": "release_readiness",
+      "target": "<2h",
+      "current_value": "TODO",
+      "delta": "TODO",
+      "status": "TODO",
+      "evidence_link": "TODO",
+      "covered": false,
+      "target_eval": "unknown"
+    }
+  ],
+  "breach_kpi_ids": []
+}

@@ -1,0 +1,17 @@
+{
+  "mainline_pass_rate": {
+    "current_value": "99.1%",
+    "status": "on_track",
+    "evidence_link": "ci://runs/mainline-pass-rate-prev"
+  },
+  "pr_cycle_time": {
+    "current_value": "23h",
+    "status": "watch",
+    "evidence_link": "scm://analytics/pr-cycle-time-prev"
+  },
+  "critical_vulns": {
+    "current_value": "0",
+    "status": "on_track",
+    "evidence_link": "security://scan/default-branch-prev"
+  }
+}
