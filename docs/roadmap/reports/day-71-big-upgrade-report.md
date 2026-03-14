@@ -1,14 +1,14 @@
-# Day 71 big upgrade report
+# Case-study prep #3 big upgrade report (legacy Day 71)
 
 ## Objective
 
-Close Day 71 with a high-signal case-study prep lane that converts Day 70 outputs into a measurable escalation-quality before/after evidence pack and a strict Day 72 handoff.
+Close the case-study prep #3 lane with a high-signal package that converts prior outputs into measurable escalation-quality before/after evidence and a strict handoff into prep #4.
 
 ## What shipped
 
-- New `day71-case-study-prep3-closeout` CLI lane with strict scoring and Day 70 continuity validation.
-- New Day 71 integration guide with command lane, contract lock, quality checklist, and delivery board.
-- New Day 71 contract checker script for CI and local execution gating.
+- New `day71-case-study-prep3-closeout` CLI lane with strict scoring and continuity validation against prior artifacts.
+- New integration guide with command lane, contract lock, quality checklist, and delivery board.
+- New contract checker script for CI and local execution gating.
 - New case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
 - New `docs/roadmap/plans/escalation-quality-case-study.json` baseline dataset scaffold for escalation-quality case-study prep.
 
@@ -23,4 +23,4 @@ python scripts/check_day71_case_study_prep3_closeout_contract.py
 
 ## Outcome
 
-Day 71 is now an evidence-backed case-study prep #3 lane with strict continuity to Day 70 and deterministic handoff into Day 72 case-study prep #4.
+Case-study prep #3 is now an evidence-backed closeout lane with strict continuity checks and a deterministic handoff into case-study prep #4.
