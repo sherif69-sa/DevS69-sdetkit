@@ -163,24 +163,24 @@ Phase 2 converts early traction into repeatable growth loops. Each impact ships 
 - Each impact must produce measurable external impact (traffic, adoption, discussions, integrations, or downstream reuse).
 - If external-impact evidence is missing, the impact is not accepted as complete.
 
-#### Day 31–60 sprint plan
+#### Sprint plan (Cycles 31–60)
 
-| Day | Sprint focus |
+| Cycle | Sprint focus |
 | --- | --- |
 | 31 | **Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets. |
 | 32 | **Release cadence setup:** lock weekly release rhythm and changelog publication checklist. |
 | 33 | **Demo asset #1:** produce/publish `doctor` workflow short video or GIF, with command evidence and docs CTA. |
 | 34 | **Demo asset #2:** produce/publish `repo audit` workflow short video or GIF. |
 | 35 | **KPI instrumentation closeout:** report growth deltas, lock threshold alerts, and tighten next-week actions. |
-| 36 | **Community distribution closeout:** publish Day 35 KPI narrative across GitHub/LinkedIn/newsletter with owner-backed posting windows. |
-| 37 | **Experiment lane activation:** seed controlled experiments from Day 36 distribution misses and KPI deltas. |
+| 36 | **Community distribution closeout:** publish the cycle-35 KPI narrative across GitHub/LinkedIn/newsletter with owner-backed posting windows. |
+| 37 | **Experiment lane activation:** seed controlled experiments from prior distribution misses and KPI deltas. |
 | 38 | **Distribution batch #1:** publish coordinated posts linking demo assets to docs. |
 | 39 | **Playbook post #1:** publish Repo Reliability Playbook article #1. |
 | 40 | **Scale lane #1:** scale proven playbook motion across docs, commands, and channel matrix artifacts. |
-| 41 | **Expansion automation lane:** automate Day 40 winners into repeatable workflows with strict execution proof. |
-| 42 | **Optimization closeout lane:** convert Day 41 expansion evidence into deterministic remediation loops. |
+| 41 | **Expansion automation lane:** automate proven winners into repeatable workflows with strict execution proof. |
+| 42 | **Optimization closeout lane:** convert expansion evidence into deterministic remediation loops. |
 | 42 | **Weekly review #6:** measure referral traffic, asset engagement, and stars/week trend. |
-| 43 | **Acceleration lane kickoff:** convert Day 42 optimization wins into accelerated growth loops. |
+| 43 | **Acceleration lane kickoff:** convert optimization wins into accelerated growth loops. |
 | 43 | **Production templates bundle v1:** package and document first template set. |
 | 44 | **Integration spotlight #1:** announce template usage with example CI scenario. |
 | 45 | **Integration spotlight #2:** add second real-world workflow example. |
