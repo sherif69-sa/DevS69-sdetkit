@@ -163,45 +163,43 @@ Phase 2 converts early traction into repeatable growth loops. Each impact ships 
 - Each impact must produce measurable external impact (traffic, adoption, discussions, integrations, or downstream reuse).
 - If external-impact evidence is missing, the impact is not accepted as complete.
 
-#### Day 31–60 sprint plan
+#### Sprint plan (Cycles 31–60)
 
-- **Day 31 — Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets.
-- **Day 32 — Release cadence setup:** lock weekly release rhythm and changelog publication checklist.
-- **Day 33 — Demo asset #1:** produce/publish `doctor` workflow short video or GIF, with command evidence and docs CTA.
-- **Day 34 — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.
-- **Day 35 — KPI instrumentation closeout:** report growth deltas, lock threshold alerts, and tighten next-week actions.
-
-- **Day 36 — Community distribution closeout:** publish Day 35 KPI narrative across GitHub/LinkedIn/newsletter with owner-backed posting windows.
-- **Day 37 — Experiment lane activation:** seed controlled experiments from Day 36 distribution misses and KPI deltas.
-- **Day 38 — Distribution batch #1:** publish coordinated posts linking demo assets to docs.
-- **Day 39 — Playbook post #1:** publish Repo Reliability Playbook article #1.
-- **Day 40 — Scale lane #1:** scale proven playbook motion across docs, commands, and channel matrix artifacts.
-- **Day 41 — Expansion automation lane:** automate Day 40 winners into repeatable workflows with strict execution proof.
-- **Day 42 — Optimization closeout lane:** convert Day 41 expansion evidence into deterministic remediation loops.
-- **Day 42 — Weekly review #6:** measure referral traffic, asset engagement, and stars/week trend.
-- **Day 43 — Acceleration lane kickoff:** convert Day 42 optimization wins into accelerated growth loops.
-
-- **Day 43 — Production templates bundle v1:** package and document first template set.
-- **Day 44 — Integration spotlight #1:** announce template usage with example CI scenario.
-- **Day 45 — Integration spotlight #2:** add second real-world workflow example.
-- **Day 46 — Distribution batch #2:** run second wave of promotion for templates and playbooks.
-- **Day 47 — Community feedback capture:** collect issues/discussions and group by adoption blockers.
-- **Day 48 — Objection handling update:** improve docs for top 3 recurring questions.
-- **Day 49 — Weekly review #7:** evaluate conversion and reuse rates for templates.
-- **Day 50 — Execution prioritization lock:** convert weekly-review wins into a deterministic execution board.
-
-- **Day 50 — Release storytelling uplift:** improve changelog with outcome-focused highlights.
-- **Day 51 — Case snippet #1:** publish mini-case on reliability or quality gate value.
-- **Day 52 — Case snippet #2:** publish mini-case on security/ops workflow value.
-- **Day 53 — Docs loop optimization:** add stronger cross-links between demos, playbooks, and CLI docs.
-- **Day 54 — Re-engagement campaign:** promote best-performing assets from Cycles 33–53.
-- **Day 55 — Contributor activation #2:** highlight advanced issues for repeat contributors.
-- **Day 56 — Stabilization closeout:** enforce deterministic follow-through, KPI recovery, and risk rollback proof.
-
-- **Day 57 — KPI deep audit closeout:** lock 30-impact trendlines (stars, CTR, discussions, PRs, returning users) with strict anomaly triage.
-- **Day 58 — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.
-- **Day 59 — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.
-- **Day 60 — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.
+| Cycle | Sprint focus |
+| --- | --- |
+| 31 | **Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets. |
+| 32 | **Release cadence setup:** lock weekly release rhythm and changelog publication checklist. |
+| 33 | **Demo asset #1:** produce/publish `doctor` workflow short video or GIF, with command evidence and docs CTA. |
+| 34 | **Demo asset #2:** produce/publish `repo audit` workflow short video or GIF. |
+| 35 | **KPI instrumentation closeout:** report growth deltas, lock threshold alerts, and tighten next-week actions. |
+| 36 | **Community distribution closeout:** publish the cycle-35 KPI narrative across GitHub/LinkedIn/newsletter with owner-backed posting windows. |
+| 37 | **Experiment lane activation:** seed controlled experiments from prior distribution misses and KPI deltas. |
+| 38 | **Distribution batch #1:** publish coordinated posts linking demo assets to docs. |
+| 39 | **Playbook post #1:** publish Repo Reliability Playbook article #1. |
+| 40 | **Scale lane #1:** scale proven playbook motion across docs, commands, and channel matrix artifacts. |
+| 41 | **Expansion automation lane:** automate proven winners into repeatable workflows with strict execution proof. |
+| 42 | **Optimization closeout lane:** convert expansion evidence into deterministic remediation loops. |
+| 42 | **Weekly review #6:** measure referral traffic, asset engagement, and stars/week trend. |
+| 43 | **Acceleration lane kickoff:** convert optimization wins into accelerated growth loops. |
+| 43 | **Production templates bundle v1:** package and document first template set. |
+| 44 | **Integration spotlight #1:** announce template usage with example CI scenario. |
+| 45 | **Integration spotlight #2:** add second real-world workflow example. |
+| 46 | **Distribution batch #2:** run second wave of promotion for templates and playbooks. |
+| 47 | **Community feedback capture:** collect issues/discussions and group by adoption blockers. |
+| 48 | **Objection handling update:** improve docs for top 3 recurring questions. |
+| 49 | **Weekly review #7:** evaluate conversion and reuse rates for templates. |
+| 50 | **Execution prioritization lock:** convert weekly-review wins into a deterministic execution board. |
+| 50 | **Release storytelling uplift:** improve changelog with outcome-focused highlights. |
+| 51 | **Case snippet #1:** publish mini-case on reliability or quality gate value. |
+| 52 | **Case snippet #2:** publish mini-case on security/ops workflow value. |
+| 53 | **Docs loop optimization:** add stronger cross-links between demos, playbooks, and CLI docs. |
+| 54 | **Re-engagement campaign:** promote best-performing assets from Cycles 33–53. |
+| 55 | **Contributor activation #2:** highlight advanced issues for repeat contributors. |
+| 56 | **Stabilization closeout:** enforce deterministic follow-through, KPI recovery, and risk rollback proof. |
+| 57 | **KPI deep audit closeout:** lock 30-impact trendlines (stars, CTR, discussions, PRs, returning users) with strict anomaly triage. |
+| 58 | **Phase-2 hardening:** polish highest-traffic pages and remove top friction points. |
+| 59 | **Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities. |
+| 60 | **Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board. |
 
 #### Phase-2 weekly deliverables (must ship)
 
