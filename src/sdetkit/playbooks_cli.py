@@ -90,6 +90,10 @@ _DISABLED_SERIES_GENERIC_ALIAS_MODULES: set[str] = {
 }
 
 
+def _contains_day_token(name: str) -> bool:
+    return "day" in re.split(r"[^a-z0-9]+", name.lower())
+
+
 def _cmd_to_mod(cmd: str) -> str:
     return cmd.replace("-", "_")
 
@@ -173,16 +177,28 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
 
 
 def _apply_search_list(xs: list[str], search: str | None) -> list[str]:
+    xs = [x for x in xs if not _contains_day_token(x)]
     if not search:
         return xs
     s = search.lower()
+    if _contains_day_token(s):
+        s = " ".join(tok for tok in re.split(r"[^a-z0-9]+", s) if tok != "day")
+        s = s.strip()
+        if not s:
+            return xs
     return [x for x in xs if s in x.lower()]
 
 
 def _apply_search_aliases(d: dict[str, str], search: str | None) -> dict[str, str]:
+    d = {k: v for k, v in d.items() if not _contains_day_token(k) and not _contains_day_token(v)}
     if not search:
         return d
     s = search.lower()
+    if _contains_day_token(s):
+        s = " ".join(tok for tok in re.split(r"[^a-z0-9]+", s) if tok != "day")
+        s = s.strip()
+        if not s:
+            return d
     return {k: v for k, v in d.items() if (s in k.lower()) or (s in v.lower())}
 
 

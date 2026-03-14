@@ -15,10 +15,18 @@ def test_alias_helpers_and_discovery(tmp_path: Path) -> None:
     mods = pc._discover_legacy_modules(tmp_path)
     assert "day77_community_touchpoint_closeout" in mods
     assert (
-        pc._alias_for_day_closeout("day77_community_touchpoint_closeout")
+        pc._alias_for_series_closeout("day77_community_touchpoint_closeout")
         == "community-touchpoint-closeout"
     )
-    assert pc._alias_for_day_module("day99_custom") == "custom"
+    assert pc._alias_for_series_module("day99_custom") == "custom"
+
+
+def test_search_filters_day_tokens() -> None:
+    assert pc._apply_search_list(["day-review", "weekly-review"], None) == ["weekly-review"]
+    assert pc._apply_search_list(["weekly-review", "release"], "day weekly") == ["weekly-review"]
+    assert pc._apply_search_aliases({"day-alias": "weekly-review", "stable": "release"}, None) == {
+        "stable": "release"
+    }
 
 
 def test_cmd_run_unknown_and_validate_unknown(monkeypatch, capsys) -> None:
