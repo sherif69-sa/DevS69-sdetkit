@@ -30,7 +30,7 @@ These strengths are the right base for growth; the next step is packaging, disco
 
 ## 90-impact execution plan
 
-## Day 1–90 execution contract: real upgrades only (mandatory for all phases)
+## Cycle 1–90 execution contract: real upgrades only (mandatory for all phases)
 
 To enforce your requirement, every impact in this plan is now governed by a **non-trivial delivery contract**.
 
@@ -58,7 +58,7 @@ A impact is **rejected** and does not count if it is primarily:
 
 ### Daily deliverable template (required)
 
-For each impact `N` (Day 1…Day 90), execution must produce:
+For each impact `N` (Cycle 1…Cycle 90), execution must produce:
 
 - **Upgrade title** (clear business/engineering outcome).
 - **Problem statement** (what real-world pain it solves).
@@ -92,7 +92,7 @@ Use this run protocol when you say "start impact X":
 
 ### Phase 1 (Cycles 1-30): Positioning + conversion (daily execution)
 
-This phase now runs as a **impact-by-impact operating plan**. When we say "work Day 1," we execute that impact’s checklist in full and publish the artifacts before moving on.
+This phase now runs as a **impact-by-impact operating plan**. When we say "work cycle 1," we execute that impact's checklist in full and publish the artifacts before moving on.
 
 
 #### Phase-1 non-trivial enforcement gates
@@ -102,42 +102,42 @@ This phase now runs as a **impact-by-impact operating plan**. When we say "work 
 - At least one of the impact’s outputs must be directly runnable by users in real workflows.
 - Cycles that fail this gate are reopened and replaced with larger scoped upgrades before moving forward.
 
-#### Day 1–30 sprint plan
+#### Cycle 1–30 sprint plan
 
-- **Day 1 — Core positioning refresh:** finalize one-line value proposition, role-based audience block, and top CTA in README.
-- **Day 2 — 60-second demo path:** add a copy-paste command flow with expected output snippets.
-- **Day 3 — Proof artifacts:** capture and publish 3 command screenshots/GIFs (`doctor`, `repo audit`, `security`).
-- **Day 4 — Comparison clarity:** publish "sdetkit vs ad-hoc scripts" and "vs lint-only pipelines" guidance.
-- **Day 5 — Platform onboarding:** add Linux/macOS/Windows setup snippets.
-- **Day 6 — Conversion QA:** test README links/anchors and remove friction points.
-- **Day 7 — Weekly review #1:** publish what shipped, what moved KPIs, and next-week focus.
+- **Cycle 1 — Core positioning refresh:** finalize one-line value proposition, role-based audience block, and top CTA in README.
+- **Cycle 2 — 60-second demo path:** add a copy-paste command flow with expected output snippets.
+- **Cycle 3 — Proof artifacts:** capture and publish 3 command screenshots/GIFs (`doctor`, `repo audit`, `security`).
+- **Cycle 4 — Comparison clarity:** publish "sdetkit vs ad-hoc scripts" and "vs lint-only pipelines" guidance.
+- **Cycle 5 — Platform onboarding:** add Linux/macOS/Windows setup snippets.
+- **Cycle 6 — Conversion QA:** test README links/anchors and remove friction points.
+- **Cycle 7 — Weekly review #1:** publish what shipped, what moved KPIs, and next-week focus.
 
-- **Day 8 — Contributor funnel start:** create 10 curated `good first issue` tasks.
-- **Day 9 — Contribution templates:** improve issue/PR templates for fast triage.
-- **Day 10 — First-contribution checklist:** add guided path in contributing docs.
-- **Day 11 — Docs navigation tune-up:** make top user journeys one-click from docs home.
-- **Day 12 — Use-case page #1:** startup/small-team workflow landing page.
-- **Day 13 — Use-case page #2:** enterprise/regulated workflow landing page.
-- **Day 14 — Weekly review #2:** report traffic, stars, discussions, and blocker fixes.
+- **Cycle 8 — Contributor funnel start:** create 10 curated `good first issue` tasks.
+- **Cycle 9 — Contribution templates:** improve issue/PR templates for fast triage.
+- **Cycle 10 — First-contribution checklist:** add guided path in contributing docs.
+- **Cycle 11 — Docs navigation tune-up:** make top user journeys one-click from docs home.
+- **Cycle 12 — Use-case page #1:** startup/small-team workflow landing page.
+- **Cycle 13 — Use-case page #2:** enterprise/regulated workflow landing page.
+- **Cycle 14 — Weekly review #2:** report traffic, stars, discussions, and blocker fixes.
 
-- **Day 15 — Integration recipe #1:** GitHub Actions quickstart with minimal config.
-- **Day 16 — Integration recipe #2:** GitLab CI quickstart.
-- **Day 17 — Integration recipe #3:** Jenkins quickstart.
-- **Day 18 — Reliability evidence pack:** publish sample outputs/artifacts bundle.
-- **Day 19 — Social launch kit:** prepare short post templates + visuals for recurring promotion.
-- **Day 20 — Release narrative:** produce clear changelog storytelling for non-maintainers.
-- **Day 21 — Weekly review #3:** track conversion improvements and external contributor response.
+- **Cycle 15 — Integration recipe #1:** GitHub Actions quickstart with minimal config.
+- **Cycle 16 — Integration recipe #2:** GitLab CI quickstart.
+- **Cycle 17 — Integration recipe #3:** Jenkins quickstart.
+- **Cycle 18 — Reliability evidence pack:** publish sample outputs/artifacts bundle.
+- **Cycle 19 — Social launch kit:** prepare short post templates + visuals for recurring promotion.
+- **Cycle 20 — Release narrative:** produce clear changelog storytelling for non-maintainers.
+- **Cycle 21 — Weekly review #3:** track conversion improvements and external contributor response.
 
-- **Day 22 — Trust signal upgrade:** tighten security/reliability badge and policy visibility.
-- **Day 23 — FAQ and objections:** answer adoption blockers ("when to use", "when not to use").
-- **Day 24 — Onboarding time reduction:** optimize path to first successful command under 3 minutes.
-- **Day 25 — Community activation:** open roadmap-voting discussion and collect feedback.
-- **Day 26 — External contribution push:** spotlight open starter tasks publicly.
-- **Day 27 — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).
-- **Day 28 — Weekly review #4:** document wins, misses, and corrective actions.
+- **Cycle 22 — Trust signal upgrade:** tighten security/reliability badge and policy visibility.
+- **Cycle 23 — FAQ and objections:** answer adoption blockers ("when to use", "when not to use").
+- **Cycle 24 — Onboarding time reduction:** optimize path to first successful command under 3 minutes.
+- **Cycle 25 — Community activation:** open roadmap-voting discussion and collect feedback.
+- **Cycle 26 — External contribution push:** spotlight open starter tasks publicly.
+- **Cycle 27 — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).
+- **Cycle 28 — Weekly review #4:** document wins, misses, and corrective actions.
 
-- **Day 29 — Phase-1 hardening:** close stale docs gaps and polish top entry pages.
-- **Day 30 — Phase-1 wrap + handoff:** publish a full report, lock Phase-2 backlog, and ship deterministic handoff evidence pack.
+- **Cycle 29 — Phase-1 hardening:** close stale docs gaps and polish top entry pages.
+- **Cycle 30 — Phase-1 wrap + handoff:** publish a full report, lock Phase-2 backlog, and ship deterministic handoff evidence pack.
 
 #### Phase-1 weekly deliverables (must ship)
 
@@ -148,7 +148,7 @@ This phase now runs as a **impact-by-impact operating plan**. When we say "work 
 
 **Phase-1 target metrics:**
 - README-to-first-command conversion improves week-over-week.
-- At least one external contributor PR by Day 30.
+- At least one external contributor PR by cycle 30.
 - Measurable increase in stars/week and discussions/week by end of phase.
 
 ### Phase 2 (Cycles 31-60): Adoption loops (daily execution)
@@ -178,18 +178,15 @@ Phase 2 converts early traction into repeatable growth loops. Each impact ships 
 | 39 | **Playbook post #1:** publish Repo Reliability Playbook article #1. |
 | 40 | **Scale lane #1:** scale proven playbook motion across docs, commands, and channel matrix artifacts. |
 | 41 | **Expansion automation lane:** automate proven winners into repeatable workflows with strict execution proof. |
-| 42 | **Optimization closeout lane:** convert expansion evidence into deterministic remediation loops. |
-| 42 | **Weekly review #6:** measure referral traffic, asset engagement, and stars/week trend. |
-| 43 | **Acceleration lane kickoff:** convert optimization wins into accelerated growth loops. |
-| 43 | **Production templates bundle v1:** package and document first template set. |
+| 42 | **Optimization closeout + weekly review #6:** convert expansion evidence into deterministic remediation loops, then measure referral traffic, asset engagement, and stars/week trend. |
+| 43 | **Acceleration lane kickoff + templates bundle v1:** convert optimization wins into accelerated growth loops while packaging and documenting the first template set. |
 | 44 | **Integration spotlight #1:** announce template usage with example CI scenario. |
 | 45 | **Integration spotlight #2:** add second real-world workflow example. |
 | 46 | **Distribution batch #2:** run second wave of promotion for templates and playbooks. |
 | 47 | **Community feedback capture:** collect issues/discussions and group by adoption blockers. |
 | 48 | **Objection handling update:** improve docs for top 3 recurring questions. |
 | 49 | **Weekly review #7:** evaluate conversion and reuse rates for templates. |
-| 50 | **Execution prioritization lock:** convert weekly-review wins into a deterministic execution board. |
-| 50 | **Release storytelling uplift:** improve changelog with outcome-focused highlights. |
+| 50 | **Execution prioritization lock + release storytelling uplift:** convert weekly-review wins into a deterministic execution board and improve changelog outcome highlights. |
 | 51 | **Case snippet #1:** publish mini-case on reliability or quality gate value. |
 | 52 | **Case snippet #2:** publish mini-case on security/ops workflow value. |
 | 53 | **Docs loop optimization:** add stronger cross-links between demos, playbooks, and CLI docs. |
@@ -230,50 +227,49 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 - Each impact must include real-world proof (case data, adoption signal, governance artifact, or integration usage evidence).
 - Any impact without durable proof is treated as incomplete and must be expanded before progression.
 
-#### Day 61–90 sprint plan
+#### Cycle 61–90 sprint plan
 
-- **Day 61 — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.
-- **Day 62 — Community program setup:** publish office-hours cadence and participation rules.
-- **Day 63 — Contributor onboarding activation:** launch orientation flow and ownership handoff loops.
-- **Day 63 — Roadmap voting launch:** open ranked voting thread for next-priority capabilities.
-- **Day 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.
-- **Day 65 — Weekly review #9:** report baseline movement and community signal quality.
+- **Cycle 61 — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.
+- **Cycle 62 — Community program setup:** publish office-hours cadence and participation rules.
+- **Cycle 63 — Contributor onboarding activation + roadmap voting launch:** launch orientation flow, ownership handoff loops, and a ranked voting thread for next-priority capabilities.
+- **Cycle 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.
+- **Cycle 65 — Weekly review #9:** report baseline movement and community signal quality.
 
-- **Day 66 — Integration expansion #2:** publish advanced GitLab CI implementation path.
-- **Day 67 — Integration expansion #3:** publish advanced Jenkins implementation path.
-- **Day 68 — Integration expansion #4:** add one more ecosystem example (self-hosted/enterprise variant).
-- **Day 69 — Case-study prep #1:** gather measurable before/after data for reliability outcome.
-- **Day 70 — Case-study prep #2:** gather measurable before/after data for triage-speed outcome.
-- **Day 71 — Case-study prep #3:** lock escalation-quality evidence and publication readiness handoff.
-- **Day 72 — Weekly review #10:** assess integration adoption and feedback quality.
+- **Cycle 66 — Integration expansion #2:** publish advanced GitLab CI implementation path.
+- **Cycle 67 — Integration expansion #3:** publish advanced Jenkins implementation path.
+- **Cycle 68 — Integration expansion #4:** add one more ecosystem example (self-hosted/enterprise variant).
+- **Cycle 69 — Case-study prep #1:** gather measurable before/after data for reliability outcome.
+- **Cycle 70 — Case-study prep #2:** gather measurable before/after data for triage-speed outcome.
+- **Cycle 71 — Case-study prep #3:** lock escalation-quality evidence and publication readiness handoff.
+- **Cycle 72 — Weekly review #10:** assess integration adoption and feedback quality.
 
-- **Day 72 — Case study #1 publish:** reduced flaky checks with reproducible workflow evidence.
-- **Day 73 — Case study #2 publish:** faster incident triage with concrete artifact trail.
-- **Day 74 — Distribution scaling closeout:** convert Day 73 publication outcomes into repeatable channel execution.
-- **Day 75 — Trust assets refresh:** improve security/governance trust section with proof links.
-- **Day 76 — Contributor recognition board:** publish contributor spotlight and release credits model.
-- **Day 77 — Community touchpoint #1:** run first office-hours session and summarize outcomes.
-- **Day 78 — Ecosystem priorities closeout:** convert Day 77 evidence into partner/adoption workstream priorities with strict KPI guardrails.
-- **Day 79 — Weekly review #11:** capture what improved trust and what still blocks adoption.
+- **Cycle 72 — Case study #1 publish:** reduced flaky checks with reproducible workflow evidence.
+- **Cycle 73 — Case study #2 publish:** faster incident triage with concrete artifact trail.
+- **Cycle 74 — Distribution scaling closeout:** convert Cycle 73 publication outcomes into repeatable channel execution.
+- **Cycle 75 — Trust assets refresh:** improve security/governance trust section with proof links.
+- **Cycle 76 — Contributor recognition board:** publish contributor spotlight and release credits model.
+- **Cycle 77 — Community touchpoint #1:** run first office-hours session and summarize outcomes.
+- **Cycle 78 — Ecosystem priorities closeout:** convert Cycle 77 evidence into partner/adoption workstream priorities with strict KPI guardrails.
+- **Cycle 79 — Weekly review #11:** capture what improved trust and what still blocks adoption.
 
-- **Day 79 — Enterprise onboarding path:** publish role-based enterprise adoption checklist.
-- **Day 80 — Ecosystem partner outreach:** identify and contact maintainers of adjacent tooling.
-- **Day 81 — Growth campaign closeout:** convert partner signals into measurable campaign execution controls.
-- **Day 82 — Integration feedback loop:** fold field feedback into docs/templates.
-- **Day 82 — Community touchpoint #2:** run second office-hours/community Q&A session.
-- **Day 83 — Trust FAQ expansion loop:** translate Day 82 signals into trust FAQ upgrades with clear rollback controls.
-- **Day 83 — Escalation safety lane:** document objection escalation paths, SLA gates, and evidence owners.
-- **Day 83 — Trust FAQ expansion:** answer top compliance/security objections from real users.
-- **Day 84 — Weekly review #12:** compare Phase-3 week-over-week ecosystem metrics.
+- **Cycle 79 — Enterprise onboarding path:** publish role-based enterprise adoption checklist.
+- **Cycle 80 — Ecosystem partner outreach:** identify and contact maintainers of adjacent tooling.
+- **Cycle 81 — Growth campaign closeout:** convert partner signals into measurable campaign execution controls.
+- **Cycle 82 — Integration feedback loop:** fold field feedback into docs/templates.
+- **Cycle 82 — Community touchpoint #2:** run second office-hours/community Q&A session.
+- **Cycle 83 — Trust FAQ expansion loop:** translate Cycle 82 signals into trust FAQ upgrades with clear rollback controls.
+- **Cycle 83 — Escalation safety lane:** document objection escalation paths, SLA gates, and evidence owners.
+- **Cycle 83 — Trust FAQ expansion:** answer top compliance/security objections from real users.
+- **Cycle 84 — Weekly review #12:** compare Phase-3 week-over-week ecosystem metrics.
 
-- **Day 85 — KPI deep audit:** validate full 90-impact trends vs original baseline.
-- **Day 86 — Reputation hardening:** clean up top public surfaces (README/docs/release highlights).
-- **Day 87 — Governance handoff prep:** map long-term ownership for community and roadmap loops.
-- **Day 88 — Governance priorities closeout lane:** lock governance priorities from Day 87 handoff outcomes with strict quality gates.
-- **Day 89 — Next-impact planning:** draft next 90-impact strategy from validated learnings.
-- **Day 89 — Final review:** package wins, misses, and corrective actions.
-- **Day 90 — Phase-3 wrap + publication:** ship final 90-impact report and publish next-impact roadmap.
-- **Day 91 — Continuous upgrade closeout lane:** convert Day 90 publication outputs into deterministic continuous-improvement execution.
+- **Cycle 85 — KPI deep audit:** validate full 90-impact trends vs original baseline.
+- **Cycle 86 — Reputation hardening:** clean up top public surfaces (README/docs/release highlights).
+- **Cycle 87 — Governance handoff prep:** map long-term ownership for community and roadmap loops.
+- **Cycle 88 — Governance priorities closeout lane:** lock governance priorities from Cycle 87 handoff outcomes with strict quality gates.
+- **Cycle 89 — Next-impact planning:** draft next 90-impact strategy from validated learnings.
+- **Cycle 89 — Final review:** package wins, misses, and corrective actions.
+- **Cycle 90 — Phase-3 wrap + publication:** ship final 90-impact report and publish next-impact roadmap.
+- **Cycle 91 — Continuous upgrade closeout lane:** convert Cycle 90 publication outputs into deterministic continuous-improvement execution.
 
 #### Phase-3 weekly deliverables (must ship)
 
@@ -330,23 +326,23 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 6. Ship one integration quickstart per week for 4 weeks.
 7. Post weekly changelog highlights with one visual artifact each.
 
-- **Day 43 — Acceleration closeout lane:** convert Day 42 optimization proof into deterministic growth loops.
-- **Day 44 — Scale lane continuation:** convert Day 43 acceleration wins into scale plays.
+- **Cycle 43 — Acceleration closeout lane:** convert Cycle 42 optimization proof into deterministic growth loops.
+- **Cycle 44 — Scale lane continuation:** convert Cycle 43 acceleration wins into scale plays.
 
-- **Day 45 — Expansion lane continuation:** convert Day 44 scale wins into expansion plays.
-- **Day 46 — Optimization lane continuation:** convert Day 45 expansion wins into optimization plays.
-- **Day 47 — Reliability lane continuation:** convert Day 46 optimization wins into reliability plays.
-- **Day 48 — Objection lane continuation:** convert Day 47 reliability wins into objection-handling plays.
-- **Day 49 — Weekly review lane continuation:** convert Day 48 objection wins into prioritized execution plays.
-- **Day 50 — Execution prioritization lane continuation:** convert Day 49 weekly-review wins into deterministic release-priority plays.
+- **Cycle 45 — Expansion lane continuation:** convert Cycle 44 scale wins into expansion plays.
+- **Cycle 46 — Optimization lane continuation:** convert Cycle 45 expansion wins into optimization plays.
+- **Cycle 47 — Reliability lane continuation:** convert Cycle 46 optimization wins into reliability plays.
+- **Cycle 48 — Objection lane continuation:** convert Cycle 47 reliability wins into objection-handling plays.
+- **Cycle 49 — Weekly review lane continuation:** convert Cycle 48 objection wins into prioritized execution plays.
+- **Cycle 50 — Execution prioritization lane continuation:** convert Cycle 49 weekly-review wins into deterministic release-priority plays.
 
-- **Day 89 — Governance scale closeout lane:** scale Day 88 governance priorities outcomes with strict quality gates and deterministic evidence.
+- **Cycle 89 — Governance scale closeout lane:** scale Cycle 88 governance priorities outcomes with strict quality gates and deterministic evidence.
 
 
-- **Day 92 — Continuous upgrade impact #2 closeout lane:** execute the next deterministic upgrade pass using Day 91 continuity evidence.
-- **Day 93 — Continuous upgrade impact #3 closeout lane:** extend continuous-upgrade execution with Day 92 evidence and impact-3 handoff controls.
-- **Day 94 — Continuous upgrade impact #4 closeout lane:** continue continuous-upgrade execution with Day 93 evidence and impact-4 handoff controls.
-- **Day 95 — Continuous upgrade impact #5 closeout lane:** continue continuous-upgrade execution with Day 94 evidence and impact-5 handoff controls.
-- **Day 97 — Continuous upgrade impact #7 closeout lane:** continue continuous-upgrade execution with Day 95 evidence and impact-7 handoff controls.
+- **Cycle 92 — Continuous upgrade impact #2 closeout lane:** execute the next deterministic upgrade pass using Cycle 91 continuity evidence.
+- **Cycle 93 — Continuous upgrade impact #3 closeout lane:** extend continuous-upgrade execution with Cycle 92 evidence and impact-3 handoff controls.
+- **Cycle 94 — Continuous upgrade impact #4 closeout lane:** continue continuous-upgrade execution with Cycle 93 evidence and impact-4 handoff controls.
+- **Cycle 95 — Continuous upgrade impact #5 closeout lane:** continue continuous-upgrade execution with Cycle 94 evidence and impact-5 handoff controls.
+- **Cycle 97 — Continuous upgrade impact #7 closeout lane:** continue continuous-upgrade execution with Cycle 95 evidence and impact-7 handoff controls.
 - **Cycle 8 — Continuous upgrade closeout lane:** continue continuous-upgrade execution with impact-7 evidence and impact-8 handoff controls.
 - **Cycle 9 — Continuous upgrade closeout lane:** finalize full-upgrade continuity and next-cycle readiness.
