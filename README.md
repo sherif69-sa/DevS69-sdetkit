@@ -29,6 +29,14 @@ python -m sdetkit forensics bundle --run examples/kits/forensics/run-b.json --ou
 python -m sdetkit continuous-upgrade-name8-closeout --format json --strict
 ```
 
+## Upgrade planning (first step)
+
+Run a direct dependency audit against PyPI to identify candidate upgrades:
+
+```bash
+make upgrade-audit
+```
+
 ## Sample artifacts
 
 - `examples/kits/intelligence/*`
