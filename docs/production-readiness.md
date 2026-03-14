@@ -44,4 +44,4 @@ Generated artifacts:
 1. Run the readiness check at least weekly.
 2. Track score trend in release planning.
 3. Resolve failed checks before major release milestones.
-4. Pair this with the [Production S-class tier blueprint](production-s-class-90-day-boost.md) for 90-day execution planning.
+4. Pair this with the [Production S-class tier blueprint](production-s-class-90-impact-boost.md) for 90-impact execution planning.

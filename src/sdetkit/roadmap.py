@@ -10,7 +10,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class RoadmapEntry:
-    day: int
+    impact: int
     report_file: str | None
     plan_file: str | None
     report_path: str | None
@@ -43,7 +43,7 @@ def load_manifest() -> list[RoadmapEntry]:
     out: list[RoadmapEntry] = []
 
     for row in data.get("phases", []):
-        day = int(row.get("day"))
+        impact = int(row.get("impact"))
         report_file = row.get("report_file")
         plan_file = row.get("plan_file")
 
@@ -72,7 +72,7 @@ def load_manifest() -> list[RoadmapEntry]:
 
         out.append(
             RoadmapEntry(
-                day=day,
+                impact=impact,
                 report_file=report_file,
                 plan_file=plan_file,
                 report_path=report_path,
@@ -80,20 +80,20 @@ def load_manifest() -> list[RoadmapEntry]:
             )
         )
 
-    out.sort(key=lambda e: e.day)
+    out.sort(key=lambda e: e.impact)
     return out
 
 
-def get_entry(day: int) -> RoadmapEntry | None:
+def get_entry(impact: int) -> RoadmapEntry | None:
     for e in load_manifest():
-        if e.day == day:
+        if e.impact == impact:
             return e
     return None
 
 
 def main(argv: list[str]) -> int:
     if not argv or argv[0] in {"-h", "--help"}:
-        print("usage: sdetkit roadmap {list|show|open} [day] [report|plan]")
+        print("usage: sdetkit roadmap {list|show|open} [impact] [report|plan]")
         return 0
 
     cmd = argv[0]
@@ -104,27 +104,27 @@ def main(argv: list[str]) -> int:
         for entry in entries:
             r = "R" if entry.report_path else "-"
             p = "P" if entry.plan_path else "-"
-            print(f"{entry.day:02d} {r} {p}")
+            print(f"{entry.impact:02d} {r} {p}")
         return 0
 
     if cmd in {"show", "open"}:
         if not rest:
-            print("roadmap: missing day", file=sys.stderr)
+            print("roadmap: missing impact", file=sys.stderr)
             return 2
         try:
-            day = int(rest[0])
+            impact = int(rest[0])
         except ValueError:
-            print("roadmap: invalid day", file=sys.stderr)
+            print("roadmap: invalid impact", file=sys.stderr)
             return 2
 
-        e = get_entry(day)
+        e = get_entry(impact)
         if e is None:
-            print("roadmap: unknown day", file=sys.stderr)
+            print("roadmap: unknown impact", file=sys.stderr)
             return 2
 
         if cmd == "show":
             payload = {
-                "day": e.day,
+                "impact": e.impact,
                 "report_path": e.report_path,
                 "plan_path": e.plan_path,
             }

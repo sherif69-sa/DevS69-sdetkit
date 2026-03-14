@@ -174,10 +174,10 @@ def build_day59_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day59_links",
             "weight": 8,
             "passed": (
-                "day-59-big-upgrade-report.md" in docs_index_text
+                "impact-59-big-upgrade-report.md" in docs_index_text
                 and "integrations-phase3-preplan-closeout.md" in docs_index_text
             ),
-            "evidence": "day-59-big-upgrade-report.md + integrations-phase3-preplan-closeout.md",
+            "evidence": "impact-59-big-upgrade-report.md + integrations-phase3-preplan-closeout.md",
         },
         {
             "check_id": "top10_day59_alignment",

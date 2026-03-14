@@ -210,10 +210,10 @@ def build_day49_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day49_links",
             "weight": 8,
             "passed": (
-                "day-49-big-upgrade-report.md" in docs_index_text
+                "impact-49-big-upgrade-report.md" in docs_index_text
                 and "integrations-weekly-review-closeout.md" in docs_index_text
             ),
-            "evidence": "day-49-big-upgrade-report.md + integrations-weekly-review-closeout.md",
+            "evidence": "impact-49-big-upgrade-report.md + integrations-weekly-review-closeout.md",
         },
         {
             "check_id": "top10_day49_alignment",

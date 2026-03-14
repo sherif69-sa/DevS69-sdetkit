@@ -3,7 +3,7 @@
 ## What shipped
 
 - Added `day95-continuous-upgrade-cycle5-closeout` command to score Day 95 readiness from Day 94 continuous-upgrade artifacts.
-- Added deterministic pack emission and execution evidence generation for cycle-5 continuous-upgrade proof.
+- Added deterministic pack emission and execution evidence generation for impact-5 continuous-upgrade proof.
 - Added strict contract validation script and tests that enforce Day 95 closeout quality gates.
 
 ## Command lane

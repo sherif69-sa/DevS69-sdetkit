@@ -6,7 +6,7 @@ from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
-DAY8_REPORT = Path("docs/day-8-ultra-upgrade-report.md")
+DAY8_REPORT = Path("docs/impact-8-ultra-upgrade-report.md")
 DAY8_ARTIFACT = Path("docs/artifacts/day8-good-first-issues-sample.md")
 DAY8_ISSUE_PACK = Path("docs/artifacts/day8-issue-pack")
 DAY8_MODULE = Path("src/sdetkit/contributor_funnel.py")
@@ -15,7 +15,7 @@ REQUIRED_README_SNIPPETS = [
     "## 🧲 Day 8 ultra: contributor funnel backlog",
     "python -m sdetkit contributor-funnel --format text --strict",
     "python -m sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/day8-issue-pack",
-    "docs/day-8-ultra-upgrade-report.md",
+    "docs/impact-8-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [

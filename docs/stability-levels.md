@@ -8,7 +8,7 @@ This page defines the current stability labels used across docs and CLI help. It
 
 ## Stable/Core
 
-- **Intended audience:** teams making day-to-day go/no-go release decisions.
+- **Intended audience:** teams making impact-to-impact go/no-go release decisions.
 - **Expected stability:** highest stability in this repository; this is the default starting path.
 - **Support expectations:** prioritized for maintenance, docs clarity, and regression prevention.
 - **Backward compatibility:** best-effort compatibility is expected for normal usage; changes should be deliberate and clearly documented.
@@ -34,13 +34,13 @@ Typical examples include `gate`, `doctor`, `security`, `evidence`, and `scripts/
 
 ## Experimental
 
-- **Intended audience:** advanced users and maintainers exploring incubator lanes or historical day/closeout flows.
+- **Intended audience:** advanced users and maintainers exploring incubator lanes or historical impact/closeout flows.
 - **Expected stability:** lower stability and faster iteration; not the first stop for new adopters.
 - **Support expectations:** best-effort maintenance; focus is learning, transition support, and preserving historical value.
 - **Backward compatibility:** may change more quickly, though breaking changes should still be communicated where practical.
 - **How to use in production:** treat as opt-in and validate locally/in CI before relying on it for critical release decisions.
 
-This includes many day/cycle/closeout lanes. They remain available as transition-era and advanced playbook material, not removed.
+This includes many impact/impact/closeout lanes. They remain available as transition-era and advanced playbook material, not removed.
 
 ## Usage guidance
 

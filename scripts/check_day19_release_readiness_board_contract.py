@@ -8,7 +8,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY19_PAGE = Path("docs/integrations-release-readiness-board.md")
-DAY19_REPORT = Path("docs/day-19-ultra-upgrade-report.md")
+DAY19_REPORT = Path("docs/impact-19-ultra-upgrade-report.md")
 DAY19_ARTIFACT = Path("docs/artifacts/day19-release-readiness-board-sample.md")
 DAY19_PACK_SUMMARY = Path(
     "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json"

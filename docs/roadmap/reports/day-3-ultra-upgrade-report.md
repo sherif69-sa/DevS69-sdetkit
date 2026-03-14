@@ -32,7 +32,7 @@ Without a dedicated Day 3 command, proof gathering was manual and inconsistent.
   - Added command reference for `sdetkit proof`.
 - `docs/artifacts/day3-proof-sample.md`
   - Added generated Day 3 proof artifact sample.
-- `docs/day-3-ultra-upgrade-report.md`
+- `docs/impact-3-ultra-upgrade-report.md`
   - Added Day 3 implementation and validation record.
 
 ## Validation checklist

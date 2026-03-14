@@ -20,7 +20,7 @@
       "check_id": "docs_index_day72_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-72-big-upgrade-report.md + integrations-day72-case-study-prep4-closeout.md"
+      "evidence": "impact-72-big-upgrade-report.md + integrations-day72-case-study-prep4-closeout.md"
     },
     {
       "check_id": "top10_day72_alignment",

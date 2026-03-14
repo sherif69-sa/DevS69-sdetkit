@@ -15,7 +15,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/index.md").write_text(
-        "day-78-big-upgrade-report.md\nintegrations-ecosystem-priorities-closeout.md\n",
+        "impact-78-big-upgrade-report.md\nintegrations-ecosystem-priorities-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text("Day 77\nDay 78\n", encoding="utf-8")

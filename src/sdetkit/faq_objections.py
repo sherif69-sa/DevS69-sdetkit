@@ -137,7 +137,7 @@ _SIGNALS = [
         "check_id": "docs_index_day23",
         "category": "discoverability",
         "weight": 7,
-        "marker": "day-23-ultra-upgrade-report.md",
+        "marker": "impact-23-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {

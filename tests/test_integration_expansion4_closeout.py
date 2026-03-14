@@ -16,7 +16,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-68-big-upgrade-report.md\nintegrations-integration-expansion4-closeout.md\n",
+        "impact-68-big-upgrade-report.md\nintegrations-integration-expansion4-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(

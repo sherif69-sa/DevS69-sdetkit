@@ -7,7 +7,7 @@
   "pr_cycle_time": {
     "current_value": "23h",
     "status": "watch",
-    "evidence_link": "scm://analytics/pr-cycle-time-prev"
+    "evidence_link": "scm://analytics/pr-impact-time-prev"
   },
   "critical_vulns": {
     "current_value": "0",

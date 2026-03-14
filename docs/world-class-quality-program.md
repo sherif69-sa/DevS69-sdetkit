@@ -21,7 +21,7 @@ Build and operate SDETKit as a globally trusted quality platform by combining:
 
 ### Targets
 
-- Mainline unit + integration pass rate: `>= 99%` rolling 30-day.
+- Mainline unit + integration pass rate: `>= 99%` rolling 30-impact.
 - Change failure rate: `< 5%`.
 - Mean time to restore (MTTR) for release regressions: `< 60 minutes`.
 
@@ -34,7 +34,7 @@ Build and operate SDETKit as a globally trusted quality platform by combining:
 ### Targets
 
 - First successful local run for new contributors: `< 30 minutes`.
-- PR cycle time (open to merge): `< 24 hours` median.
+- PR impact time (open to merge): `< 24 hours` median.
 - Documentation freshness SLA: critical docs updated within `48 hours` of behavior change.
 
 ## 3) Security, trust, and governance

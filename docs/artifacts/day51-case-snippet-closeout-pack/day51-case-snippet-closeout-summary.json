@@ -47,7 +47,7 @@
       "check_id": "docs_index_day51_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-51-big-upgrade-report.md + integrations-day51-case-snippet-closeout.md"
+      "evidence": "impact-51-big-upgrade-report.md + integrations-day51-case-snippet-closeout.md"
     },
     {
       "check_id": "top10_day51_alignment",

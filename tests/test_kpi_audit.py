@@ -25,7 +25,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("day-27-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text("impact-27-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Day 27 — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).\n",
         encoding="utf-8",

@@ -177,10 +177,10 @@ def build_day84_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any
             "check_id": "docs_index_day84_links",
             "weight": 8,
             "passed": (
-                "day-84-big-upgrade-report.md" in docs_index_text
+                "impact-84-big-upgrade-report.md" in docs_index_text
                 and "integrations-evidence-narrative-closeout.md" in docs_index_text
             ),
-            "evidence": "day-84-big-upgrade-report.md + integrations-evidence-narrative-closeout.md",
+            "evidence": "impact-84-big-upgrade-report.md + integrations-evidence-narrative-closeout.md",
         },
         {
             "check_id": "top10_day84_alignment",

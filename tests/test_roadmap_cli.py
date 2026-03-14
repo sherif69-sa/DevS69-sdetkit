@@ -20,7 +20,7 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
 
     (manifest_dir / "manifest.json").write_text(
         json.dumps(
-            {"phases": [{"day": 1, "report_file": "day01-report.md", "plan_file": "day01-plan.json"}]}
+            {"phases": [{"impact": 1, "report_file": "day01-report.md", "plan_file": "day01-plan.json"}]}
         ),
         encoding="utf-8",
     )
@@ -40,7 +40,7 @@ def test_load_manifest_handles_dot_prefixed_plan_candidates(tmp_path: Path, monk
     dot_plan = tmp_path / ".day02-plan.json"
     dot_plan.write_text("{}", encoding="utf-8")
     (manifest_dir / "manifest.json").write_text(
-        json.dumps({"phases": [{"day": 2, "report_file": None, "plan_file": ".day02-plan.json"}]}),
+        json.dumps({"phases": [{"impact": 2, "report_file": None, "plan_file": ".day02-plan.json"}]}),
         encoding="utf-8",
     )
 
@@ -54,7 +54,7 @@ def test_load_manifest_handles_dot_prefixed_plan_candidates(tmp_path: Path, monk
 
 def test_roadmap_main_show_open_and_error_paths(monkeypatch, capsys, tmp_path: Path) -> None:
     entry = roadmap.RoadmapEntry(
-        day=9,
+        impact=9,
         report_file="day09-report.md",
         plan_file="day09-plan.json",
         report_path="docs/day09-report.md",
@@ -65,7 +65,7 @@ def test_roadmap_main_show_open_and_error_paths(monkeypatch, capsys, tmp_path: P
 
     assert roadmap.main(["show", "9"]) == 0
     show_payload = json.loads(capsys.readouterr().out)
-    assert show_payload["day"] == 9
+    assert show_payload["impact"] == 9
 
     assert roadmap.main(["open", "9", "plan"]) == 0
     open_out = capsys.readouterr().out.strip()
@@ -74,16 +74,16 @@ def test_roadmap_main_show_open_and_error_paths(monkeypatch, capsys, tmp_path: P
     assert roadmap.main(["open", "9", "report"]) == 0
     assert capsys.readouterr().out.strip().endswith("/docs/day09-report.md")
 
-    assert roadmap.main(["show", "not-a-day"]) == 2
-    assert capsys.readouterr().err.strip() == "roadmap: invalid day"
+    assert roadmap.main(["show", "not-a-impact"]) == 2
+    assert capsys.readouterr().err.strip() == "roadmap: invalid impact"
 
     assert roadmap.main(["show", "99"]) == 2
-    assert capsys.readouterr().err.strip() == "roadmap: unknown day"
+    assert capsys.readouterr().err.strip() == "roadmap: unknown impact"
 
 
 def test_roadmap_open_file_not_found_for_selected_kind(monkeypatch, capsys) -> None:
     entry = roadmap.RoadmapEntry(
-        day=10,
+        impact=10,
         report_file="day10-report.md",
         plan_file="day10-plan.json",
         report_path="docs/day10-report.md",
@@ -113,7 +113,7 @@ def test_roadmap_main_list_help_and_unknown_command(monkeypatch, capsys) -> None
     assert out == ["01 - -", "02 R P"]
 
     assert roadmap.main(["open"]) == 2
-    assert capsys.readouterr().err.strip() == "roadmap: missing day"
+    assert capsys.readouterr().err.strip() == "roadmap: missing impact"
 
     assert roadmap.main(["wat"]) == 2
     assert capsys.readouterr().err.strip() == "roadmap: unknown command"

@@ -7,7 +7,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 QUICKSTART_PAGE = Path("docs/integrations-github-actions-quickstart.md")
-DAY15_REPORT = Path("docs/day-15-ultra-upgrade-report.md")
+DAY15_REPORT = Path("docs/impact-15-ultra-upgrade-report.md")
 DAY15_ARTIFACT = Path("docs/artifacts/day15-github-actions-quickstart-sample.md")
 DAY15_PACK_STRICT = Path("docs/artifacts/day15-github-pack/day15-sdetkit-strict.yml")
 DAY15_PACK_NIGHTLY = Path("docs/artifacts/day15-github-pack/day15-sdetkit-nightly.yml")
@@ -20,7 +20,7 @@ README_EXPECTED = [
     "python -m sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/day15-github-pack --format json --strict",
     "python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict",
     "python scripts/check_day15_github_actions_quickstart_contract.py",
-    "docs/day-15-ultra-upgrade-report.md",
+    "docs/impact-15-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [

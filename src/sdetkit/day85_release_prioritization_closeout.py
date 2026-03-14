@@ -177,10 +177,10 @@ def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str,
             "check_id": "docs_index_day85_links",
             "weight": 8,
             "passed": (
-                "day-85-big-upgrade-report.md" in docs_index_text
+                "impact-85-big-upgrade-report.md" in docs_index_text
                 and "integrations-release-prioritization-closeout.md" in docs_index_text
             ),
-            "evidence": "day-85-big-upgrade-report.md + integrations-release-prioritization-closeout.md",
+            "evidence": "impact-85-big-upgrade-report.md + integrations-release-prioritization-closeout.md",
         },
         {
             "check_id": "top10_day85_alignment",

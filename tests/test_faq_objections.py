@@ -9,7 +9,7 @@ from sdetkit import faq_objections as fqo
 
 def _write_fixture(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("day-23-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text("impact-23-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "README.md").write_text(
         "docs/integrations-faq-objections.md\nrelease-narrative\n", encoding="utf-8"
     )

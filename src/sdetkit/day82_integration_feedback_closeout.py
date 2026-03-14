@@ -187,10 +187,10 @@ def build_day82_integration_feedback_closeout_summary(root: Path) -> dict[str, A
             "check_id": "docs_index_day82_links",
             "weight": 8,
             "passed": (
-                "day-82-big-upgrade-report.md" in docs_index_text
+                "impact-82-big-upgrade-report.md" in docs_index_text
                 and "integrations-integration-feedback-closeout.md" in docs_index_text
             ),
-            "evidence": "day-82-big-upgrade-report.md + integrations-integration-feedback-closeout.md",
+            "evidence": "impact-82-big-upgrade-report.md + integrations-integration-feedback-closeout.md",
         },
         {
             "check_id": "top10_day82_alignment",

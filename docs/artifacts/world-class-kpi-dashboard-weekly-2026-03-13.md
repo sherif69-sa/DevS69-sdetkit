@@ -7,7 +7,7 @@ Generated from `docs/artifacts/world-class-kpi-dashboard-baseline.json`.
 - Program: `world-class-quality`
 - Dashboard: `world-class-kpi`
 - Baseline version: `v1`
-- Snapshot window: `rolling-30-day`
+- Snapshot window: `rolling-30-impact`
 - Review cadence: `weekly`
 - KPI coverage: `0/11` with provided metric values
 
@@ -19,7 +19,7 @@ Generated from `docs/artifacts/world-class-kpi-dashboard-baseline.json`.
 | change_failure_rate | reliability | Change failure rate | `<5%` | TODO | TODO | TODO | TODO |
 | release_regression_mttr | reliability | MTTR for release regression | `<60m` | TODO | TODO | TODO | TODO |
 | first_successful_local_run | velocity | First successful local run | `<30m` | TODO | TODO | TODO | TODO |
-| pr_cycle_time | velocity | PR cycle time median | `<24h` | TODO | TODO | TODO | TODO |
+| pr_cycle_time | velocity | PR impact time median | `<24h` | TODO | TODO | TODO | TODO |
 | doc_freshness_sla | velocity | Doc freshness SLA | `100%` | TODO | TODO | TODO | TODO |
 | critical_vulns | trust_security | Critical vulns on default branch | `0` | TODO | TODO | TODO | TODO |
 | security_drift_remediation | trust_security | Security drift remediation | `<72h` | TODO | TODO | TODO | TODO |

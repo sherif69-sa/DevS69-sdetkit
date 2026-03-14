@@ -2,7 +2,7 @@
   "program": "world-class-quality",
   "dashboard": "world-class-kpi",
   "version": "v1",
-  "snapshot_window": "rolling-30-day",
+  "snapshot_window": "rolling-30-impact",
   "review_cadence": "weekly",
   "owners": {
     "reliability": {
@@ -58,7 +58,7 @@
     {
       "id": "pr_cycle_time",
       "lane": "velocity",
-      "metric": "PR cycle time median",
+      "metric": "PR impact time median",
       "target": "<24h",
       "status": "baseline-defined",
       "source": "SCM analytics export"
@@ -113,7 +113,7 @@
     }
   ],
   "next_actions": [
-    "Automate extraction for CI pass rate and PR cycle time.",
+    "Automate extraction for CI pass rate and PR impact time.",
     "Add an evidence-pack coverage check to the release workflow.",
     "Backfill last 4 weeks of KPI values to establish trend lines."
   ]

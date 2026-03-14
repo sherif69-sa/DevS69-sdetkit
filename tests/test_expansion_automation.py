@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-41-big-upgrade-report.md\nintegrations-expansion-automation.md\n",
+        "impact-41-big-upgrade-report.md\nintegrations-expansion-automation.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-expansion-automation.md").write_text(
         d41._DAY41_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-41-big-upgrade-report.md").write_text("# Day 41 report\n", encoding="utf-8")
+    (root / "docs/impact-41-big-upgrade-report.md").write_text("# Day 41 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day40-scale-lane-pack/day40-scale-lane-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)

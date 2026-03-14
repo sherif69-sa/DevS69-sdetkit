@@ -6,7 +6,7 @@ from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
-DAY7_REPORT = Path("docs/day-7-ultra-upgrade-report.md")
+DAY7_REPORT = Path("docs/impact-7-ultra-upgrade-report.md")
 DAY7_ARTIFACT = Path("docs/artifacts/day7-weekly-review-sample.md")
 WEEKLY_MODULE = Path("src/sdetkit/weekly_review.py")
 
@@ -14,7 +14,7 @@ REQUIRED_README_SNIPPETS = [
     "## 📊 Day 7 ultra: weekly review #1",
     "python -m sdetkit weekly-review --format text",
     "python -m sdetkit weekly-review --format markdown --output docs/artifacts/day7-weekly-review-sample.md",
-    "docs/day-7-ultra-upgrade-report.md",
+    "docs/impact-7-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [

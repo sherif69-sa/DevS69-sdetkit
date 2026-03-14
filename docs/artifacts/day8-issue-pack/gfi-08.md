@@ -8,4 +8,4 @@
 
 1. docs/cli.md explains strict-mode exit behavior in one short paragraph.
 2. Example includes strict usage for local + CI context.
-3. No contradictory language with day-3 report.
+3. No contradictory language with impact-3 report.

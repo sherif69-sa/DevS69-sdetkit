@@ -20,7 +20,7 @@
       "check_id": "docs_index_day78_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-78-big-upgrade-report.md + integrations-day78-ecosystem-priorities-closeout.md"
+      "evidence": "impact-78-big-upgrade-report.md + integrations-day78-ecosystem-priorities-closeout.md"
     },
     {
       "check_id": "top10_day78_alignment",

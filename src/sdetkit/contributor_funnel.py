@@ -93,7 +93,7 @@ _DAY8_ISSUES = [
         "acceptance": [
             "docs/cli.md explains strict-mode exit behavior in one short paragraph.",
             "Example includes strict usage for local + CI context.",
-            "No contradictory language with day-3 report.",
+            "No contradictory language with impact-3 report.",
         ],
     },
     {
@@ -109,11 +109,11 @@ _DAY8_ISSUES = [
     },
     {
         "id": "GFI-10",
-        "title": "Create docs snippet for running day contract scripts locally",
+        "title": "Create docs snippet for running impact contract scripts locally",
         "area": "docs",
         "estimate": "S",
         "acceptance": [
-            "Contributing or docs index includes a command block for day contract scripts.",
+            "Contributing or docs index includes a command block for impact contract scripts.",
             "Snippet references at least day6 and day7 script examples.",
             "Instructions remain compatible with bash on Linux/macOS.",
         ],

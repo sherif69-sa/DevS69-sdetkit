@@ -184,10 +184,10 @@ def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, A
             "check_id": "docs_index_day74_links",
             "weight": 8,
             "passed": (
-                "day-74-big-upgrade-report.md" in docs_index_text
+                "impact-74-big-upgrade-report.md" in docs_index_text
                 and "integrations-distribution-scaling-closeout.md" in docs_index_text
             ),
-            "evidence": "day-74-big-upgrade-report.md + integrations-distribution-scaling-closeout.md",
+            "evidence": "impact-74-big-upgrade-report.md + integrations-distribution-scaling-closeout.md",
         },
         {
             "check_id": "top10_day74_alignment",

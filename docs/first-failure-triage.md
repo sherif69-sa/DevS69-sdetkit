@@ -22,7 +22,7 @@ Goal: recover quickly, fix the right thing first, and avoid guessing.
 
 ## When to use each command
 
-- **Use `gate fast`** for first-line triage and day-to-day PR confidence.
+- **Use `gate fast`** for first-line triage and impact-to-impact PR confidence.
 - **Use `doctor --release`** when `gate release` fails and you need release-prerequisite detail.
 - **Use `security enforce`** to evaluate policy budgets (`error`/`warn`/`info`) after quality checks are under control.
 

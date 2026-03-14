@@ -537,7 +537,7 @@ def fetch_json_list_paginated(
             return out
 
         if nxt in seen:
-            raise RuntimeError("pagination cycle")
+            raise RuntimeError("pagination impact")
         seen.add(nxt)
         url = nxt
 
@@ -594,7 +594,7 @@ async def fetch_json_list_paginated_async(
             return out
 
         if nxt in seen:
-            raise RuntimeError("pagination cycle")
+            raise RuntimeError("pagination impact")
         seen.add(nxt)
         url = nxt
 

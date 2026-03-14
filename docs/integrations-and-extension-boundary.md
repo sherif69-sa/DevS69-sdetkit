@@ -52,7 +52,7 @@ Playbooks may iterate faster than core command docs as long as they stay aligned
 Keep material in **Experimental** (or explicitly transition-era) when it is:
 
 - New and not yet proven across multiple adoption contexts.
-- Historical day/cycle/closeout content preserved for auditability.
+- Historical impact/impact/closeout content preserved for auditability.
 - Advanced or niche lanes that are useful for some users but not core onboarding.
 
 Do not remove this content by default; keep it available but clearly secondary in high-traffic docs.

@@ -161,10 +161,10 @@ def build_day30_phase1_wrap_summary(
             "check_id": "docs_index_day30_links",
             "weight": 10,
             "passed": (
-                "day-30-ultra-upgrade-report.md" in docs_index_text
+                "impact-30-ultra-upgrade-report.md" in docs_index_text
                 and "integrations-phase1-wrap.md" in docs_index_text
             ),
-            "evidence": "day-30-ultra-upgrade-report.md + integrations-phase1-wrap.md",
+            "evidence": "impact-30-ultra-upgrade-report.md + integrations-phase1-wrap.md",
         },
         {
             "check_id": "top10_day30_alignment",

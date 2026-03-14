@@ -177,10 +177,10 @@ def build_day87_governance_handoff_closeout_summary(root: Path) -> dict[str, Any
             "check_id": "docs_index_day87_links",
             "weight": 8,
             "passed": (
-                "day-87-big-upgrade-report.md" in docs_index_text
+                "impact-87-big-upgrade-report.md" in docs_index_text
                 and "integrations-governance-handoff-closeout.md" in docs_index_text
             ),
-            "evidence": "day-87-big-upgrade-report.md + integrations-governance-handoff-closeout.md",
+            "evidence": "impact-87-big-upgrade-report.md + integrations-governance-handoff-closeout.md",
         },
         {
             "check_id": "top10_day87_alignment",

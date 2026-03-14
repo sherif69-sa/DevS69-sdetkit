@@ -167,6 +167,6 @@ nav:
 exclude_docs: |
   artifacts/**
   roadmap/reports/**
-  day-*-*-report.md
+  impact-*-*-report.md
   integrations-*.md
   !integrations-and-extension-boundary.md

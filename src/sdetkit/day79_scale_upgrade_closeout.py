@@ -178,10 +178,10 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day79_links",
             "weight": 8,
             "passed": (
-                "day-79-big-upgrade-report.md" in docs_index_text
+                "impact-79-big-upgrade-report.md" in docs_index_text
                 and "integrations-scale-upgrade-closeout.md" in docs_index_text
             ),
-            "evidence": "day-79-big-upgrade-report.md + integrations-scale-upgrade-closeout.md",
+            "evidence": "impact-79-big-upgrade-report.md + integrations-scale-upgrade-closeout.md",
         },
         {
             "check_id": "top10_day79_alignment",

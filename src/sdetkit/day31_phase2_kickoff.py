@@ -129,8 +129,8 @@ def _backlog_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day31 = any("day 31" in line for line in lines)
-    has_day32 = any("day 32" in line for line in lines)
+    has_day31 = any("impact 31" in line for line in lines)
+    has_day32 = any("impact 32" in line for line in lines)
     return item_count, has_day31, has_day32
 
 
@@ -199,10 +199,10 @@ def build_day31_phase2_kickoff_summary(
             "check_id": "docs_index_day31_links",
             "weight": 8,
             "passed": (
-                "day-31-ultra-upgrade-report.md" in docs_index_text
+                "impact-31-ultra-upgrade-report.md" in docs_index_text
                 and "integrations-phase2-kickoff.md" in docs_index_text
             ),
-            "evidence": "day-31-ultra-upgrade-report.md + integrations-phase2-kickoff.md",
+            "evidence": "impact-31-ultra-upgrade-report.md + integrations-phase2-kickoff.md",
         },
         {
             "check_id": "top10_day31_alignment",
@@ -390,7 +390,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day31-baseline-snapshot.json",
         json.dumps(
             {
-                "day": 31,
+                "impact": 31,
                 "baseline": {
                     "day30_activation_score": payload["rollup"]["day30_activation_score"],
                     "day30_average_activation_score": payload["rollup"][

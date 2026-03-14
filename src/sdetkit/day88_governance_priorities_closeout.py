@@ -177,10 +177,10 @@ def build_day88_governance_priorities_closeout_summary(root: Path) -> dict[str, 
             "check_id": "docs_index_day88_links",
             "weight": 8,
             "passed": (
-                "day-88-big-upgrade-report.md" in docs_index_text
+                "impact-88-big-upgrade-report.md" in docs_index_text
                 and "integrations-governance-priorities-closeout.md" in docs_index_text
             ),
-            "evidence": "day-88-big-upgrade-report.md + integrations-governance-priorities-closeout.md",
+            "evidence": "impact-88-big-upgrade-report.md + integrations-governance-priorities-closeout.md",
         },
         {
             "check_id": "top10_day88_alignment",

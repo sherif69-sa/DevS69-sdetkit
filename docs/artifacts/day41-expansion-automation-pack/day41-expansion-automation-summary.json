@@ -47,7 +47,7 @@
       "check_id": "docs_index_day41_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-41-big-upgrade-report.md + integrations-day41-expansion-automation.md"
+      "evidence": "impact-41-big-upgrade-report.md + integrations-day41-expansion-automation.md"
     },
     {
       "check_id": "top10_day41_alignment",

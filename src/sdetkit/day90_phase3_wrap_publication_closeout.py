@@ -38,7 +38,7 @@ _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 90 phase-3 wrap publication execution and signoff.",
     "The Day 90 lane references Day 89 outcomes, controls, and trust continuity signals.",
     "Every Day 90 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-cycle roadmap inputs.",
+    "Day 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -52,7 +52,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 90 phase-3 wrap publication plan committed",
     "- [ ] Day 90 narrative template upgrade ledger exported",
     "- [ ] Day 90 storyline outcomes ledger exported",
-    "- [ ] Next-cycle roadmap draft captured from Day 90 outcomes",
+    "- [ ] Next-impact roadmap draft captured from Day 90 outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -71,7 +71,7 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 
 - Converts Day 89 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 90 closeout into the next-cycle roadmap.
+- Creates a deterministic handoff from Day 90 closeout into the next-impact roadmap.
 
 ## Required inputs (Day 89)
 
@@ -93,7 +93,7 @@ python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 - Single owner + backup reviewer are assigned for Day 90 phase-3 wrap publication execution and signoff.
 - The Day 90 lane references Day 89 outcomes, controls, and trust continuity signals.
 - Every Day 90 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-cycle roadmap inputs.
+- Day 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
 
 ## Phase-3 wrap publication quality checklist
 
@@ -109,7 +109,7 @@ python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 - [ ] Day 90 phase-3 wrap publication plan committed
 - [ ] Day 90 narrative template upgrade ledger exported
 - [ ] Day 90 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Day 90 outcomes
+- [ ] Next-impact roadmap draft captured from Day 90 outcomes
 
 ## Scoring model
 
@@ -177,10 +177,10 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
             "check_id": "docs_index_day90_links",
             "weight": 8,
             "passed": (
-                "day-90-big-upgrade-report.md" in docs_index_text
+                "impact-90-big-upgrade-report.md" in docs_index_text
                 and "integrations-phase3-wrap-publication-closeout.md" in docs_index_text
             ),
-            "evidence": "day-90-big-upgrade-report.md + integrations-phase3-wrap-publication-closeout.md",
+            "evidence": "impact-90-big-upgrade-report.md + integrations-phase3-wrap-publication-closeout.md",
         },
         {
             "check_id": "top10_day90_alignment",
@@ -299,7 +299,7 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 90 phase-3 wrap publication closeout lane is fully complete and ready for next-cycle roadmap execution."
+            "Day 90 phase-3 wrap publication closeout lane is fully complete and ready for next-impact roadmap execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))

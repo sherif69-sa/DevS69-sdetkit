@@ -21,7 +21,7 @@ Machine-readable baseline: `docs/artifacts/world-class-kpi-dashboard-baseline.js
 | Change failure rate | Releases requiring rollback or hotfix / total releases in rolling 30 cycles | `< 5%` | Release board + changelog incidents |
 | MTTR for release regression | Time from regression detection to verified recovery | `< 60 minutes` | Incident timeline artifacts |
 | First successful local run | Time from clone to first successful `make test` for new contributor cohort | `< 30 minutes` | Onboarding diary samples |
-| PR cycle time | Median time from PR open to merge | `< 24 hours` | SCM analytics export |
+| PR impact time | Median time from PR open to merge | `< 24 hours` | SCM analytics export |
 | Doc freshness SLA | Critical docs updated within 48h of behavior changes | `100%` compliance | Docs PR labels + merged timestamps |
 | Critical vulns on default branch | Open critical vulnerabilities affecting supported branch | `0` | Security scan reports |
 | Security drift remediation | Time from baseline drift detection to fix merge | `< 72 hours` | Security baseline incidents |
@@ -41,7 +41,7 @@ Machine-readable baseline: `docs/artifacts/world-class-kpi-dashboard-baseline.js
 
 - [x] Add first weekly snapshot artifact (`docs/artifacts/world-class-kpi-dashboard-weekly-2026-03-13.md`).
 - [ ] Automate CI pass-rate extraction from workflow history.
-- [ ] Automate PR cycle time extraction from SCM analytics export.
+- [ ] Automate PR impact time extraction from SCM analytics export.
 - [ ] Wire release evidence-pack coverage into release preflight checks.
 - [ ] Backfill last 4 weeks of KPI values.
 
@@ -67,6 +67,6 @@ python scripts/generate_world_class_kpi_snapshot.py \
 
 ## Immediate next actions
 
-- Automate extraction for CI pass rate and PR cycle time.
+- Automate extraction for CI pass rate and PR impact time.
 - Add an evidence-pack coverage check to the release workflow.
 - Backfill last 4 weeks of KPI values to establish trend lines.

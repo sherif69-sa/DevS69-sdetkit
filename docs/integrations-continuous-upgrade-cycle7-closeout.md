@@ -1,6 +1,6 @@
 # Continuous Upgrade Cycle 7 Closeout — Continuous upgrade closeout lane
 
-Continuous Upgrade Cycle 7 continues the next-cycle motion by converting prior cycle publication outcomes into a deterministic continuous-upgrade lane.
+Continuous Upgrade Cycle 7 continues the next-impact motion by converting prior impact publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Cycle 7 matters
 
@@ -45,7 +45,7 @@ python scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py
 - [ ] Day 97 continuous upgrade plan committed
 - [ ] Day 97 upgrade template upgrade ledger exported
 - [ ] Day 97 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Day 97 outcomes
+- [ ] Next-impact roadmap draft captured from Day 97 outcomes
 
 ## Scoring model
 

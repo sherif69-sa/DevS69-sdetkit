@@ -20,7 +20,7 @@
       "check_id": "docs_index_day68_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-68-big-upgrade-report.md + integrations-day68-integration-expansion4-closeout.md"
+      "evidence": "impact-68-big-upgrade-report.md + integrations-day68-integration-expansion4-closeout.md"
     },
     {
       "check_id": "top10_day68_alignment",

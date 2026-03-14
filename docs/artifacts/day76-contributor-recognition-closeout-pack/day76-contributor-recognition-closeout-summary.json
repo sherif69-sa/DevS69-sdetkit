@@ -20,7 +20,7 @@
       "check_id": "docs_index_day76_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-76-big-upgrade-report.md + integrations-day76-contributor-recognition-closeout.md"
+      "evidence": "impact-76-big-upgrade-report.md + integrations-day76-contributor-recognition-closeout.md"
     },
     {
       "check_id": "top10_day76_alignment",

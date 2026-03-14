@@ -66,9 +66,9 @@ depends_on = ["a"]
     try:
         _load_workflow(path)
     except ValueError as exc:
-        assert "cycle" in str(exc)
+        assert "impact" in str(exc)
     else:
-        raise AssertionError("expected cycle")
+        raise AssertionError("expected impact")
 
 
 def test_variable_interpolation() -> None:

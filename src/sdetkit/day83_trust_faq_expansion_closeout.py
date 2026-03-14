@@ -187,10 +187,10 @@ def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, An
             "check_id": "docs_index_day83_links",
             "weight": 8,
             "passed": (
-                "day-83-big-upgrade-report.md" in docs_index_text
+                "impact-83-big-upgrade-report.md" in docs_index_text
                 and "integrations-trust-faq-expansion-closeout.md" in docs_index_text
             ),
-            "evidence": "day-83-big-upgrade-report.md + integrations-trust-faq-expansion-closeout.md",
+            "evidence": "impact-83-big-upgrade-report.md + integrations-trust-faq-expansion-closeout.md",
         },
         {
             "check_id": "top10_day83_alignment",

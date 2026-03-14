@@ -20,18 +20,18 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-91-big-upgrade-report.md\nintegrations-continuous-upgrade-closeout.md\n",
+        "impact-91-big-upgrade-report.md\nintegrations-continuous-upgrade-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Day 90 — Phase-3 wrap publication closeout lane:** close Day 90 publication quality loop.\n"
-        "- **Day 91 — Continuous upgrade closeout lane:** start next-cycle continuous upgrade execution.\n",
+        "- **Day 91 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-closeout.md").write_text(
         d91._DAY91_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-91-big-upgrade-report.md").write_text("# Day 91 report\n", encoding="utf-8")
+    (root / "docs/impact-91-big-upgrade-report.md").write_text("# Day 91 report\n", encoding="utf-8")
     (root / "scripts").mkdir(parents=True, exist_ok=True)
     (root / "scripts/check_day91_continuous_upgrade_closeout_contract.py").write_text(
         "from __future__ import annotations\n"
@@ -67,7 +67,7 @@ def _seed_repo(root: Path) -> None:
                 "- [ ] Day 90 phase-3 wrap publication plan committed",
                 "- [ ] Day 90 narrative template upgrade ledger exported",
                 "- [ ] Day 90 storyline outcomes ledger exported",
-                "- [ ] Next-cycle roadmap draft captured from Day 90 outcomes",
+                "- [ ] Next-impact roadmap draft captured from Day 90 outcomes",
             ]
         )
         + "\n",

@@ -9,7 +9,7 @@ from sdetkit import community_activation as ca
 
 def _seed(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("day-25-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text("impact-25-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "README.md").write_text(
         "docs/integrations-community-activation.md\ncommunity-activation\n", encoding="utf-8"
     )

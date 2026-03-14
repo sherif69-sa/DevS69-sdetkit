@@ -47,7 +47,7 @@
       "check_id": "docs_index_day48_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-48-big-upgrade-report.md + integrations-day48-objection-closeout.md"
+      "evidence": "impact-48-big-upgrade-report.md + integrations-day48-objection-closeout.md"
     },
     {
       "check_id": "top10_day48_alignment",

@@ -7,7 +7,7 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY14_REPORT = Path("docs/day-14-ultra-upgrade-report.md")
+DAY14_REPORT = Path("docs/impact-14-ultra-upgrade-report.md")
 DAY14_ARTIFACT = Path("docs/artifacts/day14-weekly-review-sample.md")
 DAY14_SIGNALS = Path("docs/artifacts/day14-growth-signals.json")
 DAY7_SIGNALS = Path("docs/artifacts/day7-growth-signals.json")
@@ -21,7 +21,7 @@ README_EXPECTED = [
     "python -m sdetkit weekly-review --week 2 --format text --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json",
     "python -m sdetkit weekly-review --week 2 --emit-pack-dir docs/artifacts/day14-weekly-pack --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/day7-growth-signals.json --format json --strict",
     "python scripts/check_day14_weekly_review_contract.py",
-    "docs/day-14-ultra-upgrade-report.md",
+    "docs/impact-14-ultra-upgrade-report.md",
 ]
 
 INDEX_EXPECTED = [

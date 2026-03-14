@@ -33,7 +33,7 @@ This made first-command onboarding brittle and slowed trust-building during repo
   - Corrected Phase-1 strategy anchor target used in links.
 - `docs/index.md`
   - Added Day 5 and Day 6 report links plus execution bullets.
-  - Corrected strategy anchor links for day-plan navigation.
+  - Corrected strategy anchor links for impact-plan navigation.
 - `docs/cli.md`
   - Added `docs-qa` command reference and usage examples.
 - `docs/artifacts/day1-onboarding-sample.md`

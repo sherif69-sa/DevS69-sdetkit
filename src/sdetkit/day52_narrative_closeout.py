@@ -214,10 +214,10 @@ def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day52_links",
             "weight": 8,
             "passed": (
-                "day-52-big-upgrade-report.md" in docs_index_text
+                "impact-52-big-upgrade-report.md" in docs_index_text
                 and "integrations-narrative-closeout.md" in docs_index_text
             ),
-            "evidence": "day-52-big-upgrade-report.md + integrations-narrative-closeout.md",
+            "evidence": "impact-52-big-upgrade-report.md + integrations-narrative-closeout.md",
         },
         {
             "check_id": "top10_day52_alignment",

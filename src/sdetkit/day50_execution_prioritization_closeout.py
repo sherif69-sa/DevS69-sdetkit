@@ -214,10 +214,10 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
             "check_id": "docs_index_day50_links",
             "weight": 8,
             "passed": (
-                "day-50-big-upgrade-report.md" in docs_index_text
+                "impact-50-big-upgrade-report.md" in docs_index_text
                 and "integrations-execution-prioritization-closeout.md" in docs_index_text
             ),
-            "evidence": "day-50-big-upgrade-report.md + integrations-execution-prioritization-closeout.md",
+            "evidence": "impact-50-big-upgrade-report.md + integrations-execution-prioritization-closeout.md",
         },
         {
             "check_id": "top10_day50_alignment",

@@ -57,7 +57,7 @@ def _default_plan() -> list[dict[str, Any]]:
             "deliverables": [
                 "Quarterly operating cadence (QBR, risk review, architecture council).",
                 "Production excellence handbook for onboarding and cross-team consistency.",
-                "Phase closeout board with next 90-day backlog and owners.",
+                "Phase closeout board with next 90-impact backlog and owners.",
             ],
             "kpis": {
                 "change_failure_rate": "< 10%",
@@ -86,7 +86,7 @@ def build_phase_boost_payload(repo_name: str, start_date: str) -> dict[str, Any]
 
 def _as_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# S-class production readiness \u2014 90-day phase boost",
+        "# S-class production readiness \u2014 90-impact phase boost",
         "",
         f"- **Repository:** {payload['repository']}",
         f"- **Start date:** {payload['start_date']}",
@@ -124,20 +124,20 @@ def _as_markdown(payload: dict[str, Any]) -> str:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m sdetkit phase-boost",
-        description="Generate a production-ready 90-day, 3-phase boost plan.",
+        description="Generate a production-ready 90-impact, 3-phase boost plan.",
     )
     parser.add_argument("--repo-name", default="DevS69-sdetkit", help="Repository name in output.")
     parser.add_argument("--start-date", default="TBD", help="Program start date label.")
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("docs/artifacts/production-s-class-90-day-plan.md"),
+        default=Path("docs/artifacts/production-s-class-90-impact-plan.md"),
         help="Markdown output path.",
     )
     parser.add_argument(
         "--json-output",
         type=Path,
-        default=Path("docs/artifacts/production-s-class-90-day-plan.json"),
+        default=Path("docs/artifacts/production-s-class-90-impact-plan.json"),
         help="JSON output path.",
     )
     return parser

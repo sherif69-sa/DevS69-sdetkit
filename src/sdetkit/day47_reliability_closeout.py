@@ -210,10 +210,10 @@ def build_day47_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day47_links",
             "weight": 8,
             "passed": (
-                "day-47-big-upgrade-report.md" in docs_index_text
+                "impact-47-big-upgrade-report.md" in docs_index_text
                 and "integrations-reliability-closeout.md" in docs_index_text
             ),
-            "evidence": "day-47-big-upgrade-report.md + integrations-reliability-closeout.md",
+            "evidence": "impact-47-big-upgrade-report.md + integrations-reliability-closeout.md",
         },
         {
             "check_id": "top10_day47_alignment",

@@ -464,7 +464,7 @@ class SdetHttpClient:
             if not nxt:
                 return out
             if nxt in seen:
-                raise RuntimeError("pagination cycle")
+                raise RuntimeError("pagination impact")
             seen.add(nxt)
             cur = nxt
 
@@ -520,7 +520,7 @@ class SdetHttpClient:
                 raise ValueError(f"expected string or null at key '{next_key}'")
             nxt = str(urljoin(str(r.url), nxt_raw))
             if nxt in seen:
-                raise RuntimeError("pagination cycle")
+                raise RuntimeError("pagination impact")
             seen.add(nxt)
             cur = nxt
 
@@ -842,7 +842,7 @@ class SdetAsyncHttpClient:
             if not nxt:
                 return out
             if nxt in seen:
-                raise RuntimeError("pagination cycle")
+                raise RuntimeError("pagination impact")
             seen.add(nxt)
             cur = nxt
 

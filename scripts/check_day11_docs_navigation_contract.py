@@ -6,7 +6,7 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY11_REPORT = Path("docs/day-11-ultra-upgrade-report.md")
+DAY11_REPORT = Path("docs/impact-11-ultra-upgrade-report.md")
 DAY11_ARTIFACT = Path("docs/artifacts/day11-docs-navigation-sample.md")
 
 README_EXPECTED = [
@@ -14,11 +14,11 @@ README_EXPECTED = [
     "python -m sdetkit docs-nav --format text --strict",
     "python -m sdetkit docs-nav --write-defaults --format json --strict",
     "python scripts/check_day11_docs_navigation_contract.py",
-    "docs/day-11-ultra-upgrade-report.md",
+    "docs/impact-11-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [
-    "[🧭 Day 11 ultra report](day-11-ultra-upgrade-report.md)",
+    "[🧭 Day 11 ultra report](impact-11-ultra-upgrade-report.md)",
     "## Day 11 ultra upgrades (docs navigation tune-up)",
     "sdetkit docs-nav --format text --strict",
     "sdetkit docs-nav --write-defaults --format json --strict",

@@ -208,10 +208,10 @@ def build_day55_contributor_activation_closeout_summary(root: Path) -> dict[str,
             "check_id": "docs_index_day55_links",
             "weight": 8,
             "passed": (
-                "day-55-big-upgrade-report.md" in docs_index_text
+                "impact-55-big-upgrade-report.md" in docs_index_text
                 and "integrations-contributor-activation-closeout.md" in docs_index_text
             ),
-            "evidence": "day-55-big-upgrade-report.md + integrations-contributor-activation-closeout.md",
+            "evidence": "impact-55-big-upgrade-report.md + integrations-contributor-activation-closeout.md",
         },
         {
             "check_id": "top10_day55_alignment",

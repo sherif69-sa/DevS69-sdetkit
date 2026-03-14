@@ -180,10 +180,10 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
             "check_id": "docs_index_day78_links",
             "weight": 8,
             "passed": (
-                "day-78-big-upgrade-report.md" in docs_index_text
+                "impact-78-big-upgrade-report.md" in docs_index_text
                 and "integrations-ecosystem-priorities-closeout.md" in docs_index_text
             ),
-            "evidence": "day-78-big-upgrade-report.md + integrations-ecosystem-priorities-closeout.md",
+            "evidence": "impact-78-big-upgrade-report.md + integrations-ecosystem-priorities-closeout.md",
         },
         {
             "check_id": "top10_day78_alignment",

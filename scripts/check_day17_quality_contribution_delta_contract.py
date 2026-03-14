@@ -6,7 +6,7 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY17_REPORT = Path("docs/day-17-ultra-upgrade-report.md")
+DAY17_REPORT = Path("docs/impact-17-ultra-upgrade-report.md")
 DAY17_ARTIFACT = Path("docs/artifacts/day17-quality-contribution-delta-sample.md")
 DAY17_PACK_SUMMARY = Path("docs/artifacts/day17-delta-pack/day17-delta-summary.json")
 DAY17_PACK_ACTION = Path("docs/artifacts/day17-delta-pack/day17-contribution-action-plan.md")

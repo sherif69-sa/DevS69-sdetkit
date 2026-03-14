@@ -183,10 +183,10 @@ def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, A
             "check_id": "docs_index_day75_links",
             "weight": 8,
             "passed": (
-                "day-75-big-upgrade-report.md" in docs_index_text
+                "impact-75-big-upgrade-report.md" in docs_index_text
                 and "integrations-trust-assets-refresh-closeout.md" in docs_index_text
             ),
-            "evidence": "day-75-big-upgrade-report.md + integrations-trust-assets-refresh-closeout.md",
+            "evidence": "impact-75-big-upgrade-report.md + integrations-trust-assets-refresh-closeout.md",
         },
         {
             "check_id": "top10_day75_alignment",

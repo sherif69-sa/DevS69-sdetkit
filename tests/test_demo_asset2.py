@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-34-ultra-upgrade-report.md\nintegrations-demo-asset2.md\n",
+        "impact-34-ultra-upgrade-report.md\nintegrations-demo-asset2.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-demo-asset2.md").write_text(
         d34._DAY34_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-34-ultra-upgrade-report.md").write_text("# Day 34 report\n", encoding="utf-8")
+    (root / "docs/impact-34-ultra-upgrade-report.md").write_text("# Day 34 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)

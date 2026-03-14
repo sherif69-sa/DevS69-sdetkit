@@ -37,8 +37,8 @@ Without those answers above-the-fold, conversion from visit → first command ru
 - `docs/index.md`
   - Added direct navigation link to this Day 1 report.
   - Added Day 1 ultra upgrades section before Fast start.
-- `docs/day-1-ultra-upgrade-report.md`
-  - Added day artifact and validation record.
+- `docs/impact-1-ultra-upgrade-report.md`
+  - Added impact artifact and validation record.
 
 ## Validation checklist
 

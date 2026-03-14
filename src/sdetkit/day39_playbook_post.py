@@ -145,8 +145,8 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day38 = any("day 38" in line for line in lines)
-    has_day39 = any("day 39" in line for line in lines)
+    has_day38 = any("impact 38" in line for line in lines)
+    has_day39 = any("impact 39" in line for line in lines)
     return item_count, has_day38, has_day39
 
 
@@ -216,10 +216,10 @@ def build_day39_playbook_post_summary(
             "check_id": "docs_index_day39_links",
             "weight": 8,
             "passed": (
-                "day-39-big-upgrade-report.md" in docs_index_text
+                "impact-39-big-upgrade-report.md" in docs_index_text
                 and "integrations-playbook-post.md" in docs_index_text
             ),
-            "evidence": "day-39-big-upgrade-report.md + integrations-playbook-post.md",
+            "evidence": "impact-39-big-upgrade-report.md + integrations-playbook-post.md",
         },
         {
             "check_id": "top10_day39_alignment",
@@ -423,7 +423,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day39-rollout-plan.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
         "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-playbook-post.md,python -m sdetkit playbook-post --format json --strict,completion:+5%\n"
-        "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-39-big-upgrade-report.md,python scripts/check_playbook_post_contract.py,adoption:+7%\n"
+        "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/impact-39-big-upgrade-report.md,python scripts/check_playbook_post_contract.py,adoption:+7%\n"
         "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict,ctr:+2%\n",
     )
     _write(

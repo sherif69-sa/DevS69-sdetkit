@@ -343,7 +343,7 @@ def _validate_graph(wf: WorkflowDef) -> None:
         if node not in by_id:
             raise ValueError(f"unknown dependency: {node}")
         if state[node] == 1:
-            raise ValueError("cycle detected")
+            raise ValueError("impact detected")
         if state[node] == 2:
             return
         state[node] = 1
@@ -395,7 +395,7 @@ def _resolve_order(wf: WorkflowDef) -> list[str]:
                 ready.append(nxt)
                 ready.sort()
     if len(out) != len(wf.steps):
-        raise ValueError("cycle detected")
+        raise ValueError("impact detected")
     return out
 
 

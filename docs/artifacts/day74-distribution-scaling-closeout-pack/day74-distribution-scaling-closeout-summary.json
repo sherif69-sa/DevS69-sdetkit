@@ -20,7 +20,7 @@
       "check_id": "docs_index_day74_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-74-big-upgrade-report.md + integrations-day74-distribution-scaling-closeout.md"
+      "evidence": "impact-74-big-upgrade-report.md + integrations-day74-distribution-scaling-closeout.md"
     },
     {
       "check_id": "top10_day74_alignment",

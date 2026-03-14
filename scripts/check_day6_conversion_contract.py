@@ -6,7 +6,7 @@ from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
-DAY6_REPORT = Path("docs/day-6-ultra-upgrade-report.md")
+DAY6_REPORT = Path("docs/impact-6-ultra-upgrade-report.md")
 DAY6_ARTIFACT = Path("docs/artifacts/day6-conversion-qa-sample.md")
 DOCS_QA_MODULE = Path("src/sdetkit/docs_qa.py")
 
@@ -14,7 +14,7 @@ REQUIRED_README_SNIPPETS = [
     "## 🔗 Day 6 ultra: conversion QA hardening",
     "python -m sdetkit docs-qa --format text",
     "python -m sdetkit docs-qa --format markdown --output docs/artifacts/day6-conversion-qa-sample.md",
-    "docs/day-6-ultra-upgrade-report.md",
+    "docs/impact-6-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [

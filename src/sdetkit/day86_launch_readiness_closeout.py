@@ -179,10 +179,10 @@ def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day86_links",
             "weight": 8,
             "passed": (
-                "day-86-big-upgrade-report.md" in docs_index_text
+                "impact-86-big-upgrade-report.md" in docs_index_text
                 and "integrations-launch-readiness-closeout.md" in docs_index_text
             ),
-            "evidence": "day-86-big-upgrade-report.md + integrations-launch-readiness-closeout.md",
+            "evidence": "impact-86-big-upgrade-report.md + integrations-launch-readiness-closeout.md",
         },
         {
             "check_id": "top10_day86_alignment",

@@ -6,18 +6,18 @@ import sys
 from pathlib import Path
 
 README = Path("README.md")
-DAY3_REPORT = Path("docs/day-3-ultra-upgrade-report.md")
+DAY3_REPORT = Path("docs/impact-3-ultra-upgrade-report.md")
 DAY3_ARTIFACT = Path("docs/artifacts/day3-proof-sample.md")
 
 REQUIRED_README_SNIPPETS = [
     "## 📸 Day 3 ultra: proof pack",
     "python -m sdetkit proof --execute --strict --format text",
     "python -m sdetkit proof --execute --strict --format markdown --output docs/artifacts/day3-proof-sample.md",
-    "docs/day-3-ultra-upgrade-report.md",
+    "docs/impact-3-ultra-upgrade-report.md",
 ]
 
 REQUIRED_DAY3_SECTION_LINKS = [
-    "docs/day-3-ultra-upgrade-report.md",
+    "docs/impact-3-ultra-upgrade-report.md",
     "docs/artifacts/day3-proof-sample.md",
 ]
 
@@ -64,7 +64,7 @@ def main() -> int:
             errors.append(f"missing link target: {link}")
 
     if not DAY3_REPORT.exists():
-        errors.append("missing docs/day-3-ultra-upgrade-report.md")
+        errors.append("missing docs/impact-3-ultra-upgrade-report.md")
     else:
         report_text = DAY3_REPORT.read_text(encoding="utf-8")
         for snippet in REQUIRED_REPORT_SNIPPETS:

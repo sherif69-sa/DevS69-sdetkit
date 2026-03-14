@@ -143,8 +143,8 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day39 = any("day 39" in line for line in lines)
-    has_day40 = any("day 40" in line for line in lines)
+    has_day39 = any("impact 39" in line for line in lines)
+    has_day40 = any("impact 40" in line for line in lines)
     return item_count, has_day39, has_day40
 
 
@@ -214,10 +214,10 @@ def build_day40_scale_lane_summary(
             "check_id": "docs_index_day40_links",
             "weight": 8,
             "passed": (
-                "day-40-big-upgrade-report.md" in docs_index_text
+                "impact-40-big-upgrade-report.md" in docs_index_text
                 and "integrations-scale-lane.md" in docs_index_text
             ),
-            "evidence": "day-40-big-upgrade-report.md + integrations-scale-lane.md",
+            "evidence": "impact-40-big-upgrade-report.md + integrations-scale-lane.md",
         },
         {
             "check_id": "top10_day40_alignment",
@@ -419,7 +419,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day40-channel-matrix.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
         "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-scale-lane.md,python -m sdetkit day40-scale-lane --format json --strict,completion:+5%\n"
-        "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/day-40-big-upgrade-report.md,python scripts/check_day40_scale_lane_contract.py,adoption:+7%\n"
+        "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/impact-40-big-upgrade-report.md,python scripts/check_day40_scale_lane_contract.py,adoption:+7%\n"
         "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict,ctr:+2%\n",
     )
     _write(

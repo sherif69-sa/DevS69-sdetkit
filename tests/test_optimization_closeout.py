@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-46-big-upgrade-report.md\nintegrations-optimization-closeout.md\n",
+        "impact-46-big-upgrade-report.md\nintegrations-optimization-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-optimization-closeout.md").write_text(
         d46._DAY46_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-46-big-upgrade-report.md").write_text("# Day 46 report\n", encoding="utf-8")
+    (root / "docs/impact-46-big-upgrade-report.md").write_text("# Day 46 report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"

@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 97 continuous upgrade plan committed",
     "- [ ] Day 97 upgrade template upgrade ledger exported",
     "- [ ] Day 97 storyline outcomes ledger exported",
-    "- [ ] Next-cycle roadmap draft captured from Day 97 outcomes",
+    "- [ ] Next-impact roadmap draft captured from Day 97 outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
     "plan_id",
@@ -114,7 +114,7 @@ python scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py
 - [ ] Day 97 continuous upgrade plan committed
 - [ ] Day 97 upgrade template upgrade ledger exported
 - [ ] Day 97 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Day 97 outcomes
+- [ ] Next-impact roadmap draft captured from Day 97 outcomes
 
 ## Scoring model
 
@@ -240,10 +240,10 @@ def build_day97_continuous_upgrade_cycle7_closeout_summary(root: Path) -> dict[s
             "check_id": "docs_index_day97_links",
             "weight": 8,
             "passed": (
-                "day-97-big-upgrade-report.md" in docs_index_text
+                "impact-97-big-upgrade-report.md" in docs_index_text
                 and "integrations-continuous-upgrade-cycle7-closeout.md" in docs_index_text
             ),
-            "evidence": "day-97-big-upgrade-report.md + integrations-continuous-upgrade-cycle7-closeout.md",
+            "evidence": "impact-97-big-upgrade-report.md + integrations-continuous-upgrade-cycle7-closeout.md",
         },
         {
             "check_id": "top10_day97_align",

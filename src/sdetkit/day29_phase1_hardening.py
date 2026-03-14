@@ -90,7 +90,7 @@ def build_day29_phase1_hardening_summary(
     readme = root / readme_path
     docs_index = root / docs_index_path
     top10 = root / top10_path
-    report = root / "docs/day-29-ultra-upgrade-report.md"
+    report = root / "docs/impact-29-ultra-upgrade-report.md"
 
     page_text = _read(page)
     readme_text = _read(readme)
@@ -144,11 +144,11 @@ def build_day29_phase1_hardening_summary(
             "passed": all(
                 token in docs_index_text
                 for token in [
-                    "day-29-ultra-upgrade-report.md",
+                    "impact-29-ultra-upgrade-report.md",
                     "integrations-phase1-hardening.md",
                 ]
             ),
-            "evidence": "day-29-ultra-upgrade-report.md + integrations-phase1-hardening.md",
+            "evidence": "impact-29-ultra-upgrade-report.md + integrations-phase1-hardening.md",
         },
         {
             "check_id": "top10_day29_alignment",
@@ -192,7 +192,7 @@ def build_day29_phase1_hardening_summary(
             "docs_page": str(page.relative_to(root)) if page.exists() else docs_page_path,
             "report_page": str(report.relative_to(root))
             if report.exists()
-            else "docs/day-29-ultra-upgrade-report.md",
+            else "docs/impact-29-ultra-upgrade-report.md",
         },
         "checks": checks,
         "summary": {

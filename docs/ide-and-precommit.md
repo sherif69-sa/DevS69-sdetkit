@@ -68,4 +68,4 @@ SARIF remains available for compatible IDEs:
 
 - For project-level audits, pair `--all-projects` with `--ide-output` for aggregated diagnostics.
 - Keep baseline and policy files per project where practical.
-- Use `sdetkit dev audit` for day-to-day local checks and `sdetkit dev fix` for quick fix previews.
+- Use `sdetkit dev audit` for impact-to-impact local checks and `sdetkit dev fix` for quick fix previews.

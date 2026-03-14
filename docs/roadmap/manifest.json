@@ -1,478 +1,478 @@
 {
   "phases": [
     {
-      "day": 1,
-      "report_path": "docs/roadmap/reports/day-1-ultra-upgrade-report.md",
+      "impact": 1,
+      "report_path": "docs/roadmap/reports/impact-1-ultra-upgrade-report.md",
       "report_title": "Day 1 Ultra Upgrade Report \u2014 Core Positioning Refresh"
     },
     {
-      "day": 2,
-      "report_path": "docs/roadmap/reports/day-2-ultra-upgrade-report.md",
+      "impact": 2,
+      "report_path": "docs/roadmap/reports/impact-2-ultra-upgrade-report.md",
       "report_title": "Day 2 Ultra Upgrade Report \u2014 60-Second Demo Path Closeout"
     },
     {
-      "day": 3,
-      "report_path": "docs/roadmap/reports/day-3-ultra-upgrade-report.md",
+      "impact": 3,
+      "report_path": "docs/roadmap/reports/impact-3-ultra-upgrade-report.md",
       "report_title": "Day 3 Ultra Upgrade Report \u2014 Proof Pack + Evidence Boost"
     },
     {
-      "day": 4,
-      "report_path": "docs/roadmap/reports/day-4-ultra-upgrade-report.md",
+      "impact": 4,
+      "report_path": "docs/roadmap/reports/impact-4-ultra-upgrade-report.md",
       "report_title": "Day 4 Ultra Upgrade Report \u2014 Skills Expansion + Full Template Sweep"
     },
     {
-      "day": 5,
-      "report_path": "docs/roadmap/reports/day-5-ultra-upgrade-report.md",
+      "impact": 5,
+      "report_path": "docs/roadmap/reports/impact-5-ultra-upgrade-report.md",
       "report_title": "Day 5 Ultra Upgrade Report \u2014 Platform Onboarding + Boost"
     },
     {
-      "day": 6,
-      "report_path": "docs/roadmap/reports/day-6-ultra-upgrade-report.md",
+      "impact": 6,
+      "report_path": "docs/roadmap/reports/impact-6-ultra-upgrade-report.md",
       "report_title": "Day 6 Ultra Upgrade Report \u2014 Conversion QA Hardening"
     },
     {
-      "day": 7,
-      "report_path": "docs/roadmap/reports/day-7-ultra-upgrade-report.md",
+      "impact": 7,
+      "report_path": "docs/roadmap/reports/impact-7-ultra-upgrade-report.md",
       "report_title": "Day 7 Ultra Upgrade Report \u2014 Weekly Review #1"
     },
     {
-      "day": 8,
-      "report_path": "docs/roadmap/reports/day-8-ultra-upgrade-report.md",
+      "impact": 8,
+      "report_path": "docs/roadmap/reports/impact-8-ultra-upgrade-report.md",
       "report_title": "Day 8 Ultra Upgrade Report \u2014 Contributor Funnel Start"
     },
     {
-      "day": 9,
-      "report_path": "docs/roadmap/reports/day-9-ultra-upgrade-report.md",
+      "impact": 9,
+      "report_path": "docs/roadmap/reports/impact-9-ultra-upgrade-report.md",
       "report_title": "Day 9 Ultra Upgrade Report \u2014 Contribution Template Triage"
     },
     {
-      "day": 10,
-      "report_path": "docs/roadmap/reports/day-10-ultra-upgrade-report.md",
+      "impact": 10,
+      "report_path": "docs/roadmap/reports/impact-10-ultra-upgrade-report.md",
       "report_title": "Day 10 Ultra Upgrade Report \u2014 First-Contribution Checklist"
     },
     {
-      "day": 11,
-      "report_path": "docs/roadmap/reports/day-11-ultra-upgrade-report.md",
+      "impact": 11,
+      "report_path": "docs/roadmap/reports/impact-11-ultra-upgrade-report.md",
       "report_title": "Day 11 Ultra Upgrade Report \u2014 Docs Navigation Tune-Up"
     },
     {
-      "day": 12,
-      "report_path": "docs/roadmap/reports/day-12-ultra-upgrade-report.md",
+      "impact": 12,
+      "report_path": "docs/roadmap/reports/impact-12-ultra-upgrade-report.md",
       "report_title": "Day 12 Ultra Upgrade Report \u2014 Startup/Small-Team Use-Case Page"
     },
     {
-      "day": 13,
-      "report_path": "docs/roadmap/reports/day-13-ultra-upgrade-report.md",
+      "impact": 13,
+      "report_path": "docs/roadmap/reports/impact-13-ultra-upgrade-report.md",
       "report_title": "Day 13 Ultra Upgrade Report"
     },
     {
-      "day": 14,
-      "report_path": "docs/roadmap/reports/day-14-ultra-upgrade-report.md",
+      "impact": 14,
+      "report_path": "docs/roadmap/reports/impact-14-ultra-upgrade-report.md",
       "report_title": "Day 14 Ultra Upgrade Report \u2014 Weekly Review #2"
     },
     {
-      "day": 15,
-      "report_path": "docs/roadmap/reports/day-15-ultra-upgrade-report.md",
+      "impact": 15,
+      "report_path": "docs/roadmap/reports/impact-15-ultra-upgrade-report.md",
       "report_title": "Day 15 ultra upgrade report"
     },
     {
-      "day": 16,
-      "report_path": "docs/roadmap/reports/day-16-ultra-upgrade-report.md",
+      "impact": 16,
+      "report_path": "docs/roadmap/reports/impact-16-ultra-upgrade-report.md",
       "report_title": "Day 16 ultra upgrade report"
     },
     {
-      "day": 17,
-      "report_path": "docs/roadmap/reports/day-17-ultra-upgrade-report.md",
+      "impact": 17,
+      "report_path": "docs/roadmap/reports/impact-17-ultra-upgrade-report.md",
       "report_title": "Day 17 ultra upgrade report"
     },
     {
-      "day": 18,
-      "report_path": "docs/roadmap/reports/day-18-ultra-upgrade-report.md",
+      "impact": 18,
+      "report_path": "docs/roadmap/reports/impact-18-ultra-upgrade-report.md",
       "report_title": "Day 18 ultra upgrade report"
     },
     {
-      "day": 19,
-      "report_path": "docs/roadmap/reports/day-19-ultra-upgrade-report.md",
+      "impact": 19,
+      "report_path": "docs/roadmap/reports/impact-19-ultra-upgrade-report.md",
       "report_title": "Day 19 ultra upgrade report"
     },
     {
-      "day": 20,
-      "report_path": "docs/roadmap/reports/day-20-ultra-upgrade-report.md",
+      "impact": 20,
+      "report_path": "docs/roadmap/reports/impact-20-ultra-upgrade-report.md",
       "report_title": "Day 20 ultra upgrade report"
     },
     {
-      "day": 21,
-      "report_path": "docs/roadmap/reports/day-21-ultra-upgrade-report.md",
+      "impact": 21,
+      "report_path": "docs/roadmap/reports/impact-21-ultra-upgrade-report.md",
       "report_title": "Day 21 ultra upgrade report"
     },
     {
-      "day": 22,
-      "report_path": "docs/roadmap/reports/day-22-ultra-upgrade-report.md",
+      "impact": 22,
+      "report_path": "docs/roadmap/reports/impact-22-ultra-upgrade-report.md",
       "report_title": "Day 22 ultra upgrade report"
     },
     {
-      "day": 23,
-      "report_path": "docs/roadmap/reports/day-23-ultra-upgrade-report.md",
+      "impact": 23,
+      "report_path": "docs/roadmap/reports/impact-23-ultra-upgrade-report.md",
       "report_title": "Day 23 ultra upgrade report"
     },
     {
-      "day": 24,
-      "report_path": "docs/roadmap/reports/day-24-ultra-upgrade-report.md",
+      "impact": 24,
+      "report_path": "docs/roadmap/reports/impact-24-ultra-upgrade-report.md",
       "report_title": "Day 24 ultra upgrade report \u2014 onboarding time-to-first-success closeout"
     },
     {
-      "day": 25,
-      "report_path": "docs/roadmap/reports/day-25-ultra-upgrade-report.md",
+      "impact": 25,
+      "report_path": "docs/roadmap/reports/impact-25-ultra-upgrade-report.md",
       "report_title": "Day 25 ultra upgrade report \u2014 community activation closeout"
     },
     {
-      "day": 26,
-      "report_path": "docs/roadmap/reports/day-26-ultra-upgrade-report.md",
+      "impact": 26,
+      "report_path": "docs/roadmap/reports/impact-26-ultra-upgrade-report.md",
       "report_title": "Day 26 ultra upgrade report \u2014 external contribution push closeout"
     },
     {
-      "day": 27,
-      "report_path": "docs/roadmap/reports/day-27-ultra-upgrade-report.md",
+      "impact": 27,
+      "report_path": "docs/roadmap/reports/impact-27-ultra-upgrade-report.md",
       "report_title": "Day 27 ultra upgrade report \u2014 KPI audit closeout"
     },
     {
-      "day": 28,
-      "report_path": "docs/roadmap/reports/day-28-ultra-upgrade-report.md",
+      "impact": 28,
+      "report_path": "docs/roadmap/reports/impact-28-ultra-upgrade-report.md",
       "report_title": "Day 28 ultra upgrade report \u2014 weekly review #4 closeout"
     },
     {
-      "day": 29,
-      "report_path": "docs/roadmap/reports/day-29-ultra-upgrade-report.md",
+      "impact": 29,
+      "report_path": "docs/roadmap/reports/impact-29-ultra-upgrade-report.md",
       "report_title": "Day 29 ultra upgrade report \u2014 phase-1 hardening closeout"
     },
     {
-      "day": 30,
-      "report_path": "docs/roadmap/reports/day-30-ultra-upgrade-report.md",
+      "impact": 30,
+      "report_path": "docs/roadmap/reports/impact-30-ultra-upgrade-report.md",
       "report_title": "Day 30 ultra upgrade report \u2014 Phase-1 wrap + Phase-2 handoff"
     },
     {
-      "day": 31,
-      "report_path": "docs/roadmap/reports/day-31-ultra-upgrade-report.md",
+      "impact": 31,
+      "report_path": "docs/roadmap/reports/impact-31-ultra-upgrade-report.md",
       "report_title": "Day 31 ultra upgrade report \u2014 Phase-2 kickoff baseline closeout"
     },
     {
-      "day": 32,
-      "report_path": "docs/roadmap/reports/day-32-ultra-upgrade-report.md",
+      "impact": 32,
+      "report_path": "docs/roadmap/reports/impact-32-ultra-upgrade-report.md",
       "report_title": "Day 32 \u2014 Ultra Upgrade Report (Release cadence setup)"
     },
     {
-      "day": 33,
-      "report_path": "docs/roadmap/reports/day-33-ultra-upgrade-report.md",
+      "impact": 33,
+      "report_path": "docs/roadmap/reports/impact-33-ultra-upgrade-report.md",
       "report_title": "Day 33 Ultra Upgrade Report"
     },
     {
-      "day": 34,
-      "report_path": "docs/roadmap/reports/day-34-ultra-upgrade-report.md",
+      "impact": 34,
+      "report_path": "docs/roadmap/reports/impact-34-ultra-upgrade-report.md",
       "report_title": "Day 34 Ultra Upgrade Report"
     },
     {
-      "day": 35,
-      "report_path": "docs/roadmap/reports/day-35-big-upgrade-report.md",
+      "impact": 35,
+      "report_path": "docs/roadmap/reports/impact-35-big-upgrade-report.md",
       "report_title": "Day 35 Big Upgrade Report"
     },
     {
-      "day": 36,
-      "report_path": "docs/roadmap/reports/day-36-big-upgrade-report.md",
+      "impact": 36,
+      "report_path": "docs/roadmap/reports/impact-36-big-upgrade-report.md",
       "report_title": "Day 36 Big Upgrade Report"
     },
     {
-      "day": 37,
-      "report_path": "docs/roadmap/reports/day-37-big-upgrade-report.md",
+      "impact": 37,
+      "report_path": "docs/roadmap/reports/impact-37-big-upgrade-report.md",
       "report_title": "Day 37 Big Upgrade Report"
     },
     {
-      "day": 38,
-      "report_path": "docs/roadmap/reports/day-38-big-upgrade-report.md",
+      "impact": 38,
+      "report_path": "docs/roadmap/reports/impact-38-big-upgrade-report.md",
       "report_title": "Day 38 Big Upgrade Report"
     },
     {
-      "day": 39,
-      "report_path": "docs/roadmap/reports/day-39-big-upgrade-report.md",
+      "impact": 39,
+      "report_path": "docs/roadmap/reports/impact-39-big-upgrade-report.md",
       "report_title": "Day 39 Big Upgrade Report"
     },
     {
-      "day": 40,
-      "report_path": "docs/roadmap/reports/day-40-big-upgrade-report.md",
+      "impact": 40,
+      "report_path": "docs/roadmap/reports/impact-40-big-upgrade-report.md",
       "report_title": "Day 40 Big Upgrade Report"
     },
     {
-      "day": 41,
-      "report_path": "docs/roadmap/reports/day-41-big-upgrade-report.md",
+      "impact": 41,
+      "report_path": "docs/roadmap/reports/impact-41-big-upgrade-report.md",
       "report_title": "Day 41 Big Upgrade Report"
     },
     {
-      "day": 42,
-      "report_path": "docs/roadmap/reports/day-42-big-upgrade-report.md",
+      "impact": 42,
+      "report_path": "docs/roadmap/reports/impact-42-big-upgrade-report.md",
       "report_title": "Day 42 Big Upgrade Report"
     },
     {
-      "day": 43,
-      "report_path": "docs/roadmap/reports/day-43-big-upgrade-report.md",
+      "impact": 43,
+      "report_path": "docs/roadmap/reports/impact-43-big-upgrade-report.md",
       "report_title": "Day 43 big upgrade report"
     },
     {
-      "day": 44,
-      "report_path": "docs/roadmap/reports/day-44-big-upgrade-report.md",
+      "impact": 44,
+      "report_path": "docs/roadmap/reports/impact-44-big-upgrade-report.md",
       "report_title": "Day 44 big upgrade report"
     },
     {
-      "day": 45,
-      "report_path": "docs/roadmap/reports/day-45-big-upgrade-report.md",
+      "impact": 45,
+      "report_path": "docs/roadmap/reports/impact-45-big-upgrade-report.md",
       "report_title": "Day 45 big upgrade report"
     },
     {
-      "day": 46,
-      "report_path": "docs/roadmap/reports/day-46-big-upgrade-report.md",
+      "impact": 46,
+      "report_path": "docs/roadmap/reports/impact-46-big-upgrade-report.md",
       "report_title": "Day 46 big upgrade report"
     },
     {
-      "day": 47,
-      "report_path": "docs/roadmap/reports/day-47-big-upgrade-report.md",
+      "impact": 47,
+      "report_path": "docs/roadmap/reports/impact-47-big-upgrade-report.md",
       "report_title": "Day 47 big upgrade report"
     },
     {
-      "day": 48,
-      "report_path": "docs/roadmap/reports/day-48-big-upgrade-report.md",
+      "impact": 48,
+      "report_path": "docs/roadmap/reports/impact-48-big-upgrade-report.md",
       "report_title": "Day 48 big upgrade report"
     },
     {
-      "day": 49,
-      "report_path": "docs/roadmap/reports/day-49-big-upgrade-report.md",
+      "impact": 49,
+      "report_path": "docs/roadmap/reports/impact-49-big-upgrade-report.md",
       "report_title": "Day 49 Big Upgrade Report"
     },
     {
-      "day": 50,
-      "report_path": "docs/roadmap/reports/day-50-big-upgrade-report.md",
+      "impact": 50,
+      "report_path": "docs/roadmap/reports/impact-50-big-upgrade-report.md",
       "report_title": "Day 50 Big Upgrade Report"
     },
     {
-      "day": 51,
-      "report_path": "docs/roadmap/reports/day-51-big-upgrade-report.md",
+      "impact": 51,
+      "report_path": "docs/roadmap/reports/impact-51-big-upgrade-report.md",
       "report_title": "Day 51 Big Upgrade Report"
     },
     {
-      "day": 52,
-      "report_path": "docs/roadmap/reports/day-52-big-upgrade-report.md",
+      "impact": 52,
+      "report_path": "docs/roadmap/reports/impact-52-big-upgrade-report.md",
       "report_title": "Day 52 Big Upgrade Report"
     },
     {
-      "day": 53,
-      "report_path": "docs/roadmap/reports/day-53-big-upgrade-report.md",
+      "impact": 53,
+      "report_path": "docs/roadmap/reports/impact-53-big-upgrade-report.md",
       "report_title": "Day 53 Big Upgrade Report"
     },
     {
-      "day": 55,
-      "report_path": "docs/roadmap/reports/day-55-big-upgrade-report.md",
+      "impact": 55,
+      "report_path": "docs/roadmap/reports/impact-55-big-upgrade-report.md",
       "report_title": "Day 55 Big Upgrade Report"
     },
     {
-      "day": 56,
-      "report_path": "docs/roadmap/reports/day-56-big-upgrade-report.md",
+      "impact": 56,
+      "report_path": "docs/roadmap/reports/impact-56-big-upgrade-report.md",
       "report_title": "Day 56 Big Upgrade Report"
     },
     {
-      "day": 57,
-      "report_path": "docs/roadmap/reports/day-57-big-upgrade-report.md",
+      "impact": 57,
+      "report_path": "docs/roadmap/reports/impact-57-big-upgrade-report.md",
       "report_title": "Day 57 Big Upgrade Report"
     },
     {
-      "day": 58,
-      "report_path": "docs/roadmap/reports/day-58-big-upgrade-report.md",
+      "impact": 58,
+      "report_path": "docs/roadmap/reports/impact-58-big-upgrade-report.md",
       "report_title": "Day 58 Big Upgrade Report"
     },
     {
-      "day": 59,
-      "report_path": "docs/roadmap/reports/day-59-big-upgrade-report.md",
+      "impact": 59,
+      "report_path": "docs/roadmap/reports/impact-59-big-upgrade-report.md",
       "report_title": "Day 59 Big Upgrade Report"
     },
     {
-      "day": 60,
-      "report_path": "docs/roadmap/reports/day-60-big-upgrade-report.md",
+      "impact": 60,
+      "report_path": "docs/roadmap/reports/impact-60-big-upgrade-report.md",
       "report_title": "Day 60 Big Upgrade Report"
     },
     {
-      "day": 61,
-      "report_path": "docs/roadmap/reports/day-61-big-upgrade-report.md",
+      "impact": 61,
+      "report_path": "docs/roadmap/reports/impact-61-big-upgrade-report.md",
       "report_title": "Day 61 Big Upgrade Report"
     },
     {
-      "day": 62,
-      "report_path": "docs/roadmap/reports/day-62-big-upgrade-report.md",
+      "impact": 62,
+      "report_path": "docs/roadmap/reports/impact-62-big-upgrade-report.md",
       "report_title": "Day 62 big upgrade report"
     },
     {
-      "day": 63,
-      "report_path": "docs/roadmap/reports/day-63-big-upgrade-report.md",
+      "impact": 63,
+      "report_path": "docs/roadmap/reports/impact-63-big-upgrade-report.md",
       "report_title": "Day 63 big upgrade report"
     },
     {
-      "day": 64,
-      "report_path": "docs/roadmap/reports/day-64-big-upgrade-report.md",
+      "impact": 64,
+      "report_path": "docs/roadmap/reports/impact-64-big-upgrade-report.md",
       "report_title": "Day 64 big upgrade report"
     },
     {
-      "day": 65,
-      "report_path": "docs/roadmap/reports/day-65-big-upgrade-report.md",
+      "impact": 65,
+      "report_path": "docs/roadmap/reports/impact-65-big-upgrade-report.md",
       "report_title": "Day 65 big upgrade report"
     },
     {
-      "day": 66,
-      "report_path": "docs/roadmap/reports/day-66-big-upgrade-report.md",
+      "impact": 66,
+      "report_path": "docs/roadmap/reports/impact-66-big-upgrade-report.md",
       "report_title": "Day 66 big upgrade report"
     },
     {
-      "day": 67,
-      "report_path": "docs/roadmap/reports/day-67-big-upgrade-report.md",
+      "impact": 67,
+      "report_path": "docs/roadmap/reports/impact-67-big-upgrade-report.md",
       "report_title": "Day 67 big upgrade report"
     },
     {
-      "day": 68,
-      "report_path": "docs/roadmap/reports/day-68-big-upgrade-report.md",
+      "impact": 68,
+      "report_path": "docs/roadmap/reports/impact-68-big-upgrade-report.md",
       "report_title": "Day 68 big upgrade report"
     },
     {
-      "day": 69,
-      "report_path": "docs/roadmap/reports/day-69-big-upgrade-report.md",
+      "impact": 69,
+      "report_path": "docs/roadmap/reports/impact-69-big-upgrade-report.md",
       "report_title": "Day 69 big upgrade report"
     },
     {
-      "day": 70,
-      "report_path": "docs/roadmap/reports/day-70-big-upgrade-report.md",
+      "impact": 70,
+      "report_path": "docs/roadmap/reports/impact-70-big-upgrade-report.md",
       "report_title": "Day 70 big upgrade report"
     },
     {
-      "day": 71,
-      "report_path": "docs/roadmap/reports/day-71-big-upgrade-report.md",
+      "impact": 71,
+      "report_path": "docs/roadmap/reports/impact-71-big-upgrade-report.md",
       "report_title": "Day 71 big upgrade report"
     },
     {
-      "day": 72,
-      "report_path": "docs/roadmap/reports/day-72-big-upgrade-report.md",
+      "impact": 72,
+      "report_path": "docs/roadmap/reports/impact-72-big-upgrade-report.md",
       "report_title": "Day 72 big upgrade report"
     },
     {
-      "day": 73,
-      "report_path": "docs/roadmap/reports/day-73-big-upgrade-report.md",
+      "impact": 73,
+      "report_path": "docs/roadmap/reports/impact-73-big-upgrade-report.md",
       "report_title": "Day 73 big upgrade report"
     },
     {
-      "day": 74,
-      "report_path": "docs/roadmap/reports/day-74-big-upgrade-report.md",
+      "impact": 74,
+      "report_path": "docs/roadmap/reports/impact-74-big-upgrade-report.md",
       "report_title": "Day 74 big upgrade report"
     },
     {
-      "day": 75,
-      "report_path": "docs/roadmap/reports/day-75-big-upgrade-report.md",
+      "impact": 75,
+      "report_path": "docs/roadmap/reports/impact-75-big-upgrade-report.md",
       "report_title": "Day 75 big upgrade report"
     },
     {
-      "day": 76,
-      "report_path": "docs/roadmap/reports/day-76-big-upgrade-report.md",
+      "impact": 76,
+      "report_path": "docs/roadmap/reports/impact-76-big-upgrade-report.md",
       "report_title": "Day 76 big upgrade report"
     },
     {
-      "day": 77,
-      "report_path": "docs/roadmap/reports/day-77-big-upgrade-report.md",
+      "impact": 77,
+      "report_path": "docs/roadmap/reports/impact-77-big-upgrade-report.md",
       "report_title": "Day 77 big upgrade report"
     },
     {
-      "day": 78,
-      "report_path": "docs/roadmap/reports/day-78-big-upgrade-report.md",
+      "impact": 78,
+      "report_path": "docs/roadmap/reports/impact-78-big-upgrade-report.md",
       "report_title": "Day 78 big upgrade report"
     },
     {
-      "day": 79,
-      "report_path": "docs/roadmap/reports/day-79-big-upgrade-report.md",
+      "impact": 79,
+      "report_path": "docs/roadmap/reports/impact-79-big-upgrade-report.md",
       "report_title": "Day 79 big upgrade report"
     },
     {
-      "day": 80,
-      "report_path": "docs/roadmap/reports/day-80-big-upgrade-report.md",
+      "impact": 80,
+      "report_path": "docs/roadmap/reports/impact-80-big-upgrade-report.md",
       "report_title": "Day 80 Big Upgrade Report"
     },
     {
-      "day": 81,
-      "report_path": "docs/roadmap/reports/day-81-big-upgrade-report.md",
+      "impact": 81,
+      "report_path": "docs/roadmap/reports/impact-81-big-upgrade-report.md",
       "report_title": "Day 81 Big Upgrade Report"
     },
     {
-      "day": 82,
-      "report_path": "docs/roadmap/reports/day-82-big-upgrade-report.md",
+      "impact": 82,
+      "report_path": "docs/roadmap/reports/impact-82-big-upgrade-report.md",
       "report_title": "Day 82 Big Upgrade Report"
     },
     {
-      "day": 83,
-      "report_path": "docs/roadmap/reports/day-83-big-upgrade-report.md",
+      "impact": 83,
+      "report_path": "docs/roadmap/reports/impact-83-big-upgrade-report.md",
       "report_title": "Day 83 Big Upgrade Report"
     },
     {
-      "day": 84,
-      "report_path": "docs/roadmap/reports/day-84-big-upgrade-report.md",
+      "impact": 84,
+      "report_path": "docs/roadmap/reports/impact-84-big-upgrade-report.md",
       "report_title": "Day 84 big upgrade report"
     },
     {
-      "day": 85,
-      "report_path": "docs/roadmap/reports/day-85-big-upgrade-report.md",
+      "impact": 85,
+      "report_path": "docs/roadmap/reports/impact-85-big-upgrade-report.md",
       "report_title": "Day 85 big upgrade report"
     },
     {
-      "day": 86,
-      "report_path": "docs/roadmap/reports/day-86-big-upgrade-report.md",
+      "impact": 86,
+      "report_path": "docs/roadmap/reports/impact-86-big-upgrade-report.md",
       "report_title": "Day 86 big upgrade report"
     },
     {
-      "day": 87,
-      "report_path": "docs/roadmap/reports/day-87-big-upgrade-report.md",
+      "impact": 87,
+      "report_path": "docs/roadmap/reports/impact-87-big-upgrade-report.md",
       "report_title": "Day 87 big upgrade report"
     },
     {
-      "day": 88,
-      "report_path": "docs/roadmap/reports/day-88-big-upgrade-report.md",
+      "impact": 88,
+      "report_path": "docs/roadmap/reports/impact-88-big-upgrade-report.md",
       "report_title": "Day 88 big upgrade report"
     },
     {
-      "day": 89,
-      "report_path": "docs/roadmap/reports/day-89-big-upgrade-report.md",
+      "impact": 89,
+      "report_path": "docs/roadmap/reports/impact-89-big-upgrade-report.md",
       "report_title": "Day 89 big upgrade report"
     },
     {
-      "day": 90,
-      "report_path": "docs/roadmap/reports/day-90-big-upgrade-report.md",
+      "impact": 90,
+      "report_path": "docs/roadmap/reports/impact-90-big-upgrade-report.md",
       "report_title": "Day 90 big upgrade report"
     },
     {
-      "day": 91,
-      "report_path": "docs/roadmap/reports/day-91-big-upgrade-report.md",
+      "impact": 91,
+      "report_path": "docs/roadmap/reports/impact-91-big-upgrade-report.md",
       "report_title": "Day 91 big upgrade report"
     },
     {
-      "day": 92,
-      "report_path": "docs/roadmap/reports/day-92-big-upgrade-report.md",
+      "impact": 92,
+      "report_path": "docs/roadmap/reports/impact-92-big-upgrade-report.md",
       "report_title": "Day 92 big upgrade report"
     },
     {
-      "day": 93,
-      "report_path": "docs/roadmap/reports/day-93-big-upgrade-report.md",
+      "impact": 93,
+      "report_path": "docs/roadmap/reports/impact-93-big-upgrade-report.md",
       "report_title": "Day 93 big upgrade report"
     },
     {
-      "day": 95,
-      "report_path": "docs/roadmap/reports/day-95-big-upgrade-report.md",
+      "impact": 95,
+      "report_path": "docs/roadmap/reports/impact-95-big-upgrade-report.md",
       "report_title": "Day 95 big upgrade report"
     },
     {
-      "day": 96,
-      "report_path": "docs/roadmap/reports/day-96-big-upgrade-report.md",
+      "impact": 96,
+      "report_path": "docs/roadmap/reports/impact-96-big-upgrade-report.md",
       "report_title": "Day 96 big upgrade report"
     },
     {
-      "day": 97,
-      "report_path": "docs/roadmap/reports/day-97-big-upgrade-report.md",
+      "impact": 97,
+      "report_path": "docs/roadmap/reports/impact-97-big-upgrade-report.md",
       "report_title": "Day 97 big upgrade report"
     }
   ]

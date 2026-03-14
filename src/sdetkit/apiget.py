@@ -594,7 +594,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                             data = out
                             break
                         if nxt in seen:
-                            raise RuntimeError("pagination cycle")
+                            raise RuntimeError("pagination impact")
                         seen.add(nxt)
                         cur = nxt
                     else:

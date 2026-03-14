@@ -145,8 +145,8 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day36 = any("day 36" in line for line in lines)
-    has_day37 = any("day 37" in line for line in lines)
+    has_day36 = any("impact 36" in line for line in lines)
+    has_day37 = any("impact 37" in line for line in lines)
     return item_count, has_day36, has_day37
 
 
@@ -216,10 +216,10 @@ def build_day37_experiment_lane_summary(
             "check_id": "docs_index_day37_links",
             "weight": 8,
             "passed": (
-                "day-37-big-upgrade-report.md" in docs_index_text
+                "impact-37-big-upgrade-report.md" in docs_index_text
                 and "integrations-experiment-lane.md" in docs_index_text
             ),
-            "evidence": "day-37-big-upgrade-report.md + integrations-experiment-lane.md",
+            "evidence": "impact-37-big-upgrade-report.md + integrations-experiment-lane.md",
         },
         {
             "check_id": "top10_day37_alignment",

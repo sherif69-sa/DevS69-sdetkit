@@ -25,8 +25,8 @@ def test_build_manifest_merges_reports_and_plans(tmp_path: Path) -> None:
     reports.mkdir(parents=True)
     plans.mkdir(parents=True)
 
-    (reports / "day-3-alpha-report.md").write_text("# Day 3 report\n", encoding="utf-8")
-    (reports / "day-4-beta-report.md").write_text("text only\n", encoding="utf-8")
+    (reports / "impact-3-alpha-report.md").write_text("# Day 3 report\n", encoding="utf-8")
+    (reports / "impact-4-beta-report.md").write_text("text only\n", encoding="utf-8")
     (plans / "day3-plan.json").write_text('{"name": "Plan 3"}', encoding="utf-8")
     (plans / "day4-plan.json").write_text('{"title": " Plan 4 "}', encoding="utf-8")
 
@@ -34,16 +34,16 @@ def test_build_manifest_merges_reports_and_plans(tmp_path: Path) -> None:
     assert manifest == {
         "phases": [
             {
-                "day": 3,
-                "report_path": "docs/roadmap/reports/day-3-alpha-report.md",
+                "impact": 3,
+                "report_path": "docs/roadmap/reports/impact-3-alpha-report.md",
                 "report_title": "Day 3 report",
                 "plan_path": "docs/roadmap/phase3/plans/day3-plan.json",
                 "plan_title": "Plan 3",
             },
             {
-                "day": 4,
-                "report_path": "docs/roadmap/reports/day-4-beta-report.md",
-                "report_title": "day-4-beta-report.md",
+                "impact": 4,
+                "report_path": "docs/roadmap/reports/impact-4-beta-report.md",
+                "report_title": "impact-4-beta-report.md",
                 "plan_path": "docs/roadmap/phase3/plans/day4-plan.json",
                 "plan_title": "Plan 4",
             },
@@ -57,17 +57,17 @@ def test_build_manifest_duplicate_report_and_plan_errors(tmp_path: Path) -> None
     reports.mkdir(parents=True)
     plans.mkdir(parents=True)
 
-    (reports / "day-5-a-report.md").write_text("# A\n", encoding="utf-8")
-    (reports / "day-5-b-report.md").write_text("# B\n", encoding="utf-8")
+    (reports / "impact-5-a-report.md").write_text("# A\n", encoding="utf-8")
+    (reports / "impact-5-b-report.md").write_text("# B\n", encoding="utf-8")
 
     try:
         rm.build_manifest(repo_root=tmp_path)
         raise AssertionError("expected duplicate report error")
     except ValueError as exc:
-        assert "duplicate report for day 5" in str(exc)
+        assert "duplicate report for impact 5" in str(exc)
 
     # Keep one report so plan duplicate path can be reached.
-    (reports / "day-5-b-report.md").unlink()
+    (reports / "impact-5-b-report.md").unlink()
     (plans / "day5-a.json").write_text("{}", encoding="utf-8")
     (plans / "day5-b.json").write_text("{}", encoding="utf-8")
 
@@ -75,13 +75,13 @@ def test_build_manifest_duplicate_report_and_plan_errors(tmp_path: Path) -> None
         rm.build_manifest(repo_root=tmp_path)
         raise AssertionError("expected duplicate plan error")
     except ValueError as exc:
-        assert "duplicate plan for day 5" in str(exc)
+        assert "duplicate plan for impact 5" in str(exc)
 
 
 def test_render_write_check_and_main_commands(tmp_path: Path, monkeypatch, capsys) -> None:
     docs = tmp_path / "docs" / "roadmap" / "reports"
     docs.mkdir(parents=True)
-    (docs / "day-6-gamma-report.md").write_text("# Réport\n", encoding="utf-8")
+    (docs / "impact-6-gamma-report.md").write_text("# Réport\n", encoding="utf-8")
 
     rendered = rm.render_manifest_json(repo_root=tmp_path)
     parsed = json.loads(rendered)

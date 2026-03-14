@@ -20,7 +20,7 @@
       "check_id": "docs_index_day89_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-89-big-upgrade-report.md + integrations-day89-governance-scale-closeout.md"
+      "evidence": "impact-89-big-upgrade-report.md + integrations-day89-governance-scale-closeout.md"
     },
     {
       "check_id": "top10_day89_alignment",

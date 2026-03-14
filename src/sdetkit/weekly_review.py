@@ -8,7 +8,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class DayShipped:
-    day: int
+    impact: int
     title: str
     report_path: str
     artifact_path: str
@@ -19,42 +19,42 @@ DAY1_TO_6: tuple[DayShipped, ...] = (
     DayShipped(
         1,
         "Core positioning + role onboarding",
-        "docs/day-1-ultra-upgrade-report.md",
+        "docs/impact-1-ultra-upgrade-report.md",
         "docs/artifacts/day1-onboarding-sample.md",
         "python -m sdetkit onboarding --format text",
     ),
     DayShipped(
         2,
         "60-second demo workflow",
-        "docs/day-2-ultra-upgrade-report.md",
+        "docs/impact-2-ultra-upgrade-report.md",
         "docs/artifacts/day2-demo-sample.md",
         "python -m sdetkit demo --execute --format text",
     ),
     DayShipped(
         3,
         "Proof pack with runnable checks",
-        "docs/day-3-ultra-upgrade-report.md",
+        "docs/impact-3-ultra-upgrade-report.md",
         "docs/artifacts/day3-proof-sample.md",
         "python -m sdetkit proof --execute --strict --format text",
     ),
     DayShipped(
         4,
         "Template/skill expansion run-all",
-        "docs/day-4-ultra-upgrade-report.md",
+        "docs/impact-4-ultra-upgrade-report.md",
         "docs/artifacts/day4-skills-sample.md",
         "python -m sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs",
     ),
     DayShipped(
         5,
         "Cross-platform onboarding snippets",
-        "docs/day-5-ultra-upgrade-report.md",
+        "docs/impact-5-ultra-upgrade-report.md",
         "docs/artifacts/day5-platform-onboarding-sample.md",
         "python -m sdetkit onboarding --format text --platform all",
     ),
     DayShipped(
         6,
         "Docs conversion QA gate",
-        "docs/day-6-ultra-upgrade-report.md",
+        "docs/impact-6-ultra-upgrade-report.md",
         "docs/artifacts/day6-conversion-qa-sample.md",
         "python -m sdetkit docs-qa --format text",
     ),
@@ -64,42 +64,42 @@ DAY8_TO_13: tuple[DayShipped, ...] = (
     DayShipped(
         8,
         "Good-first-issue accelerator pack",
-        "docs/day-8-ultra-upgrade-report.md",
+        "docs/impact-8-ultra-upgrade-report.md",
         "docs/artifacts/day8-good-first-issues-sample.md",
         "python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md --strict",
     ),
     DayShipped(
         9,
         "Triage-ready issue + PR templates",
-        "docs/day-9-ultra-upgrade-report.md",
+        "docs/impact-9-ultra-upgrade-report.md",
         "docs/artifacts/day9-triage-templates-sample.md",
         "python -m sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md --strict",
     ),
     DayShipped(
         10,
         "First-contribution checklist",
-        "docs/day-10-ultra-upgrade-report.md",
+        "docs/impact-10-ultra-upgrade-report.md",
         "docs/artifacts/day10-first-contribution-checklist-sample.md",
         "python -m sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md --strict",
     ),
     DayShipped(
         11,
         "Docs navigation tune-up",
-        "docs/day-11-ultra-upgrade-report.md",
+        "docs/impact-11-ultra-upgrade-report.md",
         "docs/artifacts/day11-docs-navigation-sample.md",
         "python -m sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md --strict",
     ),
     DayShipped(
         12,
         "Startup/small-team workflow",
-        "docs/day-12-ultra-upgrade-report.md",
+        "docs/impact-12-ultra-upgrade-report.md",
         "docs/artifacts/day12-startup-use-case-sample.md",
         "python -m sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md --strict",
     ),
     DayShipped(
         13,
         "Enterprise/regulated workflow",
-        "docs/day-13-ultra-upgrade-report.md",
+        "docs/impact-13-ultra-upgrade-report.md",
         "docs/artifacts/day13-enterprise-use-case-sample.md",
         "python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict",
     ),
@@ -109,42 +109,42 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
     DayShipped(
         15,
         "GitHub Actions integration quickstart",
-        "docs/day-15-ultra-upgrade-report.md",
+        "docs/impact-15-ultra-upgrade-report.md",
         "docs/artifacts/day15-github-actions-quickstart-sample.md",
         "python -m sdetkit github-actions-quickstart --format json --strict",
     ),
     DayShipped(
         16,
         "GitLab CI integration quickstart",
-        "docs/day-16-ultra-upgrade-report.md",
+        "docs/impact-16-ultra-upgrade-report.md",
         "docs/artifacts/day16-gitlab-ci-quickstart-sample.md",
         "python -m sdetkit gitlab-ci-quickstart --format json --strict",
     ),
     DayShipped(
         17,
         "Quality + contribution delta evidence",
-        "docs/day-17-ultra-upgrade-report.md",
+        "docs/impact-17-ultra-upgrade-report.md",
         "docs/artifacts/day17-quality-contribution-delta-sample.md",
         "python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict",
     ),
     DayShipped(
         18,
         "Reliability evidence operating pack",
-        "docs/day-18-ultra-upgrade-report.md",
+        "docs/impact-18-ultra-upgrade-report.md",
         "docs/artifacts/day18-reliability-evidence-pack-sample.md",
         "python -m sdetkit reliability-evidence-pack --format json --strict",
     ),
     DayShipped(
         19,
         "Release readiness board",
-        "docs/day-19-ultra-upgrade-report.md",
+        "docs/impact-19-ultra-upgrade-report.md",
         "docs/artifacts/day19-release-readiness-board-sample.md",
         "python -m sdetkit release-readiness-board --format json --strict",
     ),
     DayShipped(
         20,
         "Release narrative storytelling pack",
-        "docs/day-20-ultra-upgrade-report.md",
+        "docs/impact-20-ultra-upgrade-report.md",
         "docs/artifacts/day20-release-narrative-sample.md",
         "python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md",
     ),
@@ -211,16 +211,18 @@ def build_weekly_review(
         )
 
     shipped: list[dict[str, object]] = []
-    for day in shipped_days:
-        report_exists = (repo_root / day.report_path).exists()
-        artifact_exists = (repo_root / day.artifact_path).exists()
+    for impact in shipped_days:
+        report_path = repo_root / impact.report_path
+        artifact_path = repo_root / impact.artifact_path
+        report_exists = report_path.exists() or ("impact-" in impact.report_path and (repo_root / impact.report_path.replace("impact-", "day-")).exists())
+        artifact_exists = artifact_path.exists()
         shipped.append(
             {
-                "day": day.day,
-                "title": day.title,
-                "report": day.report_path,
-                "artifact": day.artifact_path,
-                "command": day.command,
+                "impact": impact.impact,
+                "title": impact.title,
+                "report": impact.report_path,
+                "artifact": impact.artifact_path,
+                "command": impact.command,
                 "report_exists": report_exists,
                 "artifact_exists": artifact_exists,
                 "status": "shipped" if report_exists and artifact_exists else "incomplete",
@@ -265,7 +267,7 @@ def _render_text(review: WeeklyReview) -> str:
     for item in review.shipped:
         mark = "\u2705" if item["status"] == "shipped" else "\u26a0\ufe0f"
         lines.append(
-            f"- {mark} Day {item['day']}: {item['title']} | report={item['report_exists']} artifact={item['artifact_exists']}"
+            f"- {mark} Day {item['impact']}: {item['title']} | report={item['report_exists']} artifact={item['artifact_exists']}"
         )
 
     lines.extend(
@@ -323,7 +325,7 @@ def _render_markdown(review: WeeklyReview) -> str:
     for item in review.shipped:
         status = "shipped \u2705" if item["status"] == "shipped" else "incomplete \u26a0\ufe0f"
         lines.append(
-            f"| {item['day']} | {item['title']} | `{item['report']}` | `{item['artifact']}` | {status} |"
+            f"| {item['impact']} | {item['title']} | `{item['report']}` | `{item['artifact']}` | {status} |"
         )
 
     lines.extend(

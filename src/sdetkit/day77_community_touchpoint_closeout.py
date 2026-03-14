@@ -180,10 +180,10 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
             "check_id": "docs_index_day77_links",
             "weight": 8,
             "passed": (
-                "day-77-big-upgrade-report.md" in docs_index_text
+                "impact-77-big-upgrade-report.md" in docs_index_text
                 and "integrations-community-touchpoint-closeout.md" in docs_index_text
             ),
-            "evidence": "day-77-big-upgrade-report.md + integrations-community-touchpoint-closeout.md",
+            "evidence": "impact-77-big-upgrade-report.md + integrations-community-touchpoint-closeout.md",
         },
         {
             "check_id": "top10_day77_alignment",

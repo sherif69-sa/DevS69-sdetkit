@@ -8,7 +8,7 @@ This is a recommended adoption flow based on SDETKit's current repository workfl
 
 It is a scenario, not a claim that a specific company already executed it.
 
-## Stage 0 — one engineer proves value locally (day 1)
+## Stage 0 — one engineer proves value locally (impact 1)
 
 Commands:
 

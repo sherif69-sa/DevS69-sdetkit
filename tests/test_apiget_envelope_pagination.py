@@ -93,7 +93,7 @@ def test_netclient_envelope_pagination_cycle_and_shape_errors():
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as raw:
         client = SdetHttpClient(raw, retry=RetryPolicy(retries=1))
-        with pytest.raises(RuntimeError, match="pagination cycle"):
+        with pytest.raises(RuntimeError, match="pagination impact"):
             client.get_json_list_paginated_envelope("https://example.test/items", max_pages=4)
 
     with httpx.Client(

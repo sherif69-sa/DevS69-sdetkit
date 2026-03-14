@@ -25,7 +25,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Cycle 7 — Continuous upgrade closeout lane:** close Cycle 7 continuous-upgrade quality loop.\n"
-        "- **Cycle 8 — Continuous upgrade closeout lane:** start next-cycle continuous upgrade execution.\n",
+        "- **Cycle 8 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-cycle8-closeout.md").write_text(
@@ -68,7 +68,7 @@ def _seed_repo(root: Path) -> None:
                 "- [ ] Cycle 7 continuous upgrade plan committed",
                 "- [ ] Cycle 7 upgrade template upgrade ledger exported",
                 "- [ ] Cycle 7 storyline outcomes ledger exported",
-                "- [ ] Next-cycle roadmap draft captured from Cycle 7 outcomes",
+                "- [ ] Next-impact roadmap draft captured from Cycle 7 outcomes",
             ]
         )
         + "\n",

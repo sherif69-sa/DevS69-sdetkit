@@ -117,7 +117,7 @@ _GOVERNANCE_SIGNALS = [
     {"key": "ci_workflow", "path": ".github/workflows/ci.yml", "weight": 6},
     {"key": "security_workflow", "path": ".github/workflows/security.yml", "weight": 8},
     {"key": "pages_workflow", "path": ".github/workflows/pages.yml", "weight": 4},
-    {"key": "docs_index_day22", "marker": "day-22-ultra-upgrade-report.md", "weight": 2},
+    {"key": "docs_index_day22", "marker": "impact-22-ultra-upgrade-report.md", "weight": 2},
 ]
 
 _CRITICAL_FAILURE_KEYS = {"security_doc_exists", "security_workflow", "ci_workflow"}

@@ -209,10 +209,10 @@ def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day45_links",
             "weight": 8,
             "passed": (
-                "day-45-big-upgrade-report.md" in docs_index_text
+                "impact-45-big-upgrade-report.md" in docs_index_text
                 and "integrations-expansion-closeout.md" in docs_index_text
             ),
-            "evidence": "day-45-big-upgrade-report.md + integrations-expansion-closeout.md",
+            "evidence": "impact-45-big-upgrade-report.md + integrations-expansion-closeout.md",
         },
         {
             "check_id": "top10_day45_alignment",

@@ -47,7 +47,7 @@
       "check_id": "docs_index_day47_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-47-big-upgrade-report.md + integrations-day47-reliability-closeout.md"
+      "evidence": "impact-47-big-upgrade-report.md + integrations-day47-reliability-closeout.md"
     },
     {
       "check_id": "top10_day47_alignment",

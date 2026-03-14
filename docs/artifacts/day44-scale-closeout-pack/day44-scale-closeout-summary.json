@@ -47,7 +47,7 @@
       "check_id": "docs_index_day44_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-44-big-upgrade-report.md + integrations-day44-scale-closeout.md"
+      "evidence": "impact-44-big-upgrade-report.md + integrations-day44-scale-closeout.md"
     },
     {
       "check_id": "top10_day44_alignment",

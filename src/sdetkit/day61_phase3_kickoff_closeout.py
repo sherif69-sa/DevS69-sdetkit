@@ -174,10 +174,10 @@ def build_day61_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day61_links",
             "weight": 8,
             "passed": (
-                "day-61-big-upgrade-report.md" in docs_index_text
+                "impact-61-big-upgrade-report.md" in docs_index_text
                 and "integrations-phase3-kickoff-closeout.md" in docs_index_text
             ),
-            "evidence": "day-61-big-upgrade-report.md + integrations-phase3-kickoff-closeout.md",
+            "evidence": "impact-61-big-upgrade-report.md + integrations-phase3-kickoff-closeout.md",
         },
         {
             "check_id": "top10_day61_alignment",

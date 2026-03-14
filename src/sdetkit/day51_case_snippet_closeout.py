@@ -214,10 +214,10 @@ def build_day51_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day51_links",
             "weight": 8,
             "passed": (
-                "day-51-big-upgrade-report.md" in docs_index_text
+                "impact-51-big-upgrade-report.md" in docs_index_text
                 and "integrations-case-snippet-closeout.md" in docs_index_text
             ),
-            "evidence": "day-51-big-upgrade-report.md + integrations-case-snippet-closeout.md",
+            "evidence": "impact-51-big-upgrade-report.md + integrations-case-snippet-closeout.md",
         },
         {
             "check_id": "top10_day51_alignment",

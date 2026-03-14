@@ -211,10 +211,10 @@ def build_day44_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day44_links",
             "weight": 8,
             "passed": (
-                "day-44-big-upgrade-report.md" in docs_index_text
+                "impact-44-big-upgrade-report.md" in docs_index_text
                 and "integrations-scale-closeout.md" in docs_index_text
             ),
-            "evidence": "day-44-big-upgrade-report.md + integrations-scale-closeout.md",
+            "evidence": "impact-44-big-upgrade-report.md + integrations-scale-closeout.md",
         },
         {
             "check_id": "top10_day44_alignment",

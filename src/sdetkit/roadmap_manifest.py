@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_REPORT_RE = re.compile(r"^day-(\d+)-.*-report\.md$")
-_PLAN_RE = re.compile(r"^day(\d+)-.*\.json$")
+_REPORT_RE = re.compile(r"^impact-(\d+)-.*-report\.md$")
+_PLAN_RE = re.compile(r"^impact(\d+)-.*\.json$")
 
 
 def _repo_root(start: Path | None = None) -> Path:
@@ -41,28 +41,28 @@ def build_manifest(repo_root: Path | None = None) -> dict[str, Any]:
     items: dict[int, dict[str, Any]] = {}
 
     if reports_dir.exists():
-        for p in sorted(reports_dir.glob("day-*-*-report.md")):
+        for p in sorted(reports_dir.glob("impact-*-*-report.md")):
             m = _REPORT_RE.match(p.name)
             if not m:
                 continue
-            day = int(m.group(1))
-            e = items.setdefault(day, {"day": day})
+            impact = int(m.group(1))
+            e = items.setdefault(impact, {"impact": impact})
             if "report_path" in e:
-                raise ValueError(f"duplicate report for day {day}: {e['report_path']} and {p}")
+                raise ValueError(f"duplicate report for impact {impact}: {e['report_path']} and {p}")
             rel = p.relative_to(root).as_posix()
             report_title = _first_heading(p.read_text(encoding="utf-8")) or p.name
             e["report_path"] = rel
             e["report_title"] = report_title
 
     if plans_dir.exists():
-        for p in sorted(plans_dir.glob("day*.json")):
+        for p in sorted(plans_dir.glob("impact*.json")):
             m = _PLAN_RE.match(p.name)
             if not m:
                 continue
-            day = int(m.group(1))
-            e = items.setdefault(day, {"day": day})
+            impact = int(m.group(1))
+            e = items.setdefault(impact, {"impact": impact})
             if "plan_path" in e:
-                raise ValueError(f"duplicate plan for day {day}: {e['plan_path']} and {p}")
+                raise ValueError(f"duplicate plan for impact {impact}: {e['plan_path']} and {p}")
             rel = p.relative_to(root).as_posix()
             data = _load_json(p)
             plan_title: str | None = None

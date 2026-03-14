@@ -179,10 +179,10 @@ def build_day65_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day65_links",
             "weight": 8,
             "passed": (
-                "day-65-big-upgrade-report.md" in docs_index_text
+                "impact-65-big-upgrade-report.md" in docs_index_text
                 and "integrations-weekly-review-closeout-cycle2.md" in docs_index_text
             ),
-            "evidence": "day-65-big-upgrade-report.md + integrations-weekly-review-closeout-cycle2.md",
+            "evidence": "impact-65-big-upgrade-report.md + integrations-weekly-review-closeout-cycle2.md",
         },
         {
             "check_id": "top10_day65_alignment",

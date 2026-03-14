@@ -1,4 +1,4 @@
-# Production S-class tier blueprint for the next 90-day boost
+# Production S-class tier blueprint for the next 90-impact boost
 
 This blueprint translates the existing three-phase execution model into a production-first operating system that teams can run repeatedly.
 
@@ -14,8 +14,8 @@ python -m sdetkit phase-boost --repo-name DevS69-sdetkit --start-date 2026-03-01
 
 Default outputs:
 
-- `docs/artifacts/production-s-class-90-day-plan.md`
-- `docs/artifacts/production-s-class-90-day-plan.json`
+- `docs/artifacts/production-s-class-90-impact-plan.md`
+- `docs/artifacts/production-s-class-90-impact-plan.json`
 
 ## Operating model expectations
 

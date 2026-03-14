@@ -20,7 +20,7 @@
       "check_id": "docs_index_day86_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-86-big-upgrade-report.md + integrations-day86-launch-readiness-closeout.md"
+      "evidence": "impact-86-big-upgrade-report.md + integrations-day86-launch-readiness-closeout.md"
     },
     {
       "check_id": "top10_day86_alignment",

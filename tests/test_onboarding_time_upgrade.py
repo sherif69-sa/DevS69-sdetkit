@@ -9,7 +9,7 @@ from sdetkit import onboarding_time_upgrade as otu
 
 def _write_fixture(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("day-24-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text("impact-24-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "README.md").write_text(
         "docs/integrations-onboarding-time-upgrade.md\nonboarding-time-upgrade\n", encoding="utf-8"
     )

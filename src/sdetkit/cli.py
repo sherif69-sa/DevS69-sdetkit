@@ -147,7 +147,7 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
 def _is_hidden_cmd(name: str) -> bool:
     if name == "playbooks":
         return False
-    if name.startswith("day") and len(name) > 3 and name[3].isdigit():
+    if name.startswith("impact") and len(name) > 3 and name[3].isdigit():
         return True
     if name.endswith("-closeout"):
         return True
@@ -188,7 +188,7 @@ def _resolve_non_day_playbook_alias(cmd: str) -> str:
     except Exception:
         return cmd
 
-    if cmd in alias_to_canonical and cmd in cmd_to_mod and not cmd.startswith("day"):
+    if cmd in alias_to_canonical and cmd in cmd_to_mod and not cmd.startswith("impact"):
         return alias_to_canonical[cmd]
 
     return cmd

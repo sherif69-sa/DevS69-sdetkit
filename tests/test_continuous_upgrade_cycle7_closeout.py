@@ -20,18 +20,18 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-97-big-upgrade-report.md\nintegrations-continuous-upgrade-cycle7-closeout.md\n",
+        "impact-97-big-upgrade-report.md\nintegrations-continuous-upgrade-cycle7-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Day 95 — Continuous upgrade closeout lane:** close Day 95 continuous-upgrade quality loop.\n"
-        "- **Day 97 — Continuous upgrade closeout lane:** start next-cycle continuous upgrade execution.\n",
+        "- **Day 97 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-cycle7-closeout.md").write_text(
         d93._DAY95_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-97-big-upgrade-report.md").write_text("# Day 97 report\n", encoding="utf-8")
+    (root / "docs/impact-97-big-upgrade-report.md").write_text("# Day 97 report\n", encoding="utf-8")
     (root / "scripts").mkdir(parents=True, exist_ok=True)
     (root / "scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py").write_text(
         "from __future__ import annotations\n"
@@ -68,7 +68,7 @@ def _seed_repo(root: Path) -> None:
                 "- [ ] Day 95 continuous upgrade plan committed",
                 "- [ ] Day 95 upgrade template upgrade ledger exported",
                 "- [ ] Day 95 storyline outcomes ledger exported",
-                "- [ ] Next-cycle roadmap draft captured from Day 95 outcomes",
+                "- [ ] Next-impact roadmap draft captured from Day 95 outcomes",
             ]
         )
         + "\n",

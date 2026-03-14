@@ -7,7 +7,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-enterprise-regulated.md")
-DAY13_REPORT = Path("docs/day-13-ultra-upgrade-report.md")
+DAY13_REPORT = Path("docs/impact-13-ultra-upgrade-report.md")
 DAY13_ARTIFACT = Path("docs/artifacts/day13-enterprise-use-case-sample.md")
 DAY13_PACK_CI = Path("docs/artifacts/day13-enterprise-pack/enterprise-day13-ci.yml")
 DAY13_EVIDENCE = Path("docs/artifacts/day13-enterprise-pack/evidence/day13-execution-summary.json")
@@ -18,7 +18,7 @@ README_EXPECTED = [
     "python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
     "python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
     "python scripts/check_day13_enterprise_use_case_contract.py",
-    "docs/day-13-ultra-upgrade-report.md",
+    "docs/impact-13-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [

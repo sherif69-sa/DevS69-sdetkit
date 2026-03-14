@@ -7,7 +7,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 QUICKSTART_PAGE = Path("docs/integrations-gitlab-ci-quickstart.md")
-DAY16_REPORT = Path("docs/day-16-ultra-upgrade-report.md")
+DAY16_REPORT = Path("docs/impact-16-ultra-upgrade-report.md")
 DAY16_ARTIFACT = Path("docs/artifacts/day16-gitlab-ci-quickstart-sample.md")
 DAY16_PACK_STRICT = Path("docs/artifacts/day16-gitlab-pack/day16-sdetkit-strict.yml")
 DAY16_PACK_NIGHTLY = Path("docs/artifacts/day16-gitlab-pack/day16-sdetkit-nightly.yml")
@@ -21,7 +21,7 @@ README_EXPECTED = [
     "python -m sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
     "python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict",
     "python scripts/check_day16_gitlab_ci_quickstart_contract.py",
-    "docs/day-16-ultra-upgrade-report.md",
+    "docs/impact-16-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [

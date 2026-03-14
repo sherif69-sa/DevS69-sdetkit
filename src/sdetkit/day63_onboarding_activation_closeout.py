@@ -174,10 +174,10 @@ def build_day63_onboarding_activation_closeout_summary(root: Path) -> dict[str, 
             "check_id": "docs_index_day63_links",
             "weight": 8,
             "passed": (
-                "day-63-big-upgrade-report.md" in docs_index_text
+                "impact-63-big-upgrade-report.md" in docs_index_text
                 and "integrations-onboarding-activation-closeout.md" in docs_index_text
             ),
-            "evidence": "day-63-big-upgrade-report.md + integrations-onboarding-activation-closeout.md",
+            "evidence": "impact-63-big-upgrade-report.md + integrations-onboarding-activation-closeout.md",
         },
         {
             "check_id": "top10_day63_alignment",

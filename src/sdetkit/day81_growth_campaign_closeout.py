@@ -178,10 +178,10 @@ def build_day81_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day81_links",
             "weight": 8,
             "passed": (
-                "day-81-big-upgrade-report.md" in docs_index_text
+                "impact-81-big-upgrade-report.md" in docs_index_text
                 and "integrations-growth-campaign-closeout.md" in docs_index_text
             ),
-            "evidence": "day-81-big-upgrade-report.md + integrations-growth-campaign-closeout.md",
+            "evidence": "impact-81-big-upgrade-report.md + integrations-growth-campaign-closeout.md",
         },
         {
             "check_id": "top10_day81_alignment",

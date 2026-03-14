@@ -153,8 +153,8 @@ def build_day28_weekly_review_summary(
             "check_id": "docs_index_day28_link",
             "category": "discoverability",
             "weight": 10,
-            "passed": "day-28-ultra-upgrade-report.md" in docs_index_text,
-            "evidence": "day-28-ultra-upgrade-report.md",
+            "passed": "impact-28-ultra-upgrade-report.md" in docs_index_text,
+            "evidence": "impact-28-ultra-upgrade-report.md",
         },
         {
             "check_id": "top10_day28_alignment",

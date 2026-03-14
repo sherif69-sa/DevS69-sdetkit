@@ -18,8 +18,8 @@ This is an inspection and planning artifact. It does **not** propose broad refac
   - core user journeys,
   - reference docs,
   - integration guides,
-  - a large archive of day-based reports and closeout pages.
-- `scripts/` includes both core workflows (`ready_to_use.sh`, `check.sh`, `bootstrap.sh`) and many day-specific contract checks.
+  - a large archive of impact-based reports and closeout pages.
+- `scripts/` includes both core workflows (`ready_to_use.sh`, `check.sh`, `bootstrap.sh`) and many impact-specific contract checks.
 
 ## Package and command surface observations
 
@@ -37,10 +37,10 @@ These appear closest to stable product surface:
 
 ## Confusing/overlapping/internal-feeling areas
 
-- Very large set of day/closeout command modules in `src/sdetkit/` (for example `day28_*` through `day97_*` and many `*_closeout` modules).
+- Very large set of impact/closeout command modules in `src/sdetkit/` (for example `day28_*` through `day97_*` and many `*_closeout` modules).
 - CLI has to hide many commands from main help, which is itself a signal that product boundaries are still blurred.
 - Docs navigation includes strong flagship pages plus a very large historical/report corpus in the same visible namespace.
-- Command naming has overlap in places (`weekly-review`, `weekly-review-lane`, cycle-specific closeouts), which can feel incubator-like to external adopters.
+- Command naming has overlap in places (`weekly-review`, `weekly-review-lane`, impact-specific closeouts), which can feel incubator-like to external adopters.
 
 ## 2) Classification of current contents (core / integrations / playbooks / experimental)
 
@@ -84,8 +84,8 @@ Classification is based on current repository contents and naming patterns.
 **Definition:** incubator/history-heavy surfaces that are useful but should not define first-time product identity.
 
 - Most `dayNN_*` and `*_closeout` modules in `src/sdetkit/`.
-- Day-based contract scripts in `scripts/check_day*.py` and cycle-specific closeout checks.
-- Large archive of day-based docs and integration closeout pages in `docs/`.
+- Day-based contract scripts in `scripts/check_day*.py` and impact-specific closeout checks.
+- Large archive of impact-based docs and integration closeout pages in `docs/`.
 - Long-tail command aliases and hidden command behavior currently needed to keep main help usable.
 
 ## 3) Public/stable vs unclear boundary statement
@@ -106,7 +106,7 @@ Classification is based on current repository contents and naming patterns.
 
 ## Treat as incubator/legacy lane (explicit opt-in)
 
-- Day/cycle/closeout command family and matching day-report documentation.
+- Day/impact/closeout command family and matching impact-report documentation.
 - Campaign-style command names where scope is phase-specific rather than evergreen.
 
 ## 4) Proposed target taxonomy (for future productization)
@@ -120,7 +120,7 @@ sdetkit/
   core/           # release gate, doctor, security, evidence, readiness contracts
   integrations/   # CI providers, chat/notify adapters, external connectors, plugin adapters
   playbooks/      # guided onboarding, rollout, adoption, governance playbooks
-  experimental/   # incubator lanes, day/cycle closeouts, unstable aliases
+  experimental/   # incubator lanes, impact/impact closeouts, unstable aliases
   cli/            # user-facing command routing (thin), help profiles, command visibility policy
 ```
 
@@ -154,7 +154,7 @@ Recommended top-level docs journeys:
 5. **Playbooks**
    - Outcome-based guided lanes (onboarding, contribution, reliability narratives, etc.).
 6. **Experimental / archive**
-   - Day/cycle closeout history and incubator commands, clearly marked as non-primary.
+   - Day/impact closeout history and incubator commands, clearly marked as non-primary.
 
 Practical IA rule:
 - Keep only journeys 1-4 prominently in README and docs landing pages.
@@ -168,18 +168,18 @@ Practical IA rule:
 2. **CLI discoverability PR**
    - Introduce clearer help grouping that labels commands as Core / Integrations / Playbooks / Experimental.
 3. **Docs IA PR**
-   - Reorganize MkDocs nav to foreground 3-5 flagship journeys and move day/cycle history under archive sections.
+   - Reorganize MkDocs nav to foreground 3-5 flagship journeys and move impact/impact history under archive sections.
 4. **Compatibility PR**
-   - Add explicit alias/compatibility matrix for legacy day/closeout commands.
+   - Add explicit alias/compatibility matrix for legacy impact/closeout commands.
 5. **Incremental module convergence PRs**
    - Move only a few modules at a time toward target taxonomy with tests and deprecation notes.
 
 ## 7) Key risks and ambiguities
 
-- **Risk: product identity dilution.** The breadth of commands and day-history artifacts can overshadow the flagship release-confidence promise.
+- **Risk: product identity dilution.** The breadth of commands and impact-history artifacts can overshadow the flagship release-confidence promise.
 - **Risk: accidental breaking change.** Aggressive command cleanup could break existing automation that depends on legacy names.
 - **Risk: docs overload for first-time users.** Too many equally prominent pages slows adoption.
-- **Ambiguity: long-term status of day/closeout modules.** Need maintainers to decide: archive-only, supported-long-tail, or scheduled deprecation.
+- **Ambiguity: long-term status of impact/closeout modules.** Need maintainers to decide: archive-only, supported-long-tail, or scheduled deprecation.
 - **Ambiguity: naming end-state.** Whether to keep flat top-level commands forever or migrate to grouped command namespaces with aliases.
 
 ## 8) Decision checkpoints for maintainers

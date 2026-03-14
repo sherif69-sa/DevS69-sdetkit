@@ -214,10 +214,10 @@ def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day53_links",
             "weight": 8,
             "passed": (
-                "day-53-big-upgrade-report.md" in docs_index_text
+                "impact-53-big-upgrade-report.md" in docs_index_text
                 and "integrations-docs-loop-closeout.md" in docs_index_text
             ),
-            "evidence": "day-53-big-upgrade-report.md + integrations-docs-loop-closeout.md",
+            "evidence": "impact-53-big-upgrade-report.md + integrations-docs-loop-closeout.md",
         },
         {
             "check_id": "top10_day53_alignment",

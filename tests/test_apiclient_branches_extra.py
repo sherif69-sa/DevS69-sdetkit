@@ -7,10 +7,10 @@ from sdetkit import apiclient
 
 
 def test_sync_pagination_cycle_and_limit_errors() -> None:
-    def cycle(req: httpx.Request) -> httpx.Response:
+    def impact(req: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=[1], headers={"Link": '</x>; rel="next"'}, request=req)
 
-    with httpx.Client(transport=httpx.MockTransport(cycle)) as c:
+    with httpx.Client(transport=httpx.MockTransport(impact)) as c:
         with pytest.raises(RuntimeError):
             apiclient.fetch_json_list_paginated(c, "https://example.test/x", max_pages=3)
 
@@ -30,16 +30,16 @@ def test_sync_pagination_cycle_and_limit_errors() -> None:
 
 @pytest.mark.asyncio
 async def test_async_pagination_cycle_and_value_guards() -> None:
-    def cycle(req: httpx.Request) -> httpx.Response:
+    def impact(req: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=[1], headers={"Link": '</x>; rel="next"'}, request=req)
 
-    async with httpx.AsyncClient(transport=httpx.MockTransport(cycle)) as c:
+    async with httpx.AsyncClient(transport=httpx.MockTransport(impact)) as c:
         with pytest.raises(RuntimeError):
             await apiclient.fetch_json_list_paginated_async(
                 c, "https://example.test/x", max_pages=3
             )
 
-    async with httpx.AsyncClient(transport=httpx.MockTransport(cycle)) as c:
+    async with httpx.AsyncClient(transport=httpx.MockTransport(impact)) as c:
         with pytest.raises(ValueError):
             await apiclient.fetch_json_list_paginated_async(c, "https://example.test/x", retries=0)
 

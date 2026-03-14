@@ -1,6 +1,6 @@
 # Continuous Upgrade Cycle 6 Closeout — Continuous upgrade closeout lane
 
-Continuous Upgrade Cycle 6 continues the next-cycle motion by converting prior cycle publication outcomes into a deterministic continuous-upgrade lane.
+Continuous Upgrade Cycle 6 continues the next-impact motion by converting prior impact publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Cycle 6 matters
 
@@ -45,7 +45,7 @@ python scripts/check_day96_continuous_upgrade_cycle6_closeout_contract.py
 - [ ] Day 96 continuous upgrade plan committed
 - [ ] Day 96 upgrade template upgrade ledger exported
 - [ ] Day 96 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Day 96 outcomes
+- [ ] Next-impact roadmap draft captured from Day 96 outcomes
 
 ## Scoring model
 

@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-29-ultra-upgrade-report.md\nintegrations-phase1-hardening.md\n",
+        "impact-29-ultra-upgrade-report.md\nintegrations-phase1-hardening.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -39,7 +39,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-phase1-hardening.md").write_text(
         d29._DAY29_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-29-ultra-upgrade-report.md").write_text("# Day 29 report\n", encoding="utf-8")
+    (root / "docs/impact-29-ultra-upgrade-report.md").write_text("# Day 29 report\n", encoding="utf-8")
 
 
 def test_day29_hardening_json(tmp_path: Path, capsys) -> None:

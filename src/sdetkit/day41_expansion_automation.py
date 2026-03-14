@@ -209,10 +209,10 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day41_links",
             "weight": 8,
             "passed": (
-                "day-41-big-upgrade-report.md" in docs_index_text
+                "impact-41-big-upgrade-report.md" in docs_index_text
                 and "integrations-expansion-automation.md" in docs_index_text
             ),
-            "evidence": "day-41-big-upgrade-report.md + integrations-expansion-automation.md",
+            "evidence": "impact-41-big-upgrade-report.md + integrations-expansion-automation.md",
         },
         {
             "check_id": "top10_day41_alignment",
@@ -418,7 +418,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day41-automation-matrix.csv",
         "workflow,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target,risk_guardrail\n"
         "expansion-summary,pm-owner,backup-pm,2026-03-09T09:00:00Z,docs/integrations-expansion-automation.md,python -m sdetkit day41-expansion-automation --format json --strict,completion:+6%,rollback-doc-ready\n"
-        "matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/day-41-big-upgrade-report.md,python scripts/check_day41_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout\n"
+        "matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/impact-41-big-upgrade-report.md,python scripts/check_day41_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout\n"
         "kpi-review,growth-owner,backup-growth,2026-03-10T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict,ctr:+3%,trigger-alert-on-regression\n",
     )
     _write(

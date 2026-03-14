@@ -47,7 +47,7 @@
       "check_id": "docs_index_day40_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-40-big-upgrade-report.md + integrations-day40-scale-lane.md"
+      "evidence": "impact-40-big-upgrade-report.md + integrations-day40-scale-lane.md"
     },
     {
       "check_id": "top10_day40_alignment",

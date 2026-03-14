@@ -210,10 +210,10 @@ def build_day48_objection_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day48_links",
             "weight": 8,
             "passed": (
-                "day-48-big-upgrade-report.md" in docs_index_text
+                "impact-48-big-upgrade-report.md" in docs_index_text
                 and "integrations-objection-closeout.md" in docs_index_text
             ),
-            "evidence": "day-48-big-upgrade-report.md + integrations-objection-closeout.md",
+            "evidence": "impact-48-big-upgrade-report.md + integrations-objection-closeout.md",
         },
         {
             "check_id": "top10_day48_alignment",

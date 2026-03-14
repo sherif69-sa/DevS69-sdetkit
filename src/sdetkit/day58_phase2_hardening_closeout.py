@@ -185,10 +185,10 @@ def build_day58_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day58_links",
             "weight": 8,
             "passed": (
-                "day-58-big-upgrade-report.md" in docs_index_text
+                "impact-58-big-upgrade-report.md" in docs_index_text
                 and "integrations-phase2-hardening-closeout.md" in docs_index_text
             ),
-            "evidence": "day-58-big-upgrade-report.md + integrations-phase2-hardening-closeout.md",
+            "evidence": "impact-58-big-upgrade-report.md + integrations-phase2-hardening-closeout.md",
         },
         {
             "check_id": "top10_day58_alignment",

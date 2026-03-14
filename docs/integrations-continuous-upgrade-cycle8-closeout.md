@@ -1,6 +1,6 @@
 # Cycle 8 — Continuous upgrade closeout lane
 
-Cycle 8 closes with a major upgrade that converts Cycle 7 continuous-upgrade outcomes into a deterministic next-cycle execution lane.
+Cycle 8 closes with a major upgrade that converts Cycle 7 continuous-upgrade outcomes into a deterministic next-impact execution lane.
 
 ## Why Cycle 8 matters
 
@@ -44,7 +44,7 @@ python scripts/check_continuous_upgrade_cycle8_closeout_contract.py
 - [ ] Cycle 8 continuous upgrade plan committed
 - [ ] Cycle 8 upgrade template upgrade ledger exported
 - [ ] Cycle 8 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Cycle 8 outcomes
+- [ ] Next-impact roadmap draft captured from Cycle 8 outcomes
 
 ## Scoring model
 

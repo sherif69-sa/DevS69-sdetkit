@@ -183,10 +183,10 @@ def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str
             "check_id": "docs_index_day76_links",
             "weight": 8,
             "passed": (
-                "day-76-big-upgrade-report.md" in docs_index_text
+                "impact-76-big-upgrade-report.md" in docs_index_text
                 and "integrations-contributor-recognition-closeout.md" in docs_index_text
             ),
-            "evidence": "day-76-big-upgrade-report.md + integrations-contributor-recognition-closeout.md",
+            "evidence": "impact-76-big-upgrade-report.md + integrations-contributor-recognition-closeout.md",
         },
         {
             "check_id": "top10_day76_alignment",

@@ -143,8 +143,8 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day33 = any("day 33" in line for line in lines)
-    has_day34 = any("day 34" in line for line in lines)
+    has_day33 = any("impact 33" in line for line in lines)
+    has_day34 = any("impact 34" in line for line in lines)
     return item_count, has_day33, has_day34
 
 
@@ -214,10 +214,10 @@ def build_day33_demo_asset_summary(
             "check_id": "docs_index_day33_links",
             "weight": 8,
             "passed": (
-                "day-33-ultra-upgrade-report.md" in docs_index_text
+                "impact-33-ultra-upgrade-report.md" in docs_index_text
                 and "integrations-demo-asset.md" in docs_index_text
             ),
-            "evidence": "day-33-ultra-upgrade-report.md + integrations-demo-asset.md",
+            "evidence": "impact-33-ultra-upgrade-report.md + integrations-demo-asset.md",
         },
         {
             "check_id": "top10_day33_alignment",
@@ -411,7 +411,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day33-demo-asset-plan.json",
         json.dumps(
             {
-                "day": 33,
+                "impact": 33,
                 "asset": {
                     "id": "demo-asset-1",
                     "theme": "doctor workflow",

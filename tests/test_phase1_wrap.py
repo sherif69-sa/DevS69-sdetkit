@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-30-ultra-upgrade-report.md\nintegrations-phase1-wrap.md\n",
+        "impact-30-ultra-upgrade-report.md\nintegrations-phase1-wrap.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-phase1-wrap.md").write_text(
         d30._DAY30_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-30-ultra-upgrade-report.md").write_text("# Day 30 report\n", encoding="utf-8")
+    (root / "docs/impact-30-ultra-upgrade-report.md").write_text("# Day 30 report\n", encoding="utf-8")
 
     for rel in [
         "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",

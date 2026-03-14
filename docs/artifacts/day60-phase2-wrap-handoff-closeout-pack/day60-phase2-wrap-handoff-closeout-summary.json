@@ -19,7 +19,7 @@
       "check_id": "docs_index_day60_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-60-big-upgrade-report.md + integrations-day60-phase2-wrap-handoff-closeout.md"
+      "evidence": "impact-60-big-upgrade-report.md + integrations-day60-phase2-wrap-handoff-closeout.md"
     },
     {
       "check_id": "top10_day60_alignment",

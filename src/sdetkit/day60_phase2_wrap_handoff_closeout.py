@@ -176,10 +176,10 @@ def build_day60_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, An
             "check_id": "docs_index_day60_links",
             "weight": 8,
             "passed": (
-                "day-60-big-upgrade-report.md" in docs_index_text
+                "impact-60-big-upgrade-report.md" in docs_index_text
                 and "integrations-phase2-wrap-handoff-closeout.md" in docs_index_text
             ),
-            "evidence": "day-60-big-upgrade-report.md + integrations-phase2-wrap-handoff-closeout.md",
+            "evidence": "impact-60-big-upgrade-report.md + integrations-phase2-wrap-handoff-closeout.md",
         },
         {
             "check_id": "top10_day60_alignment",

@@ -188,10 +188,10 @@ def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str,
             "check_id": "docs_index_day66_links",
             "weight": 8,
             "passed": (
-                "day-66-big-upgrade-report.md" in docs_index_text
+                "impact-66-big-upgrade-report.md" in docs_index_text
                 and "integrations-integration-expansion2-closeout.md" in docs_index_text
             ),
-            "evidence": "day-66-big-upgrade-report.md + integrations-integration-expansion2-closeout.md",
+            "evidence": "impact-66-big-upgrade-report.md + integrations-integration-expansion2-closeout.md",
         },
         {
             "check_id": "top10_day66_alignment",

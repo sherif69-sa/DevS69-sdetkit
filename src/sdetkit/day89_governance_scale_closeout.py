@@ -179,10 +179,10 @@ def build_day89_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day89_links",
             "weight": 8,
             "passed": (
-                "day-89-big-upgrade-report.md" in docs_index_text
+                "impact-89-big-upgrade-report.md" in docs_index_text
                 and "integrations-governance-scale-closeout.md" in docs_index_text
             ),
-            "evidence": "day-89-big-upgrade-report.md + integrations-governance-scale-closeout.md",
+            "evidence": "impact-89-big-upgrade-report.md + integrations-governance-scale-closeout.md",
         },
         {
             "check_id": "top10_day89_alignment",

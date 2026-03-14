@@ -20,7 +20,7 @@
       "check_id": "docs_index_day64_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-64-big-upgrade-report.md + integrations-day64-integration-expansion-closeout.md"
+      "evidence": "impact-64-big-upgrade-report.md + integrations-day64-integration-expansion-closeout.md"
     },
     {
       "check_id": "top10_day64_alignment",

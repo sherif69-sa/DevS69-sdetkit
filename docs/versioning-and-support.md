@@ -14,7 +14,7 @@ promises that are not yet operationally guaranteed.
 - It complements (not replaces) command docs, release workflow docs, and
   stability-level guidance.
 - Where needed, this page uses terms like **intended direction** and
-  **best-effort** to stay honest about present-day guarantees.
+  **best-effort** to stay honest about present-impact guarantees.
 
 ## Versioning expectations
 
@@ -39,7 +39,7 @@ promises that are not yet operationally guaranteed.
 
 ## Stability tiers and what they imply
 
-- **Stable/Core:** highest confidence for day-to-day release gating and shipping
+- **Stable/Core:** highest confidence for impact-to-impact release gating and shipping
   readiness checks.
 - **Integrations:** suitable for production use after local/CI validation in
   your environment.
@@ -73,7 +73,7 @@ Treat as most stable for production rollout:
 Treat as evolving (validate before broad dependence):
 
 - Environment-specific integration edges.
-- Guided playbook narratives and transition-era/day closeout lanes.
+- Guided playbook narratives and transition-era/impact closeout lanes.
 - Newer or explicitly experimental command families.
 
 ## Maintainer operational note (release/changelog hygiene)

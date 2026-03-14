@@ -8,7 +8,7 @@
 
 The initial Day 2 implementation provided a static walkthrough, but operators still needed to manually run commands and infer whether output matched expected snippets.
 
-For day-closeout quality, the demo path needed to be executable, self-validating, and packaged with practical hints that improve consistency in live demos and handoffs.
+For impact-closeout quality, the demo path needed to be executable, self-validating, and packaged with practical hints that improve consistency in live demos and handoffs.
 
 ## Implementation scope
 
@@ -29,7 +29,7 @@ For day-closeout quality, the demo path needed to be executable, self-validating
   - Updated demo examples and documented execute-related flags.
 - `docs/artifacts/day2-demo-sample.md`
   - Refreshed artifact to include execution summary + closeout hints.
-- `docs/day-2-ultra-upgrade-report.md`
+- `docs/impact-2-ultra-upgrade-report.md`
   - Recorded closeout implementation and validation details.
 
 ## Validation checklist

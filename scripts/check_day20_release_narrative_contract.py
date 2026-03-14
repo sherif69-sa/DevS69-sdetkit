@@ -8,7 +8,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY20_PAGE = Path("docs/integrations-release-narrative.md")
-DAY20_REPORT = Path("docs/day-20-ultra-upgrade-report.md")
+DAY20_REPORT = Path("docs/impact-20-ultra-upgrade-report.md")
 DAY20_ARTIFACT = Path("docs/artifacts/day20-release-narrative-sample.md")
 DAY20_PACK_SUMMARY = Path(
     "docs/artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json"

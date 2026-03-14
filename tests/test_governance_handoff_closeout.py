@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-87-big-upgrade-report.md\nintegrations-governance-handoff-closeout.md\n",
+        "impact-87-big-upgrade-report.md\nintegrations-governance-handoff-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-governance-handoff-closeout.md").write_text(
         d87._DAY87_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-87-big-upgrade-report.md").write_text("# Day 87 report\n", encoding="utf-8")
+    (root / "docs/impact-87-big-upgrade-report.md").write_text("# Day 87 report\n", encoding="utf-8")
 
     summary = (
         root

@@ -20,7 +20,7 @@
       "check_id": "docs_index_day90_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-90-big-upgrade-report.md + integrations-day90-phase3-wrap-publication-closeout.md"
+      "evidence": "impact-90-big-upgrade-report.md + integrations-day90-phase3-wrap-publication-closeout.md"
     },
     {
       "check_id": "top10_day90_alignment",
@@ -118,7 +118,7 @@
     "Day 89 continuity baseline is stable with activation score=100.",
     "Day 89 delivery board integrity validated with 5 checklist items.",
     "Day 90 phase-3 wrap publication dataset is available for governance execution.",
-    "Day 90 phase-3 wrap publication closeout lane is fully complete and ready for next-cycle roadmap execution."
+    "Day 90 phase-3 wrap publication closeout lane is fully complete and ready for next-impact roadmap execution."
   ],
   "misses": [],
   "handoff_actions": []

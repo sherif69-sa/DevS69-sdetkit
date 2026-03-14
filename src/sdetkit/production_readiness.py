@@ -41,7 +41,7 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         "docs/index.md",
         "docs/repo-audit.md",
         "docs/security.md",
-        "docs/production-s-class-90-day-boost.md",
+        "docs/production-s-class-90-impact-boost.md",
         "tests/test_cli_sdetkit.py",
     ]
     required_workflows = [
@@ -89,9 +89,9 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="phase_boost_blueprint_present",
             weight=10,
-            passed=_exists(root, "docs/production-s-class-90-day-boost.md"),
-            evidence="docs/production-s-class-90-day-boost.md",
-            remediation="Add a concrete 90-day execution blueprint and keep it versioned.",
+            passed=_exists(root, "docs/production-s-class-90-impact-boost.md"),
+            evidence="docs/production-s-class-90-impact-boost.md",
+            remediation="Add a concrete 90-impact execution blueprint and keep it versioned.",
         ),
         ReadinessCheck(
             check_id="tests_folder_present",

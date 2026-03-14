@@ -1,6 +1,6 @@
 # Continuous Upgrade Cycle 4 Closeout — Continuous upgrade closeout lane
 
-Day 94 starts the next cycle by converting Day 93 publication outcomes into a deterministic continuous-upgrade lane.
+Day 94 starts the next impact by converting Day 93 publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Cycle 4 matters
 
@@ -45,7 +45,7 @@ python scripts/check_day94_continuous_upgrade_cycle4_closeout_contract.py
 - [ ] Day 94 continuous upgrade plan committed
 - [ ] Day 94 upgrade template upgrade ledger exported
 - [ ] Day 94 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Day 94 outcomes
+- [ ] Next-impact roadmap draft captured from Day 94 outcomes
 
 ## Scoring model
 

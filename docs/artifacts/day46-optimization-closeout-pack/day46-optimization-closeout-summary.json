@@ -47,7 +47,7 @@
       "check_id": "docs_index_day46_links",
       "weight": 8,
       "passed": true,
-      "evidence": "day-46-big-upgrade-report.md + integrations-day46-optimization-closeout.md"
+      "evidence": "impact-46-big-upgrade-report.md + integrations-day46-optimization-closeout.md"
     },
     {
       "check_id": "top10_day46_alignment",

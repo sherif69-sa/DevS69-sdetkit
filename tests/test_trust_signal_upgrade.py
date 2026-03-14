@@ -40,7 +40,7 @@ def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:
     (root / "docs").mkdir(exist_ok=True)
     (root / "docs/security.md").write_text("# Security docs\n", encoding="utf-8")
     (root / "docs/policy-and-baselines.md").write_text("# Policy\n", encoding="utf-8")
-    (root / "docs/index.md").write_text("day-22-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text("impact-22-ultra-upgrade-report.md\n", encoding="utf-8")
 
     workflows = root / ".github/workflows"
     workflows.mkdir(parents=True, exist_ok=True)

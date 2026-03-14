@@ -3,7 +3,7 @@
 ## What shipped
 
 - Added `continuous-upgrade-cycle8-closeout` command to score Cycle 8 readiness from Cycle 7 continuous-upgrade artifacts.
-- Added deterministic pack emission and execution evidence generation for cycle-8 continuous-upgrade proof.
+- Added deterministic pack emission and execution evidence generation for impact-8 continuous-upgrade proof.
 - Added strict contract validation script and tests that enforce Cycle 8 closeout quality gates.
 
 ## Command lane

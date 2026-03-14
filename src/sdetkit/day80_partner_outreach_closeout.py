@@ -184,10 +184,10 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day80_links",
             "weight": 8,
             "passed": (
-                "day-80-big-upgrade-report.md" in docs_index_text
+                "impact-80-big-upgrade-report.md" in docs_index_text
                 and "integrations-partner-outreach-closeout.md" in docs_index_text
             ),
-            "evidence": "day-80-big-upgrade-report.md + integrations-partner-outreach-closeout.md",
+            "evidence": "impact-80-big-upgrade-report.md + integrations-partner-outreach-closeout.md",
         },
         {
             "check_id": "top10_day80_alignment",

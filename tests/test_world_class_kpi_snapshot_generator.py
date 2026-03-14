@@ -18,7 +18,7 @@ def test_generator_writes_snapshot_from_baseline(tmp_path: Path) -> None:
         "program": "world-class-quality",
         "dashboard": "world-class-kpi",
         "version": "v1",
-        "snapshot_window": "rolling-30-day",
+        "snapshot_window": "rolling-30-impact",
         "review_cadence": "weekly",
         "owners": {"reliability": {"primary": "A", "backup": "B"}},
         "kpis": [
@@ -113,7 +113,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
                     {
                         "id": "pr_cycle_time",
                         "lane": "velocity",
-                        "metric": "PR cycle time",
+                        "metric": "PR impact time",
                         "target": "<24h",
                     }
                 ],
@@ -128,7 +128,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
                 "pr_cycle_time": {
                     "current_value": "21h",
                     "status": "watch",
-                    "evidence_link": "scm://analytics/pr-cycle-time",
+                    "evidence_link": "scm://analytics/pr-impact-time",
                 }
             }
         ),
@@ -141,7 +141,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
                 "pr_cycle_time": {
                     "current_value": "23h",
                     "status": "watch",
-                    "evidence_link": "scm://analytics/pr-cycle-time-prev",
+                    "evidence_link": "scm://analytics/pr-impact-time-prev",
                 }
             }
         ),
@@ -162,7 +162,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
 
     assert proc.returncode == 0
     text = output_path.read_text(encoding="utf-8")
-    assert "| pr_cycle_time | velocity | PR cycle time | `<24h` | 21h | -2.00h | watch | scm://analytics/pr-cycle-time |" in text
+    assert "| pr_cycle_time | velocity | PR impact time | `<24h` | 21h | -2.00h | watch | scm://analytics/pr-impact-time |" in text
 
 
 def test_generator_rejects_invalid_snapshot_date(tmp_path: Path) -> None:
@@ -197,7 +197,7 @@ def test_generator_uses_na_delta_when_units_do_not_match(tmp_path: Path) -> None
                     {
                         "id": "pr_cycle_time",
                         "lane": "velocity",
-                        "metric": "PR cycle time",
+                        "metric": "PR impact time",
                         "target": "<24h",
                     }
                 ],
@@ -213,7 +213,7 @@ def test_generator_uses_na_delta_when_units_do_not_match(tmp_path: Path) -> None
                     "current_value": "21h",
                     "previous_value": "88%",
                     "status": "watch",
-                    "evidence_link": "scm://analytics/pr-cycle-time",
+                    "evidence_link": "scm://analytics/pr-impact-time",
                 }
             }
         ),
@@ -232,7 +232,7 @@ def test_generator_uses_na_delta_when_units_do_not_match(tmp_path: Path) -> None
 
     assert proc.returncode == 0
     text = output_path.read_text(encoding="utf-8")
-    assert "| pr_cycle_time | velocity | PR cycle time | `<24h` | 21h | n/a | watch | scm://analytics/pr-cycle-time |" in text
+    assert "| pr_cycle_time | velocity | PR impact time | `<24h` | 21h | n/a | watch | scm://analytics/pr-impact-time |" in text
 
 
 def test_generator_strict_metrics_fails_when_kpis_missing(tmp_path: Path) -> None:

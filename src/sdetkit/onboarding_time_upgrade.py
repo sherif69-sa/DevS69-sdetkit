@@ -125,7 +125,7 @@ _SIGNALS = [
         "check_id": "docs_index_day24_link",
         "category": "discoverability",
         "weight": 10,
-        "marker": "day-24-ultra-upgrade-report.md",
+        "marker": "impact-24-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {
@@ -305,7 +305,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
                 "",
                 "- [ ] Docs contract page includes all required sections.",
                 "- [ ] README links the Day 24 integration page and command lane.",
-                "- [ ] Docs index links day-24-ultra-upgrade-report.md.",
+                "- [ ] Docs index links impact-24-ultra-upgrade-report.md.",
                 "- [ ] onboarding command retains role + platform selectors.",
                 "- [ ] Execution evidence artifacts attached to release thread.",
             ]

@@ -143,8 +143,8 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day32 = any("day 32" in line for line in lines)
-    has_day33 = any("day 33" in line for line in lines)
+    has_day32 = any("impact 32" in line for line in lines)
+    has_day33 = any("impact 33" in line for line in lines)
     return item_count, has_day32, has_day33
 
 
@@ -214,10 +214,10 @@ def build_day32_release_cadence_summary(
             "check_id": "docs_index_day32_links",
             "weight": 8,
             "passed": (
-                "day-32-ultra-upgrade-report.md" in docs_index_text
+                "impact-32-ultra-upgrade-report.md" in docs_index_text
                 and "integrations-release-cadence.md" in docs_index_text
             ),
-            "evidence": "day-32-ultra-upgrade-report.md + integrations-release-cadence.md",
+            "evidence": "impact-32-ultra-upgrade-report.md + integrations-release-cadence.md",
         },
         {
             "check_id": "top10_day32_alignment",
@@ -413,7 +413,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day32-cadence-calendar.json",
         json.dumps(
             {
-                "day": 32,
+                "impact": 32,
                 "cadence": {
                     "publish_day": "Friday",
                     "merge_cutoff": "16:00 UTC",

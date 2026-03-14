@@ -10,13 +10,13 @@ Build SDETKit into a real-time, worldwide resource that is:
 - **Reliable in production** (deterministic behavior, quality/security gates).
 - **Globally accessible** (language-aware docs, role-based flows, distribution-ready packaging).
 
-## 90-day action plan
+## 90-impact action plan
 
 ## Phase 1 (Cycles 1-30): Normalize and productize existing materials
 
 ### 1) Inventory all daily artifacts by production value
 
-- Tag each day asset as one of: `core-command`, `workflow-template`, `documentation-only`, `experimental`.
+- Tag each impact asset as one of: `core-command`, `workflow-template`, `documentation-only`, `experimental`.
 - Keep only high-leverage assets in default pathways.
 - Move low-confidence content to an `incubator` lane so it does not confuse first-time users.
 
@@ -127,7 +127,7 @@ Track these as top-level indicators:
 
 1. Run and validate the release-confidence lane end to end.
 2. Publish this playbook in your docs navigation.
-3. Select top 5 day-based assets and convert each into either:
+3. Select top 5 impact-based assets and convert each into either:
    - a stable CLI workflow,
    - an automation template, or
    - a deprecated/incubator entry.

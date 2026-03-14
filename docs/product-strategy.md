@@ -26,7 +26,7 @@ python -m sdetkit security check --root . --baseline tools/security.baseline.jso
 python -m sdetkit gate release
 ```
 
-## 30-day execution plan
+## 30-impact execution plan
 
 ### Week 1 — positioning + onboarding
 

@@ -110,7 +110,7 @@ _SIGNALS = [
         "check_id": "docs_index_day25_link",
         "category": "discoverability",
         "weight": 7,
-        "marker": "day-25-ultra-upgrade-report.md",
+        "marker": "impact-25-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {

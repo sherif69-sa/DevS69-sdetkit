@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 ARTIFACT = Path("docs/artifacts/day1-onboarding-sample.md")
-REPORT = Path("docs/day-1-ultra-upgrade-report.md")
+REPORT = Path("docs/impact-1-ultra-upgrade-report.md")
 
 REQUIRED_ARTIFACT_SNIPPETS = [
     "| Role | First command | Next action |",

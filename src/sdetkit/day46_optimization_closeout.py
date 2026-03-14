@@ -210,10 +210,10 @@ def build_day46_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day46_links",
             "weight": 8,
             "passed": (
-                "day-46-big-upgrade-report.md" in docs_index_text
+                "impact-46-big-upgrade-report.md" in docs_index_text
                 and "integrations-optimization-closeout.md" in docs_index_text
             ),
-            "evidence": "day-46-big-upgrade-report.md + integrations-optimization-closeout.md",
+            "evidence": "impact-46-big-upgrade-report.md + integrations-optimization-closeout.md",
         },
         {
             "check_id": "top10_day46_alignment",

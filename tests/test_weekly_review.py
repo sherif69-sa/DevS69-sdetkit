@@ -46,7 +46,7 @@ def test_week2_review_adds_growth_signals_and_deltas() -> None:
 def test_weekly_review_flags_missing_files(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# temp\n", encoding="utf-8")
     (tmp_path / "docs").mkdir()
-    (tmp_path / "docs" / "day-1-ultra-upgrade-report.md").write_text("ok\n", encoding="utf-8")
+    (tmp_path / "docs" / "impact-1-ultra-upgrade-report.md").write_text("ok\n", encoding="utf-8")
 
     review = weekly_review.build_weekly_review(tmp_path)
     assert review.kpis["days_completed"] < review.kpis["days_planned"]
@@ -86,8 +86,8 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
     root = tmp_path / "repo"
     (root / "docs" / "artifacts").mkdir(parents=True)
 
-    for day in range(15, 21):
-        (root / "docs" / f"day-{day}-ultra-upgrade-report.md").write_text("ok\n", encoding="utf-8")
+    for impact in range(15, 21):
+        (root / "docs" / f"impact-{impact}-ultra-upgrade-report.md").write_text("ok\n", encoding="utf-8")
     for artifact in (
         "day15-github-actions-quickstart-sample.md",
         "day16-gitlab-ci-quickstart-sample.md",

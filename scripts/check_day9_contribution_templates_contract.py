@@ -6,7 +6,7 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY9_REPORT = Path("docs/day-9-ultra-upgrade-report.md")
+DAY9_REPORT = Path("docs/impact-9-ultra-upgrade-report.md")
 DAY9_ARTIFACT = Path("docs/artifacts/day9-triage-templates-sample.md")
 ISSUE_CONFIG = Path(".github/ISSUE_TEMPLATE/config.yml")
 
@@ -14,7 +14,7 @@ README_EXPECTED = [
     "## 🧩 Day 9 ultra: contribution templates",
     "python -m sdetkit triage-templates --format text --strict",
     "python -m sdetkit triage-templates --write-defaults --format json --strict",
-    "docs/day-9-ultra-upgrade-report.md",
+    "docs/impact-9-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [

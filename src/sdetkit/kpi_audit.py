@@ -197,8 +197,8 @@ def build_kpi_audit_summary(
             "check_id": "docs_index_day27_link",
             "category": "discoverability",
             "weight": 6,
-            "passed": "day-27-ultra-upgrade-report.md" in docs_index_text,
-            "evidence": "day-27-ultra-upgrade-report.md",
+            "passed": "impact-27-ultra-upgrade-report.md" in docs_index_text,
+            "evidence": "impact-27-ultra-upgrade-report.md",
         },
         {
             "check_id": "top10_day27_alignment",

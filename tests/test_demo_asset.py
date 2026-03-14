@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "day-33-ultra-upgrade-report.md\nintegrations-demo-asset.md\n",
+        "impact-33-ultra-upgrade-report.md\nintegrations-demo-asset.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-demo-asset.md").write_text(d33._DAY33_DEFAULT_PAGE, encoding="utf-8")
-    (root / "docs/day-33-ultra-upgrade-report.md").write_text("# Day 33 report\n", encoding="utf-8")
+    (root / "docs/impact-33-ultra-upgrade-report.md").write_text("# Day 33 report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)

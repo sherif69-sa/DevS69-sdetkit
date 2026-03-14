@@ -1,6 +1,6 @@
 # Continuous Upgrade Closeout — Continuous upgrade closeout lane
 
-Day 91 starts the next cycle by converting Day 90 publication outcomes into a deterministic continuous-upgrade lane.
+Day 91 starts the next impact by converting Day 90 publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Closeout matters
 
@@ -45,7 +45,7 @@ python scripts/check_day91_continuous_upgrade_closeout_contract.py
 - [ ] Day 91 continuous upgrade plan committed
 - [ ] Day 91 upgrade template upgrade ledger exported
 - [ ] Day 91 storyline outcomes ledger exported
-- [ ] Next-cycle roadmap draft captured from Day 91 outcomes
+- [ ] Next-impact roadmap draft captured from Day 91 outcomes
 
 ## Scoring model
 

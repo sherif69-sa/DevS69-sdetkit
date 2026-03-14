@@ -8,7 +8,7 @@ CONTRIBUTING = Path("CONTRIBUTING.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DOCS_CONTRIBUTING = Path("docs/contributing.md")
-DAY10_REPORT = Path("docs/day-10-ultra-upgrade-report.md")
+DAY10_REPORT = Path("docs/impact-10-ultra-upgrade-report.md")
 DAY10_ARTIFACT = Path("docs/artifacts/day10-first-contribution-checklist-sample.md")
 
 README_EXPECTED = [
@@ -16,7 +16,7 @@ README_EXPECTED = [
     "python -m sdetkit first-contribution --format text --strict",
     "python -m sdetkit first-contribution --write-defaults --format json --strict",
     "python scripts/check_day10_first_contribution_contract.py",
-    "docs/day-10-ultra-upgrade-report.md",
+    "docs/impact-10-ultra-upgrade-report.md",
 ]
 
 CONTRIBUTING_EXPECTED = [

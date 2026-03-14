@@ -28,28 +28,28 @@ These strengths are the right base for growth; the next step is packaging, disco
 - Reach strong stars/forks/download momentum through repeatable launch motions.
 - Build a recognizable category position: "enterprise-grade SDET operations CLI."
 
-## 90-day execution plan
+## 90-impact execution plan
 
 ## Day 1–90 execution contract: real upgrades only (mandatory for all phases)
 
-To enforce your requirement, every day in this plan is now governed by a **non-trivial delivery contract**.
+To enforce your requirement, every impact in this plan is now governed by a **non-trivial delivery contract**.
 
 ### Daily minimum bar (must all pass)
 
-1. **Scope size:** each day ships a meaningful implementation with a target patch size of **+2000 to +5000 lines diff** (code + tests + docs + CI updates).
+1. **Scope size:** each impact ships a meaningful implementation with a target patch size of **+2000 to +5000 lines diff** (code + tests + docs + CI updates).
 2. **Production relevance:** changes must solve a real workflow problem (reliability, security, automation, integration, governance, or scale).
-3. **Multi-surface impact:** each day must touch at least **3 of 5 surfaces**:
+3. **Multi-surface impact:** each impact must touch at least **3 of 5 surfaces**:
    - product code,
    - automated tests,
    - docs/runbooks,
    - CI/automation,
    - developer/operator UX.
-4. **Validation depth:** each day must include passing checks (unit/integration/contract tests as applicable) and a short risk note.
-5. **Adoption proof:** each day must publish at least one concrete artifact (report, dashboard, benchmark, case snapshot, or demo output).
+4. **Validation depth:** each impact must include passing checks (unit/integration/contract tests as applicable) and a short risk note.
+5. **Adoption proof:** each impact must publish at least one concrete artifact (report, dashboard, benchmark, case snapshot, or demo output).
 
 ### Hard rejection rules
 
-A day is **rejected** and does not count if it is primarily:
+A impact is **rejected** and does not count if it is primarily:
 
 - refactor-only without user-visible capability gain,
 - docs-only without shipped capability,
@@ -58,7 +58,7 @@ A day is **rejected** and does not count if it is primarily:
 
 ### Daily deliverable template (required)
 
-For each day `N` (Day 1…Day 90), execution must produce:
+For each impact `N` (Day 1…Day 90), execution must produce:
 
 - **Upgrade title** (clear business/engineering outcome).
 - **Problem statement** (what real-world pain it solves).
@@ -78,28 +78,28 @@ Every 7 cycles, publish a weekly gate report with:
 - adoption signals,
 - carry-over risk list.
 
-If any day fails the contract, the next day starts with remediation before new scope.
+If any impact fails the contract, the next impact starts with remediation before new scope.
 
-### Operator command for day execution
+### Operator command for impact execution
 
-Use this run protocol when you say "start day X":
+Use this run protocol when you say "start impact X":
 
-1. Confirm day scope and target outcome from this strategy.
+1. Confirm impact scope and target outcome from this strategy.
 2. Implement full non-trivial scope (`+2000` to `+5000` diff target).
 3. Run tests/checks and collect artifacts.
 4. Publish daily report + open follow-up risks.
-5. Only then mark day complete and move to day X+1.
+5. Only then mark impact complete and move to impact X+1.
 
 ### Phase 1 (Cycles 1-30): Positioning + conversion (daily execution)
 
-This phase now runs as a **day-by-day operating plan**. When we say "work Day 1," we execute that day’s checklist in full and publish the artifacts before moving on.
+This phase now runs as a **impact-by-impact operating plan**. When we say "work Day 1," we execute that impact’s checklist in full and publish the artifacts before moving on.
 
 
 #### Phase-1 non-trivial enforcement gates
 
-- Every day must ship a production-grade capability upgrade, not messaging-only updates.
+- Every impact must ship a production-grade capability upgrade, not messaging-only updates.
 - Minimum daily change target stays **+2000 to +5000 diff**, including code, tests, docs, and automation updates.
-- At least one of the day’s outputs must be directly runnable by users in real workflows.
+- At least one of the impact’s outputs must be directly runnable by users in real workflows.
 - Cycles that fail this gate are reopened and replaced with larger scoped upgrades before moving forward.
 
 #### Day 1–30 sprint plan
@@ -153,15 +153,15 @@ This phase now runs as a **day-by-day operating plan**. When we say "work Day 1,
 
 ### Phase 2 (Cycles 31-60): Adoption loops (daily execution)
 
-Phase 2 converts early traction into repeatable growth loops. Each day ships one concrete asset that increases discoverability, trust, or reuse.
+Phase 2 converts early traction into repeatable growth loops. Each impact ships one concrete asset that increases discoverability, trust, or reuse.
 
 
 #### Phase-2 non-trivial enforcement gates
 
-- Every day must strengthen a real adoption loop (release, distribution, integration, trust proof), not cosmetic updates.
+- Every impact must strengthen a real adoption loop (release, distribution, integration, trust proof), not cosmetic updates.
 - Minimum daily change target stays **+2000 to +5000 diff** with functional and validation coverage.
-- Each day must produce measurable external impact (traffic, adoption, discussions, integrations, or downstream reuse).
-- If external-impact evidence is missing, the day is not accepted as complete.
+- Each impact must produce measurable external impact (traffic, adoption, discussions, integrations, or downstream reuse).
+- If external-impact evidence is missing, the impact is not accepted as complete.
 
 #### Day 31–60 sprint plan
 
@@ -198,7 +198,7 @@ Phase 2 converts early traction into repeatable growth loops. Each day ships one
 - **Day 55 — Contributor activation #2:** highlight advanced issues for repeat contributors.
 - **Day 56 — Stabilization closeout:** enforce deterministic follow-through, KPI recovery, and risk rollback proof.
 
-- **Day 57 — KPI deep audit closeout:** lock 30-day trendlines (stars, CTR, discussions, PRs, returning users) with strict anomaly triage.
+- **Day 57 — KPI deep audit closeout:** lock 30-impact trendlines (stars, CTR, discussions, PRs, returning users) with strict anomaly triage.
 - **Day 58 — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.
 - **Day 59 — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.
 - **Day 60 — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.
@@ -222,10 +222,10 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 
 #### Phase-3 non-trivial enforcement gates
 
-- Every day must deliver durable ecosystem or governance value (integration depth, trust artifacts, community outcomes).
+- Every impact must deliver durable ecosystem or governance value (integration depth, trust artifacts, community outcomes).
 - Minimum daily change target stays **+2000 to +5000 diff** with explicit reliability/security validation.
-- Each day must include real-world proof (case data, adoption signal, governance artifact, or integration usage evidence).
-- Any day without durable proof is treated as incomplete and must be expanded before progression.
+- Each impact must include real-world proof (case data, adoption signal, governance artifact, or integration usage evidence).
+- Any impact without durable proof is treated as incomplete and must be expanded before progression.
 
 #### Day 61–90 sprint plan
 
@@ -263,13 +263,13 @@ Phase 3 turns growth into durable ecosystem trust: stronger community rituals, d
 - **Day 83 — Trust FAQ expansion:** answer top compliance/security objections from real users.
 - **Day 84 — Weekly review #12:** compare Phase-3 week-over-week ecosystem metrics.
 
-- **Day 85 — KPI deep audit:** validate full 90-day trends vs original baseline.
+- **Day 85 — KPI deep audit:** validate full 90-impact trends vs original baseline.
 - **Day 86 — Reputation hardening:** clean up top public surfaces (README/docs/release highlights).
 - **Day 87 — Governance handoff prep:** map long-term ownership for community and roadmap loops.
 - **Day 88 — Governance priorities closeout lane:** lock governance priorities from Day 87 handoff outcomes with strict quality gates.
-- **Day 89 — Next-cycle planning:** draft next 90-day strategy from validated learnings.
+- **Day 89 — Next-impact planning:** draft next 90-impact strategy from validated learnings.
 - **Day 89 — Final review:** package wins, misses, and corrective actions.
-- **Day 90 — Phase-3 wrap + publication:** ship final 90-day report and publish next-cycle roadmap.
+- **Day 90 — Phase-3 wrap + publication:** ship final 90-impact report and publish next-impact roadmap.
 - **Day 91 — Continuous upgrade closeout lane:** convert Day 90 publication outputs into deterministic continuous-improvement execution.
 
 #### Phase-3 weekly deliverables (must ship)
@@ -323,7 +323,7 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 2. Add a one-command quick demo block that runs safely in under 60 seconds.
 3. Add an "Adoption proof" section (sample outputs and badges).
 4. Create 10 curated `good first issue` tasks.
-5. Publish a public 90-day milestone board.
+5. Publish a public 90-impact milestone board.
 6. Ship one integration quickstart per week for 4 weeks.
 7. Post weekly changelog highlights with one visual artifact each.
 
@@ -340,10 +340,10 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 - **Day 89 — Governance scale closeout lane:** scale Day 88 governance priorities outcomes with strict quality gates and deterministic evidence.
 
 
-- **Day 92 — Continuous upgrade cycle #2 closeout lane:** execute the next deterministic upgrade pass using Day 91 continuity evidence.
-- **Day 93 — Continuous upgrade cycle #3 closeout lane:** extend continuous-upgrade execution with Day 92 evidence and cycle-3 handoff controls.
-- **Day 94 — Continuous upgrade cycle #4 closeout lane:** continue continuous-upgrade execution with Day 93 evidence and cycle-4 handoff controls.
-- **Day 95 — Continuous upgrade cycle #5 closeout lane:** continue continuous-upgrade execution with Day 94 evidence and cycle-5 handoff controls.
-- **Day 97 — Continuous upgrade cycle #7 closeout lane:** continue continuous-upgrade execution with Day 95 evidence and cycle-7 handoff controls.
-- **Cycle 8 — Continuous upgrade closeout lane:** continue continuous-upgrade execution with cycle-7 evidence and cycle-8 handoff controls.
+- **Day 92 — Continuous upgrade impact #2 closeout lane:** execute the next deterministic upgrade pass using Day 91 continuity evidence.
+- **Day 93 — Continuous upgrade impact #3 closeout lane:** extend continuous-upgrade execution with Day 92 evidence and impact-3 handoff controls.
+- **Day 94 — Continuous upgrade impact #4 closeout lane:** continue continuous-upgrade execution with Day 93 evidence and impact-4 handoff controls.
+- **Day 95 — Continuous upgrade impact #5 closeout lane:** continue continuous-upgrade execution with Day 94 evidence and impact-5 handoff controls.
+- **Day 97 — Continuous upgrade impact #7 closeout lane:** continue continuous-upgrade execution with Day 95 evidence and impact-7 handoff controls.
+- **Cycle 8 — Continuous upgrade closeout lane:** continue continuous-upgrade execution with impact-7 evidence and impact-8 handoff controls.
 

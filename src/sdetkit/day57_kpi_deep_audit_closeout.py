@@ -203,10 +203,10 @@ def build_day57_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day57_links",
             "weight": 8,
             "passed": (
-                "day-57-big-upgrade-report.md" in docs_index_text
+                "impact-57-big-upgrade-report.md" in docs_index_text
                 and "integrations-kpi-deep-audit-closeout.md" in docs_index_text
             ),
-            "evidence": "day-57-big-upgrade-report.md + integrations-kpi-deep-audit-closeout.md",
+            "evidence": "impact-57-big-upgrade-report.md + integrations-kpi-deep-audit-closeout.md",
         },
         {
             "check_id": "top10_day57_alignment",

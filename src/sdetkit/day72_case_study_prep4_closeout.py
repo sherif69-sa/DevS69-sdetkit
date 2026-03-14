@@ -184,10 +184,10 @@ def build_day72_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_index_day72_links",
             "weight": 8,
             "passed": (
-                "day-72-big-upgrade-report.md" in docs_index_text
+                "impact-72-big-upgrade-report.md" in docs_index_text
                 and "integrations-case-study-prep4-closeout.md" in docs_index_text
             ),
-            "evidence": "day-72-big-upgrade-report.md + integrations-case-study-prep4-closeout.md",
+            "evidence": "impact-72-big-upgrade-report.md + integrations-case-study-prep4-closeout.md",
         },
         {
             "check_id": "top10_day72_alignment",

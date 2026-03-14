@@ -159,7 +159,7 @@ def test_http_client_pagination_cycle_detected():
 
     with pytest.raises(RuntimeError) as e:
         hc.get_json_list_paginated("https://example.test/a", max_pages=3)
-    assert "pagination cycle" in str(e.value)
+    assert "pagination impact" in str(e.value)
 
 
 def test_backoff_delay_with_jitter_is_deterministic(monkeypatch):

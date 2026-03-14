@@ -143,8 +143,8 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day37 = any("day 37" in line for line in lines)
-    has_day38 = any("day 38" in line for line in lines)
+    has_day37 = any("impact 37" in line for line in lines)
+    has_day38 = any("impact 38" in line for line in lines)
     return item_count, has_day37, has_day38
 
 
@@ -214,10 +214,10 @@ def build_day38_distribution_batch_summary(
             "check_id": "docs_index_day38_links",
             "weight": 8,
             "passed": (
-                "day-38-big-upgrade-report.md" in docs_index_text
+                "impact-38-big-upgrade-report.md" in docs_index_text
                 and "integrations-distribution-batch.md" in docs_index_text
             ),
-            "evidence": "day-38-big-upgrade-report.md + integrations-distribution-batch.md",
+            "evidence": "impact-38-big-upgrade-report.md + integrations-distribution-batch.md",
         },
         {
             "check_id": "top10_day38_alignment",
@@ -410,7 +410,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day38-channel-plan.csv",
         "channel,post_id,experiment_winner,docs_cta,command_cta,owner,window_utc,kpi_target\n"
         "github,gh-01,exp-01,README:docs/integrations-experiment-lane.md,python -m sdetkit day37-experiment-lane --format json,community-owner,2026-03-03T15:00:00Z,ctr:+2%\n"
-        "linkedin,li-01,exp-02,docs/index.md#day-37-big-upgrades,python -m sdetkit day36-distribution-closeout --format json,growth-owner,2026-03-03T12:00:00Z,visitors:+8%\n"
+        "linkedin,li-01,exp-02,docs/index.md#impact-37-big-upgrades,python -m sdetkit day36-distribution-closeout --format json,growth-owner,2026-03-03T12:00:00Z,visitors:+8%\n"
         "newsletter,nl-01,exp-03,docs/integrations-experiment-lane.md,python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json,pm-owner,2026-03-04T09:00:00Z,replies:+1.5%\n",
     )
     _write(

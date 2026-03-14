@@ -61,8 +61,8 @@ RESERVED_NAMES: set[str] = (
     {"baseline", "playbooks"} | CORE_COMMANDS | DOC_AND_GOV_COMMANDS | set(RECOMMENDED_PLAYBOOKS)
 )
 
-_DAY_PREFIX = re.compile(r"^day\d+_")
-_DAY_CLOSEOUT = re.compile(r"^day\d+_(.+_closeout)$")
+_DAY_PREFIX = re.compile(r"^impact\d+_")
+_DAY_CLOSEOUT = re.compile(r"^impact\d+_(.+_closeout)$")
 
 # Stable product lanes promoted from Day 41-50 naming.
 _PRODUCT_CANONICAL_BY_DAY_MODULE: dict[str, str] = {
@@ -344,7 +344,7 @@ def _selected_playbooks(
     if ns.recommended:
         return sorted([n for n in RECOMMENDED_PLAYBOOKS if n in all_names])
     if ns.legacy:
-        return [n for n in all_names if n.startswith("day") or n.endswith("-closeout")]
+        return [n for n in all_names if n.startswith("impact") or n.endswith("-closeout")]
     if ns.aliases:
         return sorted(alias_to_canonical.keys())
 

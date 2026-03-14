@@ -16,7 +16,7 @@ This document starts implementation of the "Assign owners for every release-crit
 ## Escalation policy
 
 - Any red gate on a release candidate is escalated immediately in the release channel.
-- If primary owner is unavailable for more than 4 business hours during release day, backup owner assumes authority.
+- If primary owner is unavailable for more than 4 business hours during release impact, backup owner assumes authority.
 - Tagging is blocked until all workflows have either a green status or an explicit, documented exception approved by two owners.
 
 ## RACI shorthand

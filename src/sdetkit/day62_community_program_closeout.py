@@ -176,10 +176,10 @@ def build_day62_community_program_closeout_summary(root: Path) -> dict[str, Any]
             "check_id": "docs_index_day62_links",
             "weight": 8,
             "passed": (
-                "day-62-big-upgrade-report.md" in docs_index_text
+                "impact-62-big-upgrade-report.md" in docs_index_text
                 and "integrations-community-program-closeout.md" in docs_index_text
             ),
-            "evidence": "day-62-big-upgrade-report.md + integrations-community-program-closeout.md",
+            "evidence": "impact-62-big-upgrade-report.md + integrations-community-program-closeout.md",
         },
         {
             "check_id": "top10_day62_alignment",
