@@ -1,0 +1,22 @@
+FROM public.ecr.aws/x8v8d7g8/mars-base:latest
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+
+# Use explicit relative paths for editable installs; pip can reject ambiguous paths.
+RUN test -d ./python_modules/dagster-pipes \
+ && test -d ./python_modules/dagster \
+ && python -m pip install --upgrade pip setuptools wheel \
+ && python -m pip install -e ./python_modules/dagster-pipes \
+ && python -m pip install -e "./python_modules/dagster[test]" \
+ && python - <<'PY'
+import dagster
+import dagster_shared
+print("docker dagster env ok")
+PY
