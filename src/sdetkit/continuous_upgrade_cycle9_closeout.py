@@ -346,7 +346,7 @@ def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, An
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
     if not cycle8_summary.exists() or not cycle8_board.exists():
-        critical_failures.append("cycle8_handoff_inputs")
+        critical_failures.append("cycle8-handoff-inputs")
 
     wins: list[str] = []
     misses: list[str] = []
