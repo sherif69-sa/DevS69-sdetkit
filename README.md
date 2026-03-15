@@ -28,6 +28,7 @@ python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --
 python -m sdetkit forensics bundle --run examples/kits/forensics/run-b.json --output build/repro.zip
 python -m sdetkit continuous-upgrade-cycle9-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle10-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 ```
 
 ## Upgrade planning (first step)

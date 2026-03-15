@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_continuous_upgrade_cycle11_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "continuous-upgrade-cycle11-closeout contract check passed\n",
+  "stderr": ""
+}

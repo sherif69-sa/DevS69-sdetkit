@@ -47,6 +47,8 @@ Utility commands such as `kv`, `apiget`, and `cassette-get` remain available for
 
 ### Latest continuous-upgrade lane
 
+- [Cycle 11 big upgrade report](continuous-upgrade-cycle11-big-upgrade-report.md)
+- [Continuous upgrade impact #11 closeout](integrations-continuous-upgrade-cycle11-closeout.md)
 - [Cycle 10 big upgrade report](continuous-upgrade-cycle10-big-upgrade-report.md)
 - [Continuous upgrade impact #10 closeout](integrations-continuous-upgrade-cycle10-closeout.md)
 - [Cycle 9 big upgrade report](continuous-upgrade-cycle9-big-upgrade-report.md)
