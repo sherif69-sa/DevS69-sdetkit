@@ -344,6 +344,7 @@ def _run_security_check(args: argparse.Namespace, root: Path) -> tuple[int, str]
     if args.tee:
         try:
             tee_path = _safe_user_path(root, str(args.tee))
+            tee_path.parent.mkdir(parents=True, exist_ok=True)
             tee_path.write_text(out, encoding="utf-8")
         except (OSError, ValueError) as exc:
             print(f"triage: failed to write tee output to {args.tee!r}: {exc}", file=sys.stderr)
@@ -365,6 +366,7 @@ def _run_pytest(args: argparse.Namespace, root: Path) -> tuple[int, str]:
     if args.tee:
         try:
             tee_path = _safe_user_path(root, str(args.tee))
+            tee_path.parent.mkdir(parents=True, exist_ok=True)
             tee_path.write_text(out, encoding="utf-8")
         except (OSError, ValueError) as exc:
             # Best-effort: failing to tee output should not be fatal, but log for visibility.
