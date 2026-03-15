@@ -354,7 +354,9 @@ def build_continuous_upgrade_cycle11_closeout_summary(root: Path) -> dict[str, A
     handoff_actions: list[str] = []
 
     if cycle10_score >= 85 and cycle10_strict:
-        wins.append(f"Cycle 11 continuity baseline is stable with activation score={cycle10_score}.")
+        wins.append(
+            f"Cycle 11 continuity baseline is stable with activation score={cycle10_score}."
+        )
     else:
         misses.append("Cycle 11 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
