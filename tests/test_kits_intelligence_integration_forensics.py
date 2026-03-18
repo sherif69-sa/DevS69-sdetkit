@@ -81,6 +81,17 @@ def test_integration_and_forensics_contracts_and_bundle_determinism(tmp_path: Pa
     assert integration_json["schema_version"] == "sdetkit.integration.profile-check.v1"
     assert integration_json["summary"]["next_step"]
 
+    topology = _run(
+        "integration",
+        "topology-check",
+        "--profile",
+        "examples/kits/integration/heterogeneous-topology.json",
+    )
+    assert topology.returncode == 0
+    topology_json = json.loads(topology.stdout)
+    assert topology_json["schema_version"] == "sdetkit.integration.topology-check.v1"
+    assert topology_json["summary"]["passed"] is True
+
     cassette = tmp_path / "cassette.json"
     cassette.write_text(
         json.dumps(

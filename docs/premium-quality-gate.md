@@ -56,7 +56,7 @@ Use `bash premium-gate.sh` locally and in CI. The gate is now a self-contained *
 
 1. **Head-1 Foundation & Quality** (`bash quality.sh`)
 2. **Head-2 Source Truth & Style** (ruff format/lint)
-3. **Head-3 Operational Confidence** (CI + doctor + maintenance + ops profile)
+3. **Head-3 Operational Confidence** (CI + doctor + maintenance + integration topology contract + ops profile)
 4. **Head-4 Security & Compliance** (SARIF scan + baseline-aware triage + evidence pack)
 5. **Head-5 Intelligence Brain** (`python3 -m sdetkit.premium_gate_engine`)
 
@@ -65,6 +65,7 @@ The script emits:
 - per-step logs under `.sdetkit/out/premium-gate.*.log`
 - a machine ledger: `.sdetkit/out/premium-step-results.ndjson`
 - a structured five-head index: `.sdetkit/out/premium-step-index.json`
+- integration topology artifact: `.sdetkit/out/integration-topology.json`
 - premium engine summary: `.sdetkit/out/premium-summary.json`
 
 Useful flags:
@@ -74,6 +75,7 @@ Useful flags:
 - `--engine-min-score <int>`
 - `--out-dir <path>`
 - `--ops-jobs <int>`
+- `SDETKIT_PREMIUM_TOPOLOGY_PROFILE=<path>` to override the topology profile used by the Head-3 topology contract step
 
 Examples:
 
