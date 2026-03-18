@@ -23,6 +23,7 @@ from pathlib import Path
 
 REQ_NAME_RE = re.compile(r"^\s*([A-Za-z0-9_.-]+)")
 PINNED_VERSION_RE = re.compile(r"==\s*([A-Za-z0-9_.!+-]+)")
+CONSTRAINT_RE = re.compile(r"(==|~=|>=|<=|>|<)\s*([A-Za-z0-9_.!+-]+)")
 
 
 @dataclass(frozen=True)
@@ -43,6 +44,7 @@ class PackageReport:
     pinned_versions: list[str]
     current_version: str
     alignment: str
+    constraint_status: str
     latest_version: str
     latest_release_date: str | None
     version_gap: str
@@ -95,6 +97,15 @@ def _extract_minimum_version(raw_requirement: str) -> str | None:
                 if normalized:
                     return normalized
     return None
+
+
+def _parse_requirement_constraints(raw_requirement: str) -> list[tuple[str, str]]:
+    base = raw_requirement.split(";", 1)[0].strip()
+    if not base:
+        return []
+    start = REQ_NAME_RE.match(base)
+    spec = base[start.end() :] if start else base
+    return [(operator, version) for operator, version in CONSTRAINT_RE.findall(spec)]
 
 
 def _normalize_requirement_line(line: str) -> str | None:
@@ -259,7 +270,9 @@ def _fetch_package_metadata(
     if offline:
         if cached_entry:
             return _metadata_from_cache(cached_entry, source="cache-stale")
-        return PackageMetadata(latest_version="offline-no-cache", release_date=None, source="offline")
+        return PackageMetadata(
+            latest_version="offline-no-cache", release_date=None, source="offline"
+        )
 
     try:
         latest_version, release_date = _latest_pypi_metadata(package, timeout_s=timeout_s)
@@ -338,6 +351,55 @@ def _version_key(version: str) -> tuple[tuple[int, object], ...]:
     return tuple(parts)
 
 
+def _compare_versions(left: str, right: str) -> int:
+    left_key = _version_key(left)
+    right_key = _version_key(right)
+    if left_key < right_key:
+        return -1
+    if left_key > right_key:
+        return 1
+    return 0
+
+
+def _compatible_upper_bound(version: str) -> str | None:
+    parts = [int(part) for part in re.findall(r"\d+", version)]
+    if not parts:
+        return None
+    if len(parts) == 1:
+        return str(parts[0] + 1)
+    upper = parts[:-1]
+    upper[-1] += 1
+    return ".".join(str(part) for part in upper)
+
+
+def _constraint_allows_version(constraint: tuple[str, str], version: str) -> bool:
+    operator, required = constraint
+    cmp = _compare_versions(version, required)
+    if operator == "==":
+        return cmp == 0
+    if operator == ">=":
+        return cmp >= 0
+    if operator == "<=":
+        return cmp <= 0
+    if operator == ">":
+        return cmp > 0
+    if operator == "<":
+        return cmp < 0
+    if operator == "~=":
+        upper = _compatible_upper_bound(required)
+        if upper is None:
+            return False
+        return cmp >= 0 and _compare_versions(version, upper) < 0
+    return False
+
+
+def _requirement_allows_version(raw_requirement: str, version: str) -> bool | None:
+    constraints = _parse_requirement_constraints(raw_requirement)
+    if not constraints:
+        return None
+    return all(_constraint_allows_version(constraint, version) for constraint in constraints)
+
+
 def _pick_current_version(deps: list[Dependency]) -> str:
     pinned_versions = sorted(
         {dep.pinned_version for dep in deps if dep.pinned_version},
@@ -357,6 +419,43 @@ def _pick_current_version(deps: list[Dependency]) -> str:
     if lower_bounds:
         return lower_bounds[-1]
     return "unbounded"
+
+
+def _constraint_status(deps: list[Dependency], latest_version: str) -> str:
+    if latest_version in {
+        "unknown",
+        "network-error",
+        "offline-no-cache",
+    } or latest_version.startswith("http-"):
+        return "unknown"
+    allowed_results = [
+        result
+        for dep in deps
+        if (result := _requirement_allows_version(dep.raw, latest_version)) is not None
+    ]
+    if not allowed_results:
+        return "unbounded"
+    return "allowed" if all(allowed_results) else "blocked"
+
+
+def _infer_alignment(deps: list[Dependency], current_version: str) -> str:
+    requirements = sorted({dep.raw for dep in deps})
+    pinned_versions = sorted({dep.pinned_version for dep in deps if dep.pinned_version})
+    if len(requirements) == 1:
+        return "range-or-unpinned" if not pinned_versions else "aligned"
+
+    if len(pinned_versions) > 1:
+        return "drift"
+
+    allowed_results = [
+        result
+        for dep in deps
+        if current_version != "unbounded"
+        and (result := _requirement_allows_version(dep.raw, current_version)) is not None
+    ]
+    if allowed_results and all(allowed_results):
+        return "compatible"
+    return "drift"
 
 
 def _major_minor_patch(version: str) -> tuple[int, int, int] | None:
@@ -420,18 +519,20 @@ def _build_package_report(
     current_version = _pick_current_version(deps)
     version_gap = _classify_version_gap(current_version, latest_version)
     release_age_days = _release_age_days(release_date)
-
-    alignment = "aligned"
-    if len(requirements) > 1:
-        alignment = "drift"
-    elif not pinned_versions:
-        alignment = "range-or-unpinned"
+    alignment = _infer_alignment(deps, current_version)
+    constraint_status = _constraint_status(deps, latest_version)
 
     notes: list[str] = []
     if alignment == "drift":
         notes.append("Cross-manifest requirement drift detected.")
+    elif alignment == "compatible":
+        notes.append("Cross-manifest requirements differ but remain mutually compatible.")
     if alignment == "range-or-unpinned":
         notes.append("Package is not pinned to a single exact version.")
+    if constraint_status == "allowed":
+        notes.append("Latest PyPI release is already allowed by the declared version policy.")
+    elif constraint_status == "blocked":
+        notes.append("Latest PyPI release falls outside the currently declared version policy.")
     if version_gap == "major":
         notes.append("Latest PyPI release is a major-version jump from the repo baseline.")
     elif version_gap == "minor":
@@ -444,6 +545,8 @@ def _build_package_report(
     upgrade_signal = "watch"
     if alignment == "drift":
         upgrade_signal = "critical" if version_gap == "major" else "high"
+    elif constraint_status == "allowed":
+        upgrade_signal = "watch" if "default" not in groups else "medium"
     elif version_gap == "major":
         upgrade_signal = "high" if "default" in groups else "medium"
     elif version_gap == "minor":
@@ -460,7 +563,11 @@ def _build_package_report(
     risk_score = 0
     if alignment == "drift":
         risk_score += 45
+    elif alignment == "compatible":
+        risk_score += 10
     elif alignment == "range-or-unpinned":
+        risk_score += 15
+    if constraint_status == "blocked":
         risk_score += 15
 
     risk_score += {
@@ -480,19 +587,27 @@ def _build_package_report(
 
     next_action = "Keep under observation; no immediate action required."
     if upgrade_signal == "critical":
-        next_action = "Resolve manifest drift first, then validate the major upgrade in a dedicated branch."
+        next_action = (
+            "Resolve manifest drift first, then validate the major upgrade in a dedicated branch."
+        )
     elif upgrade_signal == "high":
         next_action = "Plan an upgrade spike with regression coverage before the next release cut."
     elif upgrade_signal == "medium":
-        next_action = "Queue the upgrade for the next maintenance batch and validate targeted smoke tests."
-    elif upgrade_signal == "watch":
-        next_action = "Track the package and batch it with nearby dependency maintenance work."
-    elif upgrade_signal == "investigate":
         next_action = (
-            "Retry metadata collection and inspect package naming, cache freshness, or connectivity issues."
+            "Queue the upgrade for the next maintenance batch and validate targeted smoke tests."
         )
+    elif upgrade_signal == "watch":
+        next_action = (
+            "Keep the package on watch; the declared version policy already covers the latest release."
+            if constraint_status == "allowed"
+            else "Track the package and batch it with nearby dependency maintenance work."
+        )
+    elif upgrade_signal == "investigate":
+        next_action = "Retry metadata collection and inspect package naming, cache freshness, or connectivity issues."
     elif upgrade_signal == "unknown":
-        next_action = "Review the declared version range manually because the gap could not be classified."
+        next_action = (
+            "Review the declared version range manually because the gap could not be classified."
+        )
 
     return PackageReport(
         name=name,
@@ -502,6 +617,7 @@ def _build_package_report(
         pinned_versions=pinned_versions,
         current_version=current_version,
         alignment=alignment,
+        constraint_status=constraint_status,
         latest_version=latest_version,
         latest_release_date=release_date,
         version_gap=version_gap,
@@ -520,11 +636,16 @@ def _render_markdown(
     requirement_paths: list[Path],
 ) -> str:
     drift_count = sum(1 for report in reports if report.alignment == "drift")
+    compatible_count = sum(1 for report in reports if report.alignment == "compatible")
     high_priority = sum(1 for report in reports if report.upgrade_signal == "high")
     critical_priority = sum(1 for report in reports if report.upgrade_signal == "critical")
     medium_priority = sum(1 for report in reports if report.upgrade_signal == "medium")
     investigate_priority = sum(1 for report in reports if report.upgrade_signal == "investigate")
-    cached_results = sum(1 for report in reports if any("cache" in note.lower() for note in report.notes))
+    policy_covered = sum(1 for report in reports if report.constraint_status == "allowed")
+    policy_blocked = sum(1 for report in reports if report.constraint_status == "blocked")
+    cached_results = sum(
+        1 for report in reports if any("cache" in note.lower() for note in report.notes)
+    )
     lines = [
         "# Upgrade audit",
         "",
@@ -533,14 +654,17 @@ def _render_markdown(
         "",
         f"- packages audited: {len(reports)}",
         f"- manifest drift packages: {drift_count}",
+        f"- compatible multi-manifest packages: {compatible_count}",
+        f"- policy-covered latest releases: {policy_covered}",
+        f"- policy-blocked latest releases: {policy_blocked}",
         f"- critical upgrade signals: {critical_priority}",
         f"- high-priority upgrade signals: {high_priority}",
         f"- medium-priority upgrade signals: {medium_priority}",
         f"- investigate signals: {investigate_priority}",
         f"- packages using cached metadata: {cached_results}",
         "",
-        "| Package | Current | Latest PyPI | Gap | Alignment | Signal | Risk | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "| Package | Current | Latest PyPI | Gap | Alignment | Policy | Signal | Risk | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
@@ -548,7 +672,7 @@ def _render_markdown(
         lines.append(
             "| "
             f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.version_gap} | "
-            f"{report.alignment} | {report.upgrade_signal} | {report.risk_score} | {release_age} | {requirements} |"
+            f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {release_age} | {requirements} |"
         )
     lines.extend(["", "## Focus notes", ""])
     for report in reports:
@@ -569,6 +693,15 @@ def _render_json(
         "summary": {
             "packages_audited": len(reports),
             "manifest_drift_packages": sum(1 for report in reports if report.alignment == "drift"),
+            "compatible_constraint_packages": sum(
+                1 for report in reports if report.alignment == "compatible"
+            ),
+            "policy_covered_packages": sum(
+                1 for report in reports if report.constraint_status == "allowed"
+            ),
+            "policy_blocked_packages": sum(
+                1 for report in reports if report.constraint_status == "blocked"
+            ),
             "critical_upgrade_signals": sum(
                 1 for report in reports if report.upgrade_signal == "critical"
             ),
@@ -594,7 +727,11 @@ def _render_json(
 def _sort_reports(reports: list[PackageReport]) -> list[PackageReport]:
     return sorted(
         reports,
-        key=lambda report: (-report.risk_score, -SIGNAL_PRIORITY.get(report.upgrade_signal, 0), report.name),
+        key=lambda report: (
+            -report.risk_score,
+            -SIGNAL_PRIORITY.get(report.upgrade_signal, 0),
+            report.name,
+        ),
     )
 
 

@@ -78,15 +78,48 @@ def test_build_package_report_flags_drift_and_priority() -> None:
         release_date="2026-01-01T00:00:00Z",
     )
 
-    assert report.alignment == "drift"
+    assert report.alignment == "compatible"
+    assert report.constraint_status == "blocked"
     assert report.current_version == "0.28.1"
     assert report.version_gap == "minor"
-    assert report.upgrade_signal == "high"
-    assert report.risk_score >= 75
+    assert report.upgrade_signal == "medium"
+    assert report.risk_score >= 45
     assert report.latest_version == "0.29.0"
     assert report.latest_release_date == "2026-01-01T00:00:00Z"
-    assert "Plan an upgrade spike" in report.next_action
-    assert "Cross-manifest requirement drift detected." in report.notes
+    assert "Queue the upgrade" in report.next_action
+    assert "mutually compatible" in " ".join(report.notes)
+
+
+def test_build_package_report_marks_compatible_policy_covered_manifests() -> None:
+    deps = [
+        upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="default",
+            raw="httpx>=0.27,<1",
+            name="httpx",
+            pinned_version=None,
+        ),
+        upgrade_audit.Dependency(
+            source="requirements.txt",
+            group="requirements",
+            raw="httpx==0.28.1",
+            name="httpx",
+            pinned_version="0.28.1",
+        ),
+    ]
+
+    report = upgrade_audit._build_package_report(
+        "httpx",
+        deps,
+        latest_version="0.28.1",
+        release_date="2026-01-01T00:00:00Z",
+    )
+
+    assert report.alignment == "compatible"
+    assert report.constraint_status == "allowed"
+    assert report.upgrade_signal == "medium"
+    assert "mutually compatible" in " ".join(report.notes)
+    assert "already allowed by the declared version policy" in " ".join(report.notes)
 
 
 def test_build_package_report_flags_major_jump_as_critical() -> None:
@@ -124,6 +157,7 @@ def test_render_json_summary_counts() -> None:
             pinned_versions=["0.28.1"],
             current_version="0.28.1",
             alignment="drift",
+            constraint_status="blocked",
             latest_version="0.29.0",
             latest_release_date="2026-01-01T00:00:00Z",
             version_gap="minor",
@@ -141,6 +175,7 @@ def test_render_json_summary_counts() -> None:
             pinned_versions=["0.15.6"],
             current_version="0.15.6",
             alignment="aligned",
+            constraint_status="allowed",
             latest_version="0.15.6",
             latest_release_date=None,
             version_gap="up-to-date",
@@ -161,6 +196,7 @@ def test_render_json_summary_counts() -> None:
     )
 
     assert payload["summary"] == {
+        "compatible_constraint_packages": 0,
         "cached_metadata_packages": 0,
         "critical_upgrade_signals": 0,
         "packages_audited": 2,
@@ -169,6 +205,8 @@ def test_render_json_summary_counts() -> None:
         "investigate_upgrade_signals": 0,
         "max_risk_score": 85,
         "medium_priority_upgrade_signals": 0,
+        "policy_blocked_packages": 1,
+        "policy_covered_packages": 1,
     }
     assert payload["packages"][0]["name"] == "httpx"
 
@@ -203,12 +241,15 @@ dependencies = ["httpx>=0.27,<1"]
     assert rc == 0
     out = capsys.readouterr().out
     assert "# Upgrade audit" in out
-    assert "manifest drift packages: 1" in out
+    assert "manifest drift packages: 0" in out
+    assert "compatible multi-manifest packages: 1" in out
     assert "packages using cached metadata: 0" in out
-    assert "Current | Latest PyPI | Gap | Alignment | Signal | Risk" in out
-    assert "`httpx` | `0.28.1` | `0.29.0` | minor | drift | high |" in out
+    assert "Current | Latest PyPI | Gap | Alignment | Policy | Signal | Risk" in out
+    assert "`httpx` | `0.28.1` | `0.29.0` | minor | compatible | blocked | medium |" in out
     assert "Focus notes" in out
-    assert "Plan an upgrade spike with regression coverage before the next release cut." in out
+    assert (
+        "Queue the upgrade for the next maintenance batch and validate targeted smoke tests." in out
+    )
 
 
 def test_run_returns_failure_when_signal_threshold_is_met(monkeypatch, tmp_path: Path) -> None:
@@ -252,6 +293,7 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             pinned_versions=["1.0.0"],
             current_version="1.0.0",
             alignment="aligned",
+            constraint_status="blocked",
             latest_version="1.0.1",
             latest_release_date=None,
             version_gap="patch",
@@ -269,6 +311,7 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             pinned_versions=["1.2.3"],
             current_version="1.2.3",
             alignment="drift",
+            constraint_status="blocked",
             latest_version="2.0.0",
             latest_release_date=None,
             version_gap="major",

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit.maintenance import cli as mcli
-from sdetkit.maintenance.types import CheckResult, MaintenanceContext
+from sdetkit.maintenance.types import CheckAction, CheckResult, MaintenanceContext
 
 
 def test_build_report_handles_runner_crash(monkeypatch, tmp_path: Path) -> None:
@@ -28,6 +28,47 @@ def test_build_report_handles_runner_crash(monkeypatch, tmp_path: Path) -> None:
     assert report["ok"] is False
     assert report["meta"]["had_crash"] is True
     assert "check crashed" in report["checks"]["b"]["summary"]
+
+
+def test_build_report_filters_checks_and_aggregates_actions(monkeypatch, tmp_path: Path) -> None:
+    def _fail(_ctx: MaintenanceContext) -> CheckResult:
+        return CheckResult(
+            ok=False,
+            summary="needs work",
+            details={},
+            actions=[CheckAction(id="lint", title="Run lint", applied=False)],
+        )
+
+    def _ok(_ctx: MaintenanceContext) -> CheckResult:
+        return CheckResult(ok=True, summary="ok", details={}, actions=[])
+
+    monkeypatch.setattr(
+        mcli,
+        "checks_for_mode",
+        lambda mode: [("lint_check", _fail), ("tests_check", _ok), ("doctor_check", _ok)],
+    )
+
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe="python",
+        mode="quick",
+        fix=False,
+        env={},
+        logger=mcli.StderrLogger(),
+    )
+    report = mcli._build_report(
+        ctx,
+        deterministic=True,
+        include_checks=["lint_check", "tests_check"],
+        exclude_checks=["tests_check"],
+        jobs=4,
+    )
+
+    assert set(report["checks"]) == {"lint_check"}
+    assert report["meta"]["selected_checks"] == ["lint_check"]
+    assert report["meta"]["excluded_checks"] == ["tests_check"]
+    assert report["meta"]["jobs"] == 4
+    assert "Suggested next actions: Run lint." in report["recommendations"]
 
 
 def test_main_json_output_and_write_file(monkeypatch, tmp_path: Path, capsys) -> None:
