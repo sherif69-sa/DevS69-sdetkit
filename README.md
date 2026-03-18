@@ -54,11 +54,12 @@ python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 
 ## Upgrade planning (first step)
 
-Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps. The audit now surfaces the repo baseline version, estimated version-gap size (major/minor/patch), release recency, and focus notes for each package:
+Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps. The audit now surfaces the repo baseline version, estimated version-gap size (major/minor/patch), release recency, an ordered risk score, and a concrete next action for each package. You can also fail CI at a chosen signal threshold:
 
 ```bash
 make upgrade-audit
 python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
+python scripts/upgrade_audit.py --fail-on high
 ```
 
 ## Sample artifacts

@@ -82,8 +82,10 @@ def test_build_package_report_flags_drift_and_priority() -> None:
     assert report.current_version == "0.28.1"
     assert report.version_gap == "minor"
     assert report.upgrade_signal == "high"
+    assert report.risk_score >= 75
     assert report.latest_version == "0.29.0"
     assert report.latest_release_date == "2026-01-01T00:00:00Z"
+    assert "Plan an upgrade spike" in report.next_action
     assert "Cross-manifest requirement drift detected." in report.notes
 
 
@@ -108,6 +110,7 @@ def test_build_package_report_flags_major_jump_as_critical() -> None:
     assert report.current_version == "0.28.1"
     assert report.version_gap == "major"
     assert report.upgrade_signal == "high"
+    assert report.risk_score >= 45
     assert any("major-version jump" in note for note in report.notes)
 
 
@@ -126,6 +129,8 @@ def test_render_json_summary_counts() -> None:
             version_gap="minor",
             release_age_days=0,
             upgrade_signal="high",
+            risk_score=85,
+            next_action="Plan an upgrade spike with regression coverage before the next release cut.",
             notes=["Cross-manifest requirement drift detected."],
         ),
         upgrade_audit.PackageReport(
@@ -141,6 +146,8 @@ def test_render_json_summary_counts() -> None:
             version_gap="up-to-date",
             release_age_days=None,
             upgrade_signal="watch",
+            risk_score=10,
+            next_action="Keep under observation; no immediate action required.",
             notes=[],
         ),
     ]
@@ -158,6 +165,9 @@ def test_render_json_summary_counts() -> None:
         "packages_audited": 2,
         "manifest_drift_packages": 1,
         "high_priority_upgrade_signals": 1,
+        "investigate_upgrade_signals": 0,
+        "max_risk_score": 85,
+        "medium_priority_upgrade_signals": 0,
     }
     assert payload["packages"][0]["name"] == "httpx"
 
@@ -192,6 +202,80 @@ dependencies = ["httpx>=0.27,<1"]
     out = capsys.readouterr().out
     assert "# Upgrade audit" in out
     assert "manifest drift packages: 1" in out
-    assert "Current | Latest PyPI | Gap | Alignment | Signal" in out
+    assert "Current | Latest PyPI | Gap | Alignment | Signal | Risk" in out
     assert "`httpx` | `0.28.1` | `0.29.0` | minor | drift | high |" in out
     assert "Focus notes" in out
+    assert "Plan an upgrade spike with regression coverage before the next release cut." in out
+
+
+def test_run_returns_failure_when_signal_threshold_is_met(monkeypatch, tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx>=0.27,<1"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("httpx==0.28.1\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        upgrade_audit,
+        "_latest_pypi_metadata",
+        lambda package, timeout_s: ("1.0.0", "2026-01-01T00:00:00Z"),
+    )
+
+    rc = upgrade_audit.run(
+        pyproject,
+        timeout_s=0.1,
+        requirement_paths=[requirements],
+        output_format="json",
+        fail_on="high",
+    )
+
+    assert rc == 1
+
+
+def test_sort_reports_surfaces_highest_risk_first() -> None:
+    reports = [
+        upgrade_audit.PackageReport(
+            name="watch-pkg",
+            sources=["requirements.txt"],
+            groups=["requirements"],
+            requirements=["watch-pkg==1.0.0"],
+            pinned_versions=["1.0.0"],
+            current_version="1.0.0",
+            alignment="aligned",
+            latest_version="1.0.1",
+            latest_release_date=None,
+            version_gap="patch",
+            release_age_days=None,
+            upgrade_signal="watch",
+            risk_score=10,
+            next_action="Track the package and batch it with nearby dependency maintenance work.",
+            notes=[],
+        ),
+        upgrade_audit.PackageReport(
+            name="critical-pkg",
+            sources=["pyproject.toml", "requirements.txt"],
+            groups=["default", "requirements"],
+            requirements=["critical-pkg>=1,<2", "critical-pkg==1.2.3"],
+            pinned_versions=["1.2.3"],
+            current_version="1.2.3",
+            alignment="drift",
+            latest_version="2.0.0",
+            latest_release_date=None,
+            version_gap="major",
+            release_age_days=None,
+            upgrade_signal="critical",
+            risk_score=90,
+            next_action="Resolve manifest drift first, then validate the major upgrade in a dedicated branch.",
+            notes=[],
+        ),
+    ]
+
+    sorted_reports = upgrade_audit._sort_reports(reports)
+
+    assert [report.name for report in sorted_reports] == ["critical-pkg", "watch-pkg"]
