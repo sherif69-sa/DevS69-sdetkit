@@ -5,9 +5,14 @@
       {
         "name": "edge-gateway",
         "role": "api-gateway",
+        "owner": "platform-edge",
         "language": "go",
         "error_handling": "typed sentinel + wrapped errors",
         "logging_format": "zap json",
+        "dependencies": [
+          {"kind": "application", "target": "ml-serving"},
+          {"kind": "mock", "target": "stripe-like-payments"}
+        ],
         "interfaces": [
           {"protocol": "rest", "audience": "external"},
           {"protocol": "graphql", "audience": "dashboard"},
@@ -17,9 +22,14 @@
       {
         "name": "relevance-ml",
         "role": "ml-serving",
+        "owner": "ml-platform",
         "language": "python",
         "error_handling": "domain exceptions + model fallback",
         "logging_format": "structlog json",
+        "dependencies": [
+          {"kind": "data", "target": "orders-db"},
+          {"kind": "data", "target": "session-cache"}
+        ],
         "interfaces": [
           {"protocol": "grpc", "audience": "internal"}
         ]
@@ -27,9 +37,15 @@
       {
         "name": "search-indexer",
         "role": "data-pipeline",
+        "owner": "search-infra",
         "language": "rust",
         "error_handling": "Result<T, E> with anyhow context",
         "logging_format": "tracing json",
+        "dependencies": [
+          {"kind": "data", "target": "orders-db"},
+          {"kind": "data", "target": "export-blob"},
+          {"kind": "mock", "target": "segment-like-events"}
+        ],
         "interfaces": [
           {"protocol": "grpc", "audience": "internal"}
         ]

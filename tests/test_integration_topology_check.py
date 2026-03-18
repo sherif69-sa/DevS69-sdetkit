@@ -28,6 +28,9 @@ def test_topology_check_accepts_heterogeneous_enterprise_profile() -> None:
         "segment-like-events",
         "stripe-like-payments",
     ]
+    assert payload["inventory"]["protocols"] == ["graphql", "grpc", "rest"]
+    assert "api-gateway->application:ml-serving" in payload["inventory"]["dependency_edges"]
+    assert "data-pipeline->mock:segment-like-events" in payload["inventory"]["dependency_edges"]
 
 
 def test_topology_check_flags_missing_heterogeneous_contracts(tmp_path: Path) -> None:
@@ -44,12 +47,14 @@ def test_topology_check_flags_missing_heterogeneous_contracts(tmp_path: Path) ->
                             "language": "python",
                             "logging_format": "json",
                             "interfaces": [{"protocol": "rest", "audience": "external"}],
+                            "dependencies": [{"kind": "mock", "target": "crm"}],
                         },
                         {
                             "name": "worker",
                             "role": "ml-serving",
                             "language": "python",
                             "error_handling": "exceptions",
+                            "owner": "ml-team",
                             "interfaces": [{"protocol": "http", "audience": "internal"}],
                         },
                     ],
@@ -72,9 +77,15 @@ def test_topology_check_flags_missing_heterogeneous_contracts(tmp_path: Path) ->
     failed = {(item["kind"], item["name"]) for item in payload["checks"] if not item["passed"]}
     assert ("application-service", "api-gateway") in failed
     assert ("application-service", "data-pipeline") in failed
+    assert ("dependency-contract", "api-gateway") in failed
+    assert ("dependency-contract", "ml-serving") in failed
+    assert ("dependency-contract", "data-pipeline") in failed
     assert ("interface", "internal-grpc") in failed
     assert ("data-service", "transactional") in failed
     assert ("mock-platform", "crm") in failed
+    assert ("service-contract", "gateway:error-handling") in failed
+    assert ("service-contract", "gateway:owner") in failed
+    assert ("service-contract", "worker:logging-format") in failed
 
 
 def test_topology_check_requires_topology_object(tmp_path: Path) -> None:

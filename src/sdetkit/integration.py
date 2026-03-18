@@ -23,6 +23,11 @@ REQUIRED_DATA_SERVICE_TECH = {
     "cache": "redis",
     "blob": "s3",
 }
+REQUIRED_APP_DEPENDENCIES = {
+    "api-gateway": {"application": {"ml-serving"}},
+    "ml-serving": {"data": {"transactional", "cache"}},
+    "data-pipeline": {"data": {"transactional", "blob"}, "mock": {"segment-like-events"}},
+}
 
 
 def _load_profile(path: Path) -> dict[str, Any]:
@@ -39,10 +44,14 @@ def _probe_tcp_localhost(port: int, timeout_s: float = 0.2) -> bool:
 
 
 def _normalize(value: Any) -> str:
+    if value is None:
+        return ""
     return str(value).strip().lower()
 
 
-def _service_exposes_protocol(service: dict[str, Any], *, protocol: str, audience: str | None = None) -> bool:
+def _service_exposes_protocol(
+    service: dict[str, Any], *, protocol: str, audience: str | None = None
+) -> bool:
     interfaces = service.get("interfaces", [])
     if not isinstance(interfaces, list):
         return False
@@ -57,6 +66,51 @@ def _service_exposes_protocol(service: dict[str, Any], *, protocol: str, audienc
             continue
         return True
     return False
+
+
+def _normalize_dependency_entry(
+    entry: Any,
+    *,
+    application_names: set[str],
+    data_names: set[str],
+    mock_names: set[str],
+) -> dict[str, str] | None:
+    if isinstance(entry, str):
+        name = _normalize(entry)
+        if not name:
+            return None
+        if name in application_names:
+            return {"kind": "application", "target": name}
+        if name in data_names:
+            return {"kind": "data", "target": name}
+        if name in mock_names:
+            return {"kind": "mock", "target": name}
+        return {"kind": "unknown", "target": name}
+    if not isinstance(entry, dict):
+        return None
+
+    target = _normalize(entry.get("target") or entry.get("name") or entry.get("service"))
+    if not target:
+        return None
+
+    kind = _normalize(entry.get("kind") or entry.get("type"))
+    if kind in {"service", "application-service", "application"}:
+        resolved_kind = "application"
+    elif kind in {"data", "data-service", "database", "store"}:
+        resolved_kind = "data"
+    elif kind in {"mock", "mock-platform", "platform", "external"}:
+        resolved_kind = "mock"
+    elif kind:
+        resolved_kind = kind
+    elif target in application_names:
+        resolved_kind = "application"
+    elif target in data_names:
+        resolved_kind = "data"
+    elif target in mock_names:
+        resolved_kind = "mock"
+    else:
+        resolved_kind = "unknown"
+    return {"kind": resolved_kind, "target": target}
 
 
 def _evaluate(profile: dict[str, Any]) -> dict[str, Any]:
@@ -130,8 +184,17 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = []
 
-    language_map = {str(svc.get("name", "service")): _normalize(svc.get("language")) for svc in app_services}
-    role_map = {str(svc.get("role", "")): svc for svc in app_services}
+    language_map = {
+        str(svc.get("name", "service")): _normalize(svc.get("language")) for svc in app_services
+    }
+    role_map = {_normalize(svc.get("role")): svc for svc in app_services}
+    app_role_aliases = {
+        _normalize(svc.get("name")): _normalize(svc.get("role")) for svc in app_services
+    }
+    data_role_aliases = {
+        _normalize(svc.get("name")): _normalize(svc.get("role")) for svc in data_services
+    }
+    mock_name_aliases = {_normalize(svc.get("name")): _normalize(svc.get("name")) for svc in mocked_platforms}
     distinct_languages = sorted({lang for lang in language_map.values() if lang})
     checks.append(
         {
@@ -156,10 +219,20 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
+    dependency_edges: list[str] = []
+    dependency_by_role: dict[str, set[tuple[str, str]]] = {}
+    protocols: set[str] = set()
+
+    app_names = set(app_role_aliases)
+    data_names = set(data_role_aliases)
+    mock_names = set(mock_name_aliases)
+
     for svc in sorted(app_services, key=lambda item: str(item.get("name", ""))):
         name = str(svc.get("name", "service"))
+        role = _normalize(svc.get("role"))
         logging_format = _normalize(svc.get("logging_format"))
         error_style = _normalize(svc.get("error_handling"))
+        owner = _normalize(svc.get("owner"))
         checks.append(
             {
                 "kind": "service-contract",
@@ -176,13 +249,74 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
                 "observed": error_style or None,
             }
         )
+        checks.append(
+            {
+                "kind": "service-contract",
+                "name": f"{name}:owner",
+                "passed": bool(owner),
+                "observed": owner or None,
+            }
+        )
+
+        for interface in svc.get("interfaces", []):
+            if isinstance(interface, dict):
+                protocol = _normalize(interface.get("protocol"))
+                if protocol:
+                    protocols.add(protocol)
+
+        raw_dependencies = svc.get("dependencies", [])
+        normalized_dependencies: set[tuple[str, str]] = set()
+        if isinstance(raw_dependencies, list):
+            for entry in raw_dependencies:
+                normalized = _normalize_dependency_entry(
+                    entry,
+                    application_names=app_names,
+                    data_names=data_names,
+                    mock_names=mock_names,
+                )
+                if normalized is None:
+                    continue
+                target = normalized["target"]
+                kind = normalized["kind"]
+                if kind == "application":
+                    target = app_role_aliases.get(target, target)
+                elif kind == "data":
+                    target = data_role_aliases.get(target, target)
+                elif kind == "mock":
+                    target = mock_name_aliases.get(target, target)
+                normalized_dependencies.add((kind, target))
+                dependency_edges.append(f"{role or _normalize(name)}->{kind}:{target}")
+        dependency_by_role[role] = normalized_dependencies
+
+    for role, expected_dependencies in REQUIRED_APP_DEPENDENCIES.items():
+        observed_dependencies = dependency_by_role.get(role, set())
+        missing: list[str] = []
+        for dependency_kind, accepted_targets in expected_dependencies.items():
+            if not any(
+                observed_kind == dependency_kind and observed_target in accepted_targets
+                for observed_kind, observed_target in observed_dependencies
+            ):
+                missing.append(f"{dependency_kind}:{'|'.join(sorted(accepted_targets))}")
+        checks.append(
+            {
+                "kind": "dependency-contract",
+                "name": role,
+                "passed": not missing,
+                "observed_dependencies": [
+                    f"{dependency_kind}:{target}"
+                    for dependency_kind, target in sorted(observed_dependencies)
+                ],
+                "missing_dependencies": missing,
+            }
+        )
 
     checks.append(
         {
             "kind": "interface",
             "name": "public-rest",
             "passed": any(
-                _service_exposes_protocol(svc, protocol="rest", audience="external") for svc in app_services
+                _service_exposes_protocol(svc, protocol="rest", audience="external")
+                for svc in app_services
             ),
         }
     )
@@ -191,7 +325,8 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
             "kind": "interface",
             "name": "internal-grpc",
             "passed": any(
-                _service_exposes_protocol(svc, protocol="grpc", audience="internal") for svc in app_services
+                _service_exposes_protocol(svc, protocol="grpc", audience="internal")
+                for svc in app_services
             ),
         }
     )
@@ -206,10 +341,14 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
         }
     )
 
-    data_by_role = {_normalize(svc.get("role")): _normalize(svc.get("technology")) for svc in data_services}
+    data_by_role = {
+        _normalize(svc.get("role")): _normalize(svc.get("technology")) for svc in data_services
+    }
     for role, technology in REQUIRED_DATA_SERVICE_TECH.items():
         observed = data_by_role.get(role, "")
-        matches = observed == technology or (role == "blob" and observed in {"s3", "s3-compatible", "s3-like"})
+        matches = observed == technology or (
+            role == "blob" and observed in {"s3", "s3-compatible", "s3-like"}
+        )
         checks.append(
             {
                 "kind": "data-service",
@@ -220,11 +359,31 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
+    platform_names = {_normalize(platform.get("name")) for platform in mocked_platforms}
+    covered_platforms = {
+        target
+        for dependencies in dependency_by_role.values()
+        for kind, target in dependencies
+        if kind == "mock"
+    }
+    checks.append(
+        {
+            "kind": "mock-coverage",
+            "name": "platform-dependencies",
+            "passed": platform_names == covered_platforms,
+            "observed_platform_dependencies": sorted(covered_platforms),
+            "missing_platform_dependencies": sorted(platform_names - covered_platforms),
+            "unexpected_platform_dependencies": sorted(covered_platforms - platform_names),
+        }
+    )
+
     for platform in sorted(mocked_platforms, key=lambda item: str(item.get("name", ""))):
         name = str(platform.get("name", "mocked-platform"))
         api_style = _normalize(platform.get("api_style"))
         protocol = _normalize(platform.get("protocol"))
-        fidelity = sorted({_normalize(item) for item in platform.get("fidelity", []) if _normalize(item)})
+        fidelity = sorted(
+            {_normalize(item) for item in platform.get("fidelity", []) if _normalize(item)}
+        )
         operations = [op for op in platform.get("operations", []) if isinstance(op, str) and op.strip()]
         checks.append(
             {
@@ -251,14 +410,23 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
             "next_step": (
                 "Topology contract is ready for enterprise integration scenarios."
                 if not failed
-                else "Fill the missing topology contracts before claiming production-grade multi-service readiness."
+                else (
+                    "Fill the missing topology contracts before claiming "
+                    "production-grade multi-service readiness."
+                )
             ),
         },
         "inventory": {
             "application_services": sorted(language_map),
             "languages": distinct_languages,
-            "data_services": sorted(str(item.get("name", item.get("role", "data-service"))) for item in data_services),
-            "mocked_platforms": sorted(str(item.get("name", "mocked-platform")) for item in mocked_platforms),
+            "data_services": sorted(
+                str(item.get("name", item.get("role", "data-service"))) for item in data_services
+            ),
+            "mocked_platforms": sorted(
+                str(item.get("name", "mocked-platform")) for item in mocked_platforms
+            ),
+            "protocols": sorted(protocols),
+            "dependency_edges": sorted(dependency_edges),
         },
     }
 
