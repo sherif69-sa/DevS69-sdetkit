@@ -25,7 +25,7 @@ python -m sdetkit release gate release
 python -m sdetkit intelligence failure-fingerprint --failures examples/kits/intelligence/failures.json
 python -m sdetkit integration check --profile examples/kits/integration/profile.json
 python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json
-# validates service owners, dependency edges, and mocked platform coverage
+# validates service owners, dependency edges, mocked platform coverage, deployments, telemetry, and data resilience
 python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
 python -m sdetkit forensics bundle --run examples/kits/forensics/run-b.json --output build/repro.zip
 python -m sdetkit continuous-upgrade-cycle9-closeout --format json --strict

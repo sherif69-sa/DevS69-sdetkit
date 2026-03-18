@@ -68,6 +68,31 @@ def _service_exposes_protocol(
     return False
 
 
+def _normalize_deployments(service: dict[str, Any]) -> list[dict[str, Any]]:
+    deployments = service.get("deployments", [])
+    if not isinstance(deployments, list):
+        return []
+    return [item for item in deployments if isinstance(item, dict)]
+
+
+def _parse_replicas(value: Any) -> int:
+    if isinstance(value, bool):
+        return 0
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _telemetry_signal_enabled(telemetry: dict[str, Any], signal: str) -> bool:
+    value = telemetry.get(signal)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return _normalize(value) in {"enabled", "true", "required", "on"}
+    return False
+
+
 def _normalize_dependency_entry(
     entry: Any,
     *,
@@ -233,6 +258,28 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
         logging_format = _normalize(svc.get("logging_format"))
         error_style = _normalize(svc.get("error_handling"))
         owner = _normalize(svc.get("owner"))
+        telemetry = svc.get("telemetry")
+        if not isinstance(telemetry, dict):
+            telemetry = {}
+        deployments = _normalize_deployments(svc)
+        deployment_envs = {
+            _normalize(deployment.get("environment") or deployment.get("env"))
+            for deployment in deployments
+            if _normalize(deployment.get("environment") or deployment.get("env"))
+        }
+        production_regions = {
+            _normalize(deployment.get("region"))
+            for deployment in deployments
+            if _normalize(deployment.get("environment") or deployment.get("env"))
+            in {"prod", "production"}
+            and _normalize(deployment.get("region"))
+        }
+        production_replicas = [
+            _parse_replicas(deployment.get("replicas"))
+            for deployment in deployments
+            if _normalize(deployment.get("environment") or deployment.get("env"))
+            in {"prod", "production"}
+        ]
         checks.append(
             {
                 "kind": "service-contract",
@@ -255,6 +302,38 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
                 "name": f"{name}:owner",
                 "passed": bool(owner),
                 "observed": owner or None,
+            }
+        )
+        checks.append(
+            {
+                "kind": "observability",
+                "name": f"{name}:telemetry",
+                "passed": all(
+                    _telemetry_signal_enabled(telemetry, signal)
+                    for signal in ("logs", "metrics", "traces")
+                ),
+                "signals": {
+                    signal: _telemetry_signal_enabled(telemetry, signal)
+                    for signal in ("logs", "metrics", "traces")
+                },
+            }
+        )
+        checks.append(
+            {
+                "kind": "deployment",
+                "name": f"{name}:environments",
+                "passed": {"staging", "prod"}.issubset(deployment_envs)
+                or {"staging", "production"}.issubset(deployment_envs),
+                "observed_environments": sorted(deployment_envs),
+            }
+        )
+        checks.append(
+            {
+                "kind": "deployment",
+                "name": f"{name}:production-scale",
+                "passed": len(production_regions) >= 1 and any(replicas >= 2 for replicas in production_replicas),
+                "production_regions": sorted(production_regions),
+                "production_replicas": production_replicas,
             }
         )
 
@@ -344,6 +423,30 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
     data_by_role = {
         _normalize(svc.get("role")): _normalize(svc.get("technology")) for svc in data_services
     }
+    for svc in sorted(data_services, key=lambda item: str(item.get("name", ""))):
+        name = str(svc.get("name", svc.get("role", "data-service")))
+        role = _normalize(svc.get("role"))
+        backup_strategy = _normalize(svc.get("backup_strategy"))
+        multi_az = bool(svc.get("multi_az"))
+        checks.append(
+            {
+                "kind": "data-resilience",
+                "name": f"{name}:backup-strategy",
+                "passed": bool(backup_strategy),
+                "observed": backup_strategy or None,
+                "role": role or None,
+            }
+        )
+        checks.append(
+            {
+                "kind": "data-resilience",
+                "name": f"{name}:multi-az",
+                "passed": multi_az,
+                "observed": multi_az,
+                "role": role or None,
+            }
+        )
+
     for role, technology in REQUIRED_DATA_SERVICE_TECH.items():
         observed = data_by_role.get(role, "")
         matches = observed == technology or (
@@ -399,13 +502,17 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
 
     checks.sort(key=lambda item: (str(item.get("kind", "")), str(item.get("name", ""))))
     failed = [item for item in checks if not bool(item.get("passed"))]
+    total = len(checks)
+    passed_count = total - len(failed)
     return {
         "schema_version": "sdetkit.integration.topology-check.v1",
         "profile_name": str(profile.get("name", "default")),
         "checks": checks,
         "summary": {
-            "total": len(checks),
+            "total": total,
             "failed": len(failed),
+            "passed_checks": passed_count,
+            "pass_rate": round((passed_count / total) * 100, 1) if total else 100.0,
             "passed": not failed if checks else True,
             "next_step": (
                 "Topology contract is ready for enterprise integration scenarios."
@@ -427,6 +534,12 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
             ),
             "protocols": sorted(protocols),
             "dependency_edges": sorted(dependency_edges),
+            "counts": {
+                "application_services": len(app_services),
+                "data_services": len(data_services),
+                "mocked_platforms": len(mocked_platforms),
+                "dependency_edges": len(dependency_edges),
+            },
         },
     }
 
