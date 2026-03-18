@@ -17,6 +17,7 @@ import sys
 import tomllib
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -52,6 +53,13 @@ class PackageReport:
     notes: list[str]
 
 
+@dataclass(frozen=True)
+class PackageMetadata:
+    latest_version: str
+    release_date: str | None
+    source: str
+
+
 SIGNAL_PRIORITY = {
     "critical": 5,
     "high": 4,
@@ -60,6 +68,7 @@ SIGNAL_PRIORITY = {
     "investigate": 2,
     "unknown": 1,
 }
+DEFAULT_CACHE_PATH = Path(".sdetkit/cache/upgrade-audit-cache.json")
 
 
 def _parse_dep_name(raw_requirement: str) -> str:
@@ -185,6 +194,132 @@ def _latest_pypi_metadata(package: str, timeout_s: float) -> tuple[str, str | No
     return version, release_date
 
 
+def _load_cache(cache_path: Path) -> dict[str, dict[str, str | float | None]]:
+    if not cache_path.exists():
+        return {}
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    cache = payload.get("packages", {})
+    if not isinstance(cache, dict):
+        return {}
+    normalized: dict[str, dict[str, str | float | None]] = {}
+    for package, item in cache.items():
+        if isinstance(package, str) and isinstance(item, dict):
+            normalized[package] = item
+    return normalized
+
+
+def _persist_cache(cache_path: Path, cache: dict[str, dict[str, str | float | None]]) -> None:
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "generated_at": dt.datetime.now(dt.UTC).isoformat(),
+        "packages": cache,
+    }
+    cache_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _cache_entry_fresh(entry: dict[str, str | float | None], ttl_hours: float) -> bool:
+    fetched_at = entry.get("fetched_at")
+    if not isinstance(fetched_at, (int, float)):
+        return False
+    age_s = dt.datetime.now(dt.UTC).timestamp() - float(fetched_at)
+    return age_s <= max(ttl_hours, 0) * 3600
+
+
+def _metadata_from_cache(entry: dict[str, str | float | None], *, source: str) -> PackageMetadata:
+    latest_version = entry.get("latest_version")
+    release_date = entry.get("release_date")
+    if not isinstance(latest_version, str):
+        latest_version = "unknown"
+    if release_date is not None and not isinstance(release_date, str):
+        release_date = None
+    return PackageMetadata(
+        latest_version=latest_version,
+        release_date=release_date,
+        source=source,
+    )
+
+
+def _fetch_package_metadata(
+    package: str,
+    *,
+    timeout_s: float,
+    cache: dict[str, dict[str, str | float | None]],
+    cache_ttl_hours: float,
+    offline: bool,
+) -> PackageMetadata:
+    cached_entry = cache.get(package)
+    if cached_entry and _cache_entry_fresh(cached_entry, cache_ttl_hours):
+        return _metadata_from_cache(cached_entry, source="cache")
+
+    if offline:
+        if cached_entry:
+            return _metadata_from_cache(cached_entry, source="cache-stale")
+        return PackageMetadata(latest_version="offline-no-cache", release_date=None, source="offline")
+
+    try:
+        latest_version, release_date = _latest_pypi_metadata(package, timeout_s=timeout_s)
+    except urllib.error.HTTPError as exc:
+        latest_version, release_date = f"http-{exc.code}", None
+    except urllib.error.URLError:
+        if cached_entry:
+            return _metadata_from_cache(cached_entry, source="cache-stale")
+        latest_version, release_date = "network-error", None
+
+    cache[package] = {
+        "fetched_at": dt.datetime.now(dt.UTC).timestamp(),
+        "latest_version": latest_version,
+        "release_date": release_date,
+    }
+    return PackageMetadata(latest_version=latest_version, release_date=release_date, source="pypi")
+
+
+def _collect_package_metadata(
+    packages: list[str],
+    *,
+    timeout_s: float,
+    cache_path: Path,
+    cache_ttl_hours: float,
+    offline: bool,
+    max_workers: int,
+) -> dict[str, PackageMetadata]:
+    cache = _load_cache(cache_path)
+    metadata: dict[str, PackageMetadata] = {}
+    worker_count = max(1, min(max_workers, len(packages)))
+    if worker_count == 1:
+        for package in packages:
+            metadata[package] = _fetch_package_metadata(
+                package,
+                timeout_s=timeout_s,
+                cache=cache,
+                cache_ttl_hours=cache_ttl_hours,
+                offline=offline,
+            )
+    else:
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            futures = {
+                executor.submit(
+                    _fetch_package_metadata,
+                    package,
+                    timeout_s=timeout_s,
+                    cache=cache,
+                    cache_ttl_hours=cache_ttl_hours,
+                    offline=offline,
+                ): package
+                for package in packages
+            }
+            for future in as_completed(futures):
+                metadata[futures[future]] = future.result()
+
+    if not offline:
+        _persist_cache(cache_path, cache)
+    return metadata
+
+
 def _version_key(version: str) -> tuple[tuple[int, object], ...]:
     parts: list[tuple[int, object]] = []
     for segment in re.split(r"[.+!_-]", version):
@@ -241,6 +376,7 @@ def _classify_version_gap(current_version: str, latest_version: str) -> str:
         in {
             "unknown",
             "network-error",
+            "offline-no-cache",
         }
         or latest_version.startswith("http-")
     ):
@@ -318,6 +454,8 @@ def _build_package_report(
         upgrade_signal = "unknown"
     elif latest_version == "network-error" or latest_version.startswith("http-"):
         upgrade_signal = "investigate"
+    elif latest_version == "offline-no-cache":
+        upgrade_signal = "investigate"
 
     risk_score = 0
     if alignment == "drift":
@@ -350,7 +488,9 @@ def _build_package_report(
     elif upgrade_signal == "watch":
         next_action = "Track the package and batch it with nearby dependency maintenance work."
     elif upgrade_signal == "investigate":
-        next_action = "Retry metadata collection and inspect package naming or connectivity issues."
+        next_action = (
+            "Retry metadata collection and inspect package naming, cache freshness, or connectivity issues."
+        )
     elif upgrade_signal == "unknown":
         next_action = "Review the declared version range manually because the gap could not be classified."
 
@@ -384,6 +524,7 @@ def _render_markdown(
     critical_priority = sum(1 for report in reports if report.upgrade_signal == "critical")
     medium_priority = sum(1 for report in reports if report.upgrade_signal == "medium")
     investigate_priority = sum(1 for report in reports if report.upgrade_signal == "investigate")
+    cached_results = sum(1 for report in reports if any("cache" in note.lower() for note in report.notes))
     lines = [
         "# Upgrade audit",
         "",
@@ -396,6 +537,7 @@ def _render_markdown(
         f"- high-priority upgrade signals: {high_priority}",
         f"- medium-priority upgrade signals: {medium_priority}",
         f"- investigate signals: {investigate_priority}",
+        f"- packages using cached metadata: {cached_results}",
         "",
         "| Package | Current | Latest PyPI | Gap | Alignment | Signal | Risk | Release age (days) | Requirements |",
         "|---|---|---|---|---|---|---|---|---|",
@@ -439,6 +581,9 @@ def _render_json(
             "investigate_upgrade_signals": sum(
                 1 for report in reports if report.upgrade_signal == "investigate"
             ),
+            "cached_metadata_packages": sum(
+                1 for report in reports if any("cache" in note.lower() for note in report.notes)
+            ),
             "max_risk_score": max((report.risk_score for report in reports), default=0),
         },
         "packages": [asdict(report) for report in reports],
@@ -467,6 +612,10 @@ def run(
     requirement_paths: list[Path],
     output_format: str,
     fail_on: str = "never",
+    cache_path: Path = DEFAULT_CACHE_PATH,
+    cache_ttl_hours: float = 24.0,
+    offline: bool = False,
+    max_workers: int = 8,
 ) -> int:
     dependencies = _load_dependencies(pyproject_path, requirement_paths)
 
@@ -478,23 +627,29 @@ def run(
     for dep in dependencies:
         by_package.setdefault(dep.name, []).append(dep)
 
+    packages = sorted(by_package)
+    metadata_by_package = _collect_package_metadata(
+        packages,
+        timeout_s=timeout_s,
+        cache_path=cache_path,
+        cache_ttl_hours=cache_ttl_hours,
+        offline=offline,
+        max_workers=max_workers,
+    )
     reports: list[PackageReport] = []
-    for package in sorted(by_package):
-        try:
-            latest_version, release_date = _latest_pypi_metadata(package, timeout_s=timeout_s)
-        except urllib.error.HTTPError as exc:
-            latest_version, release_date = f"http-{exc.code}", None
-        except urllib.error.URLError:
-            latest_version, release_date = "network-error", None
-
+    for package in packages:
+        metadata = metadata_by_package[package]
         reports.append(
             _build_package_report(
                 package,
                 by_package[package],
-                latest_version=latest_version,
-                release_date=release_date,
+                latest_version=metadata.latest_version,
+                release_date=metadata.release_date,
             )
         )
+        report = reports[-1]
+        if metadata.source != "pypi":
+            report.notes.append(f"Latest metadata source: {metadata.source}.")
 
     reports = _sort_reports(reports)
 
@@ -553,6 +708,29 @@ def main() -> int:
         default="never",
         help="Exit with code 1 when a package meets or exceeds this signal threshold.",
     )
+    parser.add_argument(
+        "--cache-path",
+        type=Path,
+        default=DEFAULT_CACHE_PATH,
+        help=f"Path to the metadata cache file (default: {DEFAULT_CACHE_PATH})",
+    )
+    parser.add_argument(
+        "--cache-ttl-hours",
+        type=float,
+        default=24.0,
+        help="Hours before cached metadata is considered stale (default: 24).",
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Skip PyPI calls and use cached metadata when available.",
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=8,
+        help="Maximum number of parallel PyPI metadata requests (default: 8).",
+    )
     args = parser.parse_args()
 
     if not args.pyproject.exists():
@@ -578,6 +756,10 @@ def main() -> int:
         requirement_paths=requirement_paths,
         output_format=args.format,
         fail_on=args.fail_on,
+        cache_path=args.cache_path,
+        cache_ttl_hours=args.cache_ttl_hours,
+        offline=bool(args.offline),
+        max_workers=max(args.max_workers, 1),
     )
 
 
