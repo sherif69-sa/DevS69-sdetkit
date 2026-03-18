@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+
+def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, "-m", "sdetkit", *args], text=True, capture_output=True, cwd=cwd
+    )
+
+
+def test_topology_check_accepts_heterogeneous_enterprise_profile() -> None:
+    proc = _run(
+        "integration",
+        "topology-check",
+        "--profile",
+        "examples/kits/integration/heterogeneous-topology.json",
+    )
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    assert payload["schema_version"] == "sdetkit.integration.topology-check.v1"
+    assert payload["summary"]["passed"] is True
+    assert payload["inventory"]["languages"] == ["go", "python", "rust"]
+    assert payload["inventory"]["mocked_platforms"] == [
+        "segment-like-events",
+        "stripe-like-payments",
+    ]
+
+
+def test_topology_check_flags_missing_heterogeneous_contracts(tmp_path: Path) -> None:
+    profile = tmp_path / "bad-topology.json"
+    profile.write_text(
+        json.dumps(
+            {
+                "name": "bad-topology",
+                "topology": {
+                    "application_services": [
+                        {
+                            "name": "gateway",
+                            "role": "api-gateway",
+                            "language": "python",
+                            "logging_format": "json",
+                            "interfaces": [{"protocol": "rest", "audience": "external"}],
+                        },
+                        {
+                            "name": "worker",
+                            "role": "ml-serving",
+                            "language": "python",
+                            "error_handling": "exceptions",
+                            "interfaces": [{"protocol": "http", "audience": "internal"}],
+                        },
+                    ],
+                    "data_services": [
+                        {"name": "orders", "role": "transactional", "technology": "mysql"}
+                    ],
+                    "mocked_platforms": [
+                        {"name": "crm", "protocol": "rest", "operations": ["sync"]}
+                    ],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    proc = _run("integration", "topology-check", "--profile", str(profile))
+    assert proc.returncode == 1
+    payload = json.loads(proc.stdout)
+    assert payload["summary"]["passed"] is False
+    failed = {(item["kind"], item["name"]) for item in payload["checks"] if not item["passed"]}
+    assert ("application-service", "api-gateway") in failed
+    assert ("application-service", "data-pipeline") in failed
+    assert ("interface", "internal-grpc") in failed
+    assert ("data-service", "transactional") in failed
+    assert ("mock-platform", "crm") in failed
+
+
+def test_topology_check_requires_topology_object(tmp_path: Path) -> None:
+    profile = tmp_path / "missing-topology.json"
+    profile.write_text('{"name": "oops"}', encoding="utf-8")
+    proc = _run("integration", "topology-check", "--profile", str(profile))
+    assert proc.returncode == 2
+    assert "integration error" in proc.stderr

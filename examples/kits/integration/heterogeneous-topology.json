@@ -1,0 +1,60 @@
+{
+  "name": "enterprise-heterogeneous-stack",
+  "topology": {
+    "application_services": [
+      {
+        "name": "edge-gateway",
+        "role": "api-gateway",
+        "language": "go",
+        "error_handling": "typed sentinel + wrapped errors",
+        "logging_format": "zap json",
+        "interfaces": [
+          {"protocol": "rest", "audience": "external"},
+          {"protocol": "graphql", "audience": "dashboard"},
+          {"protocol": "grpc", "audience": "internal"}
+        ]
+      },
+      {
+        "name": "relevance-ml",
+        "role": "ml-serving",
+        "language": "python",
+        "error_handling": "domain exceptions + model fallback",
+        "logging_format": "structlog json",
+        "interfaces": [
+          {"protocol": "grpc", "audience": "internal"}
+        ]
+      },
+      {
+        "name": "search-indexer",
+        "role": "data-pipeline",
+        "language": "rust",
+        "error_handling": "Result<T, E> with anyhow context",
+        "logging_format": "tracing json",
+        "interfaces": [
+          {"protocol": "grpc", "audience": "internal"}
+        ]
+      }
+    ],
+    "data_services": [
+      {"name": "orders-db", "role": "transactional", "technology": "postgresql"},
+      {"name": "session-cache", "role": "cache", "technology": "redis"},
+      {"name": "export-blob", "role": "blob", "technology": "s3-compatible"}
+    ],
+    "mocked_platforms": [
+      {
+        "name": "stripe-like-payments",
+        "api_style": "resource-oriented",
+        "protocol": "rest",
+        "fidelity": ["idempotency", "pagination", "rate-limits"],
+        "operations": ["create-payment-intent", "capture-payment", "refund-payment"]
+      },
+      {
+        "name": "segment-like-events",
+        "api_style": "event-ingest",
+        "protocol": "http",
+        "fidelity": ["batching", "retry-after", "schema-validation"],
+        "operations": ["track", "identify"]
+      }
+    ]
+  }
+}
