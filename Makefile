@@ -1,6 +1,6 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit
+.PHONY: venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci
 
 venv:
 	@test -x .venv/bin/python || python3 -m venv .venv
@@ -44,3 +44,7 @@ release-verify-plan: venv
 
 upgrade-audit: venv
 	@bash -lc 'set -euo pipefail; . .venv/bin/activate && python scripts/upgrade_audit.py'
+
+
+upgrade-audit-ci: venv
+	@bash -lc 'set -euo pipefail; . .venv/bin/activate && python scripts/upgrade_audit.py --fail-on high'

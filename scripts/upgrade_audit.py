@@ -47,7 +47,19 @@ class PackageReport:
     version_gap: str
     release_age_days: int | None
     upgrade_signal: str
+    risk_score: int
+    next_action: str
     notes: list[str]
+
+
+SIGNAL_PRIORITY = {
+    "critical": 5,
+    "high": 4,
+    "medium": 3,
+    "watch": 2,
+    "investigate": 2,
+    "unknown": 1,
+}
 
 
 def _parse_dep_name(raw_requirement: str) -> str:
@@ -307,6 +319,41 @@ def _build_package_report(
     elif latest_version == "network-error" or latest_version.startswith("http-"):
         upgrade_signal = "investigate"
 
+    risk_score = 0
+    if alignment == "drift":
+        risk_score += 45
+    elif alignment == "range-or-unpinned":
+        risk_score += 15
+
+    risk_score += {
+        "major": 35,
+        "minor": 20,
+        "patch": 10,
+        "different": 15,
+        "unknown": 5,
+    }.get(version_gap, 0)
+
+    if "default" in groups:
+        risk_score += 10
+    if release_age_days is not None and release_age_days <= 30:
+        risk_score += 10
+    if upgrade_signal == "investigate":
+        risk_score += 10
+
+    next_action = "Keep under observation; no immediate action required."
+    if upgrade_signal == "critical":
+        next_action = "Resolve manifest drift first, then validate the major upgrade in a dedicated branch."
+    elif upgrade_signal == "high":
+        next_action = "Plan an upgrade spike with regression coverage before the next release cut."
+    elif upgrade_signal == "medium":
+        next_action = "Queue the upgrade for the next maintenance batch and validate targeted smoke tests."
+    elif upgrade_signal == "watch":
+        next_action = "Track the package and batch it with nearby dependency maintenance work."
+    elif upgrade_signal == "investigate":
+        next_action = "Retry metadata collection and inspect package naming or connectivity issues."
+    elif upgrade_signal == "unknown":
+        next_action = "Review the declared version range manually because the gap could not be classified."
+
     return PackageReport(
         name=name,
         sources=sources,
@@ -320,6 +367,8 @@ def _build_package_report(
         version_gap=version_gap,
         release_age_days=release_age_days,
         upgrade_signal=upgrade_signal,
+        risk_score=risk_score,
+        next_action=next_action,
         notes=notes,
     )
 
@@ -333,6 +382,8 @@ def _render_markdown(
     drift_count = sum(1 for report in reports if report.alignment == "drift")
     high_priority = sum(1 for report in reports if report.upgrade_signal == "high")
     critical_priority = sum(1 for report in reports if report.upgrade_signal == "critical")
+    medium_priority = sum(1 for report in reports if report.upgrade_signal == "medium")
+    investigate_priority = sum(1 for report in reports if report.upgrade_signal == "investigate")
     lines = [
         "# Upgrade audit",
         "",
@@ -343,9 +394,11 @@ def _render_markdown(
         f"- manifest drift packages: {drift_count}",
         f"- critical upgrade signals: {critical_priority}",
         f"- high-priority upgrade signals: {high_priority}",
+        f"- medium-priority upgrade signals: {medium_priority}",
+        f"- investigate signals: {investigate_priority}",
         "",
-        "| Package | Current | Latest PyPI | Gap | Alignment | Signal | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|",
+        "| Package | Current | Latest PyPI | Gap | Alignment | Signal | Risk | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
@@ -353,13 +406,12 @@ def _render_markdown(
         lines.append(
             "| "
             f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.version_gap} | "
-            f"{report.alignment} | {report.upgrade_signal} | {release_age} | {requirements} |"
+            f"{report.alignment} | {report.upgrade_signal} | {report.risk_score} | {release_age} | {requirements} |"
         )
     lines.extend(["", "## Focus notes", ""])
     for report in reports:
-        if not report.notes:
-            continue
-        lines.append(f"- `{report.name}`: {' '.join(report.notes)}")
+        note_text = " ".join(report.notes) if report.notes else "No additional notes."
+        lines.append(f"- `{report.name}` ({report.next_action}) {note_text}")
     return "\n".join(lines) + "\n"
 
 
@@ -381,10 +433,31 @@ def _render_json(
             "high_priority_upgrade_signals": sum(
                 1 for report in reports if report.upgrade_signal == "high"
             ),
+            "medium_priority_upgrade_signals": sum(
+                1 for report in reports if report.upgrade_signal == "medium"
+            ),
+            "investigate_upgrade_signals": sum(
+                1 for report in reports if report.upgrade_signal == "investigate"
+            ),
+            "max_risk_score": max((report.risk_score for report in reports), default=0),
         },
         "packages": [asdict(report) for report in reports],
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _sort_reports(reports: list[PackageReport]) -> list[PackageReport]:
+    return sorted(
+        reports,
+        key=lambda report: (-report.risk_score, -SIGNAL_PRIORITY.get(report.upgrade_signal, 0), report.name),
+    )
+
+
+def _should_fail(reports: list[PackageReport], fail_on: str) -> bool:
+    if fail_on == "never":
+        return False
+    threshold = SIGNAL_PRIORITY[fail_on]
+    return any(SIGNAL_PRIORITY.get(report.upgrade_signal, 0) >= threshold for report in reports)
 
 
 def run(
@@ -393,6 +466,7 @@ def run(
     *,
     requirement_paths: list[Path],
     output_format: str,
+    fail_on: str = "never",
 ) -> int:
     dependencies = _load_dependencies(pyproject_path, requirement_paths)
 
@@ -422,6 +496,8 @@ def run(
             )
         )
 
+    reports = _sort_reports(reports)
+
     rendered = {
         "json": _render_json(
             reports, pyproject_path=pyproject_path, requirement_paths=requirement_paths
@@ -431,7 +507,7 @@ def run(
         ),
     }[output_format]
     sys.stdout.write(rendered)
-    return 0
+    return 1 if _should_fail(reports, fail_on) else 0
 
 
 def main() -> int:
@@ -471,6 +547,12 @@ def main() -> int:
         action="store_true",
         help="Include requirements*.txt.lock files discovered in the repo root.",
     )
+    parser.add_argument(
+        "--fail-on",
+        choices=["critical", "high", "medium", "watch", "investigate", "unknown", "never"],
+        default="never",
+        help="Exit with code 1 when a package meets or exceeds this signal threshold.",
+    )
     args = parser.parse_args()
 
     if not args.pyproject.exists():
@@ -495,6 +577,7 @@ def main() -> int:
         timeout_s=args.timeout,
         requirement_paths=requirement_paths,
         output_format=args.format,
+        fail_on=args.fail_on,
     )
 
 
