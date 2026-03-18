@@ -9,6 +9,7 @@ MODE="${SDETKIT_PREMIUM_MODE:-full}"
 CONTINUE_ON_ERROR=0
 ENGINE_MIN_SCORE="${SDETKIT_PREMIUM_MIN_SCORE:-70}"
 OPS_JOBS="${SDETKIT_PREMIUM_OPS_JOBS:-2}"
+TOPOLOGY_PROFILE="${SDETKIT_PREMIUM_TOPOLOGY_PROFILE:-examples/kits/integration/heterogeneous-topology.json}"
 
 usage() {
   cat <<'USAGE'
@@ -213,12 +214,14 @@ run_plan() {
     run_step "doctor_ascii" "Head-3 Operational Confidence" "Doctor ASCII" "python3 -m sdetkit doctor --ascii"
     run_step "doctor_json" "Head-3 Operational Confidence" "Doctor JSON" "python3 -m sdetkit doctor --json --out '$OUT_DIR/doctor.json'"
     run_step "maintenance_full" "Head-3 Operational Confidence" "Maintenance Full" "python3 -m sdetkit maintenance --mode full --format json --out '$OUT_DIR/maintenance.json'"
+    run_step "integration_topology" "Head-3 Operational Confidence" "Integration Topology Contract" "python3 -m sdetkit integration topology-check --profile '$TOPOLOGY_PROFILE' > '$OUT_DIR/integration-topology.json'"
     run_step "security_scan" "Head-4 Security & Compliance" "Security Scan (offline SARIF)" "python3 -m sdetkit security scan --fail-on none --format sarif --output '$OUT_DIR/security.sarif'"
     run_step "security_triage" "Head-4 Security & Compliance" "Security Triage (baseline-aware)" "python3 tools/triage.py --mode security --run-security --security-baseline tools/security.baseline.json --max-items 20 --tee '$OUT_DIR/security-check.json'"
     run_step "ops_ci" "Head-3 Operational Confidence" "Control Plane Ops (CI profile)" "python3 -m sdetkit ops run --profile ci --jobs '$OPS_JOBS'"
     run_step "evidence" "Head-4 Security & Compliance" "Evidence Pack" "python3 -m sdetkit evidence pack --output '$OUT_DIR/evidence.zip'"
   else
     run_step "doctor_json" "Head-3 Operational Confidence" "Doctor JSON" "python3 -m sdetkit doctor --json --out '$OUT_DIR/doctor.json'"
+    run_step "integration_topology" "Head-3 Operational Confidence" "Integration Topology Contract" "python3 -m sdetkit integration topology-check --profile '$TOPOLOGY_PROFILE' > '$OUT_DIR/integration-topology.json'"
     run_step "security_scan" "Head-4 Security & Compliance" "Security Scan (offline SARIF)" "python3 -m sdetkit security scan --fail-on none --format sarif --output '$OUT_DIR/security.sarif'"
   fi
 }
@@ -259,11 +262,11 @@ PY
   info "Step run ledger: $STEP_RESULTS_NDJSON"
 }
 
-export MODE OUT_DIR STEP_RESULTS_NDJSON
+export MODE OUT_DIR STEP_RESULTS_NDJSON TOPOLOGY_PROFILE
 
 preflight
 run_plan
 run_engine
 final_report
 
-echo "Premium gate passed. Artifacts: $OUT_DIR/doctor.json, $OUT_DIR/maintenance.json, $OUT_DIR/security.sarif, $OUT_DIR/security-check.json, $OUT_DIR/premium-summary.json, $OUT_DIR/evidence.zip"
+echo "Premium gate passed. Artifacts: $OUT_DIR/doctor.json, $OUT_DIR/maintenance.json, $OUT_DIR/integration-topology.json, $OUT_DIR/security.sarif, $OUT_DIR/security-check.json, $OUT_DIR/premium-summary.json, $OUT_DIR/evidence.zip"

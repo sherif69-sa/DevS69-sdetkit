@@ -37,6 +37,7 @@ SEVERITY_RANK = {
 REQUIRED_ARTIFACTS = (
     "doctor.json",
     "maintenance.json",
+    "integration-topology.json",
     "security-check.json",
 )
 
@@ -52,6 +53,10 @@ RECOMMENDATION_CATALOG: dict[str, tuple[str, str]] = {
     "security": (
         "Security findings are present in control-plane inputs.",
         "Address high/critical vulnerabilities before enabling broad rollout.",
+    ),
+    "integration": (
+        "Integration topology contract drift is present in premium gate inputs.",
+        "Repair the service, dependency, and deployment contracts before promoting the topology as production-ready.",
     ),
     "engine:artifact-integrity": (
         "Gate artifacts are incomplete or unreadable.",
@@ -258,6 +263,48 @@ def _parse_security(payload: dict[str, Any]) -> SourceResult:
             )
 
     return SourceResult("security", warnings, [], checks)
+
+
+def _parse_integration_topology(payload: dict[str, Any]) -> SourceResult:
+    warnings: list[Signal] = []
+    recommendations: list[Signal] = []
+    checks: list[Signal] = []
+
+    for item in payload.get("checks", []):
+        if not isinstance(item, dict) or item.get("passed", False):
+            continue
+        kind = _safe_text(item.get("kind") or "contract")
+        name = _safe_text(item.get("name") or "unknown")
+        message = _safe_text(item.get("reason")) or f"{kind} failed: {name}"
+        warnings.append(_make_signal("integration", f"{kind}:{name}", "high", message))
+
+    summary = payload.get("summary")
+    if isinstance(summary, dict):
+        pass_rate = summary.get("pass_rate")
+        if isinstance(pass_rate, (int, float)) and float(pass_rate) < 100.0:
+            checks.append(
+                _make_signal(
+                    "integration",
+                    "pass-rate",
+                    "warn",
+                    f"integration topology pass rate below premium bar: {pass_rate}%",
+                )
+            )
+
+    inventory = payload.get("inventory")
+    if isinstance(inventory, dict):
+        counts = inventory.get("counts")
+        if isinstance(counts, dict) and int(counts.get("application_services", 0)) < 3:
+            checks.append(
+                _make_signal(
+                    "integration",
+                    "service-count",
+                    "warn",
+                    "integration topology includes fewer than three application services",
+                )
+            )
+
+    return SourceResult("integration", warnings, recommendations, checks)
 
 
 def _scan_step_logs(out_dir: Path) -> list[StepStatus]:
@@ -795,6 +842,7 @@ def collect_signals(out_dir: Path) -> dict[str, Any]:
     sources = {
         "doctor": (out_dir / "doctor.json", _parse_doctor),
         "maintenance": (out_dir / "maintenance.json", _parse_maintenance),
+        "integration": (out_dir / "integration-topology.json", _parse_integration_topology),
         "security": (out_dir / "security-check.json", _parse_security),
     }
 

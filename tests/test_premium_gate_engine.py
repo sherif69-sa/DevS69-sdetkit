@@ -9,6 +9,21 @@ import pytest
 from sdetkit import premium_gate_engine as eng
 
 
+def _write_topology_artifact(
+    path: Path, *, pass_rate: float = 100.0, app_services: int = 3, checks: list[dict[str, object]] | None = None
+) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "checks": checks or [],
+                "summary": {"pass_rate": pass_rate, "passed": pass_rate == 100.0},
+                "inventory": {"counts": {"application_services": app_services}},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_collect_signals_reads_artifacts_and_extracts_warnings_and_recommendations(
     tmp_path: Path,
 ) -> None:
@@ -35,6 +50,7 @@ def test_collect_signals_reads_artifacts_and_extracts_warnings_and_recommendatio
         ),
         encoding="utf-8",
     )
+    _write_topology_artifact(out / "integration-topology.json")
     (out / "security-check.json").write_text(
         json.dumps({"findings": [{"rule_id": "SEC_X", "severity": "high", "path": "src/app.py"}]}),
         encoding="utf-8",
@@ -48,6 +64,7 @@ def test_collect_signals_reads_artifacts_and_extracts_warnings_and_recommendatio
     assert payload["required_artifacts"] == {
         "doctor.json": True,
         "maintenance.json": True,
+        "integration-topology.json": True,
         "security-check.json": True,
     }
     assert payload["hotspots"] == {"doctor": 1, "maintenance": 1, "security": 1}
@@ -56,7 +73,7 @@ def test_collect_signals_reads_artifacts_and_extracts_warnings_and_recommendatio
 
 def test_collect_signals_missing_artifacts_adds_engine_checks(tmp_path: Path) -> None:
     payload = eng.collect_signals(tmp_path)
-    assert payload["counts"]["engine_checks"] == 7
+    assert payload["counts"]["engine_checks"] == 9
     assert payload["counts"]["steps"] == 0
     assert payload["ok"] is False
 
@@ -76,6 +93,7 @@ def test_main_writes_json_output_and_double_check(tmp_path: Path, capsys) -> Non
     (out / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": ["all good"]}), encoding="utf-8"
     )
+    _write_topology_artifact(out / "integration-topology.json")
     (out / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
     (out / "premium-gate.Quality.log").write_text("all clear\n", encoding="utf-8")
 
@@ -105,6 +123,7 @@ def test_main_min_score_gate_can_fail(tmp_path: Path) -> None:
     (tmp_path / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
     )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
     (tmp_path / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
     (tmp_path / "premium-gate.Quality.log").write_text("ok\n", encoding="utf-8")
     rc = eng.main(["--out-dir", str(tmp_path), "--min-score", "95", "--format", "json"])
@@ -164,6 +183,7 @@ def test_main_auto_fix_adds_manual_followup_recommendation(tmp_path: Path, capsy
     (tmp_path / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
     )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
     (tmp_path / "security-check.json").write_text(
         json.dumps({"findings": [{"rule_id": "SEC_UNKNOWN", "path": "src/missing.py"}]}),
         encoding="utf-8",
@@ -188,6 +208,7 @@ def test_collect_signals_ignores_info_security_findings(tmp_path: Path) -> None:
     (tmp_path / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
     )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
     (tmp_path / "security-check.json").write_text(
         json.dumps(
             {
@@ -227,6 +248,7 @@ def test_main_markdown_format_includes_five_heads_and_plan(tmp_path: Path, capsy
     (tmp_path / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
     )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
     (tmp_path / "security-check.json").write_text(
         json.dumps({"findings": [{"rule_id": "SEC_UNKNOWN", "path": "src/missing.py"}]}),
         encoding="utf-8",
@@ -274,6 +296,7 @@ def test_main_learn_db_and_commit_persists_records(tmp_path: Path) -> None:
     (tmp_path / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
     )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
     (tmp_path / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
     (tmp_path / "premium-gate.Quality.log").write_text("ok\n", encoding="utf-8")
     db = tmp_path / "premium-insights.db"
@@ -314,6 +337,7 @@ def test_main_applies_learned_guidelines_to_recommendations(tmp_path: Path, caps
     (tmp_path / "maintenance.json").write_text(
         json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
     )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
     (tmp_path / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
     (tmp_path / "premium-gate.Quality.log").write_text("ok\n", encoding="utf-8")
     db = tmp_path / "premium-insights.db"
@@ -340,3 +364,33 @@ def test_main_applies_learned_guidelines_to_recommendations(tmp_path: Path, caps
     payload = json.loads(capsys.readouterr().out)
     assert any(item["category"] == "learned-guideline" for item in payload["recommendations"])
     assert payload.get("manual_fix_plan")
+
+
+def test_collect_signals_reads_integration_topology_contract(tmp_path: Path) -> None:
+    (tmp_path / "doctor.json").write_text(
+        json.dumps({"checks": {}, "recommendations": []}), encoding="utf-8"
+    )
+    (tmp_path / "maintenance.json").write_text(
+        json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
+    )
+    _write_topology_artifact(
+        tmp_path / "integration-topology.json",
+        pass_rate=92.5,
+        app_services=2,
+        checks=[
+            {
+                "kind": "dependency-contract",
+                "name": "ml-serving",
+                "passed": False,
+                "reason": "missing dependency",
+            }
+        ],
+    )
+    (tmp_path / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
+
+    payload = eng.collect_signals(tmp_path)
+    assert payload["required_artifacts"]["integration-topology.json"] is True
+    assert payload["hotspots"]["integration"] == 1
+    categories = {item["category"] for item in payload["engine_checks"]}
+    assert "pass-rate" in categories
+    assert "service-count" in categories
