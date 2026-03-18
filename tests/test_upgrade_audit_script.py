@@ -161,6 +161,7 @@ def test_render_json_summary_counts() -> None:
     )
 
     assert payload["summary"] == {
+        "cached_metadata_packages": 0,
         "critical_upgrade_signals": 0,
         "packages_audited": 2,
         "manifest_drift_packages": 1,
@@ -196,12 +197,14 @@ dependencies = ["httpx>=0.27,<1"]
         timeout_s=0.1,
         requirement_paths=[requirements],
         output_format="md",
+        cache_path=tmp_path / "audit-cache.json",
     )
 
     assert rc == 0
     out = capsys.readouterr().out
     assert "# Upgrade audit" in out
     assert "manifest drift packages: 1" in out
+    assert "packages using cached metadata: 0" in out
     assert "Current | Latest PyPI | Gap | Alignment | Signal | Risk" in out
     assert "`httpx` | `0.28.1` | `0.29.0` | minor | drift | high |" in out
     assert "Focus notes" in out
@@ -233,6 +236,7 @@ dependencies = ["httpx>=0.27,<1"]
         requirement_paths=[requirements],
         output_format="json",
         fail_on="high",
+        cache_path=tmp_path / "audit-cache.json",
     )
 
     assert rc == 1
@@ -279,3 +283,47 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
     sorted_reports = upgrade_audit._sort_reports(reports)
 
     assert [report.name for report in sorted_reports] == ["critical-pkg", "watch-pkg"]
+
+
+def test_run_uses_cache_in_offline_mode(capsys, tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx==0.28.1"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    cache_path = tmp_path / "cache.json"
+    cache_path.write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-01-02T00:00:00+00:00",
+                "packages": {
+                    "httpx": {
+                        "fetched_at": 1_767_000_000.0,
+                        "latest_version": "0.28.1",
+                        "release_date": "2026-01-01T00:00:00Z",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = upgrade_audit.run(
+        pyproject,
+        timeout_s=0.1,
+        requirement_paths=[],
+        output_format="json",
+        offline=True,
+        cache_path=cache_path,
+        cache_ttl_hours=9999,
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["summary"]["cached_metadata_packages"] == 1
+    assert payload["packages"][0]["latest_version"] == "0.28.1"
+    assert "Latest metadata source: cache." in payload["packages"][0]["notes"]
