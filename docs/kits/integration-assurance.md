@@ -5,7 +5,7 @@ Provide offline-first confidence that runtime dependencies are actually ready.
 
 ## Inputs
 - Readiness profile JSON (`required_env`, `required_files`, `services`)
-- Topology profile JSON (`topology.application_services`, `topology.data_services`, `topology.mocked_platforms`)
+- Topology profile JSON (`topology.application_services`, `topology.data_services`, `topology.mocked_platforms`) with deployment, telemetry, and data resilience metadata
 - Cassette JSON for replay contract validation
 
 ## Outputs / artifacts

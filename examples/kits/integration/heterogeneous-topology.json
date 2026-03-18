@@ -9,6 +9,15 @@
         "language": "go",
         "error_handling": "typed sentinel + wrapped errors",
         "logging_format": "zap json",
+        "telemetry": {
+          "logs": true,
+          "metrics": true,
+          "traces": true
+        },
+        "deployments": [
+          {"environment": "staging", "region": "us-east-1", "replicas": 1},
+          {"environment": "prod", "region": "us-east-1", "replicas": 3}
+        ],
         "dependencies": [
           {"kind": "application", "target": "ml-serving"},
           {"kind": "mock", "target": "stripe-like-payments"}
@@ -26,6 +35,15 @@
         "language": "python",
         "error_handling": "domain exceptions + model fallback",
         "logging_format": "structlog json",
+        "telemetry": {
+          "logs": true,
+          "metrics": true,
+          "traces": true
+        },
+        "deployments": [
+          {"environment": "staging", "region": "us-east-1", "replicas": 1},
+          {"environment": "prod", "region": "us-east-1", "replicas": 2}
+        ],
         "dependencies": [
           {"kind": "data", "target": "orders-db"},
           {"kind": "data", "target": "session-cache"}
@@ -41,6 +59,15 @@
         "language": "rust",
         "error_handling": "Result<T, E> with anyhow context",
         "logging_format": "tracing json",
+        "telemetry": {
+          "logs": true,
+          "metrics": true,
+          "traces": true
+        },
+        "deployments": [
+          {"environment": "staging", "region": "us-east-1", "replicas": 1},
+          {"environment": "prod", "region": "us-east-1", "replicas": 2}
+        ],
         "dependencies": [
           {"kind": "data", "target": "orders-db"},
           {"kind": "data", "target": "export-blob"},
@@ -52,9 +79,27 @@
       }
     ],
     "data_services": [
-      {"name": "orders-db", "role": "transactional", "technology": "postgresql"},
-      {"name": "session-cache", "role": "cache", "technology": "redis"},
-      {"name": "export-blob", "role": "blob", "technology": "s3-compatible"}
+      {
+        "name": "orders-db",
+        "role": "transactional",
+        "technology": "postgresql",
+        "backup_strategy": "point-in-time recovery",
+        "multi_az": true
+      },
+      {
+        "name": "session-cache",
+        "role": "cache",
+        "technology": "redis",
+        "backup_strategy": "snapshot + replica promotion",
+        "multi_az": true
+      },
+      {
+        "name": "export-blob",
+        "role": "blob",
+        "technology": "s3-compatible",
+        "backup_strategy": "object versioning + lifecycle replication",
+        "multi_az": true
+      }
     ],
     "mocked_platforms": [
       {
