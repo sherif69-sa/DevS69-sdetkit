@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,24 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fix", action="store_true")
     parser.add_argument("--deterministic", action="store_true")
     parser.add_argument("--quiet", action="store_true")
+    parser.add_argument(
+        "--include-check",
+        action="append",
+        default=None,
+        help="Run only the named check(s). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--exclude-check",
+        action="append",
+        default=None,
+        help="Skip the named check(s). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=1,
+        help="Maximum number of checks to run in parallel (default: 1).",
+    )
     return parser
 
 
@@ -101,30 +120,107 @@ def _deterministic_generated_at(env: dict[str, str]) -> str:
         return DETERMINISTIC_GENERATED_AT
 
 
-def _build_report(ctx: MaintenanceContext, *, deterministic: bool = False) -> dict[str, Any]:
-    started = time.monotonic()
-    checks: dict[str, dict[str, Any]] = {}
-    crashes = False
-    for name, runner in checks_for_mode(ctx.mode):
-        try:
-            result: CheckResult = runner(ctx)
-        except Exception as exc:
-            crashes = True
-            result = CheckResult(
+def _normalize_names(values: list[str] | None) -> list[str]:
+    return sorted({value.strip() for value in values or [] if value.strip()})
+
+
+def _select_checks(
+    available_checks: list[tuple[str, Any]],
+    *,
+    include_checks: list[str] | None = None,
+    exclude_checks: list[str] | None = None,
+) -> list[tuple[str, Any]]:
+    include = set(_normalize_names(include_checks))
+    exclude = set(_normalize_names(exclude_checks))
+    selected: list[tuple[str, Any]] = []
+    for name, runner in available_checks:
+        if include and name not in include:
+            continue
+        if name in exclude:
+            continue
+        selected.append((name, runner))
+    return selected
+
+
+def _run_check(name: str, runner: Any, ctx: MaintenanceContext) -> tuple[str, CheckResult, bool]:
+    try:
+        return name, runner(ctx), False
+    except Exception as exc:
+        return (
+            name,
+            CheckResult(
                 ok=False,
                 summary=f"check crashed: {exc}",
                 details={"error": repr(exc)},
                 actions=[],
-            )
-        checks[name] = result.as_dict()
+            ),
+            True,
+        )
+
+
+def _build_recommendations(checks: dict[str, dict[str, Any]]) -> list[str]:
+    failing = sorted(name for name, item in checks.items() if not item["ok"])
+    if not failing:
+        return ["All maintenance checks passed."]
+
+    recommendations = [f"Review failing checks: {', '.join(failing)}."]
+    suggested_actions: list[str] = []
+    for name in failing:
+        actions = checks[name].get("actions", [])
+        if not isinstance(actions, list):
+            continue
+        for action in actions:
+            if not isinstance(action, dict):
+                continue
+            title = str(action.get("title", "")).strip()
+            applied = bool(action.get("applied", False))
+            if title and not applied:
+                suggested_actions.append(title)
+    if suggested_actions:
+        unique_actions = sorted(dict.fromkeys(suggested_actions))
+        recommendations.append(f"Suggested next actions: {', '.join(unique_actions[:5])}.")
+    return recommendations
+
+
+def _build_report(
+    ctx: MaintenanceContext,
+    *,
+    deterministic: bool = False,
+    include_checks: list[str] | None = None,
+    exclude_checks: list[str] | None = None,
+    jobs: int = 1,
+) -> dict[str, Any]:
+    started = time.monotonic()
+    checks: dict[str, dict[str, Any]] = {}
+    crashes = False
+    available_checks = checks_for_mode(ctx.mode)
+    selected_checks = _select_checks(
+        available_checks,
+        include_checks=include_checks,
+        exclude_checks=exclude_checks,
+    )
+    worker_count = max(1, jobs)
+
+    if worker_count == 1 or len(selected_checks) <= 1:
+        for name, runner in selected_checks:
+            _, result, crashed = _run_check(name, runner, ctx)
+            crashes = crashes or crashed
+            checks[name] = result.as_dict()
+    else:
+        with ThreadPoolExecutor(max_workers=worker_count) as pool:
+            futures = {
+                pool.submit(_run_check, name, runner, ctx): name for name, runner in selected_checks
+            }
+            for future in as_completed(futures):
+                name, result, crashed = future.result()
+                crashes = crashes or crashed
+                checks[name] = result.as_dict()
+
+    checks = dict(sorted(checks.items()))
     passed = sum(1 for item in checks.values() if item["ok"])
     total = len(checks)
     score = 100 if total == 0 else round((passed / total) * 100)
-    recommendations = [
-        f"Review failing checks: {', '.join(sorted(name for name, item in checks.items() if not item['ok']))}."
-    ]
-    if all(item["ok"] for item in checks.values()):
-        recommendations = ["All maintenance checks passed."]
+    recommendations = _build_recommendations(checks)
     report = {
         "ok": all(item["ok"] for item in checks.values()),
         "score": score,
@@ -140,6 +236,11 @@ def _build_report(ctx: MaintenanceContext, *, deterministic: bool = False) -> di
             "python": ctx.python_exe,
             "duration_seconds": 0.0 if deterministic else round(time.monotonic() - started, 3),
             "had_crash": crashes,
+            "jobs": worker_count,
+            "available_checks": [name for name, _runner in available_checks],
+            "selected_checks": [name for name, _runner in selected_checks],
+            "excluded_checks": _normalize_names(exclude_checks),
+            "include_checks": _normalize_names(include_checks),
         },
     }
     return report
@@ -179,7 +280,13 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     try:
-        report = _build_report(ctx, deterministic=bool(ns.deterministic))
+        report = _build_report(
+            ctx,
+            deterministic=bool(ns.deterministic),
+            include_checks=ns.include_check,
+            exclude_checks=ns.exclude_check,
+            jobs=max(int(ns.jobs), 1),
+        )
         rendered = {
             "json": json.dumps(report, sort_keys=True),
             "text": _render_text(report),

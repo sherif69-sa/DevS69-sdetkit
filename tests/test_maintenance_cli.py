@@ -110,6 +110,30 @@ def test_fix_mode_records_actions() -> None:
     assert lint_actions
 
 
+def test_cli_supports_include_exclude_and_jobs(monkeypatch, capsys) -> None:
+    def _ok(_ctx: MaintenanceContext):
+        return cli.CheckResult(ok=True, summary="ok", details={}, actions=[])
+
+    monkeypatch.setattr(cli, "checks_for_mode", lambda _mode: [("a", _ok), ("b", _ok)])
+    rc = cli.main(
+        [
+            "--format",
+            "json",
+            "--include-check",
+            "a",
+            "--exclude-check",
+            "b",
+            "--jobs",
+            "3",
+            "--deterministic",
+        ]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out.splitlines()[0])
+    assert payload["meta"]["jobs"] == 3
+    assert payload["meta"]["selected_checks"] == ["a"]
+
+
 def test_doctor_check_handles_empty_output(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr(doctor_check.doctor, "main", lambda _args: 2)
     ctx = MaintenanceContext(
