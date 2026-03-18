@@ -29,6 +29,12 @@ def test_kits_list_and_describe_contract() -> None:
         "release",
         "intelligence",
     ]
+    release_kit = next(item for item in payload["kits"] if item["slug"] == "release")
+    assert "capabilities" in release_kit
+    assert "typical_inputs" in release_kit
+    assert "key_artifacts" in release_kit
+    assert "learning_path" in release_kit
+    assert release_kit["learning_path"][0] == "sdetkit release gate fast"
 
     describe_proc = _run("kits", "describe", "release", "--format", "json")
     assert describe_proc.returncode == 0
@@ -36,9 +42,19 @@ def test_kits_list_and_describe_contract() -> None:
     assert describe_payload["schema_version"] == "sdetkit.kits.catalog.v1"
     assert describe_payload["kit"]["id"] == "release-confidence"
     assert describe_payload["kit"]["slug"] == "release"
+    assert "Pre-merge quality gates" in describe_payload["kit"]["capabilities"]
 
 
 def test_kits_describe_unknown_is_usage_error() -> None:
     proc = _run("kits", "describe", "unknown-kit")
     assert proc.returncode == 2
     assert "kits error" in proc.stderr
+
+
+def test_kits_describe_text_includes_capability_map() -> None:
+    proc = _run("kits", "describe", "integration")
+    assert proc.returncode == 0
+    assert "capabilities:" in proc.stdout
+    assert "typical inputs:" in proc.stdout
+    assert "key artifacts:" in proc.stdout
+    assert "learning path:" in proc.stdout

@@ -27,6 +27,11 @@ def test_kits_list_json_schema_and_order() -> None:
     ids = [x["id"] for x in payload["kits"]]
     assert ids == sorted(ids)
     assert "release-confidence" in ids
+    release = next(x for x in payload["kits"] if x["id"] == "release-confidence")
+    assert release["capabilities"]
+    assert release["typical_inputs"]
+    assert release["key_artifacts"]
+    assert release["learning_path"]
 
 
 def test_release_alias_routes_to_gate_and_backcompat_gate_still_works() -> None:

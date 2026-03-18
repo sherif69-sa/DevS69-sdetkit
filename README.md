@@ -17,6 +17,23 @@ It turns CI and test signals into deterministic contracts, machine-readable arti
 - **Failure Forensics Kit** — `sdetkit forensics ...`
 - **Catalog** — `sdetkit kits list` / `sdetkit kits describe <kit>`
 
+## Choose your SDET lane fast
+
+- **Release confidence**: use when you need go/no-go readiness, repo health signals, and approval evidence.
+- **Test intelligence**: use when you need smarter triage for flakes, failure clustering, impact analysis, or reproducible env capture.
+- **Integration assurance**: use when you need stronger service-profile checks, environment readiness validation, and topology-aware contracts.
+- **Failure forensics**: use when you need run-to-run diffs, repro bundles, and escalation-ready evidence packs.
+
+For a fuller capability map, run:
+
+```bash
+python -m sdetkit kits list
+python -m sdetkit kits describe release
+python -m sdetkit kits describe intelligence
+python -m sdetkit kits describe integration
+python -m sdetkit kits describe forensics
+```
+
 ## Hero commands
 
 ```bash
