@@ -49,6 +49,7 @@ _KITS: Final[list[Kit]] = [
         "hero_commands": [
             "sdetkit integration check --profile integration-profile.json",
             "sdetkit integration matrix --profile integration-profile.json",
+            "sdetkit integration topology-check --profile heterogeneous-topology.json",
         ],
     },
     {

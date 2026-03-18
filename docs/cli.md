@@ -17,6 +17,7 @@ DevS69 SDETKit is organized around four umbrella kits. Use these first.
 - `sdetkit release gate release`
 - `sdetkit intelligence flake classify --history examples/kits/intelligence/flake-history.json`
 - `sdetkit integration check --profile examples/kits/integration/profile.json`
+- `sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json`
 - `sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json`
 
 ## Compatibility and supporting surfaces
