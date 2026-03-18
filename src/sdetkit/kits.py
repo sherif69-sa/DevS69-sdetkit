@@ -15,6 +15,10 @@ class Kit(TypedDict):
     stability: str
     summary: str
     hero_commands: list[str]
+    capabilities: list[str]
+    typical_inputs: list[str]
+    key_artifacts: list[str]
+    learning_path: list[str]
 
 
 _KITS: Final[list[Kit]] = [
@@ -29,6 +33,27 @@ _KITS: Final[list[Kit]] = [
             "sdetkit release doctor",
             "sdetkit release evidence",
         ],
+        "capabilities": [
+            "Pre-merge quality gates",
+            "Release preflight diagnostics",
+            "Policy and security enforcement",
+            "Evidence packaging for approvals",
+        ],
+        "typical_inputs": [
+            "Repository working tree",
+            "CI configuration",
+            "Quality and policy baselines",
+        ],
+        "key_artifacts": [
+            "Gate JSON summaries",
+            "Doctor readiness reports",
+            "Release evidence bundles",
+        ],
+        "learning_path": [
+            "sdetkit release gate fast",
+            "sdetkit release doctor",
+            "sdetkit release gate release",
+        ],
     },
     {
         "id": "test-intelligence",
@@ -39,6 +64,27 @@ _KITS: Final[list[Kit]] = [
             "sdetkit intelligence flake classify --history history.json",
             "sdetkit intelligence impact summarize --changed changed.txt --map testmap.json",
             "sdetkit intelligence capture-env",
+        ],
+        "capabilities": [
+            "Flake and failure classification",
+            "Change impact summaries",
+            "Environment capture for reproducibility",
+            "Signal shaping for quality governance",
+        ],
+        "typical_inputs": [
+            "Failure history JSON",
+            "Changed file lists",
+            "Test ownership or mapping data",
+        ],
+        "key_artifacts": [
+            "Flake classification reports",
+            "Impact summaries",
+            "Captured environment snapshots",
+        ],
+        "learning_path": [
+            "sdetkit intelligence capture-env",
+            "sdetkit intelligence flake classify --history history.json",
+            "sdetkit intelligence impact summarize --changed changed.txt --map testmap.json",
         ],
     },
     {
@@ -51,6 +97,27 @@ _KITS: Final[list[Kit]] = [
             "sdetkit integration matrix --profile integration-profile.json",
             "sdetkit integration topology-check --profile heterogeneous-topology.json",
         ],
+        "capabilities": [
+            "Service profile validation",
+            "Environment readiness checks",
+            "Dependency topology validation",
+            "Cross-system contract coverage",
+        ],
+        "typical_inputs": [
+            "Integration profile JSON",
+            "Topology maps",
+            "Environment dependency metadata",
+        ],
+        "key_artifacts": [
+            "Integration readiness reports",
+            "Matrix coverage outputs",
+            "Topology contract artifacts",
+        ],
+        "learning_path": [
+            "sdetkit integration check --profile integration-profile.json",
+            "sdetkit integration matrix --profile integration-profile.json",
+            "sdetkit integration topology-check --profile heterogeneous-topology.json",
+        ],
     },
     {
         "id": "failure-forensics",
@@ -58,6 +125,27 @@ _KITS: Final[list[Kit]] = [
         "stability": "stable",
         "summary": "Run-to-run regression intelligence, evidence diffing, and deterministic repro bundle generation.",
         "hero_commands": [
+            "sdetkit forensics compare --from old.json --to new.json",
+            "sdetkit forensics bundle --run run.json --output bundle.zip",
+            "sdetkit forensics bundle-diff --from-bundle old.zip --to-bundle new.zip",
+        ],
+        "capabilities": [
+            "Run-to-run diff analysis",
+            "Deterministic repro bundle generation",
+            "Evidence comparisons across failures",
+            "Escalation-ready debugging packs",
+        ],
+        "typical_inputs": [
+            "Structured run result JSON",
+            "Historical evidence bundles",
+            "Build or test failure metadata",
+        ],
+        "key_artifacts": [
+            "Forensics diff summaries",
+            "Repro ZIP bundles",
+            "Bundle-to-bundle comparison outputs",
+        ],
+        "learning_path": [
             "sdetkit forensics compare --from old.json --to new.json",
             "sdetkit forensics bundle --run run.json --output bundle.zip",
             "sdetkit forensics bundle-diff --from-bundle old.zip --to-bundle new.zip",
@@ -108,8 +196,20 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{kit['id']} [{kit['stability']}]")
         print(f"route: sdetkit {kit['slug']} ...")
         print(f"summary: {kit['summary']}")
+        print("capabilities:")
+        for item in kit["capabilities"]:
+            print(f"  - {item}")
+        print("typical inputs:")
+        for item in kit["typical_inputs"]:
+            print(f"  - {item}")
+        print("key artifacts:")
+        for item in kit["key_artifacts"]:
+            print(f"  - {item}")
         print("hero commands:")
         for cmd in kit["hero_commands"]:
+            print(f"  - {cmd}")
+        print("learning path:")
+        for cmd in kit["learning_path"]:
             print(f"  - {cmd}")
         return 0
 
@@ -130,6 +230,8 @@ def main(argv: list[str] | None = None) -> int:
     for kit in kits_sorted:
         print(f"- {kit['id']} [{kit['stability']}]")
         print(f"  {kit['summary']}")
+        print(f"  capabilities: {', '.join(kit['capabilities'])}")
+        print(f"  start with: {kit['learning_path'][0]}")
     return 0
 
 
