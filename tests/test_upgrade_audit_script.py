@@ -86,6 +86,7 @@ def test_build_package_report_flags_drift_and_priority() -> None:
     assert report.risk_score >= 45
     assert report.latest_version == "0.29.0"
     assert report.latest_release_date == "2026-01-01T00:00:00Z"
+    assert report.metadata_source == "pypi"
     assert "Queue the upgrade" in report.next_action
     assert "mutually compatible" in " ".join(report.notes)
 
@@ -160,6 +161,7 @@ def test_render_json_summary_counts() -> None:
             constraint_status="blocked",
             latest_version="0.29.0",
             latest_release_date="2026-01-01T00:00:00Z",
+            metadata_source="pypi",
             version_gap="minor",
             release_age_days=0,
             upgrade_signal="high",
@@ -178,6 +180,7 @@ def test_render_json_summary_counts() -> None:
             constraint_status="allowed",
             latest_version="0.15.6",
             latest_release_date=None,
+            metadata_source="cache",
             version_gap="up-to-date",
             release_age_days=None,
             upgrade_signal="watch",
@@ -244,8 +247,9 @@ dependencies = ["httpx>=0.27,<1"]
     assert "manifest drift packages: 0" in out
     assert "compatible multi-manifest packages: 1" in out
     assert "packages using cached metadata: 0" in out
-    assert "Current | Latest PyPI | Gap | Alignment | Policy | Signal | Risk" in out
-    assert "`httpx` | `0.28.1` | `0.29.0` | minor | compatible | blocked | medium |" in out
+    assert "Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk" in out
+    assert "`httpx` | `0.28.1` | `0.29.0` | pypi | minor | compatible | blocked | medium |" in out
+    assert "Priority queue" in out
     assert "Focus notes" in out
     assert (
         "Queue the upgrade for the next maintenance batch and validate targeted smoke tests." in out
@@ -296,6 +300,7 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             constraint_status="blocked",
             latest_version="1.0.1",
             latest_release_date=None,
+            metadata_source="pypi",
             version_gap="patch",
             release_age_days=None,
             upgrade_signal="watch",
@@ -314,6 +319,7 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             constraint_status="blocked",
             latest_version="2.0.0",
             latest_release_date=None,
+            metadata_source="pypi",
             version_gap="major",
             release_age_days=None,
             upgrade_signal="critical",
@@ -369,4 +375,95 @@ dependencies = ["httpx==0.28.1"]
     payload = json.loads(capsys.readouterr().out)
     assert payload["summary"]["cached_metadata_packages"] == 1
     assert payload["packages"][0]["latest_version"] == "0.28.1"
+    assert payload["packages"][0]["metadata_source"] == "cache"
     assert "Latest metadata source: cache." in payload["packages"][0]["notes"]
+
+
+def test_filter_reports_supports_signal_policy_and_top() -> None:
+    reports = [
+        upgrade_audit.PackageReport(
+            name="critical-pkg",
+            sources=["pyproject.toml"],
+            groups=["default"],
+            requirements=["critical-pkg==1.0.0"],
+            pinned_versions=["1.0.0"],
+            current_version="1.0.0",
+            alignment="aligned",
+            constraint_status="blocked",
+            latest_version="2.0.0",
+            latest_release_date="2026-01-01T00:00:00Z",
+            metadata_source="pypi",
+            version_gap="major",
+            release_age_days=0,
+            upgrade_signal="high",
+            risk_score=80,
+            next_action="Plan an upgrade spike with regression coverage before the next release cut.",
+            notes=[],
+        ),
+        upgrade_audit.PackageReport(
+            name="watch-pkg",
+            sources=["requirements.txt"],
+            groups=["requirements"],
+            requirements=["watch-pkg==1.0.0"],
+            pinned_versions=["1.0.0"],
+            current_version="1.0.0",
+            alignment="aligned",
+            constraint_status="allowed",
+            latest_version="1.0.1",
+            latest_release_date=None,
+            metadata_source="cache",
+            version_gap="patch",
+            release_age_days=None,
+            upgrade_signal="watch",
+            risk_score=10,
+            next_action="Keep under observation; no immediate action required.",
+            notes=[],
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        signals=["high", "critical"],
+        policies=["blocked"],
+        top=1,
+    )
+
+    assert [report.name for report in filtered] == ["critical-pkg"]
+
+
+def test_run_applies_signal_policy_and_top_filters(monkeypatch, capsys, tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx>=0.27,<1", "ruff==0.15.6"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("httpx==0.28.1\nruff==0.15.6\n", encoding="utf-8")
+
+    def _fake_metadata(package: str, timeout_s: float) -> tuple[str, str | None]:
+        if package == "httpx":
+            return "0.29.0", "2026-01-01T00:00:00Z"
+        return "0.15.6", "2026-01-01T00:00:00Z"
+
+    monkeypatch.setattr(upgrade_audit, "_latest_pypi_metadata", _fake_metadata)
+
+    rc = upgrade_audit.run(
+        pyproject,
+        timeout_s=0.1,
+        requirement_paths=[requirements],
+        output_format="json",
+        cache_path=tmp_path / "audit-cache.json",
+        signals=["medium"],
+        policies=["blocked"],
+        top=1,
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["summary"]["packages_audited"] == 1
+    assert payload["priority_queue"][0]["name"] == "httpx"
+    assert [item["name"] for item in payload["packages"]] == ["httpx"]
