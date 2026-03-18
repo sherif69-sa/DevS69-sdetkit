@@ -47,6 +47,7 @@ class PackageReport:
     constraint_status: str
     latest_version: str
     latest_release_date: str | None
+    metadata_source: str
     version_gap: str
     release_age_days: int | None
     upgrade_signal: str
@@ -510,7 +511,12 @@ def _release_age_days(release_date: str | None) -> int | None:
 
 
 def _build_package_report(
-    name: str, deps: list[Dependency], latest_version: str, release_date: str | None
+    name: str,
+    deps: list[Dependency],
+    latest_version: str,
+    release_date: str | None,
+    *,
+    metadata_source: str = "pypi",
 ) -> PackageReport:
     sources = sorted({dep.source for dep in deps})
     groups = sorted({dep.group for dep in deps})
@@ -620,6 +626,7 @@ def _build_package_report(
         constraint_status=constraint_status,
         latest_version=latest_version,
         latest_release_date=release_date,
+        metadata_source=metadata_source,
         version_gap=version_gap,
         release_age_days=release_age_days,
         upgrade_signal=upgrade_signal,
@@ -627,6 +634,43 @@ def _build_package_report(
         next_action=next_action,
         notes=notes,
     )
+
+
+def _priority_queue(reports: list[PackageReport], *, limit: int = 5) -> list[dict[str, object]]:
+    queue: list[dict[str, object]] = []
+    for report in reports[: max(limit, 0)]:
+        queue.append(
+            {
+                "name": report.name,
+                "signal": report.upgrade_signal,
+                "risk_score": report.risk_score,
+                "alignment": report.alignment,
+                "policy": report.constraint_status,
+                "current_version": report.current_version,
+                "latest_version": report.latest_version,
+                "next_action": report.next_action,
+            }
+        )
+    return queue
+
+
+def _filter_reports(
+    reports: list[PackageReport],
+    *,
+    signals: list[str] | None = None,
+    policies: list[str] | None = None,
+    top: int | None = None,
+) -> list[PackageReport]:
+    filtered = reports
+    if signals:
+        allowed_signals = {item.strip() for item in signals if item.strip()}
+        filtered = [report for report in filtered if report.upgrade_signal in allowed_signals]
+    if policies:
+        allowed_policies = {item.strip() for item in policies if item.strip()}
+        filtered = [report for report in filtered if report.constraint_status in allowed_policies]
+    if top is not None:
+        filtered = filtered[: max(top, 0)]
+    return filtered
 
 
 def _render_markdown(
@@ -663,16 +707,21 @@ def _render_markdown(
         f"- investigate signals: {investigate_priority}",
         f"- packages using cached metadata: {cached_results}",
         "",
-        "| Package | Current | Latest PyPI | Gap | Alignment | Policy | Signal | Risk | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| Package | Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
         requirements = " <br> ".join(f"`{item}`" for item in report.requirements)
         lines.append(
             "| "
-            f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.version_gap} | "
+            f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.metadata_source} | {report.version_gap} | "
             f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {release_age} | {requirements} |"
+        )
+    lines.extend(["", "## Priority queue", ""])
+    for item in _priority_queue(reports):
+        lines.append(
+            f"- `{item['name']}` [{item['signal']}, risk {item['risk_score']}] → {item['next_action']}"
         )
     lines.extend(["", "## Focus notes", ""])
     for report in reports:
@@ -719,6 +768,7 @@ def _render_json(
             ),
             "max_risk_score": max((report.risk_score for report in reports), default=0),
         },
+        "priority_queue": _priority_queue(reports),
         "packages": [asdict(report) for report in reports],
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
@@ -753,6 +803,9 @@ def run(
     cache_ttl_hours: float = 24.0,
     offline: bool = False,
     max_workers: int = 8,
+    signals: list[str] | None = None,
+    policies: list[str] | None = None,
+    top: int | None = None,
 ) -> int:
     dependencies = _load_dependencies(pyproject_path, requirement_paths)
 
@@ -782,6 +835,7 @@ def run(
                 by_package[package],
                 latest_version=metadata.latest_version,
                 release_date=metadata.release_date,
+                metadata_source=metadata.source,
             )
         )
         report = reports[-1]
@@ -789,6 +843,7 @@ def run(
             report.notes.append(f"Latest metadata source: {metadata.source}.")
 
     reports = _sort_reports(reports)
+    reports = _filter_reports(reports, signals=signals, policies=policies, top=top)
 
     rendered = {
         "json": _render_json(
@@ -868,6 +923,26 @@ def main() -> int:
         default=8,
         help="Maximum number of parallel PyPI metadata requests (default: 8).",
     )
+    parser.add_argument(
+        "--signal",
+        action="append",
+        choices=["critical", "high", "medium", "watch", "investigate", "unknown"],
+        default=None,
+        help="Show only packages with the selected upgrade signal(s). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--policy",
+        action="append",
+        choices=["allowed", "blocked", "unknown", "unbounded"],
+        default=None,
+        help="Show only packages with the selected policy status(es). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--top",
+        type=int,
+        default=None,
+        help="Limit output to the highest-risk N packages after filtering.",
+    )
     args = parser.parse_args()
 
     if not args.pyproject.exists():
@@ -897,6 +972,9 @@ def main() -> int:
         cache_ttl_hours=args.cache_ttl_hours,
         offline=bool(args.offline),
         max_workers=max(args.max_workers, 1),
+        signals=args.signal,
+        policies=args.policy,
+        top=args.top,
     )
 
 

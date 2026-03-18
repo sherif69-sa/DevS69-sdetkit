@@ -62,6 +62,7 @@ python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 python scripts/upgrade_audit.py --fail-on high
 python scripts/upgrade_audit.py --cache-ttl-hours 6 --max-workers 12
 python scripts/upgrade_audit.py --offline --format md
+python scripts/upgrade_audit.py --signal high --policy blocked --top 5
 ```
 
 ## Sample artifacts
