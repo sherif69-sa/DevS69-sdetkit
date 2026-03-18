@@ -54,10 +54,11 @@ python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 
 ## Upgrade planning (first step)
 
-Run a direct dependency audit against PyPI to identify candidate upgrades:
+Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps:
 
 ```bash
 make upgrade-audit
+python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 ```
 
 ## Sample artifacts
