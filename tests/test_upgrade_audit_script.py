@@ -79,9 +79,36 @@ def test_build_package_report_flags_drift_and_priority() -> None:
     )
 
     assert report.alignment == "drift"
+    assert report.current_version == "0.28.1"
+    assert report.version_gap == "minor"
     assert report.upgrade_signal == "high"
     assert report.latest_version == "0.29.0"
     assert report.latest_release_date == "2026-01-01T00:00:00Z"
+    assert "Cross-manifest requirement drift detected." in report.notes
+
+
+def test_build_package_report_flags_major_jump_as_critical() -> None:
+    deps = [
+        upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="default",
+            raw="httpx==0.28.1",
+            name="httpx",
+            pinned_version="0.28.1",
+        )
+    ]
+
+    report = upgrade_audit._build_package_report(
+        "httpx",
+        deps,
+        latest_version="1.1.0",
+        release_date="2026-01-01T00:00:00Z",
+    )
+
+    assert report.current_version == "0.28.1"
+    assert report.version_gap == "major"
+    assert report.upgrade_signal == "high"
+    assert any("major-version jump" in note for note in report.notes)
 
 
 def test_render_json_summary_counts() -> None:
@@ -92,10 +119,14 @@ def test_render_json_summary_counts() -> None:
             groups=["default", "requirements"],
             requirements=["httpx>=0.27,<1", "httpx==0.28.1"],
             pinned_versions=["0.28.1"],
+            current_version="0.28.1",
             alignment="drift",
             latest_version="0.29.0",
             latest_release_date="2026-01-01T00:00:00Z",
+            version_gap="minor",
+            release_age_days=0,
             upgrade_signal="high",
+            notes=["Cross-manifest requirement drift detected."],
         ),
         upgrade_audit.PackageReport(
             name="ruff",
@@ -103,10 +134,14 @@ def test_render_json_summary_counts() -> None:
             groups=["dev", "requirements"],
             requirements=["ruff==0.15.6"],
             pinned_versions=["0.15.6"],
+            current_version="0.15.6",
             alignment="aligned",
             latest_version="0.15.6",
             latest_release_date=None,
+            version_gap="up-to-date",
+            release_age_days=None,
             upgrade_signal="watch",
+            notes=[],
         ),
     ]
 
@@ -119,6 +154,7 @@ def test_render_json_summary_counts() -> None:
     )
 
     assert payload["summary"] == {
+        "critical_upgrade_signals": 0,
         "packages_audited": 2,
         "manifest_drift_packages": 1,
         "high_priority_upgrade_signals": 1,
@@ -156,4 +192,6 @@ dependencies = ["httpx>=0.27,<1"]
     out = capsys.readouterr().out
     assert "# Upgrade audit" in out
     assert "manifest drift packages: 1" in out
-    assert "`httpx` | drift | high | `0.29.0`" in out
+    assert "Current | Latest PyPI | Gap | Alignment | Signal" in out
+    assert "`httpx` | `0.28.1` | `0.29.0` | minor | drift | high |" in out
+    assert "Focus notes" in out
