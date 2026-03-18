@@ -10,6 +10,7 @@ PyPI release metadata for each package.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import re
 import sys
@@ -39,10 +40,14 @@ class PackageReport:
     groups: list[str]
     requirements: list[str]
     pinned_versions: list[str]
+    current_version: str
     alignment: str
     latest_version: str
     latest_release_date: str | None
+    version_gap: str
+    release_age_days: int | None
     upgrade_signal: str
+    notes: list[str]
 
 
 def _parse_dep_name(raw_requirement: str) -> str:
@@ -56,6 +61,18 @@ def _extract_pinned_version(raw_requirement: str) -> str | None:
     match = PINNED_VERSION_RE.search(raw_requirement)
     if match:
         return match.group(1)
+    return None
+
+
+def _extract_minimum_version(raw_requirement: str) -> str | None:
+    for token in raw_requirement.split(","):
+        candidate = token.strip()
+        for operator in (">=", "~=", ">"):
+            if operator in candidate:
+                _, _, version = candidate.partition(operator)
+                normalized = version.strip()
+                if normalized:
+                    return normalized
     return None
 
 
@@ -156,6 +173,95 @@ def _latest_pypi_metadata(package: str, timeout_s: float) -> tuple[str, str | No
     return version, release_date
 
 
+def _version_key(version: str) -> tuple[tuple[int, object], ...]:
+    parts: list[tuple[int, object]] = []
+    for segment in re.split(r"[.+!_-]", version):
+        cleaned = segment.strip()
+        if not cleaned:
+            continue
+        if cleaned.isdigit():
+            parts.append((0, int(cleaned)))
+        else:
+            match = re.match(r"^(\d+)([A-Za-z].*)$", cleaned)
+            if match:
+                parts.append((0, int(match.group(1))))
+                parts.append((1, match.group(2).lower()))
+            else:
+                parts.append((1, cleaned.lower()))
+    return tuple(parts)
+
+
+def _pick_current_version(deps: list[Dependency]) -> str:
+    pinned_versions = sorted(
+        {dep.pinned_version for dep in deps if dep.pinned_version},
+        key=_version_key,
+    )
+    if pinned_versions:
+        return pinned_versions[-1]
+
+    lower_bounds = sorted(
+        {
+            lower_bound
+            for dep in deps
+            if (lower_bound := _extract_minimum_version(dep.raw)) is not None
+        },
+        key=_version_key,
+    )
+    if lower_bounds:
+        return lower_bounds[-1]
+    return "unbounded"
+
+
+def _major_minor_patch(version: str) -> tuple[int, int, int] | None:
+    match = re.match(r"^\s*(\d+)(?:\.(\d+))?(?:\.(\d+))?", version)
+    if not match:
+        return None
+    major = int(match.group(1))
+    minor = int(match.group(2) or 0)
+    patch = int(match.group(3) or 0)
+    return major, minor, patch
+
+
+def _classify_version_gap(current_version: str, latest_version: str) -> str:
+    if (
+        current_version in {"unbounded", "unknown"}
+        or latest_version
+        in {
+            "unknown",
+            "network-error",
+        }
+        or latest_version.startswith("http-")
+    ):
+        return "unknown"
+    if current_version == latest_version:
+        return "up-to-date"
+    current_triplet = _major_minor_patch(current_version)
+    latest_triplet = _major_minor_patch(latest_version)
+    if current_triplet is None or latest_triplet is None:
+        return "different"
+    if latest_triplet[0] != current_triplet[0]:
+        return "major"
+    if latest_triplet[1] != current_triplet[1]:
+        return "minor"
+    if latest_triplet[2] != current_triplet[2]:
+        return "patch"
+    return "different"
+
+
+def _release_age_days(release_date: str | None) -> int | None:
+    if not release_date:
+        return None
+    normalized = release_date.replace("Z", "+00:00")
+    try:
+        uploaded = dt.datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if uploaded.tzinfo is None:
+        uploaded = uploaded.replace(tzinfo=dt.UTC)
+    now = dt.datetime.now(dt.UTC)
+    return max((now - uploaded).days, 0)
+
+
 def _build_package_report(
     name: str, deps: list[Dependency], latest_version: str, release_date: str | None
 ) -> PackageReport:
@@ -163,6 +269,9 @@ def _build_package_report(
     groups = sorted({dep.group for dep in deps})
     requirements = sorted({dep.raw for dep in deps})
     pinned_versions = sorted({dep.pinned_version for dep in deps if dep.pinned_version})
+    current_version = _pick_current_version(deps)
+    version_gap = _classify_version_gap(current_version, latest_version)
+    release_age_days = _release_age_days(release_date)
 
     alignment = "aligned"
     if len(requirements) > 1:
@@ -170,13 +279,33 @@ def _build_package_report(
     elif not pinned_versions:
         alignment = "range-or-unpinned"
 
+    notes: list[str] = []
+    if alignment == "drift":
+        notes.append("Cross-manifest requirement drift detected.")
+    if alignment == "range-or-unpinned":
+        notes.append("Package is not pinned to a single exact version.")
+    if version_gap == "major":
+        notes.append("Latest PyPI release is a major-version jump from the repo baseline.")
+    elif version_gap == "minor":
+        notes.append("Latest PyPI release is a minor-version jump from the repo baseline.")
+    elif version_gap == "patch":
+        notes.append("Latest PyPI release is a patch-level bump from the repo baseline.")
+    if release_age_days is not None and release_age_days <= 30:
+        notes.append("Latest PyPI release is recent enough to merit fast follow-up validation.")
+
     upgrade_signal = "watch"
     if alignment == "drift":
-        upgrade_signal = "high"
-    elif len(pinned_versions) == 1 and latest_version not in {"unknown", pinned_versions[0]}:
+        upgrade_signal = "critical" if version_gap == "major" else "high"
+    elif version_gap == "major":
         upgrade_signal = "high" if "default" in groups else "medium"
+    elif version_gap == "minor":
+        upgrade_signal = "medium" if "default" in groups else "watch"
+    elif version_gap == "patch":
+        upgrade_signal = "watch"
     elif latest_version == "unknown":
         upgrade_signal = "unknown"
+    elif latest_version == "network-error" or latest_version.startswith("http-"):
+        upgrade_signal = "investigate"
 
     return PackageReport(
         name=name,
@@ -184,10 +313,14 @@ def _build_package_report(
         groups=groups,
         requirements=requirements,
         pinned_versions=pinned_versions,
+        current_version=current_version,
         alignment=alignment,
         latest_version=latest_version,
         latest_release_date=release_date,
+        version_gap=version_gap,
+        release_age_days=release_age_days,
         upgrade_signal=upgrade_signal,
+        notes=notes,
     )
 
 
@@ -199,6 +332,7 @@ def _render_markdown(
 ) -> str:
     drift_count = sum(1 for report in reports if report.alignment == "drift")
     high_priority = sum(1 for report in reports if report.upgrade_signal == "high")
+    critical_priority = sum(1 for report in reports if report.upgrade_signal == "critical")
     lines = [
         "# Upgrade audit",
         "",
@@ -207,18 +341,25 @@ def _render_markdown(
         "",
         f"- packages audited: {len(reports)}",
         f"- manifest drift packages: {drift_count}",
+        f"- critical upgrade signals: {critical_priority}",
         f"- high-priority upgrade signals: {high_priority}",
         "",
-        "| Package | Alignment | Upgrade signal | Latest PyPI | Release date | Requirements |",
-        "|---|---|---|---|---|---|",
+        "| Package | Current | Latest PyPI | Gap | Alignment | Signal | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
-        release_date = report.latest_release_date or "-"
+        release_age = "-" if report.release_age_days is None else str(report.release_age_days)
         requirements = " <br> ".join(f"`{item}`" for item in report.requirements)
         lines.append(
             "| "
-            f"`{report.name}` | {report.alignment} | {report.upgrade_signal} | `{report.latest_version}` | {release_date} | {requirements} |"
+            f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.version_gap} | "
+            f"{report.alignment} | {report.upgrade_signal} | {release_age} | {requirements} |"
         )
+    lines.extend(["", "## Focus notes", ""])
+    for report in reports:
+        if not report.notes:
+            continue
+        lines.append(f"- `{report.name}`: {' '.join(report.notes)}")
     return "\n".join(lines) + "\n"
 
 
@@ -234,6 +375,9 @@ def _render_json(
         "summary": {
             "packages_audited": len(reports),
             "manifest_drift_packages": sum(1 for report in reports if report.alignment == "drift"),
+            "critical_upgrade_signals": sum(
+                1 for report in reports if report.upgrade_signal == "critical"
+            ),
             "high_priority_upgrade_signals": sum(
                 1 for report in reports if report.upgrade_signal == "high"
             ),
