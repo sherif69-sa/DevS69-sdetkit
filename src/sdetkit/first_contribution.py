@@ -6,6 +6,27 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+_STARTER_PROFILES = {
+    "docs-polish": {
+        "label": "Docs polish",
+        "impact": "Clarify commands, fix internal links, and improve first-run confidence.",
+        "starter_files": ["README.md", "docs/choose-your-path.md", "CONTRIBUTING.md"],
+        "validation": ["python -m pre_commit run -a", "mkdocs build"],
+    },
+    "test-hardening": {
+        "label": "Test hardening",
+        "impact": "Add focused regression coverage without changing the public surface area.",
+        "starter_files": ["tests/", "src/sdetkit/"],
+        "validation": ["python -m pytest -q", "bash quality.sh cov"],
+    },
+    "automation-upgrade": {
+        "label": "Automation upgrade",
+        "impact": "Improve CI repeatability, artifact quality, or release safety checks.",
+        "starter_files": ["scripts/", "templates/automations/", ".github/"],
+        "validation": ["python -m pre_commit run -a", "bash quality.sh cov", "python -m build"],
+    },
+}
+
 _CHECKLIST_SECTION_HEADER = "## 0) Day 10 first-contribution checklist"
 
 _CHECKLIST_ITEMS = [
@@ -128,6 +149,7 @@ def build_first_contribution_status(root: str = ".") -> dict[str, Any]:
         "required_commands": list(_COMMAND_BLOCKS),
         "guide": str(guide),
         "missing": missing,
+        "starter_profiles": _STARTER_PROFILES,
         "actions": {
             "open_guide": "docs/contributing.md",
             "validate": "sdetkit first-contribution --format json --strict",
@@ -156,6 +178,11 @@ def _render_text(payload: dict[str, Any]) -> str:
             lines.append(f"- {item}")
     else:
         lines.append("Guide coverage gaps: none")
+    lines.extend(["", "Starter profiles:"])
+    for key, details in payload["starter_profiles"].items():
+        lines.append(f"- {details['label']} ({key}): {details['impact']}")
+        lines.append(f"  files     : {', '.join(details['starter_files'])}")
+        lines.append(f"  validate  : {'; '.join(details['validation'])}")
     lines.extend(["", "Actions:"])
     lines.append(f"- Open guide: {payload['actions']['open_guide']}")
     lines.append(f"- Validate: {payload['actions']['validate']}")
@@ -178,7 +205,15 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- [ ] {item}")
     lines.extend(["", "## Required command sequence", "", "```bash"])
     lines.extend(payload["required_commands"])
-    lines.extend(["```", "", "## Guide coverage gaps", ""])
+    lines.extend(["```", "", "## Starter profiles", ""])
+    for key, details in payload["starter_profiles"].items():
+        lines.append(f"### {details['label']} (`{key}`)")
+        lines.append("")
+        lines.append(f"- Impact: {details['impact']}")
+        lines.append(f"- Good starter files: `{'`, `'.join(details['starter_files'])}`")
+        lines.append(f"- Validate with: `{'`, `'.join(details['validation'])}`")
+        lines.append("")
+    lines.extend(["## Guide coverage gaps", ""])
     if payload["missing"]:
         for item in payload["missing"]:
             lines.append(f"- `{item}`")

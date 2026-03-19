@@ -69,6 +69,27 @@ def test_onboarding_help_describes_product_surface(capsys):
         onboarding.main(["--help"])
     assert excinfo.value.code == 0
     out = capsys.readouterr().out
-    assert "Render role-based onboarding guidance and cross-platform setup snippets." in out
+    assert "Render role-based onboarding guidance, cross-platform setup snippets, and" in out
+    assert "contributor journeys." in out
+    assert "--journey {all,fast-start,first-pr,ci-rollout,artifact-review}" in out
     assert "--platform {all,linux,macos,windows}" in out
     assert "Cross-platform setup snippets to print." in out
+
+
+def test_onboarding_journey_markdown_highlights_first_pr_runway(capsys):
+    rc = onboarding.main(["--journey", "first-pr", "--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Contributor journeys" in out
+    assert "First PR / contributor runway" in out
+    assert "python -m sdetkit first-contribution --format markdown --strict" in out
+    assert "Fast start / first 15 minutes" not in out
+
+
+def test_onboarding_json_includes_journey_and_sequence(capsys):
+    rc = onboarding.main(["--role", "security", "--journey", "artifact-review", "--format", "json"])
+    assert rc == 0
+    data = json.loads(capsys.readouterr().out)
+    assert "journeys" in data
+    assert "artifact-review" in data["journeys"]
+    assert data["recommended_sequence"][0] == "sdetkit kits list"

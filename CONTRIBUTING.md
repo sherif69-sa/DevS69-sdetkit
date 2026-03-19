@@ -47,6 +47,12 @@ If you are unsure where to start, run:
 python -m sdetkit first-contribution --format text --strict
 ```
 
+Then pick a guided journey:
+
+```bash
+python -m sdetkit onboarding --journey first-pr --role sdet --format markdown
+```
+
 ## Where to find starter work
 
 - Look for open issues labelled **`good first issue`**, **`help wanted`**, **`documentation`**, **`tests`**, or **`needs-triage`**.
