@@ -424,12 +424,15 @@ def test_build_script_candidates_targets_doctor_maintenance_and_security(tmp_pat
         auto_fix_results=[eng.AutoFixResult("SEC_X", "src/app.py", "fixed", "patched")],
     )
 
-    assert [item.script_id for item in candidates] == [
+    ids = [item.script_id for item in candidates]
+    assert ids[:4] == [
         "gate_fast_fix_only",
-        "doctor_refresh",
-        "maintenance_fix",
         "security_triage_refresh",
+        "maintenance_fix",
+        "doctor_refresh",
     ]
+    assert candidates[0].score >= candidates[-1].score
+    assert candidates[0].priority in {"high", "critical"}
 
 
 def test_main_auto_run_scripts_records_results_and_score_delta(
@@ -476,6 +479,9 @@ def test_main_auto_run_scripts_records_results_and_score_delta(
                     "refresh maintenance",
                     ["python", "-m", "sdetkit", "maintenance"],
                     ["maintenance.json"],
+                    "high",
+                    24,
+                    ["maintenance"],
                 )
             ],
             [
@@ -512,3 +518,80 @@ def test_main_auto_run_scripts_records_results_and_score_delta(
     assert payload["smart_remediation"]["selected_scripts"] == ["maintenance_fix"]
     assert payload["smart_remediation"]["score_delta"] >= 0
     assert payload["counts"]["script_runs"] == 1
+    assert payload["smart_remediation"]["plan"]["selected"][0]["script_id"] == "maintenance_fix"
+
+
+def test_filter_payload_and_guideline_search_support_targeted_queries(tmp_path: Path) -> None:
+    db = tmp_path / "premium-insights.db"
+    eng.add_guideline(db, "doctor:policy", "enforce doctor policy", ["doctor", "policy"])
+    eng.add_guideline(db, "security:SEC_X", "rotate token", ["security", "critical"])
+
+    payload = {
+        "warnings": [
+            {
+                "source": "doctor",
+                "category": "policy",
+                "severity": "high",
+                "message": "policy drift",
+            },
+            {"source": "security", "category": "SEC_X", "severity": "critical", "message": "token"},
+        ],
+        "recommendations": [
+            {"source": "engine", "category": "playbook", "message": "rotate token"}
+        ],
+        "engine_checks": [],
+        "step_status": [{"name": "doctor_json", "ok": False, "details": "failed"}],
+        "counts": {"warnings": 2, "recommendations": 1, "engine_checks": 0, "steps": 1},
+        "smart_remediation": {
+            "plan": {"selected": [{"script_id": "doctor_refresh"}], "deferred": []}
+        },
+    }
+
+    filtered = eng.filter_payload(payload, "doctor")
+    assert len(filtered["warnings"]) == 1
+    assert filtered["warnings"][0]["source"] == "doctor"
+    assert filtered["counts"]["warnings"] == 1
+
+    guidelines = eng.search_guidelines(db, "rotate")
+    assert len(guidelines) == 1
+    assert guidelines[0]["title"] == "security:SEC_X"
+
+
+def test_main_plan_output_and_search_filter_rendered_payload(tmp_path: Path, capsys) -> None:
+    (tmp_path / "doctor.json").write_text(
+        json.dumps(
+            {
+                "checks": {"policy": {"ok": False, "severity": "high", "message": "policy drift"}},
+                "recommendations": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "maintenance.json").write_text(
+        json.dumps({"checks": [], "recommendations": []}),
+        encoding="utf-8",
+    )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
+    (tmp_path / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
+    (tmp_path / "premium-gate.Quality.log").write_text("warning: drift\n", encoding="utf-8")
+    plan_path = tmp_path / "plan.json"
+
+    rc = eng.main(
+        [
+            "--out-dir",
+            str(tmp_path),
+            "--plan-output",
+            str(plan_path),
+            "--search",
+            "doctor",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["search_query"] == "doctor"
+    assert len(payload["warnings"]) == 1
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    assert plan["candidate_count"] >= 1
+    assert plan["selected"][0]["script_id"] == "gate_fast_fix_only"
