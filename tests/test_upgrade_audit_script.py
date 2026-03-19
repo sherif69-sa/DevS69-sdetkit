@@ -71,17 +71,17 @@ def test_build_package_report_flags_drift_and_priority() -> None:
         release_date="2026-01-01T00:00:00Z",
     )
 
-    assert report.alignment == "compatible"
+    assert report.alignment == "floor-lock"
     assert report.constraint_status == "blocked"
     assert report.current_version == "0.28.1"
     assert report.version_gap == "minor"
     assert report.upgrade_signal == "medium"
-    assert report.risk_score >= 45
+    assert report.risk_score >= 40
     assert report.latest_version == "0.29.0"
     assert report.latest_release_date == "2026-01-01T00:00:00Z"
     assert report.metadata_source == "pypi"
     assert "Queue the upgrade" in report.next_action
-    assert "mutually compatible" in " ".join(report.notes)
+    assert "floor-and-lock pattern" in " ".join(report.notes)
 
 
 def test_build_package_report_marks_compatible_policy_covered_manifests() -> None:
@@ -109,10 +109,11 @@ def test_build_package_report_marks_compatible_policy_covered_manifests() -> Non
         release_date="2026-01-01T00:00:00Z",
     )
 
-    assert report.alignment == "compatible"
+    assert report.alignment == "floor-lock"
     assert report.constraint_status == "allowed"
-    assert report.upgrade_signal == "medium"
-    assert "mutually compatible" in " ".join(report.notes)
+    assert report.upgrade_signal == "watch"
+    assert report.manifest_action == "none"
+    assert "floor-and-lock pattern" in " ".join(report.notes)
     assert "already allowed by the declared version policy" in " ".join(report.notes)
 
 
@@ -159,6 +160,8 @@ def test_render_json_summary_counts() -> None:
             release_age_days=0,
             upgrade_signal="high",
             risk_score=85,
+            manifest_action="stage-upgrade",
+            suggested_version="0.29.0",
             next_action="Plan an upgrade spike with regression coverage before the next release cut.",
             notes=["Cross-manifest requirement drift detected."],
         ),
@@ -178,6 +181,8 @@ def test_render_json_summary_counts() -> None:
             release_age_days=None,
             upgrade_signal="watch",
             risk_score=10,
+            manifest_action="none",
+            suggested_version=None,
             next_action="Keep under observation; no immediate action required.",
             notes=[],
         ),
@@ -193,6 +198,7 @@ def test_render_json_summary_counts() -> None:
 
     assert payload["summary"] == {
         "compatible_constraint_packages": 0,
+        "floor_lock_packages": 0,
         "cached_metadata_packages": 0,
         "critical_upgrade_signals": 0,
         "packages_audited": 2,
@@ -238,10 +244,11 @@ dependencies = ["httpx>=0.27,<1"]
     out = capsys.readouterr().out
     assert "# Upgrade audit" in out
     assert "manifest drift packages: 0" in out
-    assert "compatible multi-manifest packages: 1" in out
+    assert "compatible multi-manifest packages: 0" in out
+    assert "floor-and-lock baseline packages: 1" in out
     assert "packages using cached metadata: 0" in out
-    assert "Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk" in out
-    assert "`httpx` | `0.28.1` | `0.29.0` | pypi | minor | compatible | blocked | medium |" in out
+    assert "Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
+    assert "`httpx` | `0.28.1` | `0.29.0` | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
     assert "Priority queue" in out
     assert "Focus notes" in out
     assert (
@@ -298,6 +305,8 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             release_age_days=None,
             upgrade_signal="watch",
             risk_score=10,
+            manifest_action="stage-upgrade",
+            suggested_version="1.0.1",
             next_action="Track the package and batch it with nearby dependency maintenance work.",
             notes=[],
         ),
@@ -317,6 +326,8 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             release_age_days=None,
             upgrade_signal="critical",
             risk_score=90,
+            manifest_action="plan-major-upgrade",
+            suggested_version="2.0.0",
             next_action="Resolve manifest drift first, then validate the major upgrade in a dedicated branch.",
             notes=[],
         ),
@@ -390,6 +401,8 @@ def test_filter_reports_supports_signal_policy_and_top() -> None:
             release_age_days=0,
             upgrade_signal="high",
             risk_score=80,
+            manifest_action="plan-major-upgrade",
+            suggested_version="2.0.0",
             next_action="Plan an upgrade spike with regression coverage before the next release cut.",
             notes=[],
         ),
@@ -409,6 +422,8 @@ def test_filter_reports_supports_signal_policy_and_top() -> None:
             release_age_days=None,
             upgrade_signal="watch",
             risk_score=10,
+            manifest_action="none",
+            suggested_version=None,
             next_action="Keep under observation; no immediate action required.",
             notes=[],
         ),
@@ -480,6 +495,8 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
             release_age_days=0,
             upgrade_signal="critical",
             risk_score=90,
+            manifest_action="plan-major-upgrade",
+            suggested_version="2.0.0",
             next_action="Resolve manifest drift first, then validate the major upgrade in a dedicated branch.",
             notes=["Cross-manifest requirement drift detected."],
         ),
@@ -499,6 +516,8 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
             release_age_days=None,
             upgrade_signal="watch",
             risk_score=10,
+            manifest_action="none",
+            suggested_version=None,
             next_action="Keep under observation; no immediate action required.",
             notes=["Latest metadata source: cache."],
         ),
@@ -535,6 +554,8 @@ def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
             release_age_days=0,
             upgrade_signal="medium",
             risk_score=55,
+            manifest_action="stage-upgrade",
+            suggested_version="0.29.0",
             next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
             notes=["Cross-manifest requirements differ but remain mutually compatible."],
         )
