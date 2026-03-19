@@ -68,7 +68,7 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       - name: Install project + dev/test extras
-        run: python -m pip install -e .[dev,test]
+        run: python -m pip install -c constraints-ci.txt -e .[dev,test]
 
       - name: Canonical fast gate (offline default)
         if: ${{ github.event.inputs.run_network_tests != 'true' }}
@@ -155,7 +155,7 @@ jobs:
 
       - name: Install packaging tooling
         run: |
-          python -m pip install -e .[dev,packaging]
+          python -m pip install -c constraints-ci.txt -e .[dev,packaging]
 
       - name: Build distributions
         run: python -m build
@@ -213,7 +213,7 @@ jobs:
 
       - name: Install project + all extras
         run: |
-          python -m pip install -e .[dev,test,docs]
+          python -m pip install -c constraints-ci.txt -e .[dev,test,docs]
 
       - name: Pre-commit
         run: python -m pre_commit run -a
