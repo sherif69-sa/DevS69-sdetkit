@@ -35,6 +35,22 @@ python -m sdetkit kits describe forensics
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 ```
 
+## Contributor quickstart (90 seconds)
+
+If you want the fastest path from curiosity to contribution, run this trio:
+
+```bash
+python -m sdetkit onboarding --journey fast-start --format markdown
+python -m sdetkit first-contribution --format markdown --strict
+python -m sdetkit onboarding --journey first-pr --role sdet --format markdown
+```
+
+These commands give a new contributor three things immediately:
+
+- a role-aware entrypoint instead of a generic wall of commands,
+- a first-PR checklist that can be validated locally,
+- and a curated command journey that turns the repo into an obvious place to start.
+
 ## Hero commands
 
 ```bash

@@ -37,3 +37,19 @@ def test_main_json_strict_fail(tmp_path: Path, capsys) -> None:
     assert rc == 1
     payload = json.loads(capsys.readouterr().out)
     assert payload["missing"]
+
+
+def test_build_status_exposes_starter_profiles(tmp_path: Path) -> None:
+    (tmp_path / "CONTRIBUTING.md").write_text(fc._DAY10_DEFAULT_BLOCK, encoding="utf-8")
+    payload = fc.build_first_contribution_status(str(tmp_path))
+    assert payload["starter_profiles"]["docs-polish"]["label"] == "Docs polish"
+    assert "mkdocs build" in payload["starter_profiles"]["docs-polish"]["validation"]
+
+
+def test_markdown_render_lists_starter_profiles(tmp_path: Path, capsys) -> None:
+    (tmp_path / "CONTRIBUTING.md").write_text(fc._DAY10_DEFAULT_BLOCK, encoding="utf-8")
+    rc = fc.main(["--root", str(tmp_path), "--format", "markdown"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "## Starter profiles" in out
+    assert "Automation upgrade" in out
