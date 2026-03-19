@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import datetime as dt
 import fnmatch
 import json
@@ -53,6 +54,9 @@ class PackageReport:
     manifest_action: str
     suggested_version: str | None
     impact_area: str
+    repo_usage_count: int
+    repo_usage_tier: str
+    repo_usage_files: list[str]
     validation_commands: list[str]
     next_action: str
     notes: list[str]
@@ -77,6 +81,16 @@ SIGNAL_PRIORITY = {
     "unknown": 1,
 }
 DEFAULT_CACHE_PATH = Path(".sdetkit/cache/upgrade-audit-cache.json")
+COMMON_IMPORT_ALIASES = {
+    "python-telegram-bot": {"telegram"},
+    "twilio": {"twilio"},
+    "mkdocs-material": {"material"},
+    "pytest-asyncio": {"pytest_asyncio"},
+    "pytest-cov": {"pytest_cov"},
+    "check-wheel-contents": {"check_wheel_contents"},
+    "cyclonedx-bom": {"cyclonedx_py"},
+    "pre-commit": {"pre_commit"},
+}
 
 
 def _parse_dep_name(raw_requirement: str) -> str:
@@ -637,6 +651,73 @@ def _requirement_allows_version(raw_requirement: str, version: str) -> bool | No
     return all(_constraint_allows_version(constraint, version) for constraint in constraints)
 
 
+def _candidate_import_roots(package: str) -> set[str]:
+    normalized = package.lower().replace("-", "_").replace(".", "_")
+    candidates = {normalized}
+    candidates.update(COMMON_IMPORT_ALIASES.get(package, set()))
+    return {candidate for candidate in candidates if candidate}
+
+
+def _iter_repo_python_files(root: Path) -> list[Path]:
+    files: list[Path] = []
+    for folder in (root / "src", root / "tests"):
+        if not folder.exists():
+            continue
+        for path in sorted(folder.rglob("*.py")):
+            if ".egg-info" in path.parts:
+                continue
+            files.append(path)
+    return files
+
+
+def _extract_import_roots(path: Path) -> set[str]:
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return set()
+    roots: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".", 1)[0].strip().lower()
+                if root:
+                    roots.add(root)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            root = node.module.split(".", 1)[0].strip().lower()
+            if root:
+                roots.add(root)
+    return roots
+
+
+def _collect_repo_usage(root: Path, package_names: list[str]) -> dict[str, list[str]]:
+    packages_by_root: dict[str, set[str]] = {}
+    for package in package_names:
+        for root_name in _candidate_import_roots(package):
+            packages_by_root.setdefault(root_name, set()).add(package)
+
+    usage: dict[str, set[str]] = {package: set() for package in package_names}
+    for path in _iter_repo_python_files(root):
+        rel_path = path.relative_to(root).as_posix()
+        matched_packages = {
+            package
+            for root_name in _extract_import_roots(path)
+            for package in packages_by_root.get(root_name, set())
+        }
+        for package in matched_packages:
+            usage[package].add(rel_path)
+    return {package: sorted(paths) for package, paths in usage.items()}
+
+
+def _repo_usage_tier(repo_usage_count: int) -> str:
+    if repo_usage_count >= 5:
+        return "hot-path"
+    if repo_usage_count >= 2:
+        return "active"
+    if repo_usage_count == 1:
+        return "edge"
+    return "declared-only"
+
+
 def _pick_current_version(deps: list[Dependency]) -> str:
     pinned_versions = sorted(
         {dep.pinned_version for dep in deps if dep.pinned_version},
@@ -785,6 +866,7 @@ def _build_package_report(
     compatible_release_date: str | None = None,
     compatibility_status: str = "unknown",
     metadata_source: str = "pypi",
+    repo_usage_files: list[str] | None = None,
 ) -> PackageReport:
     sources = sorted({dep.source for dep in deps})
     groups = sorted({dep.group for dep in deps})
@@ -797,6 +879,9 @@ def _build_package_report(
     release_age_days = _release_age_days(target_release_date)
     alignment = _infer_alignment(deps, current_version)
     constraint_status = _constraint_status(deps, target_version)
+    repo_usage_files = sorted(repo_usage_files or [])
+    repo_usage_count = len(repo_usage_files)
+    repo_usage_tier = _repo_usage_tier(repo_usage_count)
 
     notes: list[str] = []
     if alignment == "drift":
@@ -879,6 +964,12 @@ def _build_package_report(
         risk_score += 10
     if upgrade_signal == "investigate":
         risk_score += 10
+    risk_score += {
+        "hot-path": 15,
+        "active": 8,
+        "edge": 3,
+        "declared-only": 0,
+    }[repo_usage_tier]
 
     manifest_action, suggested_version = _manifest_action(
         current_version=current_version,
@@ -913,6 +1004,9 @@ def _build_package_report(
             manifest_action=manifest_action,
             suggested_version=suggested_version,
             impact_area="repo-tooling",
+            repo_usage_count=repo_usage_count,
+            repo_usage_tier=repo_usage_tier,
+            repo_usage_files=repo_usage_files,
             validation_commands=[],
             next_action="",
             notes=[],
@@ -957,6 +1051,16 @@ def _build_package_report(
     if suggested_version is not None:
         notes.append(f"Suggested target version: {suggested_version}.")
     notes.append(f"Repo impact area: {impact_area}.")
+    if repo_usage_files:
+        sample_files = ", ".join(repo_usage_files[:3])
+        extra = "" if len(repo_usage_files) <= 3 else f" (+{len(repo_usage_files) - 3} more)"
+        notes.append(
+            f"Repo usage: {repo_usage_count} file(s), tier {repo_usage_tier}; observed in {sample_files}{extra}."
+        )
+    else:
+        notes.append(
+            "Repo usage: declared in manifests but not imported from tracked src/tests Python files."
+        )
 
     return PackageReport(
         name=name,
@@ -983,6 +1087,9 @@ def _build_package_report(
         manifest_action=manifest_action,
         suggested_version=suggested_version,
         impact_area=impact_area,
+        repo_usage_count=repo_usage_count,
+        repo_usage_tier=repo_usage_tier,
+        repo_usage_files=repo_usage_files,
         validation_commands=validation_commands,
         next_action=next_action,
         notes=notes,
@@ -1004,6 +1111,9 @@ def _priority_queue(reports: list[PackageReport], *, limit: int = 5) -> list[dic
                 "manifest_action": report.manifest_action,
                 "suggested_version": report.suggested_version,
                 "impact_area": report.impact_area,
+                "repo_usage_count": report.repo_usage_count,
+                "repo_usage_tier": report.repo_usage_tier,
+                "repo_usage_files": report.repo_usage_files,
                 "validation_commands": report.validation_commands,
                 "next_action": report.next_action,
                 "lane": _recommended_lane(report),
@@ -1141,6 +1251,31 @@ def _is_actionable_upgrade(report: PackageReport) -> bool:
     return report.manifest_action != "none"
 
 
+def _repo_usage_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        buckets.setdefault(report.repo_usage_tier, []).append(report)
+    order = {"hot-path": 0, "active": 1, "edge": 2, "declared-only": 3}
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            order.get(item[0], 99),
+            -max((report.repo_usage_count for report in item[1]), default=0),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "repo_usage_tier": tier,
+            "count": len(items),
+            "max_repo_usage_count": max((report.repo_usage_count for report in items), default=0),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "packages": [report.name for report in items[:5]],
+        }
+        for tier, items in ordered
+    ]
+
+
 def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
     return {
         "packages_audited": len(reports),
@@ -1183,6 +1318,12 @@ def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
             1 for report in reports if report.compatibility_status == "requires-newer-python"
         ),
         "actionable_packages": sum(1 for report in reports if _is_actionable_upgrade(report)),
+        "hot_path_packages": sum(1 for report in reports if report.repo_usage_tier == "hot-path"),
+        "active_usage_packages": sum(1 for report in reports if report.repo_usage_tier == "active"),
+        "edge_usage_packages": sum(1 for report in reports if report.repo_usage_tier == "edge"),
+        "declared_only_packages": sum(
+            1 for report in reports if report.repo_usage_tier == "declared-only"
+        ),
         "runtime_core_packages": sum(1 for report in reports if report.impact_area == "runtime-core"),
         "quality_tooling_packages": sum(
             1 for report in reports if report.impact_area == "quality-tooling"
@@ -1317,6 +1458,8 @@ def _filter_reports(
     metadata_sources: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
+    repo_usage_tiers: list[str] | None = None,
+    used_in_repo_only: bool = False,
     outdated_only: bool = False,
     top: int | None = None,
 ) -> list[PackageReport]:
@@ -1349,6 +1492,11 @@ def _filter_reports(
     if manifest_actions:
         allowed_actions = {item.strip() for item in manifest_actions if item.strip()}
         filtered = [report for report in filtered if report.manifest_action in allowed_actions]
+    if repo_usage_tiers:
+        allowed_tiers = {item.strip() for item in repo_usage_tiers if item.strip()}
+        filtered = [report for report in filtered if report.repo_usage_tier in allowed_tiers]
+    if used_in_repo_only:
+        filtered = [report for report in filtered if report.repo_usage_count > 0]
     if outdated_only:
         filtered = [report for report in filtered if _is_actionable_upgrade(report)]
     if top is not None:
@@ -1385,19 +1533,24 @@ def _render_markdown(
         f"- fallback compatible targets below latest: {summary['python_compatible_fallback_packages']}",
         f"- latest releases requiring newer Python: {summary['python_incompatible_latest_packages']}",
         f"- actionable upgrade candidates: {summary['actionable_packages']}",
+        f"- hot-path repo-used packages: {summary['hot_path_packages']}",
+        f"- active repo-used packages: {summary['active_usage_packages']}",
+        f"- edge repo-used packages: {summary['edge_usage_packages']}",
+        f"- declared-only packages: {summary['declared_only_packages']}",
         f"- runtime core packages: {summary['runtime_core_packages']}",
         f"- quality tooling packages: {summary['quality_tooling_packages']}",
         f"- integration adapter packages: {summary['integration_adapter_packages']}",
         "",
-        "| Package | Impact | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| Package | Impact | Repo usage | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
         requirements = " <br> ".join(f"`{item}`" for item in report.requirements)
+        repo_usage = f"{report.repo_usage_tier} ({report.repo_usage_count})"
         lines.append(
             "| "
-            f"`{report.name}` | {report.impact_area} | `{report.current_version}` | `{report.target_version}` | `{report.latest_version}` | {report.compatibility_status} | {report.metadata_source} | {report.version_gap} | "
+            f"`{report.name}` | {report.impact_area} | {repo_usage} | `{report.current_version}` | `{report.target_version}` | `{report.latest_version}` | {report.compatibility_status} | {report.metadata_source} | {report.version_gap} | "
             f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {report.manifest_action} | {report.suggested_version or '-'} | {release_age} | {requirements} |"
         )
     lines.extend(["", "## Priority queue", ""])
@@ -1412,6 +1565,13 @@ def _render_markdown(
         pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
         lines.append(
             f"- **{item['lane']}**: {item['count']} package(s), max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
+    lines.extend(["", "## Repo usage tiers", ""])
+    for item in _repo_usage_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- **{item['repo_usage_tier']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max repo usage {item['max_repo_usage_count']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Repo impact map", ""])
@@ -1467,6 +1627,7 @@ def _render_json(
         "summary": _report_summary(reports),
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
+        "repo_usage": _repo_usage_summary(reports),
         "impact": _impact_summary(reports),
         "actions": _action_summary(reports),
         "groups": _group_summary(reports),
@@ -1513,6 +1674,8 @@ def run(
     metadata_sources: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
+    repo_usage_tiers: list[str] | None = None,
+    used_in_repo_only: bool = False,
     outdated_only: bool = False,
     top: int | None = None,
     include_prereleases: bool = False,
@@ -1553,6 +1716,7 @@ def run(
         sys.stdout.write(rendered)
         return 0
 
+    repo_usage = _collect_repo_usage(pyproject_path.parent, package_names)
     metadata_by_package = _collect_package_metadata(
         package_names,
         timeout_s=timeout_s,
@@ -1577,6 +1741,7 @@ def run(
                 compatible_release_date=metadata.compatible_release_date,
                 compatibility_status=metadata.compatibility_status,
                 metadata_source=metadata.source,
+                repo_usage_files=repo_usage.get(package, []),
             )
         )
         report = reports[-1]
@@ -1594,6 +1759,8 @@ def run(
         metadata_sources=metadata_sources,
         impact_areas=impact_areas,
         manifest_actions=manifest_actions,
+        repo_usage_tiers=repo_usage_tiers,
+        used_in_repo_only=used_in_repo_only,
         outdated_only=outdated_only,
         top=top,
     )
@@ -1752,6 +1919,18 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages with the selected manifest action(s).",
     )
     parser.add_argument(
+        "--repo-usage-tier",
+        action="append",
+        choices=["hot-path", "active", "edge", "declared-only"],
+        default=None,
+        help="Show only packages matching the selected observed repo-usage tier(s).",
+    )
+    parser.add_argument(
+        "--used-in-repo-only",
+        action="store_true",
+        help="Show only packages imported from tracked src/tests Python files.",
+    )
+    parser.add_argument(
         "--outdated-only",
         action="store_true",
         help="Show only actionable upgrade candidates and baseline-establishment work.",
@@ -1809,6 +1988,9 @@ def main(argv: list[str] | None = None) -> int:
         sources=args.source,
         metadata_sources=args.metadata_source,
         impact_areas=args.impact_area,
+        manifest_actions=args.manifest_action,
+        repo_usage_tiers=args.repo_usage_tier,
+        used_in_repo_only=bool(args.used_in_repo_only),
         outdated_only=bool(args.outdated_only),
         top=args.top,
         include_prereleases=bool(args.include_prereleases),

@@ -32,6 +32,9 @@ def _report(**overrides: object) -> upgrade_audit.PackageReport:
         "manifest_action": "none",
         "suggested_version": None,
         "impact_area": "repo-tooling",
+        "repo_usage_count": 0,
+        "repo_usage_tier": "declared-only",
+        "repo_usage_files": [],
         "validation_commands": ["bash ci.sh quick --skip-docs --artifact-dir build"],
         "next_action": "Keep under observation; no immediate action required.",
         "notes": [],
@@ -92,6 +95,26 @@ def test_load_dependencies_follows_nested_requirement_files(tmp_path: Path) -> N
 
     assert [dep.name for dep in deps] == ["ruff", "httpx"]
     assert [dep.source for dep in deps] == ["nested.txt", "requirements.txt"]
+
+
+def test_collect_repo_usage_tracks_imported_packages(tmp_path: Path) -> None:
+    src_dir = tmp_path / "src" / "demo"
+    src_dir.mkdir(parents=True)
+    (src_dir / "__init__.py").write_text("import httpx\n", encoding="utf-8")
+    (src_dir / "client.py").write_text("from telegram import Bot\n", encoding="utf-8")
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir()
+    (tests_dir / "test_client.py").write_text("import pytest_asyncio\n", encoding="utf-8")
+
+    usage = upgrade_audit._collect_repo_usage(
+        tmp_path,
+        ["httpx", "python-telegram-bot", "pytest-asyncio", "twilio"],
+    )
+
+    assert usage["httpx"] == ["src/demo/__init__.py"]
+    assert usage["python-telegram-bot"] == ["src/demo/client.py"]
+    assert usage["pytest-asyncio"] == ["tests/test_client.py"]
+    assert usage["twilio"] == []
 
 
 def test_build_package_report_flags_drift_and_priority() -> None:
@@ -164,6 +187,38 @@ def test_build_package_report_uses_compatible_target_when_latest_needs_newer_pyt
     assert report.suggested_version == "0.29.0"
     assert report.compatibility_status == "compatible-available"
     assert "using compatible target 0.29.0" in " ".join(report.notes)
+
+
+def test_build_package_report_includes_repo_usage_and_risk_boost() -> None:
+    deps = [
+        upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="default",
+            raw="httpx==0.28.1",
+            name="httpx",
+            pinned_version="0.28.1",
+        )
+    ]
+
+    report = upgrade_audit._build_package_report(
+        "httpx",
+        deps,
+        latest_version="0.29.0",
+        release_date="2026-03-01T00:00:00Z",
+        repo_usage_files=[
+            "src/sdetkit/apiclient.py",
+            "src/sdetkit/netclient.py",
+            "tests/test_apiclient.py",
+            "tests/test_netclient_extra.py",
+            "tests/test_apiget_request_builder.py",
+        ],
+    )
+
+    assert report.repo_usage_count == 5
+    assert report.repo_usage_tier == "hot-path"
+    assert report.repo_usage_files[0] == "src/sdetkit/apiclient.py"
+    assert report.risk_score >= 60
+    assert "tier hot-path" in " ".join(report.notes)
 
 
 def test_build_package_report_marks_compatible_policy_covered_manifests() -> None:
@@ -292,11 +347,15 @@ def test_render_json_summary_counts() -> None:
 
     assert payload["summary"] == {
         "actionable_packages": 1,
+        "active_usage_packages": 0,
         "cached_metadata_packages": 1,
         "compatible_constraint_packages": 0,
         "critical_upgrade_signals": 0,
+        "declared_only_packages": 2,
+        "edge_usage_packages": 0,
         "floor_lock_packages": 0,
         "high_priority_upgrade_signals": 1,
+        "hot_path_packages": 0,
         "integration_adapter_packages": 0,
         "investigate_upgrade_signals": 0,
         "manifest_drift_packages": 1,
@@ -312,6 +371,7 @@ def test_render_json_summary_counts() -> None:
         "runtime_core_packages": 1,
         "stale_metadata_packages": 0,
     }
+    assert payload["repo_usage"][0]["repo_usage_tier"] == "declared-only"
     assert payload["packages"][0]["name"] == "httpx"
 
 
@@ -358,10 +418,12 @@ dependencies = ["httpx>=0.27,<1"]
     assert "stale cached metadata packages: 0" in out
     assert "latest releases compatible with repo Python policy: 1" in out
     assert "actionable upgrade candidates: 1" in out
+    assert "declared-only packages: 1" in out
     assert "runtime core packages: 1" in out
-    assert "Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
-    assert "`httpx` | runtime-core | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
+    assert "Impact | Repo usage | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
+    assert "`httpx` | runtime-core | declared-only (0) | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
     assert "Priority queue" in out
+    assert "Repo usage tiers" in out
     assert "Repo impact map" in out
     assert "Focus notes" in out
     assert (
@@ -1141,6 +1203,22 @@ def test_filter_reports_supports_impact_area_filters() -> None:
     assert [report.name for report in filtered] == ["ruff"]
 
 
+def test_filter_reports_supports_repo_usage_filters() -> None:
+    reports = [
+        _report(name="httpx", repo_usage_count=7, repo_usage_tier="hot-path"),
+        _report(name="ruff", repo_usage_count=2, repo_usage_tier="active"),
+        _report(name="twilio", repo_usage_count=0, repo_usage_tier="declared-only"),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        repo_usage_tiers=["active", "hot-path"],
+        used_in_repo_only=True,
+    )
+
+    assert [report.name for report in filtered] == ["httpx", "ruff"]
+
+
 def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
@@ -1157,6 +1235,9 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
             "default",
             "--source",
             "pyproject.toml",
+            "--repo-usage-tier",
+            "hot-path",
+            "--used-in-repo-only",
         ]
     )
 
@@ -1168,5 +1249,7 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.source == ["pyproject.toml"]
     assert args.impact_area is None
     assert args.manifest_action is None
+    assert args.repo_usage_tier == ["hot-path"]
+    assert args.used_in_repo_only is True
     assert args.include_prereleases is False
     assert requirement_paths == []
