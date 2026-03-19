@@ -314,7 +314,7 @@ dependencies = ["httpx>=0.27,<1"]
     monkeypatch.setattr(
         upgrade_audit,
         "_latest_pypi_metadata",
-        lambda package, timeout_s, project_python_requires=None: (
+        lambda package, timeout_s, project_python_requires=None, include_prereleases=False: (
             "0.29.0",
             "2026-01-01T00:00:00Z",
             "0.29.0",
@@ -366,7 +366,7 @@ dependencies = ["httpx>=0.27,<1"]
     monkeypatch.setattr(
         upgrade_audit,
         "_latest_pypi_metadata",
-        lambda package, timeout_s, project_python_requires=None: (
+        lambda package, timeout_s, project_python_requires=None, include_prereleases=False: (
             "1.0.0",
             "2026-01-01T00:00:00Z",
             "1.0.0",
@@ -456,6 +456,7 @@ dependencies = ["httpx==0.28.1"]
                 "packages": {
                     "httpx": {
                         "fetched_at": 1_767_000_000.0,
+                        "include_prereleases": False,
                         "latest_version": "0.28.1",
                         "release_date": "2026-01-01T00:00:00Z",
                         "compatible_version": "0.28.1",
@@ -626,6 +627,7 @@ dependencies = ["httpx>=0.27,<1", "ruff==0.15.6"]
         package: str,
         timeout_s: float,
         project_python_requires: str | None = None,
+        include_prereleases: bool = False,
     ) -> tuple[str, str | None, str | None, str | None, str]:
         if package == "httpx":
             return (
@@ -834,6 +836,116 @@ dependencies = ["httpx==0.28.1", "ruff==0.15.6"]
     assert [item["name"] for item in payload["packages"]] == ["httpx"]
 
 
+def test_latest_compatible_release_skips_prereleases_by_default() -> None:
+    payload = {
+        "info": {"version": "0.28.1"},
+        "releases": {
+            "0.28.1": [
+                {
+                    "upload_time_iso_8601": "2024-12-06T15:37:21.509172Z",
+                    "requires_python": ">=3.8",
+                }
+            ],
+            "1.0.dev3": [
+                {
+                    "upload_time_iso_8601": "2025-09-15T16:15:10.458000Z",
+                    "requires_python": ">=3.11",
+                }
+            ],
+        },
+    }
+
+    compatible_version, release_date, status = upgrade_audit._latest_compatible_release(
+        payload,
+        project_python_requires=">=3.11",
+        include_prereleases=False,
+    )
+
+    assert compatible_version == "0.28.1"
+    assert release_date == "2024-12-06T15:37:21.509172Z"
+    assert status == "compatible-latest"
+
+
+def test_latest_compatible_release_can_include_prereleases() -> None:
+    payload = {
+        "info": {"version": "0.28.1"},
+        "releases": {
+            "0.28.1": [
+                {
+                    "upload_time_iso_8601": "2024-12-06T15:37:21.509172Z",
+                    "requires_python": ">=3.8",
+                }
+            ],
+            "1.0.dev3": [
+                {
+                    "upload_time_iso_8601": "2025-09-15T16:15:10.458000Z",
+                    "requires_python": ">=3.11",
+                }
+            ],
+        },
+    }
+
+    compatible_version, release_date, status = upgrade_audit._latest_compatible_release(
+        payload,
+        project_python_requires=">=3.11",
+        include_prereleases=True,
+    )
+
+    assert compatible_version == "1.0.dev3"
+    assert release_date == "2025-09-15T16:15:10.458000Z"
+    assert status == "compatible-available"
+
+
+def test_run_respects_package_filter_without_shadowing(monkeypatch, capsys, tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx==0.28.1", "ruff==0.15.6"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    def _fake_metadata(
+        package: str,
+        timeout_s: float,
+        project_python_requires: str | None = None,
+        include_prereleases: bool = False,
+    ) -> tuple[str, str | None, str | None, str | None, str]:
+        if package == "httpx":
+            return (
+                "0.29.0",
+                "2026-01-01T00:00:00Z",
+                "0.29.0",
+                "2026-01-01T00:00:00Z",
+                "compatible-latest",
+            )
+        return (
+            "0.15.6",
+            "2026-01-01T00:00:00Z",
+            "0.15.6",
+            "2026-01-01T00:00:00Z",
+            "compatible-latest",
+        )
+
+    monkeypatch.setattr(upgrade_audit, "_latest_pypi_metadata", _fake_metadata)
+
+    rc = upgrade_audit.run(
+        pyproject,
+        timeout_s=0.1,
+        requirement_paths=[],
+        output_format="json",
+        cache_path=tmp_path / "audit-cache.json",
+        packages=["ruff"],
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["summary"]["packages_audited"] == 1
+    assert [item["name"] for item in payload["packages"]] == ["ruff"]
+
+
 def test_filter_reports_supports_group_and_source_filters() -> None:
     reports = [
         _report(
@@ -919,4 +1031,5 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.package == ["http*"]
     assert args.group == ["default"]
     assert args.source == ["pyproject.toml"]
+    assert args.include_prereleases is False
     assert requirement_paths == []

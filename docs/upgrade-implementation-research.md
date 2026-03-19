@@ -8,6 +8,8 @@ This document summarizes practical upgrade methods for SDETKit with a focus on:
 
 The baseline inventory came from the repository's direct dependency audit command (`make upgrade-audit`).
 
+> Note: the upgrade audit now defaults to stable-release planning. Prerelease/dev tags are only pulled into the suggested target lane when `--include-prereleases` is passed explicitly.
+
 ## 1) Current baseline and where risk concentrates
 
 ### Runtime and tooling baseline
