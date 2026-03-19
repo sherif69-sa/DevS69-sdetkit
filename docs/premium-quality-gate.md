@@ -67,6 +67,7 @@ The script emits:
 - a structured five-head index: `.sdetkit/out/premium-step-index.json`
 - integration topology artifact: `.sdetkit/out/integration-topology.json`
 - premium engine summary: `.sdetkit/out/premium-summary.json`
+- smart remediation logs when the engine auto-runs repo scripts: `.sdetkit/out/premium-autofix.*.log`
 
 Useful flags:
 
@@ -75,6 +76,7 @@ Useful flags:
 - `--engine-min-score <int>`
 - `--out-dir <path>`
 - `--ops-jobs <int>`
+- `--no-auto-run-scripts` to keep the engine in analysis-only mode
 - `SDETKIT_PREMIUM_TOPOLOGY_PROFILE=<path>` to override the topology profile used by the Head-3 topology contract step
 
 Examples:
@@ -83,8 +85,25 @@ Examples:
 bash premium-gate.sh --mode full
 bash premium-gate.sh --mode full --continue-on-error
 bash premium-gate.sh --mode fast --engine-min-score 75
+bash premium-gate.sh --mode full --no-auto-run-scripts
 bash premium-gate.sh --mode engine-only --out-dir .sdetkit/out
 ```
+
+## Smart remediation loop
+
+Head-5 now does more than report problems:
+
+- it applies the existing safe security auto-fixes,
+- it selects repo-safe remediation scripts based on the current warning mix,
+- it refreshes artifacts like `doctor.json`, `maintenance.json`, and `security-check.json`,
+- and it records a pre/post score delta in `premium-summary.json`.
+
+Today the smart script lane can automatically trigger:
+
+- `sdetkit gate fast --fix-only` when doctor/style/quality drift is detected,
+- `sdetkit doctor --json --out ...` to refresh doctor evidence after fixes,
+- `sdetkit maintenance --mode full --fix --format json --out ...` for maintenance drift,
+- and `tools/triage.py --mode security ... --tee ...` to rebuild the baseline-aware security artifact after security auto-fixes.
 
 
 ## Local insights API (editable guideline reference + commit learning)

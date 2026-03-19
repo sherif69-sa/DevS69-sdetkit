@@ -398,3 +398,117 @@ def test_collect_signals_reads_integration_topology_contract(tmp_path: Path) -> 
     categories = {item["category"] for item in payload["engine_checks"]}
     assert "pass-rate" in categories
     assert "service-count" in categories
+
+
+def test_build_script_candidates_targets_doctor_maintenance_and_security(tmp_path: Path) -> None:
+    payload = {
+        "warnings": [
+            {"source": "doctor", "category": "policy", "severity": "high", "message": "drift"},
+            {
+                "source": "maintenance",
+                "category": "tests",
+                "severity": "medium",
+                "message": "failed",
+            },
+            {"source": "security", "category": "SEC_X", "severity": "high", "message": "finding"},
+        ],
+        "engine_checks": [],
+        "recommendations": [],
+        "step_status": [{"name": "ruff_lint", "ok": False, "details": "failed"}],
+    }
+
+    candidates = eng._build_script_candidates(
+        payload,
+        out_dir=tmp_path,
+        fix_root=tmp_path,
+        auto_fix_results=[eng.AutoFixResult("SEC_X", "src/app.py", "fixed", "patched")],
+    )
+
+    assert [item.script_id for item in candidates] == [
+        "gate_fast_fix_only",
+        "doctor_refresh",
+        "maintenance_fix",
+        "security_triage_refresh",
+    ]
+
+
+def test_main_auto_run_scripts_records_results_and_score_delta(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    (tmp_path / "doctor.json").write_text(
+        json.dumps({"checks": {}, "recommendations": []}), encoding="utf-8"
+    )
+    (tmp_path / "maintenance.json").write_text(
+        json.dumps(
+            {
+                "score": 60,
+                "checks": [
+                    {"name": "tests", "ok": False, "severity": "medium", "summary": "tests failed"}
+                ],
+                "recommendations": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
+    (tmp_path / "security-check.json").write_text(
+        json.dumps({"findings": [{"rule_id": "SEC_X", "severity": "high", "path": "src/app.py"}]}),
+        encoding="utf-8",
+    )
+    (tmp_path / "premium-gate.Quality.log").write_text("warning: drift\n", encoding="utf-8")
+
+    calls: list[str] = []
+
+    def fake_run_scripts(payload, *, out_dir, fix_root, auto_fix_results=None, max_scripts=4):
+        assert out_dir == tmp_path
+        assert fix_root == tmp_path
+        calls.append("run")
+        (tmp_path / "maintenance.json").write_text(
+            json.dumps({"score": 100, "checks": [], "recommendations": []}), encoding="utf-8"
+        )
+        (tmp_path / "security-check.json").write_text(
+            json.dumps({"findings": [], "totals": {"critical": 0, "high": 0}}), encoding="utf-8"
+        )
+        return (
+            [
+                eng.ScriptCandidate(
+                    "maintenance_fix",
+                    "refresh maintenance",
+                    ["python", "-m", "sdetkit", "maintenance"],
+                    ["maintenance.json"],
+                )
+            ],
+            [
+                eng.ScriptRunResult(
+                    "maintenance_fix",
+                    "passed",
+                    0,
+                    ["python", "-m", "sdetkit", "maintenance"],
+                    "refresh maintenance",
+                    ["maintenance.json"],
+                    str(tmp_path / "premium-autofix.maintenance_fix.log"),
+                    "script completed successfully",
+                )
+            ],
+        )
+
+    monkeypatch.setattr(eng, "run_smart_scripts", fake_run_scripts)
+
+    rc = eng.main(
+        [
+            "--out-dir",
+            str(tmp_path),
+            "--fix-root",
+            str(tmp_path),
+            "--auto-run-scripts",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert calls == ["run"]
+    assert payload["script_runs"][0]["script_id"] == "maintenance_fix"
+    assert payload["smart_remediation"]["selected_scripts"] == ["maintenance_fix"]
+    assert payload["smart_remediation"]["score_delta"] >= 0
+    assert payload["counts"]["script_runs"] == 1
