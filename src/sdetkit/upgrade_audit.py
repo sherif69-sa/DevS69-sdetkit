@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fnmatch
 import json
 import re
 import sys
@@ -744,11 +745,62 @@ def _lane_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
     ]
 
 
+def _is_actionable_upgrade(report: PackageReport) -> bool:
+    return report.manifest_action != "none"
+
+
+def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
+    return {
+        "packages_audited": len(reports),
+        "manifest_drift_packages": sum(1 for report in reports if report.alignment == "drift"),
+        "compatible_constraint_packages": sum(
+            1 for report in reports if report.alignment == "compatible"
+        ),
+        "floor_lock_packages": sum(1 for report in reports if report.alignment == "floor-lock"),
+        "policy_covered_packages": sum(
+            1 for report in reports if report.constraint_status == "allowed"
+        ),
+        "policy_blocked_packages": sum(
+            1 for report in reports if report.constraint_status == "blocked"
+        ),
+        "critical_upgrade_signals": sum(
+            1 for report in reports if report.upgrade_signal == "critical"
+        ),
+        "high_priority_upgrade_signals": sum(
+            1 for report in reports if report.upgrade_signal == "high"
+        ),
+        "medium_priority_upgrade_signals": sum(
+            1 for report in reports if report.upgrade_signal == "medium"
+        ),
+        "investigate_upgrade_signals": sum(
+            1 for report in reports if report.upgrade_signal == "investigate"
+        ),
+        "cached_metadata_packages": sum(
+            1 for report in reports if report.metadata_source.startswith("cache")
+        ),
+        "stale_metadata_packages": sum(
+            1 for report in reports if report.metadata_source == "cache-stale"
+        ),
+        "actionable_packages": sum(1 for report in reports if _is_actionable_upgrade(report)),
+        "max_risk_score": max((report.risk_score for report in reports), default=0),
+    }
+
+
+def _matches_package_filters(report: PackageReport, package_filters: list[str] | None) -> bool:
+    if not package_filters:
+        return True
+    normalized = report.name.lower()
+    return any(fnmatch.fnmatch(normalized, pattern) for pattern in package_filters)
+
+
 def _filter_reports(
     reports: list[PackageReport],
     *,
     signals: list[str] | None = None,
     policies: list[str] | None = None,
+    packages: list[str] | None = None,
+    metadata_sources: list[str] | None = None,
+    outdated_only: bool = False,
     top: int | None = None,
 ) -> list[PackageReport]:
     filtered = reports
@@ -758,6 +810,16 @@ def _filter_reports(
     if policies:
         allowed_policies = {item.strip() for item in policies if item.strip()}
         filtered = [report for report in filtered if report.constraint_status in allowed_policies]
+    if packages:
+        package_filters = [item.strip().lower() for item in packages if item.strip()]
+        filtered = [
+            report for report in filtered if _matches_package_filters(report, package_filters)
+        ]
+    if metadata_sources:
+        allowed_sources = {item.strip() for item in metadata_sources if item.strip()}
+        filtered = [report for report in filtered if report.metadata_source in allowed_sources]
+    if outdated_only:
+        filtered = [report for report in filtered if _is_actionable_upgrade(report)]
     if top is not None:
         filtered = filtered[: max(top, 0)]
     return filtered
@@ -769,35 +831,26 @@ def _render_markdown(
     pyproject_path: Path,
     requirement_paths: list[Path],
 ) -> str:
-    drift_count = sum(1 for report in reports if report.alignment == "drift")
-    compatible_count = sum(1 for report in reports if report.alignment == "compatible")
-    floor_lock_count = sum(1 for report in reports if report.alignment == "floor-lock")
-    high_priority = sum(1 for report in reports if report.upgrade_signal == "high")
-    critical_priority = sum(1 for report in reports if report.upgrade_signal == "critical")
-    medium_priority = sum(1 for report in reports if report.upgrade_signal == "medium")
-    investigate_priority = sum(1 for report in reports if report.upgrade_signal == "investigate")
-    policy_covered = sum(1 for report in reports if report.constraint_status == "allowed")
-    policy_blocked = sum(1 for report in reports if report.constraint_status == "blocked")
-    cached_results = sum(
-        1 for report in reports if any("cache" in note.lower() for note in report.notes)
-    )
+    summary = _report_summary(reports)
     lines = [
         "# Upgrade audit",
         "",
         f"Source pyproject: `{pyproject_path}`",
         f"Requirement manifests: {', '.join(f'`{path}`' for path in requirement_paths) if requirement_paths else '`none`'}",
         "",
-        f"- packages audited: {len(reports)}",
-        f"- manifest drift packages: {drift_count}",
-        f"- compatible multi-manifest packages: {compatible_count}",
-        f"- floor-and-lock baseline packages: {floor_lock_count}",
-        f"- policy-covered latest releases: {policy_covered}",
-        f"- policy-blocked latest releases: {policy_blocked}",
-        f"- critical upgrade signals: {critical_priority}",
-        f"- high-priority upgrade signals: {high_priority}",
-        f"- medium-priority upgrade signals: {medium_priority}",
-        f"- investigate signals: {investigate_priority}",
-        f"- packages using cached metadata: {cached_results}",
+        f"- packages audited: {summary['packages_audited']}",
+        f"- manifest drift packages: {summary['manifest_drift_packages']}",
+        f"- compatible multi-manifest packages: {summary['compatible_constraint_packages']}",
+        f"- floor-and-lock baseline packages: {summary['floor_lock_packages']}",
+        f"- policy-covered latest releases: {summary['policy_covered_packages']}",
+        f"- policy-blocked latest releases: {summary['policy_blocked_packages']}",
+        f"- critical upgrade signals: {summary['critical_upgrade_signals']}",
+        f"- high-priority upgrade signals: {summary['high_priority_upgrade_signals']}",
+        f"- medium-priority upgrade signals: {summary['medium_priority_upgrade_signals']}",
+        f"- investigate signals: {summary['investigate_upgrade_signals']}",
+        f"- packages using cached metadata: {summary['cached_metadata_packages']}",
+        f"- stale cached metadata packages: {summary['stale_metadata_packages']}",
+        f"- actionable upgrade candidates: {summary['actionable_packages']}",
         "",
         "| Package | Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
@@ -840,36 +893,7 @@ def _render_json(
     payload = {
         "pyproject": str(pyproject_path),
         "requirements": [str(path) for path in requirement_paths],
-        "summary": {
-            "packages_audited": len(reports),
-            "manifest_drift_packages": sum(1 for report in reports if report.alignment == "drift"),
-            "compatible_constraint_packages": sum(
-                1 for report in reports if report.alignment == "compatible"
-            ),
-            "floor_lock_packages": sum(1 for report in reports if report.alignment == "floor-lock"),
-            "policy_covered_packages": sum(
-                1 for report in reports if report.constraint_status == "allowed"
-            ),
-            "policy_blocked_packages": sum(
-                1 for report in reports if report.constraint_status == "blocked"
-            ),
-            "critical_upgrade_signals": sum(
-                1 for report in reports if report.upgrade_signal == "critical"
-            ),
-            "high_priority_upgrade_signals": sum(
-                1 for report in reports if report.upgrade_signal == "high"
-            ),
-            "medium_priority_upgrade_signals": sum(
-                1 for report in reports if report.upgrade_signal == "medium"
-            ),
-            "investigate_upgrade_signals": sum(
-                1 for report in reports if report.upgrade_signal == "investigate"
-            ),
-            "cached_metadata_packages": sum(
-                1 for report in reports if any("cache" in note.lower() for note in report.notes)
-            ),
-            "max_risk_score": max((report.risk_score for report in reports), default=0),
-        },
+        "summary": _report_summary(reports),
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
         "packages": [asdict(report) for report in reports],
@@ -908,6 +932,9 @@ def run(
     max_workers: int = 8,
     signals: list[str] | None = None,
     policies: list[str] | None = None,
+    packages: list[str] | None = None,
+    metadata_sources: list[str] | None = None,
+    outdated_only: bool = False,
     top: int | None = None,
 ) -> int:
     dependencies = _load_dependencies(pyproject_path, requirement_paths)
@@ -946,7 +973,15 @@ def run(
             report.notes.append(f"Latest metadata source: {metadata.source}.")
 
     reports = _sort_reports(reports)
-    reports = _filter_reports(reports, signals=signals, policies=policies, top=top)
+    reports = _filter_reports(
+        reports,
+        signals=signals,
+        policies=policies,
+        packages=packages,
+        metadata_sources=metadata_sources,
+        outdated_only=outdated_only,
+        top=top,
+    )
 
     rendered = {
         "json": _render_json(
@@ -1042,6 +1077,24 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages with the selected policy status(es). Can be passed multiple times.",
     )
     parser.add_argument(
+        "--package",
+        action="append",
+        default=None,
+        help="Show only packages matching the provided name or glob pattern. Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--metadata-source",
+        action="append",
+        choices=["pypi", "cache", "cache-stale", "offline"],
+        default=None,
+        help="Show only packages resolved from the selected metadata source(s).",
+    )
+    parser.add_argument(
+        "--outdated-only",
+        action="store_true",
+        help="Show only actionable upgrade candidates and baseline-establishment work.",
+    )
+    parser.add_argument(
         "--top",
         type=int,
         default=None,
@@ -1089,6 +1142,9 @@ def main(argv: list[str] | None = None) -> int:
         max_workers=max(args.max_workers, 1),
         signals=args.signal,
         policies=args.policy,
+        packages=args.package,
+        metadata_sources=args.metadata_source,
+        outdated_only=bool(args.outdated_only),
         top=args.top,
     )
 

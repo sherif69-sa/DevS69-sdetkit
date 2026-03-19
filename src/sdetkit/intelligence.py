@@ -242,6 +242,14 @@ def main(argv: list[str] | None = None) -> int:
         choices=["allowed", "blocked", "unknown", "unbounded"],
         default=None,
     )
+    ua.add_argument("--package", action="append", default=None)
+    ua.add_argument(
+        "--metadata-source",
+        action="append",
+        choices=["pypi", "cache", "cache-stale", "offline"],
+        default=None,
+    )
+    ua.add_argument("--outdated-only", action="store_true")
     ua.add_argument("--top", type=int, default=None)
 
     ns = parser.parse_args(argv)
@@ -284,6 +292,9 @@ def main(argv: list[str] | None = None) -> int:
                 max_workers=max(ns.max_workers, 1),
                 signals=ns.signal,
                 policies=ns.policy,
+                packages=ns.package,
+                metadata_sources=ns.metadata_source,
+                outdated_only=bool(ns.outdated_only),
                 top=ns.top,
             )
         else:
