@@ -6,6 +6,38 @@ from pathlib import Path
 from sdetkit import upgrade_audit
 
 
+def _report(**overrides: object) -> upgrade_audit.PackageReport:
+    payload: dict[str, object] = {
+        "name": "pkg",
+        "sources": ["pyproject.toml"],
+        "groups": ["default"],
+        "requirements": ["pkg==1.0.0"],
+        "pinned_versions": ["1.0.0"],
+        "project_python_requires": ">=3.11",
+        "current_version": "1.0.0",
+        "target_version": "1.0.0",
+        "target_release_date": None,
+        "latest_compatible_version": "1.0.0",
+        "latest_compatible_release_date": None,
+        "compatibility_status": "compatible-latest",
+        "alignment": "aligned",
+        "constraint_status": "allowed",
+        "latest_version": "1.0.0",
+        "latest_release_date": None,
+        "metadata_source": "pypi",
+        "version_gap": "up-to-date",
+        "release_age_days": None,
+        "upgrade_signal": "watch",
+        "risk_score": 10,
+        "manifest_action": "none",
+        "suggested_version": None,
+        "next_action": "Keep under observation; no immediate action required.",
+        "notes": [],
+    }
+    payload.update(overrides)
+    return upgrade_audit.PackageReport(**payload)
+
+
 def test_load_dependencies_collects_pyproject_and_requirements(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text(
@@ -46,6 +78,20 @@ ruff==0.15.6
     assert deps[2].pinned_version == "0.28.1"
 
 
+def test_load_dependencies_follows_nested_requirement_files(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
+    requirements = tmp_path / "requirements.txt"
+    requirements.write_text("-r nested.txt\nhttpx==0.28.1\n", encoding="utf-8")
+    nested = tmp_path / "nested.txt"
+    nested.write_text("ruff==0.15.6\n", encoding="utf-8")
+
+    deps = upgrade_audit._load_dependencies(pyproject, [requirements])
+
+    assert [dep.name for dep in deps] == ["ruff", "httpx"]
+    assert [dep.source for dep in deps] == ["nested.txt", "requirements.txt"]
+
+
 def test_build_package_report_flags_drift_and_priority() -> None:
     deps = [
         upgrade_audit.Dependency(
@@ -82,6 +128,35 @@ def test_build_package_report_flags_drift_and_priority() -> None:
     assert report.metadata_source == "pypi"
     assert "Queue the upgrade" in report.next_action
     assert "floor-and-lock pattern" in " ".join(report.notes)
+
+
+def test_build_package_report_uses_compatible_target_when_latest_needs_newer_python() -> None:
+    deps = [
+        upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="default",
+            raw="httpx==0.28.1",
+            name="httpx",
+            pinned_version="0.28.1",
+        )
+    ]
+
+    report = upgrade_audit._build_package_report(
+        "httpx",
+        deps,
+        latest_version="0.30.0",
+        release_date="2026-03-01T00:00:00Z",
+        project_python_requires=">=3.11",
+        compatible_version="0.29.0",
+        compatible_release_date="2026-02-01T00:00:00Z",
+        compatibility_status="compatible-available",
+    )
+
+    assert report.target_version == "0.29.0"
+    assert report.version_gap == "minor"
+    assert report.suggested_version == "0.29.0"
+    assert report.compatibility_status == "compatible-available"
+    assert "using compatible target 0.29.0" in " ".join(report.notes)
 
 
 def test_build_package_report_marks_compatible_policy_covered_manifests() -> None:
@@ -144,13 +219,18 @@ def test_build_package_report_flags_major_jump_as_critical() -> None:
 
 def test_render_json_summary_counts() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="httpx",
             sources=["pyproject.toml", "requirements.txt"],
             groups=["default", "requirements"],
             requirements=["httpx>=0.27,<1", "httpx==0.28.1"],
             pinned_versions=["0.28.1"],
             current_version="0.28.1",
+            target_version="0.29.0",
+            target_release_date="2026-01-01T00:00:00Z",
+            latest_compatible_version="0.29.0",
+            latest_compatible_release_date="2026-01-01T00:00:00Z",
+            compatibility_status="compatible-latest",
             alignment="drift",
             constraint_status="blocked",
             latest_version="0.29.0",
@@ -165,7 +245,7 @@ def test_render_json_summary_counts() -> None:
             next_action="Plan an upgrade spike with regression coverage before the next release cut.",
             notes=["Cross-manifest requirement drift detected."],
         ),
-        upgrade_audit.PackageReport(
+        _report(
             name="ruff",
             sources=["pyproject.toml", "requirements.txt"],
             groups=["dev", "requirements"],
@@ -210,6 +290,9 @@ def test_render_json_summary_counts() -> None:
         "packages_audited": 2,
         "policy_blocked_packages": 1,
         "policy_covered_packages": 1,
+        "python_compatible_fallback_packages": 0,
+        "python_compatible_latest_packages": 2,
+        "python_incompatible_latest_packages": 0,
         "stale_metadata_packages": 0,
     }
     assert payload["packages"][0]["name"] == "httpx"
@@ -231,7 +314,13 @@ dependencies = ["httpx>=0.27,<1"]
     monkeypatch.setattr(
         upgrade_audit,
         "_latest_pypi_metadata",
-        lambda package, timeout_s: ("0.29.0", "2026-01-01T00:00:00Z"),
+        lambda package, timeout_s, project_python_requires=None: (
+            "0.29.0",
+            "2026-01-01T00:00:00Z",
+            "0.29.0",
+            "2026-01-01T00:00:00Z",
+            "compatible-latest",
+        ),
     )
 
     rc = upgrade_audit.run(
@@ -250,9 +339,10 @@ dependencies = ["httpx>=0.27,<1"]
     assert "floor-and-lock baseline packages: 1" in out
     assert "packages using cached metadata: 0" in out
     assert "stale cached metadata packages: 0" in out
+    assert "latest releases compatible with repo Python policy: 1" in out
     assert "actionable upgrade candidates: 1" in out
-    assert "Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
-    assert "`httpx` | `0.28.1` | `0.29.0` | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
+    assert "Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
+    assert "`httpx` | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
     assert "Priority queue" in out
     assert "Focus notes" in out
     assert (
@@ -276,7 +366,13 @@ dependencies = ["httpx>=0.27,<1"]
     monkeypatch.setattr(
         upgrade_audit,
         "_latest_pypi_metadata",
-        lambda package, timeout_s: ("1.0.0", "2026-01-01T00:00:00Z"),
+        lambda package, timeout_s, project_python_requires=None: (
+            "1.0.0",
+            "2026-01-01T00:00:00Z",
+            "1.0.0",
+            "2026-01-01T00:00:00Z",
+            "compatible-latest",
+        ),
     )
 
     rc = upgrade_audit.run(
@@ -293,7 +389,7 @@ dependencies = ["httpx>=0.27,<1"]
 
 def test_sort_reports_surfaces_highest_risk_first() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="watch-pkg",
             sources=["requirements.txt"],
             groups=["requirements"],
@@ -314,7 +410,7 @@ def test_sort_reports_surfaces_highest_risk_first() -> None:
             next_action="Track the package and batch it with nearby dependency maintenance work.",
             notes=[],
         ),
-        upgrade_audit.PackageReport(
+        _report(
             name="critical-pkg",
             sources=["pyproject.toml", "requirements.txt"],
             groups=["default", "requirements"],
@@ -362,6 +458,9 @@ dependencies = ["httpx==0.28.1"]
                         "fetched_at": 1_767_000_000.0,
                         "latest_version": "0.28.1",
                         "release_date": "2026-01-01T00:00:00Z",
+                        "compatible_version": "0.28.1",
+                        "compatible_release_date": "2026-01-01T00:00:00Z",
+                        "compatibility_status": "compatible-latest",
                     }
                 },
             }
@@ -390,13 +489,18 @@ dependencies = ["httpx==0.28.1"]
 
 def test_filter_reports_supports_package_metadata_source_and_outdated_only() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="httpx",
             sources=["pyproject.toml"],
             groups=["default"],
             requirements=["httpx==0.28.1"],
             pinned_versions=["0.28.1"],
             current_version="0.28.1",
+            target_version="0.29.0",
+            target_release_date="2026-01-01T00:00:00Z",
+            latest_compatible_version="0.29.0",
+            latest_compatible_release_date="2026-01-01T00:00:00Z",
+            compatibility_status="compatible-latest",
             alignment="aligned",
             constraint_status="blocked",
             latest_version="0.29.0",
@@ -411,7 +515,7 @@ def test_filter_reports_supports_package_metadata_source_and_outdated_only() -> 
             next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
             notes=[],
         ),
-        upgrade_audit.PackageReport(
+        _report(
             name="ruff",
             sources=["requirements.txt"],
             groups=["requirements"],
@@ -446,13 +550,18 @@ def test_filter_reports_supports_package_metadata_source_and_outdated_only() -> 
 
 def test_filter_reports_supports_signal_policy_and_top() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="critical-pkg",
             sources=["pyproject.toml"],
             groups=["default"],
             requirements=["critical-pkg==1.0.0"],
             pinned_versions=["1.0.0"],
             current_version="1.0.0",
+            target_version="2.0.0",
+            target_release_date="2026-01-01T00:00:00Z",
+            latest_compatible_version="2.0.0",
+            latest_compatible_release_date="2026-01-01T00:00:00Z",
+            compatibility_status="compatible-latest",
             alignment="aligned",
             constraint_status="blocked",
             latest_version="2.0.0",
@@ -467,7 +576,7 @@ def test_filter_reports_supports_signal_policy_and_top() -> None:
             next_action="Plan an upgrade spike with regression coverage before the next release cut.",
             notes=[],
         ),
-        upgrade_audit.PackageReport(
+        _report(
             name="watch-pkg",
             sources=["requirements.txt"],
             groups=["requirements"],
@@ -513,10 +622,26 @@ dependencies = ["httpx>=0.27,<1", "ruff==0.15.6"]
     requirements = tmp_path / "requirements.txt"
     requirements.write_text("httpx==0.28.1\nruff==0.15.6\n", encoding="utf-8")
 
-    def _fake_metadata(package: str, timeout_s: float) -> tuple[str, str | None]:
+    def _fake_metadata(
+        package: str,
+        timeout_s: float,
+        project_python_requires: str | None = None,
+    ) -> tuple[str, str | None, str | None, str | None, str]:
         if package == "httpx":
-            return "0.29.0", "2026-01-01T00:00:00Z"
-        return "0.15.6", "2026-01-01T00:00:00Z"
+            return (
+                "0.29.0",
+                "2026-01-01T00:00:00Z",
+                "0.29.0",
+                "2026-01-01T00:00:00Z",
+                "compatible-latest",
+            )
+        return (
+            "0.15.6",
+            "2026-01-01T00:00:00Z",
+            "0.15.6",
+            "2026-01-01T00:00:00Z",
+            "compatible-latest",
+        )
 
     monkeypatch.setattr(upgrade_audit, "_latest_pypi_metadata", _fake_metadata)
 
@@ -540,13 +665,18 @@ dependencies = ["httpx>=0.27,<1", "ruff==0.15.6"]
 
 def test_render_json_includes_lane_summary_and_priority_lane() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="critical-pkg",
             sources=["pyproject.toml", "requirements.txt"],
             groups=["default", "requirements"],
             requirements=["critical-pkg>=1,<2", "critical-pkg==1.2.3"],
             pinned_versions=["1.2.3"],
             current_version="1.2.3",
+            target_version="2.0.0",
+            target_release_date="2026-01-01T00:00:00Z",
+            latest_compatible_version="2.0.0",
+            latest_compatible_release_date="2026-01-01T00:00:00Z",
+            compatibility_status="compatible-latest",
             alignment="drift",
             constraint_status="blocked",
             latest_version="2.0.0",
@@ -561,7 +691,7 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
             next_action="Resolve manifest drift first, then validate the major upgrade in a dedicated branch.",
             notes=["Cross-manifest requirement drift detected."],
         ),
-        upgrade_audit.PackageReport(
+        _report(
             name="watch-pkg",
             sources=["requirements.txt"],
             groups=["requirements"],
@@ -603,13 +733,18 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
 
 def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="httpx",
             sources=["pyproject.toml", "requirements.txt"],
             groups=["default", "requirements"],
             requirements=["httpx>=0.27,<1", "httpx==0.28.1"],
             pinned_versions=["0.28.1"],
             current_version="0.28.1",
+            target_version="0.29.0",
+            target_release_date="2026-01-01T00:00:00Z",
+            latest_compatible_version="0.29.0",
+            latest_compatible_release_date="2026-01-01T00:00:00Z",
+            compatibility_status="compatible-latest",
             alignment="compatible",
             constraint_status="blocked",
             latest_version="0.29.0",
@@ -660,11 +795,17 @@ dependencies = ["httpx==0.28.1", "ruff==0.15.6"]
                         "fetched_at": 1.0,
                         "latest_version": "0.29.0",
                         "release_date": "2026-01-01T00:00:00Z",
+                        "compatible_version": "0.29.0",
+                        "compatible_release_date": "2026-01-01T00:00:00Z",
+                        "compatibility_status": "compatible-latest",
                     },
                     "ruff": {
                         "fetched_at": 1.0,
                         "latest_version": "0.15.6",
                         "release_date": "2026-01-01T00:00:00Z",
+                        "compatible_version": "0.15.6",
+                        "compatible_release_date": "2026-01-01T00:00:00Z",
+                        "compatibility_status": "compatible-latest",
                     },
                 },
             }
@@ -695,13 +836,18 @@ dependencies = ["httpx==0.28.1", "ruff==0.15.6"]
 
 def test_filter_reports_supports_group_and_source_filters() -> None:
     reports = [
-        upgrade_audit.PackageReport(
+        _report(
             name="httpx",
             sources=["pyproject.toml", "requirements.txt"],
             groups=["default", "requirements"],
             requirements=["httpx==0.28.1"],
             pinned_versions=["0.28.1"],
             current_version="0.28.1",
+            target_version="0.29.0",
+            target_release_date="2026-01-01T00:00:00Z",
+            latest_compatible_version="0.29.0",
+            latest_compatible_release_date="2026-01-01T00:00:00Z",
+            compatibility_status="compatible-latest",
             alignment="aligned",
             constraint_status="blocked",
             latest_version="0.29.0",
@@ -716,7 +862,7 @@ def test_filter_reports_supports_group_and_source_filters() -> None:
             next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
             notes=[],
         ),
-        upgrade_audit.PackageReport(
+        _report(
             name="mkdocs",
             sources=["requirements-docs.txt"],
             groups=["docs"],
