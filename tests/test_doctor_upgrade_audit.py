@@ -324,3 +324,177 @@ def test_doctor_upgrade_audit_supports_package_source_and_usage_filters(
     assert meta["filters"]["used_in_repo_only"] is True
     assert meta["priority_queue"][0]["name"] == "httpx"
     assert meta["source_summary"][0]["source"] == "pyproject.toml"
+
+
+def test_doctor_upgrade_audit_supports_release_age_filters_and_freshness_hints(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_minimal_pyproject(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    deps = [
+        doctor.upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="default",
+            raw="httpx>=0.28.1,<1",
+            name="httpx",
+            pinned_version=None,
+        ),
+        doctor.upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="dev",
+            raw="ruff==0.15.6",
+            name="ruff",
+            pinned_version="0.15.6",
+        ),
+    ]
+
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+    )
+    monkeypatch.setattr(
+        doctor.upgrade_audit,
+        "_collect_repo_usage",
+        lambda *_args, **_kwargs: {
+            "httpx": ["src/sdetkit/netclient.py"],
+            "ruff": [],
+        },
+    )
+    monkeypatch.setattr(
+        doctor.upgrade_audit,
+        "_collect_package_metadata",
+        lambda *_args, **_kwargs: {
+            "httpx": doctor.upgrade_audit.PackageMetadata(
+                latest_version="0.29.0",
+                release_date="2026-03-15T00:00:00+00:00",
+                compatible_version="0.29.0",
+                compatible_release_date="2026-03-15T00:00:00+00:00",
+                compatibility_status="compatible-latest",
+                source="cache",
+            ),
+            "ruff": doctor.upgrade_audit.PackageMetadata(
+                latest_version="0.15.6",
+                release_date="2025-01-01T00:00:00+00:00",
+                compatible_version="0.15.6",
+                compatible_release_date="2025-01-01T00:00:00+00:00",
+                compatibility_status="compatible-latest",
+                source="cache",
+            ),
+        },
+    )
+
+    rc = doctor.main(
+        [
+            "--upgrade-audit",
+            "--upgrade-audit-max-release-age-days",
+            "14",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    meta = payload["checks"]["upgrade_audit"]["meta"]
+    assert meta["packages_audited"] == 2
+    assert meta["packages_in_scope"] == 1
+    assert meta["filters"]["max_release_age_days"] == 14
+    assert meta["priority_queue"][0]["name"] == "httpx"
+    assert meta["release_freshness_summary"][0]["release_freshness"] == "fresh-release"
+    assert any("release freshness fresh-release" in hint for hint in payload["hints"])
+    assert any("Fresh release watchlist" in item for item in payload["recommendations"])
+
+
+def test_upgrade_audit_json_and_markdown_include_release_freshness_sections() -> None:
+    fresh = doctor.upgrade_audit.PackageReport(
+        name="ruff",
+        sources=["pyproject.toml"],
+        groups=["dev"],
+        requirements=["ruff==0.15.6"],
+        pinned_versions=["0.15.6"],
+        project_python_requires=">=3.11",
+        current_version="0.15.6",
+        target_version="0.15.6",
+        target_release_date="2026-03-15T00:00:00+00:00",
+        latest_compatible_version="0.15.6",
+        latest_compatible_release_date="2026-03-15T00:00:00+00:00",
+        compatibility_status="compatible-latest",
+        alignment="aligned",
+        constraint_status="allowed",
+        latest_version="0.15.6",
+        latest_release_date="2026-03-15T00:00:00+00:00",
+        metadata_source="cache",
+        version_gap="up-to-date",
+        release_age_days=4,
+        upgrade_signal="watch",
+        risk_score=10,
+        manifest_action="none",
+        suggested_version=None,
+        impact_area="quality-tooling",
+        repo_usage_count=0,
+        repo_usage_tier="declared-only",
+        repo_usage_files=[],
+        validation_commands=["bash quality.sh ci"],
+        next_action="Keep validating recent quality-tooling releases.",
+        notes=["Latest release is fresh enough to justify a fast-follow check."],
+    )
+    stale = doctor.upgrade_audit.PackageReport(
+        name="httpx",
+        sources=["pyproject.toml"],
+        groups=["default"],
+        requirements=["httpx==0.28.1"],
+        pinned_versions=["0.28.1"],
+        project_python_requires=">=3.11",
+        current_version="0.28.1",
+        target_version="0.28.1",
+        target_release_date="2024-01-01T00:00:00+00:00",
+        latest_compatible_version="0.28.1",
+        latest_compatible_release_date="2024-01-01T00:00:00+00:00",
+        compatibility_status="compatible-latest",
+        alignment="aligned",
+        constraint_status="allowed",
+        latest_version="0.28.1",
+        latest_release_date="2024-01-01T00:00:00+00:00",
+        metadata_source="cache",
+        version_gap="up-to-date",
+        release_age_days=430,
+        upgrade_signal="watch",
+        risk_score=12,
+        manifest_action="none",
+        suggested_version=None,
+        impact_area="runtime-core",
+        repo_usage_count=2,
+        repo_usage_tier="active",
+        repo_usage_files=["src/sdetkit/netclient.py"],
+        validation_commands=["bash quality.sh cov"],
+        next_action="Review stale runtime-core baselines on the next maintenance pass.",
+        notes=["Runtime dependency baseline is aging."],
+    )
+
+    reports = [stale, fresh]
+    json_payload = json.loads(
+        doctor.upgrade_audit._render_json(
+            reports,
+            pyproject_path=Path("pyproject.toml"),
+            requirement_paths=[Path("requirements.txt")],
+        )
+    )
+    markdown_payload = doctor.upgrade_audit._render_markdown(
+        reports,
+        pyproject_path=Path("pyproject.toml"),
+        requirement_paths=[Path("requirements.txt")],
+    )
+
+    assert json_payload["summary"]["fresh_release_packages"] == 1
+    assert json_payload["summary"]["stale_release_packages"] == 1
+    assert json_payload["release_freshness"][0]["release_freshness"] in {
+        "fresh-release",
+        "stale",
+    }
+    assert "## Release freshness" in markdown_payload
+    assert "fresh releases (<=14d)" in markdown_payload
+    assert "stale releases (>365d)" in markdown_payload
