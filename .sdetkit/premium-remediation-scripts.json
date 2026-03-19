@@ -1,0 +1,26 @@
+{
+  "scripts": [
+    {
+      "script_id": "ruff_format_apply",
+      "reason": "Apply Ruff formatting automatically when premium gate sees style or doctor drift.",
+      "command": ["python3", "-m", "ruff", "format", "."],
+      "artifact_paths": ["doctor.json"],
+      "priority": "high",
+      "score_bonus": 26,
+      "trigger_sources": ["doctor"],
+      "trigger_steps": ["quality", "ruff_format", "ruff_lint"],
+      "requires_files": ["pyproject.toml"]
+    },
+    {
+      "script_id": "ruff_check_fix",
+      "reason": "Run Ruff autofix to clear lint-level premium gate issues before the doctor refresh.",
+      "command": ["python3", "-m", "ruff", "check", "--fix", "."],
+      "artifact_paths": ["doctor.json"],
+      "priority": "high",
+      "score_bonus": 24,
+      "trigger_sources": ["doctor"],
+      "trigger_steps": ["quality", "ruff_lint"],
+      "requires_files": ["pyproject.toml"]
+    }
+  ]
+}

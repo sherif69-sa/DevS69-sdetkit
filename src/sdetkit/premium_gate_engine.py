@@ -5,6 +5,7 @@ import ast
 import hashlib
 import http.server
 import json
+import shutil
 import sqlite3
 import subprocess
 import sys
@@ -156,6 +157,7 @@ class ScriptRunResult:
 
 
 _PRIORITY_RANK = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+DEFAULT_SCRIPT_CATALOG = ".sdetkit/premium-remediation-scripts.json"
 
 
 def _safe_text(value: Any) -> str:
@@ -597,12 +599,131 @@ def _failed_step_ids(payload: dict[str, Any]) -> set[str]:
     return failed
 
 
+def _matched_sources(payload: dict[str, Any], trigger_sources: list[str]) -> list[str]:
+    matched: list[str] = []
+    wanted = {_safe_text(item) for item in trigger_sources if _safe_text(item)}
+    if not wanted:
+        return matched
+    for key in ("warnings", "engine_checks", "recommendations"):
+        items = payload.get(key, [])
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            source = _safe_text(item.get("source"))
+            if source in wanted and source not in matched:
+                matched.append(source)
+    return matched
+
+
+def _load_script_catalog(path: Path) -> list[dict[str, Any]]:
+    payload = _load_json(path)
+    if not payload:
+        return []
+    scripts = payload.get("scripts")
+    if not isinstance(scripts, list):
+        return []
+    return [item for item in scripts if isinstance(item, dict)]
+
+
+def _command_available(command: list[str]) -> bool:
+    if not command:
+        return False
+    executable = _safe_text(command[0])
+    if not executable:
+        return False
+    if executable in {sys.executable, "python", "python3", "bash", "sh"}:
+        return True
+    return shutil.which(executable) is not None
+
+
+def _catalog_candidates(
+    payload: dict[str, Any],
+    *,
+    fix_root: Path,
+    failed_steps: set[str],
+    hotspot_counts: dict[str, Any],
+    auto_fix_results: list[AutoFixResult] | None = None,
+    script_catalog_path: Path | None = None,
+) -> list[ScriptCandidate]:
+    if script_catalog_path is None:
+        return []
+    resolved_catalog = script_catalog_path
+    entries = _load_script_catalog(resolved_catalog)
+    if not entries:
+        return []
+
+    autofix_applied = any(item.status == "fixed" for item in auto_fix_results or [])
+    candidates: list[ScriptCandidate] = []
+    for entry in entries:
+        script_id = _safe_text(entry.get("script_id"))
+        reason = _safe_text(entry.get("reason"))
+        command = entry.get("command")
+        if not script_id or not reason or not isinstance(command, list):
+            continue
+        normalized_command = [_safe_text(item) for item in command if _safe_text(item)]
+        if not normalized_command or not _command_available(normalized_command):
+            continue
+
+        trigger_sources = [
+            _safe_text(item) for item in entry.get("trigger_sources", []) if _safe_text(item)
+        ]
+        matched_sources = _matched_sources(payload, trigger_sources)
+        trigger_steps = {
+            _safe_text(item) for item in entry.get("trigger_steps", []) if _safe_text(item)
+        }
+        matched_steps = sorted(step for step in failed_steps if step in trigger_steps)
+        trigger_on_autofix = bool(entry.get("trigger_on_autofix", False))
+
+        if (
+            not matched_sources
+            and not matched_steps
+            and not (trigger_on_autofix and autofix_applied)
+        ):
+            continue
+
+        requires_files = [
+            _safe_text(item) for item in entry.get("requires_files", []) if _safe_text(item)
+        ]
+        if requires_files and any(not (fix_root / rel).exists() for rel in requires_files):
+            continue
+
+        artifact_paths = [
+            _safe_text(item) for item in entry.get("artifact_paths", []) if _safe_text(item)
+        ]
+        priority = _safe_text(entry.get("priority"))
+        if priority not in _PRIORITY_RANK:
+            priority = "medium"
+        score_bonus = int(entry.get("score_bonus", 0) or 0)
+        score = score_bonus
+        for source in matched_sources:
+            score += int(hotspot_counts.get(source, 0)) * 10
+        score += len(matched_steps) * 8
+        if trigger_on_autofix and autofix_applied:
+            score += 6
+
+        candidates.append(
+            ScriptCandidate(
+                script_id=script_id,
+                reason=reason,
+                command=normalized_command,
+                artifact_paths=artifact_paths,
+                priority=priority,
+                score=score,
+                trigger_sources=sorted(set(matched_sources) | set(matched_steps)),
+            )
+        )
+    return candidates
+
+
 def _build_script_candidates(
     payload: dict[str, Any],
     *,
     out_dir: Path,
     fix_root: Path,
     auto_fix_results: list[AutoFixResult] | None = None,
+    script_catalog_path: Path | None = None,
 ) -> list[ScriptCandidate]:
     candidates: list[ScriptCandidate] = []
     failed_steps = _failed_step_ids(payload)
@@ -766,6 +887,17 @@ def _build_script_candidates(
             )
         )
 
+    candidates.extend(
+        _catalog_candidates(
+            payload,
+            fix_root=fix_root,
+            failed_steps=failed_steps,
+            hotspot_counts=hotspot_counts,
+            auto_fix_results=auto_fix_results,
+            script_catalog_path=script_catalog_path,
+        )
+    )
+
     deduped: list[ScriptCandidate] = []
     seen: set[str] = set()
     for candidate in candidates:
@@ -786,12 +918,14 @@ def _build_script_plan(
     fix_root: Path,
     auto_fix_results: list[AutoFixResult] | None = None,
     max_scripts: int = 4,
+    script_catalog_path: Path | None = None,
 ) -> dict[str, Any]:
     candidates = _build_script_candidates(
         payload,
         out_dir=out_dir,
         fix_root=fix_root,
         auto_fix_results=auto_fix_results,
+        script_catalog_path=script_catalog_path,
     )
     selected = candidates[: max(0, max_scripts)]
     deferred = candidates[max(0, max_scripts) :]
@@ -823,6 +957,12 @@ def _build_script_plan(
         "max_scripts": max(0, max_scripts),
         "candidate_count": len(candidates),
     }
+
+
+def _smart_script_kwargs(script_catalog_path: Path | None) -> dict[str, Any]:
+    if script_catalog_path is None:
+        return {}
+    return {"script_catalog_path": script_catalog_path}
 
 
 def _run_script_candidate(
@@ -860,12 +1000,14 @@ def run_smart_scripts(
     fix_root: Path,
     auto_fix_results: list[AutoFixResult] | None = None,
     max_scripts: int = 4,
+    script_catalog_path: Path | None = None,
 ) -> tuple[list[ScriptCandidate], list[ScriptRunResult]]:
     candidates = _build_script_candidates(
         payload,
         out_dir=out_dir,
         fix_root=fix_root,
         auto_fix_results=auto_fix_results,
+        script_catalog_path=script_catalog_path,
     )
     selected = candidates[: max(0, max_scripts)]
     results = [
@@ -1535,6 +1677,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--learn-commit", action="store_true")
     parser.add_argument("--list-guidelines", action="store_true")
     parser.add_argument("--search", default=None)
+    parser.add_argument("--script-catalog", default=None)
     parser.add_argument("--serve-api", action="store_true")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8799)
@@ -1558,6 +1701,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     fix_root = Path(ns.fix_root)
+    script_catalog_path = Path(ns.script_catalog) if ns.script_catalog else None
     payload = collect_signals(out_dir)
     payload = _apply_learned_guideline_actions(payload, db_path)
 
@@ -1596,6 +1740,7 @@ def main(argv: list[str] | None = None) -> int:
             fix_root=fix_root,
             auto_fix_results=fixes,
             max_scripts=int(ns.max_auto_scripts),
+            **_smart_script_kwargs(script_catalog_path),
         )
         selected_scripts, script_results = run_smart_scripts(
             payload,
@@ -1603,6 +1748,7 @@ def main(argv: list[str] | None = None) -> int:
             fix_root=fix_root,
             auto_fix_results=fixes,
             max_scripts=int(ns.max_auto_scripts),
+            **_smart_script_kwargs(script_catalog_path),
         )
         refreshed = collect_signals(out_dir)
         refreshed = _apply_learned_guideline_actions(refreshed, db_path)
@@ -1654,6 +1800,7 @@ def main(argv: list[str] | None = None) -> int:
             fix_root=fix_root,
             auto_fix_results=fixes,
             max_scripts=int(ns.max_auto_scripts),
+            **_smart_script_kwargs(script_catalog_path),
         )
         Path(ns.plan_output).write_text(
             json.dumps(plan_payload, indent=2, sort_keys=True) + "\n",
