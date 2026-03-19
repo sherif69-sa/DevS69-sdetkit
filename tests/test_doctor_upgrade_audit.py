@@ -223,4 +223,99 @@ def test_doctor_upgrade_audit_supports_query_and_action_filters(
     assert meta["filters"]["manifest_actions"] == ["plan-major-upgrade"]
     assert meta["filters"]["top"] == 1
     assert meta["priority_queue"][0]["name"] == "mypy"
+    assert meta["action_summary"][0]["manifest_action"] == "plan-major-upgrade"
+    assert meta["group_summary"][0]["group"] == "dev"
+    assert meta["source_summary"][0]["source"] == "pyproject.toml"
     assert any("mypy" in hint for hint in payload["hints"])
+
+
+def test_doctor_upgrade_audit_supports_package_source_and_usage_filters(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_minimal_pyproject(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    deps = [
+        doctor.upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="default",
+            raw="httpx>=0.28.1,<1",
+            name="httpx",
+            pinned_version=None,
+        ),
+        doctor.upgrade_audit.Dependency(
+            source="requirements-docs.txt",
+            group="docs",
+            raw="mkdocs-material==9.7.5",
+            name="mkdocs-material",
+            pinned_version="9.7.5",
+        ),
+    ]
+
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+    )
+    monkeypatch.setattr(
+        doctor.upgrade_audit,
+        "_collect_repo_usage",
+        lambda *_args, **_kwargs: {
+            "httpx": ["src/sdetkit/netclient.py", "tests/test_netclient_extra.py"],
+            "mkdocs-material": [],
+        },
+    )
+    monkeypatch.setattr(
+        doctor.upgrade_audit,
+        "_collect_package_metadata",
+        lambda *_args, **_kwargs: {
+            "httpx": doctor.upgrade_audit.PackageMetadata(
+                latest_version="0.29.0",
+                release_date="2026-03-01T00:00:00+00:00",
+                compatible_version="0.29.0",
+                compatible_release_date="2026-03-01T00:00:00+00:00",
+                compatibility_status="compatible-latest",
+                source="cache-stale",
+            ),
+            "mkdocs-material": doctor.upgrade_audit.PackageMetadata(
+                latest_version="9.7.6",
+                release_date="2026-03-01T00:00:00+00:00",
+                compatible_version="9.7.6",
+                compatible_release_date="2026-03-01T00:00:00+00:00",
+                compatibility_status="compatible-latest",
+                source="pypi",
+            ),
+        },
+    )
+
+    rc = doctor.main(
+        [
+            "--upgrade-audit",
+            "--upgrade-audit-package",
+            "httpx",
+            "--upgrade-audit-source",
+            "pyproject.toml",
+            "--upgrade-audit-metadata-source",
+            "cache-stale",
+            "--upgrade-audit-repo-usage-tier",
+            "active",
+            "--upgrade-audit-used-in-repo-only",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    meta = payload["checks"]["upgrade_audit"]["meta"]
+    assert meta["packages_audited"] == 2
+    assert meta["packages_in_scope"] == 1
+    assert meta["filters"]["packages"] == ["httpx"]
+    assert meta["filters"]["sources"] == ["pyproject.toml"]
+    assert meta["filters"]["metadata_sources"] == ["cache-stale"]
+    assert meta["filters"]["repo_usage_tiers"] == ["active"]
+    assert meta["filters"]["used_in_repo_only"] is True
+    assert meta["priority_queue"][0]["name"] == "httpx"
+    assert meta["source_summary"][0]["source"] == "pyproject.toml"
