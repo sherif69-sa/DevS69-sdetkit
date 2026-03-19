@@ -30,6 +30,7 @@ class ProjectsConfigError(ValueError):
 class RepoProject:
     name: str
     root: str
+    kind: str | None
     config_path: str | None
     profile: str | None
     packs: tuple[str, ...]
@@ -42,6 +43,7 @@ class ResolvedRepoProject:
     name: str
     root: Path
     root_rel: str
+    kind: str | None
     config_path: Path | None
     config_rel: str | None
     profile: str | None
@@ -310,6 +312,48 @@ def _csproj_project_name(csproj: Path) -> str | None:
     return csproj.stem or None
 
 
+def _detect_project_identity(project_dir: Path, filenames: set[str]) -> tuple[str | None, str | None]:
+    if "pyproject.toml" in filenames:
+        if name := _pyproject_project_name(project_dir / "pyproject.toml"):
+            return name, "python"
+    if "Cargo.toml" in filenames:
+        if name := _cargo_project_name(project_dir / "Cargo.toml"):
+            return name, "rust"
+    if "go.mod" in filenames:
+        if name := _go_module_name(project_dir / "go.mod"):
+            return name, "go"
+    if "package.json" in filenames:
+        if name := _package_json_project_name(project_dir / "package.json"):
+            return name, "node"
+    if "pom.xml" in filenames:
+        if name := _maven_project_name(project_dir / "pom.xml"):
+            return name, "maven"
+    if "settings.gradle" in filenames or "settings.gradle.kts" in filenames:
+        settings_name = "settings.gradle" if "settings.gradle" in filenames else "settings.gradle.kts"
+        if name := _gradle_project_name(project_dir / settings_name):
+            return name, "gradle"
+    csproj_files = sorted(name for name in filenames if name.endswith(".csproj"))
+    if csproj_files:
+        if name := _csproj_project_name(project_dir / csproj_files[0]):
+            return name, "dotnet"
+    return None, None
+
+
+def _infer_project_kind(repo_root: Path, root_rel: str, config_rel: str | None) -> str | None:
+    candidate_dir = repo_root / root_rel
+    filenames: set[str] = set()
+    try:
+        if candidate_dir.is_dir():
+            filenames.update(path.name for path in candidate_dir.iterdir() if path.is_file())
+    except OSError:
+        pass
+    if config_rel:
+        config_name = Path(config_rel).name
+        filenames.add(config_name)
+    _, kind = _detect_project_identity(candidate_dir, filenames)
+    return kind
+
+
 def _autodiscover_roots(*, data: dict[str, Any] | None, field_prefix: str) -> tuple[str, ...]:
     if data is None:
         return _AUTODISCOVER_BASES
@@ -358,46 +402,22 @@ def _autodiscover_projects(
             dirnames[:] = sorted(
                 d for d in dirnames if d not in _SKIP_DIRS and not d.startswith(".")
             )
-            has_pyproject = "pyproject.toml" in filenames
-            has_cargo_toml = "Cargo.toml" in filenames
-            has_go_mod = "go.mod" in filenames
-            has_package_json = "package.json" in filenames
-            has_pom_xml = "pom.xml" in filenames
-            has_gradle_settings = (
-                "settings.gradle" in filenames or "settings.gradle.kts" in filenames
-            )
-            csproj_files = sorted(name for name in filenames if name.endswith(".csproj"))
+            filename_set = set(filenames)
             if not any(
                 (
-                    has_pyproject,
-                    has_cargo_toml,
-                    has_go_mod,
-                    has_package_json,
-                    has_pom_xml,
-                    has_gradle_settings,
-                    csproj_files,
+                    "pyproject.toml" in filename_set,
+                    "Cargo.toml" in filename_set,
+                    "go.mod" in filename_set,
+                    "package.json" in filename_set,
+                    "pom.xml" in filename_set,
+                    "settings.gradle" in filename_set,
+                    "settings.gradle.kts" in filename_set,
+                    any(name.endswith(".csproj") for name in filename_set),
                 )
             ):
                 continue
             project_dir = Path(dirpath)
-            name: str | None = None
-            if has_pyproject:
-                name = _pyproject_project_name(project_dir / "pyproject.toml")
-            if not name and has_cargo_toml:
-                name = _cargo_project_name(project_dir / "Cargo.toml")
-            if not name and has_go_mod:
-                name = _go_module_name(project_dir / "go.mod")
-            if not name and has_package_json:
-                name = _package_json_project_name(project_dir / "package.json")
-            if not name and has_pom_xml:
-                name = _maven_project_name(project_dir / "pom.xml")
-            if not name and has_gradle_settings:
-                settings_name = (
-                    "settings.gradle" if "settings.gradle" in filenames else "settings.gradle.kts"
-                )
-                name = _gradle_project_name(project_dir / settings_name)
-            if not name and csproj_files:
-                name = _csproj_project_name(project_dir / csproj_files[0])
+            name, kind = _detect_project_identity(project_dir, filename_set)
             if not name:
                 continue
             root_rel = project_dir.relative_to(repo_root).as_posix()
@@ -411,6 +431,7 @@ def _autodiscover_projects(
                 RepoProject(
                     name=name,
                     root=_normalize_rel(root_rel, field="root"),
+                    kind=kind,
                     config_path=None,
                     profile=None,
                     packs=(),
@@ -475,22 +496,17 @@ def discover_projects(
             raise ProjectsConfigError(f"duplicate project root: {normalized_root}")
         seen_names.add(name)
         seen_roots.add(normalized_root)
+        cfg = _as_str(entry.get("config"), field="config")
+        baseline = _as_str(entry.get("baseline"), field="baseline")
         projects.append(
             RepoProject(
                 name=name,
                 root=normalized_root,
-                config_path=(
-                    _normalize_rel(cfg, field="config")
-                    if (cfg := _as_str(entry.get("config"), field="config"))
-                    else None
-                ),
+                kind=_infer_project_kind(repo_root, normalized_root, cfg),
+                config_path=_normalize_rel(cfg, field="config") if cfg else None,
                 profile=_as_str(entry.get("profile"), field="profile"),
                 packs=_as_str_list_or_csv(entry.get("packs"), field="packs"),
-                baseline_path=(
-                    _normalize_rel(base, field="baseline")
-                    if (base := _as_str(entry.get("baseline"), field="baseline"))
-                    else None
-                ),
+                baseline_path=_normalize_rel(baseline, field="baseline") if baseline else None,
                 exclude_paths=_as_str_list_or_csv(entry.get("exclude"), field="exclude"),
             )
         )
@@ -516,6 +532,7 @@ def resolve_project(repo_root: Path, project: RepoProject) -> ResolvedRepoProjec
         name=project.name,
         root=root,
         root_rel=root_rel,
+        kind=project.kind,
         config_path=(repo_root / project.config_path).resolve(strict=False)
         if project.config_path
         else None,

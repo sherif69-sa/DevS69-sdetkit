@@ -46,6 +46,8 @@ packs = "core,security"
 - List discovered projects:
   - `sdetkit repo projects list .`
   - `sdetkit repo projects list . --json`
+  - `sdetkit repo projects list . --kind python`
+  - `sdetkit repo projects list . --kind node --json`
 - Aggregate audit:
   - `sdetkit repo audit . --all-projects`
   - `sdetkit repo audit . --all-projects --format json`
@@ -58,6 +60,10 @@ packs = "core,security"
 
 - Project discovery is deterministic (manifest order).
 - `--sort` switches to alphabetical project ordering.
+- Project listings now include an inferred `kind` (`python`, `node`, `rust`, `go`,
+  `maven`, `gradle`, `dotnet`, or `unknown`) and a summary count by kind.
+- `repo projects list --kind ...` lets you filter large monorepos down to only the
+  ecosystems you want to audit or inspect first.
 - JSON aggregate schema: `sdetkit.audit.aggregate.v1`.
 - SARIF output emits one SARIF file with separate `runs` per project.
 - Baseline default per project root is `.sdetkit/audit-baseline.json`.
