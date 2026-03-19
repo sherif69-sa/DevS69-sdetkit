@@ -279,6 +279,13 @@ def main(argv: list[str] | None = None) -> int:
         ],
         default=None,
     )
+    ua.add_argument(
+        "--repo-usage-tier",
+        action="append",
+        choices=["hot-path", "active", "edge", "declared-only"],
+        default=None,
+    )
+    ua.add_argument("--used-in-repo-only", action="store_true")
     ua.add_argument("--outdated-only", action="store_true")
     ua.add_argument("--top", type=int, default=None)
     ua.add_argument("--include-prereleases", action="store_true")
@@ -329,6 +336,8 @@ def main(argv: list[str] | None = None) -> int:
                 metadata_sources=ns.metadata_source,
                 impact_areas=ns.impact_area,
                 manifest_actions=ns.manifest_action,
+                repo_usage_tiers=ns.repo_usage_tier,
+                used_in_repo_only=bool(ns.used_in_repo_only),
                 outdated_only=bool(ns.outdated_only),
                 top=ns.top,
                 include_prereleases=bool(ns.include_prereleases),
