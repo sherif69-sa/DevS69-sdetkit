@@ -91,6 +91,7 @@ Run a dependency-manifest audit against PyPI to identify candidate upgrades, det
 ```bash
 make upgrade-audit
 python -m sdetkit intelligence upgrade-audit --format json --top 5
+python -m sdetkit intelligence upgrade-audit --include-prereleases --package httpx
 python -m sdetkit intelligence upgrade-audit --format md --offline
 python -m sdetkit intelligence upgrade-audit --outdated-only --package "http*"
 python -m sdetkit intelligence upgrade-audit --group default --source pyproject.toml --format md
@@ -98,10 +99,13 @@ python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 python scripts/upgrade_audit.py --fail-on high
 python scripts/upgrade_audit.py --cache-ttl-hours 6 --max-workers 12
 python scripts/upgrade_audit.py --offline --format md
+python scripts/upgrade_audit.py --include-prereleases --signal high
 python scripts/upgrade_audit.py --signal high --policy blocked --top 5
 python scripts/upgrade_audit.py --metadata-source cache-stale --outdated-only
 python scripts/upgrade_audit.py --group requirements --source requirements.txt --top 10
 ```
+
+By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue.
 
 ## Sample artifacts
 

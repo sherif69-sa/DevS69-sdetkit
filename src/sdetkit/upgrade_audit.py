@@ -225,6 +225,7 @@ def _latest_pypi_metadata(
     timeout_s: float,
     *,
     project_python_requires: str | None,
+    include_prereleases: bool,
 ) -> tuple[str, str | None, str | None, str | None, str]:
     url = f"https://pypi.org/pypi/{package}/json"
     request = urllib.request.Request(url, headers={"User-Agent": "sdetkit-upgrade-audit/2.1"})
@@ -245,6 +246,7 @@ def _latest_pypi_metadata(
     compatible_version, compatible_release_date, compatibility_status = _latest_compatible_release(
         payload,
         project_python_requires=project_python_requires,
+        include_prereleases=include_prereleases,
     )
     return version, release_date, compatible_version, compatible_release_date, compatibility_status
 
@@ -277,9 +279,16 @@ def _persist_cache(cache_path: Path, cache: dict[str, dict[str, str | float | No
     cache_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _cache_entry_fresh(entry: dict[str, str | float | None], ttl_hours: float) -> bool:
+def _cache_entry_fresh(
+    entry: dict[str, str | float | None],
+    ttl_hours: float,
+    *,
+    include_prereleases: bool,
+) -> bool:
     fetched_at = entry.get("fetched_at")
     if not isinstance(fetched_at, (int, float)):
+        return False
+    if entry.get("include_prereleases") is not include_prereleases:
         return False
     age_s = dt.datetime.now(dt.UTC).timestamp() - float(fetched_at)
     return age_s <= max(ttl_hours, 0) * 3600
@@ -319,14 +328,28 @@ def _fetch_package_metadata(
     cache_ttl_hours: float,
     offline: bool,
     project_python_requires: str | None,
+    include_prereleases: bool,
 ) -> PackageMetadata:
     cached_entry = cache.get(package)
-    if cached_entry and _cache_entry_fresh(cached_entry, cache_ttl_hours):
+    if cached_entry and _cache_entry_fresh(
+        cached_entry,
+        cache_ttl_hours,
+        include_prereleases=include_prereleases,
+    ):
         return _metadata_from_cache(cached_entry, source="cache")
 
     if offline:
         if cached_entry:
-            return _metadata_from_cache(cached_entry, source="cache-stale")
+            source = (
+                "cache"
+                if _cache_entry_fresh(
+                    cached_entry,
+                    cache_ttl_hours,
+                    include_prereleases=include_prereleases,
+                )
+                else "cache-stale"
+            )
+            return _metadata_from_cache(cached_entry, source=source)
         return PackageMetadata(
             latest_version="offline-no-cache",
             release_date=None,
@@ -347,6 +370,7 @@ def _fetch_package_metadata(
             package,
             timeout_s=timeout_s,
             project_python_requires=project_python_requires,
+            include_prereleases=include_prereleases,
         )
     except urllib.error.HTTPError as exc:
         latest_version, release_date = f"http-{exc.code}", None
@@ -359,6 +383,7 @@ def _fetch_package_metadata(
 
     cache[package] = {
         "fetched_at": dt.datetime.now(dt.UTC).timestamp(),
+        "include_prereleases": include_prereleases,
         "latest_version": latest_version,
         "release_date": release_date,
         "compatible_version": compatible_version,
@@ -384,6 +409,7 @@ def _collect_package_metadata(
     offline: bool,
     max_workers: int,
     project_python_requires: str | None,
+    include_prereleases: bool,
 ) -> dict[str, PackageMetadata]:
     cache = _load_cache(cache_path)
     metadata: dict[str, PackageMetadata] = {}
@@ -397,6 +423,7 @@ def _collect_package_metadata(
                 cache_ttl_hours=cache_ttl_hours,
                 offline=offline,
                 project_python_requires=project_python_requires,
+                include_prereleases=include_prereleases,
             )
     else:
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
@@ -409,6 +436,7 @@ def _collect_package_metadata(
                     cache_ttl_hours=cache_ttl_hours,
                     offline=offline,
                     project_python_requires=project_python_requires,
+                    include_prereleases=include_prereleases,
                 ): package
                 for package in packages
             }
@@ -559,10 +587,16 @@ def _release_date_from_files(release_files: list[dict[str, object]]) -> str | No
     return sorted(dates)[0] if dates else None
 
 
+def _is_prerelease_version(version: str) -> bool:
+    normalized = version.strip().lower()
+    return bool(re.search(r"(?<![a-z])(a|alpha|b|beta|rc|c|pre|preview|dev)\d*", normalized))
+
+
 def _latest_compatible_release(
     payload: dict[str, object],
     *,
     project_python_requires: str | None,
+    include_prereleases: bool,
 ) -> tuple[str | None, str | None, str]:
     releases = payload.get("releases", {})
     if not isinstance(releases, dict):
@@ -573,6 +607,8 @@ def _latest_compatible_release(
     latest_status = "unknown"
     for version, release_files in sorted(releases.items(), key=lambda item: _version_key(str(item[0])), reverse=True):
         if not isinstance(version, str) or not isinstance(release_files, list):
+            continue
+        if not include_prereleases and _is_prerelease_version(version):
             continue
         compatible, status = _release_is_python_compatible(
             release_files,
@@ -1260,6 +1296,7 @@ def run(
     metadata_sources: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
+    include_prereleases: bool = False,
 ) -> int:
     dependencies = _load_dependencies(pyproject_path, requirement_paths)
     project_python_requires = _load_project_python_requires(pyproject_path)
@@ -1272,18 +1309,20 @@ def run(
     for dep in dependencies:
         by_package.setdefault(dep.name, []).append(dep)
 
-    packages = sorted(by_package)
+    package_filters = packages
+    package_names = sorted(by_package)
     metadata_by_package = _collect_package_metadata(
-        packages,
+        package_names,
         timeout_s=timeout_s,
         cache_path=cache_path,
         cache_ttl_hours=cache_ttl_hours,
         offline=offline,
         max_workers=max_workers,
         project_python_requires=project_python_requires,
+        include_prereleases=include_prereleases,
     )
     reports: list[PackageReport] = []
-    for package in packages:
+    for package in package_names:
         metadata = metadata_by_package[package]
         reports.append(
             _build_package_report(
@@ -1307,7 +1346,7 @@ def run(
         reports,
         signals=signals,
         policies=policies,
-        packages=packages,
+        packages=package_filters,
         groups=groups,
         sources=sources,
         metadata_sources=metadata_sources,
@@ -1387,6 +1426,11 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         "--offline",
         action="store_true",
         help="Skip PyPI calls and use cached metadata when available.",
+    )
+    parser.add_argument(
+        "--include-prereleases",
+        action="store_true",
+        help="Include prerelease/dev versions when choosing compatible upgrade targets.",
     )
     parser.add_argument(
         "--max-workers",
@@ -1492,6 +1536,7 @@ def main(argv: list[str] | None = None) -> int:
         metadata_sources=args.metadata_source,
         outdated_only=bool(args.outdated_only),
         top=args.top,
+        include_prereleases=bool(args.include_prereleases),
     )
 
 
