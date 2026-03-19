@@ -6,7 +6,9 @@
 
 - `sdetkit doctor --all --format json`
 - `sdetkit doctor --dev --ci --deps --clean-tree --repo --format md`
+- `sdetkit doctor --upgrade-audit --upgrade-audit-offline --format json`
 - `sdetkit doctor --only pyproject --format json`
+- `bash quality.sh doctor`
 
 ## Contract
 
@@ -28,6 +30,10 @@
 - stdlib-shadowing and non-ASCII hygiene
 
 Each failing check includes actionable remediation (`fix`) and supporting evidence.
+
+When `--upgrade-audit` is enabled, `doctor` also emits ranked dependency-maintenance hints with
+repo impact areas, recommended lanes, and validation commands so dependency planning becomes part
+of the same readiness report.
 
 ## Determinism
 
