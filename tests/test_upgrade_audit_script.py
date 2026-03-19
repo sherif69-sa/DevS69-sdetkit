@@ -372,6 +372,7 @@ def test_render_json_summary_counts() -> None:
         "stale_metadata_packages": 0,
     }
     assert payload["repo_usage"][0]["repo_usage_tier"] == "declared-only"
+    assert payload["hotspots"] == []
     assert payload["packages"][0]["name"] == "httpx"
 
 
@@ -874,6 +875,7 @@ def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
     )
 
     assert "## Recommended upgrade lanes" in rendered
+    assert "## Repo hotspots" in rendered
     assert "## Repo impact map" in rendered
     assert "## Dependency groups" in rendered
     assert "## Manifest sources" in rendered
@@ -1185,6 +1187,43 @@ def test_action_summary_groups_packages_by_manifest_action() -> None:
     assert summary[0]["manifest_action"] == "stage-upgrade"
     assert summary[0]["count"] == 2
     assert summary[0]["packages"] == ["httpx", "pytest"]
+
+
+def test_repo_hotspots_prioritize_actionable_shared_paths() -> None:
+    reports = [
+        _report(
+            name="httpx",
+            manifest_action="stage-upgrade",
+            risk_score=60,
+            repo_usage_files=["src/sdetkit/netclient.py", "src/sdetkit/doctor.py"],
+            validation_commands=["bash ci.sh quick --skip-docs --artifact-dir build"],
+        ),
+        _report(
+            name="pytest",
+            manifest_action="refresh-pin",
+            risk_score=50,
+            repo_usage_files=["src/sdetkit/doctor.py"],
+            validation_commands=["bash quality.sh ci"],
+        ),
+        _report(
+            name="ruff",
+            manifest_action="none",
+            risk_score=10,
+            repo_usage_files=["src/sdetkit/doctor.py"],
+            validation_commands=["bash quality.sh cov"],
+        ),
+    ]
+
+    hotspots = upgrade_audit._repo_hotspots(reports)
+
+    assert hotspots[0]["path"] == "src/sdetkit/doctor.py"
+    assert hotspots[0]["actionable_packages"] == 2
+    assert hotspots[0]["packages"] == ["httpx", "pytest", "ruff"]
+    assert hotspots[0]["validation_commands"] == [
+        "bash ci.sh quick --skip-docs --artifact-dir build",
+        "bash quality.sh ci",
+        "bash quality.sh cov",
+    ]
 
 
 def test_filter_reports_supports_impact_area_filters() -> None:

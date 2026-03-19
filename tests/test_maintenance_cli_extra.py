@@ -86,6 +86,41 @@ def test_main_json_output_and_write_file(monkeypatch, tmp_path: Path, capsys) ->
     assert (tmp_path / "reports/m.json").exists()
 
 
+def test_renderers_include_quality_signals_and_hints(tmp_path: Path) -> None:
+    report = {
+        "ok": False,
+        "score": 50,
+        "checks": {
+            "doctor_check": {
+                "ok": False,
+                "summary": "doctor score 82% (1 failed, 1 hint(s))",
+                "details": {
+                    "quality": {
+                        "passed_checks": 2,
+                        "failed_checks": 1,
+                        "skipped_checks": 0,
+                        "pass_rate": 67,
+                    },
+                    "hint_samples": ["impact quality-tooling: 1 actionable package(s)"],
+                },
+                "actions": [],
+            }
+        },
+        "recommendations": [
+            "Doctor hint spotlight: impact quality-tooling: 1 actionable package(s)"
+        ],
+        "meta": {"mode": "quick"},
+    }
+
+    text = mcli._render_text(report)
+    md = mcli._render_markdown(report)
+
+    assert "quality: 2 passed / 1 failed / 0 skipped" in text
+    assert "hint: impact quality-tooling: 1 actionable package(s)" in text
+    assert "### Quality signals" in md
+    assert "### Hint samples" in md
+
+
 def test_main_handles_unknown_format_keyerror(monkeypatch) -> None:
     class _NS:
         format = "broken"

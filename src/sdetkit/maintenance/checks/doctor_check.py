@@ -45,18 +45,61 @@ def run(ctx: MaintenanceContext) -> CheckResult:
                 )
             ],
         )
+    quality = parsed.get("quality", {}) if isinstance(parsed, dict) else {}
+    hints = parsed.get("hints", []) if isinstance(parsed, dict) else []
+    quality_failed = int(quality.get("failed_checks", 0)) if isinstance(quality, dict) else 0
+    hint_count = len(hints) if isinstance(hints, list) else 0
+    summary = f"doctor score {parsed.get('score', 0)}%"
+    if quality_failed or hint_count:
+        summary += f" ({quality_failed} failed, {hint_count} hint(s))"
+
+    actions = [
+        CheckAction(
+            id="doctor-run",
+            title="Run doctor checks",
+            applied=False,
+            notes="Use `sdetkit doctor --all` for detailed review",
+        )
+    ]
+    next_actions = parsed.get("next_actions", []) if isinstance(parsed, dict) else []
+    if isinstance(next_actions, list):
+        for item in next_actions[:3]:
+            if not isinstance(item, dict):
+                continue
+            check_id = str(item.get("id", "")).strip() or "doctor-follow-up"
+            fixes = item.get("fix", [])
+            first_fix = ""
+            if isinstance(fixes, list) and fixes:
+                first_fix = str(fixes[0]).strip()
+            title = first_fix or str(item.get("summary", "")).strip() or "Inspect doctor finding"
+            if title:
+                actions.append(
+                    CheckAction(
+                        id=f"doctor-{check_id}",
+                        title=title,
+                        applied=False,
+                        notes=str(item.get("severity", "medium")),
+                    )
+                )
+
     return CheckResult(
         ok=bool(parsed.get("ok", False)),
-        summary=f"doctor score {parsed.get('score', 0)}%",
-        details={"doctor": parsed, "exit_code": code},
-        actions=[
-            CheckAction(
-                id="doctor-run",
-                title="Run doctor checks",
-                applied=False,
-                notes="Use `sdetkit doctor --all` for detailed review",
-            )
-        ],
+        summary=summary,
+        details={
+            "doctor": parsed,
+            "exit_code": code,
+            "quality": quality if isinstance(quality, dict) else {},
+            "hint_samples": hints[:5] if isinstance(hints, list) else [],
+            "priority_queue": parsed.get("checks", {})
+            .get("upgrade_audit", {})
+            .get("meta", {})
+            .get("priority_queue", []),
+            "hotspots": parsed.get("checks", {})
+            .get("upgrade_audit", {})
+            .get("meta", {})
+            .get("hotspots", []),
+        },
+        actions=actions,
     )
 
 
