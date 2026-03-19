@@ -1114,6 +1114,15 @@ def _fix_yaml_safe_load(path: Path) -> bool:
     return False
 
 
+def _fix_subprocess_shell_false(path: Path) -> bool:
+    text = path.read_text(encoding="utf-8")
+    out = text.replace("shell=True", "shell=False")
+    if out != text:
+        path.write_text(out, encoding="utf-8")
+        return True
+    return False
+
+
 def _inject_requests_timeout(text: str, timeout: int) -> str:
     try:
         tree = ast.parse(text)
@@ -1306,10 +1315,14 @@ def main(argv: list[str] | None = None) -> int:
                 before = py_file.read_text(encoding="utf-8")
                 did_change = _fix_yaml_safe_load(py_file) if should_apply else False
                 did_change = (
+                    _fix_subprocess_shell_false(py_file) if should_apply else False
+                ) or did_change
+                did_change = (
                     _fix_requests_timeout(py_file, ns.timeout) if should_apply else False
                 ) or did_change
                 if not should_apply:
                     candidate = re.sub(r"\byaml\.load\s*\(", "yaml.safe_load(", before)
+                    candidate = candidate.replace("shell=True", "shell=False")
                     candidate = _inject_requests_timeout(candidate, ns.timeout)
                     if candidate != before:
                         rel = py_file.relative_to(root).as_posix()
@@ -1338,7 +1351,7 @@ def main(argv: list[str] | None = None) -> int:
                 if previews:
                     sys.stdout.write("\n".join(previews[:5]) + "\n")
                 sys.stdout.write(
-                    "notes: risky transforms are not auto-applied; use manual remediation for complex subprocess/eval patterns.\n"
+                    "notes: safe deterministic yaml/timeout/shell fixes are previewed; use manual remediation for complex subprocess/eval patterns.\n"
                 )
                 sys.stdout.write(f"security fix complete; candidate files: {changed}\n")
             return 0

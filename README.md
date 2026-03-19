@@ -129,6 +129,8 @@ The doctor surface now carries those same upgrade-audit focus controls, so you c
 
 The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, can merge in repo-local smart fix scripts from `.sdetkit/premium-remediation-scripts.json`, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 
+The security auto-remediation lane is stronger too: premium gate can now prioritize a built-in `security_fix_apply` smart script before baseline-aware security re-triage, and the security fixer now safely rewrites `shell=True` to `shell=False` alongside request timeout injection and `yaml.safe_load` upgrades for deterministic repo-safe cleanup.
+
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.
 
 ## Sample artifacts

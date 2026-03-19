@@ -92,6 +92,19 @@ def test_security_fix_dry_run_previews_and_applies_requests_timeout(tmp_path: Pa
     assert "timeout=10" in target.read_text(encoding="utf-8")
 
 
+def test_security_fix_dry_run_previews_and_applies_shell_false(tmp_path: Path, capsys) -> None:
+    target = tmp_path / "cmd.py"
+    target.write_text("import subprocess\nsubprocess.run('echo hi', shell=True)\n", encoding="utf-8")
+
+    assert _run(["fix", "--root", str(tmp_path)]) == 0
+    dry_out = capsys.readouterr().out
+    assert "+subprocess.run('echo hi', shell=False)" in dry_out
+    assert "shell=False" not in target.read_text(encoding="utf-8")
+
+    assert _run(["fix", "--root", str(tmp_path), "--apply"]) == 0
+    assert "shell=False" in target.read_text(encoding="utf-8")
+
+
 def test_premium_gate_script_smoke_contains_commands() -> None:
     text = Path("premium-gate.sh").read_text(encoding="utf-8")
     assert "bash quality.sh ci" in text

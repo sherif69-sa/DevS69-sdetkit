@@ -150,7 +150,7 @@ def test_auto_fix_applies_supported_security_rules(tmp_path: Path) -> None:
         json.dumps(
             {
                 "findings": [
-                    {"rule_id": "SEC_REQUESTS_NO_TIMEOUT", "path": "src/app.py"},
+                    {"rule_id": "SEC_NETWORK_TIMEOUT", "path": "src/app.py"},
                     {"rule_id": "SEC_SUBPROCESS_SHELL_TRUE", "path": "src/app.py"},
                     {"rule_id": "SEC_YAML_LOAD", "path": "src/app.py"},
                 ]
@@ -426,10 +426,10 @@ def test_build_script_candidates_targets_doctor_maintenance_and_security(tmp_pat
 
     ids = [item.script_id for item in candidates]
     assert ids[:4] == [
+        "security_fix_apply",
         "gate_fast_fix_only",
         "security_triage_refresh",
         "maintenance_fix",
-        "doctor_refresh",
     ]
     assert candidates[0].score >= candidates[-1].score
     assert candidates[0].priority in {"high", "critical"}
