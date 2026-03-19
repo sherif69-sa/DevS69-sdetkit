@@ -81,6 +81,13 @@ SIGNAL_PRIORITY = {
     "unknown": 1,
 }
 DEFAULT_CACHE_PATH = Path(".sdetkit/cache/upgrade-audit-cache.json")
+RELEASE_FRESHNESS_BUCKETS = (
+    "fresh-release",
+    "current",
+    "aging",
+    "stale",
+    "unknown",
+)
 COMMON_IMPORT_ALIASES = {
     "python-telegram-bot": {"telegram"},
     "twilio": {"twilio"},
@@ -854,6 +861,18 @@ def _release_age_days(release_date: str | None) -> int | None:
     return max((now - uploaded).days, 0)
 
 
+def _release_freshness_bucket(release_age_days: int | None) -> str:
+    if release_age_days is None:
+        return "unknown"
+    if release_age_days <= 14:
+        return "fresh-release"
+    if release_age_days <= 90:
+        return "current"
+    if release_age_days <= 365:
+        return "aging"
+    return "stale"
+
+
 def _build_package_report(
     name: str,
     deps: list[Dependency],
@@ -1329,6 +1348,27 @@ def _repo_hotspots(reports: list[PackageReport], *, limit: int = 5) -> list[dict
     return hotspots
 
 
+def _release_freshness_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {bucket: [] for bucket in RELEASE_FRESHNESS_BUCKETS}
+    for report in reports:
+        buckets[_release_freshness_bucket(report.release_age_days)].append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (-len(item[1]), RELEASE_FRESHNESS_BUCKETS.index(item[0])),
+    )
+    return [
+        {
+            "release_freshness": bucket,
+            "count": len(items),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "packages": [report.name for report in items[:5]],
+        }
+        for bucket, items in ordered
+        if items
+    ]
+
+
 def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
     return {
         "packages_audited": len(reports),
@@ -1385,6 +1425,27 @@ def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
         ),
         "integration_adapter_packages": sum(
             1 for report in reports if report.impact_area == "integration-adapters"
+        ),
+        "fresh_release_packages": sum(
+            1
+            for report in reports
+            if _release_freshness_bucket(report.release_age_days) == "fresh-release"
+        ),
+        "current_release_packages": sum(
+            1
+            for report in reports
+            if _release_freshness_bucket(report.release_age_days) == "current"
+        ),
+        "aging_release_packages": sum(
+            1 for report in reports if _release_freshness_bucket(report.release_age_days) == "aging"
+        ),
+        "stale_release_packages": sum(
+            1 for report in reports if _release_freshness_bucket(report.release_age_days) == "stale"
+        ),
+        "unknown_release_age_packages": sum(
+            1
+            for report in reports
+            if _release_freshness_bucket(report.release_age_days) == "unknown"
         ),
         "max_risk_score": max((report.risk_score for report in reports), default=0),
     }
@@ -1542,6 +1603,8 @@ def _filter_reports(
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
     queries: list[str] | None = None,
+    min_release_age_days: int | None = None,
+    max_release_age_days: int | None = None,
     used_in_repo_only: bool = False,
     outdated_only: bool = False,
     top: int | None = None,
@@ -1583,6 +1646,20 @@ def _filter_reports(
     if queries:
         query_terms = [item.strip().lower() for item in queries if item.strip()]
         filtered = [report for report in filtered if _matches_text_query(report, query_terms)]
+    if min_release_age_days is not None:
+        filtered = [
+            report
+            for report in filtered
+            if report.release_age_days is not None
+            and report.release_age_days >= min_release_age_days
+        ]
+    if max_release_age_days is not None:
+        filtered = [
+            report
+            for report in filtered
+            if report.release_age_days is not None
+            and report.release_age_days <= max_release_age_days
+        ]
     if used_in_repo_only:
         filtered = [report for report in filtered if report.repo_usage_count > 0]
     if outdated_only:
@@ -1628,6 +1705,11 @@ def _render_markdown(
         f"- runtime core packages: {summary['runtime_core_packages']}",
         f"- quality tooling packages: {summary['quality_tooling_packages']}",
         f"- integration adapter packages: {summary['integration_adapter_packages']}",
+        f"- fresh releases (<=14d): {summary['fresh_release_packages']}",
+        f"- current releases (15-90d): {summary['current_release_packages']}",
+        f"- aging releases (91-365d): {summary['aging_release_packages']}",
+        f"- stale releases (>365d): {summary['stale_release_packages']}",
+        f"- unknown release age packages: {summary['unknown_release_age_packages']}",
         "",
         "| Package | Impact | Repo usage | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
@@ -1682,6 +1764,13 @@ def _render_markdown(
             + (f" — {pkg_list}" if pkg_list else "")
             + (f" — validate with {validations}" if validations else "")
         )
+    lines.extend(["", "## Release freshness", ""])
+    for item in _release_freshness_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- **{item['release_freshness']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
     lines.extend(["", "## Manifest actions", ""])
     for item in _action_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
@@ -1729,6 +1818,7 @@ def _render_json(
         "repo_usage": _repo_usage_summary(reports),
         "hotspots": _repo_hotspots(reports),
         "impact": _impact_summary(reports),
+        "release_freshness": _release_freshness_summary(reports),
         "actions": _action_summary(reports),
         "groups": _group_summary(reports),
         "sources": _source_summary(reports),
@@ -1776,6 +1866,8 @@ def run(
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
     queries: list[str] | None = None,
+    min_release_age_days: int | None = None,
+    max_release_age_days: int | None = None,
     used_in_repo_only: bool = False,
     outdated_only: bool = False,
     top: int | None = None,
@@ -1862,6 +1954,8 @@ def run(
         manifest_actions=manifest_actions,
         repo_usage_tiers=repo_usage_tiers,
         queries=queries,
+        min_release_age_days=min_release_age_days,
+        max_release_age_days=max_release_age_days,
         used_in_repo_only=used_in_repo_only,
         outdated_only=outdated_only,
         top=top,
@@ -2037,6 +2131,18 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--min-release-age-days",
+        type=int,
+        default=None,
+        help="Show only packages whose target release is at least N days old.",
+    )
+    parser.add_argument(
+        "--max-release-age-days",
+        type=int,
+        default=None,
+        help="Show only packages whose target release is at most N days old.",
+    )
+    parser.add_argument(
         "--used-in-repo-only",
         action="store_true",
         help="Show only packages imported from tracked src/tests Python files.",
@@ -2102,6 +2208,8 @@ def main(argv: list[str] | None = None) -> int:
         manifest_actions=args.manifest_action,
         repo_usage_tiers=args.repo_usage_tier,
         queries=args.query,
+        min_release_age_days=args.min_release_age_days,
+        max_release_age_days=args.max_release_age_days,
         used_in_repo_only=bool(args.used_in_repo_only),
         outdated_only=bool(args.outdated_only),
         top=args.top,

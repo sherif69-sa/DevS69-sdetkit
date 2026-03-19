@@ -699,6 +699,30 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
                 recs.append(rec)
             if len(recs) >= 6:
                 break
+    release_freshness_summary = upgrade_meta.get("release_freshness_summary", [])
+    if isinstance(release_freshness_summary, list):
+        for item in release_freshness_summary:
+            if not isinstance(item, dict):
+                continue
+            freshness = str(item.get("release_freshness", "")).strip()
+            count = int(item.get("count", 0))
+            actionable = int(item.get("actionable_packages", 0))
+            packages = item.get("packages", [])
+            package_text = ", ".join(
+                str(name).strip() for name in packages[:3] if str(name).strip()
+            )
+            if freshness == "fresh-release" and count > 0:
+                rec = f"Fresh release watchlist: {count} package(s) landed in the last 14 days."
+                if package_text:
+                    rec += f" Review {package_text} for fast-follow validation."
+                recs.append(rec)
+            elif freshness == "stale" and actionable > 0:
+                rec = f"Stale dependency lane: {actionable} actionable package(s) target releases older than a year."
+                if package_text:
+                    rec += f" Start with {package_text}."
+                recs.append(rec)
+            if len(recs) >= 6:
+                break
     if not recs:
         recs.append(
             "No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality."
@@ -773,7 +797,7 @@ def _build_quality_summary(
     }
 
 
-def _build_hints(data: dict[str, Any], *, limit: int = 5) -> list[str]:
+def _build_hints(data: dict[str, Any], *, limit: int = 7) -> list[str]:
     hints: list[str] = []
 
     next_actions = data.get("next_actions", [])
@@ -868,6 +892,28 @@ def _build_hints(data: dict[str, Any], *, limit: int = 5) -> list[str]:
                     detail += f" — validate with {command_text}"
                 hints.append(detail)
 
+    release_freshness_summary = upgrade_meta.get("release_freshness_summary", [])
+    if isinstance(release_freshness_summary, list):
+        for item in release_freshness_summary[:2]:
+            if not isinstance(item, dict):
+                continue
+            freshness = str(item.get("release_freshness", "")).strip()
+            count = int(item.get("count", 0))
+            actionable = int(item.get("actionable_packages", 0))
+            packages = item.get("packages", [])
+            package_text = ""
+            if isinstance(packages, list) and packages:
+                package_text = ", ".join(
+                    str(name).strip() for name in packages[:3] if str(name).strip()
+                )
+            if freshness and count > 0:
+                detail = f"release freshness {freshness}: {count} package(s)"
+                if actionable > 0:
+                    detail += f", actionable {actionable}"
+                if package_text:
+                    detail += f" — includes {package_text}"
+                hints.append(detail)
+
     action_summary = upgrade_meta.get("action_summary", [])
     if isinstance(action_summary, list):
         for item in action_summary[:2]:
@@ -952,6 +998,8 @@ def _check_upgrade_audit(
     repo_usage_tiers: list[str] | None = None,
     used_in_repo_only: bool = False,
     outdated_only: bool = False,
+    min_release_age_days: int | None = None,
+    max_release_age_days: int | None = None,
     top: int | None = None,
 ) -> tuple[bool, str, list[dict[str, Any]], list[str], dict[str, Any]]:
     pyproject_path = root / "pyproject.toml"
@@ -1034,6 +1082,8 @@ def _check_upgrade_audit(
         manifest_actions=manifest_actions,
         repo_usage_tiers=repo_usage_tiers,
         queries=queries,
+        min_release_age_days=min_release_age_days,
+        max_release_age_days=max_release_age_days,
         used_in_repo_only=used_in_repo_only,
         outdated_only=outdated_only,
         top=top,
@@ -1106,6 +1156,7 @@ def _check_upgrade_audit(
         "impact_summary": upgrade_audit._impact_summary(filtered_reports),
         "repo_usage_summary": upgrade_audit._repo_usage_summary(filtered_reports),
         "hotspots": upgrade_audit._repo_hotspots(filtered_reports),
+        "release_freshness_summary": upgrade_audit._release_freshness_summary(filtered_reports),
         "action_summary": upgrade_audit._action_summary(filtered_reports),
         "group_summary": upgrade_audit._group_summary(filtered_reports),
         "source_summary": upgrade_audit._source_summary(filtered_reports),
@@ -1122,6 +1173,8 @@ def _check_upgrade_audit(
             "impact_areas": impact_areas or [],
             "manifest_actions": manifest_actions or [],
             "repo_usage_tiers": repo_usage_tiers or [],
+            "min_release_age_days": min_release_age_days,
+            "max_release_age_days": max_release_age_days,
             "used_in_repo_only": used_in_repo_only,
             "outdated_only": outdated_only,
             "top": top,
@@ -1406,6 +1459,8 @@ def main(argv: list[str] | None = None) -> int:
         "--upgrade-audit-manifest-action",
         "--upgrade-audit-repo-usage-tier",
         "--upgrade-audit-top",
+        "--upgrade-audit-min-release-age-days",
+        "--upgrade-audit-max-release-age-days",
     }
     i = 0
     while i < len(args0):
@@ -1537,6 +1592,20 @@ def main(argv: list[str] | None = None) -> int:
         choices=["hot-path", "active", "edge", "declared-only"],
         default=None,
         help="Focus doctor upgrade-audit hints on packages by repo-usage tier.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-min-release-age-days",
+        dest="upgrade_audit_min_release_age_days",
+        type=int,
+        default=None,
+        help="Focus doctor upgrade-audit hints on packages whose target release is at least N days old.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-max-release-age-days",
+        dest="upgrade_audit_max_release_age_days",
+        type=int,
+        default=None,
+        help="Focus doctor upgrade-audit hints on packages whose target release is at most N days old.",
     )
     parser.add_argument(
         "--upgrade-audit-used-in-repo-only",
@@ -1983,6 +2052,8 @@ def main(argv: list[str] | None = None) -> int:
             impact_areas=ns.upgrade_audit_impact_areas,
             manifest_actions=ns.upgrade_audit_manifest_actions,
             repo_usage_tiers=ns.upgrade_audit_repo_usage_tiers,
+            min_release_age_days=ns.upgrade_audit_min_release_age_days,
+            max_release_age_days=ns.upgrade_audit_max_release_age_days,
             used_in_repo_only=bool(ns.upgrade_audit_used_in_repo_only),
             outdated_only=bool(ns.upgrade_audit_outdated_only),
             top=ns.upgrade_audit_top,
