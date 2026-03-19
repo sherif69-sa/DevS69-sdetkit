@@ -12,7 +12,6 @@ from .atomicio import canonical_json_dumps
 from .cassette import Cassette
 from .security import SecurityError, safe_path
 
-
 REQUIRED_APP_SERVICE_RULES = (
     ("api-gateway", "go"),
     ("ml-serving", "python"),
@@ -219,7 +218,9 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
     data_role_aliases = {
         _normalize(svc.get("name")): _normalize(svc.get("role")) for svc in data_services
     }
-    mock_name_aliases = {_normalize(svc.get("name")): _normalize(svc.get("name")) for svc in mocked_platforms}
+    mock_name_aliases = {
+        _normalize(svc.get("name")): _normalize(svc.get("name")) for svc in mocked_platforms
+    }
     distinct_languages = sorted({lang for lang in language_map.values() if lang})
     checks.append(
         {
@@ -331,7 +332,8 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
             {
                 "kind": "deployment",
                 "name": f"{name}:production-scale",
-                "passed": len(production_regions) >= 1 and any(replicas >= 2 for replicas in production_replicas),
+                "passed": len(production_regions) >= 1
+                and any(replicas >= 2 for replicas in production_replicas),
                 "production_regions": sorted(production_regions),
                 "production_replicas": production_replicas,
             }
@@ -487,7 +489,9 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
         fidelity = sorted(
             {_normalize(item) for item in platform.get("fidelity", []) if _normalize(item)}
         )
-        operations = [op for op in platform.get("operations", []) if isinstance(op, str) and op.strip()]
+        operations = [
+            op for op in platform.get("operations", []) if isinstance(op, str) and op.strip()
+        ]
         checks.append(
             {
                 "kind": "mock-platform",
