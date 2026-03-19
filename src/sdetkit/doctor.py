@@ -854,6 +854,38 @@ def _build_hints(data: dict[str, Any], *, limit: int = 5) -> list[str]:
                     detail += f" — validate with {command_text}"
                 hints.append(detail)
 
+    action_summary = upgrade_meta.get("action_summary", [])
+    if isinstance(action_summary, list):
+        for item in action_summary[:2]:
+            if not isinstance(item, dict):
+                continue
+            action = str(item.get("manifest_action", "")).strip()
+            count = int(item.get("count", 0))
+            packages = item.get("packages", [])
+            package_text = ""
+            if isinstance(packages, list) and packages:
+                package_text = ", ".join(
+                    str(name).strip() for name in packages[:3] if str(name).strip()
+                )
+            if action and count > 0:
+                detail = f"action {action}: {count} package(s)"
+                if package_text:
+                    detail += f" — includes {package_text}"
+                hints.append(detail)
+
+    for key, label in (("group_summary", "group"), ("source_summary", "source")):
+        summary_rows = upgrade_meta.get(key, [])
+        if not isinstance(summary_rows, list):
+            continue
+        for item in summary_rows[:2]:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get(label, "")).strip()
+            count = int(item.get("count", 0))
+            actionable = int(item.get("actionable_packages", 0))
+            if name and count > 0 and actionable > 0:
+                hints.append(f"{label} {name}: {count} package(s), actionable {actionable}")
+
     deduped: list[str] = []
     seen: set[str] = set()
     for hint in hints:
@@ -869,9 +901,18 @@ def _check_upgrade_audit(
     root: Path,
     *,
     offline: bool,
+    signals: list[str] | None = None,
+    policies: list[str] | None = None,
+    packages: list[str] | None = None,
+    groups: list[str] | None = None,
+    sources: list[str] | None = None,
+    metadata_sources: list[str] | None = None,
     queries: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
+    repo_usage_tiers: list[str] | None = None,
+    used_in_repo_only: bool = False,
+    outdated_only: bool = False,
     top: int | None = None,
 ) -> tuple[bool, str, list[dict[str, Any]], list[str], dict[str, Any]]:
     pyproject_path = root / "pyproject.toml"
@@ -944,9 +985,18 @@ def _check_upgrade_audit(
     reports = upgrade_audit._sort_reports(reports)
     filtered_reports = upgrade_audit._filter_reports(
         reports,
+        signals=signals,
+        policies=policies,
+        packages=packages,
+        groups=groups,
+        sources=sources,
+        metadata_sources=metadata_sources,
         impact_areas=impact_areas,
         manifest_actions=manifest_actions,
+        repo_usage_tiers=repo_usage_tiers,
         queries=queries,
+        used_in_repo_only=used_in_repo_only,
+        outdated_only=outdated_only,
         top=top,
     )
     actionable = [
@@ -1016,12 +1066,24 @@ def _check_upgrade_audit(
         "lane_summary": upgrade_audit._lane_summary(filtered_reports),
         "impact_summary": upgrade_audit._impact_summary(filtered_reports),
         "repo_usage_summary": upgrade_audit._repo_usage_summary(filtered_reports),
+        "action_summary": upgrade_audit._action_summary(filtered_reports),
+        "group_summary": upgrade_audit._group_summary(filtered_reports),
+        "source_summary": upgrade_audit._source_summary(filtered_reports),
         "offline": offline,
         "requirements": [path.name for path in requirement_paths],
         "filters": {
+            "signals": signals or [],
+            "policies": policies or [],
+            "packages": packages or [],
+            "groups": groups or [],
+            "sources": sources or [],
+            "metadata_sources": metadata_sources or [],
             "queries": queries or [],
             "impact_areas": impact_areas or [],
             "manifest_actions": manifest_actions or [],
+            "repo_usage_tiers": repo_usage_tiers or [],
+            "used_in_repo_only": used_in_repo_only,
+            "outdated_only": outdated_only,
             "top": top,
         },
     }
@@ -1282,6 +1344,17 @@ def main(argv: list[str] | None = None) -> int:
         "--apply-plan",
         "--snapshot",
         "--diff-snapshot",
+        "--upgrade-audit-signal",
+        "--upgrade-audit-policy",
+        "--upgrade-audit-package",
+        "--upgrade-audit-group",
+        "--upgrade-audit-source",
+        "--upgrade-audit-metadata-source",
+        "--upgrade-audit-query",
+        "--upgrade-audit-impact-area",
+        "--upgrade-audit-manifest-action",
+        "--upgrade-audit-repo-usage-tier",
+        "--upgrade-audit-top",
     }
     i = 0
     while i < len(args0):
@@ -1314,6 +1387,51 @@ def main(argv: list[str] | None = None) -> int:
         dest="upgrade_audit_offline",
         action="store_true",
         help="Use cached metadata only for upgrade-audit hints.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-signal",
+        dest="upgrade_audit_signals",
+        action="append",
+        choices=["critical", "high", "medium", "watch", "investigate", "unknown"],
+        default=None,
+        help="Focus doctor upgrade-audit hints on specific upgrade signal severities.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-policy",
+        dest="upgrade_audit_policies",
+        action="append",
+        choices=["allowed", "blocked", "no-spec"],
+        default=None,
+        help="Focus doctor upgrade-audit hints on version-policy status.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-package",
+        dest="upgrade_audit_packages",
+        action="append",
+        default=None,
+        help="Focus doctor upgrade-audit hints on one or more package names or glob patterns.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-group",
+        dest="upgrade_audit_groups",
+        action="append",
+        default=None,
+        help="Focus doctor upgrade-audit hints on dependency groups such as default, dev, test, or docs.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-source",
+        dest="upgrade_audit_sources",
+        action="append",
+        default=None,
+        help="Focus doctor upgrade-audit hints on manifest sources such as pyproject.toml or requirements.txt.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-metadata-source",
+        dest="upgrade_audit_metadata_sources",
+        action="append",
+        choices=["pypi", "cache", "cache-stale", "offline-no-cache", "error"],
+        default=None,
+        help="Focus doctor upgrade-audit hints on where package metadata came from.",
     )
     parser.add_argument(
         "--upgrade-audit-query",
@@ -1360,6 +1478,26 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=None,
         help="Limit doctor upgrade-audit hint generation to the highest-risk N matching packages.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-repo-usage-tier",
+        dest="upgrade_audit_repo_usage_tiers",
+        action="append",
+        choices=["hot-path", "active", "edge", "declared-only"],
+        default=None,
+        help="Focus doctor upgrade-audit hints on packages by repo-usage tier.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-used-in-repo-only",
+        dest="upgrade_audit_used_in_repo_only",
+        action="store_true",
+        help="Limit doctor upgrade-audit hints to dependencies that appear in repo code or tests.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-outdated-only",
+        dest="upgrade_audit_outdated_only",
+        action="store_true",
+        help="Limit doctor upgrade-audit hints to actionable upgrades only.",
     )
     parser.add_argument("--dev", action="store_true")
     parser.add_argument("--pyproject", action="store_true")
@@ -1784,9 +1922,18 @@ def main(argv: list[str] | None = None) -> int:
         ua_ok, ua_summary, ua_evidence, ua_fix, ua_meta = _check_upgrade_audit(
             root,
             offline=bool(ns.upgrade_audit_offline),
+            signals=ns.upgrade_audit_signals,
+            policies=ns.upgrade_audit_policies,
+            packages=ns.upgrade_audit_packages,
+            groups=ns.upgrade_audit_groups,
+            sources=ns.upgrade_audit_sources,
+            metadata_sources=ns.upgrade_audit_metadata_sources,
             queries=ns.upgrade_audit_queries,
             impact_areas=ns.upgrade_audit_impact_areas,
             manifest_actions=ns.upgrade_audit_manifest_actions,
+            repo_usage_tiers=ns.upgrade_audit_repo_usage_tiers,
+            used_in_repo_only=bool(ns.upgrade_audit_used_in_repo_only),
+            outdated_only=bool(ns.upgrade_audit_outdated_only),
             top=ns.upgrade_audit_top,
         )
         data["upgrade_audit_ok"] = ua_ok

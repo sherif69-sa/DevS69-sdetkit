@@ -111,12 +111,14 @@ python scripts/upgrade_audit.py --group requirements --source requirements.txt -
 python -m sdetkit doctor --upgrade-audit --upgrade-audit-offline --format json
 python -m sdetkit doctor --upgrade-audit --upgrade-audit-query quality --upgrade-audit-impact-area quality-tooling --upgrade-audit-top 5 --format md
 python -m sdetkit doctor --upgrade-audit --upgrade-audit-manifest-action refresh-pin --upgrade-audit-top 3 --format json
+python -m sdetkit doctor --upgrade-audit --upgrade-audit-package "http*" --upgrade-audit-source pyproject.toml --upgrade-audit-metadata-source cache-stale --format json
+python -m sdetkit doctor --upgrade-audit --upgrade-audit-policy blocked --upgrade-audit-repo-usage-tier hot-path --upgrade-audit-used-in-repo-only --format md
 bash quality.sh doctor
 ```
 
 By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch. Use `--query` when you want text search across package names, notes, repo-usage files, recommended lanes, and validation commands without pre-classifying the package first.
 
-The doctor surface now carries those same upgrade-audit focus controls, so you can search and narrow dependency work without leaving the readiness report. It also emits a quality summary block with pass/fail/skipped counts, pass rate, failing check IDs, and hint coverage so the readiness signal is easier to scan in CI, markdown, and JSON outputs.
+The doctor surface now carries those same upgrade-audit focus controls, so you can search and narrow dependency work without leaving the readiness report. In addition to query, impact-area, and manifest-action targeting, doctor now supports package, manifest source, metadata source, signal, policy, and repo-usage-tier filters plus `--upgrade-audit-used-in-repo-only` / `--upgrade-audit-outdated-only` for tighter maintenance slices. The readiness payload also exposes grouped action, dependency-group, and manifest-source summaries so CI and PR checks can explain which upgrade lane is hottest without re-running the full audit. It also emits a quality summary block with pass/fail/skipped counts, pass rate, failing check IDs, and hint coverage so the readiness signal is easier to scan in CI, markdown, and JSON outputs.
 
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.
 
