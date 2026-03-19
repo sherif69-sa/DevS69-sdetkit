@@ -13,9 +13,7 @@ def _write_minimal_pyproject(root: Path) -> None:
     )
 
 
-def test_doctor_upgrade_audit_emits_priority_hints(
-    tmp_path: Path, monkeypatch, capsys
-) -> None:
+def test_doctor_upgrade_audit_emits_priority_hints(tmp_path: Path, monkeypatch, capsys) -> None:
     _write_minimal_pyproject(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -27,7 +25,9 @@ def test_doctor_upgrade_audit_emits_priority_hints(
         pinned_version=None,
     )
 
-    monkeypatch.setattr(doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: []
+    )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: [dep])
     monkeypatch.setattr(
         doctor.upgrade_audit,
@@ -60,7 +60,16 @@ def test_doctor_upgrade_audit_emits_priority_hints(
     payload = json.loads(capsys.readouterr().out)
     assert payload["checks"]["upgrade_audit"]["ok"] is True
     assert payload["checks"]["upgrade_audit"]["meta"]["priority_queue"][0]["name"] == "httpx"
+    assert (
+        payload["checks"]["upgrade_audit"]["meta"]["lane_summary"][0]["lane"] == "refresh-baselines"
+    )
+    assert (
+        payload["checks"]["upgrade_audit"]["meta"]["impact_summary"][0]["impact_area"]
+        == "runtime-core"
+    )
     assert any("httpx" in hint for hint in payload["hints"])
+    assert any("impact runtime-core" in hint for hint in payload["hints"])
+    assert any("Runtime lane follow-up" in item for item in payload["recommendations"])
 
 
 def test_doctor_only_upgrade_audit_reports_drift_failure(
@@ -86,13 +95,19 @@ def test_doctor_only_upgrade_audit_reports_drift_failure(
         ),
     ]
 
-    monkeypatch.setattr(doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: []
+    )
     monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
-    monkeypatch.setattr(doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11")
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+    )
     monkeypatch.setattr(
         doctor.upgrade_audit,
         "_collect_repo_usage",
-        lambda *_args, **_kwargs: {"httpx": ["src/sdetkit/netclient.py", "tests/test_netclient_extra.py"]},
+        lambda *_args, **_kwargs: {
+            "httpx": ["src/sdetkit/netclient.py", "tests/test_netclient_extra.py"]
+        },
     )
     monkeypatch.setattr(
         doctor.upgrade_audit,

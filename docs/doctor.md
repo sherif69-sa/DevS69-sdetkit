@@ -33,7 +33,9 @@ Each failing check includes actionable remediation (`fix`) and supporting eviden
 
 When `--upgrade-audit` is enabled, `doctor` also emits ranked dependency-maintenance hints with
 repo impact areas, recommended lanes, and validation commands so dependency planning becomes part
-of the same readiness report.
+of the same readiness report. The upgrade-audit metadata now also carries lane and impact summaries,
+so doctor recommendations can call out quality-tooling, runtime-core, and integration-adapter work
+with concrete follow-up commands instead of only listing raw packages.
 
 ## Determinism
 

@@ -420,8 +420,14 @@ dependencies = ["httpx>=0.27,<1"]
     assert "actionable upgrade candidates: 1" in out
     assert "declared-only packages: 1" in out
     assert "runtime core packages: 1" in out
-    assert "Impact | Repo usage | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
-    assert "`httpx` | runtime-core | declared-only (0) | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
+    assert (
+        "Impact | Repo usage | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested"
+        in out
+    )
+    assert (
+        "`httpx` | runtime-core | declared-only (0) | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |"
+        in out
+    )
     assert "Priority queue" in out
     assert "Repo usage tiers" in out
     assert "Repo impact map" in out
@@ -1219,6 +1225,35 @@ def test_filter_reports_supports_repo_usage_filters() -> None:
     assert [report.name for report in filtered] == ["httpx", "ruff"]
 
 
+def test_filter_reports_supports_text_query_across_actions_and_notes() -> None:
+    reports = [
+        _report(
+            name="httpx",
+            manifest_action="stage-upgrade",
+            impact_area="runtime-core",
+            next_action="Queue the upgrade for the next maintenance batch.",
+            notes=["Observed in src/sdetkit/netclient.py."],
+            repo_usage_files=["src/sdetkit/netclient.py"],
+            validation_commands=["bash ci.sh quick --skip-docs --artifact-dir build"],
+        ),
+        _report(
+            name="ruff",
+            manifest_action="none",
+            impact_area="quality-tooling",
+            next_action="Keep under observation; no immediate action required.",
+            notes=["Latest metadata source: cache."],
+            validation_commands=["bash quality.sh ci"],
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        queries=["runtime-core", "netclient.py", "stage-upgrade"],
+    )
+
+    assert [report.name for report in filtered] == ["httpx"]
+
+
 def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
@@ -1237,6 +1272,8 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
             "pyproject.toml",
             "--repo-usage-tier",
             "hot-path",
+            "--query",
+            "runtime-core",
             "--used-in-repo-only",
         ]
     )
@@ -1250,6 +1287,7 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.impact_area is None
     assert args.manifest_action is None
     assert args.repo_usage_tier == ["hot-path"]
+    assert args.query == ["runtime-core"]
     assert args.used_in_repo_only is True
     assert args.include_prereleases is False
     assert requirement_paths == []

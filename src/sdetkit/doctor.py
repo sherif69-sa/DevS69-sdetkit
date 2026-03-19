@@ -666,8 +666,39 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
             suggested = item.get("suggested_version")
             next_action = str(item.get("next_action", "")).strip()
             if name and action and action != "none":
-                version_text = f" to {suggested}" if isinstance(suggested, str) and suggested else ""
-                recs.append(f"Upgrade-audit priority: {name} via {action}{version_text}. {next_action}")
+                version_text = (
+                    f" to {suggested}" if isinstance(suggested, str) and suggested else ""
+                )
+                recs.append(
+                    f"Upgrade-audit priority: {name} via {action}{version_text}. {next_action}"
+                )
+    impact_summary = upgrade_meta.get("impact_summary", [])
+    if isinstance(impact_summary, list):
+        for item in impact_summary:
+            if not isinstance(item, dict) or int(item.get("actionable_packages", 0)) <= 0:
+                continue
+            impact_area = str(item.get("impact_area", "")).strip()
+            commands = item.get("validation_commands", [])
+            command_text = ""
+            if isinstance(commands, list) and commands:
+                command_text = str(commands[0]).strip()
+            if impact_area == "quality-tooling":
+                rec = "Quality lane follow-up: batch actionable quality-tooling upgrades with full gate reruns."
+                if command_text:
+                    rec += f" Start with {command_text}."
+                recs.append(rec)
+            elif impact_area == "runtime-core":
+                rec = "Runtime lane follow-up: validate runtime-core dependency upgrades against the fast gate first."
+                if command_text:
+                    rec += f" Start with {command_text}."
+                recs.append(rec)
+            elif impact_area == "integration-adapters":
+                rec = "Integration lane follow-up: keep adapter upgrades isolated and verify notification/integration tests."
+                if command_text:
+                    rec += f" Start with {command_text}."
+                recs.append(rec)
+            if len(recs) >= 6:
+                break
     if not recs:
         recs.append(
             "No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality."
@@ -689,7 +720,11 @@ def _build_hints(data: dict[str, Any]) -> list[str]:
             first_fix = ""
             if isinstance(fix_list, list) and fix_list:
                 first_fix = str(fix_list[0]).strip()
-            parts = [part for part in [f"{check_id}: {summary}" if check_id and summary else "", first_fix] if part]
+            parts = [
+                part
+                for part in [f"{check_id}: {summary}" if check_id and summary else "", first_fix]
+                if part
+            ]
             if parts:
                 hints.append(" — ".join(parts))
 
@@ -718,6 +753,42 @@ def _build_hints(data: dict[str, Any]) -> list[str]:
                 detail += f" — validate with {validation}"
             hints.append(detail)
 
+    lane_summary = upgrade_meta.get("lane_summary", [])
+    if isinstance(lane_summary, list):
+        for item in lane_summary[:2]:
+            if not isinstance(item, dict):
+                continue
+            lane = str(item.get("lane", "")).strip()
+            count = int(item.get("count", 0))
+            packages = item.get("packages", [])
+            package_text = ""
+            if isinstance(packages, list) and packages:
+                package_text = ", ".join(
+                    str(name).strip() for name in packages[:3] if str(name).strip()
+                )
+            if lane and count > 0:
+                detail = f"lane {lane}: {count} package(s)"
+                if package_text:
+                    detail += f" — focus on {package_text}"
+                hints.append(detail)
+
+    impact_summary = upgrade_meta.get("impact_summary", [])
+    if isinstance(impact_summary, list):
+        for item in impact_summary[:2]:
+            if not isinstance(item, dict):
+                continue
+            impact_area = str(item.get("impact_area", "")).strip()
+            actionable = int(item.get("actionable_packages", 0))
+            commands = item.get("validation_commands", [])
+            command_text = ""
+            if isinstance(commands, list) and commands:
+                command_text = str(commands[0]).strip()
+            if impact_area and actionable > 0:
+                detail = f"impact {impact_area}: {actionable} actionable package(s)"
+                if command_text:
+                    detail += f" — validate with {command_text}"
+                hints.append(detail)
+
     deduped: list[str] = []
     seen: set[str] = set()
     for hint in hints:
@@ -739,7 +810,13 @@ def _check_upgrade_audit(
         return (
             False,
             "pyproject.toml is missing for upgrade audit",
-            [{"type": "missing_file", "message": "pyproject.toml is missing", "path": "pyproject.toml"}],
+            [
+                {
+                    "type": "missing_file",
+                    "message": "pyproject.toml is missing",
+                    "path": "pyproject.toml",
+                }
+            ],
             ["Add pyproject.toml before running upgrade audit checks."],
             {},
         )
@@ -811,7 +888,9 @@ def _check_upgrade_audit(
         top_signal = str(top.get("signal", "")).strip()
         top_action = str(top.get("manifest_action", "")).strip()
         if top_name:
-            summary_bits.append(f"top priority {top_name} [{top_signal or 'watch'} / {top_action or 'review'}]")
+            summary_bits.append(
+                f"top priority {top_name} [{top_signal or 'watch'} / {top_action or 'review'}]"
+            )
     summary = "upgrade audit found " + "; ".join(summary_bits)
 
     evidence: list[dict[str, Any]] = []
@@ -831,7 +910,9 @@ def _check_upgrade_audit(
             message += f" — {next_action}"
         evidence.append({"type": "upgrade_priority", "message": message, "path": "pyproject.toml"})
 
-    fix = ["Run `python -m sdetkit intelligence upgrade-audit --format md --top 5` for the full ranked report."]
+    fix = [
+        "Run `python -m sdetkit intelligence upgrade-audit --format md --top 5` for the full ranked report."
+    ]
     fix.extend(
         str(command)
         for item in priority_queue
@@ -847,6 +928,9 @@ def _check_upgrade_audit(
         "packages_audited": len(reports),
         "actionable_packages": len(actionable),
         "priority_queue": priority_queue,
+        "lane_summary": upgrade_audit._lane_summary(reports),
+        "impact_summary": upgrade_audit._impact_summary(reports),
+        "repo_usage_summary": upgrade_audit._repo_usage_summary(reports),
         "offline": offline,
         "requirements": [path.name for path in requirement_paths],
     }
