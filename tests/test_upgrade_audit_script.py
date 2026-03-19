@@ -1043,6 +1043,82 @@ def test_filter_reports_supports_group_and_source_filters() -> None:
     assert [report.name for report in filtered] == ["httpx"]
 
 
+def test_filter_reports_supports_manifest_action_filters() -> None:
+    reports = [
+        _report(name="httpx", manifest_action="stage-upgrade"),
+        _report(name="ruff", manifest_action="none"),
+    ]
+
+    filtered = upgrade_audit._filter_reports(reports, manifest_actions=["stage-upgrade"])
+
+    assert [report.name for report in filtered] == ["httpx"]
+
+
+def test_run_prefilters_dependency_metadata_collection(monkeypatch, tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx==0.28.1", "filelock==3.25.2"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    requested_packages: list[str] = []
+
+    def _fake_collect(
+        packages: list[str],
+        *,
+        timeout_s: float,
+        cache_path: Path,
+        cache_ttl_hours: float,
+        offline: bool,
+        max_workers: int,
+        project_python_requires: str | None,
+        include_prereleases: bool,
+    ) -> dict[str, upgrade_audit.PackageMetadata]:
+        requested_packages.extend(packages)
+        return {
+            package: upgrade_audit.PackageMetadata(
+                latest_version="0.28.1" if package == "httpx" else "3.25.2",
+                release_date="2026-01-01T00:00:00Z",
+                compatible_version="0.28.1" if package == "httpx" else "3.25.2",
+                compatible_release_date="2026-01-01T00:00:00Z",
+                compatibility_status="compatible-latest",
+                source="pypi",
+            )
+            for package in packages
+        }
+
+    monkeypatch.setattr(upgrade_audit, "_collect_package_metadata", _fake_collect)
+
+    rc = upgrade_audit.run(
+        pyproject,
+        timeout_s=0.1,
+        requirement_paths=[],
+        output_format="json",
+        packages=["http*"],
+    )
+
+    assert rc == 0
+    assert requested_packages == ["httpx"]
+
+
+def test_action_summary_groups_packages_by_manifest_action() -> None:
+    reports = [
+        _report(name="httpx", manifest_action="stage-upgrade", risk_score=50),
+        _report(name="ruff", manifest_action="none", risk_score=10),
+        _report(name="pytest", manifest_action="stage-upgrade", risk_score=40),
+    ]
+
+    summary = upgrade_audit._action_summary(reports)
+
+    assert summary[0]["manifest_action"] == "stage-upgrade"
+    assert summary[0]["count"] == 2
+    assert summary[0]["packages"] == ["httpx", "pytest"]
+
+
 def test_filter_reports_supports_impact_area_filters() -> None:
     reports = [
         _report(
@@ -1091,5 +1167,6 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.group == ["default"]
     assert args.source == ["pyproject.toml"]
     assert args.impact_area is None
+    assert args.manifest_action is None
     assert args.include_prereleases is False
     assert requirement_paths == []

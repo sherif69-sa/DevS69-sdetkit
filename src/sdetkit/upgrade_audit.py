@@ -1258,6 +1258,54 @@ def _matches_any_filter(values: list[str], allowed_filters: list[str] | None) ->
     return any(filter_value in normalized_values for filter_value in allowed_filters)
 
 
+def _matches_dependency_filters(
+    deps: list[Dependency],
+    *,
+    packages: list[str] | None = None,
+    groups: list[str] | None = None,
+    sources: list[str] | None = None,
+) -> bool:
+    if packages:
+        package_filters = [item.strip().lower() for item in packages if item.strip()]
+        if package_filters and not any(
+            fnmatch.fnmatch(dep.name.lower(), pattern) for pattern in package_filters for dep in deps
+        ):
+            return False
+    if groups:
+        group_filters = {item.strip().lower() for item in groups if item.strip()}
+        if group_filters and not any(dep.group.lower() in group_filters for dep in deps):
+            return False
+    if sources:
+        source_filters = {item.strip().lower() for item in sources if item.strip()}
+        if source_filters and not any(dep.source.lower() in source_filters for dep in deps):
+            return False
+    return True
+
+
+def _action_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        buckets.setdefault(report.manifest_action, []).append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            -sum(1 for report in item[1] if _is_actionable_upgrade(report)),
+            -max((report.risk_score for report in item[1]), default=0),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "manifest_action": action,
+            "count": len(items),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "packages": [report.name for report in items[:5]],
+        }
+        for action, items in ordered
+    ]
+
+
 def _filter_reports(
     reports: list[PackageReport],
     *,
@@ -1268,6 +1316,7 @@ def _filter_reports(
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
     impact_areas: list[str] | None = None,
+    manifest_actions: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
 ) -> list[PackageReport]:
@@ -1297,6 +1346,9 @@ def _filter_reports(
     if impact_areas:
         allowed_impact_areas = {item.strip() for item in impact_areas if item.strip()}
         filtered = [report for report in filtered if report.impact_area in allowed_impact_areas]
+    if manifest_actions:
+        allowed_actions = {item.strip() for item in manifest_actions if item.strip()}
+        filtered = [report for report in filtered if report.manifest_action in allowed_actions]
     if outdated_only:
         filtered = [report for report in filtered if _is_actionable_upgrade(report)]
     if top is not None:
@@ -1371,6 +1423,13 @@ def _render_markdown(
             + (f" — {pkg_list}" if pkg_list else "")
             + (f" — validate with {validations}" if validations else "")
         )
+    lines.extend(["", "## Manifest actions", ""])
+    for item in _action_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- **{item['manifest_action']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
     lines.extend(["", "## Dependency groups", ""])
     for item in _group_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
@@ -1409,6 +1468,7 @@ def _render_json(
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
         "impact": _impact_summary(reports),
+        "actions": _action_summary(reports),
         "groups": _group_summary(reports),
         "sources": _source_summary(reports),
         "packages": [asdict(report) for report in reports],
@@ -1452,6 +1512,7 @@ def run(
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
     impact_areas: list[str] | None = None,
+    manifest_actions: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
     include_prereleases: bool = False,
@@ -1468,7 +1529,30 @@ def run(
         by_package.setdefault(dep.name, []).append(dep)
 
     package_filters = packages
+    if packages or groups or sources:
+        by_package = {
+            name: deps
+            for name, deps in by_package.items()
+            if _matches_dependency_filters(
+                deps,
+                packages=packages,
+                groups=groups,
+                sources=sources,
+            )
+        }
     package_names = sorted(by_package)
+    if not package_names:
+        rendered = {
+            "json": _render_json(
+                [], pyproject_path=pyproject_path, requirement_paths=requirement_paths
+            ),
+            "md": _render_markdown(
+                [], pyproject_path=pyproject_path, requirement_paths=requirement_paths
+            ),
+        }[output_format]
+        sys.stdout.write(rendered)
+        return 0
+
     metadata_by_package = _collect_package_metadata(
         package_names,
         timeout_s=timeout_s,
@@ -1509,6 +1593,7 @@ def run(
         sources=sources,
         metadata_sources=metadata_sources,
         impact_areas=impact_areas,
+        manifest_actions=manifest_actions,
         outdated_only=outdated_only,
         top=top,
     )
@@ -1650,6 +1735,21 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         ],
         default=None,
         help="Show only packages in the selected repo impact area(s).",
+    )
+    parser.add_argument(
+        "--manifest-action",
+        action="append",
+        choices=[
+            "none",
+            "refresh-pin",
+            "raise-floor",
+            "stage-upgrade",
+            "plan-major-upgrade",
+            "establish-baseline",
+            "investigate-metadata",
+        ],
+        default=None,
+        help="Show only packages with the selected manifest action(s).",
     )
     parser.add_argument(
         "--outdated-only",
