@@ -3460,6 +3460,12 @@ def main(argv: list[str] | None = None) -> int:
     projlist.add_argument("path", nargs="?", default=".")
     projlist.add_argument("--json", action="store_true")
     projlist.add_argument("--sort", action="store_true")
+    projlist.add_argument(
+        "--kind",
+        action="append",
+        choices=["python", "rust", "go", "node", "maven", "gradle", "dotnet", "unknown"],
+        default=[],
+    )
     projlist.add_argument("--allow-absolute-path", action="store_true")
 
     rules_parser = sub.add_parser("rules")
@@ -3600,11 +3606,16 @@ def main(argv: list[str] | None = None) -> int:
             print(str(exc), file=sys.stderr)
             return 2
         records = []
+        selected_kinds = set(ns.kind)
         for project in projects:
             resolved = resolve_project(projects_root, project)
+            project_kind = getattr(resolved, "kind", None) or "unknown"
+            if selected_kinds and project_kind not in selected_kinds:
+                continue
             records.append(
                 {
                     "name": resolved.name,
+                    "kind": project_kind,
                     "root": resolved.root_rel,
                     "root_resolved": str(resolved.root),
                     "config": resolved.config_rel,
@@ -3615,7 +3626,15 @@ def main(argv: list[str] | None = None) -> int:
                     "exclude": list(resolved.exclude_paths),
                 }
             )
-        projects_payload = {"manifest": source, "projects": records}
+        kind_counts: dict[str, int] = {}
+        for rec in records:
+            kind = str(rec["kind"])
+            kind_counts[kind] = kind_counts.get(kind, 0) + 1
+        projects_payload = {
+            "manifest": source,
+            "projects": records,
+            "summary": {"count": len(records), "kinds": kind_counts},
+        }
         if ns.json:
             sys.stdout.write(
                 json.dumps(projects_payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
@@ -3624,7 +3643,14 @@ def main(argv: list[str] | None = None) -> int:
         if source:
             print(f"Manifest: {source}")
         for rec in records:
-            print(f"- {rec['name']}: root={rec['root']} baseline={rec['baseline']}")
+            print(
+                f"- {rec['name']} [{rec['kind']}]: root={rec['root']} baseline={rec['baseline']}"
+            )
+        if records:
+            kind_summary = ", ".join(
+                f"{kind}={count}" for kind, count in sorted(kind_counts.items(), key=lambda item: item[0])
+            )
+            print(f"Summary: count={len(records)} kinds={kind_summary}")
         return 0
 
     target_path = getattr(ns, "path", getattr(ns, "root", "."))

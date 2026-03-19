@@ -79,6 +79,72 @@ def test_projects_list_json_is_deterministic(tmp_path: Path) -> None:
     assert first.stdout == second.stdout
     payload = json.loads(first.stdout)
     assert [item["name"] for item in payload["projects"]] == ["api", "core"]
+    assert [item["kind"] for item in payload["projects"]] == ["python", "python"]
+    assert payload["summary"] == {"count": 2, "kinds": {"python": 2}}
+
+
+def test_projects_list_kind_filter_and_text_summary(tmp_path: Path) -> None:
+    _seed_monorepo(tmp_path)
+    (tmp_path / "services" / "api" / "pyproject.toml").write_text(
+        "[project]\nname='api'\n", encoding="utf-8"
+    )
+    (tmp_path / "libs" / "core" / "pyproject.toml").write_text(
+        "[project]\nname='core'\n", encoding="utf-8"
+    )
+    (tmp_path / ".sdetkit" / "projects.toml").write_text(
+        """
+autodiscover = true
+autodiscover_roots = ["services", "libs", "apps"]
+
+[[project]]
+name = "api"
+root = "services/api"
+exclude = ["docs/*"]
+
+[[project]]
+name = "core"
+root = "libs/core"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    web = tmp_path / "apps" / "web"
+    web.mkdir(parents=True)
+    (web / "package.json").write_text('{"name": "@acme/web"}\n', encoding="utf-8")
+
+    runner = CliRunner()
+    out_json = runner.invoke(
+        [
+            "repo",
+            "projects",
+            "list",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--json",
+            "--kind",
+            "node",
+        ]
+    )
+    assert out_json.exit_code == 0
+    payload = json.loads(out_json.stdout)
+    assert payload["summary"] == {"count": 1, "kinds": {"node": 1}}
+    assert [(item["name"], item["kind"]) for item in payload["projects"]] == [("@acme/web", "node")]
+
+    out_text = runner.invoke(
+        [
+            "repo",
+            "projects",
+            "list",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--kind",
+            "python",
+        ]
+    )
+    assert out_text.exit_code == 0
+    assert "- api [python]:" in out_text.stdout
+    assert "- core [python]:" in out_text.stdout
+    assert "Summary: count=2 kinds=python=2" in out_text.stdout
 
 
 def test_audit_all_projects_json_and_sarif_runs(tmp_path: Path) -> None:

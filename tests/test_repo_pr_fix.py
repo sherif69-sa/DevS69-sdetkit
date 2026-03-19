@@ -315,4 +315,5 @@ def test_repo_rules_and_projects_text_modes(tmp_path: Path, monkeypatch) -> None
     projects = runner.invoke(["repo", "projects", "list", str(tmp_path), "--allow-absolute-path"])
     assert projects.exit_code == 0
     assert "Manifest: manifest.yml" in projects.stdout
-    assert "- app:" in projects.stdout
+    assert "- app [unknown]:" in projects.stdout
+    assert "Summary: count=1 kinds=unknown=1" in projects.stdout

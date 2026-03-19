@@ -25,14 +25,15 @@ def test_autodiscover_packages_ignores_node_modules(tmp_path: Path) -> None:
 
     source, projects = discover_projects(repo, sort=True)
     assert source == "autodiscover"
-    assert [(p.name, p.root) for p in projects] == [
-        ("pkg-a", "packages/a"),
-        ("pkg-b", "packages/b"),
+    assert [(p.name, p.root, p.kind) for p in projects] == [
+        ("pkg-a", "packages/a", "python"),
+        ("pkg-b", "packages/b", "python"),
     ]
 
     resolved = [resolve_project(repo, p) for p in projects]
     assert [r.root_rel for r in resolved] == ["packages/a", "packages/b"]
     assert resolved[0].baseline_rel == "packages/a/.sdetkit/audit-baseline.json"
+    assert [r.kind for r in resolved] == ["python", "python"]
 
 
 def test_autodiscover_detects_common_monorepo_roots_by_default(tmp_path: Path) -> None:
@@ -45,10 +46,10 @@ def test_autodiscover_detects_common_monorepo_roots_by_default(tmp_path: Path) -
 
     source, projects = discover_projects(repo, sort=True)
     assert source == "autodiscover"
-    assert [(p.name, p.root) for p in projects] == [
-        ("crate-engine", "crates/engine"),
-        ("lib-core", "libs/core"),
-        ("svc-api", "services/api"),
+    assert [(p.name, p.root, p.kind) for p in projects] == [
+        ("crate-engine", "crates/engine", "python"),
+        ("lib-core", "libs/core", "python"),
+        ("svc-api", "services/api", "python"),
     ]
 
 
@@ -260,9 +261,9 @@ def test_autodiscover_detects_node_package_json_projects(tmp_path: Path) -> None
     )
 
     _, projects = discover_projects(repo, sort=True)
-    assert [(p.name, p.root) for p in projects] == [
-        ("@acme/web", "apps/web"),
-        ("acme-api", "packages/api"),
+    assert [(p.name, p.root, p.kind) for p in projects] == [
+        ("@acme/web", "apps/web", "node"),
+        ("acme-api", "packages/api", "node"),
     ]
 
 
@@ -312,9 +313,9 @@ version = "0.1.0"
 
     source, projects = discover_projects(repo, sort=True)
     assert source == "autodiscover"
-    assert [(p.name, p.root) for p in projects] == [
-        ("acme-worker", "packages/worker"),
-        ("github.com/acme/gateway", "apps/gateway"),
+    assert [(p.name, p.root, p.kind) for p in projects] == [
+        ("acme-worker", "packages/worker", "rust"),
+        ("github.com/acme/gateway", "apps/gateway", "go"),
     ]
 
 
@@ -411,10 +412,10 @@ def test_autodiscover_detects_maven_gradle_and_dotnet_projects(tmp_path: Path) -
 
     source, projects = discover_projects(repo, sort=True)
     assert source == "autodiscover"
-    assert [(p.name, p.root) for p in projects] == [
-        ("Acme.Payments", "libs/payments"),
-        ("billing-service", "services/billing"),
-        ("checkout-app", "apps/checkout"),
+    assert [(p.name, p.root, p.kind) for p in projects] == [
+        ("Acme.Payments", "libs/payments", "dotnet"),
+        ("billing-service", "services/billing", "maven"),
+        ("checkout-app", "apps/checkout", "gradle"),
     ]
 
 
