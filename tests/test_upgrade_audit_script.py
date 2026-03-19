@@ -595,6 +595,10 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
     assert payload["priority_queue"][0]["lane"] == "stabilize-manifests"
     assert payload["lanes"][0]["lane"] == "stabilize-manifests"
     assert payload["lanes"][0]["packages"] == ["critical-pkg"]
+    assert payload["groups"][0]["group"] == "requirements"
+    assert payload["groups"][0]["actionable_packages"] == 1
+    assert payload["sources"][0]["source"] == "requirements.txt"
+    assert payload["sources"][0]["count"] == 2
 
 
 def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
@@ -629,6 +633,8 @@ def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
     )
 
     assert "## Recommended upgrade lanes" in rendered
+    assert "## Dependency groups" in rendered
+    assert "## Manifest sources" in rendered
     assert "**next-maintenance-batch**" in rendered
 
 
@@ -687,15 +693,84 @@ dependencies = ["httpx==0.28.1", "ruff==0.15.6"]
     assert [item["name"] for item in payload["packages"]] == ["httpx"]
 
 
+def test_filter_reports_supports_group_and_source_filters() -> None:
+    reports = [
+        upgrade_audit.PackageReport(
+            name="httpx",
+            sources=["pyproject.toml", "requirements.txt"],
+            groups=["default", "requirements"],
+            requirements=["httpx==0.28.1"],
+            pinned_versions=["0.28.1"],
+            current_version="0.28.1",
+            alignment="aligned",
+            constraint_status="blocked",
+            latest_version="0.29.0",
+            latest_release_date="2026-01-01T00:00:00Z",
+            metadata_source="pypi",
+            version_gap="minor",
+            release_age_days=0,
+            upgrade_signal="medium",
+            risk_score=55,
+            manifest_action="stage-upgrade",
+            suggested_version="0.29.0",
+            next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
+            notes=[],
+        ),
+        upgrade_audit.PackageReport(
+            name="mkdocs",
+            sources=["requirements-docs.txt"],
+            groups=["docs"],
+            requirements=["mkdocs==1.6.1"],
+            pinned_versions=["1.6.1"],
+            current_version="1.6.1",
+            alignment="aligned",
+            constraint_status="allowed",
+            latest_version="1.6.1",
+            latest_release_date=None,
+            metadata_source="cache",
+            version_gap="up-to-date",
+            release_age_days=None,
+            upgrade_signal="watch",
+            risk_score=10,
+            manifest_action="none",
+            suggested_version=None,
+            next_action="Keep under observation; no immediate action required.",
+            notes=[],
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        groups=["default"],
+        sources=["requirements.txt"],
+    )
+
+    assert [report.name for report in filtered] == ["httpx"]
+
+
 def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
 
     parser = upgrade_audit.build_parser()
-    args = parser.parse_args(["--pyproject", str(pyproject), "--outdated-only", "--package", "http*"])
+    args = parser.parse_args(
+        [
+            "--pyproject",
+            str(pyproject),
+            "--outdated-only",
+            "--package",
+            "http*",
+            "--group",
+            "default",
+            "--source",
+            "pyproject.toml",
+        ]
+    )
 
     requirement_paths = upgrade_audit._resolve_requirement_paths(args)
 
     assert args.outdated_only is True
     assert args.package == ["http*"]
+    assert args.group == ["default"]
+    assert args.source == ["pyproject.toml"]
     assert requirement_paths == []

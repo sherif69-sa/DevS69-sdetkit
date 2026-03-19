@@ -101,6 +101,10 @@ dependencies = ["httpx==0.28.1"]
         str(cache_path),
         "--format",
         "json",
+        "--group",
+        "default",
+        "--source",
+        "pyproject.toml",
     )
 
     assert proc.returncode == 0
@@ -108,6 +112,8 @@ dependencies = ["httpx==0.28.1"]
     assert payload["packages"][0]["name"] == "httpx"
     assert payload["priority_queue"][0]["lane"] == "next-maintenance-batch"
     assert payload["lanes"][0]["lane"] == "next-maintenance-batch"
+    assert payload["groups"][0]["group"] == "default"
+    assert payload["sources"][0]["source"] == "pyproject.toml"
 
 
 def test_intelligence_failure_mode_invalid_failures_file(tmp_path: Path) -> None:
