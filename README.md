@@ -77,6 +77,7 @@ python -m sdetkit integration topology-check --profile examples/kits/integration
 # validates service owners, dependency edges, mocked platform coverage, deployments, telemetry, and data resilience
 bash premium-gate.sh --mode full
 # premium gate now emits .sdetkit/out/integration-topology.json as a first-class operational artifact
+# head-5 also auto-runs repo-safe remediation scripts unless you pass --no-auto-run-scripts
 python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
 python -m sdetkit forensics bundle --run examples/kits/forensics/run-b.json --output build/repro.zip
 python -m sdetkit continuous-upgrade-cycle9-closeout --format json --strict

@@ -132,6 +132,26 @@ class FixPlanItem:
     suggested_edit: str
 
 
+@dataclass(frozen=True)
+class ScriptCandidate:
+    script_id: str
+    reason: str
+    command: list[str]
+    artifact_paths: list[str]
+
+
+@dataclass(frozen=True)
+class ScriptRunResult:
+    script_id: str
+    status: str
+    rc: int
+    command: list[str]
+    reason: str
+    artifact_paths: list[str]
+    log_path: str
+    message: str
+
+
 def _safe_text(value: Any) -> str:
     return "" if value is None else str(value).strip()
 
@@ -544,6 +564,196 @@ def _build_fix_plan_item(result: AutoFixResult) -> FixPlanItem:
     return FixPlanItem(
         rule_id=rule, path=result.path, priority=priority, reason=base_reason, suggested_edit=edit
     )
+
+
+def _has_signal(payload: dict[str, Any], *, source: str) -> bool:
+    for key in ("warnings", "engine_checks", "recommendations"):
+        items = payload.get(key, [])
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if isinstance(item, dict) and _safe_text(item.get("source")) == source:
+                return True
+    return False
+
+
+def _failed_step_ids(payload: dict[str, Any]) -> set[str]:
+    steps = payload.get("step_status", [])
+    failed: set[str] = set()
+    if not isinstance(steps, list):
+        return failed
+    for item in steps:
+        if not isinstance(item, dict) or bool(item.get("ok", True)):
+            continue
+        name = _safe_text(item.get("name"))
+        if name:
+            failed.add(name)
+    return failed
+
+
+def _build_script_candidates(
+    payload: dict[str, Any],
+    *,
+    out_dir: Path,
+    fix_root: Path,
+    auto_fix_results: list[AutoFixResult] | None = None,
+) -> list[ScriptCandidate]:
+    candidates: list[ScriptCandidate] = []
+    failed_steps = _failed_step_ids(payload)
+    has_doctor_signal = _has_signal(payload, source="doctor") or "doctor_json" in failed_steps
+    has_maintenance_signal = _has_signal(payload, source="maintenance") or (
+        "maintenance_full" in failed_steps
+    )
+    has_security_signal = _has_signal(payload, source="security") or (
+        "security_triage" in failed_steps
+    )
+    has_style_or_quality_signal = bool(
+        failed_steps.intersection(
+            {"quality", "ruff_format", "ruff_lint", "ruff", "ruff_format_apply"}
+        )
+    )
+    autofix_applied = any(item.status == "fixed" for item in auto_fix_results or [])
+
+    if has_doctor_signal or has_style_or_quality_signal:
+        candidates.append(
+            ScriptCandidate(
+                script_id="gate_fast_fix_only",
+                reason="Doctor/style/quality signals detected; run the repo-safe formatter/fix lane.",
+                command=[
+                    sys.executable,
+                    "-m",
+                    "sdetkit",
+                    "gate",
+                    "fast",
+                    "--root",
+                    str(fix_root),
+                    "--fix-only",
+                    "--format",
+                    "json",
+                    "--out",
+                    str(out_dir / "gate-fast-fix.json"),
+                ],
+                artifact_paths=["gate-fast-fix.json"],
+            )
+        )
+        candidates.append(
+            ScriptCandidate(
+                script_id="doctor_refresh",
+                reason="Refresh doctor evidence after auto-remediation so premium scoring uses current artifacts.",
+                command=[
+                    sys.executable,
+                    "-m",
+                    "sdetkit",
+                    "doctor",
+                    "--json",
+                    "--out",
+                    str(out_dir / "doctor.json"),
+                ],
+                artifact_paths=["doctor.json"],
+            )
+        )
+
+    if has_maintenance_signal:
+        candidates.append(
+            ScriptCandidate(
+                script_id="maintenance_fix",
+                reason="Maintenance issues were detected; run the fix-aware maintenance lane to regenerate artifacts.",
+                command=[
+                    sys.executable,
+                    "-m",
+                    "sdetkit",
+                    "maintenance",
+                    "--mode",
+                    "full",
+                    "--fix",
+                    "--format",
+                    "json",
+                    "--out",
+                    str(out_dir / "maintenance.json"),
+                ],
+                artifact_paths=["maintenance.json"],
+            )
+        )
+
+    if has_security_signal or autofix_applied:
+        candidates.append(
+            ScriptCandidate(
+                script_id="security_triage_refresh",
+                reason="Security findings or auto-fixes changed the repo; refresh the baseline-aware security artifact.",
+                command=[
+                    sys.executable,
+                    "tools/triage.py",
+                    "--mode",
+                    "security",
+                    "--run-security",
+                    "--security-baseline",
+                    "tools/security.baseline.json",
+                    "--max-items",
+                    "20",
+                    "--tee",
+                    str(out_dir / "security-check.json"),
+                ],
+                artifact_paths=["security-check.json"],
+            )
+        )
+
+    deduped: list[ScriptCandidate] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        if candidate.script_id in seen:
+            continue
+        seen.add(candidate.script_id)
+        deduped.append(candidate)
+    return deduped
+
+
+def _run_script_candidate(
+    candidate: ScriptCandidate, *, cwd: Path, out_dir: Path
+) -> ScriptRunResult:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    log_path = out_dir / f"premium-autofix.{candidate.script_id}.log"
+    proc = subprocess.run(candidate.command, cwd=cwd, capture_output=True, text=True, check=False)
+    log_text = []
+    if proc.stdout:
+        log_text.append(proc.stdout.rstrip())
+    if proc.stderr:
+        log_text.append(proc.stderr.rstrip())
+    log_path.write_text(
+        "\n".join(part for part in log_text if part) + ("\n" if log_text else ""), encoding="utf-8"
+    )
+    status = "passed" if proc.returncode == 0 else "failed"
+    message = "script completed successfully" if proc.returncode == 0 else "script failed"
+    return ScriptRunResult(
+        script_id=candidate.script_id,
+        status=status,
+        rc=int(proc.returncode),
+        command=list(candidate.command),
+        reason=candidate.reason,
+        artifact_paths=list(candidate.artifact_paths),
+        log_path=str(log_path),
+        message=message,
+    )
+
+
+def run_smart_scripts(
+    payload: dict[str, Any],
+    *,
+    out_dir: Path,
+    fix_root: Path,
+    auto_fix_results: list[AutoFixResult] | None = None,
+    max_scripts: int = 4,
+) -> tuple[list[ScriptCandidate], list[ScriptRunResult]]:
+    candidates = _build_script_candidates(
+        payload,
+        out_dir=out_dir,
+        fix_root=fix_root,
+        auto_fix_results=auto_fix_results,
+    )
+    selected = candidates[: max(0, max_scripts)]
+    results = [
+        _run_script_candidate(candidate, cwd=fix_root, out_dir=out_dir) for candidate in selected
+    ]
+    return selected, results
 
 
 def _init_db(db_path: Path) -> None:
@@ -1088,6 +1298,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--double-check", action="store_true")
     parser.add_argument("--min-score", type=int, default=None)
     parser.add_argument("--auto-fix", action="store_true")
+    parser.add_argument("--auto-run-scripts", action="store_true")
+    parser.add_argument("--max-auto-scripts", type=int, default=4)
     parser.add_argument("--fix-root", default=".")
     parser.add_argument("--learn-db", action="store_true")
     parser.add_argument("--learn-commit", action="store_true")
@@ -1103,14 +1315,16 @@ def main(argv: list[str] | None = None) -> int:
         serve_insights_api(str(ns.host), int(ns.port), out_dir, db_path)
         return 0
 
+    fix_root = Path(ns.fix_root)
     payload = collect_signals(out_dir)
     payload = _apply_learned_guideline_actions(payload, db_path)
 
     if ns.double_check:
         payload = _apply_double_check(payload, collect_signals(out_dir))
 
+    fixes: list[AutoFixResult] = []
     if ns.auto_fix:
-        fixes = run_autofix(out_dir, Path(ns.fix_root))
+        fixes = run_autofix(out_dir, fix_root)
         payload = dict(payload)
         payload["auto_fix_results"] = [asdict(x) for x in fixes]
         manual_plan = [
@@ -1131,6 +1345,57 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
             )
+
+    if ns.auto_run_scripts:
+        pre_script_score = int(payload.get("score", 0))
+        selected_scripts, script_results = run_smart_scripts(
+            payload,
+            out_dir=out_dir,
+            fix_root=fix_root,
+            auto_fix_results=fixes,
+            max_scripts=int(ns.max_auto_scripts),
+        )
+        refreshed = collect_signals(out_dir)
+        refreshed = _apply_learned_guideline_actions(refreshed, db_path)
+        extras = {
+            key: value
+            for key, value in payload.items()
+            if key
+            in {
+                "auto_fix_results",
+                "manual_fix_plan",
+            }
+        }
+        payload = {**refreshed, **extras}
+        payload["script_runs"] = [asdict(item) for item in script_results]
+        payload["smart_remediation"] = {
+            "selected_scripts": [item.script_id for item in selected_scripts],
+            "selected_count": len(selected_scripts),
+            "successful_scripts": sum(1 for item in script_results if item.status == "passed"),
+            "failed_scripts": sum(1 for item in script_results if item.status != "passed"),
+            "pre_script_score": pre_script_score,
+            "post_script_score": int(refreshed.get("score", 0)),
+        }
+        payload["smart_remediation"]["score_delta"] = (
+            payload["smart_remediation"]["post_script_score"]
+            - payload["smart_remediation"]["pre_script_score"]
+        )
+        if any(item.status != "passed" for item in script_results):
+            payload.setdefault("recommendations", []).append(
+                asdict(
+                    _make_signal(
+                        "engine",
+                        "script-followup",
+                        "high",
+                        "One or more smart remediation scripts failed. Inspect premium-autofix logs and rerun the premium gate after targeted fixes.",
+                    )
+                )
+            )
+        payload["counts"] = {
+            **payload.get("counts", {}),
+            "recommendations": len(payload.get("recommendations", [])),
+            "script_runs": len(script_results),
+        }
 
     if ns.json_output:
         Path(ns.json_output).write_text(

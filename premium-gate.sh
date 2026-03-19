@@ -10,6 +10,7 @@ CONTINUE_ON_ERROR=0
 ENGINE_MIN_SCORE="${SDETKIT_PREMIUM_MIN_SCORE:-70}"
 OPS_JOBS="${SDETKIT_PREMIUM_OPS_JOBS:-2}"
 TOPOLOGY_PROFILE="${SDETKIT_PREMIUM_TOPOLOGY_PROFILE:-examples/kits/integration/heterogeneous-topology.json}"
+AUTO_RUN_SCRIPTS="${SDETKIT_PREMIUM_AUTO_RUN_SCRIPTS:-1}"
 
 usage() {
   cat <<'USAGE'
@@ -20,6 +21,7 @@ Options:
   --out-dir <path>                 Artifact/log directory (default: .sdetkit/out)
   --engine-min-score <int>         Minimum premium engine score (default: 70)
   --ops-jobs <int>                 Parallel jobs for ops run (default: 2)
+  --no-auto-run-scripts            Disable smart remediation script execution inside the premium engine
   --continue-on-error              Continue collecting evidence after a failing step
   -h, --help                       Show this help
 USAGE
@@ -45,6 +47,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --continue-on-error)
       CONTINUE_ON_ERROR=1
+      shift
+      ;;
+    --no-auto-run-scripts)
+      AUTO_RUN_SCRIPTS=0
       shift
       ;;
     -h|--help)
@@ -228,7 +234,12 @@ run_plan() {
 
 run_engine() {
   section "Real-time warnings and recommendations summary"
-  run_step "premium_engine" "Head-5 Intelligence Brain" "Premium Gate Engine" "python3 -m sdetkit.premium_gate_engine --out-dir '$OUT_DIR' --double-check --min-score '$ENGINE_MIN_SCORE' --auto-fix --fix-root '$ROOT_DIR' --learn-db --learn-commit --db-path '$OUT_DIR/premium-insights.db' --format markdown --json-output '$OUT_DIR/premium-summary.json'"
+  local engine_cmd
+  engine_cmd="python3 -m sdetkit.premium_gate_engine --out-dir '$OUT_DIR' --double-check --min-score '$ENGINE_MIN_SCORE' --auto-fix --fix-root '$ROOT_DIR' --learn-db --learn-commit --db-path '$OUT_DIR/premium-insights.db' --format markdown --json-output '$OUT_DIR/premium-summary.json'"
+  if [[ "$AUTO_RUN_SCRIPTS" == "1" ]]; then
+    engine_cmd+=" --auto-run-scripts"
+  fi
+  run_step "premium_engine" "Head-5 Intelligence Brain" "Premium Gate Engine" "$engine_cmd"
 }
 
 final_report() {
