@@ -786,11 +786,68 @@ def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
     }
 
 
+def _group_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        for group in report.groups:
+            buckets.setdefault(group, []).append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            -max((report.risk_score for report in item[1]), default=0),
+            -len(item[1]),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "group": group,
+            "count": len(items),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "packages": [report.name for report in items[:5]],
+        }
+        for group, items in ordered
+    ]
+
+
+def _source_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        for source in report.sources:
+            buckets.setdefault(source, []).append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            -max((report.risk_score for report in item[1]), default=0),
+            -len(item[1]),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "source": source,
+            "count": len(items),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "packages": [report.name for report in items[:5]],
+        }
+        for source, items in ordered
+    ]
+
+
 def _matches_package_filters(report: PackageReport, package_filters: list[str] | None) -> bool:
     if not package_filters:
         return True
     normalized = report.name.lower()
     return any(fnmatch.fnmatch(normalized, pattern) for pattern in package_filters)
+
+
+def _matches_any_filter(values: list[str], allowed_filters: list[str] | None) -> bool:
+    if not allowed_filters:
+        return True
+    normalized_values = {value.lower() for value in values}
+    return any(filter_value in normalized_values for filter_value in allowed_filters)
 
 
 def _filter_reports(
@@ -799,6 +856,8 @@ def _filter_reports(
     signals: list[str] | None = None,
     policies: list[str] | None = None,
     packages: list[str] | None = None,
+    groups: list[str] | None = None,
+    sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
@@ -814,6 +873,14 @@ def _filter_reports(
         package_filters = [item.strip().lower() for item in packages if item.strip()]
         filtered = [
             report for report in filtered if _matches_package_filters(report, package_filters)
+        ]
+    if groups:
+        group_filters = [item.strip().lower() for item in groups if item.strip()]
+        filtered = [report for report in filtered if _matches_any_filter(report.groups, group_filters)]
+    if sources:
+        source_filters = [item.strip().lower() for item in sources if item.strip()]
+        filtered = [
+            report for report in filtered if _matches_any_filter(report.sources, source_filters)
         ]
     if metadata_sources:
         allowed_sources = {item.strip() for item in metadata_sources if item.strip()}
@@ -877,6 +944,20 @@ def _render_markdown(
             f"- **{item['lane']}**: {item['count']} package(s), max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
+    lines.extend(["", "## Dependency groups", ""])
+    for item in _group_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- **{item['group']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
+    lines.extend(["", "## Manifest sources", ""])
+    for item in _source_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- **{item['source']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
     lines.extend(["", "## Focus notes", ""])
     for report in reports:
         note_text = " ".join(report.notes) if report.notes else "No additional notes."
@@ -896,6 +977,8 @@ def _render_json(
         "summary": _report_summary(reports),
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
+        "groups": _group_summary(reports),
+        "sources": _source_summary(reports),
         "packages": [asdict(report) for report in reports],
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
@@ -933,6 +1016,8 @@ def run(
     signals: list[str] | None = None,
     policies: list[str] | None = None,
     packages: list[str] | None = None,
+    groups: list[str] | None = None,
+    sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
@@ -978,6 +1063,8 @@ def run(
         signals=signals,
         policies=policies,
         packages=packages,
+        groups=groups,
+        sources=sources,
         metadata_sources=metadata_sources,
         outdated_only=outdated_only,
         top=top,
@@ -1083,6 +1170,18 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages matching the provided name or glob pattern. Can be passed multiple times.",
     )
     parser.add_argument(
+        "--group",
+        action="append",
+        default=None,
+        help="Show only packages declared in the selected dependency group(s). Can be passed multiple times.",
+    )
+    parser.add_argument(
+        "--source",
+        action="append",
+        default=None,
+        help="Show only packages declared in the selected manifest source file(s). Can be passed multiple times.",
+    )
+    parser.add_argument(
         "--metadata-source",
         action="append",
         choices=["pypi", "cache", "cache-stale", "offline"],
@@ -1143,6 +1242,8 @@ def main(argv: list[str] | None = None) -> int:
         signals=args.signal,
         policies=args.policy,
         packages=args.package,
+        groups=args.group,
+        sources=args.source,
         metadata_sources=args.metadata_source,
         outdated_only=bool(args.outdated_only),
         top=args.top,

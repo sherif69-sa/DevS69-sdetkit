@@ -86,19 +86,21 @@ python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 
 ## Upgrade planning (first step)
 
-Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps. The audit now surfaces the repo baseline version, estimated version-gap size (major/minor/patch), release recency, an ordered risk score, recommended maintenance lanes, manifest actions, suggested target versions, and floor-and-lock baseline detection for repos that intentionally mix flexible ranges with tested pins. You can invoke it from either the standalone script or the primary Intelligence kit surface, and you can fail CI at a chosen signal threshold:
+Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps. The audit now surfaces the repo baseline version, estimated version-gap size (major/minor/patch), release recency, an ordered risk score, recommended maintenance lanes, group/source rollups, manifest actions, suggested target versions, and floor-and-lock baseline detection for repos that intentionally mix flexible ranges with tested pins. You can invoke it from either the standalone script or the primary Intelligence kit surface, filter the results down to the hottest dependency groups or manifest sources, and fail CI at a chosen signal threshold:
 
 ```bash
 make upgrade-audit
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 python -m sdetkit intelligence upgrade-audit --format md --offline
 python -m sdetkit intelligence upgrade-audit --outdated-only --package "http*"
+python -m sdetkit intelligence upgrade-audit --group default --source pyproject.toml --format md
 python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 python scripts/upgrade_audit.py --fail-on high
 python scripts/upgrade_audit.py --cache-ttl-hours 6 --max-workers 12
 python scripts/upgrade_audit.py --offline --format md
 python scripts/upgrade_audit.py --signal high --policy blocked --top 5
 python scripts/upgrade_audit.py --metadata-source cache-stale --outdated-only
+python scripts/upgrade_audit.py --group requirements --source requirements.txt --top 10
 ```
 
 ## Sample artifacts

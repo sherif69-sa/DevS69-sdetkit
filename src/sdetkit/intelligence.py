@@ -243,6 +243,8 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
     )
     ua.add_argument("--package", action="append", default=None)
+    ua.add_argument("--group", action="append", default=None)
+    ua.add_argument("--source", action="append", default=None)
     ua.add_argument(
         "--metadata-source",
         action="append",
@@ -293,6 +295,8 @@ def main(argv: list[str] | None = None) -> int:
                 signals=ns.signal,
                 policies=ns.policy,
                 packages=ns.package,
+                groups=ns.group,
+                sources=ns.source,
                 metadata_sources=ns.metadata_source,
                 outdated_only=bool(ns.outdated_only),
                 top=ns.top,
