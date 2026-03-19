@@ -197,18 +197,20 @@ def test_render_json_summary_counts() -> None:
     )
 
     assert payload["summary"] == {
+        "actionable_packages": 1,
+        "cached_metadata_packages": 1,
         "compatible_constraint_packages": 0,
-        "floor_lock_packages": 0,
-        "cached_metadata_packages": 0,
         "critical_upgrade_signals": 0,
-        "packages_audited": 2,
-        "manifest_drift_packages": 1,
+        "floor_lock_packages": 0,
         "high_priority_upgrade_signals": 1,
         "investigate_upgrade_signals": 0,
+        "manifest_drift_packages": 1,
         "max_risk_score": 85,
         "medium_priority_upgrade_signals": 0,
+        "packages_audited": 2,
         "policy_blocked_packages": 1,
         "policy_covered_packages": 1,
+        "stale_metadata_packages": 0,
     }
     assert payload["packages"][0]["name"] == "httpx"
 
@@ -247,6 +249,8 @@ dependencies = ["httpx>=0.27,<1"]
     assert "compatible multi-manifest packages: 0" in out
     assert "floor-and-lock baseline packages: 1" in out
     assert "packages using cached metadata: 0" in out
+    assert "stale cached metadata packages: 0" in out
+    assert "actionable upgrade candidates: 1" in out
     assert "Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
     assert "`httpx` | `0.28.1` | `0.29.0` | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
     assert "Priority queue" in out
@@ -378,9 +382,66 @@ dependencies = ["httpx==0.28.1"]
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["summary"]["cached_metadata_packages"] == 1
+    assert payload["summary"]["stale_metadata_packages"] == 0
     assert payload["packages"][0]["latest_version"] == "0.28.1"
     assert payload["packages"][0]["metadata_source"] == "cache"
     assert "Latest metadata source: cache." in payload["packages"][0]["notes"]
+
+
+def test_filter_reports_supports_package_metadata_source_and_outdated_only() -> None:
+    reports = [
+        upgrade_audit.PackageReport(
+            name="httpx",
+            sources=["pyproject.toml"],
+            groups=["default"],
+            requirements=["httpx==0.28.1"],
+            pinned_versions=["0.28.1"],
+            current_version="0.28.1",
+            alignment="aligned",
+            constraint_status="blocked",
+            latest_version="0.29.0",
+            latest_release_date="2026-01-01T00:00:00Z",
+            metadata_source="cache-stale",
+            version_gap="minor",
+            release_age_days=0,
+            upgrade_signal="medium",
+            risk_score=55,
+            manifest_action="stage-upgrade",
+            suggested_version="0.29.0",
+            next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
+            notes=[],
+        ),
+        upgrade_audit.PackageReport(
+            name="ruff",
+            sources=["requirements.txt"],
+            groups=["requirements"],
+            requirements=["ruff==0.15.6"],
+            pinned_versions=["0.15.6"],
+            current_version="0.15.6",
+            alignment="aligned",
+            constraint_status="allowed",
+            latest_version="0.15.6",
+            latest_release_date=None,
+            metadata_source="pypi",
+            version_gap="up-to-date",
+            release_age_days=None,
+            upgrade_signal="watch",
+            risk_score=10,
+            manifest_action="none",
+            suggested_version=None,
+            next_action="Keep under observation; no immediate action required.",
+            notes=[],
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        packages=["http*"],
+        metadata_sources=["cache-stale"],
+        outdated_only=True,
+    )
+
+    assert [report.name for report in filtered] == ["httpx"]
 
 
 def test_filter_reports_supports_signal_policy_and_top() -> None:
@@ -569,3 +630,72 @@ def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
 
     assert "## Recommended upgrade lanes" in rendered
     assert "**next-maintenance-batch**" in rendered
+
+
+def test_run_applies_package_metadata_source_and_outdated_filters(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx==0.28.1", "ruff==0.15.6"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    cache_path = tmp_path / "cache.json"
+    cache_path.write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-01-02T00:00:00+00:00",
+                "packages": {
+                    "httpx": {
+                        "fetched_at": 1.0,
+                        "latest_version": "0.29.0",
+                        "release_date": "2026-01-01T00:00:00Z",
+                    },
+                    "ruff": {
+                        "fetched_at": 1.0,
+                        "latest_version": "0.15.6",
+                        "release_date": "2026-01-01T00:00:00Z",
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = upgrade_audit.run(
+        pyproject,
+        timeout_s=0.1,
+        requirement_paths=[],
+        output_format="json",
+        offline=True,
+        cache_path=cache_path,
+        cache_ttl_hours=0,
+        packages=["http*"],
+        metadata_sources=["cache-stale"],
+        outdated_only=True,
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["summary"]["packages_audited"] == 1
+    assert payload["summary"]["stale_metadata_packages"] == 1
+    assert payload["summary"]["actionable_packages"] == 1
+    assert [item["name"] for item in payload["packages"]] == ["httpx"]
+
+
+def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
+
+    parser = upgrade_audit.build_parser()
+    args = parser.parse_args(["--pyproject", str(pyproject), "--outdated-only", "--package", "http*"])
+
+    requirement_paths = upgrade_audit._resolve_requirement_paths(args)
+
+    assert args.outdated_only is True
+    assert args.package == ["http*"]
+    assert requirement_paths == []

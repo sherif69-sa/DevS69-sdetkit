@@ -61,11 +61,13 @@ Run a dependency-manifest audit against PyPI to identify candidate upgrades, det
 make upgrade-audit
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 python -m sdetkit intelligence upgrade-audit --format md --offline
+python -m sdetkit intelligence upgrade-audit --outdated-only --package "http*"
 python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 python scripts/upgrade_audit.py --fail-on high
 python scripts/upgrade_audit.py --cache-ttl-hours 6 --max-workers 12
 python scripts/upgrade_audit.py --offline --format md
 python scripts/upgrade_audit.py --signal high --policy blocked --top 5
+python scripts/upgrade_audit.py --metadata-source cache-stale --outdated-only
 ```
 
 ## Sample artifacts
