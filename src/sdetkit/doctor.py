@@ -14,7 +14,7 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any
 
-from . import _toml
+from . import _toml, upgrade_audit
 from .import_hazards import find_stdlib_shadowing
 from .security import SecurityError, safe_path
 
@@ -32,6 +32,7 @@ CHECK_ORDER = [
     "security_files",
     "repo_readiness",
     "release_meta",
+    "upgrade_audit",
     "ascii",
 ]
 
@@ -49,6 +50,7 @@ SUPPORTED_POLICY_CHECKS = {
     "pre_commit",
     "repo_readiness",
     "release_meta",
+    "upgrade_audit",
 }
 
 
@@ -134,6 +136,15 @@ def _baseline_checks() -> dict[str, dict[str, Any]]:
             skipped=True,
             fix=[
                 "Run doctor with --release to validate version, changelog, and release workflow wiring."
+            ],
+        ),
+        "upgrade_audit": _make_check(
+            ok=True,
+            severity="medium",
+            summary="upgrade audit check not requested",
+            skipped=True,
+            fix=[
+                "Run doctor with --upgrade-audit to surface dependency upgrade hints and impact areas."
             ],
         ),
     }
@@ -644,11 +655,202 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
         recs.append("Run dependency updates and resolve `pip check` conflicts.")
     if data.get("clean_tree_ok") is False:
         recs.append("Commit or stash pending changes before release/CI validation.")
+    upgrade_meta = data.get("checks", {}).get("upgrade_audit", {}).get("meta", {})
+    priority_queue = upgrade_meta.get("priority_queue", [])
+    if isinstance(priority_queue, list):
+        for item in priority_queue[:2]:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name", "")).strip()
+            action = str(item.get("manifest_action", "")).strip()
+            suggested = item.get("suggested_version")
+            next_action = str(item.get("next_action", "")).strip()
+            if name and action and action != "none":
+                version_text = f" to {suggested}" if isinstance(suggested, str) and suggested else ""
+                recs.append(f"Upgrade-audit priority: {name} via {action}{version_text}. {next_action}")
     if not recs:
         recs.append(
             "No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality."
         )
     return recs
+
+
+def _build_hints(data: dict[str, Any]) -> list[str]:
+    hints: list[str] = []
+
+    next_actions = data.get("next_actions", [])
+    if isinstance(next_actions, list):
+        for item in next_actions[:3]:
+            if not isinstance(item, dict):
+                continue
+            check_id = str(item.get("id", "")).strip()
+            summary = str(item.get("summary", "")).strip()
+            fix_list = item.get("fix", [])
+            first_fix = ""
+            if isinstance(fix_list, list) and fix_list:
+                first_fix = str(fix_list[0]).strip()
+            parts = [part for part in [f"{check_id}: {summary}" if check_id and summary else "", first_fix] if part]
+            if parts:
+                hints.append(" — ".join(parts))
+
+    upgrade_meta = data.get("checks", {}).get("upgrade_audit", {}).get("meta", {})
+    priority_queue = upgrade_meta.get("priority_queue", [])
+    if isinstance(priority_queue, list):
+        for item in priority_queue[:3]:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name", "")).strip()
+            if not name:
+                continue
+            action = str(item.get("manifest_action", "")).strip()
+            target = str(item.get("suggested_version", "")).strip()
+            validations = item.get("validation_commands", [])
+            validation = ""
+            if isinstance(validations, list) and validations:
+                validation = str(validations[0]).strip()
+            lane = str(item.get("lane", "")).strip()
+            detail = f"{name}: {action or 'review'}"
+            if target:
+                detail += f" -> {target}"
+            if lane:
+                detail += f" [{lane}]"
+            if validation:
+                detail += f" — validate with {validation}"
+            hints.append(detail)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for hint in hints:
+        normalized = hint.strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(normalized)
+    return deduped[:5]
+
+
+def _check_upgrade_audit(
+    root: Path,
+    *,
+    offline: bool,
+) -> tuple[bool, str, list[dict[str, Any]], list[str], dict[str, Any]]:
+    pyproject_path = root / "pyproject.toml"
+    if not pyproject_path.exists():
+        return (
+            False,
+            "pyproject.toml is missing for upgrade audit",
+            [{"type": "missing_file", "message": "pyproject.toml is missing", "path": "pyproject.toml"}],
+            ["Add pyproject.toml before running upgrade audit checks."],
+            {},
+        )
+
+    requirement_paths = upgrade_audit._discover_requirement_files(root, include_lockfiles=False)
+    dependencies = upgrade_audit._load_dependencies(pyproject_path, requirement_paths)
+    if not dependencies:
+        return (
+            True,
+            "no dependencies declared for upgrade audit",
+            [],
+            ["Add dependency manifests when you are ready to track package upgrades."],
+            {
+                "packages_audited": 0,
+                "actionable_packages": 0,
+                "priority_queue": [],
+                "offline": offline,
+            },
+        )
+
+    by_package: dict[str, list[upgrade_audit.Dependency]] = {}
+    for dep in dependencies:
+        by_package.setdefault(dep.name, []).append(dep)
+
+    package_names = sorted(by_package)
+    project_python_requires = upgrade_audit._load_project_python_requires(pyproject_path)
+    repo_usage = upgrade_audit._collect_repo_usage(root, package_names)
+    metadata_by_package = upgrade_audit._collect_package_metadata(
+        package_names,
+        timeout_s=5.0,
+        cache_path=upgrade_audit.DEFAULT_CACHE_PATH,
+        cache_ttl_hours=24.0,
+        offline=offline,
+        max_workers=4,
+        project_python_requires=project_python_requires,
+        include_prereleases=False,
+    )
+
+    reports: list[upgrade_audit.PackageReport] = []
+    for package in package_names:
+        metadata = metadata_by_package[package]
+        reports.append(
+            upgrade_audit._build_package_report(
+                package,
+                by_package[package],
+                latest_version=metadata.latest_version,
+                release_date=metadata.release_date,
+                project_python_requires=project_python_requires,
+                compatible_version=metadata.compatible_version,
+                compatible_release_date=metadata.compatible_release_date,
+                compatibility_status=metadata.compatibility_status,
+                metadata_source=metadata.source,
+                repo_usage_files=repo_usage.get(package, []),
+            )
+        )
+    reports = upgrade_audit._sort_reports(reports)
+    actionable = [report for report in reports if upgrade_audit._is_actionable_upgrade(report)]
+    priority_source = actionable if actionable else reports
+    priority_queue = upgrade_audit._priority_queue(priority_source, limit=3)
+
+    has_high_risk = any(report.upgrade_signal in {"critical", "high"} for report in actionable)
+    has_drift = any(report.alignment == "drift" for report in reports)
+    ok = not has_high_risk and not has_drift
+
+    summary_bits = [f"{len(actionable)} actionable package(s)"]
+    if priority_queue:
+        top = priority_queue[0]
+        top_name = str(top.get("name", "")).strip()
+        top_signal = str(top.get("signal", "")).strip()
+        top_action = str(top.get("manifest_action", "")).strip()
+        if top_name:
+            summary_bits.append(f"top priority {top_name} [{top_signal or 'watch'} / {top_action or 'review'}]")
+    summary = "upgrade audit found " + "; ".join(summary_bits)
+
+    evidence: list[dict[str, Any]] = []
+    for item in priority_queue:
+        name = str(item.get("name", "")).strip()
+        signal = str(item.get("signal", "")).strip()
+        action = str(item.get("manifest_action", "")).strip()
+        impact_area = str(item.get("impact_area", "")).strip()
+        next_action = str(item.get("next_action", "")).strip()
+        version = str(item.get("suggested_version", "")).strip()
+        message = f"{name}: {signal or 'watch'} / {action or 'review'}"
+        if version:
+            message += f" -> {version}"
+        if impact_area:
+            message += f" [{impact_area}]"
+        if next_action:
+            message += f" — {next_action}"
+        evidence.append({"type": "upgrade_priority", "message": message, "path": "pyproject.toml"})
+
+    fix = ["Run `python -m sdetkit intelligence upgrade-audit --format md --top 5` for the full ranked report."]
+    fix.extend(
+        str(command)
+        for item in priority_queue
+        for command in item.get("validation_commands", [])
+        if isinstance(command, str)
+    )
+    deduped_fix: list[str] = []
+    for item in fix:
+        if item not in deduped_fix:
+            deduped_fix.append(item)
+
+    meta = {
+        "packages_audited": len(reports),
+        "actionable_packages": len(actionable),
+        "priority_queue": priority_queue,
+        "offline": offline,
+        "requirements": [path.name for path in requirement_paths],
+    }
+    return ok, summary, evidence, deduped_fix[:5], meta
 
 
 def _print_human_report(data: dict[str, Any]) -> None:
@@ -661,6 +863,11 @@ def _print_human_report(data: dict[str, Any]) -> None:
     lines.append("recommendations:")
     for rec in data.get("recommendations", []):
         lines.append(f"- {rec}")
+    hints = data.get("hints", [])
+    if hints:
+        lines.append("hints:")
+        for hint in hints:
+            lines.append(f"- {hint}")
     sys.stdout.write("\n".join(lines) + "\n")
 
 
@@ -679,6 +886,11 @@ def _print_pr_report(data: dict[str, Any]) -> None:
     lines.append("- next steps:")
     for rec in data.get("recommendations", []):
         lines.append(f"  - {rec}")
+    hints = data.get("hints", [])
+    if hints:
+        lines.append("- hints:")
+        for hint in hints:
+            lines.append(f"  - {hint}")
     sys.stdout.write("\n".join(lines) + "\n")
 
 
@@ -739,6 +951,14 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
             else:
                 lines.append(f"  - {message}")
     if not has_evidence:
+        lines.append("- None")
+    lines.append("")
+    lines.append("#### Hints")
+    hints = data.get("hints", [])
+    if hints:
+        for hint in hints:
+            lines.append(f"- {hint}")
+    else:
         lines.append("- None")
     return "\n".join(lines) + "\n"
 
@@ -865,6 +1085,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--deps", action="store_true")
     parser.add_argument("--clean-tree", dest="clean_tree", action="store_true")
     parser.add_argument("--repo", "--repo-readiness", dest="repo_readiness", action="store_true")
+    parser.add_argument(
+        "--upgrade-audit",
+        dest="upgrade_audit",
+        action="store_true",
+        help="Run dependency upgrade audit hints and impact analysis.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-offline",
+        dest="upgrade_audit_offline",
+        action="store_true",
+        help="Use cached metadata only for upgrade-audit hints.",
+    )
     parser.add_argument("--dev", action="store_true")
     parser.add_argument("--pyproject", action="store_true")
     parser.add_argument("--pr", action="store_true", help="print a PR-ready markdown summary")
@@ -914,6 +1146,7 @@ def main(argv: list[str] | None = None) -> int:
         ns.deps = False
         ns.clean_tree = False
         ns.repo_readiness = False
+        ns.upgrade_audit = False
         ns.dev = False
         ns.pyproject = False
         ns.all = False
@@ -938,6 +1171,8 @@ def main(argv: list[str] | None = None) -> int:
             ns.dev = True
         if "release_meta" in only_set:
             ns.release = True
+        if "upgrade_audit" in only_set:
+            ns.upgrade_audit = True
 
     def _is_selected(check_id: str) -> bool:
         if only_set:
@@ -987,6 +1222,7 @@ def main(argv: list[str] | None = None) -> int:
         ns.ci = True
         ns.deps = True
         ns.clean_tree = True
+        ns.upgrade_audit = True
 
     if release_any and _is_selected("release_meta"):
         ns.pyproject = True
@@ -999,6 +1235,7 @@ def main(argv: list[str] | None = None) -> int:
         ns.deps = True
         ns.dev = True
         ns.repo_readiness = True
+        ns.upgrade_audit = True
 
     if ns.dev and (ns.ci or ns.deps or ns.clean_tree):
         ns.pyproject = True
@@ -1279,6 +1516,23 @@ def main(argv: list[str] | None = None) -> int:
         )
         score_items.append(rr_ok)
 
+    if ns.upgrade_audit and _is_selected("upgrade_audit"):
+        ua_ok, ua_summary, ua_evidence, ua_fix, ua_meta = _check_upgrade_audit(
+            root,
+            offline=bool(ns.upgrade_audit_offline),
+        )
+        data["upgrade_audit_ok"] = ua_ok
+        data["checks"]["upgrade_audit"] = _make_check(
+            ok=ua_ok,
+            severity="medium" if ua_ok else "high",
+            summary=ua_summary,
+            evidence=ua_evidence,
+            fix=ua_fix,
+            skipped=False,
+            meta=ua_meta,
+        )
+        score_items.append(ua_ok)
+
     policy = _load_policy(root, ns.policy)
     if policy.get("_error"):
         sys.stderr.write(str(policy["_error"]) + "\n")
@@ -1333,6 +1587,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     data["score"] = _calculate_score(score_items)
     data["recommendations"] = _recommendations(data)
+    data["hints"] = _build_hints(data)
     data["ok"] = bool(gate_ok)
     if failed_checks:
         data["failed_checks"] = failed_checks
@@ -1355,6 +1610,11 @@ def main(argv: list[str] | None = None) -> int:
         lines.append("recommendations:")
         for rec in data.get("recommendations", []):
             lines.append(f"- {rec}")
+        hints = data.get("hints", [])
+        if hints:
+            lines.append("hints:")
+            for hint in hints:
+                lines.append(f"- {hint}")
         output = "\n".join(lines) + "\n"
         is_json = False
 

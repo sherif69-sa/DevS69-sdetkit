@@ -107,6 +107,8 @@ python scripts/upgrade_audit.py --impact-area runtime-core --format md
 python scripts/upgrade_audit.py --repo-usage-tier active --used-in-repo-only --top 10
 python scripts/upgrade_audit.py --metadata-source cache-stale --outdated-only
 python scripts/upgrade_audit.py --group requirements --source requirements.txt --top 10
+python -m sdetkit doctor --upgrade-audit --upgrade-audit-offline --format json
+bash quality.sh doctor
 ```
 
 By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch.
