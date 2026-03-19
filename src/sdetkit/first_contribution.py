@@ -12,18 +12,56 @@ _STARTER_PROFILES = {
         "impact": "Clarify commands, fix internal links, and improve first-run confidence.",
         "starter_files": ["README.md", "docs/choose-your-path.md", "CONTRIBUTING.md"],
         "validation": ["python -m pre_commit run -a", "mkdocs build"],
+        "first_steps": [
+            "Read README.md and docs/choose-your-path.md to find wording drift or broken handoffs.",
+            "Make one focused docs update that shortens the path from landing page to first successful command.",
+            "Run docs-safe validation before opening your PR.",
+        ],
     },
     "test-hardening": {
         "label": "Test hardening",
         "impact": "Add focused regression coverage without changing the public surface area.",
         "starter_files": ["tests/", "src/sdetkit/"],
         "validation": ["python -m pytest -q", "bash quality.sh cov"],
+        "first_steps": [
+            "Pick one documented CLI behavior and find the closest existing test module.",
+            "Add one regression or edge-case assertion without broad refactors.",
+            "Run the focused test file first, then the repo quality gate if scope grows.",
+        ],
     },
     "automation-upgrade": {
         "label": "Automation upgrade",
         "impact": "Improve CI repeatability, artifact quality, or release safety checks.",
         "starter_files": ["scripts/", "templates/automations/", ".github/"],
         "validation": ["python -m pre_commit run -a", "bash quality.sh cov", "python -m build"],
+        "first_steps": [
+            "Inspect one automation path with a clear before/after improvement opportunity.",
+            "Keep the change scoped to one workflow or template family.",
+            "Validate both local quality checks and packaging/build safety when relevant.",
+        ],
+    },
+}
+
+_TRUST_ASSETS = {
+    "starter_inventory": {
+        "label": "Starter work inventory",
+        "path": "docs/starter-work-inventory.md",
+        "why": "Gives first-time contributors concrete, repo-specific starter lanes.",
+    },
+    "quickstart": {
+        "label": "First contribution quickstart",
+        "path": "docs/first-contribution-quickstart.md",
+        "why": "Provides a short path from clone to reviewable PR.",
+    },
+    "pr_template": {
+        "label": "PR template",
+        "path": ".github/PULL_REQUEST_TEMPLATE.md",
+        "why": "Sets reviewer expectations and keeps contribution evidence consistent.",
+    },
+    "feature_request_template": {
+        "label": "Feature request template",
+        "path": ".github/ISSUE_TEMPLATE/feature_request.yml",
+        "why": "Lets new contributors propose scoped work without guessing the maintainer format.",
     },
 }
 
@@ -92,6 +130,12 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Optional file path to also write the rendered first-contribution report.",
     )
     p.add_argument(
+        "--profile",
+        choices=["all", *_STARTER_PROFILES.keys()],
+        default="all",
+        help="Highlight one starter contribution profile instead of all profiles.",
+    )
+    p.add_argument(
         "--strict",
         action="store_true",
         help="Return non-zero if required checklist content is missing.",
@@ -130,15 +174,44 @@ def _write_defaults(base: Path) -> list[str]:
     return ["CONTRIBUTING.md"]
 
 
-def build_first_contribution_status(root: str = ".") -> dict[str, Any]:
+def _profile_payload(profile: str) -> dict[str, dict[str, Any]]:
+    if profile == "all":
+        return dict(_STARTER_PROFILES)
+    return {profile: _STARTER_PROFILES[profile]}
+
+
+def _trust_asset_status(base: Path) -> dict[str, dict[str, str | bool]]:
+    status: dict[str, dict[str, str | bool]] = {}
+    for key, details in _TRUST_ASSETS.items():
+        path = base / details["path"]
+        status[key] = {
+            "label": details["label"],
+            "path": details["path"],
+            "why": details["why"],
+            "exists": path.exists(),
+        }
+    return status
+
+
+def build_first_contribution_status(root: str = ".", profile: str = "all") -> dict[str, Any]:
     base = Path(root)
     guide = base / "CONTRIBUTING.md"
     guide_text = _read(guide)
     missing = _missing_checks(guide_text)
+    trust_assets = _trust_asset_status(base)
+    missing_assets = [
+        asset["path"]
+        for asset in trust_assets.values()
+        if not bool(asset["exists"])
+    ]
 
-    total_checks = len([_CHECKLIST_SECTION_HEADER, *_CHECKLIST_ITEMS, *_COMMAND_BLOCKS])
-    passed_checks = total_checks - len(missing)
+    total_checks = len([_CHECKLIST_SECTION_HEADER, *_CHECKLIST_ITEMS, *_COMMAND_BLOCKS]) + len(
+        trust_assets
+    )
+    passed_checks = total_checks - len(missing) - len(missing_assets)
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
+    selected_profiles = _profile_payload(profile)
+    recommended_profile = next(iter(selected_profiles)) if profile != "all" else "docs-polish"
 
     return {
         "name": "day10-first-contribution-checklist",
@@ -149,10 +222,25 @@ def build_first_contribution_status(root: str = ".") -> dict[str, Any]:
         "required_commands": list(_COMMAND_BLOCKS),
         "guide": str(guide),
         "missing": missing,
-        "starter_profiles": _STARTER_PROFILES,
+        "missing_assets": missing_assets,
+        "starter_profiles": selected_profiles,
+        "available_starter_profiles": list(_STARTER_PROFILES),
+        "selected_profile": profile,
+        "recommended_profile": recommended_profile,
+        "trust_assets": trust_assets,
+        "good_first_issue_labels": [
+            "good first issue",
+            "help wanted",
+            "documentation",
+            "tests",
+            "needs-triage",
+        ],
         "actions": {
-            "open_guide": "docs/contributing.md",
+            "open_guide": "CONTRIBUTING.md",
             "validate": "sdetkit first-contribution --format json --strict",
+            "profile_docs_polish": "sdetkit first-contribution --profile docs-polish --format markdown",
+            "profile_test_hardening": "sdetkit first-contribution --profile test-hardening --format markdown",
+            "profile_automation_upgrade": "sdetkit first-contribution --profile automation-upgrade --format markdown",
             "write_defaults": "sdetkit first-contribution --write-defaults --strict",
             "artifact": "sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md",
         },
@@ -178,14 +266,32 @@ def _render_text(payload: dict[str, Any]) -> str:
             lines.append(f"- {item}")
     else:
         lines.append("Guide coverage gaps: none")
+    lines.extend(["", "Contributor trust assets:"])
+    for asset in payload["trust_assets"].values():
+        status = "ok" if asset["exists"] else "missing"
+        lines.append(f"- [{status}] {asset['label']}: {asset['path']}")
+        lines.append(f"  why      : {asset['why']}")
+    if payload["missing_assets"]:
+        lines.append("Missing trust assets:")
+        for item in payload["missing_assets"]:
+            lines.append(f"- {item}")
+    else:
+        lines.append("Missing trust assets: none")
     lines.extend(["", "Starter profiles:"])
     for key, details in payload["starter_profiles"].items():
         lines.append(f"- {details['label']} ({key}): {details['impact']}")
         lines.append(f"  files     : {', '.join(details['starter_files'])}")
         lines.append(f"  validate  : {'; '.join(details['validation'])}")
+        lines.append(f"  first step: {details['first_steps'][0]}")
+    lines.extend(["", "Good-first-issue labels:"])
+    for label in payload["good_first_issue_labels"]:
+        lines.append(f"- {label}")
     lines.extend(["", "Actions:"])
     lines.append(f"- Open guide: {payload['actions']['open_guide']}")
     lines.append(f"- Validate: {payload['actions']['validate']}")
+    lines.append(f"- Spotlight docs profile: {payload['actions']['profile_docs_polish']}")
+    lines.append(f"- Spotlight test profile: {payload['actions']['profile_test_hardening']}")
+    lines.append(f"- Spotlight automation profile: {payload['actions']['profile_automation_upgrade']}")
     lines.append(f"- Write defaults: {payload['actions']['write_defaults']}")
     lines.append(f"- Export artifact: {payload['actions']['artifact']}")
     return "\n".join(lines) + "\n"
@@ -197,6 +303,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         f"- Guide file: `{payload['guide']}`",
+        f"- Selected starter profile: `{payload['selected_profile']}`",
+        f"- Recommended starter profile: `{payload['recommended_profile']}`",
         "",
         "## Checklist",
         "",
@@ -212,16 +320,36 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         lines.append(f"- Impact: {details['impact']}")
         lines.append(f"- Good starter files: `{'`, `'.join(details['starter_files'])}`")
         lines.append(f"- Validate with: `{'`, `'.join(details['validation'])}`")
+        lines.append("- First steps:")
+        for step in details["first_steps"]:
+            lines.append(f"  - {step}")
         lines.append("")
-    lines.extend(["## Guide coverage gaps", ""])
+    lines.extend(["## Contributor trust assets", ""])
+    for asset in payload["trust_assets"].values():
+        lines.append(
+            f"- [{'x' if asset['exists'] else ' '}] `{asset['path']}` — {asset['label']}: {asset['why']}"
+        )
+    lines.extend(["", "## Guide coverage gaps", ""])
     if payload["missing"]:
         for item in payload["missing"]:
             lines.append(f"- `{item}`")
     else:
         lines.append("- none")
+    lines.extend(["", "## Missing trust assets", ""])
+    if payload["missing_assets"]:
+        for item in payload["missing_assets"]:
+            lines.append(f"- `{item}`")
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Good-first-issue labels", ""])
+    for label in payload["good_first_issue_labels"]:
+        lines.append(f"- `{label}`")
     lines.extend(["", "## Actions", ""])
     lines.append(f"- Open guide: `{payload['actions']['open_guide']}`")
     lines.append(f"- Validate: `{payload['actions']['validate']}`")
+    lines.append(f"- Spotlight docs profile: `{payload['actions']['profile_docs_polish']}`")
+    lines.append(f"- Spotlight test profile: `{payload['actions']['profile_test_hardening']}`")
+    lines.append(f"- Spotlight automation profile: `{payload['actions']['profile_automation_upgrade']}`")
     lines.append(f"- Write defaults: `{payload['actions']['write_defaults']}`")
     lines.append(f"- Export artifact: `{payload['actions']['artifact']}`")
     return "\n".join(lines) + "\n"
@@ -234,7 +362,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.write_defaults:
         touched = _write_defaults(Path(args.root))
 
-    payload = build_first_contribution_status(args.root)
+    payload = build_first_contribution_status(args.root, profile=args.profile)
     payload["touched_files"] = touched
 
     if args.format == "json":
