@@ -721,6 +721,9 @@ def _build_quality_summary(
     failed_check_ids: list[str] = []
     fix_count = 0
     evidence_count = 0
+    severity_breakdown = {"low": 0, "medium": 0, "high": 0}
+    checks_with_fix = 0
+    checks_with_evidence = 0
 
     for check_id in ordered_selected:
         item = checks.get(check_id, {})
@@ -737,8 +740,16 @@ def _build_quality_summary(
         if severity_rank > highest_failure_rank:
             highest_failure_rank = severity_rank
             highest_failure_severity = severity
-        fix_count += len(item.get("fix", []))
-        evidence_count += len(item.get("evidence", []))
+        if severity in severity_breakdown:
+            severity_breakdown[severity] += 1
+        item_fix_count = len(item.get("fix", []))
+        item_evidence_count = len(item.get("evidence", []))
+        fix_count += item_fix_count
+        evidence_count += item_evidence_count
+        if item_fix_count:
+            checks_with_fix += 1
+        if item_evidence_count:
+            checks_with_evidence += 1
 
     total = len(ordered_selected)
     actionable = passed + failed
@@ -755,6 +766,9 @@ def _build_quality_summary(
         "failed_check_ids": failed_check_ids,
         "fix_count": fix_count,
         "evidence_count": evidence_count,
+        "failed_severity_breakdown": severity_breakdown,
+        "checks_with_fix": checks_with_fix,
+        "checks_with_evidence": checks_with_evidence,
         "hint_count": len(hints or []),
     }
 
@@ -871,6 +885,31 @@ def _build_hints(data: dict[str, Any], *, limit: int = 5) -> list[str]:
                 detail = f"action {action}: {count} package(s)"
                 if package_text:
                     detail += f" — includes {package_text}"
+                hints.append(detail)
+
+    hotspots = upgrade_meta.get("hotspots", [])
+    if isinstance(hotspots, list):
+        for item in hotspots[:2]:
+            if not isinstance(item, dict):
+                continue
+            path = str(item.get("path", "")).strip()
+            actionable = int(item.get("actionable_packages", 0))
+            packages = item.get("packages", [])
+            package_text = ""
+            if isinstance(packages, list) and packages:
+                package_text = ", ".join(
+                    str(name).strip() for name in packages[:3] if str(name).strip()
+                )
+            commands = item.get("validation_commands", [])
+            command_text = ""
+            if isinstance(commands, list) and commands:
+                command_text = str(commands[0]).strip()
+            if path:
+                detail = f"hotspot {path}: {actionable} actionable package(s)"
+                if package_text:
+                    detail += f" — packages {package_text}"
+                if command_text:
+                    detail += f" — validate with {command_text}"
                 hints.append(detail)
 
     for key, label in (("group_summary", "group"), ("source_summary", "source")):
@@ -1066,6 +1105,7 @@ def _check_upgrade_audit(
         "lane_summary": upgrade_audit._lane_summary(filtered_reports),
         "impact_summary": upgrade_audit._impact_summary(filtered_reports),
         "repo_usage_summary": upgrade_audit._repo_usage_summary(filtered_reports),
+        "hotspots": upgrade_audit._repo_hotspots(filtered_reports),
         "action_summary": upgrade_audit._action_summary(filtered_reports),
         "group_summary": upgrade_audit._group_summary(filtered_reports),
         "source_summary": upgrade_audit._source_summary(filtered_reports),
@@ -1198,6 +1238,17 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
             lines.append("- failing checks: none")
         lines.append(
             f"- hint coverage: {quality.get('hint_count', 0)} hint(s), {quality.get('fix_count', 0)} fix item(s), {quality.get('evidence_count', 0)} evidence item(s)"
+        )
+        severity_breakdown = quality.get("failed_severity_breakdown", {})
+        if isinstance(severity_breakdown, dict):
+            lines.append(
+                "- failure mix: "
+                f"high {severity_breakdown.get('high', 0)}, "
+                f"medium {severity_breakdown.get('medium', 0)}, "
+                f"low {severity_breakdown.get('low', 0)}"
+            )
+        lines.append(
+            f"- fix-ready checks: {quality.get('checks_with_fix', 0)}, evidence-rich checks: {quality.get('checks_with_evidence', 0)}"
         )
     else:
         lines.append("- None")

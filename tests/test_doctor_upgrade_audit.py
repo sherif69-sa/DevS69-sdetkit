@@ -67,8 +67,13 @@ def test_doctor_upgrade_audit_emits_priority_hints(tmp_path: Path, monkeypatch, 
         payload["checks"]["upgrade_audit"]["meta"]["impact_summary"][0]["impact_area"]
         == "runtime-core"
     )
+    assert (
+        payload["checks"]["upgrade_audit"]["meta"]["hotspots"][0]["path"]
+        == "src/sdetkit/netclient.py"
+    )
     assert any("httpx: raise-floor" in hint for hint in payload["hints"])
     assert any("impact runtime-core" in hint for hint in payload["hints"])
+    assert any("hotspot src/sdetkit/netclient.py" in hint for hint in payload["hints"])
     assert any("Runtime lane follow-up" in item for item in payload["recommendations"])
     assert payload["quality"]["passed_checks"] >= 1
     assert payload["quality"]["hint_count"] == len(payload["hints"])

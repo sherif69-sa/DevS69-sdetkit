@@ -30,6 +30,8 @@ def test_doctor_markdown_contains_table_actions_and_stable_order(tmp_path: Path)
     assert "#### Quality summary" in proc.stdout
     assert "#### Action items" in proc.stdout
     assert "#### Evidence" in proc.stdout
+    assert "- failure mix:" in proc.stdout
+    assert "- fix-ready checks:" in proc.stdout
 
     ci_idx = proc.stdout.index("| `ci_workflows` | high | FAIL |")
     sec_idx = proc.stdout.index("| `security_files` | medium | FAIL |")

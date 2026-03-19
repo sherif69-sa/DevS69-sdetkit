@@ -1281,6 +1281,54 @@ def _repo_usage_summary(reports: list[PackageReport]) -> list[dict[str, object]]
     ]
 
 
+def _repo_hotspots(reports: list[PackageReport], *, limit: int = 5) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        for path in report.repo_usage_files:
+            normalized = str(path).strip()
+            if normalized:
+                buckets.setdefault(normalized, []).append(report)
+
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            -sum(1 for report in item[1] if _is_actionable_upgrade(report)),
+            -max((report.risk_score for report in item[1]), default=0),
+            -len(item[1]),
+            item[0],
+        ),
+    )
+
+    hotspots: list[dict[str, object]] = []
+    for path, items in ordered[: max(limit, 0)]:
+        packages = [report.name for report in items[:5]]
+        validation_commands: list[str] = []
+        seen_commands: set[str] = set()
+        for report in items:
+            for command in report.validation_commands:
+                normalized = str(command).strip()
+                if normalized and normalized not in seen_commands:
+                    seen_commands.add(normalized)
+                    validation_commands.append(normalized)
+                if len(validation_commands) >= 3:
+                    break
+            if len(validation_commands) >= 3:
+                break
+
+        hotspots.append(
+            {
+                "path": path,
+                "count": len(items),
+                "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+                "max_risk_score": max((report.risk_score for report in items), default=0),
+                "lanes": sorted({_recommended_lane(report) for report in items})[:3],
+                "packages": packages,
+                "validation_commands": validation_commands,
+            }
+        )
+    return hotspots
+
+
 def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
     return {
         "packages_audited": len(reports),
@@ -1614,6 +1662,17 @@ def _render_markdown(
             f"- **{item['repo_usage_tier']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max repo usage {item['max_repo_usage_count']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
+    lines.extend(["", "## Repo hotspots", ""])
+    for item in _repo_hotspots(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lane_list = ", ".join(f"`{lane}`" for lane in item["lanes"])
+        validations = ", ".join(f"`{command}`" for command in item["validation_commands"])
+        lines.append(
+            f"- **{item['path']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" — lanes {lane_list}" if lane_list else "")
+            + (f" — validate with {validations}" if validations else "")
+        )
     lines.extend(["", "## Repo impact map", ""])
     for item in _impact_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
@@ -1668,6 +1727,7 @@ def _render_json(
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
         "repo_usage": _repo_usage_summary(reports),
+        "hotspots": _repo_hotspots(reports),
         "impact": _impact_summary(reports),
         "actions": _action_summary(reports),
         "groups": _group_summary(reports),
