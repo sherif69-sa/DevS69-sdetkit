@@ -699,6 +699,23 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
                 recs.append(rec)
             if len(recs) >= 6:
                 break
+    risk_summary = upgrade_meta.get("risk_summary", [])
+    if isinstance(risk_summary, list):
+        for item in risk_summary:
+            if not isinstance(item, dict):
+                continue
+            band = str(item.get("risk_band", "")).strip()
+            actionable = int(item.get("actionable_packages", 0))
+            packages = item.get("packages", [])
+            package_text = ", ".join(
+                str(name).strip() for name in packages[:3] if str(name).strip()
+            )
+            if band in {"critical", "high"} and actionable > 0:
+                rec = f"Risk compression: clear the {band}-band upgrade queue before broad repo churn."
+                if package_text:
+                    rec += f" Start with {package_text}."
+                recs.append(rec)
+                break
     release_freshness_summary = upgrade_meta.get("release_freshness_summary", [])
     if isinstance(release_freshness_summary, list):
         for item in release_freshness_summary:
@@ -722,6 +739,18 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
                     rec += f" Start with {package_text}."
                 recs.append(rec)
             if len(recs) >= 6:
+                break
+    validation_summary = upgrade_meta.get("validation_summary", [])
+    if isinstance(validation_summary, list):
+        for item in validation_summary:
+            if not isinstance(item, dict):
+                continue
+            command = str(item.get("command", "")).strip()
+            actionable = int(item.get("actionable_packages", 0))
+            if command and actionable > 0:
+                recs.append(
+                    f"Validation batching: use `{command}` as a shared guardrail across {actionable} actionable package(s)."
+                )
                 break
     if not recs:
         recs.append(
@@ -797,7 +826,7 @@ def _build_quality_summary(
     }
 
 
-def _build_hints(data: dict[str, Any], *, limit: int = 7) -> list[str]:
+def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
     hints: list[str] = []
 
     next_actions = data.get("next_actions", [])
@@ -958,6 +987,28 @@ def _build_hints(data: dict[str, Any], *, limit: int = 7) -> list[str]:
                     detail += f" — validate with {command_text}"
                 hints.append(detail)
 
+    risk_summary = upgrade_meta.get("risk_summary", [])
+    if isinstance(risk_summary, list):
+        for item in risk_summary[:2]:
+            if not isinstance(item, dict):
+                continue
+            band = str(item.get("risk_band", "")).strip()
+            count = int(item.get("count", 0))
+            actionable = int(item.get("actionable_packages", 0))
+            packages = item.get("packages", [])
+            package_text = ""
+            if isinstance(packages, list) and packages:
+                package_text = ", ".join(
+                    str(name).strip() for name in packages[:3] if str(name).strip()
+                )
+            if band and count > 0:
+                detail = f"risk {band}: {count} package(s)"
+                if actionable > 0:
+                    detail += f", actionable {actionable}"
+                if package_text:
+                    detail += f" — includes {package_text}"
+                hints.append(detail)
+
     for key, label in (("group_summary", "group"), ("source_summary", "source")):
         summary_rows = upgrade_meta.get(key, [])
         if not isinstance(summary_rows, list):
@@ -970,6 +1021,20 @@ def _build_hints(data: dict[str, Any], *, limit: int = 7) -> list[str]:
             actionable = int(item.get("actionable_packages", 0))
             if name and count > 0 and actionable > 0:
                 hints.append(f"{label} {name}: {count} package(s), actionable {actionable}")
+
+    validation_summary = upgrade_meta.get("validation_summary", [])
+    if isinstance(validation_summary, list):
+        for item in validation_summary[:2]:
+            if not isinstance(item, dict):
+                continue
+            command = str(item.get("command", "")).strip()
+            actionable = int(item.get("actionable_packages", 0))
+            count = int(item.get("count", 0))
+            if command and count > 0:
+                detail = f"validation {command}: {count} package(s)"
+                if actionable > 0:
+                    detail += f", actionable {actionable}"
+                hints.append(detail)
 
     deduped: list[str] = []
     seen: set[str] = set()
@@ -992,10 +1057,12 @@ def _check_upgrade_audit(
     groups: list[str] | None = None,
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
+    lanes: list[str] | None = None,
     queries: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
+    release_freshness: list[str] | None = None,
     used_in_repo_only: bool = False,
     outdated_only: bool = False,
     min_release_age_days: int | None = None,
@@ -1078,9 +1145,11 @@ def _check_upgrade_audit(
         groups=groups,
         sources=sources,
         metadata_sources=metadata_sources,
+        lanes=lanes,
         impact_areas=impact_areas,
         manifest_actions=manifest_actions,
         repo_usage_tiers=repo_usage_tiers,
+        release_freshness=release_freshness,
         queries=queries,
         min_release_age_days=min_release_age_days,
         max_release_age_days=max_release_age_days,
@@ -1153,11 +1222,13 @@ def _check_upgrade_audit(
         "actionable_packages": len(actionable),
         "priority_queue": priority_queue,
         "lane_summary": upgrade_audit._lane_summary(filtered_reports),
+        "risk_summary": upgrade_audit._risk_summary(filtered_reports),
         "impact_summary": upgrade_audit._impact_summary(filtered_reports),
         "repo_usage_summary": upgrade_audit._repo_usage_summary(filtered_reports),
         "hotspots": upgrade_audit._repo_hotspots(filtered_reports),
         "release_freshness_summary": upgrade_audit._release_freshness_summary(filtered_reports),
         "action_summary": upgrade_audit._action_summary(filtered_reports),
+        "validation_summary": upgrade_audit._validation_summary(filtered_reports),
         "group_summary": upgrade_audit._group_summary(filtered_reports),
         "source_summary": upgrade_audit._source_summary(filtered_reports),
         "offline": offline,
@@ -1169,10 +1240,12 @@ def _check_upgrade_audit(
             "groups": groups or [],
             "sources": sources or [],
             "metadata_sources": metadata_sources or [],
+            "lanes": lanes or [],
             "queries": queries or [],
             "impact_areas": impact_areas or [],
             "manifest_actions": manifest_actions or [],
             "repo_usage_tiers": repo_usage_tiers or [],
+            "release_freshness": release_freshness or [],
             "min_release_age_days": min_release_age_days,
             "max_release_age_days": max_release_age_days,
             "used_in_repo_only": used_in_repo_only,
@@ -1454,10 +1527,12 @@ def main(argv: list[str] | None = None) -> int:
         "--upgrade-audit-group",
         "--upgrade-audit-source",
         "--upgrade-audit-metadata-source",
+        "--upgrade-audit-lane",
         "--upgrade-audit-query",
         "--upgrade-audit-impact-area",
         "--upgrade-audit-manifest-action",
         "--upgrade-audit-repo-usage-tier",
+        "--upgrade-audit-release-freshness",
         "--upgrade-audit-top",
         "--upgrade-audit-min-release-age-days",
         "--upgrade-audit-max-release-age-days",
@@ -1540,6 +1615,22 @@ def main(argv: list[str] | None = None) -> int:
         help="Focus doctor upgrade-audit hints on where package metadata came from.",
     )
     parser.add_argument(
+        "--upgrade-audit-lane",
+        dest="upgrade_audit_lanes",
+        action="append",
+        choices=[
+            "stabilize-manifests",
+            "refresh-baselines",
+            "upgrade-now",
+            "next-maintenance-batch",
+            "investigate-metadata",
+            "policy-covered-watchlist",
+            "backlog-watchlist",
+        ],
+        default=None,
+        help="Focus doctor upgrade-audit hints on specific execution lanes.",
+    )
+    parser.add_argument(
         "--upgrade-audit-query",
         dest="upgrade_audit_queries",
         action="append",
@@ -1592,6 +1683,14 @@ def main(argv: list[str] | None = None) -> int:
         choices=["hot-path", "active", "edge", "declared-only"],
         default=None,
         help="Focus doctor upgrade-audit hints on packages by repo-usage tier.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-release-freshness",
+        dest="upgrade_audit_release_freshness",
+        action="append",
+        choices=list(upgrade_audit.RELEASE_FRESHNESS_BUCKETS),
+        default=None,
+        help="Focus doctor upgrade-audit hints on selected target-release freshness buckets.",
     )
     parser.add_argument(
         "--upgrade-audit-min-release-age-days",
@@ -2048,10 +2147,12 @@ def main(argv: list[str] | None = None) -> int:
             groups=ns.upgrade_audit_groups,
             sources=ns.upgrade_audit_sources,
             metadata_sources=ns.upgrade_audit_metadata_sources,
+            lanes=ns.upgrade_audit_lanes,
             queries=ns.upgrade_audit_queries,
             impact_areas=ns.upgrade_audit_impact_areas,
             manifest_actions=ns.upgrade_audit_manifest_actions,
             repo_usage_tiers=ns.upgrade_audit_repo_usage_tiers,
+            release_freshness=ns.upgrade_audit_release_freshness,
             min_release_age_days=ns.upgrade_audit_min_release_age_days,
             max_release_age_days=ns.upgrade_audit_max_release_age_days,
             used_in_repo_only=bool(ns.upgrade_audit_used_in_repo_only),

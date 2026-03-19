@@ -1162,6 +1162,18 @@ def _recommended_lane(report: PackageReport) -> str:
     return "backlog-watchlist"
 
 
+def _risk_band(report: PackageReport) -> str:
+    if report.risk_score >= 80:
+        return "critical"
+    if report.risk_score >= 60:
+        return "high"
+    if report.risk_score >= 35:
+        return "medium"
+    if report.risk_score > 0:
+        return "low"
+    return "none"
+
+
 def _impact_area(report: PackageReport) -> str:
     groups = set(report.groups)
     package = report.name
@@ -1243,6 +1255,31 @@ def _lane_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
             "packages": [r.name for r in items[:5]],
         }
         for lane, items in ordered
+    ]
+
+
+def _risk_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "none": 4}
+    for report in reports:
+        buckets.setdefault(_risk_band(report), []).append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            order.get(item[0], 99),
+            -max((report.risk_score for report in item[1]), default=0),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "risk_band": band,
+            "count": len(items),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "packages": [report.name for report in items[:5]],
+        }
+        for band, items in ordered
     ]
 
 
@@ -1346,6 +1383,34 @@ def _repo_hotspots(reports: list[PackageReport], *, limit: int = 5) -> list[dict
             }
         )
     return hotspots
+
+
+def _validation_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        for command in report.validation_commands:
+            normalized = str(command).strip()
+            if normalized:
+                buckets.setdefault(normalized, []).append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            -sum(1 for report in item[1] if _is_actionable_upgrade(report)),
+            -max((report.risk_score for report in item[1]), default=0),
+            -len(item[1]),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "command": command,
+            "count": len(items),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "packages": [report.name for report in items[:5]],
+        }
+        for command, items in ordered
+    ]
 
 
 def _release_freshness_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
@@ -1599,9 +1664,11 @@ def _filter_reports(
     groups: list[str] | None = None,
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
+    lanes: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
+    release_freshness: list[str] | None = None,
     queries: list[str] | None = None,
     min_release_age_days: int | None = None,
     max_release_age_days: int | None = None,
@@ -1634,6 +1701,9 @@ def _filter_reports(
     if metadata_sources:
         allowed_sources = {item.strip() for item in metadata_sources if item.strip()}
         filtered = [report for report in filtered if report.metadata_source in allowed_sources]
+    if lanes:
+        allowed_lanes = {item.strip() for item in lanes if item.strip()}
+        filtered = [report for report in filtered if _recommended_lane(report) in allowed_lanes]
     if impact_areas:
         allowed_impact_areas = {item.strip() for item in impact_areas if item.strip()}
         filtered = [report for report in filtered if report.impact_area in allowed_impact_areas]
@@ -1643,6 +1713,13 @@ def _filter_reports(
     if repo_usage_tiers:
         allowed_tiers = {item.strip() for item in repo_usage_tiers if item.strip()}
         filtered = [report for report in filtered if report.repo_usage_tier in allowed_tiers]
+    if release_freshness:
+        allowed_buckets = {item.strip() for item in release_freshness if item.strip()}
+        filtered = [
+            report
+            for report in filtered
+            if _release_freshness_bucket(report.release_age_days) in allowed_buckets
+        ]
     if queries:
         query_terms = [item.strip().lower() for item in queries if item.strip()]
         filtered = [report for report in filtered if _matches_text_query(report, query_terms)]
@@ -1737,6 +1814,13 @@ def _render_markdown(
             f"- **{item['lane']}**: {item['count']} package(s), max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
+    lines.extend(["", "## Risk bands", ""])
+    for item in _risk_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- **{item['risk_band']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
     lines.extend(["", "## Repo usage tiers", ""])
     for item in _repo_usage_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
@@ -1778,6 +1862,13 @@ def _render_markdown(
             f"- **{item['manifest_action']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
+    lines.extend(["", "## Validation commands", ""])
+    for item in _validation_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        lines.append(
+            f"- `{item['command']}`: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+        )
     lines.extend(["", "## Dependency groups", ""])
     for item in _group_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
@@ -1815,11 +1906,13 @@ def _render_json(
         "summary": _report_summary(reports),
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
+        "risk": _risk_summary(reports),
         "repo_usage": _repo_usage_summary(reports),
         "hotspots": _repo_hotspots(reports),
         "impact": _impact_summary(reports),
         "release_freshness": _release_freshness_summary(reports),
         "actions": _action_summary(reports),
+        "validations": _validation_summary(reports),
         "groups": _group_summary(reports),
         "sources": _source_summary(reports),
         "packages": [asdict(report) for report in reports],
@@ -1862,9 +1955,11 @@ def run(
     groups: list[str] | None = None,
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
+    lanes: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
+    release_freshness: list[str] | None = None,
     queries: list[str] | None = None,
     min_release_age_days: int | None = None,
     max_release_age_days: int | None = None,
@@ -1950,9 +2045,11 @@ def run(
         groups=groups,
         sources=sources,
         metadata_sources=metadata_sources,
+        lanes=lanes,
         impact_areas=impact_areas,
         manifest_actions=manifest_actions,
         repo_usage_tiers=repo_usage_tiers,
+        release_freshness=release_freshness,
         queries=queries,
         min_release_age_days=min_release_age_days,
         max_release_age_days=max_release_age_days,
@@ -2085,6 +2182,21 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages resolved from the selected metadata source(s).",
     )
     parser.add_argument(
+        "--lane",
+        action="append",
+        choices=[
+            "stabilize-manifests",
+            "refresh-baselines",
+            "upgrade-now",
+            "next-maintenance-batch",
+            "investigate-metadata",
+            "policy-covered-watchlist",
+            "backlog-watchlist",
+        ],
+        default=None,
+        help="Show only packages in the selected recommended upgrade lane(s).",
+    )
+    parser.add_argument(
         "--impact-area",
         action="append",
         choices=[
@@ -2120,6 +2232,13 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         choices=["hot-path", "active", "edge", "declared-only"],
         default=None,
         help="Show only packages matching the selected observed repo-usage tier(s).",
+    )
+    parser.add_argument(
+        "--release-freshness",
+        action="append",
+        choices=list(RELEASE_FRESHNESS_BUCKETS),
+        default=None,
+        help="Show only packages in the selected target-release freshness bucket(s).",
     )
     parser.add_argument(
         "--query",
@@ -2204,9 +2323,11 @@ def main(argv: list[str] | None = None) -> int:
         groups=args.group,
         sources=args.source,
         metadata_sources=args.metadata_source,
+        lanes=args.lane,
         impact_areas=args.impact_area,
         manifest_actions=args.manifest_action,
         repo_usage_tiers=args.repo_usage_tier,
+        release_freshness=args.release_freshness,
         queries=args.query,
         min_release_age_days=args.min_release_age_days,
         max_release_age_days=args.max_release_age_days,

@@ -348,12 +348,15 @@ def test_render_json_summary_counts() -> None:
     assert payload["summary"] == {
         "actionable_packages": 1,
         "active_usage_packages": 0,
+        "aging_release_packages": 0,
         "cached_metadata_packages": 1,
         "compatible_constraint_packages": 0,
+        "current_release_packages": 0,
         "critical_upgrade_signals": 0,
         "declared_only_packages": 2,
         "edge_usage_packages": 0,
         "floor_lock_packages": 0,
+        "fresh_release_packages": 1,
         "high_priority_upgrade_signals": 1,
         "hot_path_packages": 0,
         "integration_adapter_packages": 0,
@@ -369,7 +372,9 @@ def test_render_json_summary_counts() -> None:
         "python_incompatible_latest_packages": 0,
         "quality_tooling_packages": 1,
         "runtime_core_packages": 1,
+        "stale_release_packages": 0,
         "stale_metadata_packages": 0,
+        "unknown_release_age_packages": 1,
     }
     assert payload["repo_usage"][0]["repo_usage_tier"] == "declared-only"
     assert payload["hotspots"] == []
@@ -1293,6 +1298,77 @@ def test_filter_reports_supports_text_query_across_actions_and_notes() -> None:
     assert [report.name for report in filtered] == ["httpx"]
 
 
+def test_filter_reports_supports_lane_and_release_freshness_filters() -> None:
+    reports = [
+        _report(
+            name="httpx",
+            manifest_action="stage-upgrade",
+            upgrade_signal="medium",
+            risk_score=55,
+            release_age_days=5,
+        ),
+        _report(
+            name="ruff",
+            manifest_action="raise-floor",
+            constraint_status="allowed",
+            upgrade_signal="watch",
+            risk_score=20,
+            release_age_days=420,
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        lanes=["next-maintenance-batch"],
+        release_freshness=["fresh-release"],
+    )
+
+    assert [report.name for report in filtered] == ["httpx"]
+
+
+def test_render_json_and_markdown_include_risk_and_validation_summaries() -> None:
+    reports = [
+        _report(
+            name="httpx",
+            risk_score=88,
+            manifest_action="plan-major-upgrade",
+            upgrade_signal="critical",
+            validation_commands=[
+                "bash ci.sh quick --skip-docs --artifact-dir build",
+                "bash quality.sh cov",
+            ],
+        ),
+        _report(
+            name="ruff",
+            impact_area="quality-tooling",
+            risk_score=42,
+            manifest_action="stage-upgrade",
+            upgrade_signal="medium",
+            validation_commands=["bash quality.sh ci"],
+        ),
+    ]
+
+    payload = json.loads(
+        upgrade_audit._render_json(
+            reports,
+            pyproject_path=Path("pyproject.toml"),
+            requirement_paths=[Path("requirements.txt")],
+        )
+    )
+    rendered = upgrade_audit._render_markdown(
+        reports,
+        pyproject_path=Path("pyproject.toml"),
+        requirement_paths=[Path("requirements.txt")],
+    )
+
+    assert payload["risk"][0]["risk_band"] == "critical"
+    assert (
+        payload["validations"][0]["command"] == "bash ci.sh quick --skip-docs --artifact-dir build"
+    )
+    assert "## Risk bands" in rendered
+    assert "## Validation commands" in rendered
+
+
 def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
@@ -1311,6 +1387,10 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
             "pyproject.toml",
             "--repo-usage-tier",
             "hot-path",
+            "--lane",
+            "upgrade-now",
+            "--release-freshness",
+            "fresh-release",
             "--query",
             "runtime-core",
             "--used-in-repo-only",
@@ -1326,6 +1406,8 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.impact_area is None
     assert args.manifest_action is None
     assert args.repo_usage_tier == ["hot-path"]
+    assert args.lane == ["upgrade-now"]
+    assert args.release_freshness == ["fresh-release"]
     assert args.query == ["runtime-core"]
     assert args.used_in_repo_only is True
     assert args.include_prereleases is False
