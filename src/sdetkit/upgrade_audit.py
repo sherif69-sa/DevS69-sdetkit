@@ -43,6 +43,8 @@ class PackageReport:
     release_age_days: int | None
     upgrade_signal: str
     risk_score: int
+    manifest_action: str
+    suggested_version: str | None
     next_action: str
     notes: list[str]
 
@@ -446,8 +448,36 @@ def _infer_alignment(deps: list[Dependency], current_version: str) -> str:
         and (result := _requirement_allows_version(dep.raw, current_version)) is not None
     ]
     if allowed_results and all(allowed_results):
+        has_pin = any(dep.pinned_version for dep in deps)
+        has_range = any(dep.pinned_version is None for dep in deps)
+        if has_pin and has_range:
+            return "floor-lock"
         return "compatible"
     return "drift"
+
+
+def _manifest_action(
+    *,
+    current_version: str,
+    latest_version: str,
+    alignment: str,
+    constraint_status: str,
+    version_gap: str,
+) -> tuple[str, str | None]:
+    unavailable_versions = {"unknown", "network-error", "offline-no-cache"}
+    if latest_version in unavailable_versions or latest_version.startswith("http-"):
+        return "investigate-metadata", None
+    if current_version in {"unbounded", "unknown"}:
+        return "establish-baseline", latest_version if latest_version != current_version else None
+    if current_version == latest_version:
+        return "none", None
+    if constraint_status == "allowed":
+        if alignment in {"floor-lock", "range-or-unpinned"}:
+            return "raise-floor", latest_version
+        return "refresh-pin", latest_version
+    if version_gap == "major":
+        return "plan-major-upgrade", latest_version
+    return "stage-upgrade", latest_version
 
 
 def _major_minor_patch(version: str) -> tuple[int, int, int] | None:
@@ -524,6 +554,10 @@ def _build_package_report(
         notes.append("Cross-manifest requirement drift detected.")
     elif alignment == "compatible":
         notes.append("Cross-manifest requirements differ but remain mutually compatible.")
+    elif alignment == "floor-lock":
+        notes.append(
+            "Cross-manifest requirements follow a floor-and-lock pattern with a tested pinned baseline."
+        )
     if alignment == "range-or-unpinned":
         notes.append("Package is not pinned to a single exact version.")
     if constraint_status == "allowed":
@@ -542,6 +576,8 @@ def _build_package_report(
     upgrade_signal = "watch"
     if alignment == "drift":
         upgrade_signal = "critical" if version_gap == "major" else "high"
+    elif alignment == "floor-lock" and constraint_status == "allowed":
+        upgrade_signal = "watch"
     elif constraint_status == "allowed":
         upgrade_signal = "watch" if "default" not in groups else "medium"
     elif version_gap == "major":
@@ -562,6 +598,8 @@ def _build_package_report(
         risk_score += 45
     elif alignment == "compatible":
         risk_score += 10
+    elif alignment == "floor-lock":
+        risk_score += 5
     elif alignment == "range-or-unpinned":
         risk_score += 15
     if constraint_status == "blocked":
@@ -582,14 +620,28 @@ def _build_package_report(
     if upgrade_signal == "investigate":
         risk_score += 10
 
+    manifest_action, suggested_version = _manifest_action(
+        current_version=current_version,
+        latest_version=latest_version,
+        alignment=alignment,
+        constraint_status=constraint_status,
+        version_gap=version_gap,
+    )
+
     next_action = "Keep under observation; no immediate action required."
-    if upgrade_signal == "critical":
+    if manifest_action == "raise-floor":
+        next_action = (
+            "Raise the tested floor in flexible manifests, refresh pins, and validate the package in the next maintenance window."
+        )
+    elif manifest_action == "refresh-pin":
+        next_action = "Refresh pinned manifests to the newer tested version and rerun targeted validation."
+    elif upgrade_signal == "critical":
         next_action = (
             "Resolve manifest drift first, then validate the major upgrade in a dedicated branch."
         )
-    elif upgrade_signal == "high":
+    elif manifest_action == "plan-major-upgrade":
         next_action = "Plan an upgrade spike with regression coverage before the next release cut."
-    elif upgrade_signal == "medium":
+    elif manifest_action == "stage-upgrade":
         next_action = (
             "Queue the upgrade for the next maintenance batch and validate targeted smoke tests."
         )
@@ -599,12 +651,19 @@ def _build_package_report(
             if constraint_status == "allowed"
             else "Track the package and batch it with nearby dependency maintenance work."
         )
-    elif upgrade_signal == "investigate":
+    elif manifest_action == "investigate-metadata":
         next_action = "Retry metadata collection and inspect package naming, cache freshness, or connectivity issues."
     elif upgrade_signal == "unknown":
         next_action = (
             "Review the declared version range manually because the gap could not be classified."
         )
+    elif manifest_action == "establish-baseline":
+        next_action = "Pin or bound the package explicitly before attempting future upgrade automation."
+
+    if manifest_action != "none":
+        notes.append(f"Recommended manifest action: {manifest_action}.")
+    if suggested_version is not None:
+        notes.append(f"Suggested target version: {suggested_version}.")
 
     return PackageReport(
         name=name,
@@ -622,6 +681,8 @@ def _build_package_report(
         release_age_days=release_age_days,
         upgrade_signal=upgrade_signal,
         risk_score=risk_score,
+        manifest_action=manifest_action,
+        suggested_version=suggested_version,
         next_action=next_action,
         notes=notes,
     )
@@ -639,6 +700,8 @@ def _priority_queue(reports: list[PackageReport], *, limit: int = 5) -> list[dic
                 "policy": report.constraint_status,
                 "current_version": report.current_version,
                 "latest_version": report.latest_version,
+                "manifest_action": report.manifest_action,
+                "suggested_version": report.suggested_version,
                 "next_action": report.next_action,
                 "lane": _recommended_lane(report),
             }
@@ -649,6 +712,8 @@ def _priority_queue(reports: list[PackageReport], *, limit: int = 5) -> list[dic
 def _recommended_lane(report: PackageReport) -> str:
     if report.alignment == "drift":
         return "stabilize-manifests"
+    if report.manifest_action in {"raise-floor", "refresh-pin"}:
+        return "refresh-baselines"
     if report.upgrade_signal in {"critical", "high"}:
         return "upgrade-now"
     if report.upgrade_signal == "medium":
@@ -706,6 +771,7 @@ def _render_markdown(
 ) -> str:
     drift_count = sum(1 for report in reports if report.alignment == "drift")
     compatible_count = sum(1 for report in reports if report.alignment == "compatible")
+    floor_lock_count = sum(1 for report in reports if report.alignment == "floor-lock")
     high_priority = sum(1 for report in reports if report.upgrade_signal == "high")
     critical_priority = sum(1 for report in reports if report.upgrade_signal == "critical")
     medium_priority = sum(1 for report in reports if report.upgrade_signal == "medium")
@@ -724,6 +790,7 @@ def _render_markdown(
         f"- packages audited: {len(reports)}",
         f"- manifest drift packages: {drift_count}",
         f"- compatible multi-manifest packages: {compatible_count}",
+        f"- floor-and-lock baseline packages: {floor_lock_count}",
         f"- policy-covered latest releases: {policy_covered}",
         f"- policy-blocked latest releases: {policy_blocked}",
         f"- critical upgrade signals: {critical_priority}",
@@ -732,8 +799,8 @@ def _render_markdown(
         f"- investigate signals: {investigate_priority}",
         f"- packages using cached metadata: {cached_results}",
         "",
-        "| Package | Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| Package | Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
@@ -741,12 +808,14 @@ def _render_markdown(
         lines.append(
             "| "
             f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.metadata_source} | {report.version_gap} | "
-            f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {release_age} | {requirements} |"
+            f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {report.manifest_action} | {report.suggested_version or '-'} | {release_age} | {requirements} |"
         )
     lines.extend(["", "## Priority queue", ""])
     for item in _priority_queue(reports):
         lines.append(
-            f"- `{item['name']}` [{item['signal']}, risk {item['risk_score']}, lane {item['lane']}] → {item['next_action']}"
+            f"- `{item['name']}` [{item['signal']}, risk {item['risk_score']}, lane {item['lane']}, action {item['manifest_action']}]"
+            + (f" target `{item['suggested_version']}`" if item['suggested_version'] else "")
+            + f" → {item['next_action']}"
         )
     lines.extend(["", "## Recommended upgrade lanes", ""])
     for item in _lane_summary(reports):
@@ -777,6 +846,7 @@ def _render_json(
             "compatible_constraint_packages": sum(
                 1 for report in reports if report.alignment == "compatible"
             ),
+            "floor_lock_packages": sum(1 for report in reports if report.alignment == "floor-lock"),
             "policy_covered_packages": sum(
                 1 for report in reports if report.constraint_status == "allowed"
             ),
