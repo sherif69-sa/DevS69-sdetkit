@@ -200,6 +200,10 @@ def test_doctor_check_captures_quality_hints_and_hotspots(monkeypatch, tmp_path:
                         "upgrade_audit": {
                             "meta": {
                                 "priority_queue": [{"name": "ruff"}],
+                                "risk_summary": [{"risk_band": "medium", "count": 1}],
+                                "validation_summary": [
+                                    {"command": "bash quality.sh ci", "count": 1}
+                                ],
                                 "hotspots": [{"path": "src/sdetkit/doctor.py"}],
                             }
                         }
@@ -226,6 +230,8 @@ def test_doctor_check_captures_quality_hints_and_hotspots(monkeypatch, tmp_path:
     assert result.summary == "doctor score 82% (1 failed, 1 hint(s))"
     assert result.details["quality"]["failed_checks"] == 1
     assert result.details["hint_samples"] == ["impact quality-tooling: 1 actionable package(s)"]
+    assert result.details["risk_summary"][0]["risk_band"] == "medium"
+    assert result.details["validation_summary"][0]["command"] == "bash quality.sh ci"
     assert result.details["hotspots"][0]["path"] == "src/sdetkit/doctor.py"
     assert result.actions[1].title.startswith("Run `python -m sdetkit intelligence upgrade-audit")
 

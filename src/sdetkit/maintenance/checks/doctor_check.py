@@ -94,6 +94,14 @@ def run(ctx: MaintenanceContext) -> CheckResult:
             .get("upgrade_audit", {})
             .get("meta", {})
             .get("priority_queue", []),
+            "risk_summary": parsed.get("checks", {})
+            .get("upgrade_audit", {})
+            .get("meta", {})
+            .get("risk_summary", []),
+            "validation_summary": parsed.get("checks", {})
+            .get("upgrade_audit", {})
+            .get("meta", {})
+            .get("validation_summary", []),
             "hotspots": parsed.get("checks", {})
             .get("upgrade_audit", {})
             .get("meta", {})
