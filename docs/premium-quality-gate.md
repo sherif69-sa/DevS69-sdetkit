@@ -77,6 +77,7 @@ Useful flags:
 - `--out-dir <path>`
 - `--ops-jobs <int>`
 - `--no-auto-run-scripts` to keep the engine in analysis-only mode
+- `--script-catalog <path>` to load extra repo-specific remediation scripts
 - `SDETKIT_PREMIUM_TOPOLOGY_PROFILE=<path>` to override the topology profile used by the Head-3 topology contract step
 
 Examples:
@@ -104,6 +105,8 @@ Today the smart script lane can automatically trigger:
 - `sdetkit doctor --json --out ...` to refresh doctor evidence after fixes,
 - `sdetkit maintenance --mode full --fix --format json --out ...` for maintenance drift,
 - and `tools/triage.py --mode security ... --tee ...` to rebuild the baseline-aware security artifact after security auto-fixes.
+
+The engine can also ingest a repo-local JSON catalog at `.sdetkit/premium-remediation-scripts.json` (or a custom path passed via `--script-catalog` / `SDETKIT_PREMIUM_SCRIPT_CATALOG`). That lets maintainers register additional safe fix commands with trigger conditions such as failed steps, warning sources, and post-autofix follow-up runs without hard-coding every workflow into the engine.
 
 
 ## Local insights API (editable guideline reference + commit learning)

@@ -521,6 +521,117 @@ def test_main_auto_run_scripts_records_results_and_score_delta(
     assert payload["smart_remediation"]["plan"]["selected"][0]["script_id"] == "maintenance_fix"
 
 
+def test_build_script_candidates_merges_custom_catalog(tmp_path: Path) -> None:
+    catalog = tmp_path / "premium-scripts.json"
+    catalog.write_text(
+        json.dumps(
+            {
+                "scripts": [
+                    {
+                        "script_id": "ruff_fix_custom",
+                        "reason": "Run repo-local Ruff autofix lane.",
+                        "command": ["python3", "-m", "ruff", "check", "--fix", "."],
+                        "artifact_paths": ["doctor.json"],
+                        "priority": "high",
+                        "score_bonus": 31,
+                        "trigger_sources": ["doctor"],
+                        "trigger_steps": ["ruff_lint"],
+                        "requires_files": ["pyproject.toml"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "pyproject.toml").write_text("[tool.ruff]\nline-length = 100\n", encoding="utf-8")
+    payload = {
+        "warnings": [
+            {"source": "doctor", "category": "policy", "severity": "high", "message": "drift"}
+        ],
+        "engine_checks": [],
+        "recommendations": [],
+        "step_status": [{"name": "ruff_lint", "ok": False, "details": "failed"}],
+        "hotspots": {"doctor": 1},
+    }
+
+    candidates = eng._build_script_candidates(
+        payload,
+        out_dir=tmp_path,
+        fix_root=tmp_path,
+        script_catalog_path=catalog,
+    )
+
+    assert any(item.script_id == "ruff_fix_custom" for item in candidates)
+    custom = next(item for item in candidates if item.script_id == "ruff_fix_custom")
+    assert custom.priority == "high"
+    assert custom.score >= 31
+    assert "doctor" in (custom.trigger_sources or [])
+
+
+def test_main_auto_run_scripts_uses_custom_catalog(tmp_path: Path, capsys) -> None:
+    (tmp_path / "doctor.json").write_text(
+        json.dumps(
+            {
+                "checks": {"policy": {"ok": False, "severity": "high", "message": "policy drift"}},
+                "recommendations": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "maintenance.json").write_text(
+        json.dumps({"checks": [], "recommendations": []}), encoding="utf-8"
+    )
+    _write_topology_artifact(tmp_path / "integration-topology.json")
+    (tmp_path / "security-check.json").write_text(json.dumps({"findings": []}), encoding="utf-8")
+    (tmp_path / "pyproject.toml").write_text("[tool.ruff]\nline-length = 100\n", encoding="utf-8")
+    catalog = tmp_path / "premium-scripts.json"
+    catalog.write_text(
+        json.dumps(
+            {
+                "scripts": [
+                    {
+                        "script_id": "emit-custom-artifact",
+                        "reason": "Generate an extra premium remediation artifact.",
+                        "command": [
+                            "python3",
+                            "-c",
+                            "from pathlib import Path; Path('custom-fix.txt').write_text('done\\n', encoding='utf-8')",
+                        ],
+                        "artifact_paths": ["custom-fix.txt"],
+                        "priority": "high",
+                        "score_bonus": 50,
+                        "trigger_sources": ["doctor"],
+                        "requires_files": ["pyproject.toml"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = eng.main(
+        [
+            "--out-dir",
+            str(tmp_path),
+            "--fix-root",
+            str(tmp_path),
+            "--script-catalog",
+            str(catalog),
+            "--auto-run-scripts",
+            "--max-auto-scripts",
+            "1",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["smart_remediation"]["selected_scripts"] == ["emit-custom-artifact"]
+    assert payload["script_runs"][0]["status"] == "passed"
+    assert (tmp_path / "custom-fix.txt").read_text(encoding="utf-8") == "done\n"
+
+
 def test_filter_payload_and_guideline_search_support_targeted_queries(tmp_path: Path) -> None:
     db = tmp_path / "premium-insights.db"
     eng.add_guideline(db, "doctor:policy", "enforce doctor policy", ["doctor", "policy"])
