@@ -9,4 +9,4 @@ fi
 
 . .venv/bin/activate
 
-python -m pip install -r requirements-test.txt -r requirements-docs.txt -e .
+python -m pip install -c constraints-ci.txt -r requirements-test.txt -r requirements-docs.txt -e .

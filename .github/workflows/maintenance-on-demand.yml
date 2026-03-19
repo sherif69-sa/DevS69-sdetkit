@@ -48,7 +48,7 @@ jobs:
 
       - name: Install project + dev/test extras
         run: |
-          python -m pip install -e .[dev,test]
+          python -m pip install -c constraints-ci.txt -e .[dev,test]
 
       - name: Run maintenance
         run: bash scripts/maintenance_ci.sh "${{ inputs.mode }}" "${{ inputs.fix && 'true' || 'false' }}" artifacts/maintenance

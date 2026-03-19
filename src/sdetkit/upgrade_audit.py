@@ -52,6 +52,8 @@ class PackageReport:
     risk_score: int
     manifest_action: str
     suggested_version: str | None
+    impact_area: str
+    validation_commands: list[str]
     next_action: str
     notes: list[str]
 
@@ -885,6 +887,38 @@ def _build_package_report(
         constraint_status=constraint_status,
         version_gap=version_gap,
     )
+    impact_area = _impact_area(
+        PackageReport(
+            name=name,
+            sources=sources,
+            groups=groups,
+            requirements=requirements,
+            pinned_versions=pinned_versions,
+            project_python_requires=project_python_requires,
+            current_version=current_version,
+            target_version=target_version,
+            target_release_date=target_release_date,
+            latest_compatible_version=compatible_version,
+            latest_compatible_release_date=compatible_release_date,
+            compatibility_status=compatibility_status,
+            alignment=alignment,
+            constraint_status=constraint_status,
+            latest_version=latest_version,
+            latest_release_date=release_date,
+            metadata_source=metadata_source,
+            version_gap=version_gap,
+            release_age_days=release_age_days,
+            upgrade_signal=upgrade_signal,
+            risk_score=risk_score,
+            manifest_action=manifest_action,
+            suggested_version=suggested_version,
+            impact_area="repo-tooling",
+            validation_commands=[],
+            next_action="",
+            notes=[],
+        )
+    )
+    validation_commands = _validation_commands_for_impact(impact_area)
 
     next_action = "Keep under observation; no immediate action required."
     if manifest_action == "raise-floor":
@@ -922,6 +956,7 @@ def _build_package_report(
         notes.append(f"Recommended manifest action: {manifest_action}.")
     if suggested_version is not None:
         notes.append(f"Suggested target version: {suggested_version}.")
+    notes.append(f"Repo impact area: {impact_area}.")
 
     return PackageReport(
         name=name,
@@ -947,6 +982,8 @@ def _build_package_report(
         risk_score=risk_score,
         manifest_action=manifest_action,
         suggested_version=suggested_version,
+        impact_area=impact_area,
+        validation_commands=validation_commands,
         next_action=next_action,
         notes=notes,
     )
@@ -966,6 +1003,8 @@ def _priority_queue(reports: list[PackageReport], *, limit: int = 5) -> list[dic
                 "latest_version": report.latest_version,
                 "manifest_action": report.manifest_action,
                 "suggested_version": report.suggested_version,
+                "impact_area": report.impact_area,
+                "validation_commands": report.validation_commands,
                 "next_action": report.next_action,
                 "lane": _recommended_lane(report),
             }
@@ -989,6 +1028,71 @@ def _recommended_lane(report: PackageReport) -> str:
     return "backlog-watchlist"
 
 
+def _impact_area(report: PackageReport) -> str:
+    groups = set(report.groups)
+    package = report.name
+
+    if "default" in groups:
+        return "runtime-core"
+    if groups & {"telegram", "whatsapp"} or package in {"python-telegram-bot", "twilio"}:
+        return "integration-adapters"
+    if "docs" in groups or package.startswith("mkdocs"):
+        return "docs-tooling"
+    if "packaging" in groups or package in {"build", "twine", "check-wheel-contents"}:
+        return "packaging-release"
+    if package in {"pip-audit", "cyclonedx-bom"}:
+        return "security-compliance"
+    if package in {
+        "pytest",
+        "pytest-asyncio",
+        "pytest-cov",
+        "hypothesis",
+        "mutmut",
+        "ruff",
+        "mypy",
+        "pre-commit",
+    }:
+        return "quality-tooling"
+    return "repo-tooling"
+
+
+def _validation_commands_for_impact(impact_area: str) -> list[str]:
+    if impact_area == "runtime-core":
+        return [
+            "bash ci.sh quick --skip-docs --artifact-dir build",
+            "bash quality.sh cov",
+        ]
+    if impact_area == "integration-adapters":
+        return [
+            "bash ci.sh quick --skip-docs --artifact-dir build",
+            "python -m pytest -q tests/test_notify_plugins.py tests/test_notify_plugins_extra.py",
+        ]
+    if impact_area == "docs-tooling":
+        return [
+            "bash ci.sh all --artifact-dir build",
+            "make docs-build",
+        ]
+    if impact_area == "packaging-release":
+        return [
+            "make package-validate",
+            "make release-preflight",
+        ]
+    if impact_area == "security-compliance":
+        return [
+            "bash security.sh",
+            "python -m sdetkit security enforce --format json",
+        ]
+    if impact_area == "quality-tooling":
+        return [
+            "bash quality.sh ci",
+            "bash quality.sh cov",
+        ]
+    return [
+        "bash ci.sh quick --skip-docs --artifact-dir build",
+        "bash quality.sh ci",
+    ]
+
+
 def _lane_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
     buckets: dict[str, list[PackageReport]] = {}
     for report in reports:
@@ -1005,6 +1109,31 @@ def _lane_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
             "packages": [r.name for r in items[:5]],
         }
         for lane, items in ordered
+    ]
+
+
+def _impact_summary(reports: list[PackageReport]) -> list[dict[str, object]]:
+    buckets: dict[str, list[PackageReport]] = {}
+    for report in reports:
+        buckets.setdefault(report.impact_area, []).append(report)
+    ordered = sorted(
+        buckets.items(),
+        key=lambda item: (
+            -max((report.risk_score for report in item[1]), default=0),
+            -sum(1 for report in item[1] if _is_actionable_upgrade(report)),
+            item[0],
+        ),
+    )
+    return [
+        {
+            "impact_area": impact_area,
+            "count": len(items),
+            "actionable_packages": sum(1 for report in items if _is_actionable_upgrade(report)),
+            "max_risk_score": max((report.risk_score for report in items), default=0),
+            "packages": [report.name for report in items[:5]],
+            "validation_commands": items[0].validation_commands if items else [],
+        }
+        for impact_area, items in ordered
     ]
 
 
@@ -1054,6 +1183,13 @@ def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
             1 for report in reports if report.compatibility_status == "requires-newer-python"
         ),
         "actionable_packages": sum(1 for report in reports if _is_actionable_upgrade(report)),
+        "runtime_core_packages": sum(1 for report in reports if report.impact_area == "runtime-core"),
+        "quality_tooling_packages": sum(
+            1 for report in reports if report.impact_area == "quality-tooling"
+        ),
+        "integration_adapter_packages": sum(
+            1 for report in reports if report.impact_area == "integration-adapters"
+        ),
         "max_risk_score": max((report.risk_score for report in reports), default=0),
     }
 
@@ -1131,6 +1267,7 @@ def _filter_reports(
     groups: list[str] | None = None,
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
+    impact_areas: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
 ) -> list[PackageReport]:
@@ -1157,6 +1294,9 @@ def _filter_reports(
     if metadata_sources:
         allowed_sources = {item.strip() for item in metadata_sources if item.strip()}
         filtered = [report for report in filtered if report.metadata_source in allowed_sources]
+    if impact_areas:
+        allowed_impact_areas = {item.strip() for item in impact_areas if item.strip()}
+        filtered = [report for report in filtered if report.impact_area in allowed_impact_areas]
     if outdated_only:
         filtered = [report for report in filtered if _is_actionable_upgrade(report)]
     if top is not None:
@@ -1193,16 +1333,19 @@ def _render_markdown(
         f"- fallback compatible targets below latest: {summary['python_compatible_fallback_packages']}",
         f"- latest releases requiring newer Python: {summary['python_incompatible_latest_packages']}",
         f"- actionable upgrade candidates: {summary['actionable_packages']}",
+        f"- runtime core packages: {summary['runtime_core_packages']}",
+        f"- quality tooling packages: {summary['quality_tooling_packages']}",
+        f"- integration adapter packages: {summary['integration_adapter_packages']}",
         "",
-        "| Package | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| Package | Impact | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
         requirements = " <br> ".join(f"`{item}`" for item in report.requirements)
         lines.append(
             "| "
-            f"`{report.name}` | `{report.current_version}` | `{report.target_version}` | `{report.latest_version}` | {report.compatibility_status} | {report.metadata_source} | {report.version_gap} | "
+            f"`{report.name}` | {report.impact_area} | `{report.current_version}` | `{report.target_version}` | `{report.latest_version}` | {report.compatibility_status} | {report.metadata_source} | {report.version_gap} | "
             f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {report.manifest_action} | {report.suggested_version or '-'} | {release_age} | {requirements} |"
         )
     lines.extend(["", "## Priority queue", ""])
@@ -1218,6 +1361,15 @@ def _render_markdown(
         lines.append(
             f"- **{item['lane']}**: {item['count']} package(s), max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
+        )
+    lines.extend(["", "## Repo impact map", ""])
+    for item in _impact_summary(reports):
+        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        validations = ", ".join(f"`{command}`" for command in item["validation_commands"])
+        lines.append(
+            f"- **{item['impact_area']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
+            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" — validate with {validations}" if validations else "")
         )
     lines.extend(["", "## Dependency groups", ""])
     for item in _group_summary(reports):
@@ -1236,7 +1388,11 @@ def _render_markdown(
     lines.extend(["", "## Focus notes", ""])
     for report in reports:
         note_text = " ".join(report.notes) if report.notes else "No additional notes."
-        lines.append(f"- `{report.name}` ({report.next_action}) {note_text}")
+        validations = ", ".join(f"`{command}`" for command in report.validation_commands)
+        lines.append(
+            f"- `{report.name}` [{report.impact_area}] ({report.next_action}) {note_text}"
+            + (f" Validate with {validations}." if validations else "")
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -1252,6 +1408,7 @@ def _render_json(
         "summary": _report_summary(reports),
         "priority_queue": _priority_queue(reports),
         "lanes": _lane_summary(reports),
+        "impact": _impact_summary(reports),
         "groups": _group_summary(reports),
         "sources": _source_summary(reports),
         "packages": [asdict(report) for report in reports],
@@ -1294,6 +1451,7 @@ def run(
     groups: list[str] | None = None,
     sources: list[str] | None = None,
     metadata_sources: list[str] | None = None,
+    impact_areas: list[str] | None = None,
     outdated_only: bool = False,
     top: int | None = None,
     include_prereleases: bool = False,
@@ -1350,6 +1508,7 @@ def run(
         groups=groups,
         sources=sources,
         metadata_sources=metadata_sources,
+        impact_areas=impact_areas,
         outdated_only=outdated_only,
         top=top,
     )
@@ -1478,6 +1637,21 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages resolved from the selected metadata source(s).",
     )
     parser.add_argument(
+        "--impact-area",
+        action="append",
+        choices=[
+            "runtime-core",
+            "quality-tooling",
+            "integration-adapters",
+            "docs-tooling",
+            "packaging-release",
+            "security-compliance",
+            "repo-tooling",
+        ],
+        default=None,
+        help="Show only packages in the selected repo impact area(s).",
+    )
+    parser.add_argument(
         "--outdated-only",
         action="store_true",
         help="Show only actionable upgrade candidates and baseline-establishment work.",
@@ -1534,6 +1708,7 @@ def main(argv: list[str] | None = None) -> int:
         groups=args.group,
         sources=args.source,
         metadata_sources=args.metadata_source,
+        impact_areas=args.impact_area,
         outdated_only=bool(args.outdated_only),
         top=args.top,
         include_prereleases=bool(args.include_prereleases),

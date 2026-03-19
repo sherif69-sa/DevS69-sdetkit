@@ -31,6 +31,8 @@ def _report(**overrides: object) -> upgrade_audit.PackageReport:
         "risk_score": 10,
         "manifest_action": "none",
         "suggested_version": None,
+        "impact_area": "repo-tooling",
+        "validation_commands": ["bash ci.sh quick --skip-docs --artifact-dir build"],
         "next_action": "Keep under observation; no immediate action required.",
         "notes": [],
     }
@@ -123,6 +125,11 @@ def test_build_package_report_flags_drift_and_priority() -> None:
     assert report.version_gap == "minor"
     assert report.upgrade_signal == "medium"
     assert report.risk_score >= 40
+    assert report.impact_area == "runtime-core"
+    assert report.validation_commands == [
+        "bash ci.sh quick --skip-docs --artifact-dir build",
+        "bash quality.sh cov",
+    ]
     assert report.latest_version == "0.29.0"
     assert report.latest_release_date == "2026-01-01T00:00:00Z"
     assert report.metadata_source == "pypi"
@@ -242,6 +249,11 @@ def test_render_json_summary_counts() -> None:
             risk_score=85,
             manifest_action="stage-upgrade",
             suggested_version="0.29.0",
+            impact_area="runtime-core",
+            validation_commands=[
+                "bash ci.sh quick --skip-docs --artifact-dir build",
+                "bash quality.sh cov",
+            ],
             next_action="Plan an upgrade spike with regression coverage before the next release cut.",
             notes=["Cross-manifest requirement drift detected."],
         ),
@@ -263,6 +275,8 @@ def test_render_json_summary_counts() -> None:
             risk_score=10,
             manifest_action="none",
             suggested_version=None,
+            impact_area="quality-tooling",
+            validation_commands=["bash quality.sh ci", "bash quality.sh cov"],
             next_action="Keep under observation; no immediate action required.",
             notes=[],
         ),
@@ -283,6 +297,7 @@ def test_render_json_summary_counts() -> None:
         "critical_upgrade_signals": 0,
         "floor_lock_packages": 0,
         "high_priority_upgrade_signals": 1,
+        "integration_adapter_packages": 0,
         "investigate_upgrade_signals": 0,
         "manifest_drift_packages": 1,
         "max_risk_score": 85,
@@ -293,6 +308,8 @@ def test_render_json_summary_counts() -> None:
         "python_compatible_fallback_packages": 0,
         "python_compatible_latest_packages": 2,
         "python_incompatible_latest_packages": 0,
+        "quality_tooling_packages": 1,
+        "runtime_core_packages": 1,
         "stale_metadata_packages": 0,
     }
     assert payload["packages"][0]["name"] == "httpx"
@@ -341,9 +358,11 @@ dependencies = ["httpx>=0.27,<1"]
     assert "stale cached metadata packages: 0" in out
     assert "latest releases compatible with repo Python policy: 1" in out
     assert "actionable upgrade candidates: 1" in out
+    assert "runtime core packages: 1" in out
     assert "Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested" in out
-    assert "`httpx` | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
+    assert "`httpx` | runtime-core | `0.28.1` | `0.29.0` | `0.29.0` | compatible-latest | pypi | minor | floor-lock | blocked | medium | 50 | stage-upgrade | 0.29.0 |" in out
     assert "Priority queue" in out
+    assert "Repo impact map" in out
     assert "Focus notes" in out
     assert (
         "Queue the upgrade for the next maintenance batch and validate targeted smoke tests." in out
@@ -690,6 +709,11 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
             risk_score=90,
             manifest_action="plan-major-upgrade",
             suggested_version="2.0.0",
+            impact_area="runtime-core",
+            validation_commands=[
+                "bash ci.sh quick --skip-docs --artifact-dir build",
+                "bash quality.sh cov",
+            ],
             next_action="Resolve manifest drift first, then validate the major upgrade in a dedicated branch.",
             notes=["Cross-manifest requirement drift detected."],
         ),
@@ -711,6 +735,8 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
             risk_score=10,
             manifest_action="none",
             suggested_version=None,
+            impact_area="repo-tooling",
+            validation_commands=["bash ci.sh quick --skip-docs --artifact-dir build"],
             next_action="Keep under observation; no immediate action required.",
             notes=["Latest metadata source: cache."],
         ),
@@ -727,6 +753,11 @@ def test_render_json_includes_lane_summary_and_priority_lane() -> None:
     assert payload["priority_queue"][0]["lane"] == "stabilize-manifests"
     assert payload["lanes"][0]["lane"] == "stabilize-manifests"
     assert payload["lanes"][0]["packages"] == ["critical-pkg"]
+    assert payload["impact"][0]["impact_area"] == "runtime-core"
+    assert payload["impact"][0]["validation_commands"] == [
+        "bash ci.sh quick --skip-docs --artifact-dir build",
+        "bash quality.sh cov",
+    ]
     assert payload["groups"][0]["group"] == "requirements"
     assert payload["groups"][0]["actionable_packages"] == 1
     assert payload["sources"][0]["source"] == "requirements.txt"
@@ -758,6 +789,11 @@ def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
             risk_score=55,
             manifest_action="stage-upgrade",
             suggested_version="0.29.0",
+            impact_area="runtime-core",
+            validation_commands=[
+                "bash ci.sh quick --skip-docs --artifact-dir build",
+                "bash quality.sh cov",
+            ],
             next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
             notes=["Cross-manifest requirements differ but remain mutually compatible."],
         )
@@ -770,6 +806,7 @@ def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
     )
 
     assert "## Recommended upgrade lanes" in rendered
+    assert "## Repo impact map" in rendered
     assert "## Dependency groups" in rendered
     assert "## Manifest sources" in rendered
     assert "**next-maintenance-batch**" in rendered
@@ -1006,6 +1043,28 @@ def test_filter_reports_supports_group_and_source_filters() -> None:
     assert [report.name for report in filtered] == ["httpx"]
 
 
+def test_filter_reports_supports_impact_area_filters() -> None:
+    reports = [
+        _report(
+            name="httpx",
+            impact_area="runtime-core",
+            validation_commands=[
+                "bash ci.sh quick --skip-docs --artifact-dir build",
+                "bash quality.sh cov",
+            ],
+        ),
+        _report(
+            name="ruff",
+            impact_area="quality-tooling",
+            validation_commands=["bash quality.sh ci", "bash quality.sh cov"],
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(reports, impact_areas=["quality-tooling"])
+
+    assert [report.name for report in filtered] == ["ruff"]
+
+
 def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")
@@ -1031,5 +1090,6 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.package == ["http*"]
     assert args.group == ["default"]
     assert args.source == ["pyproject.toml"]
+    assert args.impact_area is None
     assert args.include_prereleases is False
     assert requirement_paths == []

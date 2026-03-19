@@ -251,6 +251,20 @@ def main(argv: list[str] | None = None) -> int:
         choices=["pypi", "cache", "cache-stale", "offline"],
         default=None,
     )
+    ua.add_argument(
+        "--impact-area",
+        action="append",
+        choices=[
+            "runtime-core",
+            "quality-tooling",
+            "integration-adapters",
+            "docs-tooling",
+            "packaging-release",
+            "security-compliance",
+            "repo-tooling",
+        ],
+        default=None,
+    )
     ua.add_argument("--outdated-only", action="store_true")
     ua.add_argument("--top", type=int, default=None)
 
@@ -298,6 +312,7 @@ def main(argv: list[str] | None = None) -> int:
                 groups=ns.group,
                 sources=ns.source,
                 metadata_sources=ns.metadata_source,
+                impact_areas=ns.impact_area,
                 outdated_only=bool(ns.outdated_only),
                 top=ns.top,
             )
