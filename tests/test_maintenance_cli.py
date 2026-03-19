@@ -172,6 +172,64 @@ def test_doctor_check_full_mode_and_bad_json(monkeypatch, tmp_path: Path, capsys
     capsys.readouterr()
 
 
+def test_doctor_check_captures_quality_hints_and_hotspots(monkeypatch, tmp_path: Path) -> None:
+    def _fake_main(args: list[str]) -> int:
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "score": 82,
+                    "quality": {
+                        "passed_checks": 2,
+                        "failed_checks": 1,
+                        "skipped_checks": 0,
+                        "pass_rate": 67,
+                    },
+                    "hints": ["impact quality-tooling: 1 actionable package(s)"],
+                    "next_actions": [
+                        {
+                            "id": "upgrade_audit",
+                            "summary": "upgrade audit needs follow-up",
+                            "severity": "medium",
+                            "fix": [
+                                "Run `python -m sdetkit intelligence upgrade-audit --format md --top 5`"
+                            ],
+                        }
+                    ],
+                    "checks": {
+                        "upgrade_audit": {
+                            "meta": {
+                                "priority_queue": [{"name": "ruff"}],
+                                "hotspots": [{"path": "src/sdetkit/doctor.py"}],
+                            }
+                        }
+                    },
+                }
+            )
+        )
+        assert args == ["--format", "json", "--pyproject", "--dev"]
+        return 2
+
+    monkeypatch.setattr(doctor_check.doctor, "main", _fake_main)
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="quick",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    result = doctor_check.run(ctx)
+
+    assert result.ok is False
+    assert result.summary == "doctor score 82% (1 failed, 1 hint(s))"
+    assert result.details["quality"]["failed_checks"] == 1
+    assert result.details["hint_samples"] == ["impact quality-tooling: 1 actionable package(s)"]
+    assert result.details["hotspots"][0]["path"] == "src/sdetkit/doctor.py"
+    assert result.actions[1].title.startswith("Run `python -m sdetkit intelligence upgrade-audit")
+
+
 def test_deps_check_deterministic_and_conflict_paths(monkeypatch, tmp_path: Path) -> None:
     pip_conflict = SimpleNamespace(returncode=1, stdout="", stderr="broken")
     monkeypatch.setattr(deps_check, "run_cmd", lambda _cmd, cwd: pip_conflict)

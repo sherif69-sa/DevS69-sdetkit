@@ -64,6 +64,19 @@ def _render_text(report: dict[str, Any]) -> str:
     for name in sorted(report["checks"]):
         check = report["checks"][name]
         lines.append(f"- {'OK' if check['ok'] else 'FAIL'} {name}: {check['summary']}")
+        details = check.get("details", {})
+        quality = details.get("quality", {}) if isinstance(details, dict) else {}
+        if isinstance(quality, dict) and quality:
+            lines.append(
+                "    quality: "
+                f"{quality.get('passed_checks', 0)} passed / "
+                f"{quality.get('failed_checks', 0)} failed / "
+                f"{quality.get('skipped_checks', 0)} skipped"
+            )
+        hint_samples = details.get("hint_samples", []) if isinstance(details, dict) else []
+        if isinstance(hint_samples, list):
+            for hint in hint_samples[:2]:
+                lines.append(f"    hint: {hint}")
     if failing:
         lines.append("failing checks: " + ", ".join(sorted(failing)))
     return "\n".join(lines) + "\n"
@@ -99,6 +112,42 @@ def _render_markdown(report: dict[str, Any]) -> str:
     lines.append("### Recommendations")
     for rec in report["recommendations"]:
         lines.append(f"- {_md_escape_cell(rec)}")
+    lines.append("")
+    lines.append("### Quality signals")
+    has_quality = False
+    for name in sorted(report["checks"]):
+        check = report["checks"][name]
+        details = check.get("details", {})
+        if not isinstance(details, dict):
+            continue
+        quality = details.get("quality", {})
+        if not isinstance(quality, dict) or not quality:
+            continue
+        has_quality = True
+        lines.append(
+            f"- `{_md_escape_cell(name)}`: {_md_escape_cell(quality.get('passed_checks', 0))} passed / "
+            f"{_md_escape_cell(quality.get('failed_checks', 0))} failed / "
+            f"{_md_escape_cell(quality.get('skipped_checks', 0))} skipped; pass rate {_md_escape_cell(str(quality.get('pass_rate', 0)))}%"
+        )
+    if not has_quality:
+        lines.append("- No embedded quality summaries were reported.")
+    lines.append("")
+    lines.append("### Hint samples")
+    has_hints = False
+    for name in sorted(report["checks"]):
+        check = report["checks"][name]
+        details = check.get("details", {})
+        if not isinstance(details, dict):
+            continue
+        hint_samples = details.get("hint_samples", [])
+        if not isinstance(hint_samples, list) or not hint_samples:
+            continue
+        has_hints = True
+        lines.append(f"- `{_md_escape_cell(name)}`")
+        for hint in hint_samples[:3]:
+            lines.append(f"  - {_md_escape_cell(hint)}")
+    if not has_hints:
+        lines.append("- No hint samples were reported.")
     return "\n".join(lines) + "\n"
 
 
@@ -179,6 +228,9 @@ def _build_recommendations(checks: dict[str, dict[str, Any]]) -> list[str]:
     if suggested_actions:
         unique_actions = sorted(dict.fromkeys(suggested_actions))
         recommendations.append(f"Suggested next actions: {', '.join(unique_actions[:5])}.")
+    doctor_hints = checks.get("doctor_check", {}).get("details", {}).get("hint_samples", [])
+    if isinstance(doctor_hints, list) and doctor_hints:
+        recommendations.append(f"Doctor hint spotlight: {doctor_hints[0]}")
     return recommendations
 
 
