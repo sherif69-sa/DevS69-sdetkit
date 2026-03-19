@@ -138,6 +138,9 @@ class ScriptCandidate:
     reason: str
     command: list[str]
     artifact_paths: list[str]
+    priority: str = "medium"
+    score: int = 0
+    trigger_sources: list[str] | None = None
 
 
 @dataclass(frozen=True)
@@ -150,6 +153,9 @@ class ScriptRunResult:
     artifact_paths: list[str]
     log_path: str
     message: str
+
+
+_PRIORITY_RANK = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 
 
 def _safe_text(value: Any) -> str:
@@ -600,6 +606,8 @@ def _build_script_candidates(
 ) -> list[ScriptCandidate]:
     candidates: list[ScriptCandidate] = []
     failed_steps = _failed_step_ids(payload)
+    hotspots = payload.get("hotspots", {})
+    hotspot_counts = hotspots if isinstance(hotspots, dict) else {}
     has_doctor_signal = _has_signal(payload, source="doctor") or "doctor_json" in failed_steps
     has_maintenance_signal = _has_signal(payload, source="maintenance") or (
         "maintenance_full" in failed_steps
@@ -613,6 +621,31 @@ def _build_script_candidates(
         )
     )
     autofix_applied = any(item.status == "fixed" for item in auto_fix_results or [])
+    has_integration_signal = _has_signal(payload, source="integration") or (
+        "integration_topology" in failed_steps
+    )
+
+    def _candidate_score(*sources: str, bonus: int = 0) -> int:
+        score = bonus
+        for source in sources:
+            score += int(hotspot_counts.get(source, 0)) * 10
+        score += sum(6 for step_id in failed_steps if any(source in step_id for source in sources))
+        return score
+
+    def _priority_for(*sources: str) -> str:
+        severities = [
+            _safe_text(item.get("severity"))
+            for key in ("warnings", "engine_checks")
+            for item in payload.get(key, [])
+            if isinstance(item, dict) and _safe_text(item.get("source")) in sources
+        ]
+        if any(sev == "critical" for sev in severities):
+            return "critical"
+        if any(sev in {"high", "warn"} for sev in severities):
+            return "high"
+        if any(sev == "medium" for sev in severities):
+            return "medium"
+        return "low"
 
     if has_doctor_signal or has_style_or_quality_signal:
         candidates.append(
@@ -634,6 +667,9 @@ def _build_script_candidates(
                     str(out_dir / "gate-fast-fix.json"),
                 ],
                 artifact_paths=["gate-fast-fix.json"],
+                priority="high" if has_style_or_quality_signal else _priority_for("doctor"),
+                score=_candidate_score("doctor", bonus=18 if has_style_or_quality_signal else 8),
+                trigger_sources=["doctor", "quality", "style"],
             )
         )
         candidates.append(
@@ -650,6 +686,9 @@ def _build_script_candidates(
                     str(out_dir / "doctor.json"),
                 ],
                 artifact_paths=["doctor.json"],
+                priority=_priority_for("doctor"),
+                score=_candidate_score("doctor", bonus=6),
+                trigger_sources=["doctor"],
             )
         )
 
@@ -672,6 +711,9 @@ def _build_script_candidates(
                     str(out_dir / "maintenance.json"),
                 ],
                 artifact_paths=["maintenance.json"],
+                priority=_priority_for("maintenance"),
+                score=_candidate_score("maintenance", bonus=14),
+                trigger_sources=["maintenance"],
             )
         )
 
@@ -694,6 +736,33 @@ def _build_script_candidates(
                     str(out_dir / "security-check.json"),
                 ],
                 artifact_paths=["security-check.json"],
+                priority=_priority_for("security"),
+                score=_candidate_score("security", bonus=16 if autofix_applied else 12),
+                trigger_sources=["security"],
+            )
+        )
+
+    if has_integration_signal:
+        candidates.append(
+            ScriptCandidate(
+                script_id="integration_topology_refresh",
+                reason=(
+                    "Integration topology drift was detected; regenerate the topology contract "
+                    "artifact so premium scoring can verify the latest shape."
+                ),
+                command=[
+                    sys.executable,
+                    "-m",
+                    "sdetkit",
+                    "integration",
+                    "topology-check",
+                    "--profile",
+                    str(fix_root / "examples/kits/integration/heterogeneous-topology.json"),
+                ],
+                artifact_paths=["integration-topology.json"],
+                priority=_priority_for("integration"),
+                score=_candidate_score("integration", bonus=15),
+                trigger_sources=["integration"],
             )
         )
 
@@ -704,7 +773,56 @@ def _build_script_candidates(
             continue
         seen.add(candidate.script_id)
         deduped.append(candidate)
-    return deduped
+    return sorted(
+        deduped,
+        key=lambda item: (-item.score, -_PRIORITY_RANK.get(item.priority, 0), item.script_id),
+    )
+
+
+def _build_script_plan(
+    payload: dict[str, Any],
+    *,
+    out_dir: Path,
+    fix_root: Path,
+    auto_fix_results: list[AutoFixResult] | None = None,
+    max_scripts: int = 4,
+) -> dict[str, Any]:
+    candidates = _build_script_candidates(
+        payload,
+        out_dir=out_dir,
+        fix_root=fix_root,
+        auto_fix_results=auto_fix_results,
+    )
+    selected = candidates[: max(0, max_scripts)]
+    deferred = candidates[max(0, max_scripts) :]
+    return {
+        "selected": [
+            {
+                "script_id": item.script_id,
+                "priority": item.priority,
+                "score": item.score,
+                "reason": item.reason,
+                "trigger_sources": list(item.trigger_sources or []),
+                "artifact_paths": list(item.artifact_paths),
+                "command": list(item.command),
+            }
+            for item in selected
+        ],
+        "deferred": [
+            {
+                "script_id": item.script_id,
+                "priority": item.priority,
+                "score": item.score,
+                "reason": item.reason,
+                "trigger_sources": list(item.trigger_sources or []),
+                "artifact_paths": list(item.artifact_paths),
+                "command": list(item.command),
+            }
+            for item in deferred
+        ],
+        "max_scripts": max(0, max_scripts),
+        "candidate_count": len(candidates),
+    }
 
 
 def _run_script_candidate(
@@ -1202,6 +1320,76 @@ def _apply_double_check(payload: dict[str, Any], second: dict[str, Any]) -> dict
     return out
 
 
+def search_guidelines(
+    db_path: Path, query: str, *, active_only: bool = True, limit: int = 100
+) -> list[dict[str, Any]]:
+    needle = _safe_text(query).lower()
+    rows = list_guidelines(db_path, active_only=active_only, limit=limit)
+    if not needle:
+        return rows
+    filtered: list[dict[str, Any]] = []
+    for row in rows:
+        haystack = " ".join(
+            [
+                _safe_text(row.get("title")),
+                _safe_text(row.get("body")),
+                " ".join(row.get("tags", []) if isinstance(row.get("tags"), list) else []),
+                _safe_text(row.get("source")),
+            ]
+        ).lower()
+        if needle in haystack:
+            filtered.append(row)
+    return filtered
+
+
+def filter_payload(payload: dict[str, Any], query: str) -> dict[str, Any]:
+    needle = _safe_text(query).lower()
+    if not needle:
+        return payload
+
+    def _matches(item: Any) -> bool:
+        if isinstance(item, dict):
+            return needle in json.dumps(item, sort_keys=True).lower()
+        return needle in _safe_text(item).lower()
+
+    out = dict(payload)
+    for key in (
+        "warnings",
+        "recommendations",
+        "engine_checks",
+        "step_status",
+        "manual_fix_plan",
+        "auto_fix_results",
+        "script_runs",
+    ):
+        value = payload.get(key, [])
+        if isinstance(value, list):
+            out[key] = [item for item in value if _matches(item)]
+    smart = payload.get("smart_remediation")
+    if isinstance(smart, dict):
+        plan = smart.get("plan")
+        if isinstance(plan, dict):
+            smart = {
+                **smart,
+                "plan": {
+                    **plan,
+                    "selected": [item for item in plan.get("selected", []) if _matches(item)],
+                    "deferred": [item for item in plan.get("deferred", []) if _matches(item)],
+                },
+            }
+        out["smart_remediation"] = smart
+    out["search_query"] = needle
+    out["counts"] = {
+        **payload.get("counts", {}),
+        "warnings": len(out.get("warnings", [])),
+        "recommendations": len(out.get("recommendations", [])),
+        "engine_checks": len(out.get("engine_checks", [])),
+        "steps": len(out.get("step_status", [])),
+        "script_runs": len(out.get("script_runs", [])),
+    }
+    return out
+
+
 def render_text(payload: dict[str, Any]) -> str:
     lines = [
         f"premium gate intelligence score: {payload['score']}%",
@@ -1248,6 +1436,20 @@ def render_text(payload: dict[str, Any]) -> str:
                 f"- \U0001f527 {item['priority']} {item['rule_id']} {item['path']}: {item['suggested_edit']}"
             )
 
+    smart = payload.get("smart_remediation")
+    if isinstance(smart, dict):
+        lines.append("smart remediation:")
+        lines.append(
+            f"- selected={smart.get('selected_count', 0)} success={smart.get('successful_scripts', 0)} "
+            f"failed={smart.get('failed_scripts', 0)} score_delta={smart.get('score_delta', 0)}"
+        )
+        plan = smart.get("plan")
+        if isinstance(plan, dict):
+            for item in plan.get("selected", [])[:10]:
+                lines.append(
+                    f"- \U0001f680 {item['script_id']} [{item['priority']}] score={item['score']}: {item['reason']}"
+                )
+
     return "\n".join(lines)
 
 
@@ -1286,6 +1488,33 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 f"- \U0001f527 `{item['priority']}` `{item['rule_id']}` `{item['path']}` \u2014 {item['suggested_edit']}"
             )
+    smart = payload.get("smart_remediation")
+    if isinstance(smart, dict):
+        lines.append("")
+        lines.append("## smart remediation")
+        lines.append(
+            "- selected: "
+            f"**{smart.get('selected_count', 0)}**, "
+            f"successful: **{smart.get('successful_scripts', 0)}**, "
+            f"failed: **{smart.get('failed_scripts', 0)}**, "
+            f"score delta: **{smart.get('score_delta', 0)}**"
+        )
+        plan = smart.get("plan")
+        if isinstance(plan, dict):
+            if plan.get("selected"):
+                lines.append("")
+                lines.append("### selected scripts")
+                for item in plan["selected"][:10]:
+                    lines.append(
+                        f"- \U0001f680 `{item['script_id']}` ({item['priority']}, score={item['score']}): {item['reason']}"
+                    )
+            if plan.get("deferred"):
+                lines.append("")
+                lines.append("### deferred scripts")
+                for item in plan["deferred"][:10]:
+                    lines.append(
+                        f"- \u23ed️ `{item['script_id']}` ({item['priority']}, score={item['score']}): {item['reason']}"
+                    )
     return "\n".join(lines)
 
 
@@ -1300,9 +1529,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--auto-fix", action="store_true")
     parser.add_argument("--auto-run-scripts", action="store_true")
     parser.add_argument("--max-auto-scripts", type=int, default=4)
+    parser.add_argument("--plan-output", default=None)
     parser.add_argument("--fix-root", default=".")
     parser.add_argument("--learn-db", action="store_true")
     parser.add_argument("--learn-commit", action="store_true")
+    parser.add_argument("--list-guidelines", action="store_true")
+    parser.add_argument("--search", default=None)
     parser.add_argument("--serve-api", action="store_true")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8799)
@@ -1313,6 +1545,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.serve_api:
         serve_insights_api(str(ns.host), int(ns.port), out_dir, db_path)
+        return 0
+
+    if ns.list_guidelines:
+        guidelines = search_guidelines(db_path, _safe_text(ns.search), active_only=True, limit=500)
+        payload = {
+            "guidelines": guidelines,
+            "count": len(guidelines),
+            "search_query": ns.search or "",
+        }
+        sys.stdout.write(f"{json.dumps(payload, indent=2, sort_keys=True)}\n")
         return 0
 
     fix_root = Path(ns.fix_root)
@@ -1348,6 +1590,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.auto_run_scripts:
         pre_script_score = int(payload.get("score", 0))
+        plan = _build_script_plan(
+            payload,
+            out_dir=out_dir,
+            fix_root=fix_root,
+            auto_fix_results=fixes,
+            max_scripts=int(ns.max_auto_scripts),
+        )
         selected_scripts, script_results = run_smart_scripts(
             payload,
             out_dir=out_dir,
@@ -1375,6 +1624,7 @@ def main(argv: list[str] | None = None) -> int:
             "failed_scripts": sum(1 for item in script_results if item.status != "passed"),
             "pre_script_score": pre_script_score,
             "post_script_score": int(refreshed.get("score", 0)),
+            "plan": plan,
         }
         payload["smart_remediation"]["score_delta"] = (
             payload["smart_remediation"]["post_script_score"]
@@ -1396,6 +1646,21 @@ def main(argv: list[str] | None = None) -> int:
             "recommendations": len(payload.get("recommendations", [])),
             "script_runs": len(script_results),
         }
+
+    if ns.plan_output:
+        plan_payload = _build_script_plan(
+            payload,
+            out_dir=out_dir,
+            fix_root=fix_root,
+            auto_fix_results=fixes,
+            max_scripts=int(ns.max_auto_scripts),
+        )
+        Path(ns.plan_output).write_text(
+            json.dumps(plan_payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    rendered_payload = filter_payload(payload, _safe_text(ns.search)) if ns.search else payload
 
     if ns.json_output:
         Path(ns.json_output).write_text(
@@ -1429,11 +1694,11 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if ns.format == "json":
-        sys.stdout.write(f"{json.dumps(payload, indent=2, sort_keys=True)}\n")
+        sys.stdout.write(f"{json.dumps(rendered_payload, indent=2, sort_keys=True)}\n")
     elif ns.format == "markdown":
-        sys.stdout.write(f"{render_markdown(payload)}\n")
+        sys.stdout.write(f"{render_markdown(rendered_payload)}\n")
     else:
-        sys.stdout.write(f"{render_text(payload)}\n")
+        sys.stdout.write(f"{render_text(rendered_payload)}\n")
 
     if ns.min_score is not None and payload["score"] < ns.min_score:
         return 2

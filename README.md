@@ -78,6 +78,9 @@ python -m sdetkit integration topology-check --profile examples/kits/integration
 bash premium-gate.sh --mode full
 # premium gate now emits .sdetkit/out/integration-topology.json as a first-class operational artifact
 # head-5 also auto-runs repo-safe remediation scripts unless you pass --no-auto-run-scripts
+# and writes .sdetkit/out/premium-remediation-plan.json so PRs can review selected vs deferred fixes
+python -m sdetkit.premium_gate_engine --out-dir .sdetkit/out --search doctor --format json
+python -m sdetkit.premium_gate_engine --db-path .sdetkit/out/premium-insights.db --list-guidelines --search security
 python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
 python -m sdetkit forensics bundle --run examples/kits/forensics/run-b.json --output build/repro.zip
 python -m sdetkit continuous-upgrade-cycle9-closeout --format json --strict
@@ -123,6 +126,8 @@ bash quality.sh doctor
 By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch. Use `--query` when you want text search across package names, notes, repo-usage files, recommended lanes, and validation commands without pre-classifying the package first. Use `--max-release-age-days 14` to build a fast-follow watchlist for just-landed releases, or `--min-release-age-days 365 --outdated-only` to isolate older targets that have gone stale and deserve a deliberate cleanup pass.
 
 The doctor surface now carries those same upgrade-audit focus controls, so you can search and narrow dependency work without leaving the readiness report. In addition to query, impact-area, manifest-action, and repo-usage targeting, doctor now supports release-age slicing via `--upgrade-audit-min-release-age-days` and `--upgrade-audit-max-release-age-days`, plus `--upgrade-audit-used-in-repo-only` / `--upgrade-audit-outdated-only` for tighter maintenance slices. The readiness payload also exposes grouped action, dependency-group, manifest-source, and release-freshness summaries so CI and PR checks can explain whether the repo’s hottest maintenance lane is “fresh releases to validate” or “older targets to retire” without re-running the full audit. It also emits a quality summary block with pass/fail/skipped counts, pass rate, failing check IDs, and hint coverage so the readiness signal is easier to scan in CI, markdown, and JSON outputs.
+
+The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.
 

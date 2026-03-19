@@ -235,7 +235,7 @@ run_plan() {
 run_engine() {
   section "Real-time warnings and recommendations summary"
   local engine_cmd
-  engine_cmd="python3 -m sdetkit.premium_gate_engine --out-dir '$OUT_DIR' --double-check --min-score '$ENGINE_MIN_SCORE' --auto-fix --fix-root '$ROOT_DIR' --learn-db --learn-commit --db-path '$OUT_DIR/premium-insights.db' --format markdown --json-output '$OUT_DIR/premium-summary.json'"
+  engine_cmd="python3 -m sdetkit.premium_gate_engine --out-dir '$OUT_DIR' --double-check --min-score '$ENGINE_MIN_SCORE' --auto-fix --fix-root '$ROOT_DIR' --learn-db --learn-commit --db-path '$OUT_DIR/premium-insights.db' --format markdown --json-output '$OUT_DIR/premium-summary.json' --plan-output '$OUT_DIR/premium-remediation-plan.json'"
   if [[ "$AUTO_RUN_SCRIPTS" == "1" ]]; then
     engine_cmd+=" --auto-run-scripts"
   fi
@@ -269,6 +269,9 @@ PY
   if [[ -f "$OUT_DIR/premium-summary.json" ]]; then
     info "Engine JSON: $OUT_DIR/premium-summary.json"
   fi
+  if [[ -f "$OUT_DIR/premium-remediation-plan.json" ]]; then
+    info "Remediation plan: $OUT_DIR/premium-remediation-plan.json"
+  fi
   info "Step index: $STEP_INDEX_JSON"
   info "Step run ledger: $STEP_RESULTS_NDJSON"
 }
@@ -280,4 +283,4 @@ run_plan
 run_engine
 final_report
 
-echo "Premium gate passed. Artifacts: $OUT_DIR/doctor.json, $OUT_DIR/maintenance.json, $OUT_DIR/integration-topology.json, $OUT_DIR/security.sarif, $OUT_DIR/security-check.json, $OUT_DIR/premium-summary.json, $OUT_DIR/evidence.zip"
+echo "Premium gate passed. Artifacts: $OUT_DIR/doctor.json, $OUT_DIR/maintenance.json, $OUT_DIR/integration-topology.json, $OUT_DIR/security.sarif, $OUT_DIR/security-check.json, $OUT_DIR/premium-summary.json, $OUT_DIR/premium-remediation-plan.json, $OUT_DIR/evidence.zip"
