@@ -27,6 +27,7 @@ def test_doctor_markdown_contains_table_actions_and_stable_order(tmp_path: Path)
     assert proc.returncode == 2
     assert "### SDET Doctor Report" in proc.stdout
     assert "| Check | Severity | Status | Summary |" in proc.stdout
+    assert "#### Quality summary" in proc.stdout
     assert "#### Action items" in proc.stdout
     assert "#### Evidence" in proc.stdout
 

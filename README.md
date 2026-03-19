@@ -109,10 +109,14 @@ python scripts/upgrade_audit.py --repo-usage-tier active --used-in-repo-only --t
 python scripts/upgrade_audit.py --metadata-source cache-stale --outdated-only
 python scripts/upgrade_audit.py --group requirements --source requirements.txt --top 10
 python -m sdetkit doctor --upgrade-audit --upgrade-audit-offline --format json
+python -m sdetkit doctor --upgrade-audit --upgrade-audit-query quality --upgrade-audit-impact-area quality-tooling --upgrade-audit-top 5 --format md
+python -m sdetkit doctor --upgrade-audit --upgrade-audit-manifest-action refresh-pin --upgrade-audit-top 3 --format json
 bash quality.sh doctor
 ```
 
 By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch. Use `--query` when you want text search across package names, notes, repo-usage files, recommended lanes, and validation commands without pre-classifying the package first.
+
+The doctor surface now carries those same upgrade-audit focus controls, so you can search and narrow dependency work without leaving the readiness report. It also emits a quality summary block with pass/fail/skipped counts, pass rate, failing check IDs, and hint coverage so the readiness signal is easier to scan in CI, markdown, and JSON outputs.
 
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.
 
