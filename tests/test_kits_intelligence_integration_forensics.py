@@ -105,6 +105,9 @@ dependencies = ["httpx==0.28.1"]
         "default",
         "--source",
         "pyproject.toml",
+        "--manifest-action",
+        "none",
+        "--include-prereleases",
     )
 
     assert proc.returncode == 0
@@ -114,6 +117,7 @@ dependencies = ["httpx==0.28.1"]
     assert payload["lanes"][0]["lane"] == "next-maintenance-batch"
     assert payload["groups"][0]["group"] == "default"
     assert payload["sources"][0]["source"] == "pyproject.toml"
+    assert payload["actions"][0]["manifest_action"] == "none"
 
 
 def test_intelligence_failure_mode_invalid_failures_file(tmp_path: Path) -> None:

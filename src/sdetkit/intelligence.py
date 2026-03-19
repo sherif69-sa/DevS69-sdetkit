@@ -265,8 +265,23 @@ def main(argv: list[str] | None = None) -> int:
         ],
         default=None,
     )
+    ua.add_argument(
+        "--manifest-action",
+        action="append",
+        choices=[
+            "none",
+            "refresh-pin",
+            "raise-floor",
+            "stage-upgrade",
+            "plan-major-upgrade",
+            "establish-baseline",
+            "investigate-metadata",
+        ],
+        default=None,
+    )
     ua.add_argument("--outdated-only", action="store_true")
     ua.add_argument("--top", type=int, default=None)
+    ua.add_argument("--include-prereleases", action="store_true")
 
     ns = parser.parse_args(argv)
     try:
@@ -313,8 +328,10 @@ def main(argv: list[str] | None = None) -> int:
                 sources=ns.source,
                 metadata_sources=ns.metadata_source,
                 impact_areas=ns.impact_area,
+                manifest_actions=ns.manifest_action,
                 outdated_only=bool(ns.outdated_only),
                 top=ns.top,
+                include_prereleases=bool(ns.include_prereleases),
             )
         else:
             payload = _cmd_mutation_policy(safe_path(Path.cwd(), ns.policy, allow_absolute=True))
