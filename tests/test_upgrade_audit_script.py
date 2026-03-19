@@ -1326,6 +1326,26 @@ def test_filter_reports_supports_lane_and_release_freshness_filters() -> None:
     assert [report.name for report in filtered] == ["httpx"]
 
 
+def test_filter_reports_supports_validation_command_filters() -> None:
+    reports = [
+        _report(
+            name="mkdocs-material",
+            validation_commands=["bash ci.sh all --artifact-dir build", "make docs-build"],
+        ),
+        _report(
+            name="ruff",
+            validation_commands=["bash quality.sh ci", "bash quality.sh cov"],
+        ),
+    ]
+
+    filtered = upgrade_audit._filter_reports(
+        reports,
+        validation_commands=["make docs-build", "bash quality.sh *"],
+    )
+
+    assert [report.name for report in filtered] == ["mkdocs-material", "ruff"]
+
+
 def test_render_json_and_markdown_include_risk_and_validation_summaries() -> None:
     reports = [
         _report(
@@ -1389,6 +1409,8 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
             "hot-path",
             "--lane",
             "upgrade-now",
+            "--validation-command",
+            "bash quality.sh *",
             "--release-freshness",
             "fresh-release",
             "--query",
@@ -1407,6 +1429,7 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.manifest_action is None
     assert args.repo_usage_tier == ["hot-path"]
     assert args.lane == ["upgrade-now"]
+    assert args.validation_command == ["bash quality.sh *"]
     assert args.release_freshness == ["fresh-release"]
     assert args.query == ["runtime-core"]
     assert args.used_in_repo_only is True

@@ -1580,6 +1580,17 @@ def _matches_any_filter(values: list[str], allowed_filters: list[str] | None) ->
     return any(filter_value in normalized_values for filter_value in allowed_filters)
 
 
+def _matches_command_filters(commands: list[str], command_filters: list[str] | None) -> bool:
+    if not command_filters:
+        return True
+    normalized_commands = [command.lower() for command in commands if command.strip()]
+    return any(
+        fnmatch.fnmatch(command, pattern)
+        for pattern in command_filters
+        for command in normalized_commands
+    )
+
+
 def _matches_text_query(report: PackageReport, query_terms: list[str] | None) -> bool:
     if not query_terms:
         return True
@@ -1667,6 +1678,7 @@ def _filter_reports(
     lanes: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
+    validation_commands: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
     release_freshness: list[str] | None = None,
     queries: list[str] | None = None,
@@ -1710,6 +1722,13 @@ def _filter_reports(
     if manifest_actions:
         allowed_actions = {item.strip() for item in manifest_actions if item.strip()}
         filtered = [report for report in filtered if report.manifest_action in allowed_actions]
+    if validation_commands:
+        command_filters = [item.strip().lower() for item in validation_commands if item.strip()]
+        filtered = [
+            report
+            for report in filtered
+            if _matches_command_filters(report.validation_commands, command_filters)
+        ]
     if repo_usage_tiers:
         allowed_tiers = {item.strip() for item in repo_usage_tiers if item.strip()}
         filtered = [report for report in filtered if report.repo_usage_tier in allowed_tiers]
@@ -1958,6 +1977,7 @@ def run(
     lanes: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
+    validation_commands: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
     release_freshness: list[str] | None = None,
     queries: list[str] | None = None,
@@ -2048,6 +2068,7 @@ def run(
         lanes=lanes,
         impact_areas=impact_areas,
         manifest_actions=manifest_actions,
+        validation_commands=validation_commands,
         repo_usage_tiers=repo_usage_tiers,
         release_freshness=release_freshness,
         queries=queries,
@@ -2227,6 +2248,15 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages with the selected manifest action(s).",
     )
     parser.add_argument(
+        "--validation-command",
+        action="append",
+        default=None,
+        help=(
+            "Show only packages whose suggested validation commands match the provided command "
+            "or glob pattern. Can be passed multiple times."
+        ),
+    )
+    parser.add_argument(
         "--repo-usage-tier",
         action="append",
         choices=["hot-path", "active", "edge", "declared-only"],
@@ -2326,6 +2356,7 @@ def main(argv: list[str] | None = None) -> int:
         lanes=args.lane,
         impact_areas=args.impact_area,
         manifest_actions=args.manifest_action,
+        validation_commands=args.validation_command,
         repo_usage_tiers=args.repo_usage_tier,
         release_freshness=args.release_freshness,
         queries=args.query,

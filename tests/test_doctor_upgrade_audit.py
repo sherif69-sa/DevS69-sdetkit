@@ -589,3 +589,77 @@ def test_doctor_upgrade_audit_supports_lane_and_release_freshness_filters(
         == "bash ci.sh quick --skip-docs --artifact-dir build"
     )
     assert any("risk " in hint for hint in payload["hints"])
+
+
+def test_doctor_upgrade_audit_supports_validation_command_filters(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    _write_minimal_pyproject(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    deps = [
+        doctor.upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="docs",
+            raw="mkdocs-material==9.7.6",
+            name="mkdocs-material",
+            pinned_version="9.7.6",
+        ),
+        doctor.upgrade_audit.Dependency(
+            source="pyproject.toml",
+            group="dev",
+            raw="ruff==0.15.7",
+            name="ruff",
+            pinned_version="0.15.7",
+        ),
+    ]
+
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_discover_requirement_files", lambda *_args, **_kwargs: []
+    )
+    monkeypatch.setattr(doctor.upgrade_audit, "_load_dependencies", lambda *_args, **_kwargs: deps)
+    monkeypatch.setattr(
+        doctor.upgrade_audit, "_load_project_python_requires", lambda *_args, **_kwargs: ">=3.11"
+    )
+    monkeypatch.setattr(doctor.upgrade_audit, "_collect_repo_usage", lambda *_args, **_kwargs: {})
+    monkeypatch.setattr(
+        doctor.upgrade_audit,
+        "_collect_package_metadata",
+        lambda *_args, **_kwargs: {
+            "mkdocs-material": doctor.upgrade_audit.PackageMetadata(
+                latest_version="9.7.7",
+                release_date="2026-03-15T00:00:00+00:00",
+                compatible_version="9.7.7",
+                compatible_release_date="2026-03-15T00:00:00+00:00",
+                compatibility_status="compatible-latest",
+                source="cache",
+            ),
+            "ruff": doctor.upgrade_audit.PackageMetadata(
+                latest_version="0.15.7",
+                release_date="2026-03-15T00:00:00+00:00",
+                compatible_version="0.15.7",
+                compatible_release_date="2026-03-15T00:00:00+00:00",
+                compatibility_status="compatible-latest",
+                source="cache",
+            ),
+        },
+    )
+
+    rc = doctor.main(
+        [
+            "--only",
+            "upgrade_audit",
+            "--upgrade-audit",
+            "--upgrade-audit-validation-command",
+            "make docs-build",
+            "--format",
+            "json",
+        ]
+    )
+
+    assert rc in {0, doctor.EXIT_FAILED}
+    payload = json.loads(capsys.readouterr().out)
+    meta = payload["checks"]["upgrade_audit"]["meta"]
+    assert meta["packages_in_scope"] == 1
+    assert meta["filters"]["validation_commands"] == ["make docs-build"]
+    assert meta["priority_queue"][0]["name"] == "mkdocs-material"

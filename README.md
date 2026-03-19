@@ -101,6 +101,7 @@ python -m sdetkit intelligence upgrade-audit --outdated-only --package "http*"
 python -m sdetkit intelligence upgrade-audit --used-in-repo-only --repo-usage-tier hot-path --format md
 python -m sdetkit intelligence upgrade-audit --query runtime-core --query "next maintenance"
 python -m sdetkit intelligence upgrade-audit --manifest-action stage-upgrade --top 10
+python -m sdetkit intelligence upgrade-audit --validation-command "make docs-build"
 python -m sdetkit intelligence upgrade-audit --group default --source pyproject.toml --format md
 python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 python scripts/upgrade_audit.py --fail-on high
@@ -124,6 +125,8 @@ bash quality.sh doctor
 ```
 
 By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch. Use `--query` when you want text search across package names, notes, repo-usage files, recommended lanes, and validation commands without pre-classifying the package first. Use `--max-release-age-days 14` to build a fast-follow watchlist for just-landed releases, or `--min-release-age-days 365 --outdated-only` to isolate older targets that have gone stale and deserve a deliberate cleanup pass.
+
+When you want a surgically targeted maintenance queue, filter by `--validation-command` as well. That lets you answer questions like “show me only upgrades that roll into `make docs-build`” or “which candidates are covered by `bash quality.sh *` smoke validation” without scanning the whole report.
 
 The doctor surface now carries those same upgrade-audit focus controls, so you can search and narrow dependency work without leaving the readiness report. In addition to query, impact-area, manifest-action, and repo-usage targeting, doctor now supports release-age slicing via `--upgrade-audit-min-release-age-days` and `--upgrade-audit-max-release-age-days`, plus `--upgrade-audit-used-in-repo-only` / `--upgrade-audit-outdated-only` for tighter maintenance slices. The readiness payload also exposes grouped action, dependency-group, manifest-source, and release-freshness summaries so CI and PR checks can explain whether the repo’s hottest maintenance lane is “fresh releases to validate” or “older targets to retire” without re-running the full audit. It also emits a quality summary block with pass/fail/skipped counts, pass rate, failing check IDs, and hint coverage so the readiness signal is easier to scan in CI, markdown, and JSON outputs.
 
