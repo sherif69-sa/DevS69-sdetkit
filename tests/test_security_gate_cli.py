@@ -311,7 +311,8 @@ def test_security_fix_apply_and_run_ruff_paths(tmp_path: Path, monkeypatch, caps
     src.mkdir()
     target = src / "mod.py"
     target.write_text(
-        "import yaml\nyaml.load(x)\nimport requests\nrequests.get(url)\n", encoding="utf-8"
+        "import subprocess\nimport yaml\nyaml.load(x)\nimport requests\nrequests.get(url)\nsubprocess.run(cmd, shell=True)\n",
+        encoding="utf-8",
     )
 
     monkeypatch.setattr("sdetkit.security_gate._run_ruff_fix", lambda _root: (True, "ruff fixed"))
@@ -324,3 +325,4 @@ def test_security_fix_apply_and_run_ruff_paths(tmp_path: Path, monkeypatch, caps
     txt = target.read_text(encoding="utf-8")
     assert "safe_load" in txt
     assert "timeout=3" in txt
+    assert "shell=False" in txt

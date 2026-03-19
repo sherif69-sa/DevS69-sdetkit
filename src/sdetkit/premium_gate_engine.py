@@ -83,6 +83,10 @@ RECOMMENDATION_CATALOG: dict[str, tuple[str, str]] = {
         "Network calls without timeout threaten reliability.",
         "Add explicit timeout and retry policy with breaker guardrails.",
     ),
+    "security:SEC_NETWORK_TIMEOUT": (
+        "Network calls without timeout threaten reliability.",
+        "Add explicit timeout and retry policy with breaker guardrails.",
+    ),
     "security:SEC_YAML_LOAD": (
         "Unsafe yaml.load usage detected.",
         "Replace yaml.load with yaml.safe_load where behavior allows.",
@@ -535,7 +539,7 @@ def _apply_autofix_for_finding(root: Path, finding: dict[str, Any]) -> AutoFixRe
     patched = text
     changed = False
 
-    if rule == "SEC_REQUESTS_NO_TIMEOUT":
+    if rule in {"SEC_REQUESTS_NO_TIMEOUT", "SEC_NETWORK_TIMEOUT"}:
         patched, changed = _autofix_timeout(text)
     elif rule == "SEC_SUBPROCESS_SHELL_TRUE":
         patched, changed = _autofix_shell_true(text)
@@ -560,7 +564,7 @@ def _build_fix_plan_item(result: AutoFixResult) -> FixPlanItem:
     elif rule == "SEC_SUBPROCESS_SHELL_TRUE":
         edit = "Replace shell invocation with argument list and shell=False; validate escaping and command boundaries."
         priority = "high"
-    elif rule == "SEC_REQUESTS_NO_TIMEOUT":
+    elif rule in {"SEC_REQUESTS_NO_TIMEOUT", "SEC_NETWORK_TIMEOUT"}:
         edit = "Add explicit timeout and retry policy to requests call; verify caller handles timeout exceptions."
         priority = "high"
     elif rule in {"SEC_YAML_LOAD", "SEC_YAML_UNSAFE_LOAD"}:
@@ -839,6 +843,30 @@ def _build_script_candidates(
         )
 
     if has_security_signal or autofix_applied:
+        candidates.append(
+            ScriptCandidate(
+                script_id="security_fix_apply",
+                reason=(
+                    "Security findings were detected; apply deterministic repo-safe security fixes "
+                    "before refreshing the baseline-aware triage artifact."
+                ),
+                command=[
+                    sys.executable,
+                    "-m",
+                    "sdetkit",
+                    "security",
+                    "fix",
+                    "--root",
+                    str(fix_root),
+                    "--apply",
+                    "--run-ruff",
+                ],
+                artifact_paths=[],
+                priority="critical" if autofix_applied else _priority_for("security"),
+                score=_candidate_score("security", bonus=18 if autofix_applied else 14),
+                trigger_sources=["security", "autofix"],
+            )
+        )
         candidates.append(
             ScriptCandidate(
                 script_id="security_triage_refresh",
