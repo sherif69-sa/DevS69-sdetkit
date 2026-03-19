@@ -51,6 +51,21 @@ These commands give a new contributor three things immediately:
 - a first-PR checklist that can be validated locally,
 - and a curated command journey that turns the repo into an obvious place to start.
 
+## Why contributors can move fast here
+
+This repo now exposes a contributor launchpad instead of expecting newcomers to reverse-engineer the workflow:
+
+```bash
+python -m sdetkit first-contribution --format markdown --strict
+python -m sdetkit first-contribution --profile docs-polish --format markdown
+python -m sdetkit first-contribution --profile test-hardening --format markdown
+python -m sdetkit first-contribution --profile automation-upgrade --format markdown
+```
+
+The launchpad checks that contributor trust assets are present, highlights concrete starter profiles, and points people toward realistic labels like `good first issue`, `documentation`, and `tests`.
+
+If you are evaluating the project as a potential contributor, this makes the repo feel maintained, navigable, and ready for real work rather than just feature demos.
+
 ## Hero commands
 
 ```bash
