@@ -706,7 +706,60 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
     return recs
 
 
-def _build_hints(data: dict[str, Any]) -> list[str]:
+def _build_quality_summary(
+    checks: dict[str, dict[str, Any]],
+    *,
+    selected_checks: list[str],
+    hints: list[str] | None = None,
+) -> dict[str, Any]:
+    ordered_selected = [check_id for check_id in CHECK_ORDER if check_id in selected_checks]
+    passed = 0
+    failed = 0
+    skipped = 0
+    highest_failure_severity = "none"
+    highest_failure_rank = 0
+    failed_check_ids: list[str] = []
+    fix_count = 0
+    evidence_count = 0
+
+    for check_id in ordered_selected:
+        item = checks.get(check_id, {})
+        if item.get("skipped"):
+            skipped += 1
+            continue
+        if item.get("ok"):
+            passed += 1
+            continue
+        failed += 1
+        failed_check_ids.append(check_id)
+        severity = str(item.get("severity", "medium"))
+        severity_rank = SEVERITY_ORDER.get(severity, 0)
+        if severity_rank > highest_failure_rank:
+            highest_failure_rank = severity_rank
+            highest_failure_severity = severity
+        fix_count += len(item.get("fix", []))
+        evidence_count += len(item.get("evidence", []))
+
+    total = len(ordered_selected)
+    actionable = passed + failed
+    pass_rate = 100 if actionable == 0 else round((passed / actionable) * 100)
+
+    return {
+        "selected_checks": total,
+        "actionable_checks": actionable,
+        "passed_checks": passed,
+        "failed_checks": failed,
+        "skipped_checks": skipped,
+        "pass_rate": pass_rate,
+        "highest_failure_severity": highest_failure_severity,
+        "failed_check_ids": failed_check_ids,
+        "fix_count": fix_count,
+        "evidence_count": evidence_count,
+        "hint_count": len(hints or []),
+    }
+
+
+def _build_hints(data: dict[str, Any], *, limit: int = 5) -> list[str]:
     hints: list[str] = []
 
     next_actions = data.get("next_actions", [])
@@ -744,13 +797,22 @@ def _build_hints(data: dict[str, Any]) -> list[str]:
             if isinstance(validations, list) and validations:
                 validation = str(validations[0]).strip()
             lane = str(item.get("lane", "")).strip()
-            detail = f"{name}: {action or 'review'}"
-            if target:
-                detail += f" -> {target}"
+            actionable = action and action != "none"
+            if actionable:
+                detail = f"{name}: {action}"
+                if target:
+                    detail += f" -> {target}"
+                if lane:
+                    detail += f" [{lane}]"
+                if validation:
+                    detail += f" — validate with {validation}"
+                hints.append(detail)
+                continue
+            detail = f"watchlist {name}"
             if lane:
                 detail += f" [{lane}]"
             if validation:
-                detail += f" — validate with {validation}"
+                detail += f" — keep validating with {validation}"
             hints.append(detail)
 
     lane_summary = upgrade_meta.get("lane_summary", [])
@@ -760,6 +822,7 @@ def _build_hints(data: dict[str, Any]) -> list[str]:
                 continue
             lane = str(item.get("lane", "")).strip()
             count = int(item.get("count", 0))
+            actionable = int(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ""
             if isinstance(packages, list) and packages:
@@ -768,6 +831,8 @@ def _build_hints(data: dict[str, Any]) -> list[str]:
                 )
             if lane and count > 0:
                 detail = f"lane {lane}: {count} package(s)"
+                if actionable > 0:
+                    detail += f", actionable {actionable}"
                 if package_text:
                     detail += f" — focus on {package_text}"
                 hints.append(detail)
@@ -797,13 +862,17 @@ def _build_hints(data: dict[str, Any]) -> list[str]:
             continue
         seen.add(normalized)
         deduped.append(normalized)
-    return deduped[:5]
+    return deduped[: max(limit, 0)]
 
 
 def _check_upgrade_audit(
     root: Path,
     *,
     offline: bool,
+    queries: list[str] | None = None,
+    impact_areas: list[str] | None = None,
+    manifest_actions: list[str] | None = None,
+    top: int | None = None,
 ) -> tuple[bool, str, list[dict[str, Any]], list[str], dict[str, Any]]:
     pyproject_path = root / "pyproject.toml"
     if not pyproject_path.exists():
@@ -873,23 +942,35 @@ def _check_upgrade_audit(
             )
         )
     reports = upgrade_audit._sort_reports(reports)
-    actionable = [report for report in reports if upgrade_audit._is_actionable_upgrade(report)]
-    priority_source = actionable if actionable else reports
+    filtered_reports = upgrade_audit._filter_reports(
+        reports,
+        impact_areas=impact_areas,
+        manifest_actions=manifest_actions,
+        queries=queries,
+        top=top,
+    )
+    actionable = [
+        report for report in filtered_reports if upgrade_audit._is_actionable_upgrade(report)
+    ]
+    priority_source = actionable if actionable else filtered_reports
     priority_queue = upgrade_audit._priority_queue(priority_source, limit=3)
 
     has_high_risk = any(report.upgrade_signal in {"critical", "high"} for report in actionable)
-    has_drift = any(report.alignment == "drift" for report in reports)
+    has_drift = any(report.alignment == "drift" for report in filtered_reports)
     ok = not has_high_risk and not has_drift
 
     summary_bits = [f"{len(actionable)} actionable package(s)"]
+    if len(filtered_reports) != len(reports):
+        summary_bits.append(f"focused view {len(filtered_reports)}/{len(reports)} package(s)")
     if priority_queue:
-        top = priority_queue[0]
-        top_name = str(top.get("name", "")).strip()
-        top_signal = str(top.get("signal", "")).strip()
-        top_action = str(top.get("manifest_action", "")).strip()
+        top_item = priority_queue[0]
+        top_name = str(top_item.get("name", "")).strip()
+        top_signal = str(top_item.get("signal", "")).strip()
+        top_action = str(top_item.get("manifest_action", "")).strip()
         if top_name:
+            summary_label = "watchlist led by" if top_action == "none" else "top priority"
             summary_bits.append(
-                f"top priority {top_name} [{top_signal or 'watch'} / {top_action or 'review'}]"
+                f"{summary_label} {top_name} [{top_signal or 'watch'} / {top_action or 'review'}]"
             )
     summary = "upgrade audit found " + "; ".join(summary_bits)
 
@@ -901,6 +982,7 @@ def _check_upgrade_audit(
         impact_area = str(item.get("impact_area", "")).strip()
         next_action = str(item.get("next_action", "")).strip()
         version = str(item.get("suggested_version", "")).strip()
+        actionable_item = bool(action and action != "none")
         message = f"{name}: {signal or 'watch'} / {action or 'review'}"
         if version:
             message += f" -> {version}"
@@ -908,6 +990,8 @@ def _check_upgrade_audit(
             message += f" [{impact_area}]"
         if next_action:
             message += f" — {next_action}"
+        elif not actionable_item:
+            message += " — no immediate manifest change required"
         evidence.append({"type": "upgrade_priority", "message": message, "path": "pyproject.toml"})
 
     fix = [
@@ -926,19 +1010,34 @@ def _check_upgrade_audit(
 
     meta = {
         "packages_audited": len(reports),
+        "packages_in_scope": len(filtered_reports),
         "actionable_packages": len(actionable),
         "priority_queue": priority_queue,
-        "lane_summary": upgrade_audit._lane_summary(reports),
-        "impact_summary": upgrade_audit._impact_summary(reports),
-        "repo_usage_summary": upgrade_audit._repo_usage_summary(reports),
+        "lane_summary": upgrade_audit._lane_summary(filtered_reports),
+        "impact_summary": upgrade_audit._impact_summary(filtered_reports),
+        "repo_usage_summary": upgrade_audit._repo_usage_summary(filtered_reports),
         "offline": offline,
         "requirements": [path.name for path in requirement_paths],
+        "filters": {
+            "queries": queries or [],
+            "impact_areas": impact_areas or [],
+            "manifest_actions": manifest_actions or [],
+            "top": top,
+        },
     }
     return ok, summary, evidence, deduped_fix[:5], meta
 
 
 def _print_human_report(data: dict[str, Any]) -> None:
     lines = [f"doctor score: {data['score']}%"]
+    quality = data.get("quality", {})
+    if isinstance(quality, dict) and quality:
+        lines.append(
+            "quality: "
+            f"{quality.get('passed_checks', 0)} passed / "
+            f"{quality.get('failed_checks', 0)} failed / "
+            f"{quality.get('skipped_checks', 0)} skipped"
+        )
     checks = data.get("checks", {})
     for key in sorted(checks):
         item = checks[key]
@@ -957,10 +1056,17 @@ def _print_human_report(data: dict[str, Any]) -> None:
 
 def _print_pr_report(data: dict[str, Any]) -> None:
     checks = data.get("checks", {})
+    quality = data.get("quality", {})
     lines = [
         "### SDET Doctor Report",
         f"- overall: {'PASS' if data.get('ok') else 'FAIL'}",
         f"- score: {data.get('score')}%",
+        (
+            "- quality: "
+            f"{quality.get('passed_checks', 0)} passed / "
+            f"{quality.get('failed_checks', 0)} failed / "
+            f"{quality.get('skipped_checks', 0)} skipped"
+        ),
         "- checks:",
     ]
     for key in sorted(checks):
@@ -981,10 +1087,17 @@ def _print_pr_report(data: dict[str, Any]) -> None:
 def _format_doctor_markdown(data: dict[str, Any]) -> str:
     checks = data.get("checks", {})
     ordered_ids = sorted(checks)
+    quality = data.get("quality", {})
     lines = [
         "### SDET Doctor Report",
         f"- overall: {'PASS' if data.get('ok') else 'FAIL'}",
         f"- score: {data.get('score')}%",
+        (
+            "- quality: "
+            f"{quality.get('passed_checks', 0)} passed / "
+            f"{quality.get('failed_checks', 0)} failed / "
+            f"{quality.get('skipped_checks', 0)} skipped"
+        ),
         "",
         "| Check | Severity | Status | Summary |",
         "| --- | --- | --- | --- |",
@@ -1005,6 +1118,27 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
         for fix in item.get("fix", []):
             action_rows.append((rank, check_id, str(fix)))
 
+    lines.append("")
+    lines.append("#### Quality summary")
+    if isinstance(quality, dict) and quality:
+        lines.append(
+            f"- pass rate: {quality.get('pass_rate', 0)}% across {quality.get('actionable_checks', 0)} actionable check(s)"
+        )
+        lines.append(
+            f"- highest failure severity: {quality.get('highest_failure_severity', 'none')}"
+        )
+        failed_check_ids = quality.get("failed_check_ids", [])
+        if isinstance(failed_check_ids, list) and failed_check_ids:
+            lines.append(
+                "- failing checks: " + ", ".join(f"`{check_id}`" for check_id in failed_check_ids)
+            )
+        else:
+            lines.append("- failing checks: none")
+        lines.append(
+            f"- hint coverage: {quality.get('hint_count', 0)} hint(s), {quality.get('fix_count', 0)} fix item(s), {quality.get('evidence_count', 0)} evidence item(s)"
+        )
+    else:
+        lines.append("- None")
     lines.append("")
     lines.append("#### Action items")
     if action_rows:
@@ -1180,6 +1314,52 @@ def main(argv: list[str] | None = None) -> int:
         dest="upgrade_audit_offline",
         action="store_true",
         help="Use cached metadata only for upgrade-audit hints.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-query",
+        dest="upgrade_audit_queries",
+        action="append",
+        default=None,
+        help="Focus doctor upgrade-audit hints using free-text search across packages, lanes, notes, and commands.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-impact-area",
+        dest="upgrade_audit_impact_areas",
+        action="append",
+        choices=[
+            "runtime-core",
+            "quality-tooling",
+            "integration-adapters",
+            "docs-tooling",
+            "packaging-release",
+            "security-compliance",
+            "repo-tooling",
+        ],
+        default=None,
+        help="Focus doctor upgrade-audit hints on specific repo impact areas.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-manifest-action",
+        dest="upgrade_audit_manifest_actions",
+        action="append",
+        choices=[
+            "none",
+            "refresh-pin",
+            "raise-floor",
+            "stage-upgrade",
+            "plan-major-upgrade",
+            "establish-baseline",
+            "investigate-metadata",
+        ],
+        default=None,
+        help="Focus doctor upgrade-audit hints on specific manifest actions.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-top",
+        dest="upgrade_audit_top",
+        type=int,
+        default=None,
+        help="Limit doctor upgrade-audit hint generation to the highest-risk N matching packages.",
     )
     parser.add_argument("--dev", action="store_true")
     parser.add_argument("--pyproject", action="store_true")
@@ -1604,6 +1784,10 @@ def main(argv: list[str] | None = None) -> int:
         ua_ok, ua_summary, ua_evidence, ua_fix, ua_meta = _check_upgrade_audit(
             root,
             offline=bool(ns.upgrade_audit_offline),
+            queries=ns.upgrade_audit_queries,
+            impact_areas=ns.upgrade_audit_impact_areas,
+            manifest_actions=ns.upgrade_audit_manifest_actions,
+            top=ns.upgrade_audit_top,
         )
         data["upgrade_audit_ok"] = ua_ok
         data["checks"]["upgrade_audit"] = _make_check(
@@ -1672,6 +1856,11 @@ def main(argv: list[str] | None = None) -> int:
     data["score"] = _calculate_score(score_items)
     data["recommendations"] = _recommendations(data)
     data["hints"] = _build_hints(data)
+    data["quality"] = _build_quality_summary(
+        data["checks"],
+        selected_checks=data["selected_checks"],
+        hints=data["hints"],
+    )
     data["ok"] = bool(gate_ok)
     if failed_checks:
         data["failed_checks"] = failed_checks
