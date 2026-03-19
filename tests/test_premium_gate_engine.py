@@ -10,7 +10,11 @@ from sdetkit import premium_gate_engine as eng
 
 
 def _write_topology_artifact(
-    path: Path, *, pass_rate: float = 100.0, app_services: int = 3, checks: list[dict[str, object]] | None = None
+    path: Path,
+    *,
+    pass_rate: float = 100.0,
+    app_services: int = 3,
+    checks: list[dict[str, object]] | None = None,
 ) -> None:
     path.write_text(
         json.dumps(

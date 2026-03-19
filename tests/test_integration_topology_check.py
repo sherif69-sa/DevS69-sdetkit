@@ -71,11 +71,7 @@ def test_topology_check_flags_missing_heterogeneous_contracts(tmp_path: Path) ->
                         },
                     ],
                     "data_services": [
-                        {
-                            "name": "orders",
-                            "role": "transactional",
-                            "technology": "mysql"
-                        }
+                        {"name": "orders", "role": "transactional", "technology": "mysql"}
                     ],
                     "mocked_platforms": [
                         {"name": "crm", "protocol": "rest", "operations": ["sync"]}
