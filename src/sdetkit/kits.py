@@ -64,12 +64,14 @@ _KITS: Final[list[Kit]] = [
             "sdetkit intelligence flake classify --history history.json",
             "sdetkit intelligence impact summarize --changed changed.txt --map testmap.json",
             "sdetkit intelligence capture-env",
+            "sdetkit intelligence upgrade-audit --format json --top 5",
         ],
         "capabilities": [
             "Flake and failure classification",
             "Change impact summaries",
             "Environment capture for reproducibility",
             "Signal shaping for quality governance",
+            "Dependency upgrade prioritization",
         ],
         "typical_inputs": [
             "Failure history JSON",
@@ -80,11 +82,13 @@ _KITS: Final[list[Kit]] = [
             "Flake classification reports",
             "Impact summaries",
             "Captured environment snapshots",
+            "Upgrade-risk and maintenance-lane reports",
         ],
         "learning_path": [
             "sdetkit intelligence capture-env",
             "sdetkit intelligence flake classify --history history.json",
             "sdetkit intelligence impact summarize --changed changed.txt --map testmap.json",
+            "sdetkit intelligence upgrade-audit --format json --top 5",
         ],
     },
     {

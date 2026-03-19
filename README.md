@@ -32,6 +32,7 @@ python -m sdetkit kits describe release
 python -m sdetkit kits describe intelligence
 python -m sdetkit kits describe integration
 python -m sdetkit kits describe forensics
+python -m sdetkit intelligence upgrade-audit --format json --top 5
 ```
 
 ## Hero commands
@@ -54,10 +55,12 @@ python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 
 ## Upgrade planning (first step)
 
-Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps. The audit now surfaces the repo baseline version, estimated version-gap size (major/minor/patch), release recency, an ordered risk score, and a concrete next action for each package. You can also fail CI at a chosen signal threshold:
+Run a dependency-manifest audit against PyPI to identify candidate upgrades, detect cross-file version drift, and prioritize the highest-signal upgrade gaps. The audit now surfaces the repo baseline version, estimated version-gap size (major/minor/patch), release recency, an ordered risk score, recommended maintenance lanes, and a concrete next action for each package. You can invoke it from either the standalone script or the primary Intelligence kit surface, and you can fail CI at a chosen signal threshold:
 
 ```bash
 make upgrade-audit
+python -m sdetkit intelligence upgrade-audit --format json --top 5
+python -m sdetkit intelligence upgrade-audit --format md --offline
 python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
 python scripts/upgrade_audit.py --fail-on high
 python scripts/upgrade_audit.py --cache-ttl-hours 6 --max-workers 12

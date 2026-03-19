@@ -64,6 +64,52 @@ def test_intelligence_contracts_and_failure_fingerprinting() -> None:
     assert fingerprint_json["summary"]["with_nondeterminism_hints"] >= 1
 
 
+def test_intelligence_upgrade_audit_primary_surface(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx==0.28.1"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    cache_path = tmp_path / "cache.json"
+    cache_path.write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-01-02T00:00:00+00:00",
+                "packages": {
+                    "httpx": {
+                        "fetched_at": 1_767_000_000.0,
+                        "latest_version": "0.28.1",
+                        "release_date": "2026-01-01T00:00:00Z",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    proc = _run(
+        "intelligence",
+        "upgrade-audit",
+        "--pyproject",
+        str(pyproject),
+        "--offline",
+        "--cache-path",
+        str(cache_path),
+        "--format",
+        "json",
+    )
+
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    assert payload["packages"][0]["name"] == "httpx"
+    assert payload["priority_queue"][0]["lane"] == "next-maintenance-batch"
+    assert payload["lanes"][0]["lane"] == "next-maintenance-batch"
+
+
 def test_intelligence_failure_mode_invalid_failures_file(tmp_path: Path) -> None:
     bad = tmp_path / "bad-failures.json"
     bad.write_text('{"oops": []}', encoding="utf-8")
