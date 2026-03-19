@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from . import upgrade_audit
 from .atomicio import canonical_json_dumps
 from .security import SecurityError, safe_path
 
@@ -211,6 +212,38 @@ def main(argv: list[str] | None = None) -> int:
     )
     fp.add_argument("--failures", required=True)
 
+    ua = sub.add_parser(
+        "upgrade-audit",
+        help="Dependency upgrade planning with manifest drift, policy, and risk lanes",
+    )
+    ua.add_argument("--pyproject", default="pyproject.toml")
+    ua.add_argument("--timeout", type=float, default=10.0)
+    ua.add_argument("--format", choices=["md", "json"], default="json")
+    ua.add_argument("--requirements", action="append", default=None)
+    ua.add_argument("--include-lockfiles", action="store_true")
+    ua.add_argument(
+        "--fail-on",
+        choices=["critical", "high", "medium", "watch", "investigate", "unknown", "never"],
+        default="never",
+    )
+    ua.add_argument("--cache-path", default=str(upgrade_audit.DEFAULT_CACHE_PATH))
+    ua.add_argument("--cache-ttl-hours", type=float, default=24.0)
+    ua.add_argument("--offline", action="store_true")
+    ua.add_argument("--max-workers", type=int, default=8)
+    ua.add_argument(
+        "--signal",
+        action="append",
+        choices=["critical", "high", "medium", "watch", "investigate", "unknown"],
+        default=None,
+    )
+    ua.add_argument(
+        "--policy",
+        action="append",
+        choices=["allowed", "blocked", "unknown", "unbounded"],
+        default=None,
+    )
+    ua.add_argument("--top", type=int, default=None)
+
     ns = parser.parse_args(argv)
     try:
         if ns.cmd == "flake" and ns.subcmd == "classify":
@@ -227,6 +260,31 @@ def main(argv: list[str] | None = None) -> int:
         elif ns.cmd == "failure-fingerprint":
             payload = _cmd_failure_fingerprint(
                 safe_path(Path.cwd(), ns.failures, allow_absolute=True)
+            )
+        elif ns.cmd == "upgrade-audit":
+            pyproject_path = safe_path(Path.cwd(), ns.pyproject, allow_absolute=True)
+            if ns.requirements is None:
+                requirement_paths = upgrade_audit._discover_requirement_files(
+                    pyproject_path.parent,
+                    include_lockfiles=bool(ns.include_lockfiles),
+                )
+            else:
+                requirement_paths = [
+                    safe_path(Path.cwd(), path, allow_absolute=True) for path in ns.requirements
+                ]
+            return upgrade_audit.run(
+                pyproject_path,
+                timeout_s=ns.timeout,
+                requirement_paths=requirement_paths,
+                output_format=ns.format,
+                fail_on=ns.fail_on,
+                cache_path=safe_path(Path.cwd(), ns.cache_path, allow_absolute=True),
+                cache_ttl_hours=ns.cache_ttl_hours,
+                offline=bool(ns.offline),
+                max_workers=max(ns.max_workers, 1),
+                signals=ns.signal,
+                policies=ns.policy,
+                top=ns.top,
             )
         else:
             payload = _cmd_mutation_policy(safe_path(Path.cwd(), ns.policy, allow_absolute=True))

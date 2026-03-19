@@ -1,16 +1,9 @@
 from __future__ import annotations
 
-import importlib.util
 import json
-import sys
 from pathlib import Path
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "upgrade_audit.py"
-SPEC = importlib.util.spec_from_file_location("upgrade_audit", SCRIPT_PATH)
-assert SPEC is not None and SPEC.loader is not None
-upgrade_audit = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = upgrade_audit
-SPEC.loader.exec_module(upgrade_audit)
+from sdetkit import upgrade_audit
 
 
 def test_load_dependencies_collects_pyproject_and_requirements(tmp_path: Path) -> None:
@@ -467,3 +460,91 @@ dependencies = ["httpx>=0.27,<1", "ruff==0.15.6"]
     assert payload["summary"]["packages_audited"] == 1
     assert payload["priority_queue"][0]["name"] == "httpx"
     assert [item["name"] for item in payload["packages"]] == ["httpx"]
+
+
+def test_render_json_includes_lane_summary_and_priority_lane() -> None:
+    reports = [
+        upgrade_audit.PackageReport(
+            name="critical-pkg",
+            sources=["pyproject.toml", "requirements.txt"],
+            groups=["default", "requirements"],
+            requirements=["critical-pkg>=1,<2", "critical-pkg==1.2.3"],
+            pinned_versions=["1.2.3"],
+            current_version="1.2.3",
+            alignment="drift",
+            constraint_status="blocked",
+            latest_version="2.0.0",
+            latest_release_date="2026-01-01T00:00:00Z",
+            metadata_source="pypi",
+            version_gap="major",
+            release_age_days=0,
+            upgrade_signal="critical",
+            risk_score=90,
+            next_action="Resolve manifest drift first, then validate the major upgrade in a dedicated branch.",
+            notes=["Cross-manifest requirement drift detected."],
+        ),
+        upgrade_audit.PackageReport(
+            name="watch-pkg",
+            sources=["requirements.txt"],
+            groups=["requirements"],
+            requirements=["watch-pkg==1.0.0"],
+            pinned_versions=["1.0.0"],
+            current_version="1.0.0",
+            alignment="aligned",
+            constraint_status="allowed",
+            latest_version="1.0.1",
+            latest_release_date=None,
+            metadata_source="cache",
+            version_gap="patch",
+            release_age_days=None,
+            upgrade_signal="watch",
+            risk_score=10,
+            next_action="Keep under observation; no immediate action required.",
+            notes=["Latest metadata source: cache."],
+        ),
+    ]
+
+    payload = json.loads(
+        upgrade_audit._render_json(
+            reports,
+            pyproject_path=Path("pyproject.toml"),
+            requirement_paths=[Path("requirements.txt")],
+        )
+    )
+
+    assert payload["priority_queue"][0]["lane"] == "stabilize-manifests"
+    assert payload["lanes"][0]["lane"] == "stabilize-manifests"
+    assert payload["lanes"][0]["packages"] == ["critical-pkg"]
+
+
+def test_render_markdown_includes_recommended_upgrade_lanes() -> None:
+    reports = [
+        upgrade_audit.PackageReport(
+            name="httpx",
+            sources=["pyproject.toml", "requirements.txt"],
+            groups=["default", "requirements"],
+            requirements=["httpx>=0.27,<1", "httpx==0.28.1"],
+            pinned_versions=["0.28.1"],
+            current_version="0.28.1",
+            alignment="compatible",
+            constraint_status="blocked",
+            latest_version="0.29.0",
+            latest_release_date="2026-01-01T00:00:00Z",
+            metadata_source="pypi",
+            version_gap="minor",
+            release_age_days=0,
+            upgrade_signal="medium",
+            risk_score=55,
+            next_action="Queue the upgrade for the next maintenance batch and validate targeted smoke tests.",
+            notes=["Cross-manifest requirements differ but remain mutually compatible."],
+        )
+    ]
+
+    rendered = upgrade_audit._render_markdown(
+        reports,
+        pyproject_path=Path("pyproject.toml"),
+        requirement_paths=[Path("requirements.txt")],
+    )
+
+    assert "## Recommended upgrade lanes" in rendered
+    assert "**next-maintenance-batch**" in rendered
