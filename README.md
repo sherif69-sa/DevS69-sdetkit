@@ -95,6 +95,7 @@ python -m sdetkit intelligence upgrade-audit --include-prereleases --package htt
 python -m sdetkit intelligence upgrade-audit --format md --offline
 python -m sdetkit intelligence upgrade-audit --outdated-only --package "http*"
 python -m sdetkit intelligence upgrade-audit --used-in-repo-only --repo-usage-tier hot-path --format md
+python -m sdetkit intelligence upgrade-audit --query runtime-core --query "next maintenance"
 python -m sdetkit intelligence upgrade-audit --manifest-action stage-upgrade --top 10
 python -m sdetkit intelligence upgrade-audit --group default --source pyproject.toml --format md
 python scripts/upgrade_audit.py --format json > build/upgrade-audit.json
@@ -111,7 +112,7 @@ python -m sdetkit doctor --upgrade-audit --upgrade-audit-offline --format json
 bash quality.sh doctor
 ```
 
-By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch.
+By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch. Use `--query` when you want text search across package names, notes, repo-usage files, recommended lanes, and validation commands without pre-classifying the package first.
 
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.
 

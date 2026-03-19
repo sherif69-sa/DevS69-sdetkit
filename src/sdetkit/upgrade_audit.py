@@ -192,9 +192,7 @@ def _load_requirements_dependencies_recursive(
         if include_target is not None:
             include_path = (requirements_path.parent / include_target).resolve()
             if include_path.exists():
-                deps.extend(
-                    _load_requirements_dependencies_recursive(include_path, seen=seen)
-                )
+                deps.extend(_load_requirements_dependencies_recursive(include_path, seen=seen))
             continue
         candidate = _normalize_requirement_line(stripped)
         if candidate is None:
@@ -509,11 +507,7 @@ def _candidate_repo_python_versions(project_python_requires: str | None) -> list
     constraints = _parse_python_constraints(project_python_requires)
     if not constraints:
         return []
-    minimums = [
-        version
-        for operator, version in constraints
-        if operator in {">=", ">", "~=", "=="}
-    ]
+    minimums = [version for operator, version in constraints if operator in {">=", ">", "~=", "=="}]
     if minimums:
         return [sorted(minimums, key=_version_key)[-1]]
     upper_bounds = [version for operator, version in constraints if operator in {"<", "<="}]
@@ -587,7 +581,10 @@ def _release_is_python_compatible(
         if requires_python is not None and not isinstance(requires_python, str):
             continue
         compatibility_observed = True
-        if all(_specifier_allows_version(requires_python, version) is not False for version in repo_versions):
+        if all(
+            _specifier_allows_version(requires_python, version) is not False
+            for version in repo_versions
+        ):
             return True, "compatible"
     if compatibility_observed:
         return False, "requires-newer-python"
@@ -621,7 +618,9 @@ def _latest_compatible_release(
     latest_compatible_version: str | None = None
     latest_compatible_release_date: str | None = None
     latest_status = "unknown"
-    for version, release_files in sorted(releases.items(), key=lambda item: _version_key(str(item[0])), reverse=True):
+    for version, release_files in sorted(
+        releases.items(), key=lambda item: _version_key(str(item[0])), reverse=True
+    ):
         if not isinstance(version, str) or not isinstance(release_files, list):
             continue
         if not include_prereleases and _is_prerelease_version(version):
@@ -908,7 +907,11 @@ def _build_package_report(
         notes.append("Latest PyPI release is recent enough to merit fast follow-up validation.")
     if project_python_requires:
         notes.append(f"Repo Python support policy: {project_python_requires}.")
-    if compatibility_status == "compatible-available" and compatible_version and compatible_version != latest_version:
+    if (
+        compatibility_status == "compatible-available"
+        and compatible_version
+        and compatible_version != latest_version
+    ):
         notes.append(
             "Newest PyPI release requires a newer Python baseline than this repo; "
             f"using compatible target {compatible_version} for action planning."
@@ -1016,11 +1019,11 @@ def _build_package_report(
 
     next_action = "Keep under observation; no immediate action required."
     if manifest_action == "raise-floor":
-        next_action = (
-            "Raise the tested floor in flexible manifests, refresh pins, and validate the package in the next maintenance window."
-        )
+        next_action = "Raise the tested floor in flexible manifests, refresh pins, and validate the package in the next maintenance window."
     elif manifest_action == "refresh-pin":
-        next_action = "Refresh pinned manifests to the newer tested version and rerun targeted validation."
+        next_action = (
+            "Refresh pinned manifests to the newer tested version and rerun targeted validation."
+        )
     elif upgrade_signal == "critical":
         next_action = (
             "Resolve manifest drift first, then validate the major upgrade in a dedicated branch."
@@ -1044,7 +1047,9 @@ def _build_package_report(
             "Review the declared version range manually because the gap could not be classified."
         )
     elif manifest_action == "establish-baseline":
-        next_action = "Pin or bound the package explicitly before attempting future upgrade automation."
+        next_action = (
+            "Pin or bound the package explicitly before attempting future upgrade automation."
+        )
 
     if manifest_action != "none":
         notes.append(f"Recommended manifest action: {manifest_action}.")
@@ -1324,7 +1329,9 @@ def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
         "declared_only_packages": sum(
             1 for report in reports if report.repo_usage_tier == "declared-only"
         ),
-        "runtime_core_packages": sum(1 for report in reports if report.impact_area == "runtime-core"),
+        "runtime_core_packages": sum(
+            1 for report in reports if report.impact_area == "runtime-core"
+        ),
         "quality_tooling_packages": sum(
             1 for report in reports if report.impact_area == "quality-tooling"
         ),
@@ -1399,6 +1406,31 @@ def _matches_any_filter(values: list[str], allowed_filters: list[str] | None) ->
     return any(filter_value in normalized_values for filter_value in allowed_filters)
 
 
+def _matches_text_query(report: PackageReport, query_terms: list[str] | None) -> bool:
+    if not query_terms:
+        return True
+
+    haystacks = [
+        report.name,
+        report.impact_area,
+        report.manifest_action,
+        report.next_action,
+        report.upgrade_signal,
+        report.alignment,
+        report.constraint_status,
+        report.repo_usage_tier,
+        _recommended_lane(report),
+    ]
+    haystacks.extend(report.groups)
+    haystacks.extend(report.sources)
+    haystacks.extend(report.requirements)
+    haystacks.extend(report.notes)
+    haystacks.extend(report.repo_usage_files)
+    haystacks.extend(report.validation_commands)
+    searchable_text = "\n".join(item for item in haystacks if item).lower()
+    return all(term in searchable_text for term in query_terms)
+
+
 def _matches_dependency_filters(
     deps: list[Dependency],
     *,
@@ -1409,7 +1441,9 @@ def _matches_dependency_filters(
     if packages:
         package_filters = [item.strip().lower() for item in packages if item.strip()]
         if package_filters and not any(
-            fnmatch.fnmatch(dep.name.lower(), pattern) for pattern in package_filters for dep in deps
+            fnmatch.fnmatch(dep.name.lower(), pattern)
+            for pattern in package_filters
+            for dep in deps
         ):
             return False
     if groups:
@@ -1459,6 +1493,7 @@ def _filter_reports(
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
+    queries: list[str] | None = None,
     used_in_repo_only: bool = False,
     outdated_only: bool = False,
     top: int | None = None,
@@ -1477,7 +1512,9 @@ def _filter_reports(
         ]
     if groups:
         group_filters = [item.strip().lower() for item in groups if item.strip()]
-        filtered = [report for report in filtered if _matches_any_filter(report.groups, group_filters)]
+        filtered = [
+            report for report in filtered if _matches_any_filter(report.groups, group_filters)
+        ]
     if sources:
         source_filters = [item.strip().lower() for item in sources if item.strip()]
         filtered = [
@@ -1495,6 +1532,9 @@ def _filter_reports(
     if repo_usage_tiers:
         allowed_tiers = {item.strip() for item in repo_usage_tiers if item.strip()}
         filtered = [report for report in filtered if report.repo_usage_tier in allowed_tiers]
+    if queries:
+        query_terms = [item.strip().lower() for item in queries if item.strip()]
+        filtered = [report for report in filtered if _matches_text_query(report, query_terms)]
     if used_in_repo_only:
         filtered = [report for report in filtered if report.repo_usage_count > 0]
     if outdated_only:
@@ -1557,7 +1597,7 @@ def _render_markdown(
     for item in _priority_queue(reports):
         lines.append(
             f"- `{item['name']}` [{item['signal']}, risk {item['risk_score']}, lane {item['lane']}, action {item['manifest_action']}]"
-            + (f" target `{item['suggested_version']}`" if item['suggested_version'] else "")
+            + (f" target `{item['suggested_version']}`" if item["suggested_version"] else "")
             + f" → {item['next_action']}"
         )
     lines.extend(["", "## Recommended upgrade lanes", ""])
@@ -1675,6 +1715,7 @@ def run(
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
+    queries: list[str] | None = None,
     used_in_repo_only: bool = False,
     outdated_only: bool = False,
     top: int | None = None,
@@ -1760,6 +1801,7 @@ def run(
         impact_areas=impact_areas,
         manifest_actions=manifest_actions,
         repo_usage_tiers=repo_usage_tiers,
+        queries=queries,
         used_in_repo_only=used_in_repo_only,
         outdated_only=outdated_only,
         top=top,
@@ -1926,6 +1968,15 @@ def build_parser(*, prog: str = "upgrade-audit") -> argparse.ArgumentParser:
         help="Show only packages matching the selected observed repo-usage tier(s).",
     )
     parser.add_argument(
+        "--query",
+        action="append",
+        default=None,
+        help=(
+            "Free-text search across package names, lanes, notes, usage files, commands, and "
+            "actions. Can be passed multiple times."
+        ),
+    )
+    parser.add_argument(
         "--used-in-repo-only",
         action="store_true",
         help="Show only packages imported from tracked src/tests Python files.",
@@ -1990,6 +2041,7 @@ def main(argv: list[str] | None = None) -> int:
         impact_areas=args.impact_area,
         manifest_actions=args.manifest_action,
         repo_usage_tiers=args.repo_usage_tier,
+        queries=args.query,
         used_in_repo_only=bool(args.used_in_repo_only),
         outdated_only=bool(args.outdated_only),
         top=args.top,
