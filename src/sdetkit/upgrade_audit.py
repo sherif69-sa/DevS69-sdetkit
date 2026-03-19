@@ -34,7 +34,13 @@ class PackageReport:
     groups: list[str]
     requirements: list[str]
     pinned_versions: list[str]
+    project_python_requires: str | None
     current_version: str
+    target_version: str
+    target_release_date: str | None
+    latest_compatible_version: str | None
+    latest_compatible_release_date: str | None
+    compatibility_status: str
     alignment: str
     constraint_status: str
     latest_version: str
@@ -54,6 +60,9 @@ class PackageReport:
 class PackageMetadata:
     latest_version: str
     release_date: str | None
+    compatible_version: str | None
+    compatible_release_date: str | None
+    compatibility_status: str
     source: str
 
 
@@ -107,7 +116,7 @@ def _normalize_requirement_line(line: str) -> str | None:
     candidate = line.split("#", 1)[0].strip()
     if not candidate:
         return None
-    if candidate.startswith(("-e", "--editable", "-r", "--requirement", "-c", "--constraint")):
+    if candidate.startswith(("-e", "--editable")):
         return None
     if candidate.startswith(("http://", "https://", "git+", ".", "/")):
         return None
@@ -146,9 +155,32 @@ def _load_pyproject_dependencies(pyproject_path: Path) -> list[Dependency]:
 
 
 def _load_requirements_dependencies(requirements_path: Path) -> list[Dependency]:
+    return _load_requirements_dependencies_recursive(requirements_path, seen=set())
+
+
+def _load_requirements_dependencies_recursive(
+    requirements_path: Path,
+    *,
+    seen: set[Path],
+) -> list[Dependency]:
+    resolved_path = requirements_path.resolve()
+    if resolved_path in seen:
+        return []
+    seen.add(resolved_path)
     deps: list[Dependency] = []
     for raw_line in requirements_path.read_text(encoding="utf-8").splitlines():
-        candidate = _normalize_requirement_line(raw_line)
+        stripped = raw_line.split("#", 1)[0].strip()
+        if not stripped:
+            continue
+        include_target = _parse_requirements_include(stripped)
+        if include_target is not None:
+            include_path = (requirements_path.parent / include_target).resolve()
+            if include_path.exists():
+                deps.extend(
+                    _load_requirements_dependencies_recursive(include_path, seen=seen)
+                )
+            continue
+        candidate = _normalize_requirement_line(stripped)
         if candidate is None:
             continue
         deps.append(
@@ -161,6 +193,14 @@ def _load_requirements_dependencies(requirements_path: Path) -> list[Dependency]
             )
         )
     return deps
+
+
+def _parse_requirements_include(line: str) -> str | None:
+    for prefix in ("-r ", "--requirement ", "-c ", "--constraint "):
+        if line.startswith(prefix):
+            include_target = line[len(prefix) :].strip()
+            return include_target or None
+    return None
 
 
 def _discover_requirement_files(root: Path, include_lockfiles: bool) -> list[Path]:
@@ -180,7 +220,12 @@ def _load_dependencies(
     return deps
 
 
-def _latest_pypi_metadata(package: str, timeout_s: float) -> tuple[str, str | None]:
+def _latest_pypi_metadata(
+    package: str,
+    timeout_s: float,
+    *,
+    project_python_requires: str | None,
+) -> tuple[str, str | None, str | None, str | None, str]:
     url = f"https://pypi.org/pypi/{package}/json"
     request = urllib.request.Request(url, headers={"User-Agent": "sdetkit-upgrade-audit/2.1"})
     with urllib.request.urlopen(request, timeout=timeout_s) as response:  # noqa: S310
@@ -197,7 +242,11 @@ def _latest_pypi_metadata(package: str, timeout_s: float) -> tuple[str, str | No
                 if isinstance(item, dict) and item.get("upload_time_iso_8601"):
                     release_date = str(item["upload_time_iso_8601"])
                     break
-    return version, release_date
+    compatible_version, compatible_release_date, compatibility_status = _latest_compatible_release(
+        payload,
+        project_python_requires=project_python_requires,
+    )
+    return version, release_date, compatible_version, compatible_release_date, compatibility_status
 
 
 def _load_cache(cache_path: Path) -> dict[str, dict[str, str | float | None]]:
@@ -239,13 +288,25 @@ def _cache_entry_fresh(entry: dict[str, str | float | None], ttl_hours: float) -
 def _metadata_from_cache(entry: dict[str, str | float | None], *, source: str) -> PackageMetadata:
     latest_version = entry.get("latest_version")
     release_date = entry.get("release_date")
+    compatible_version = entry.get("compatible_version")
+    compatible_release_date = entry.get("compatible_release_date")
+    compatibility_status = entry.get("compatibility_status")
     if not isinstance(latest_version, str):
         latest_version = "unknown"
     if release_date is not None and not isinstance(release_date, str):
         release_date = None
+    if compatible_version is not None and not isinstance(compatible_version, str):
+        compatible_version = None
+    if compatible_release_date is not None and not isinstance(compatible_release_date, str):
+        compatible_release_date = None
+    if not isinstance(compatibility_status, str):
+        compatibility_status = "unknown"
     return PackageMetadata(
         latest_version=latest_version,
         release_date=release_date,
+        compatible_version=compatible_version,
+        compatible_release_date=compatible_release_date,
+        compatibility_status=compatibility_status,
         source=source,
     )
 
@@ -257,6 +318,7 @@ def _fetch_package_metadata(
     cache: dict[str, dict[str, str | float | None]],
     cache_ttl_hours: float,
     offline: bool,
+    project_python_requires: str | None,
 ) -> PackageMetadata:
     cached_entry = cache.get(package)
     if cached_entry and _cache_entry_fresh(cached_entry, cache_ttl_hours):
@@ -266,24 +328,51 @@ def _fetch_package_metadata(
         if cached_entry:
             return _metadata_from_cache(cached_entry, source="cache-stale")
         return PackageMetadata(
-            latest_version="offline-no-cache", release_date=None, source="offline"
+            latest_version="offline-no-cache",
+            release_date=None,
+            compatible_version=None,
+            compatible_release_date=None,
+            compatibility_status="unknown",
+            source="offline",
         )
 
     try:
-        latest_version, release_date = _latest_pypi_metadata(package, timeout_s=timeout_s)
+        (
+            latest_version,
+            release_date,
+            compatible_version,
+            compatible_release_date,
+            compatibility_status,
+        ) = _latest_pypi_metadata(
+            package,
+            timeout_s=timeout_s,
+            project_python_requires=project_python_requires,
+        )
     except urllib.error.HTTPError as exc:
         latest_version, release_date = f"http-{exc.code}", None
+        compatible_version, compatible_release_date, compatibility_status = None, None, "unknown"
     except urllib.error.URLError:
         if cached_entry:
             return _metadata_from_cache(cached_entry, source="cache-stale")
         latest_version, release_date = "network-error", None
+        compatible_version, compatible_release_date, compatibility_status = None, None, "unknown"
 
     cache[package] = {
         "fetched_at": dt.datetime.now(dt.UTC).timestamp(),
         "latest_version": latest_version,
         "release_date": release_date,
+        "compatible_version": compatible_version,
+        "compatible_release_date": compatible_release_date,
+        "compatibility_status": compatibility_status,
     }
-    return PackageMetadata(latest_version=latest_version, release_date=release_date, source="pypi")
+    return PackageMetadata(
+        latest_version=latest_version,
+        release_date=release_date,
+        compatible_version=compatible_version,
+        compatible_release_date=compatible_release_date,
+        compatibility_status=compatibility_status,
+        source="pypi",
+    )
 
 
 def _collect_package_metadata(
@@ -294,6 +383,7 @@ def _collect_package_metadata(
     cache_ttl_hours: float,
     offline: bool,
     max_workers: int,
+    project_python_requires: str | None,
 ) -> dict[str, PackageMetadata]:
     cache = _load_cache(cache_path)
     metadata: dict[str, PackageMetadata] = {}
@@ -306,6 +396,7 @@ def _collect_package_metadata(
                 cache=cache,
                 cache_ttl_hours=cache_ttl_hours,
                 offline=offline,
+                project_python_requires=project_python_requires,
             )
     else:
         with ThreadPoolExecutor(max_workers=worker_count) as executor:
@@ -317,6 +408,7 @@ def _collect_package_metadata(
                     cache=cache,
                     cache_ttl_hours=cache_ttl_hours,
                     offline=offline,
+                    project_python_requires=project_python_requires,
                 ): package
                 for package in packages
             }
@@ -326,6 +418,13 @@ def _collect_package_metadata(
     if not offline:
         _persist_cache(cache_path, cache)
     return metadata
+
+
+def _load_project_python_requires(pyproject_path: Path) -> str | None:
+    data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    project = data.get("project", {})
+    value = project.get("requires-python")
+    return str(value).strip() if isinstance(value, str) and value.strip() else None
 
 
 def _version_key(version: str) -> tuple[tuple[int, object], ...]:
@@ -354,6 +453,36 @@ def _compare_versions(left: str, right: str) -> int:
     if left_key > right_key:
         return 1
     return 0
+
+
+def _parse_python_constraints(specifier: str | None) -> list[tuple[str, str]]:
+    if not specifier:
+        return []
+    return [(operator, version) for operator, version in CONSTRAINT_RE.findall(specifier)]
+
+
+def _candidate_repo_python_versions(project_python_requires: str | None) -> list[str]:
+    constraints = _parse_python_constraints(project_python_requires)
+    if not constraints:
+        return []
+    minimums = [
+        version
+        for operator, version in constraints
+        if operator in {">=", ">", "~=", "=="}
+    ]
+    if minimums:
+        return [sorted(minimums, key=_version_key)[-1]]
+    upper_bounds = [version for operator, version in constraints if operator in {"<", "<="}]
+    if upper_bounds:
+        upper = sorted(upper_bounds, key=_version_key)[0]
+        parts = _major_minor_patch(upper)
+        if parts is not None:
+            major, minor, _patch = parts
+            if minor > 0:
+                return [f"{major}.{minor - 1}"]
+            if major > 0:
+                return [f"{major - 1}.9"]
+    return []
 
 
 def _compatible_upper_bound(version: str) -> str | None:
@@ -386,6 +515,81 @@ def _constraint_allows_version(constraint: tuple[str, str], version: str) -> boo
             return False
         return cmp >= 0 and _compare_versions(version, upper) < 0
     return False
+
+
+def _specifier_allows_version(specifier: str | None, version: str) -> bool | None:
+    constraints = _parse_python_constraints(specifier)
+    if not constraints:
+        return None
+    return all(_constraint_allows_version(constraint, version) for constraint in constraints)
+
+
+def _release_is_python_compatible(
+    release_files: list[dict[str, object]],
+    *,
+    project_python_requires: str | None,
+) -> tuple[bool | None, str]:
+    repo_versions = _candidate_repo_python_versions(project_python_requires)
+    if not repo_versions:
+        return None, "unknown"
+    if not release_files:
+        return None, "unknown"
+
+    compatibility_observed = False
+    for release_file in release_files:
+        if not isinstance(release_file, dict) or bool(release_file.get("yanked")):
+            continue
+        requires_python = release_file.get("requires_python")
+        if requires_python is not None and not isinstance(requires_python, str):
+            continue
+        compatibility_observed = True
+        if all(_specifier_allows_version(requires_python, version) is not False for version in repo_versions):
+            return True, "compatible"
+    if compatibility_observed:
+        return False, "requires-newer-python"
+    return None, "unknown"
+
+
+def _release_date_from_files(release_files: list[dict[str, object]]) -> str | None:
+    dates = [
+        str(item["upload_time_iso_8601"])
+        for item in release_files
+        if isinstance(item, dict) and item.get("upload_time_iso_8601")
+    ]
+    return sorted(dates)[0] if dates else None
+
+
+def _latest_compatible_release(
+    payload: dict[str, object],
+    *,
+    project_python_requires: str | None,
+) -> tuple[str | None, str | None, str]:
+    releases = payload.get("releases", {})
+    if not isinstance(releases, dict):
+        return None, None, "unknown"
+
+    latest_compatible_version: str | None = None
+    latest_compatible_release_date: str | None = None
+    latest_status = "unknown"
+    for version, release_files in sorted(releases.items(), key=lambda item: _version_key(str(item[0])), reverse=True):
+        if not isinstance(version, str) or not isinstance(release_files, list):
+            continue
+        compatible, status = _release_is_python_compatible(
+            release_files,
+            project_python_requires=project_python_requires,
+        )
+        if compatible is True:
+            latest_compatible_version = version
+            latest_compatible_release_date = _release_date_from_files(release_files)
+            latest_status = (
+                "compatible-latest"
+                if version == str(payload.get("info", {}).get("version") or "")
+                else "compatible-available"
+            )
+            break
+        if status == "requires-newer-python" and latest_status == "unknown":
+            latest_status = status
+    return latest_compatible_version, latest_compatible_release_date, latest_status
 
 
 def _requirement_allows_version(raw_requirement: str, version: str) -> bool | None:
@@ -538,6 +742,10 @@ def _build_package_report(
     latest_version: str,
     release_date: str | None,
     *,
+    project_python_requires: str | None = None,
+    compatible_version: str | None = None,
+    compatible_release_date: str | None = None,
+    compatibility_status: str = "unknown",
     metadata_source: str = "pypi",
 ) -> PackageReport:
     sources = sorted({dep.source for dep in deps})
@@ -545,10 +753,12 @@ def _build_package_report(
     requirements = sorted({dep.raw for dep in deps})
     pinned_versions = sorted({dep.pinned_version for dep in deps if dep.pinned_version})
     current_version = _pick_current_version(deps)
-    version_gap = _classify_version_gap(current_version, latest_version)
-    release_age_days = _release_age_days(release_date)
+    target_version = compatible_version or latest_version
+    target_release_date = compatible_release_date if compatible_version else release_date
+    version_gap = _classify_version_gap(current_version, target_version)
+    release_age_days = _release_age_days(target_release_date)
     alignment = _infer_alignment(deps, current_version)
-    constraint_status = _constraint_status(deps, latest_version)
+    constraint_status = _constraint_status(deps, target_version)
 
     notes: list[str] = []
     if alignment == "drift":
@@ -573,6 +783,17 @@ def _build_package_report(
         notes.append("Latest PyPI release is a patch-level bump from the repo baseline.")
     if release_age_days is not None and release_age_days <= 30:
         notes.append("Latest PyPI release is recent enough to merit fast follow-up validation.")
+    if project_python_requires:
+        notes.append(f"Repo Python support policy: {project_python_requires}.")
+    if compatibility_status == "compatible-available" and compatible_version and compatible_version != latest_version:
+        notes.append(
+            "Newest PyPI release requires a newer Python baseline than this repo; "
+            f"using compatible target {compatible_version} for action planning."
+        )
+    elif compatibility_status == "requires-newer-python":
+        notes.append(
+            "Available PyPI releases appear to require a newer Python baseline than this repo currently declares."
+        )
 
     upgrade_signal = "watch"
     if alignment == "drift":
@@ -623,7 +844,7 @@ def _build_package_report(
 
     manifest_action, suggested_version = _manifest_action(
         current_version=current_version,
-        latest_version=latest_version,
+        latest_version=target_version,
         alignment=alignment,
         constraint_status=constraint_status,
         version_gap=version_gap,
@@ -672,7 +893,13 @@ def _build_package_report(
         groups=groups,
         requirements=requirements,
         pinned_versions=pinned_versions,
+        project_python_requires=project_python_requires,
         current_version=current_version,
+        target_version=target_version,
+        target_release_date=target_release_date,
+        latest_compatible_version=compatible_version,
+        latest_compatible_release_date=compatible_release_date,
+        compatibility_status=compatibility_status,
         alignment=alignment,
         constraint_status=constraint_status,
         latest_version=latest_version,
@@ -780,6 +1007,15 @@ def _report_summary(reports: list[PackageReport]) -> dict[str, int]:
         ),
         "stale_metadata_packages": sum(
             1 for report in reports if report.metadata_source == "cache-stale"
+        ),
+        "python_compatible_latest_packages": sum(
+            1 for report in reports if report.compatibility_status == "compatible-latest"
+        ),
+        "python_compatible_fallback_packages": sum(
+            1 for report in reports if report.compatibility_status == "compatible-available"
+        ),
+        "python_incompatible_latest_packages": sum(
+            1 for report in reports if report.compatibility_status == "requires-newer-python"
         ),
         "actionable_packages": sum(1 for report in reports if _is_actionable_upgrade(report)),
         "max_risk_score": max((report.risk_score for report in reports), default=0),
@@ -917,17 +1153,20 @@ def _render_markdown(
         f"- investigate signals: {summary['investigate_upgrade_signals']}",
         f"- packages using cached metadata: {summary['cached_metadata_packages']}",
         f"- stale cached metadata packages: {summary['stale_metadata_packages']}",
+        f"- latest releases compatible with repo Python policy: {summary['python_compatible_latest_packages']}",
+        f"- fallback compatible targets below latest: {summary['python_compatible_fallback_packages']}",
+        f"- latest releases requiring newer Python: {summary['python_incompatible_latest_packages']}",
         f"- actionable upgrade candidates: {summary['actionable_packages']}",
         "",
-        "| Package | Current | Latest PyPI | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| Package | Current | Target | Latest PyPI | Py policy | Source | Gap | Alignment | Policy | Signal | Risk | Action | Suggested | Release age (days) | Requirements |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for report in reports:
         release_age = "-" if report.release_age_days is None else str(report.release_age_days)
         requirements = " <br> ".join(f"`{item}`" for item in report.requirements)
         lines.append(
             "| "
-            f"`{report.name}` | `{report.current_version}` | `{report.latest_version}` | {report.metadata_source} | {report.version_gap} | "
+            f"`{report.name}` | `{report.current_version}` | `{report.target_version}` | `{report.latest_version}` | {report.compatibility_status} | {report.metadata_source} | {report.version_gap} | "
             f"{report.alignment} | {report.constraint_status} | {report.upgrade_signal} | {report.risk_score} | {report.manifest_action} | {report.suggested_version or '-'} | {release_age} | {requirements} |"
         )
     lines.extend(["", "## Priority queue", ""])
@@ -1023,6 +1262,7 @@ def run(
     top: int | None = None,
 ) -> int:
     dependencies = _load_dependencies(pyproject_path, requirement_paths)
+    project_python_requires = _load_project_python_requires(pyproject_path)
 
     if not dependencies:
         print("No dependencies found in the configured manifests.")
@@ -1040,6 +1280,7 @@ def run(
         cache_ttl_hours=cache_ttl_hours,
         offline=offline,
         max_workers=max_workers,
+        project_python_requires=project_python_requires,
     )
     reports: list[PackageReport] = []
     for package in packages:
@@ -1050,6 +1291,10 @@ def run(
                 by_package[package],
                 latest_version=metadata.latest_version,
                 release_date=metadata.release_date,
+                project_python_requires=project_python_requires,
+                compatible_version=metadata.compatible_version,
+                compatible_release_date=metadata.compatible_release_date,
+                compatibility_status=metadata.compatibility_status,
                 metadata_source=metadata.source,
             )
         )
