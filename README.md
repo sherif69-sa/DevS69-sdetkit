@@ -39,6 +39,7 @@ python -m sdetkit kits expand --goal "upgrade umbrella architecture with agentos
 python -m sdetkit kits radar --repo-usage-tier hot-path --format json
 python -m sdetkit kits route-map httpx --repo-usage-tier hot-path --format json
 python -m sdetkit intelligence upgrade-audit --format json --top 5
+python -m sdetkit maintenance --include-check github_automation_check --format md
 ```
 
 ## Contributor quickstart (90 seconds)

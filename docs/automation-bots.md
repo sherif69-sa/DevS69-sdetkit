@@ -27,6 +27,9 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`sbom.yml`** — refreshes SBOM coverage for downstream review.
 - **`security-maintenance-bot.yml`** — creates the weekly maintenance checklist and weak-spot report.
 - **`ghas-review-bot.yml`** — creates the weekly GHAS digest issue with open-alert counts, workflow freshness, and follow-up prompts.
+- **`ghas-campaign-bot.yml`** — creates a weekly GHAS campaign planner issue for Copilot Autofix-aware code scanning backlog slices, secret scanning age buckets, and push-protection follow-up.
+- **`security-configuration-audit-bot.yml`** — creates a monthly GHAS configuration audit issue covering repo-local workflow coverage, code security configuration visibility, and dependency submission posture.
+- **`dependency-review.yml`** — blocks pull requests that introduce vulnerable dependencies or denied license drift before they merge.
 
 ### Dependency and repo-maintenance bots
 
@@ -52,6 +55,30 @@ It now:
 
 > Optional hardening: set `GHAS_READ_TOKEN` if you want the bot to use a token with broader security-read access than the default `GITHUB_TOKEN`.
 
+### `ghas-campaign-bot.yml`
+
+This bot turns the raw GHAS alert queue into a remediation-planning surface instead of a passive dashboard.
+
+It now:
+
+- groups open code scanning alerts by severity and age,
+- highlights CodeQL/Copilot Autofix candidate volume,
+- tracks secret-scanning age buckets and push-protection bypass follow-up,
+- records repository security-configuration context when the API exposes it,
+- opens a date-scoped `🧭 GHAS campaign planner (...)` issue.
+
+### `security-configuration-audit-bot.yml`
+
+This bot gives the repo a monthly control loop for newer GHAS operating-model features that are easy to forget once the initial setup is done.
+
+It now:
+
+- audits whether the expected GHAS workflows are present in the repo,
+- verifies local supporting config files such as `dependabot.yml` and `codeql-config.yml`,
+- queries the repository's attached code security configuration when available,
+- snapshots open alert counts across code scanning, secret scanning, and Dependabot,
+- opens a date-scoped `🧱 GHAS configuration audit (...)` issue.
+
 ### `dependency-radar-bot.yml`
 
 This bot turns the repo's existing `upgrade-audit` intelligence into a scheduled maintenance surface.
@@ -67,10 +94,11 @@ It now:
 ## Recommended weekly maintainer flow
 
 1. Open the latest **GHAS digest** issue.
-2. Clear or triage high-severity security findings first.
-3. Open the latest **dependency radar** issue.
-4. Pick one upgrade candidate that already maps to a small validation command.
-5. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+2. Open the latest **GHAS campaign planner** issue and group any 14+ day backlog into a focused remediation lane.
+3. Clear or triage high-severity security findings first.
+4. Open the latest **dependency radar** issue.
+5. Pick one upgrade candidate that already maps to a small validation command.
+6. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 
@@ -81,6 +109,7 @@ python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only -
 python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --repo-usage-tier hot-path --format md
 python -m sdetkit kits optimize --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json
 python -m sdetkit kits expand --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json
+python -m sdetkit maintenance --include-check github_automation_check --format md
 ```
 
 ## What this unlocks for the repo
@@ -88,6 +117,8 @@ python -m sdetkit kits expand --goal "add more helpful automation bots and GitHu
 These bots make the repo more than a set of commands; they turn it into a continuous maintenance system with:
 
 - **better GHAS visibility**,
+- **campaign-oriented GHAS backlog planning**,
+- **coverage checks for newer GHAS operating-model features**,
 - **scheduled dependency prioritization**,
 - **clearer issue-driven follow-up**,
 - **smaller validation loops for upgrades and refactors**,

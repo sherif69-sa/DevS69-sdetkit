@@ -695,3 +695,70 @@ def test_security_check_summary_includes_repeated_fingerprint_hint(
     assert out.ok is False
     assert "fp-r1" in out.summary
     assert out.details["repeated_fingerprints"] == ["fp-r1"]
+
+
+def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    for rel_path in [
+        ".github/workflows/security.yml",
+        ".github/workflows/osv-scanner.yml",
+        ".github/workflows/dependency-audit.yml",
+        ".github/workflows/sbom.yml",
+        ".github/workflows/dependency-review.yml",
+        ".github/workflows/ghas-review-bot.yml",
+        ".github/workflows/ghas-campaign-bot.yml",
+        ".github/workflows/security-configuration-audit-bot.yml",
+        ".github/workflows/security-maintenance-bot.yml",
+        ".github/workflows/dependency-radar-bot.yml",
+        ".github/dependabot.yml",
+        ".github/codeql-config.yml",
+        ".github/pip-audit-baseline.json",
+    ]:
+        target = tmp_path / rel_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("ok\n", encoding="utf-8")
+
+    from sdetkit.maintenance.checks import github_automation_check
+
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="quick",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    result = github_automation_check.run(ctx)
+
+    assert result.ok is True
+    assert result.details["missing_required_workflows"] == []
+    assert result.details["missing_configs"] == []
+    tracks = {item["id"]: item for item in result.details["ghas_update_tracks"]}
+    assert tracks["copilot_autofix"]["present"] is True
+    assert tracks["security_configurations"]["present"] is True
+    assert tracks["dependency_review"]["present"] is True
+
+
+def test_github_automation_check_flags_missing_workflows(tmp_path: Path) -> None:
+    (tmp_path / ".github" / "workflows").mkdir(parents=True)
+    (tmp_path / ".github" / "workflows" / "security.yml").write_text("ok\n", encoding="utf-8")
+
+    from sdetkit.maintenance.checks import github_automation_check
+
+    ctx = MaintenanceContext(
+        repo_root=tmp_path,
+        python_exe=sys.executable,
+        mode="quick",
+        fix=False,
+        env={},
+        logger=object(),
+    )
+
+    result = github_automation_check.run(ctx)
+
+    assert result.ok is False
+    assert "dependency-review.yml" in result.details["missing_required_workflows"]
+    assert ".github/dependabot.yml" in result.details["missing_configs"]
+    assert any(action.title.startswith("Add `dependency-review.yml`") for action in result.actions)

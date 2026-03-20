@@ -48,6 +48,9 @@ jobs:
               'dependency-auto-merge.yml',
               'sbom.yml',
               'ghas-review-bot.yml',
+              'ghas-campaign-bot.yml',
+              'security-configuration-audit-bot.yml',
+              'dependency-review.yml',
               'dependency-radar-bot.yml',
             ];
 
@@ -106,11 +109,34 @@ jobs:
               }
             }
 
+            async function fetchSecretPushProtectionBypassCount() {
+              try {
+                const response = await github.request('GET /repos/{owner}/{repo}/secret-scanning/alerts', {
+                  owner,
+                  repo,
+                  state: 'open',
+                  per_page: 100,
+                  headers,
+                });
+                const alerts = Array.isArray(response.data) ? response.data : [];
+                return {
+                  count: alerts.filter((alert) => alert.push_protection_bypassed === true).length,
+                  note: null,
+                };
+              } catch (error) {
+                return {
+                  count: 'unknown',
+                  note: `Secret scanning push-protection review unavailable: ${error.message}. Add secret GHAS_READ_TOKEN for private security APIs if needed.`,
+                };
+              }
+            }
+
             const codeScanning = await fetchCount('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning');
             const dependabot = await fetchCount('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
             const secretScanning = await fetchCount('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
+            const pushProtectionBypassed = await fetchSecretPushProtectionBypassCount();
 
-            for (const result of [codeScanning, dependabot, secretScanning]) {
+            for (const result of [codeScanning, dependabot, secretScanning, pushProtectionBypassed]) {
               if (result.note) {
                 fallbackNotes.push(result.note);
               }
@@ -124,6 +150,7 @@ jobs:
               `- Open code scanning alerts: **${codeScanning.count}**`,
               `- Open Dependabot alerts: **${dependabot.count}**`,
               `- Open secret scanning alerts: **${secretScanning.count}**`,
+              `- Secret scanning review queue (push-protection/bypass follow-up): **${pushProtectionBypassed.count}**`,
               '',
               '## Review links',
               `- Code scanning: https://github.com/${owner}/${repo}/security/code-scanning`,
@@ -138,6 +165,8 @@ jobs:
               '',
               '## Required follow-up',
               '- [ ] Review every open GHAS alert and document disposition for anything that is still open at the end of the week.',
+              '- [ ] Create or refresh a security campaign for any alert slice that remains open for 14+ days.',
+              '- [ ] Use Copilot Autofix or targeted remediation PRs where CodeQL findings support it, then validate in CI.',
               '- [ ] Convert repeat offenders into issues or PRs with owners and rollback notes.',
               '- [ ] Escalate any new high-severity finding into the weekly maintenance issue.',
               '',
