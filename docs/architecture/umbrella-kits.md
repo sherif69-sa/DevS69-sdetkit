@@ -41,6 +41,14 @@ That turns the umbrella architecture from a static catalog into an execution-rea
 
 This makes the umbrella architecture operationally opinionated instead of merely descriptive: the repo can now tell you not just which kit to use, but how to align the major control loops into one upgrade motion.
 
+`sdetkit kits expand --goal "..."` builds one layer further on top of optimize. It converts the repo-aware signals into:
+
+- **feature candidates** — prioritized additions that are concrete enough to implement next,
+- **search missions** — targeted discovery prompts for the highest-value follow-up work,
+- **rollout tracks** — a now / next / later sequence so expansion work does not become an unbounded idea pile.
+
+That gives maintainers an explicit "what new thing should we build next?" surface instead of requiring them to infer it from the broader optimize payload.
+
 ## Compatibility and migration
 
 Use `docs/migration-compatibility-note.md` for migration guidance and the current experimental summary.

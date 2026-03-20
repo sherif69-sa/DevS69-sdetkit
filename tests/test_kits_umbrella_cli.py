@@ -117,3 +117,24 @@ def test_kits_optimize_emits_alignment_plan_json() -> None:
     assert any(item["domain"] == "agentos" for item in payload["alignment_matrix"])
     assert payload["next_boosts"][0]["id"] == "quality-boost"
     assert payload["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
+
+
+def test_kits_expand_emits_feature_candidates_and_search_missions() -> None:
+    result = _run(
+        "kits",
+        "expand",
+        "upgrade umbrella architecture with agentos optimization",
+        "--format",
+        "json",
+        "--limit",
+        "2",
+    )
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
+    assert payload["feature_candidates"]
+    assert payload["search_missions"]
+    assert payload["rollout_tracks"][0]["track"] == "now"
+    candidate_ids = {item["id"] for item in payload["feature_candidates"]}
+    assert "dependency-radar-dashboard" in candidate_ids
+    assert payload["optimize"]["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
