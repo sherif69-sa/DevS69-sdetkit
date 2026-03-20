@@ -56,6 +56,21 @@ def test_manager_plan_generation_is_deterministic_in_no_llm_mode(tmp_path: Path)
     assert plan1[0].worker_id == "worker-1"
 
 
+def test_manager_plan_routes_umbrella_tasks_to_blueprint_action(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    cfg = load_config(tmp_path / ".sdetkit/agent/config.yaml")
+
+    _message, plan = _manager_plan(
+        task="umbrella architecture optimization blueprint",
+        config=cfg,
+        provider=CountingProvider(),
+        worker_ids=["worker-1", "worker-2"],
+    )
+
+    assert plan[0].action == "kits.blueprint"
+    assert plan[0].params["goal"] == "umbrella architecture optimization blueprint"
+
+
 def test_worker_action_execution_success(tmp_path: Path) -> None:
     registry = ActionRegistry(
         root=tmp_path,
@@ -68,6 +83,30 @@ def test_worker_action_execution_success(tmp_path: Path) -> None:
 
     assert result.ok is True
     assert (tmp_path / ".sdetkit/agent/workdir/out.txt").read_text(encoding="utf-8") == "hello"
+
+
+def test_worker_can_write_umbrella_blueprint_artifact(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    registry = ActionRegistry(
+        root=tmp_path,
+        write_allowlist=(".sdetkit/agent/workdir",),
+        shell_allowlist=(),
+    )
+
+    result = registry.run(
+        "kits.blueprint",
+        {
+            "goal": "upgrade umbrella architecture with agentos",
+            "output": ".sdetkit/agent/workdir/umbrella-blueprint.json",
+            "kits": ["release", "integration"],
+        },
+    )
+
+    assert result.ok is True
+    artifact = tmp_path / ".sdetkit/agent/workdir/umbrella-blueprint.json"
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    assert payload["upgrade_backlog"]
+    assert payload["selected_kits"][0]["id"] == "release-confidence"
 
 
 def test_reviewer_rejects_failed_action(tmp_path: Path, monkeypatch) -> None:
@@ -172,3 +211,58 @@ def test_agent_run_records_are_canonical_and_stable(tmp_path: Path, monkeypatch)
     on_disk = history_file.read_text(encoding="utf-8")
     loaded = json.loads(on_disk)
     assert on_disk == canonical_json_dumps(loaded)
+
+
+def test_agent_dashboard_summary_tracks_workers_approvals_and_task_families(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    history_dir = tmp_path / ".sdetkit" / "agent" / "history"
+
+    (history_dir / "a.json").write_text(
+        json.dumps(
+            {
+                "hash": "a",
+                "captured_at": "2026-03-20T00:00:00Z",
+                "status": "ok",
+                "task": "template:repo-health-audit",
+                "actions": [
+                    {
+                        "action": "repo.audit",
+                        "worker_id": "worker-1",
+                        "ok": True,
+                        "approved": True,
+                        "denied": False,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (history_dir / "b.json").write_text(
+        json.dumps(
+            {
+                "hash": "b",
+                "captured_at": "2026-03-20T00:01:00Z",
+                "status": "error",
+                "task": "umbrella architecture optimization blueprint",
+                "actions": [
+                    {
+                        "action": "shell.run",
+                        "worker_id": "worker-2",
+                        "ok": False,
+                        "approved": False,
+                        "denied": True,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    from sdetkit.agent.dashboard import summarize_history
+
+    summary = summarize_history(history_dir)
+    assert summary["workers"][0]["name"] in {"worker-1", "worker-2"}
+    assert summary["approvals"]["approved"] == 1
+    assert summary["approvals"]["denied"] == 1
+    families = {item["name"] for item in summary["task_families"]}
+    assert {"template", "blueprint"} <= families

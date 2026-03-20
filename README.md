@@ -134,6 +134,14 @@ The doctor surface now carries those same upgrade-audit focus controls, so you c
 
 The umbrella architecture is stronger too: `sdetkit kits search <query>` now ranks the best-fit kit for a problem statement, and `sdetkit kits blueprint --goal "..."` builds a cross-kit execution plan that explicitly layers AgentOS in as the control plane for recurring automation, history capture, and dashboard exports. That makes it easier to move from discovery to an opinionated release/test/integration/forensics operating model without stitching the surfaces together by hand.
 
+The blueprint surface now goes further for umbrella-architecture upgrades: it emits explicit architecture layers, an operating model cadence, prioritized upgrade backlog items, and operating metrics so a team can move from "which kit should I start with?" to "how do I productize the whole umbrella with AgentOS on top?" without inventing its own framework first. When you want AgentOS to generate that operating plan directly, run:
+
+```bash
+python -m sdetkit kits blueprint --goal "upgrade umbrella architecture with agentos optimization"
+python -m sdetkit agent run "umbrella architecture optimization blueprint" --approve
+python -m sdetkit agent demo --scenario umbrella-upgrade-control-plane
+```
+
 The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, can merge in repo-local smart fix scripts from `.sdetkit/premium-remediation-scripts.json`, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 
 The security auto-remediation lane is stronger too: premium gate can now prioritize a built-in `security_fix_apply` smart script before baseline-aware security re-triage, and the security fixer now safely rewrites `shell=True` to `shell=False` alongside request timeout injection and `yaml.safe_load` upgrades for deterministic repo-safe cleanup.

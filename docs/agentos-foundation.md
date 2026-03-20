@@ -69,8 +69,12 @@ This improves deterministic behavior and repeatability for local-provider runs.
   - Ranks the best umbrella kit for a repo problem statement such as `topology`, `release evidence`, or `upgrade risk`
 - `sdetkit kits blueprint --goal "agentized release upgrade search"`
   - Produces an umbrella architecture plan that composes kits with AgentOS as the control plane
+- `sdetkit agent run "umbrella architecture optimization blueprint" --approve`
+  - Uses AgentOS to render a deterministic umbrella blueprint artifact at `.sdetkit/agent/workdir/umbrella-blueprint.json`
 - `sdetkit agent demo --scenario repo-enterprise-audit`
   - Runs an offline deterministic end-to-end enterprise audit scenario
+- `sdetkit agent demo --scenario umbrella-upgrade-control-plane`
+  - Demonstrates AgentOS generating an umbrella-upgrade control-plane artifact plus dashboard outputs
 
 ## Config (`.sdetkit/agent/config.yaml`)
 
@@ -104,3 +108,14 @@ Provider modes:
 See `docs/enterprise-productization-blueprint.md` for deployment modes, governance controls, adoption plans, and packaging deliverables.
 
 See also: [AgentOS cookbook](agentos-cookbook.md), [Determinism contract](determinism-contract.md), and [Security model](security-model.md).
+
+## Dashboard signal upgrades
+
+The AgentOS dashboard now tracks more than total run counts. It also summarizes:
+
+- worker utilization across orchestrated actions,
+- task-family mix (template, action, audit, blueprint, other),
+- approval outcomes including denied actions and failures after approval,
+- latest status and current success streak.
+
+That makes the dashboard more useful as an operational control-plane surface rather than just a history export.

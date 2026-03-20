@@ -260,6 +260,17 @@ def _rule_based_plan(task: str, *, max_actions: int) -> list[tuple[str, dict[str
     if parsed is not None:
         return [parsed][:max_actions]
     normalized = task.lower()
+    if any(term in normalized for term in ("umbrella", "architecture", "blueprint")):
+        return [
+            (
+                "kits.blueprint",
+                {
+                    "goal": task,
+                    "output": ".sdetkit/agent/workdir/umbrella-blueprint.json",
+                    "limit": 3,
+                },
+            )
+        ][:max_actions]
     if "audit" in normalized:
         return [("repo.audit", {"profile": "default"})][:max_actions]
     if "report" in normalized:
