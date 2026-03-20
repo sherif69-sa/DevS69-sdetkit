@@ -180,7 +180,58 @@ def _load_pyproject_dependencies(pyproject_path: Path) -> list[Dependency]:
                 )
             )
 
+    dependency_groups = data.get("dependency-groups", {})
+    deps.extend(_load_dependency_group_dependencies(pyproject_path, dependency_groups))
+
     return deps
+
+
+def _load_dependency_group_dependencies(
+    pyproject_path: Path,
+    dependency_groups: object,
+) -> list[Dependency]:
+    if not isinstance(dependency_groups, dict):
+        return []
+
+    resolved: list[Dependency] = []
+
+    def _resolve_group_items(group_name: str, trail: tuple[str, ...]) -> list[str]:
+        if group_name in trail:
+            return []
+
+        raw_items = dependency_groups.get(group_name)
+        if not isinstance(raw_items, list):
+            return []
+
+        items: list[str] = []
+        for entry in raw_items:
+            if isinstance(entry, str):
+                normalized = entry.strip()
+                if normalized:
+                    items.append(normalized)
+                continue
+            if isinstance(entry, dict):
+                include_group = entry.get("include-group")
+                if isinstance(include_group, str) and include_group.strip():
+                    items.extend(_resolve_group_items(include_group.strip(), (*trail, group_name)))
+        return items
+
+    for raw_group_name in dependency_groups:
+        group_name = str(raw_group_name).strip()
+        if not group_name:
+            continue
+        for dep in _resolve_group_items(group_name, ()):
+            resolved.append(
+                Dependency(
+                    source=pyproject_path.name,
+                    group=group_name,
+                    raw=dep,
+                    name=_parse_dep_name(dep),
+                    pinned_version=_extract_pinned_version(dep),
+                )
+            )
+
+    return resolved
 
 
 def _load_requirements_dependencies(requirements_path: Path) -> list[Dependency]:
