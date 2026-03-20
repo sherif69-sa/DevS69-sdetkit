@@ -36,6 +36,7 @@ That turns the umbrella architecture from a static catalog into an execution-rea
 - a **quality gate lane** that sequences `quality.sh`, premium gate, and CI in one plan,
 - an **integration lane** that keeps topology proof wired into the umbrella,
 - a **doctor-quality contract** that keeps promotion and remediation commands in one place,
+- an **innovation opportunities** section that recommends the highest-leverage new additions the repo could productize next from dependency, validation, and adapter signals,
 - and **performance boosters** that highlight reusable fast-path assets such as pinned CI constraints and gate snapshots.
 
 This makes the umbrella architecture operationally opinionated instead of merely descriptive: the repo can now tell you not just which kit to use, but how to align the major control loops into one upgrade motion.

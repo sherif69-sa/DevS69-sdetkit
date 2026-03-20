@@ -67,6 +67,9 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
         "python -m sdetkit intelligence upgrade-audit"
     )
     assert payload["upgrade_execution_lane"]["focus"]
+    innovation_ids = {item["id"] for item in payload["innovation_opportunities"]}
+    assert "dependency-radar" in innovation_ids
+    assert "runtime-core-fast-follow" in innovation_ids
     assert (
         payload["agentos_lane"]["commands"][1]
         == "sdetkit agent run 'template:repo-health-audit' --approve"
