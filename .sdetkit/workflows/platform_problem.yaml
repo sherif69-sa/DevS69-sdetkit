@@ -1,0 +1,99 @@
+{
+  "name": "platform_problem_authoring",
+  "version": "1",
+  "gating_order": [
+    "baseline_environment",
+    "repo_long_horizon_fit",
+    "candidate_long_horizon_fit",
+    "novelty_gate",
+    "co_develop_until_stable",
+    "freeze_tests",
+    "production_only_finishing_pass",
+    "clean_tree_verification",
+    "base_new_triad"
+  ],
+  "required_artifacts": [
+    "/work/test.patch",
+    "/work/solution.patch",
+    "/work/docker.file",
+    "/work/final_title.txt",
+    "/work/final_description.txt",
+    "/work/run_summary.json"
+  ],
+  "size_gates": {
+    "test_patch_min_bytes": 204800,
+    "solution_patch_min_bytes": 29696
+  },
+  "allowed_test_patch_paths": [
+    "test.sh",
+    "tests/test_<topic>_problem.py",
+    "tests/conftest.py"
+  ],
+  "allowed_solution_patch_paths": [
+    "production_files_only"
+  ],
+  "preferred_production_file_scope": {
+    "warning_below": 3,
+    "preferred_min": 3,
+    "preferred_max": 6,
+    "fail_below": 2
+  },
+  "runner_contract": {
+    "shape": "minimal",
+    "entrypoint": "test.sh",
+    "modes": ["base", "new"],
+    "install_steps_allowed": false
+  },
+  "clean_tree_verification_sequence": [
+    "git_apply_check_test_patch",
+    "git_apply_check_solution_patch",
+    "fresh_tree_base_pass",
+    "fresh_tree_plus_test_patch_new_fail",
+    "fresh_tree_plus_test_patch_plus_solution_patch_base_pass",
+    "fresh_tree_plus_test_patch_plus_solution_patch_new_pass"
+  ],
+  "triad_expectations": {
+    "starter_base": "pass",
+    "starter_plus_test_patch_new": "fail",
+    "starter_plus_solution_patch_base": "pass",
+    "starter_plus_solution_patch_new": "pass"
+  },
+  "novelty_gate_sections": [
+    "candidate",
+    "public-surface scan",
+    "anti-shortcut traps",
+    "breadth expectation"
+  ],
+  "gate_metadata": {
+    "baseline_environment": ["metadata inspection", "dependency inference", "baseline green requirement"],
+    "repo_long_horizon_fit": ["public entrypoints", "cross-module state", "rollback/retry/parity semantics"],
+    "candidate_long_horizon_fit": ["downstream consequences", "anti-shortcut traps", "multi-file production impact"],
+    "novelty_gate": ["structured notes", "machine-readable outcome"],
+    "freeze_rules": ["tests freeze before production-only finishing pass"]
+  },
+  "final_title_constraints": {
+    "ascii_only": true,
+    "stored_outside_description": true
+  },
+  "final_description_constraints": {
+    "ascii_only": true,
+    "word_min": 77,
+    "word_max": 88,
+    "contract_only": true,
+    "no_solution_hints": true,
+    "no_test_references": true,
+    "code_like_bullet_block": true
+  },
+  "failure_summary_fields": [
+    "success",
+    "failure_reason",
+    "repo_url",
+    "pinned_sha",
+    "artifact_paths",
+    "patch_sizes",
+    "size_gate_status",
+    "clean_tree_replay_status",
+    "base_new_triad_status",
+    "metadata_presence"
+  ]
+}

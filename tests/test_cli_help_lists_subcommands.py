@@ -24,6 +24,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "playbooks" in out
 
     assert "report" in out
+    assert "author" in out
     assert "maintenance" in out
     assert "agent" in out
     assert "proof" in out

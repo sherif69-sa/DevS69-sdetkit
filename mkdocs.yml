@@ -126,6 +126,7 @@ nav:
       - Evidence showcase: evidence-showcase.md
   - Advanced and reference:
       - CLI reference: cli.md
+      - Platform problem authoring: platform-problem-authoring.md
       - Command surface inventory: command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
       - API: api.md

@@ -14,8 +14,30 @@ It turns CI and test signals into deterministic contracts, machine-readable arti
 - **Release Confidence Kit** — `sdetkit release ...`
 - **Test Intelligence Kit** — `sdetkit intelligence ...`
 - **Integration Assurance Kit** — `sdetkit integration ...`
+- **Platform Problem Authoring Lane** — `sdetkit author problem ...`
 - **Failure Forensics Kit** — `sdetkit forensics ...`
 - **Catalog** — `sdetkit kits list` / `sdetkit kits describe <kit>`
+
+## Platform-style Python problem authoring
+
+SDETKit now ships a first-class, repo-owned workflow for platform-style Python problem authoring. This lane is environment-first: it bootstraps `/work`, renders `Dockerfile.problem`, builds and runs the authoring container, scaffolds novelty-gate notes, generates the minimal `test.sh` contract, and verifies artifact boundaries, clean-tree replay, and the base/new triad without asking the operator to paste logs or hand-assemble patches.
+
+This lane is distinct from the existing release-confidence, doctor, evidence, and gate commands. Those surfaces assess this repository or another codebase for readiness. The authoring lane prepares a pinned target repo for future platform-style problem creation and validates the stable artifact bundle expected by downstream reviewers:
+
+```bash
+python -m sdetkit author problem init --workdir /work --topic refresh-contract
+python -m sdetkit author problem doctor --repo-root . --workdir /work --format json
+python -m sdetkit author problem render-dockerfile --repo-root .
+python -m sdetkit author problem verify --repo-root . --workdir /work --format json
+python -m sdetkit author problem run \
+  --repo https://github.com/example/project.git \
+  --sha 0123456789abcdef0123456789abcdef01234567 \
+  --workdir /work \
+  --min-test-patch-bytes 204800 \
+  --min-solution-patch-bytes 29696
+```
+
+The repo-owned workflow contract lives in `.sdetkit/workflows/platform_problem.yaml`, and the end-to-end behavior is documented in `docs/platform-problem-authoring.md`.
 
 ## Choose your SDET lane fast
 
