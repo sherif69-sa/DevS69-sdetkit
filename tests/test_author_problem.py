@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -8,6 +9,8 @@ from sdetkit import cli
 from sdetkit.author_problem import (
     DockerCommandRunner,
     WorkflowContract,
+    _git_restore_paths,
+    _rich_strategy_matches,
     bootstrap_workdir,
     build_docker_image,
     load_workflow_contract,
@@ -112,6 +115,43 @@ def test_existing_behavior():
         + "\n",
         encoding="utf-8",
     )
+
+
+def _write_rich_repo(path: Path) -> None:
+    (path / "rich").mkdir(parents=True)
+    (path / "tests").mkdir(parents=True)
+    (path / "pyproject.toml").write_text(
+        """
+[project]
+name = "rich"
+version = "0.1.0"
+dependencies = []
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (path / "rich/__init__.py").write_text("", encoding="utf-8")
+    (path / "rich/text.py").write_text("class Text: ...\n", encoding="utf-8")
+    (path / "tests/test_text.py").write_text("def test_placeholder():\n    assert True\n", encoding="utf-8")
+
+
+def _write_rich_poetry_repo(path: Path) -> None:
+    (path / "rich").mkdir(parents=True)
+    (path / "tests").mkdir(parents=True)
+    (path / "pyproject.toml").write_text(
+        """
+[tool.poetry]
+name = "rich"
+version = "0.1.0"
+description = "rich"
+authors = ["Author <author@example.com>"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (path / "rich/__init__.py").write_text("", encoding="utf-8")
+    (path / "rich/text.py").write_text("class Text: ...\n", encoding="utf-8")
+    (path / "tests/test_text.py").write_text("def test_placeholder():\n    assert True\n", encoding="utf-8")
 
 
 def _make_problem_patches(repo_root: Path, workdir: Path) -> None:
@@ -319,7 +359,26 @@ def test_author_problem_doctor_verify_and_triad(tmp_path: Path) -> None:
 def test_author_problem_run_emits_failure_summary_when_artifacts_missing(tmp_path: Path) -> None:
     source = tmp_path / "source"
     source.mkdir()
-    _write_demo_repo(source)
+    (source / "pkg").mkdir()
+    (source / "tests").mkdir()
+    (source / "pyproject.toml").write_text(
+        """
+[project]
+name = "minimal"
+version = "0.1.0"
+dependencies = []
+[project.optional-dependencies]
+test = ["pytest>=8"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (source / "pkg/__init__.py").write_text("", encoding="utf-8")
+    (source / "pkg/core.py").write_text("def value():\n    return 1\n", encoding="utf-8")
+    (source / "tests/test_existing.py").write_text(
+        "from pkg.core import value\n\ndef test_value():\n    assert value() == 1\n",
+        encoding="utf-8",
+    )
     _init_git_repo(source)
     sha = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=source, check=True, capture_output=True, text=True
@@ -337,9 +396,196 @@ def test_author_problem_run_emits_failure_summary_when_artifacts_missing(tmp_pat
     assert result.ok is False
     failure = json.loads((tmp_path / "work/final_failure.json").read_text(encoding="utf-8"))
     summary = json.loads((tmp_path / "work/run_summary.json").read_text(encoding="utf-8"))
-    assert failure["reason"] == "run did not reach a verified artifact bundle"
+    assert failure["reason"] == "no automated authoring strategy matched target repository after baseline and fit gating"
+    assert summary["verification"]["ok"] is False
+
+
+def test_author_problem_run_can_succeed_end_to_end_with_demo_fixture(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    _write_demo_repo(source)
+    _init_git_repo(source)
+    sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=source, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    result = run_problem_workflow(
+        str(source),
+        sha,
+        tmp_path / "work",
+        skip_docker=True,
+        min_test_patch_bytes=1,
+        min_solution_patch_bytes=1,
+    )
+
+    assert result.ok is True
+    summary = json.loads((tmp_path / "work/run_summary.json").read_text(encoding="utf-8"))
+    assert (tmp_path / "work/test.patch").exists()
+    assert (tmp_path / "work/solution.patch").exists()
+    assert (tmp_path / "work/docker.file").exists()
     assert summary["docker"]["skipped"] is True
     assert summary["repo_url"] == str(source)
+    assert summary["verification"]["ok"] is True
+
+
+def test_author_problem_run_reuses_existing_workdir_app_checkout(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    _write_demo_repo(source)
+    _init_git_repo(source)
+    sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=source, check=True, capture_output=True, text=True
+    ).stdout.strip()
+    workdir = tmp_path / "work"
+
+    first = run_problem_workflow(
+        str(source),
+        sha,
+        workdir,
+        skip_docker=True,
+        min_test_patch_bytes=1,
+        min_solution_patch_bytes=1,
+    )
+    assert first.ok is True
+    assert (workdir / "app").exists()
+
+    second = run_problem_workflow(
+        str(source),
+        sha,
+        workdir,
+        skip_docker=True,
+        min_test_patch_bytes=1,
+        min_solution_patch_bytes=1,
+    )
+
+    assert second.ok is True
+    summary = json.loads((workdir / "run_summary.json").read_text(encoding="utf-8"))
+    assert summary["verification"]["ok"] is True
+
+
+def test_rich_strategy_matches_repo_metadata_without_checkout_name_hint(tmp_path: Path) -> None:
+    checkout = tmp_path / "work" / "app"
+    checkout.mkdir(parents=True)
+    _write_rich_repo(checkout)
+
+    assert checkout.name != "rich"
+    assert _rich_strategy_matches(checkout) is True
+
+
+def test_rich_strategy_matches_poetry_metadata_layout(tmp_path: Path) -> None:
+    checkout = tmp_path / "clone" / "app"
+    checkout.mkdir(parents=True)
+    _write_rich_poetry_repo(checkout)
+
+    assert _rich_strategy_matches(checkout) is True
+
+
+def test_rich_problem_generator_executes(tmp_path: Path) -> None:
+    output = tmp_path / "test_markup_roundtrip_problem.py"
+    script = Path("templates/platform_problem/rich/generate_test_problem.py")
+    rich_pkg = tmp_path / "rich"
+    rich_pkg.mkdir()
+    (rich_pkg / "__init__.py").write_text("", encoding="utf-8")
+    (rich_pkg / "console.py").write_text("class Console:\n    pass\n", encoding="utf-8")
+    (rich_pkg / "style.py").write_text(
+        "class Style:\n"
+        "    def __init__(self, link='', meta=None):\n"
+        "        self.link = link\n"
+        "        self.meta = meta or {}\n",
+        encoding="utf-8",
+    )
+    (rich_pkg / "text.py").write_text(
+        """
+from dataclasses import dataclass
+
+
+@dataclass
+class _Fragment:
+    plain: str
+    justify: str
+    overflow: str
+    no_wrap: bool
+    end: str
+    tab_size: int
+
+
+class Text:
+    def __init__(self, plain, style=""):
+        self.plain = plain
+        self.style = style
+        self.justify = ""
+        self.overflow = ""
+        self.no_wrap = False
+        self.end = ""
+        self.tab_size = 8
+        self._spans = []
+
+    def __len__(self):
+        return len(self.plain)
+
+    def stylize(self, style, start=0, end=None):
+        self._spans.append((style, start, len(self.plain) if end is None else end))
+
+    @property
+    def markup(self):
+        return repr((self.plain, self.style, self.justify, self.overflow, self.no_wrap, self.end, self.tab_size, len(self._spans)))
+
+    @classmethod
+    def from_markup(cls, markup, justify="", overflow="", no_wrap=False, end="", tab_size=8):
+        text = cls(markup)
+        text.justify = justify
+        text.overflow = overflow
+        text.no_wrap = no_wrap
+        text.end = end
+        text.tab_size = tab_size
+        return text
+
+    def divide(self, offsets):
+        points = [0, *offsets, len(self.plain)]
+        fragments = []
+        for start, stop in zip(points, points[1:]):
+            fragments.append(
+                _Fragment(
+                    plain=self.plain[start:stop],
+                    justify=self.justify,
+                    overflow=self.overflow,
+                    no_wrap=self.no_wrap,
+                    end=self.end,
+                    tab_size=self.tab_size,
+                )
+            )
+        return fragments
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(
+        ["python", str(script), str(output)],
+        check=True,
+        cwd=Path.cwd(),
+        capture_output=True,
+        text=True,
+        env={**os.environ, "PYTHONPATH": str(tmp_path)},
+    )
+
+    rendered = output.read_text(encoding="utf-8")
+    assert "def test_markup_roundtrip_problem_cases()" in rendered
+    assert "def test_fragment_metadata_problem_cases()" in rendered
+
+
+def test_git_restore_paths_restores_tracked_and_deletes_untracked(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "tracked.py").write_text("value = 1\n", encoding="utf-8")
+    _init_git_repo(repo)
+
+    (repo / "tracked.py").write_text("value = 2\n", encoding="utf-8")
+    (repo / "new_helper.py").write_text("helper = True\n", encoding="utf-8")
+
+    _git_restore_paths(repo, ["tracked.py", "new_helper.py"])
+
+    assert (repo / "tracked.py").read_text(encoding="utf-8") == "value = 1\n"
+    assert not (repo / "new_helper.py").exists()
 
 
 def test_main_cli_dispatches_author_problem_init_and_help_lists_author(capsys) -> None:

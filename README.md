@@ -20,18 +20,29 @@ It turns CI and test signals into deterministic contracts, machine-readable arti
 
 ## Platform-style Python problem authoring
 
-SDETKit now ships a first-class, repo-owned workflow for platform-style Python problem authoring. This lane is environment-first: it bootstraps `/work`, renders `Dockerfile.problem`, builds and runs the authoring container, scaffolds novelty-gate notes, generates the minimal `test.sh` contract, and verifies artifact boundaries, clean-tree replay, and the base/new triad without asking the operator to paste logs or hand-assemble patches.
+SDETKit now ships a first-class, repo-owned workflow for autonomous platform-problem authoring. This lane is environment-first and run-contract driven: it bootstraps `/work`, clones and pins the target repository, renders `Dockerfile.problem`, builds and runs the authoring container, scaffolds novelty-gate notes, generates the minimal `test.sh` contract when authoring succeeds, and verifies artifact boundaries, clean-tree replay, and the base/new/solution triad without asking the operator to paste logs or hand-assemble patches.
 
-This lane is distinct from the existing release-confidence, doctor, evidence, and gate commands. Those surfaces assess this repository or another codebase for readiness. The authoring lane prepares a pinned target repo for future platform-style problem creation and validates the stable artifact bundle expected by downstream reviewers:
+The stable output contract is explicit. Every run targets these paths in `/work`:
+
+- `/work/test.patch`
+- `/work/solution.patch`
+- `/work/docker.file`
+- `/work/final_title.txt`
+- `/work/final_description.txt`
+- `/work/run_summary.json`
+
+If a repo is genuinely non-viable or no automated authoring strategy matches it yet, the workflow fails honestly and writes `/work/final_failure.json` with concrete machine-readable reasons.
+
+This lane is distinct from the existing release-confidence, doctor, evidence, and gate commands. Those surfaces assess this repository or another codebase for readiness. The authoring lane prepares a pinned target repo for platform-style problem creation and validates the stable artifact bundle expected by downstream reviewers:
 
 ```bash
-python -m sdetkit author problem init --workdir /work --topic refresh-contract
+python -m sdetkit author problem init --workdir /work --topic rich-stateful-contract
 python -m sdetkit author problem doctor --repo-root . --workdir /work --format json
 python -m sdetkit author problem render-dockerfile --repo-root .
 python -m sdetkit author problem verify --repo-root . --workdir /work --format json
 python -m sdetkit author problem run \
-  --repo https://github.com/example/project.git \
-  --sha 0123456789abcdef0123456789abcdef01234567 \
+  --repo https://github.com/Textualize/rich \
+  --sha ce0118819d172d134507bcf5982d3faf82bbc43e \
   --workdir /work \
   --min-test-patch-bytes 204800 \
   --min-solution-patch-bytes 29696
