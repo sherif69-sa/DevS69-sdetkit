@@ -1,11 +1,24 @@
 import json
 import re
+from pathlib import Path
 
 from sdetkit import cli, first_contribution
 
 
 def _normalize_ws(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _seed_trust_assets(root: Path) -> None:
+    for rel in [
+        "docs/starter-work-inventory.md",
+        "docs/first-contribution-quickstart.md",
+        ".github/PULL_REQUEST_TEMPLATE.md",
+        ".github/ISSUE_TEMPLATE/feature_request.yml",
+    ]:
+        target = root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("placeholder\n", encoding="utf-8")
 
 
 def test_first_contribution_default_text(capsys):
@@ -35,7 +48,7 @@ def test_first_contribution_markdown_output_uses_productized_headings(capsys):
     assert "## Required command sequence" in out
     assert "## Guide coverage gaps" in out
     assert "## Actions" in out
-    assert "- Open guide: `docs/contributing.md`" in out
+    assert "- Open guide: `CONTRIBUTING.md`" in out
 
 
 def test_first_contribution_json_and_strict_success(capsys):
@@ -56,6 +69,7 @@ def test_first_contribution_strict_fails_when_content_missing(tmp_path, capsys):
 
 
 def test_first_contribution_write_defaults_recovers_missing_file(tmp_path, capsys):
+    _seed_trust_assets(tmp_path)
     rc = first_contribution.main(
         ["--root", str(tmp_path), "--write-defaults", "--format", "json", "--strict"]
     )

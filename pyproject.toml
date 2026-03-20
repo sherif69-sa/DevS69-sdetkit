@@ -51,7 +51,8 @@ test = [
   "hypothesis",
   "pytest",
   "pytest-asyncio",
-  "pytest-cov"
+  "pytest-cov",
+  "pytest-xdist[psutil]"
 ]
 docs = [
   "mkdocs==1.6.1",
