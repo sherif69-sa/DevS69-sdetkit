@@ -1,0 +1,179 @@
+name: GHAS Review Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 2"
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  security-events: read
+
+jobs:
+  ghas-review-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and publish GHAS digest
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        env:
+          GHAS_TOKEN: ${{ secrets.GHAS_READ_TOKEN }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'security', color: 'b60205', description: 'Security operations and hardening work' },
+              { name: 'ghas', color: '5319e7', description: 'GitHub Advanced Security automation and triage' },
+              { name: 'priority:high', color: 'd93f0b', description: 'High-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const fallbackNotes = [];
+            const trackedWorkflows = [
+              'security.yml',
+              'osv-scanner.yml',
+              'dependency-audit.yml',
+              'security-maintenance-bot.yml',
+              'dependency-auto-merge.yml',
+              'sbom.yml',
+              'ghas-review-bot.yml',
+              'dependency-radar-bot.yml',
+            ];
+
+            const workflowRows = [];
+            for (const workflowFile of trackedWorkflows) {
+              try {
+                const runs = await github.rest.actions.listWorkflowRuns({
+                  owner,
+                  repo,
+                  workflow_id: workflowFile,
+                  per_page: 1,
+                });
+                const latest = runs.data.workflow_runs?.[0];
+                workflowRows.push({
+                  workflow: workflowFile,
+                  status: latest ? (latest.conclusion || latest.status || 'unknown') : 'no-runs',
+                  updatedAt: latest?.updated_at || 'n/a',
+                  url: latest?.html_url || `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
+                });
+              } catch (error) {
+                workflowRows.push({
+                  workflow: workflowFile,
+                  status: 'inspection-failed',
+                  updatedAt: 'n/a',
+                  url: `https://github.com/${owner}/${repo}/actions/workflows/${workflowFile}`,
+                });
+                fallbackNotes.push(`Unable to inspect ${workflowFile}: ${error.message}`);
+              }
+            }
+
+            const ghasToken = process.env.GHAS_TOKEN || github.token;
+            const headers = {
+              accept: 'application/vnd.github+json',
+              authorization: `Bearer ${ghasToken}`,
+              'x-github-api-version': '2022-11-28',
+            };
+
+            async function fetchCount(path, label, priority = 'open') {
+              try {
+                const response = await github.request(`GET ${path}`, {
+                  owner,
+                  repo,
+                  state: priority,
+                  per_page: 100,
+                  headers,
+                });
+                return {
+                  count: Array.isArray(response.data) ? response.data.length : 0,
+                  note: null,
+                };
+              } catch (error) {
+                return {
+                  count: 'unknown',
+                  note: `${label} unavailable: ${error.message}. Add secret GHAS_READ_TOKEN for private security APIs if needed.`,
+                };
+              }
+            }
+
+            const codeScanning = await fetchCount('/repos/{owner}/{repo}/code-scanning/alerts', 'Code scanning');
+            const dependabot = await fetchCount('/repos/{owner}/{repo}/dependabot/alerts', 'Dependabot alerts');
+            const secretScanning = await fetchCount('/repos/{owner}/{repo}/secret-scanning/alerts', 'Secret scanning alerts');
+
+            for (const result of [codeScanning, dependabot, secretScanning]) {
+              if (result.note) {
+                fallbackNotes.push(result.note);
+              }
+            }
+
+            const digestTitle = `🛡️ GHAS weekly digest (${weekOf})`;
+            const digestBody = [
+              'This issue is auto-generated to keep GitHub Advanced Security review visible and actionable.',
+              '',
+              '## Alert totals',
+              `- Open code scanning alerts: **${codeScanning.count}**`,
+              `- Open Dependabot alerts: **${dependabot.count}**`,
+              `- Open secret scanning alerts: **${secretScanning.count}**`,
+              '',
+              '## Review links',
+              `- Code scanning: https://github.com/${owner}/${repo}/security/code-scanning`,
+              `- Dependabot: https://github.com/${owner}/${repo}/security/dependabot`,
+              `- Secret scanning: https://github.com/${owner}/${repo}/security/secret-scanning`,
+              `- Security overview: https://github.com/${owner}/${repo}/security`,
+              '',
+              '## Workflow freshness',
+              '| Workflow | Latest result | Updated at | Link |',
+              '| --- | --- | --- | --- |',
+              ...workflowRows.map((row) => `| ${row.workflow} | ${row.status} | ${row.updatedAt} | [open](${row.url}) |`),
+              '',
+              '## Required follow-up',
+              '- [ ] Review every open GHAS alert and document disposition for anything that is still open at the end of the week.',
+              '- [ ] Convert repeat offenders into issues or PRs with owners and rollback notes.',
+              '- [ ] Escalate any new high-severity finding into the weekly maintenance issue.',
+              '',
+              '## Notes',
+              ...(fallbackNotes.length ? fallbackNotes.map((note) => `- ${note}`) : ['- GHAS API queries completed without fallback warnings.']),
+            ].join('\n');
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'ghas',
+              per_page: 100,
+            });
+            const priorDigests = openIssues.data.filter((issue) => issue.title.startsWith('🛡️ GHAS weekly digest'));
+
+            for (const oldIssue of priorDigests) {
+              if (oldIssue.title !== digestTitle) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorDigests.find((issue) => issue.title === digestTitle);
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: digestBody,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title: digestTitle,
+                body: digestBody,
+                labels: ['maintenance', 'security', 'ghas', 'priority:high'],
+              });
+            }

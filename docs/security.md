@@ -40,13 +40,17 @@ Only opt out when necessary and scoped:
 
 The repository includes always-on security maintenance so it behaves like an auto-update system:
 
-- **CodeQL scanning** runs on push, pull requests, and schedule.
+- **CodeQL scanning** (`security.yml`) runs on push, pull requests, and schedule.
 - **Dependabot** checks Python and GitHub Actions dependencies daily.
-- **Dependabot auto-merge** is enabled for **minor/patch** updates after checks pass.
-- **Secret scanning bot** runs daily using gitleaks and uploads SARIF to GitHub code scanning.
-- **Weekly maintenance issue** is refreshed automatically with checklist items and links.
-- **OSV vulnerability scanning** runs daily and uploads SARIF into code scanning.
-- **Pre-commit hooks auto-update** runs weekly and opens a maintenance PR.
+- **Dependabot auto-merge** (`dependency-auto-merge.yml`) is enabled for **minor/patch** updates after checks pass.
+- **Secret scanning bot** (gitleaks inside `security-maintenance-bot.yml`) uploads SARIF to GitHub code scanning.
+- **OSV vulnerability scanning** (`osv-scanner.yml`) runs daily and uploads SARIF into code scanning.
+- **Dependency Audit** (`dependency-audit.yml`) runs `pip-audit` against the repo dependency surface.
+- **SBOM refresh** (`sbom.yml`) keeps dependency inventory artifacts current for downstream review.
+- **GHAS review bot** (`ghas-review-bot.yml`) creates a weekly digest issue for code scanning, Dependabot, secret scanning, and workflow freshness.
+- **Weekly maintenance issue** (`security-maintenance-bot.yml`) is refreshed automatically with checklist items, weak-spot reports, and links.
+- **Dependency radar bot** (`dependency-radar-bot.yml`) publishes a recurring upgrade radar and runtime fast-follow watchlist.
+- **Pre-commit hooks auto-update** (`pre-commit-autoupdate.yml`) runs weekly and opens a maintenance PR.
 
 Use the GitHub Security tab to review alerts:
 

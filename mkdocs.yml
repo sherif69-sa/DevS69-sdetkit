@@ -115,6 +115,7 @@ nav:
       - CI contract (reference): ci-contract.md
       - "GitHub Action: sdetkit repo audit": github-action.md
       - PR automation for audit auto-fixes: pr-automation.md
+      - Automation bots and maintenance control loop: automation-bots.md
       - n8n integration (PR webhook automation): n8n.md
       - Reporting and trends: reporting-and-trends.md
       - Sample outputs (first-run evidence): sample-outputs.md
