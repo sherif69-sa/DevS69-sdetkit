@@ -94,7 +94,9 @@ def test_security_fix_dry_run_previews_and_applies_requests_timeout(tmp_path: Pa
 
 def test_security_fix_dry_run_previews_and_applies_shell_false(tmp_path: Path, capsys) -> None:
     target = tmp_path / "cmd.py"
-    target.write_text("import subprocess\nsubprocess.run('echo hi', shell=True)\n", encoding="utf-8")
+    target.write_text(
+        "import subprocess\nsubprocess.run('echo hi', shell=True)\n", encoding="utf-8"
+    )
 
     assert _run(["fix", "--root", str(tmp_path)]) == 0
     dry_out = capsys.readouterr().out

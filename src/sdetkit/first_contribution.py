@@ -199,11 +199,7 @@ def build_first_contribution_status(root: str = ".", profile: str = "all") -> di
     guide_text = _read(guide)
     missing = _missing_checks(guide_text)
     trust_assets = _trust_asset_status(base)
-    missing_assets = [
-        asset["path"]
-        for asset in trust_assets.values()
-        if not bool(asset["exists"])
-    ]
+    missing_assets = [asset["path"] for asset in trust_assets.values() if not bool(asset["exists"])]
 
     total_checks = len([_CHECKLIST_SECTION_HEADER, *_CHECKLIST_ITEMS, *_COMMAND_BLOCKS]) + len(
         trust_assets
@@ -291,7 +287,9 @@ def _render_text(payload: dict[str, Any]) -> str:
     lines.append(f"- Validate: {payload['actions']['validate']}")
     lines.append(f"- Spotlight docs profile: {payload['actions']['profile_docs_polish']}")
     lines.append(f"- Spotlight test profile: {payload['actions']['profile_test_hardening']}")
-    lines.append(f"- Spotlight automation profile: {payload['actions']['profile_automation_upgrade']}")
+    lines.append(
+        f"- Spotlight automation profile: {payload['actions']['profile_automation_upgrade']}"
+    )
     lines.append(f"- Write defaults: {payload['actions']['write_defaults']}")
     lines.append(f"- Export artifact: {payload['actions']['artifact']}")
     return "\n".join(lines) + "\n"
@@ -349,7 +347,9 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines.append(f"- Validate: `{payload['actions']['validate']}`")
     lines.append(f"- Spotlight docs profile: `{payload['actions']['profile_docs_polish']}`")
     lines.append(f"- Spotlight test profile: `{payload['actions']['profile_test_hardening']}`")
-    lines.append(f"- Spotlight automation profile: `{payload['actions']['profile_automation_upgrade']}`")
+    lines.append(
+        f"- Spotlight automation profile: `{payload['actions']['profile_automation_upgrade']}`"
+    )
     lines.append(f"- Write defaults: `{payload['actions']['write_defaults']}`")
     lines.append(f"- Export artifact: `{payload['actions']['artifact']}`")
     return "\n".join(lines) + "\n"

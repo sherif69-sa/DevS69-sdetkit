@@ -107,6 +107,12 @@ def _parse_dep_name(raw_requirement: str) -> str:
     return match.group(1).lower().replace("_", "-")
 
 
+def _as_str_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value]
+
+
 def _extract_pinned_version(raw_requirement: str) -> str | None:
     match = PINNED_VERSION_RE.search(raw_requirement)
     if match:
@@ -257,6 +263,7 @@ def _latest_pypi_metadata(
     version = str(info.get("version") or "unknown")
     release_date: str | None = None
     releases = payload.get("releases", {})
+    info = payload.get("info", {})
     if isinstance(releases, dict):
         release_files = releases.get(version) or []
         if isinstance(release_files, list):
@@ -619,6 +626,7 @@ def _latest_compatible_release(
     include_prereleases: bool,
 ) -> tuple[str | None, str | None, str]:
     releases = payload.get("releases", {})
+    info = payload.get("info", {})
     if not isinstance(releases, dict):
         return None, None, "unknown"
 
@@ -641,7 +649,7 @@ def _latest_compatible_release(
             latest_compatible_release_date = _release_date_from_files(release_files)
             latest_status = (
                 "compatible-latest"
-                if version == str(payload.get("info", {}).get("version") or "")
+                if version == str(info.get("version") if isinstance(info, dict) else "")
                 else "compatible-available"
             )
             break
@@ -1828,30 +1836,32 @@ def _render_markdown(
         )
     lines.extend(["", "## Recommended upgrade lanes", ""])
     for item in _lane_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['lane']}**: {item['count']} package(s), max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Risk bands", ""])
     for item in _risk_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['risk_band']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Repo usage tiers", ""])
     for item in _repo_usage_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['repo_usage_tier']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max repo usage {item['max_repo_usage_count']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Repo hotspots", ""])
     for item in _repo_hotspots(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
-        lane_list = ", ".join(f"`{lane}`" for lane in item["lanes"])
-        validations = ", ".join(f"`{command}`" for command in item["validation_commands"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
+        lane_list = ", ".join(f"`{lane}`" for lane in _as_str_list(item["lanes"]))
+        validations = ", ".join(
+            f"`{command}`" for command in _as_str_list(item["validation_commands"])
+        )
         lines.append(
             f"- **{item['path']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
@@ -1860,8 +1870,10 @@ def _render_markdown(
         )
     lines.extend(["", "## Repo impact map", ""])
     for item in _impact_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
-        validations = ", ".join(f"`{command}`" for command in item["validation_commands"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
+        validations = ", ".join(
+            f"`{command}`" for command in _as_str_list(item["validation_commands"])
+        )
         lines.append(
             f"- **{item['impact_area']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
@@ -1869,35 +1881,35 @@ def _render_markdown(
         )
     lines.extend(["", "## Release freshness", ""])
     for item in _release_freshness_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['release_freshness']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Manifest actions", ""])
     for item in _action_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['manifest_action']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Validation commands", ""])
     for item in _validation_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- `{item['command']}`: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Dependency groups", ""])
     for item in _group_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['group']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Manifest sources", ""])
     for item in _source_summary(reports):
-        pkg_list = ", ".join(f"`{name}`" for name in item["packages"])
+        pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['source']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
             + (f" — {pkg_list}" if pkg_list else "")
@@ -2322,7 +2334,7 @@ def _resolve_requirement_paths(args: argparse.Namespace) -> list[Path] | None:
         for path in missing:
             print(f"error: requirements file not found: {path}", file=sys.stderr)
         return None
-    return requirement_paths
+    return list(requirement_paths)
 
 
 def main(argv: list[str] | None = None) -> int:

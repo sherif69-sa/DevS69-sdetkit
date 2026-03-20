@@ -78,6 +78,23 @@ def _make_check(
     return item
 
 
+def _int_value(value: object) -> int:
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    try:
+        return int(str(value))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value]
+
+
 def _baseline_checks() -> dict[str, dict[str, Any]]:
     return {
         "ascii": _make_check(
@@ -705,12 +722,12 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
             if not isinstance(item, dict):
                 continue
             band = str(item.get("risk_band", "")).strip()
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ", ".join(
                 str(name).strip() for name in packages[:3] if str(name).strip()
             )
-            if band in {"critical", "high"} and actionable > 0:
+            if band in {"critical", "high"} and actionable_count > 0:
                 rec = f"Risk compression: clear the {band}-band upgrade queue before broad repo churn."
                 if package_text:
                     rec += f" Start with {package_text}."
@@ -723,7 +740,7 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
                 continue
             freshness = str(item.get("release_freshness", "")).strip()
             count = int(item.get("count", 0))
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ", ".join(
                 str(name).strip() for name in packages[:3] if str(name).strip()
@@ -733,8 +750,8 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
                 if package_text:
                     rec += f" Review {package_text} for fast-follow validation."
                 recs.append(rec)
-            elif freshness == "stale" and actionable > 0:
-                rec = f"Stale dependency lane: {actionable} actionable package(s) target releases older than a year."
+            elif freshness == "stale" and actionable_count > 0:
+                rec = f"Stale dependency lane: {actionable_count} actionable package(s) target releases older than a year."
                 if package_text:
                     rec += f" Start with {package_text}."
                 recs.append(rec)
@@ -746,10 +763,10 @@ def _recommendations(data: dict[str, Any]) -> list[str]:
             if not isinstance(item, dict):
                 continue
             command = str(item.get("command", "")).strip()
-            actionable = int(item.get("actionable_packages", 0))
-            if command and actionable > 0:
+            actionable_count = _int_value(item.get("actionable_packages", 0))
+            if command and actionable_count > 0:
                 recs.append(
-                    f"Validation batching: use `{command}` as a shared guardrail across {actionable} actionable package(s)."
+                    f"Validation batching: use `{command}` as a shared guardrail across {actionable_count} actionable package(s)."
                 )
                 break
     if not recs:
@@ -889,7 +906,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 continue
             lane = str(item.get("lane", "")).strip()
             count = int(item.get("count", 0))
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ""
             if isinstance(packages, list) and packages:
@@ -898,8 +915,8 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 )
             if lane and count > 0:
                 detail = f"lane {lane}: {count} package(s)"
-                if actionable > 0:
-                    detail += f", actionable {actionable}"
+                if actionable_count > 0:
+                    detail += f", actionable {actionable_count}"
                 if package_text:
                     detail += f" — focus on {package_text}"
                 hints.append(detail)
@@ -910,13 +927,13 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if not isinstance(item, dict):
                 continue
             impact_area = str(item.get("impact_area", "")).strip()
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             commands = item.get("validation_commands", [])
             command_text = ""
             if isinstance(commands, list) and commands:
                 command_text = str(commands[0]).strip()
-            if impact_area and actionable > 0:
-                detail = f"impact {impact_area}: {actionable} actionable package(s)"
+            if impact_area and actionable_count > 0:
+                detail = f"impact {impact_area}: {actionable_count} actionable package(s)"
                 if command_text:
                     detail += f" — validate with {command_text}"
                 hints.append(detail)
@@ -928,7 +945,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 continue
             freshness = str(item.get("release_freshness", "")).strip()
             count = int(item.get("count", 0))
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ""
             if isinstance(packages, list) and packages:
@@ -937,8 +954,8 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 )
             if freshness and count > 0:
                 detail = f"release freshness {freshness}: {count} package(s)"
-                if actionable > 0:
-                    detail += f", actionable {actionable}"
+                if actionable_count > 0:
+                    detail += f", actionable {actionable_count}"
                 if package_text:
                     detail += f" — includes {package_text}"
                 hints.append(detail)
@@ -968,7 +985,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if not isinstance(item, dict):
                 continue
             path = str(item.get("path", "")).strip()
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ""
             if isinstance(packages, list) and packages:
@@ -980,7 +997,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if isinstance(commands, list) and commands:
                 command_text = str(commands[0]).strip()
             if path:
-                detail = f"hotspot {path}: {actionable} actionable package(s)"
+                detail = f"hotspot {path}: {actionable_count} actionable package(s)"
                 if package_text:
                     detail += f" — packages {package_text}"
                 if command_text:
@@ -994,7 +1011,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 continue
             band = str(item.get("risk_band", "")).strip()
             count = int(item.get("count", 0))
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             packages = item.get("packages", [])
             package_text = ""
             if isinstance(packages, list) and packages:
@@ -1003,8 +1020,8 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 )
             if band and count > 0:
                 detail = f"risk {band}: {count} package(s)"
-                if actionable > 0:
-                    detail += f", actionable {actionable}"
+                if actionable_count > 0:
+                    detail += f", actionable {actionable_count}"
                 if package_text:
                     detail += f" — includes {package_text}"
                 hints.append(detail)
@@ -1018,9 +1035,9 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 continue
             name = str(item.get(label, "")).strip()
             count = int(item.get("count", 0))
-            actionable = int(item.get("actionable_packages", 0))
-            if name and count > 0 and actionable > 0:
-                hints.append(f"{label} {name}: {count} package(s), actionable {actionable}")
+            actionable_count = _int_value(item.get("actionable_packages", 0))
+            if name and count > 0 and actionable_count > 0:
+                hints.append(f"{label} {name}: {count} package(s), actionable {actionable_count}")
 
     validation_summary = upgrade_meta.get("validation_summary", [])
     if isinstance(validation_summary, list):
@@ -1028,12 +1045,12 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if not isinstance(item, dict):
                 continue
             command = str(item.get("command", "")).strip()
-            actionable = int(item.get("actionable_packages", 0))
+            actionable_count = _int_value(item.get("actionable_packages", 0))
             count = int(item.get("count", 0))
             if command and count > 0:
                 detail = f"validation {command}: {count} package(s)"
-                if actionable > 0:
-                    detail += f", actionable {actionable}"
+                if actionable_count > 0:
+                    detail += f", actionable {actionable_count}"
                 hints.append(detail)
 
     deduped: list[str] = []
@@ -1210,13 +1227,12 @@ def _check_upgrade_audit(
     fix.extend(
         str(command)
         for item in priority_queue
-        for command in item.get("validation_commands", [])
-        if isinstance(command, str)
+        for command in _string_list(item.get("validation_commands", []))
     )
     deduped_fix: list[str] = []
-    for item in fix:
-        if item not in deduped_fix:
-            deduped_fix.append(item)
+    for fix_item in fix:
+        if fix_item not in deduped_fix:
+            deduped_fix.append(fix_item)
 
     meta = {
         "packages_audited": len(reports),

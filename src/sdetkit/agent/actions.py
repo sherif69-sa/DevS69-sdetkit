@@ -27,6 +27,20 @@ class ActionResult:
 ActionHandler = Callable[[dict[str, Any]], ActionResult]
 
 
+def _dict_list(value: object) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, dict)]
+
+
+def _dict_value(value: object) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _value_list(value: object) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
 class ActionRegistry:
     def __init__(
         self,
@@ -188,8 +202,10 @@ class ActionRegistry:
             {
                 "goal": goal,
                 "output": output,
-                "selected_kits": [kit["id"] for kit in payload["selected_kits"]],
-                "upgrade_count": len(payload.get("upgrade_backlog", [])),
+                "selected_kits": [
+                    str(kit["id"]) for kit in _dict_list(payload.get("selected_kits"))
+                ],
+                "upgrade_count": len(_dict_list(payload.get("upgrade_backlog"))),
             },
         )
 
@@ -228,9 +244,13 @@ class ActionRegistry:
             {
                 "goal": goal,
                 "output": output,
-                "selected_kits": [kit["id"] for kit in payload["selected_kits"]],
-                "alignment_score": payload["alignment_score"]["score"],
-                "missing_domains": payload["missing_domains"],
+                "selected_kits": [
+                    str(kit["id"]) for kit in _dict_list(payload.get("selected_kits"))
+                ],
+                "alignment_score": int(_dict_value(payload.get("alignment_score")).get("score", 0)),
+                "missing_domains": [
+                    str(item) for item in _value_list(payload.get("missing_domains"))
+                ],
             },
         )
 
