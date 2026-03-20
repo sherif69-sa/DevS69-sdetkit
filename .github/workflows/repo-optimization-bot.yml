@@ -52,6 +52,7 @@ jobs:
           automation = maintenance.get('checks', {}).get('github_automation_check', {})
           automation_details = automation.get('details', {})
           ghas_tracks = automation_details.get('ghas_update_tracks', [])
+          expansion_tracks = automation_details.get('expansion_update_tracks', [])
 
           lines = [
               '# Repo optimization control loop',
@@ -83,6 +84,14 @@ jobs:
                   lines.append(f"- **{item.get('title', item.get('id', 'track'))}** · `{present}` via `{item.get('workflow', 'n/a')}`")
           else:
               lines.append('- No GHAS update tracks were returned by the maintenance check.')
+
+          lines.extend(['', '## Expansion tracks'])
+          if expansion_tracks:
+              for item in expansion_tracks:
+                  present = 'present' if item.get('present') else 'missing'
+                  lines.append(f"- **{item.get('title', item.get('id', 'track'))}** · `{present}` via `{item.get('workflow', 'n/a')}`")
+          else:
+              lines.append('- No expansion tracks were returned by the maintenance check.')
 
           lines.extend(['', '## Search missions to continue the upgrade loop'])
           if missions:

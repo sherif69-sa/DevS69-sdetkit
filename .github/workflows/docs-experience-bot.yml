@@ -1,0 +1,215 @@
+name: Docs Experience Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "25 6 * * 2"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  docs-experience:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Audit docs experience surface
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          repo_root = Path('.')
+          docs_root = repo_root / 'docs'
+          mkdocs_path = repo_root / 'mkdocs.yml'
+          text = mkdocs_path.read_text(encoding='utf-8')
+          nav_pattern = re.compile(r':\s+([A-Za-z0-9_./-]+\.md)\s*$')
+
+          nav_targets = []
+          for raw_line in text.splitlines():
+              line = raw_line.strip()
+              if not line or line.startswith('#'):
+                  continue
+              match = nav_pattern.search(raw_line)
+              if match:
+                  nav_targets.append(match.group(1))
+
+          docs_files = sorted(path.relative_to(docs_root).as_posix() for path in docs_root.rglob('*.md'))
+          nav_target_set = set(nav_targets)
+          docs_file_set = set(docs_files)
+          ignored_prefixes = ('artifacts/', 'roadmap/reports/')
+          orphan_docs = [
+              path for path in docs_files
+              if path not in nav_target_set
+              and not path.startswith(ignored_prefixes)
+              and not (path.startswith('integrations-') and path != 'integrations-and-extension-boundary.md')
+          ]
+          missing_nav_targets = sorted(nav_target_set - docs_file_set)
+
+          flagship_docs = [
+              'index.md',
+              'choose-your-path.md',
+              'ready-to-use.md',
+              'automation-bots.md',
+              'recommended-ci-flow.md',
+              'kits/release-confidence.md',
+              'kits/test-intelligence.md',
+              'kits/integration-assurance.md',
+              'kits/failure-forensics.md',
+              'cli.md',
+              'roadmap.md',
+          ]
+          missing_flagship_docs = [
+              path for path in flagship_docs if path not in docs_file_set or path not in nav_target_set
+          ]
+
+          search_features = {
+              'search.suggest': 'search.suggest' in text,
+              'search.highlight': 'search.highlight' in text,
+              'search.share': 'search.share' in text,
+              'navigation.instant': 'navigation.instant' in text,
+              'navigation.sections': 'navigation.sections' in text,
+          }
+
+          readme = (repo_root / 'README.md').read_text(encoding='utf-8')
+          index_text = (docs_root / 'index.md').read_text(encoding='utf-8')
+          command_occurrences = {
+              'readme_python_module_calls': readme.count('python -m sdetkit'),
+              'index_release_surface_calls': index_text.count('sdetkit release'),
+          }
+
+          report = {
+              'summary': {
+                  'docs_pages': len(docs_files),
+                  'nav_targets': len(nav_targets),
+                  'orphan_docs': len(orphan_docs),
+                  'missing_nav_targets': len(missing_nav_targets),
+                  'missing_flagship_docs': len(missing_flagship_docs),
+              },
+              'search_features': search_features,
+              'command_occurrences': command_occurrences,
+              'missing_nav_targets': missing_nav_targets,
+              'orphan_docs': orphan_docs[:25],
+              'missing_flagship_docs': missing_flagship_docs,
+          }
+
+          build = repo_root / 'build'
+          build.mkdir(exist_ok=True)
+          (build / 'docs-experience-radar.json').write_text(
+              json.dumps(report, indent=2) + '\n',
+              encoding='utf-8',
+          )
+
+          lines = [
+              '# Docs experience radar',
+              '',
+              "This issue is auto-generated to keep the docs surface productized, searchable, and easy to adopt.",
+              '',
+              '## Snapshot',
+              f"- Docs pages scanned: **{report['summary']['docs_pages']}**",
+              f"- Nav targets declared: **{report['summary']['nav_targets']}**",
+              f"- Orphan docs outside the primary nav: **{report['summary']['orphan_docs']}**",
+              f"- Missing nav targets: **{report['summary']['missing_nav_targets']}**",
+              f"- Missing flagship docs/nav entries: **{report['summary']['missing_flagship_docs']}**",
+              '',
+              '## Search and navigation posture',
+          ]
+          lines.extend(
+              [
+                  f"- **{feature}**: {'enabled' if enabled else 'missing'}"
+                  for feature, enabled in search_features.items()
+              ]
+          )
+          lines.extend(
+              [
+                  '',
+                  '## Entry-point command density',
+                  f"- README `python -m sdetkit` references: **{command_occurrences['readme_python_module_calls']}**",
+                  f"- Docs home `sdetkit release` references: **{command_occurrences['index_release_surface_calls']}**",
+                  '',
+                  '## Missing nav targets',
+              ]
+          )
+          lines.extend([f'- ⚠️ `{path}`' for path in missing_nav_targets] or ['- None'])
+          lines.extend(['', '## Orphan docs outside the primary nav'])
+          lines.extend([f'- `{path}`' for path in orphan_docs[:15]] or ['- None'])
+          lines.extend(['', '## Flagship docs needing attention'])
+          lines.extend([f'- ⚠️ `{path}`' for path in missing_flagship_docs] or ['- None'])
+          lines.extend(
+              [
+                  '',
+                  '## Suggested follow-up',
+                  '- [ ] Link the highest-value orphan docs into the canonical navigation or a material-map page.',
+                  '- [ ] Keep flagship operator docs visible from the main nav and the docs home page.',
+                  '- [ ] Use this radar before major docs refactors, onboarding rewrites, or search-taxonomy updates.',
+                  '',
+                  '## Artifact',
+                  '- `build/docs-experience-radar.json`',
+              ]
+          )
+          (build / 'docs-experience-radar.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+
+      - name: Upload docs radar artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: docs-experience-radar
+          path: |
+            build/docs-experience-radar.json
+            build/docs-experience-radar.md
+
+      - name: Publish docs experience issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const title = `📚 Docs experience radar (${weekOf})`;
+            const body = fs.readFileSync('build/docs-experience-radar.md', 'utf8');
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'documentation', color: '0075ca', description: 'Documentation quality and information architecture' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'maintenance',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('📚 Docs experience radar'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'documentation', 'priority:medium'],
+              });
+            }

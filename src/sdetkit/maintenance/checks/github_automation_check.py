@@ -36,6 +36,10 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
         "dependency-auto-merge.yml": ("Dependabot auto-merge bot", False),
         "pre-commit-autoupdate.yml": ("Pre-commit auto-update bot", False),
     },
+    "expansion_bots": {
+        "docs-experience-bot.yml": ("Docs experience radar bot", True),
+        "release-readiness-radar-bot.yml": ("Release readiness radar bot", True),
+    },
     "collaboration_bots": {
         "pr-helper-bot.yml": ("PR helper bot", False),
         "pr-quality-comment.yml": ("PR quality comment bot", False),
@@ -142,6 +146,27 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
     },
 ]
 
+_EXPANSION_UPDATE_TRACKS: list[dict[str, str]] = [
+    {
+        "id": "docs_experience_radar",
+        "title": "Docs experience radar",
+        "description": (
+            "Review the docs surface as a product lane by tracking nav coverage, orphaned pages, "
+            "flagship docs presence, and search-friendly entrypoints."
+        ),
+        "workflow": "docs-experience-bot.yml",
+    },
+    {
+        "id": "release_readiness_radar",
+        "title": "Release readiness radar",
+        "description": (
+            "Track the repo's release posture with doctor output, release workflow coverage, and "
+            "freshness checks for roadmap, changelog, and release playbook assets."
+        ),
+        "workflow": "release-readiness-radar-bot.yml",
+    },
+]
+
 
 def _workflow_presence(repo_root: Path) -> dict[str, dict[str, Any]]:
     workflow_dir = repo_root / ".github" / "workflows"
@@ -214,6 +239,16 @@ def run(ctx: MaintenanceContext) -> CheckResult:
                 and (ctx.repo_root / ".github" / "workflows" / workflow).exists(),
             }
         )
+    expansion_tracks: list[dict[str, Any]] = []
+    for update in _EXPANSION_UPDATE_TRACKS:
+        workflow = update["workflow"]
+        expansion_tracks.append(
+            {
+                **update,
+                "present": workflow not in missing_required
+                and (ctx.repo_root / ".github" / "workflows" / workflow).exists(),
+            }
+        )
 
     ok = not missing_required and not missing_configs
     summary = "GitHub automation coverage is complete across GHAS, dependency review, and maintenance bots"
@@ -260,6 +295,7 @@ def run(ctx: MaintenanceContext) -> CheckResult:
             "missing_required_workflows": missing_required,
             "missing_configs": missing_configs,
             "ghas_update_tracks": tracked_updates,
+            "expansion_update_tracks": expansion_tracks,
         },
         actions=actions,
     )

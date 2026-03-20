@@ -22,6 +22,8 @@ The current priority is to make the core workflow clean, trustworthy, and easy t
 - add more realistic repo validation scenarios
 - improve CI integration examples
 - publish example outputs and proof assets
+- expand the automation control loop with docs-experience and release-readiness radar bots
+- keep docs, release assets, and maintenance evidence reviewable as first-class operating lanes
 
 ## Later (extensions)
 
