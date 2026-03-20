@@ -22,6 +22,10 @@ from sdetkit.author_problem import (
 )
 
 
+def _export_dir(root: Path) -> Path:
+    return root / "artifacts" / "platform_problem" / "latest"
+
+
 class _FakeRunner(DockerCommandRunner):
     def __init__(self) -> None:
         self.calls: list[list[str]] = []
@@ -391,13 +395,18 @@ test = ["pytest>=8"]
         skip_docker=True,
         min_test_patch_bytes=1,
         min_solution_patch_bytes=1,
+        artifact_export_root=tmp_path,
     )
 
     assert result.ok is False
     failure = json.loads((tmp_path / "work/final_failure.json").read_text(encoding="utf-8"))
     summary = json.loads((tmp_path / "work/run_summary.json").read_text(encoding="utf-8"))
+    manifest = json.loads((_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8"))
     assert failure["reason"] == "no automated authoring strategy matched target repository after baseline and fit gating"
     assert summary["verification"]["ok"] is False
+    assert (_export_dir(tmp_path) / "final_failure.json").exists()
+    assert manifest["success"] is False
+    assert manifest["exports"]["final_failure.json"]["source"].endswith("/work/final_failure.json")
 
 
 def test_author_problem_run_can_succeed_end_to_end_with_demo_fixture(tmp_path: Path) -> None:
@@ -416,16 +425,32 @@ def test_author_problem_run_can_succeed_end_to_end_with_demo_fixture(tmp_path: P
         skip_docker=True,
         min_test_patch_bytes=1,
         min_solution_patch_bytes=1,
+        artifact_export_root=tmp_path,
     )
 
     assert result.ok is True
     summary = json.loads((tmp_path / "work/run_summary.json").read_text(encoding="utf-8"))
+    manifest = json.loads((_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8"))
     assert (tmp_path / "work/test.patch").exists()
     assert (tmp_path / "work/solution.patch").exists()
     assert (tmp_path / "work/docker.file").exists()
     assert summary["docker"]["skipped"] is True
     assert summary["repo_url"] == str(source)
     assert summary["verification"]["ok"] is True
+    for name in [
+        "test.patch",
+        "solution.patch",
+        "docker.file",
+        "final_title.txt",
+        "final_description.txt",
+        "run_summary.json",
+    ]:
+        assert (_export_dir(tmp_path) / name).exists()
+    assert not (_export_dir(tmp_path) / "final_failure.json").exists()
+    assert manifest["success"] is True
+    assert manifest["exports"]["run_summary.json"]["destination"].endswith(
+        "artifacts/platform_problem/latest/run_summary.json"
+    )
 
 
 def test_author_problem_run_reuses_existing_workdir_app_checkout(tmp_path: Path) -> None:
@@ -445,6 +470,7 @@ def test_author_problem_run_reuses_existing_workdir_app_checkout(tmp_path: Path)
         skip_docker=True,
         min_test_patch_bytes=1,
         min_solution_patch_bytes=1,
+        artifact_export_root=tmp_path,
     )
     assert first.ok is True
     assert (workdir / "app").exists()
@@ -456,6 +482,7 @@ def test_author_problem_run_reuses_existing_workdir_app_checkout(tmp_path: Path)
         skip_docker=True,
         min_test_patch_bytes=1,
         min_solution_patch_bytes=1,
+        artifact_export_root=tmp_path,
     )
 
     assert second.ok is True

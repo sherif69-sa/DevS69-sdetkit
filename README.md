@@ -22,7 +22,7 @@ It turns CI and test signals into deterministic contracts, machine-readable arti
 
 SDETKit now ships a first-class, repo-owned workflow for autonomous platform-problem authoring. This lane is environment-first and run-contract driven: it bootstraps `/work`, clones and pins the target repository, renders `Dockerfile.problem`, builds and runs the authoring container, scaffolds novelty-gate notes, generates the minimal `test.sh` contract when authoring succeeds, and verifies artifact boundaries, clean-tree replay, and the base/new/solution triad without asking the operator to paste logs or hand-assemble patches.
 
-The stable output contract is explicit. Every run targets these paths in `/work`:
+The stable output contract is explicit. Every run first targets these canonical paths in `/work`:
 
 - `/work/test.patch`
 - `/work/solution.patch`
@@ -31,7 +31,17 @@ The stable output contract is explicit. Every run targets these paths in `/work`
 - `/work/final_description.txt`
 - `/work/run_summary.json`
 
-If a repo is genuinely non-viable or no automated authoring strategy matches it yet, the workflow fails honestly and writes `/work/final_failure.json` with concrete machine-readable reasons.
+After final verification completes, the workflow also exports the latest bundle into the repository at `artifacts/platform_problem/latest/`:
+
+- `artifacts/platform_problem/latest/test.patch`
+- `artifacts/platform_problem/latest/solution.patch`
+- `artifacts/platform_problem/latest/docker.file`
+- `artifacts/platform_problem/latest/final_title.txt`
+- `artifacts/platform_problem/latest/final_description.txt`
+- `artifacts/platform_problem/latest/run_summary.json`
+- `artifacts/platform_problem/latest/export_manifest.json`
+
+If a repo is genuinely non-viable or no automated authoring strategy matches it yet, the workflow fails honestly and writes `/work/final_failure.json` with concrete machine-readable reasons, then exports that failure report to `artifacts/platform_problem/latest/final_failure.json`.
 
 This lane is distinct from the existing release-confidence, doctor, evidence, and gate commands. Those surfaces assess this repository or another codebase for readiness. The authoring lane prepares a pinned target repo for platform-style problem creation and validates the stable artifact bundle expected by downstream reviewers:
 

@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ _BASE_IMAGE = "public.ecr.aws/x8v8d7g8/mars-base:latest"
 _DEFAULT_WORKFLOW_PATH = Path(".sdetkit/workflows/platform_problem.yaml")
 _ALLOWED_TEST_METADATA_EDIT = "tests/conftest.py"
 _TOOLKIT_MOUNT = "/opt/sdetkit"
+_REPO_EXPORT_ROOT = Path("artifacts/platform_problem/latest")
 _KNOWN_PYTEST_PACKAGES = (
     "pytest",
     "pytest-asyncio",
@@ -372,6 +374,70 @@ def bootstrap_workdir(workdir: Path, *, topic: str | None = None) -> WorkBootstr
         created=created,
         artifact_paths=artifact_paths,
     )
+
+
+def _artifact_export_root(root: Path | None = None) -> Path:
+    return (root or _repo_root()) / _REPO_EXPORT_ROOT
+
+
+def _export_final_artifacts(
+    workdir: Path,
+    *,
+    repo_url: str,
+    sha: str,
+    success: bool,
+    export_root: Path | None = None,
+) -> dict[str, Any]:
+    export_dir = _artifact_export_root(export_root)
+    export_dir.mkdir(parents=True, exist_ok=True)
+    exported: dict[str, dict[str, str]] = {}
+    for name in [
+        "test.patch",
+        "solution.patch",
+        "docker.file",
+        "final_title.txt",
+        "final_description.txt",
+        "run_summary.json",
+    ]:
+        source = workdir / name
+        if not source.exists():
+            continue
+        destination = export_dir / name
+        shutil.copy2(source, destination)
+        exported[name] = {
+            "source": source.as_posix(),
+            "destination": destination.as_posix(),
+        }
+
+    failure_source = workdir / "final_failure.json"
+    failure_destination = export_dir / "final_failure.json"
+    if failure_source.exists():
+        if success:
+            failure_destination.unlink(missing_ok=True)
+        else:
+            shutil.copy2(failure_source, failure_destination)
+            exported["final_failure.json"] = {
+                "source": failure_source.as_posix(),
+                "destination": failure_destination.as_posix(),
+            }
+    else:
+        failure_destination.unlink(missing_ok=True)
+
+    manifest_path = export_dir / "export_manifest.json"
+    manifest = {
+        "repo_url": repo_url,
+        "pinned_sha": sha,
+        "success": success,
+        "exported_at": datetime.now(timezone.utc).isoformat(),
+        "exports": exported,
+    }
+    _write_json(manifest_path, manifest)
+    return {
+        "export_dir": export_dir.as_posix(),
+        "manifest": manifest_path.as_posix(),
+        "success": success,
+        "exports": exported,
+    }
 
 
 def _runner_prefix(repo_root: Path | None = None) -> str:
@@ -1445,6 +1511,7 @@ def run_problem_workflow(
     skip_docker: bool = False,
     min_test_patch_bytes: int | None = None,
     min_solution_patch_bytes: int | None = None,
+    artifact_export_root: Path | None = None,
 ) -> RunResult:
     runner = runner or DockerCommandRunner()
     contract = contract or load_workflow_contract()
@@ -1474,6 +1541,23 @@ def run_problem_workflow(
                 "base_new_triad_status": None,
                 "metadata_presence": {"steps": clone_steps},
             },
+        )
+        _write_json(workdir / "run_summary.json", failure)
+        export_payload = _export_final_artifacts(
+            workdir,
+            repo_url=repo_url,
+            sha=sha,
+            success=False,
+            export_root=artifact_export_root,
+        )
+        failure["export"] = export_payload
+        _write_json(workdir / "run_summary.json", failure)
+        failure["export"] = _export_final_artifacts(
+            workdir,
+            repo_url=repo_url,
+            sha=sha,
+            success=False,
+            export_root=artifact_export_root,
         )
         _write_json(workdir / "run_summary.json", failure)
         return RunResult(False, failure, failure)
@@ -1585,8 +1669,23 @@ def run_problem_workflow(
             "solution_patch_bytes": (workdir / "solution.patch").stat().st_size if (workdir / "solution.patch").exists() else 0,
         },
     }
+    summary["export"] = _export_final_artifacts(
+        workdir,
+        repo_url=repo_url,
+        sha=sha,
+        success=bool(summary["ok"]),
+        export_root=artifact_export_root,
+    )
     _write_json(workdir / "run_summary.json", summary)
     if summary["ok"]:
+        summary["export"] = _export_final_artifacts(
+            workdir,
+            repo_url=repo_url,
+            sha=sha,
+            success=True,
+            export_root=artifact_export_root,
+        )
+        _write_json(workdir / "run_summary.json", summary)
         return RunResult(True, summary, None)
 
     failure = _build_failure_payload(
@@ -1604,6 +1703,26 @@ def run_problem_workflow(
             "metadata_presence": verification.get("required_artifacts"),
         },
     )
+    summary["export"] = _export_final_artifacts(
+        workdir,
+        repo_url=repo_url,
+        sha=sha,
+        success=False,
+        export_root=artifact_export_root,
+    )
+    _write_json(workdir / "run_summary.json", summary)
+    failure["export"] = summary["export"]
+    _write_json(workdir / "final_failure.json", failure)
+    failure["export"] = _export_final_artifacts(
+        workdir,
+        repo_url=repo_url,
+        sha=sha,
+        success=False,
+        export_root=artifact_export_root,
+    )
+    summary["export"] = failure["export"]
+    _write_json(workdir / "run_summary.json", summary)
+    _write_json(workdir / "final_failure.json", failure)
     return RunResult(False, summary, failure)
 
 
@@ -1613,12 +1732,12 @@ def _build_parser() -> argparse.ArgumentParser:
     problem = sub.add_parser("problem", help="Platform-style Python problem authoring lane")
     psub = problem.add_subparsers(dest="action", required=True)
 
-    initp = psub.add_parser("init", help="Bootstrap /work ledger state and artifact targets")
+    initp = psub.add_parser("init", help="Bootstrap /work ledger state before exporting final artifacts into artifacts/platform_problem/latest")
     initp.add_argument("--workdir", default="/work")
     initp.add_argument("--topic", default="platform-problem")
     initp.add_argument("--format", choices=["text", "json"], default="text")
 
-    doctorp = psub.add_parser("doctor", help="Inspect host tools, /work, and target repo readiness")
+    doctorp = psub.add_parser("doctor", help="Inspect host tools, /work, repo export targets, and target repo readiness")
     doctorp.add_argument("--repo-root", default=".")
     doctorp.add_argument("--workdir", default="/work")
     doctorp.add_argument("--format", choices=["text", "json"], default="text")
@@ -1627,13 +1746,13 @@ def _build_parser() -> argparse.ArgumentParser:
     renderp.add_argument("--repo-root", default=".")
     renderp.add_argument("--output", default=None)
 
-    verifyp = psub.add_parser("verify", help="Verify artifact boundaries, size gates, and triad replay")
+    verifyp = psub.add_parser("verify", help="Verify /work artifacts before final export into artifacts/platform_problem/latest")
     verifyp.add_argument("--repo-root", default=".")
     verifyp.add_argument("--workdir", default="/work")
     verifyp.add_argument("--skip-triad", action="store_true")
     verifyp.add_argument("--format", choices=["text", "json"], default="text")
 
-    runp = psub.add_parser("run", help="Clone, pin, bootstrap, render Dockerfile, and verify artifacts")
+    runp = psub.add_parser("run", help="Clone, pin, bootstrap /work, verify artifacts, then export the final bundle into artifacts/platform_problem/latest")
     runp.add_argument("--repo", required=True)
     runp.add_argument("--sha", required=True)
     runp.add_argument("--workdir", default="/work")

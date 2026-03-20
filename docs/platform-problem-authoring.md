@@ -27,7 +27,7 @@ The workflow owns the environment-first contract itself:
 
 ## Stable artifact contract
 
-Every authoring run targets these stable output paths in `/work`:
+Every authoring run targets these stable canonical output paths in `/work`:
 
 - `/work/test.patch`
 - `/work/solution.patch`
@@ -40,6 +40,20 @@ Additional machine-readable workflow outputs:
 
 - `/work/author_doctor.json`
 - `/work/final_failure.json` when the run fails honestly
+
+After final packaging and verification complete, the workflow exports the latest bundle into this repository at `artifacts/platform_problem/latest/`:
+
+- `artifacts/platform_problem/latest/test.patch`
+- `artifacts/platform_problem/latest/solution.patch`
+- `artifacts/platform_problem/latest/docker.file`
+- `artifacts/platform_problem/latest/final_title.txt`
+- `artifacts/platform_problem/latest/final_description.txt`
+- `artifacts/platform_problem/latest/run_summary.json`
+- `artifacts/platform_problem/latest/export_manifest.json`
+
+If the run fails and `/work/final_failure.json` exists, the workflow also exports:
+
+- `artifacts/platform_problem/latest/final_failure.json`
 
 If the current repo strategy cannot produce a valid artifact bundle, the workflow does **not** silently pass. It writes the failure report and keeps the output contract stable.
 
@@ -145,7 +159,8 @@ Current `run` behavior:
 7. runs the authoring doctor,
 8. builds and runs the authoring container in Python when Docker is enabled,
 9. executes repo-owned baseline, repo-fit, candidate-fit, and novelty scaffolding stages,
-10. verifies the artifact bundle and emits final summaries.
+10. verifies the artifact bundle and emits final summaries,
+11. exports the final `/work` bundle into `artifacts/platform_problem/latest/` with an `export_manifest.json`.
 
 If an automated authoring strategy matches the target repository, the run can finish with a verified artifact bundle. If not, the run still terminates cleanly with `/work/final_failure.json` and `/work/run_summary.json` explaining exactly where the workflow stopped.
 
