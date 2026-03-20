@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from typing import Final, TypedDict
 
 from .atomicio import canonical_json_dumps
 
 SCHEMA_VERSION: Final[str] = "sdetkit.kits.catalog.v1"
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
 class Kit(TypedDict):
@@ -19,6 +21,9 @@ class Kit(TypedDict):
     typical_inputs: list[str]
     key_artifacts: list[str]
     learning_path: list[str]
+    search_terms: list[str]
+    agent_workflows: list[str]
+    composes_with: list[str]
 
 
 _KITS: Final[list[Kit]] = [
@@ -54,6 +59,23 @@ _KITS: Final[list[Kit]] = [
             "sdetkit release doctor",
             "sdetkit release gate release",
         ],
+        "search_terms": [
+            "release",
+            "gate",
+            "doctor",
+            "repo",
+            "evidence",
+            "security",
+            "readiness",
+            "approval",
+            "compliance",
+        ],
+        "agent_workflows": [
+            "sdetkit agent init",
+            "sdetkit agent run 'template:repo-health-audit' --approve",
+            "sdetkit agent dashboard build --format html",
+        ],
+        "composes_with": ["test-intelligence", "failure-forensics"],
     },
     {
         "id": "test-intelligence",
@@ -90,6 +112,23 @@ _KITS: Final[list[Kit]] = [
             "sdetkit intelligence impact summarize --changed changed.txt --map testmap.json",
             "sdetkit intelligence upgrade-audit --format json --top 5",
         ],
+        "search_terms": [
+            "flakes",
+            "failure",
+            "triage",
+            "impact",
+            "upgrade",
+            "dependency",
+            "search",
+            "classification",
+            "risk",
+        ],
+        "agent_workflows": [
+            "sdetkit agent run 'template:report-dashboard' --approve",
+            "sdetkit agent run 'action repo.audit {\"profile\":\"default\"}' --approve",
+            "sdetkit agent dashboard build --format md",
+        ],
+        "composes_with": ["release-confidence", "integration-assurance"],
     },
     {
         "id": "integration-assurance",
@@ -122,6 +161,22 @@ _KITS: Final[list[Kit]] = [
             "sdetkit integration matrix --profile integration-profile.json",
             "sdetkit integration topology-check --profile heterogeneous-topology.json",
         ],
+        "search_terms": [
+            "integration",
+            "topology",
+            "service",
+            "environment",
+            "contract",
+            "readiness",
+            "matrix",
+            "profile",
+        ],
+        "agent_workflows": [
+            "sdetkit agent init",
+            "sdetkit agent run 'template:security-governance-summary' --approve",
+            "sdetkit agent dashboard build --format json",
+        ],
+        "composes_with": ["release-confidence", "failure-forensics"],
     },
     {
         "id": "failure-forensics",
@@ -154,6 +209,22 @@ _KITS: Final[list[Kit]] = [
             "sdetkit forensics bundle --run run.json --output bundle.zip",
             "sdetkit forensics bundle-diff --from-bundle old.zip --to-bundle new.zip",
         ],
+        "search_terms": [
+            "forensics",
+            "repro",
+            "bundle",
+            "regression",
+            "diff",
+            "incident",
+            "debugging",
+            "evidence",
+        ],
+        "agent_workflows": [
+            "sdetkit agent run 'template:report-dashboard' --approve",
+            "sdetkit agent history export --format csv --output .sdetkit/agent/workdir/history-summary.csv",
+            "sdetkit agent dashboard build --format html",
+        ],
+        "composes_with": ["release-confidence", "test-intelligence"],
     },
 ]
 
@@ -168,70 +239,303 @@ def _resolve_kit(name: str) -> Kit | None:
     return None
 
 
+def _tokenize(value: str) -> list[str]:
+    return _TOKEN_RE.findall(value.lower())
+
+
+def _kit_search_blob(kit: Kit) -> dict[str, set[str]]:
+    return {
+        "exact": set(_tokenize(f"{kit['id']} {kit['slug']}")) | {kit["id"], kit["slug"]},
+        "keywords": set(_tokenize(" ".join(kit["search_terms"]))),
+        "summary": set(_tokenize(kit["summary"])),
+        "capabilities": set(_tokenize(" ".join(kit["capabilities"]))),
+        "artifacts": set(_tokenize(" ".join(kit["key_artifacts"]))),
+        "commands": set(_tokenize(" ".join(kit["hero_commands"] + kit["learning_path"]))),
+        "agent": set(_tokenize(" ".join(kit["agent_workflows"]))),
+        "compose": set(_tokenize(" ".join(kit["composes_with"]))),
+    }
+
+
+def _score_kit(kit: Kit, query: str) -> tuple[int, list[str]]:
+    terms = _tokenize(query)
+    if not terms:
+        return 0, []
+    blob = _kit_search_blob(kit)
+    matched: list[str] = []
+    score = 0
+    for term in terms:
+        if term in blob["exact"]:
+            score += 10
+        elif term in blob["keywords"]:
+            score += 7
+        elif term in blob["summary"] or term in blob["capabilities"]:
+            score += 5
+        elif term in blob["artifacts"] or term in blob["commands"]:
+            score += 3
+        elif term in blob["agent"] or term in blob["compose"]:
+            score += 2
+        else:
+            continue
+        matched.append(term)
+    return score, sorted(set(matched))
+
+
+def _kit_overview(kit: Kit) -> dict[str, object]:
+    return {
+        "id": kit["id"],
+        "slug": kit["slug"],
+        "stability": kit["stability"],
+        "summary": kit["summary"],
+        "capabilities": kit["capabilities"],
+        "typical_inputs": kit["typical_inputs"],
+        "key_artifacts": kit["key_artifacts"],
+        "hero_commands": kit["hero_commands"],
+        "learning_path": kit["learning_path"],
+        "agent_workflows": kit["agent_workflows"],
+        "composes_with": kit["composes_with"],
+    }
+
+
 def list_payload() -> dict[str, object]:
     return {
         "schema_version": SCHEMA_VERSION,
-        "kits": sorted(_KITS, key=lambda item: str(item["id"])),
+        "kits": sorted((_kit_overview(kit) for kit in _KITS), key=lambda item: str(item["id"])),
     }
+
+
+def search_payload(query: str, *, limit: int = 4) -> dict[str, object]:
+    matches: list[dict[str, object]] = []
+    for kit in _KITS:
+        score, matched_terms = _score_kit(kit, query)
+        if score <= 0:
+            continue
+        matches.append(
+            {
+                "kit": _kit_overview(kit),
+                "score": score,
+                "matched_terms": matched_terms,
+                "recommended_start": kit["learning_path"][0],
+            }
+        )
+    matches.sort(key=lambda item: (-int(item["score"]), str(item["kit"]["id"])))
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "query": query,
+        "matches": matches[: max(limit, 1)],
+    }
+
+
+def blueprint_payload(
+    *, goal: str | None, selected_kits: list[str], limit: int = 3
+) -> dict[str, object]:
+    resolved: list[Kit] = []
+    seen: set[str] = set()
+    for item in selected_kits:
+        kit = _resolve_kit(item)
+        if kit is not None and kit["id"] not in seen:
+            resolved.append(kit)
+            seen.add(kit["id"])
+
+    if goal:
+        ranked = search_payload(goal, limit=max(limit, 1) + len(resolved)).get("matches", [])
+        for item in ranked:
+            kit_payload = item.get("kit")
+            if not isinstance(kit_payload, dict):
+                continue
+            kit_id = str(kit_payload.get("id", ""))
+            kit = _resolve_kit(kit_id)
+            if kit is not None and kit_id not in seen:
+                resolved.append(kit)
+                seen.add(kit_id)
+            if len(resolved) >= max(limit, 1):
+                break
+
+    if not resolved:
+        resolved = list(_KITS[: max(limit, 1)])
+
+    phases = [
+        {
+            "phase": "discover",
+            "summary": "Map the repo problem to the smallest useful umbrella surface.",
+            "commands": [
+                "sdetkit kits list",
+                *(f"sdetkit kits describe {kit['slug']}" for kit in resolved),
+            ],
+        },
+        {
+            "phase": "execute",
+            "summary": "Run the selected kits in a deliberate sequence that produces reusable artifacts.",
+            "kit_sequence": [
+                {
+                    "id": kit["id"],
+                    "summary": kit["summary"],
+                    "commands": kit["learning_path"],
+                    "agent_workflows": kit["agent_workflows"],
+                }
+                for kit in resolved
+            ],
+        },
+        {
+            "phase": "govern",
+            "summary": "Use AgentOS as the control plane for recurring runs, history, and review-ready dashboards.",
+            "commands": [
+                "sdetkit agent init",
+                "sdetkit agent history list --limit 10",
+                "sdetkit agent dashboard build --format html",
+            ],
+        },
+    ]
+
+    control_plane = {
+        "name": "agentos-control-plane",
+        "summary": (
+            "AgentOS sits above the umbrella kits as a deterministic control plane for repeatable "
+            "automation, history, and dashboard exports."
+        ),
+        "commands": [
+            "sdetkit agent init",
+            "sdetkit agent run 'template:repo-health-audit' --approve",
+            "sdetkit agent dashboard build --format html",
+        ],
+    }
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "goal": goal,
+        "selected_kits": [_kit_overview(kit) for kit in resolved[: max(limit, 1)]],
+        "control_plane": control_plane,
+        "phases": phases,
+    }
+
+
+def _print_kit_detail(kit: dict[str, object]) -> None:
+    print(f"{kit['id']} [{kit['stability']}]")
+    print(f"route: sdetkit {kit['slug']} ...")
+    print(f"summary: {kit['summary']}")
+    print("capabilities:")
+    for item in kit["capabilities"]:
+        print(f"  - {item}")
+    print("typical inputs:")
+    for item in kit["typical_inputs"]:
+        print(f"  - {item}")
+    print("key artifacts:")
+    for item in kit["key_artifacts"]:
+        print(f"  - {item}")
+    print("hero commands:")
+    for cmd in kit["hero_commands"]:
+        print(f"  - {cmd}")
+    print("learning path:")
+    for cmd in kit["learning_path"]:
+        print(f"  - {cmd}")
+    print("agent workflows:")
+    for cmd in kit["agent_workflows"]:
+        print(f"  - {cmd}")
+    print("composes with:")
+    for item in kit["composes_with"]:
+        print(f"  - {item}")
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="sdetkit kits",
-        description="Discover umbrella kit surfaces and stability lanes.",
+        description="Discover umbrella kit surfaces, search them, and build cross-kit blueprints.",
     )
-    parser.add_argument("action", nargs="?", default="list", choices=["list", "describe"])
-    parser.add_argument("kit", nargs="?", default=None)
+    parser.add_argument(
+        "action",
+        nargs="?",
+        default="list",
+        choices=["list", "describe", "search", "blueprint"],
+    )
+    parser.add_argument("target", nargs="?", default=None)
     parser.add_argument("--format", choices=["json", "text"], default="text")
+    parser.add_argument("--query", default=None, help="Free-text search query for `search`.")
+    parser.add_argument("--goal", default=None, help="Goal statement for `blueprint`.")
+    parser.add_argument(
+        "--kit",
+        dest="selected_kits",
+        action="append",
+        default=[],
+        help="Explicit kit to include in `blueprint` (repeatable).",
+    )
+    parser.add_argument("--limit", type=int, default=4, help="Maximum search or blueprint results.")
     ns = parser.parse_args(argv)
 
     if ns.action == "describe":
-        if not ns.kit:
+        if not ns.target:
             sys.stderr.write("kits error: expected <kit> for `sdetkit kits describe <kit>`\n")
             return 2
-        kit = _resolve_kit(str(ns.kit))
+        kit = _resolve_kit(str(ns.target))
         if kit is None:
-            sys.stderr.write(f"kits error: unknown kit '{ns.kit}'\n")
+            sys.stderr.write(f"kits error: unknown kit '{ns.target}'\n")
             return 2
-        payload = {"schema_version": SCHEMA_VERSION, "kit": kit}
+        payload = {"schema_version": SCHEMA_VERSION, "kit": _kit_overview(kit)}
         if ns.format == "json":
             sys.stdout.write(canonical_json_dumps(payload))
             return 0
-        print(f"{kit['id']} [{kit['stability']}]")
-        print(f"route: sdetkit {kit['slug']} ...")
-        print(f"summary: {kit['summary']}")
-        print("capabilities:")
-        for item in kit["capabilities"]:
-            print(f"  - {item}")
-        print("typical inputs:")
-        for item in kit["typical_inputs"]:
-            print(f"  - {item}")
-        print("key artifacts:")
-        for item in kit["key_artifacts"]:
-            print(f"  - {item}")
-        print("hero commands:")
-        for cmd in kit["hero_commands"]:
-            print(f"  - {cmd}")
-        print("learning path:")
-        for cmd in kit["learning_path"]:
-            print(f"  - {cmd}")
+        _print_kit_detail(payload["kit"])
         return 0
 
-    if ns.kit:
-        sys.stderr.write("kits error: unexpected <kit> for list action\n")
+    if ns.action == "search":
+        query = str(ns.query or ns.target or "").strip()
+        if not query:
+            sys.stderr.write("kits error: expected <query> for `sdetkit kits search <query>`\n")
+            return 2
+        payload = search_payload(query, limit=ns.limit)
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(payload))
+            return 0
+        print(f"Kit search results for: {query}")
+        if not payload["matches"]:
+            print("- no matches")
+            return 0
+        for item in payload["matches"]:
+            kit = item["kit"]
+            print(f"- {kit['id']} score={item['score']}")
+            print(f"  matched: {', '.join(item['matched_terms']) or 'none'}")
+            print(f"  summary: {kit['summary']}")
+            print(f"  start with: {item['recommended_start']}")
+            print(f"  agent workflow: {kit['agent_workflows'][0]}")
+        return 0
+
+    if ns.action == "blueprint":
+        goal = str(ns.goal or ns.target or "").strip() or None
+        payload = blueprint_payload(
+            goal=goal,
+            selected_kits=[str(item) for item in ns.selected_kits],
+            limit=ns.limit,
+        )
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(payload))
+            return 0
+        print("Umbrella architecture blueprint")
+        if goal:
+            print(f"goal: {goal}")
+        print("selected kits:")
+        for kit in payload["selected_kits"]:
+            print(f"- {kit['id']} ({kit['slug']})")
+            print(f"  summary: {kit['summary']}")
+            print(f"  compose with: {', '.join(kit['composes_with'])}")
+            print(f"  start with: {kit['learning_path'][0]}")
+        print("control plane:")
+        print(f"- {payload['control_plane']['name']}: {payload['control_plane']['summary']}")
+        for command in payload["control_plane"]["commands"]:
+            print(f"  - {command}")
+        print("phases:")
+        for phase in payload["phases"]:
+            print(f"- {phase['phase']}: {phase['summary']}")
+        return 0
+
+    if ns.target:
+        sys.stderr.write("kits error: unexpected <target> for list action\n")
         return 2
 
-    kits_sorted = sorted(_KITS, key=lambda item: item["id"])
-    list_json_payload = {
-        "schema_version": SCHEMA_VERSION,
-        "kits": kits_sorted,
-    }
+    payload = list_payload()
     if ns.format == "json":
-        sys.stdout.write(canonical_json_dumps(list_json_payload))
+        sys.stdout.write(canonical_json_dumps(payload))
         return 0
 
     print("SDETKit umbrella kits")
-    for kit in kits_sorted:
+    for kit in payload["kits"]:
         print(f"- {kit['id']} [{kit['stability']}]")
         print(f"  {kit['summary']}")
         print(f"  capabilities: {', '.join(kit['capabilities'])}")

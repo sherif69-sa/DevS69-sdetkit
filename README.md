@@ -32,6 +32,8 @@ python -m sdetkit kits describe release
 python -m sdetkit kits describe intelligence
 python -m sdetkit kits describe integration
 python -m sdetkit kits describe forensics
+python -m sdetkit kits search topology
+python -m sdetkit kits blueprint --goal "agentized release upgrade search"
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 ```
 
@@ -129,6 +131,8 @@ By default, the audit plans against stable releases first so dev/rc tags do not 
 When you want a surgically targeted maintenance queue, filter by `--validation-command` as well. That lets you answer questions like “show me only upgrades that roll into `make docs-build`” or “which candidates are covered by `bash quality.sh *` smoke validation” without scanning the whole report.
 
 The doctor surface now carries those same upgrade-audit focus controls, so you can search and narrow dependency work without leaving the readiness report. In addition to query, impact-area, manifest-action, and repo-usage targeting, doctor now supports release-age slicing via `--upgrade-audit-min-release-age-days` and `--upgrade-audit-max-release-age-days`, plus `--upgrade-audit-used-in-repo-only` / `--upgrade-audit-outdated-only` for tighter maintenance slices. The readiness payload also exposes grouped action, dependency-group, manifest-source, and release-freshness summaries so CI and PR checks can explain whether the repo’s hottest maintenance lane is “fresh releases to validate” or “older targets to retire” without re-running the full audit. It also emits a quality summary block with pass/fail/skipped counts, pass rate, failing check IDs, and hint coverage so the readiness signal is easier to scan in CI, markdown, and JSON outputs.
+
+The umbrella architecture is stronger too: `sdetkit kits search <query>` now ranks the best-fit kit for a problem statement, and `sdetkit kits blueprint --goal "..."` builds a cross-kit execution plan that explicitly layers AgentOS in as the control plane for recurring automation, history capture, and dashboard exports. That makes it easier to move from discovery to an opinionated release/test/integration/forensics operating model without stitching the surfaces together by hand.
 
 The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, can merge in repo-local smart fix scripts from `.sdetkit/premium-remediation-scripts.json`, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 
