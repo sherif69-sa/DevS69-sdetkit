@@ -1,0 +1,30 @@
+metadata:
+  id: validation-route-worker
+  title: Validation Route Worker
+  version: 1.0.0
+  description: Map a refactor or dependency target to the smallest safe validation route and bundle the evidence.
+inputs:
+  query:
+    default: httpx
+    description: Package or domain to route through validation lanes.
+workflow:
+  - id: route-map
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits route-map ${{inputs.query}} --repo-usage-tier hot-path --format json
+      save_stdout: ${{run.output_dir}}/route-map.json
+  - id: doctor-upgrade-audit
+    action: shell.run
+    with:
+      cmd: python -m sdetkit doctor --upgrade-audit --upgrade-audit-offline --format md
+      save_stdout: ${{run.output_dir}}/doctor-upgrade-audit.md
+  - id: summary
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/summary.md
+      content: "Validation route worker summary: captured route-map.json, doctor-upgrade-audit.md, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

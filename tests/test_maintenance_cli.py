@@ -719,6 +719,7 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
         ".github/workflows/workflow-governance-bot.yml",
         ".github/workflows/docs-experience-bot.yml",
         ".github/workflows/release-readiness-radar-bot.yml",
+        ".github/workflows/worker-alignment-bot.yml",
         ".github/dependabot.yml",
         ".github/codeql-config.yml",
         ".github/pip-audit-baseline.json",
@@ -756,6 +757,7 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
     expansion_tracks = {item["id"]: item for item in result.details["expansion_update_tracks"]}
     assert expansion_tracks["docs_experience_radar"]["present"] is True
     assert expansion_tracks["release_readiness_radar"]["present"] is True
+    assert expansion_tracks["worker_alignment"]["present"] is True
 
 
 def test_github_automation_check_flags_missing_workflows(tmp_path: Path) -> None:
