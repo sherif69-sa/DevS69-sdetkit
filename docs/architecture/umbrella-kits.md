@@ -28,6 +28,16 @@ Kit commands emit deterministic machine-readable outputs with explicit `schema_v
 
 That turns the umbrella architecture from a static catalog into an execution-ready blueprint for teams that want to scale the repo as a product surface instead of a loose collection of commands.
 
+`sdetkit kits optimize --goal "..."` extends that blueprint into a repo-aware alignment plan. It inspects whether doctor, `quality.sh`, premium gate, integration topology fixtures, CI helpers, AgentOS templates, and reproducibility assets are present, then emits:
+
+- an **alignment matrix** for doctor / quality gate / premium gate / topology / AgentOS readiness,
+- a **doctor lane** with the recommended readiness command for the current upgrade goal,
+- a **quality gate lane** that sequences `quality.sh`, premium gate, and CI in one plan,
+- an **integration lane** that keeps topology proof wired into the umbrella,
+- and **performance boosters** that highlight reusable fast-path assets such as pinned CI constraints and gate snapshots.
+
+This makes the umbrella architecture operationally opinionated instead of merely descriptive: the repo can now tell you not just which kit to use, but how to align the major control loops into one upgrade motion.
+
 ## Compatibility and migration
 
 Use `docs/migration-compatibility-note.md` for migration guidance and the current experimental summary.

@@ -71,6 +71,27 @@ def test_kits_blueprint_connects_agentos_control_plane_and_cross_kit_plan() -> N
     assert "release-confidence" in selected_ids
     assert "test-intelligence" in selected_ids
     assert payload["control_plane"]["name"] == "agentos-control-plane"
-    assert any(command.startswith("sdetkit agent init") for command in payload["control_plane"]["commands"])
+    assert any(
+        command.startswith("sdetkit agent init") for command in payload["control_plane"]["commands"]
+    )
     assert payload["phases"][1]["phase"] == "execute"
     assert payload["phases"][1]["kit_sequence"]
+
+
+def test_kits_optimize_emits_alignment_plan_json() -> None:
+    result = _run(
+        "kits",
+        "optimize",
+        "upgrade umbrella architecture with agentos optimization",
+        "--format",
+        "json",
+        "--limit",
+        "2",
+    )
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
+    assert payload["doctor_lane"]["command"].startswith("sdetkit doctor ")
+    assert payload["quality_gate_lane"]["commands"]
+    assert any(item["domain"] == "agentos" for item in payload["alignment_matrix"])
+    assert payload["blueprint"]["control_plane"]["name"] == "agentos-control-plane"

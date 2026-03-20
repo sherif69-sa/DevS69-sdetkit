@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from pathlib import Path
 from typing import Final, TypedDict
 
 from .atomicio import canonical_json_dumps
@@ -453,6 +454,233 @@ def _upgrade_backlog(selected: list[Kit], goal: str | None) -> list[dict[str, ob
     return backlog
 
 
+def _repo_signal(root: Path, relpath: str) -> bool:
+    return (root / relpath).exists()
+
+
+def _doctor_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+    goal_terms = _goal_tokens(goal)
+    flags = ["--dev", "--ci", "--repo"]
+    focus = ["developer-experience", "repo-health"]
+    if repo_signals.get("pyproject"):
+        flags.append("--deps")
+        focus.append("dependency-policy")
+    if "upgrade" in goal_terms or "optimization" in goal_terms or "quality" in goal_terms:
+        flags.append("--upgrade-audit")
+        focus.append("upgrade-readiness")
+    if repo_signals.get("topology_profile") and (
+        {"umbrella", "architecture", "integration", "topology"} & goal_terms
+    ):
+        focus.append("topology-follow-through")
+    command = "sdetkit doctor " + " ".join(flags) + " --format json"
+    return {
+        "focus_areas": focus,
+        "command": command,
+        "why": (
+            "Start with a single doctor run that aligns repo health, CI posture, dependency drift, "
+            "and upgrade-readiness hints before deeper gate work."
+        ),
+    }
+
+
+def _quality_gate_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+    goal_terms = _goal_tokens(goal)
+    commands: list[str] = []
+    if repo_signals.get("quality_script"):
+        commands.append("bash quality.sh ci")
+    if repo_signals.get("premium_gate"):
+        premium_mode = "full" if {"architecture", "umbrella", "doctor"} & goal_terms else "fast"
+        commands.append(f"bash premium-gate.sh --mode {premium_mode}")
+    if repo_signals.get("ci_script"):
+        commands.append("bash ci.sh")
+    return {
+        "commands": commands,
+        "policy": (
+            "Use quality.sh as the fast deterministic merge bar, then premium gate as the umbrella "
+            "orchestration proof that doctor, topology, security, and evidence stay aligned."
+        ),
+    }
+
+
+def _integration_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+    commands: list[str] = []
+    if repo_signals.get("integration_profile"):
+        commands.append(
+            "sdetkit integration check --profile examples/kits/integration/profile.json"
+        )
+    if repo_signals.get("topology_profile"):
+        commands.append(
+            "sdetkit integration topology-check --profile "
+            "examples/kits/integration/heterogeneous-topology.json"
+        )
+    coverage = (
+        "topology-aware"
+        if repo_signals.get("topology_profile")
+        else "profile-only"
+        if repo_signals.get("integration_profile")
+        else "missing"
+    )
+    return {
+        "coverage": coverage,
+        "commands": commands,
+        "why": (
+            "Treat integration contracts as a release input so umbrella routing, premium gate, "
+            "and AgentOS all evaluate the same topology truth."
+        ),
+    }
+
+
+def _agentos_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+    goal_text = goal or "umbrella optimization"
+    commands = [
+        "sdetkit agent init",
+        f'sdetkit agent run "{goal_text}" --approve',
+        "sdetkit agent dashboard build --format html",
+    ]
+    if repo_signals.get("agent_templates"):
+        commands.insert(1, "sdetkit agent run 'template:repo-health-audit' --approve")
+    return {
+        "commands": commands,
+        "why": (
+            "AgentOS becomes the recurring control plane that captures execution history and "
+            "exports a stable dashboard for the umbrella architecture."
+        ),
+    }
+
+
+def _performance_boosters(repo_signals: dict[str, bool]) -> list[dict[str, str]]:
+    boosters: list[dict[str, str]] = []
+    if repo_signals.get("constraints"):
+        boosters.append(
+            {
+                "id": "ci-constraints",
+                "title": "Pinned CI toolchain",
+                "detail": "Keep constraints-ci.txt as the reproducible install baseline for fast, low-drift CI bootstrap.",
+            }
+        )
+    if repo_signals.get("gate_snapshot"):
+        boosters.append(
+            {
+                "id": "fast-gate-snapshot",
+                "title": "Fast gate baseline",
+                "detail": "Reuse the checked-in fast gate snapshot to preserve deterministic quick feedback loops.",
+            }
+        )
+    if repo_signals.get("premium_gate") and repo_signals.get("topology_profile"):
+        boosters.append(
+            {
+                "id": "topology-premium-loop",
+                "title": "Topology-backed premium scoring",
+                "detail": "Feed topology artifacts into premium gate so umbrella upgrades fail on contract drift instead of late manual review.",
+            }
+        )
+    if repo_signals.get("agent_templates"):
+        boosters.append(
+            {
+                "id": "agent-templates",
+                "title": "Agent template reuse",
+                "detail": "Lean on repo automation templates so recurring audits and dashboards stay standardized instead of bespoke.",
+            }
+        )
+    return boosters
+
+
+def optimize_payload(
+    *,
+    root: Path,
+    goal: str | None,
+    selected_kits: list[str],
+    limit: int = 3,
+) -> dict[str, object]:
+    blueprint = blueprint_payload(goal=goal, selected_kits=selected_kits, limit=limit)
+    repo_signals = {
+        "pyproject": _repo_signal(root, "pyproject.toml"),
+        "quality_script": _repo_signal(root, "quality.sh"),
+        "premium_gate": _repo_signal(root, "premium-gate.sh"),
+        "ci_script": _repo_signal(root, "ci.sh"),
+        "constraints": _repo_signal(root, "constraints-ci.txt"),
+        "gate_snapshot": _repo_signal(root, ".sdetkit/gate.fast.snapshot.json"),
+        "integration_profile": _repo_signal(root, "examples/kits/integration/profile.json"),
+        "topology_profile": _repo_signal(
+            root, "examples/kits/integration/heterogeneous-topology.json"
+        ),
+        "agent_templates": _repo_signal(root, "templates/automations/repo-health-audit.yaml"),
+    }
+    doctor_lane = _doctor_lane(goal, repo_signals)
+    quality_lane = _quality_gate_lane(goal, repo_signals)
+    integration_lane = _integration_lane(goal, repo_signals)
+    agentos_lane = _agentos_lane(goal, repo_signals)
+    next_boosts = [
+        {
+            "id": "doctor-quality-sync",
+            "title": "Align doctor with the quality gate",
+            "summary": "Run doctor first, then quality.sh ci, so follow-up fixes land before premium-gate orchestration.",
+            "commands": [doctor_lane["command"], *(quality_lane["commands"][:1])],
+        },
+        {
+            "id": "umbrella-control-plane",
+            "title": "Promote AgentOS as the umbrella review loop",
+            "summary": "Capture blueprint, history, and dashboard outputs as the operating layer above the kits.",
+            "commands": agentos_lane["commands"][:3],
+        },
+        {
+            "id": "integration-proof",
+            "title": "Keep topology proof in the release lane",
+            "summary": "Make topology-check part of premium validation so umbrella architecture changes stay contract-safe.",
+            "commands": integration_lane["commands"][:2],
+        },
+    ]
+    alignment_matrix = [
+        {
+            "domain": "doctor",
+            "status": "ready" if repo_signals["pyproject"] else "gap",
+            "primary_command": doctor_lane["command"],
+        },
+        {
+            "domain": "quality-gate",
+            "status": "ready" if repo_signals["quality_script"] else "gap",
+            "primary_command": quality_lane["commands"][0] if quality_lane["commands"] else "",
+        },
+        {
+            "domain": "premium-gate",
+            "status": "ready" if repo_signals["premium_gate"] else "gap",
+            "primary_command": (
+                quality_lane["commands"][1]
+                if len(quality_lane["commands"]) > 1
+                else quality_lane["commands"][0]
+                if quality_lane["commands"]
+                else ""
+            ),
+        },
+        {
+            "domain": "integration-topology",
+            "status": "ready" if repo_signals["topology_profile"] else "gap",
+            "primary_command": (
+                integration_lane["commands"][-1] if integration_lane["commands"] else ""
+            ),
+        },
+        {
+            "domain": "agentos",
+            "status": "ready" if repo_signals["agent_templates"] else "partial",
+            "primary_command": agentos_lane["commands"][0],
+        },
+    ]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "goal": goal,
+        "selected_kits": blueprint["selected_kits"],
+        "blueprint": blueprint,
+        "repo_signals": repo_signals,
+        "doctor_lane": doctor_lane,
+        "quality_gate_lane": quality_lane,
+        "integration_lane": integration_lane,
+        "agentos_lane": agentos_lane,
+        "alignment_matrix": alignment_matrix,
+        "performance_boosters": _performance_boosters(repo_signals),
+        "next_boosts": next_boosts,
+    }
+
+
 def list_payload() -> dict[str, object]:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -614,7 +842,7 @@ def main(argv: list[str] | None = None) -> int:
         "action",
         nargs="?",
         default="list",
-        choices=["list", "describe", "search", "blueprint"],
+        choices=["list", "describe", "search", "blueprint", "optimize"],
     )
     parser.add_argument("target", nargs="?", default=None)
     parser.add_argument("--format", choices=["json", "text"], default="text")
@@ -628,6 +856,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Explicit kit to include in `blueprint` (repeatable).",
     )
     parser.add_argument("--limit", type=int, default=4, help="Maximum search or blueprint results.")
+    parser.add_argument(
+        "--repo-root",
+        default=".",
+        help="Repository root to inspect for `optimize` alignment planning.",
+    )
     ns = parser.parse_args(argv)
 
     if ns.action == "describe":
@@ -701,6 +934,45 @@ def main(argv: list[str] | None = None) -> int:
             print(f"- {lane['cadence']}: {lane['focus']}")
         print("upgrade backlog:")
         for item in payload["upgrade_backlog"]:
+            print(f"- {item['title']}: {item['summary']}")
+        return 0
+
+    if ns.action == "optimize":
+        goal = str(ns.goal or ns.target or "").strip() or None
+        payload = optimize_payload(
+            root=Path(str(ns.repo_root)).resolve(),
+            goal=goal,
+            selected_kits=[str(item) for item in ns.selected_kits],
+            limit=ns.limit,
+        )
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(payload))
+            return 0
+        print("Umbrella optimization plan")
+        if goal:
+            print(f"goal: {goal}")
+        print("alignment matrix:")
+        for item in payload["alignment_matrix"]:
+            print(f"- {item['domain']}: {item['status']}")
+            if item["primary_command"]:
+                print(f"  command: {item['primary_command']}")
+        print("doctor lane:")
+        print(f"- {payload['doctor_lane']['command']}")
+        print(f"  why: {payload['doctor_lane']['why']}")
+        print("quality gate lane:")
+        for command in payload["quality_gate_lane"]["commands"]:
+            print(f"- {command}")
+        print("integration lane:")
+        for command in payload["integration_lane"]["commands"]:
+            print(f"- {command}")
+        print("agentos lane:")
+        for command in payload["agentos_lane"]["commands"]:
+            print(f"- {command}")
+        print("performance boosters:")
+        for item in payload["performance_boosters"]:
+            print(f"- {item['title']}: {item['detail']}")
+        print("next boosts:")
+        for item in payload["next_boosts"]:
             print(f"- {item['title']}: {item['summary']}")
         return 0
 
