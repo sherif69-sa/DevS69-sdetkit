@@ -1,0 +1,35 @@
+metadata:
+  id: worker-alignment-radar
+  title: Worker Alignment Radar
+  version: 1.0.0
+  description: Keep worker templates aligned with the repo's expansion plan, automation coverage, and template inventory.
+inputs:
+  goal:
+    default: add more bots workers search and repo expansion
+    description: Goal statement for the alignment radar.
+workflow:
+  - id: expand
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits expand --goal "${{inputs.goal}}" --format json
+      save_stdout: ${{run.output_dir}}/expand.json
+  - id: automation-check
+    action: shell.run
+    with:
+      cmd: python -m sdetkit maintenance --include-check github_automation_check --format json
+      save_stdout: ${{run.output_dir}}/automation-check.json
+  - id: templates-list
+    action: shell.run
+    with:
+      cmd: python -m sdetkit agent templates list
+      save_stdout: ${{run.output_dir}}/templates.json
+  - id: summary
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/summary.md
+      content: "Worker alignment radar summary: captured expand.json, automation-check.json, templates.json, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

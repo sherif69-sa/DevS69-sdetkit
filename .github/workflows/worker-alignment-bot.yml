@@ -1,0 +1,152 @@
+name: Worker Alignment Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 7 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  worker-alignment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+            requirements-test.txt
+            requirements-docs.txt
+            constraints-ci.txt
+
+      - name: Install repo
+        run: python -m pip install -c constraints-ci.txt -e .[dev,test,docs]
+
+      - name: Run aligned worker templates
+        run: |
+          set -euo pipefail
+          mkdir -p build .sdetkit/agent/template-runs
+          python -m sdetkit agent templates run dependency-radar-worker --output-dir .sdetkit/agent/template-runs/dependency-radar-worker > build/dependency-radar-worker-run.json
+          python -m sdetkit agent templates run docs-search-radar --output-dir .sdetkit/agent/template-runs/docs-search-radar > build/docs-search-radar-run.json
+          python -m sdetkit agent templates run release-readiness-worker --output-dir .sdetkit/agent/template-runs/release-readiness-worker > build/release-readiness-worker-run.json
+          python -m sdetkit agent templates run worker-alignment-radar --output-dir .sdetkit/agent/template-runs/worker-alignment-radar > build/worker-alignment-radar-run.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          build = Path("build")
+          runs = {
+              "dependency-radar-worker": json.loads((build / "dependency-radar-worker-run.json").read_text(encoding="utf-8")),
+              "docs-search-radar": json.loads((build / "docs-search-radar-run.json").read_text(encoding="utf-8")),
+              "release-readiness-worker": json.loads((build / "release-readiness-worker-run.json").read_text(encoding="utf-8")),
+              "worker-alignment-radar": json.loads((build / "worker-alignment-radar-run.json").read_text(encoding="utf-8")),
+          }
+
+          lines = [
+              "# Worker alignment radar",
+              "",
+              "This issue is auto-generated from the repo's aligned worker templates so dependency, docs, release, and expansion lanes stay in sync.",
+              "",
+              "## Worker run status",
+          ]
+
+          for worker_id, payload in runs.items():
+              artifacts = payload.get("artifacts", [])
+              lines.append(
+                  f"- **{worker_id}** · status `{payload.get('status', 'unknown')}` · artifacts `{len(artifacts)}`"
+              )
+              if artifacts:
+                  lines.append(f"  - First artifact: `{artifacts[0]}`")
+
+          lines.extend(
+              [
+                  "",
+                  "## Follow-up prompts",
+                  "- [ ] Review dependency-radar-worker outputs before large upgrade or refactor batches.",
+                  "- [ ] Use docs-search-radar and release-readiness-worker outputs before docs or release pushes.",
+                  "- [ ] Use worker-alignment-radar outputs to keep recommended workers matched to the repo's active automation surface.",
+                  "",
+                  "## Artifacts",
+                  "- `build/dependency-radar-worker-run.json`",
+                  "- `build/docs-search-radar-run.json`",
+                  "- `build/release-readiness-worker-run.json`",
+                  "- `build/worker-alignment-radar-run.json`",
+              ]
+          )
+
+          (build / "worker-alignment-radar.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload worker-alignment artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: worker-alignment-radar
+          path: |
+            build/dependency-radar-worker-run.json
+            build/docs-search-radar-run.json
+            build/release-readiness-worker-run.json
+            build/worker-alignment-radar-run.json
+            build/worker-alignment-radar.md
+            .sdetkit/agent/template-runs/dependency-radar-worker
+            .sdetkit/agent/template-runs/docs-search-radar
+            .sdetkit/agent/template-runs/release-readiness-worker
+            .sdetkit/agent/template-runs/worker-alignment-radar
+
+      - name: Create or update worker alignment issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const title = `🤖 Worker alignment radar (${weekOf})`;
+            const body = fs.readFileSync('build/worker-alignment-radar.md', 'utf8');
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'automation', color: '5319e7', description: 'Automation and worker alignment' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'automation',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🤖 Worker alignment radar'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'automation', 'priority:medium'],
+              });
+            }

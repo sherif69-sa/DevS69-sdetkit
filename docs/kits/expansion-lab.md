@@ -37,6 +37,8 @@ The validation route map is now available directly via `sdetkit kits route-map`,
 python -m sdetkit kits expand --goal "upgrade umbrella architecture with agentos optimization"
 python -m sdetkit kits radar --repo-usage-tier hot-path --format json
 python -m sdetkit kits route-map --impact-area runtime-core --limit 5
+python -m sdetkit agent templates run dependency-radar-worker
+python -m sdetkit agent templates run worker-alignment-radar
 ```
 
 ## How to use it well

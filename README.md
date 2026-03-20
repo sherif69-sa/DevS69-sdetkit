@@ -39,6 +39,9 @@ python -m sdetkit kits optimize --goal "upgrade umbrella architecture with agent
 python -m sdetkit kits expand --goal "upgrade umbrella architecture with agentos optimization"
 python -m sdetkit kits radar --repo-usage-tier hot-path --format json
 python -m sdetkit kits route-map httpx --repo-usage-tier hot-path --format json
+python -m sdetkit agent templates run dependency-radar-worker
+python -m sdetkit agent templates run validation-route-worker --set query=httpx
+python -m sdetkit agent templates run worker-alignment-radar
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 python -m sdetkit maintenance --include-check github_automation_check --format md
 ```
@@ -173,19 +176,25 @@ The security auto-remediation lane is stronger too: premium gate can now priorit
 
 The GitHub-native maintenance layer is stronger too: beyond the existing GHAS digest, campaign planner, and configuration audit bots, the repo now carries a weekly **GHAS alert SLA tracker** for 7/14/30-day backlog enforcement, a weekly **GHAS metrics export bot** that publishes reusable JSON evidence for dashboards, audits, and roadmap reviews, a weekly **secret protection review bot** for push protection / delegated bypass / validity-check posture, a weekly **repo optimization control-loop bot** that turns `kits optimize`, `kits expand`, and automation coverage into actionable backlog slices, a weekly **docs experience radar bot** that keeps flagship docs, navigation, and search discoverability healthy, and a weekly **release readiness radar bot** that keeps doctor output, release assets, and publishing workflows visible in one operating lane.
 
-The worker layer is stronger too: `sdetkit kits expand --goal "..." --format json` now recommends **worker roles** plus a **worker launch pack** so teams can turn expansion ideas into deterministic AgentOS runs instead of leaving them as backlog text. The repo also ships three aligned worker templates out of the box:
+The worker layer is stronger too: `sdetkit kits expand --goal "..." --format json` now recommends **worker roles** plus a **worker launch pack** so teams can turn expansion ideas into deterministic AgentOS runs instead of leaving them as backlog text. The repo also ships multiple aligned worker templates out of the box:
 
 - `repo-expansion-control` for optimize/expand control-loop artifacts,
+- `dependency-radar-worker` for upgrade inventory, hotspot radar, and validation-route evidence,
+- `validation-route-worker` for refactor-safe route mapping tied to doctor upgrade guidance,
 - `docs-search-radar` for strict docs/search validation with bundled evidence,
 - `release-readiness-worker` for doctor + automation-readiness snapshots before publish windows.
+- `worker-alignment-radar` for keeping the worker pack aligned with automation inventory and expansion signals.
 
 You can run them directly with:
 
 ```bash
 python -m sdetkit kits expand --goal "add more bots workers search and repo expansion" --format json
 python -m sdetkit agent templates run repo-expansion-control
+python -m sdetkit agent templates run dependency-radar-worker
+python -m sdetkit agent templates run validation-route-worker --set query=httpx
 python -m sdetkit agent templates run docs-search-radar
 python -m sdetkit agent templates run release-readiness-worker
+python -m sdetkit agent templates run worker-alignment-radar
 ```
 
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.

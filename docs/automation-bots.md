@@ -24,15 +24,21 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 In addition to scheduled GitHub bots, the repo now ships **AgentOS worker templates** that let maintainers run the same expansion/review loops on demand and keep the outputs deterministic:
 
 - **`repo-expansion-control`** — runs `kits optimize` + `kits expand`, writes JSON artifacts, and bundles them for roadmap / dashboard follow-up.
+- **`dependency-radar-worker`** — captures an offline-safe upgrade inventory, radar snapshot, and validation route map for refactor / dependency review.
+- **`validation-route-worker`** — turns a package or domain query into a route map plus doctor-linked upgrade guidance.
 - **`docs-search-radar`** — runs a strict MkDocs build, captures the build log, and bundles docs-search evidence for later review.
 - **`release-readiness-worker`** — snapshots `doctor` plus `github_automation_check` so release-readiness follow-up can happen outside of a publish crunch.
+- **`worker-alignment-radar`** — keeps expansion recommendations, automation coverage, and template inventory aligned with the repo's active worker surface.
 
 Recommended local launches:
 
 ```bash
 python -m sdetkit agent templates run repo-expansion-control
+python -m sdetkit agent templates run dependency-radar-worker
+python -m sdetkit agent templates run validation-route-worker --set query=httpx
 python -m sdetkit agent templates run docs-search-radar
 python -m sdetkit agent templates run release-readiness-worker
+python -m sdetkit agent templates run worker-alignment-radar
 python -m sdetkit kits expand --goal "add more bots workers search and repo expansion" --format json
 ```
 
@@ -61,6 +67,7 @@ python -m sdetkit kits expand --goal "add more bots workers search and repo expa
 - **`workflow-governance-bot.yml`** — publishes a monthly workflow-governance audit for permissions, SHA pinning, and manual recovery posture.
 - **`docs-experience-bot.yml`** — publishes a weekly docs-experience radar issue plus JSON artifact covering navigation coverage, search posture, and flagship-doc visibility.
 - **`release-readiness-radar-bot.yml`** — publishes a weekly release-readiness radar issue with doctor output, release asset freshness, and release-workflow coverage.
+- **`worker-alignment-bot.yml`** — runs the aligned worker templates together and publishes a weekly worker/radar issue with deterministic artifact links.
 - **`contributor-onboarding-bot.yml`** — keeps contributor guidance discoverable.
 - **`pr-helper-bot.yml` / `pr-quality-comment.yml`** — keep pull requests reviewable and actionable.
 
@@ -211,6 +218,17 @@ It now:
 - opens a date-scoped `🚀 Release readiness radar (...)` issue,
 - uploads `build/release-readiness-radar.json` plus the raw doctor/maintenance payloads as workflow artifacts.
 
+### `worker-alignment-bot.yml`
+
+This bot turns the worker layer into a first-class operating lane instead of leaving the templates as individual commands maintainers have to remember.
+
+It now:
+
+- runs `dependency-radar-worker`, `docs-search-radar`, `release-readiness-worker`, and `worker-alignment-radar` on a weekly cadence,
+- uploads both the per-worker run records and the template output directories as reusable artifacts,
+- opens a date-scoped `🤖 Worker alignment radar (...)` issue,
+- keeps the worker surface aligned with dependency, docs, release, and automation-review loops.
+
 ## Recommended weekly maintainer flow
 
 1. Open the latest **GHAS digest** issue.
@@ -224,8 +242,9 @@ It now:
 9. Open the latest **repo optimization control loop** issue and pick one `now` candidate or search mission.
 10. Open the latest **docs experience radar** issue and fold the highest-value orphan docs or missing flagship links back into the canonical journeys.
 11. Open the latest **release readiness radar** issue before a publish window or docs release push.
-12. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
-13. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+12. Open the latest **worker alignment radar** issue and refresh any stale worker/template lanes before they drift from the base automation surface.
+13. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
+14. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 
@@ -238,6 +257,8 @@ python -m sdetkit kits optimize --goal "add more helpful automation bots and Git
 python -m sdetkit kits expand --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json
 python -m sdetkit maintenance --include-check github_automation_check --format md
 python -m sdetkit maintenance --include-check github_automation_check --format json | jq '.checks.github_automation_check.details.ghas_update_tracks'
+python -m sdetkit agent templates run dependency-radar-worker
+python -m sdetkit agent templates run worker-alignment-radar
 ```
 
 ## What this unlocks for the repo
@@ -254,6 +275,7 @@ These bots make the repo more than a set of commands; they turn it into a contin
 - **scheduled dependency prioritization**,
 - **a docs information-architecture control loop instead of ad hoc nav cleanup**,
 - **a recurring release-ops radar for trust-asset and workflow freshness**,
+- **a worker-alignment control loop that keeps template automation synchronized with the repo's strongest maintenance lanes**,
 - **clearer issue-driven follow-up**,
 - **smaller validation loops for upgrades and refactors**,
 - **less hidden drift between security posture and maintenance work**.

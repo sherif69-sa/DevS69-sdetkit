@@ -128,7 +128,11 @@ def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path:
     assert "runtime-watchlist" in candidate_ids
     assert "dependency-radar" in mission_topics
     assert "validation-route-map" in mission_topics
+    assert "worker-automation-alignment" in worker_ids
     assert "worker-optimization-control" in worker_ids
+    assert "dependency-radar-worker" in launch_templates
+    assert "validation-route-worker" in launch_templates
+    assert "worker-alignment-radar" in launch_templates
     assert "repo-expansion-control" in launch_templates
     assert payload["worker_launch_pack"]
     assert track_names == {"now", "next", "later"}

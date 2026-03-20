@@ -133,3 +133,48 @@ def test_template_run_supports_repo_expansion_and_release_workers(tmp_path: Path
     assert (release_out / "doctor.json").exists()
     assert (release_out / "automation-check.json").exists()
     assert (release_out / "bundle.tar").exists()
+
+
+def test_template_run_supports_new_alignment_workers(tmp_path: Path) -> None:
+    repo_root = Path.cwd()
+
+    dependency_template = template_by_id(repo_root, "dependency-radar-worker")
+    dependency_out = tmp_path / "dependency"
+    dependency_record = run_template(
+        repo_root,
+        template=dependency_template,
+        set_values={},
+        output_dir=dependency_out,
+    )
+    assert dependency_record["status"] == "ok"
+    assert (dependency_out / "dependency-radar.json").exists()
+    assert (dependency_out / "radar.json").exists()
+    assert (dependency_out / "route-map.json").exists()
+    assert (dependency_out / "bundle.tar").exists()
+
+    validation_template = template_by_id(repo_root, "validation-route-worker")
+    validation_out = tmp_path / "validation"
+    validation_record = run_template(
+        repo_root,
+        template=validation_template,
+        set_values={"query": "httpx"},
+        output_dir=validation_out,
+    )
+    assert validation_record["status"] == "ok"
+    assert (validation_out / "route-map.json").exists()
+    assert (validation_out / "doctor-upgrade-audit.md").exists()
+    assert (validation_out / "bundle.tar").exists()
+
+    alignment_template = template_by_id(repo_root, "worker-alignment-radar")
+    alignment_out = tmp_path / "alignment"
+    alignment_record = run_template(
+        repo_root,
+        template=alignment_template,
+        set_values={},
+        output_dir=alignment_out,
+    )
+    assert alignment_record["status"] == "ok"
+    assert (alignment_out / "expand.json").exists()
+    assert (alignment_out / "automation-check.json").exists()
+    assert (alignment_out / "templates.json").exists()
+    assert (alignment_out / "bundle.tar").exists()

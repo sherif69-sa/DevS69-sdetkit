@@ -1546,10 +1546,12 @@ def _recommended_workers(
                 "id": "worker-dependency-radar",
                 "role": "upgrade-scout",
                 "focus": "Turn dependency heat into a recurring maintenance watchlist.",
-                "template": "repo-expansion-control",
+                "template": "dependency-radar-worker",
                 "outputs": [
-                    ".sdetkit/agent/template-runs/repo-expansion-control/expand.json",
-                    ".sdetkit/agent/template-runs/repo-expansion-control/bundle.tar",
+                    ".sdetkit/agent/template-runs/dependency-radar-worker/dependency-radar.json",
+                    ".sdetkit/agent/template-runs/dependency-radar-worker/radar.json",
+                    ".sdetkit/agent/template-runs/dependency-radar-worker/route-map.json",
+                    ".sdetkit/agent/template-runs/dependency-radar-worker/bundle.tar",
                 ],
                 "commands": [
                     "python -m sdetkit kits radar --repo-usage-tier hot-path --format json",
@@ -1564,10 +1566,11 @@ def _recommended_workers(
                 "id": "worker-validation-route",
                 "role": "refactor-router",
                 "focus": "Map refactors and upgrades to the smallest safe proof loop.",
-                "template": "repo-expansion-control",
+                "template": "validation-route-worker",
                 "outputs": [
-                    ".sdetkit/agent/template-runs/repo-expansion-control/expand.json",
-                    ".sdetkit/agent/template-runs/repo-expansion-control/plan.md",
+                    ".sdetkit/agent/template-runs/validation-route-worker/route-map.json",
+                    ".sdetkit/agent/template-runs/validation-route-worker/doctor-upgrade-audit.md",
+                    ".sdetkit/agent/template-runs/validation-route-worker/bundle.tar",
                 ],
                 "commands": [
                     "python -m sdetkit kits route-map httpx --repo-usage-tier hot-path --format json",
@@ -1614,6 +1617,26 @@ def _recommended_workers(
 
     workers.append(
         {
+            "id": "worker-automation-alignment",
+            "role": "worker-orchestrator",
+            "focus": "Keep worker packs, automation inventory, and expansion recommendations aligned.",
+            "template": "worker-alignment-radar",
+            "outputs": [
+                ".sdetkit/agent/template-runs/worker-alignment-radar/expand.json",
+                ".sdetkit/agent/template-runs/worker-alignment-radar/automation-check.json",
+                ".sdetkit/agent/template-runs/worker-alignment-radar/templates.json",
+                ".sdetkit/agent/template-runs/worker-alignment-radar/bundle.tar",
+            ],
+            "commands": [
+                f'python -m sdetkit kits expand --goal "{goal_text}" --format json',
+                "python -m sdetkit maintenance --include-check github_automation_check --format json",
+                "python -m sdetkit agent templates list",
+            ],
+        }
+    )
+
+    workers.append(
+        {
             "id": "worker-optimization-control",
             "role": "control-plane-operator",
             "focus": "Join optimize, expand, and dashboard artifacts into one repeatable control loop.",
@@ -1629,7 +1652,7 @@ def _recommended_workers(
         }
     )
 
-    return workers[:5]
+    return workers[:6]
 
 
 def _worker_launch_pack(

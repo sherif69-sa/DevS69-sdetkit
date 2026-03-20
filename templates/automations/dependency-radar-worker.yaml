@@ -1,0 +1,31 @@
+metadata:
+  id: dependency-radar-worker
+  title: Dependency Radar Worker
+  version: 1.0.0
+  description: Capture upgrade inventory, dependency radar, and validation routes as a deterministic worker bundle.
+workflow:
+  - id: dependency-audit
+    action: shell.run
+    with:
+      cmd: python -m sdetkit intelligence upgrade-audit --format json --used-in-repo-only --top 10 --offline
+      save_stdout: ${{run.output_dir}}/dependency-radar.json
+  - id: radar
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits radar --repo-usage-tier hot-path --format json
+      save_stdout: ${{run.output_dir}}/radar.json
+  - id: route-map
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits route-map --impact-area runtime-core --limit 5 --format json
+      save_stdout: ${{run.output_dir}}/route-map.json
+  - id: summary
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/summary.md
+      content: "Dependency radar worker summary: captured dependency-radar.json, radar.json, route-map.json, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

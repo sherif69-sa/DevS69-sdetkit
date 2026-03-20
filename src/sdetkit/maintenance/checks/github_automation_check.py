@@ -39,6 +39,7 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
     "expansion_bots": {
         "docs-experience-bot.yml": ("Docs experience radar bot", True),
         "release-readiness-radar-bot.yml": ("Release readiness radar bot", True),
+        "worker-alignment-bot.yml": ("Worker alignment bot", True),
     },
     "collaboration_bots": {
         "pr-helper-bot.yml": ("PR helper bot", False),
@@ -164,6 +165,15 @@ _EXPANSION_UPDATE_TRACKS: list[dict[str, str]] = [
             "freshness checks for roadmap, changelog, and release playbook assets."
         ),
         "workflow": "release-readiness-radar-bot.yml",
+    },
+    {
+        "id": "worker_alignment",
+        "title": "Worker alignment radar",
+        "description": (
+            "Run the aligned worker templates together so expansion guidance, dependency review, "
+            "docs posture, and release readiness stay synchronized with the repo's base code."
+        ),
+        "workflow": "worker-alignment-bot.yml",
     },
 ]
 

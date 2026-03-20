@@ -54,3 +54,9 @@ Use `sdetkit agent templates pack` to create a deterministic tar archive of temp
 - `precommit-style-checks`
 - `dependency-outdated-report`
 - `ci-artifact-bundle`
+- `dependency-radar-worker`
+- `validation-route-worker`
+- `worker-alignment-radar`
+- `docs-search-radar`
+- `release-readiness-worker`
+- `repo-expansion-control`
