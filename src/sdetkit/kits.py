@@ -865,6 +865,178 @@ def route_map_payload(
     }
 
 
+def radar_payload(
+    *,
+    root: Path,
+    query: str | None = None,
+    repo_usage_tier: str | None = None,
+    impact_area: str | None = None,
+    limit: int = 5,
+) -> dict[str, object]:
+    upgrade_inventory = _upgrade_inventory(root)
+    route_map = _payload_list(upgrade_inventory.get("route_map"))
+    route_result = route_map_payload(
+        root=root,
+        query=query,
+        repo_usage_tier=repo_usage_tier,
+        impact_area=impact_area,
+        limit=limit,
+    )
+    filtered_matches = _payload_list(route_result.get("matches"))
+    release_freshness_summary = _payload_list(upgrade_inventory.get("release_freshness_summary"))
+
+    hot_path_packages = sum(
+        1 for item in route_map if str(item.get("repo_usage_tier", "")).lower() == "hot-path"
+    )
+    runtime_core_packages = sum(
+        1 for item in route_map if str(item.get("impact_area", "")).lower() == "runtime-core"
+    )
+    quality_tooling_packages = sum(
+        1 for item in route_map if str(item.get("impact_area", "")).lower() == "quality-tooling"
+    )
+    fresh_release_packages = sum(
+        int(item.get("count", 0))
+        for item in release_freshness_summary
+        if str(item.get("release_freshness", "")).lower() == "fresh-release"
+    )
+
+    watchlists = {
+        "hot_path": [
+            item for item in route_map if str(item.get("repo_usage_tier", "")).lower() == "hot-path"
+        ][: max(limit, 1)],
+        "runtime_core": [
+            item for item in route_map if str(item.get("impact_area", "")).lower() == "runtime-core"
+        ][: max(limit, 1)],
+        "quality_tooling": [
+            item
+            for item in route_map
+            if str(item.get("impact_area", "")).lower() == "quality-tooling"
+        ][: max(limit, 1)],
+        "fresh_releases": release_freshness_summary[: max(limit, 1)],
+    }
+
+    recommended_commands = _string_list(upgrade_inventory.get("recommended_commands"))
+    if repo_usage_tier:
+        recommended_commands.append(
+            "python -m sdetkit kits route-map "
+            f"--repo-usage-tier {repo_usage_tier} --format json"
+        )
+    if impact_area:
+        recommended_commands.append(
+            f"python -m sdetkit kits route-map --impact-area {impact_area} --format json"
+        )
+
+    dashboard_cards = [
+        {
+            "id": "maintenance-surface",
+            "title": "Maintenance surface",
+            "metric": int(upgrade_inventory.get("packages_audited", 0)),
+            "summary": "Total packages in the manifest-aware upgrade inventory.",
+            "commands": recommended_commands[:2],
+        },
+        {
+            "id": "hot-path-watchlist",
+            "title": "Hot-path watchlist",
+            "metric": hot_path_packages,
+            "summary": "Packages with the highest observed repo usage and the smallest safe proof loops.",
+            "commands": [
+                "python -m sdetkit intelligence upgrade-audit --used-in-repo-only "
+                "--repo-usage-tier hot-path --top 5 --format md",
+                "python -m sdetkit kits route-map --repo-usage-tier hot-path --format json",
+            ],
+        },
+        {
+            "id": "runtime-core-watchlist",
+            "title": "Runtime-core watchlist",
+            "metric": runtime_core_packages,
+            "summary": "Release-critical runtime packages that deserve a tighter maintenance cadence.",
+            "commands": [
+                "python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --format md",
+                "bash quality.sh ci",
+            ],
+        },
+        {
+            "id": "quality-tooling-watchlist",
+            "title": "Quality-tooling watchlist",
+            "metric": quality_tooling_packages,
+            "summary": "Tooling packages that influence local/CI proof speed and repo confidence.",
+            "commands": [
+                "python -m sdetkit intelligence upgrade-audit --impact-area quality-tooling --format md",
+                "bash quality.sh type",
+            ],
+        },
+    ]
+
+    if fresh_release_packages:
+        dashboard_cards.append(
+            {
+                "id": "fresh-release-fast-lane",
+                "title": "Fresh-release fast lane",
+                "metric": fresh_release_packages,
+                "summary": "Recently published releases that are cheap to validate before they age into backlog noise.",
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --max-release-age-days 14 --format md",
+                    "bash quality.sh ci",
+                ],
+            }
+        )
+
+    maintenance_lanes = [
+        {
+            "id": "route-hotspots",
+            "title": "Route the hottest packages first",
+            "summary": (
+                "Use repo usage tier and impact area to shrink upgrade verification to the "
+                "smallest safe proof loop."
+            ),
+            "commands": [
+                "python -m sdetkit kits route-map --repo-usage-tier hot-path --format json",
+                "python -m sdetkit kits route-map --impact-area runtime-core --format json",
+            ],
+        },
+        {
+            "id": "audit-maintenance",
+            "title": "Audit and prioritize dependency maintenance",
+            "summary": "Review the highest-signal upgrade queue before broader umbrella optimization work.",
+            "commands": recommended_commands[:3],
+        },
+        {
+            "id": "governance-export",
+            "title": "Export recurring radar reviews through AgentOS",
+            "summary": "Capture the dependency radar as a recurring review artifact instead of a one-off report.",
+            "commands": [
+                'sdetkit agent run "template:dependency-outdated-report" --approve',
+                "sdetkit agent dashboard build --format html",
+            ],
+        },
+    ]
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "status": route_result.get("status", upgrade_inventory.get("status", "missing")),
+        "summary": (
+            "Dependency radar dashboard derived from the repo's manifest-aware upgrade inventory, "
+            "route map, and maintenance watchlists."
+        ),
+        "query": query,
+        "repo_usage_tier": repo_usage_tier,
+        "impact_area": impact_area,
+        "headline_metrics": {
+            "packages_audited": int(upgrade_inventory.get("packages_audited", 0)),
+            "filtered_matches": len(filtered_matches),
+            "hot_path_packages": hot_path_packages,
+            "runtime_core_packages": runtime_core_packages,
+            "quality_tooling_packages": quality_tooling_packages,
+            "fresh_release_packages": fresh_release_packages,
+        },
+        "dashboard_cards": dashboard_cards,
+        "hotspots": filtered_matches[: max(limit, 1)],
+        "watchlists": watchlists,
+        "maintenance_lanes": maintenance_lanes,
+        "recommended_commands": recommended_commands,
+    }
+
+
 def _upgrade_execution_lane(upgrade_inventory: Payload) -> Payload:
     recommended_commands = [str(item) for item in _string_list(upgrade_inventory.get("recommended_commands"))]
     priority_packages = _payload_list(upgrade_inventory.get("priority_packages"))
@@ -1712,7 +1884,16 @@ def main(argv: list[str] | None = None) -> int:
         "action",
         nargs="?",
         default="list",
-        choices=["list", "describe", "search", "blueprint", "optimize", "expand", "route-map"],
+        choices=[
+            "list",
+            "describe",
+            "search",
+            "blueprint",
+            "optimize",
+            "expand",
+            "route-map",
+            "radar",
+        ],
     )
     parser.add_argument("target", nargs="?", default=None)
     parser.add_argument("--format", choices=["json", "text"], default="text")
@@ -1956,6 +2137,54 @@ def main(argv: list[str] | None = None) -> int:
             for path in _string_list(item.get("repo_usage_files"))[:2]:
                 print(f"  usage: {path}")
             print(f"  next action: {item['next_action']}")
+        return 0
+
+    if ns.action == "radar":
+        query = str(ns.query or ns.target or "").strip() or None
+        radar_result = radar_payload(
+            root=Path(str(ns.repo_root)).resolve(),
+            query=query,
+            repo_usage_tier=ns.repo_usage_tier,
+            impact_area=ns.impact_area,
+            limit=ns.limit,
+        )
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(radar_result))
+            return 0
+        print("Dependency radar dashboard")
+        if query:
+            print(f"query: {query}")
+        if ns.repo_usage_tier:
+            print(f"repo usage tier: {ns.repo_usage_tier}")
+        if ns.impact_area:
+            print(f"impact area: {ns.impact_area}")
+        headline_metrics = _payload_dict(radar_result.get("headline_metrics"))
+        print(
+            "headline metrics: "
+            f"packages={headline_metrics.get('packages_audited', 0)}, "
+            f"filtered={headline_metrics.get('filtered_matches', 0)}, "
+            f"hot-path={headline_metrics.get('hot_path_packages', 0)}, "
+            f"runtime-core={headline_metrics.get('runtime_core_packages', 0)}"
+        )
+        print("dashboard cards:")
+        for item in _payload_list(radar_result.get("dashboard_cards")):
+            print(f"- {item['title']}: metric={item['metric']}")
+            print(f"  {item['summary']}")
+            for command in _string_list(item.get("commands"))[:2]:
+                print(f"  - command: {command}")
+        print("hotspots:")
+        for item in _payload_list(radar_result.get("hotspots")):
+            print(
+                f"- {item['package']} [{item['impact_area']} / {item['repo_usage_tier']}] "
+                f"count={item['repo_usage_count']}"
+            )
+            print(f"  primary validation: {item['primary_validation']}")
+            print(f"  next action: {item['next_action']}")
+        print("maintenance lanes:")
+        for item in _payload_list(radar_result.get("maintenance_lanes")):
+            print(f"- {item['title']}: {item['summary']}")
+            for command in _string_list(item.get("commands"))[:2]:
+                print(f"  - command: {command}")
         return 0
 
     if ns.target:

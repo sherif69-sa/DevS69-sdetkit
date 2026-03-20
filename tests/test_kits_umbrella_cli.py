@@ -149,3 +149,13 @@ def test_kits_route_map_emits_searchable_validation_routes() -> None:
     top = payload["matches"][0]
     assert top["package"] == "httpx"
     assert top["primary_validation"]
+
+
+def test_kits_radar_emits_dependency_dashboard_json() -> None:
+    result = _run("kits", "radar", "httpx", "--repo-usage-tier", "hot-path", "--format", "json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
+    assert payload["headline_metrics"]["packages_audited"] >= 1
+    assert payload["dashboard_cards"]
+    assert payload["maintenance_lanes"]

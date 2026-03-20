@@ -160,3 +160,38 @@ def test_route_map_payload_surfaces_primary_validation_routes(tmp_path: Path) ->
     assert match["package"] == "httpx"
     assert match["primary_validation"]
     assert "src/demo/api.py" in match["repo_usage_files"]
+
+
+def test_radar_payload_exposes_dashboard_cards_and_watchlists(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        "name='x'\n"
+        "version='0.1.0'\n"
+        "dependencies=['httpx>=0.28.1,<1', 'rich>=13,<14']\n"
+        "[project.optional-dependencies]\n"
+        "docs=['mkdocs==1.6.1']\n",
+        encoding="utf-8",
+    )
+    src_dir = tmp_path / "src" / "demo"
+    src_dir.mkdir(parents=True, exist_ok=True)
+    (src_dir / "api.py").write_text("import httpx\nimport rich\n", encoding="utf-8")
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir(parents=True, exist_ok=True)
+    (tests_dir / "test_docs.py").write_text("import mkdocs\n", encoding="utf-8")
+
+    payload = kits.radar_payload(
+        root=tmp_path,
+        query="httpx",
+        repo_usage_tier="edge",
+        impact_area="runtime-core",
+        limit=5,
+    )
+
+    assert payload["status"] == "ready"
+    assert payload["headline_metrics"]["packages_audited"] == 3
+    assert payload["headline_metrics"]["filtered_matches"] == 1
+    assert payload["headline_metrics"]["runtime_core_packages"] >= 1
+    assert payload["dashboard_cards"]
+    assert payload["hotspots"][0]["package"] == "httpx"
+    assert payload["watchlists"]["runtime_core"]
+    assert payload["maintenance_lanes"][0]["id"] == "route-hotspots"
