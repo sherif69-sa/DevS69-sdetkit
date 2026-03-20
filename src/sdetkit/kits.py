@@ -949,6 +949,273 @@ def _innovation_opportunities(
     return opportunities[:5]
 
 
+def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payload]:
+    goal_text = goal or "umbrella optimization"
+    repo_signals = _payload_dict(optimize_result.get("repo_signals"))
+    innovation_ids = {
+        str(item.get("id", ""))
+        for item in _payload_list(optimize_result.get("innovation_opportunities"))
+    }
+    validation_summary = _payload_list(_payload_dict(optimize_result.get("upgrade_inventory")).get(
+        "validation_summary"
+    ))
+    top_validation = _payload_dict(validation_summary[0]) if validation_summary else {}
+    candidates: list[Payload] = []
+
+    if "dependency-radar" in innovation_ids:
+        candidates.append(
+            {
+                "id": "dependency-radar-dashboard",
+                "title": "Dependency radar dashboard",
+                "priority": "now",
+                "effort": "medium",
+                "summary": (
+                    "Promote the upgrade inventory into a reusable dashboard artifact for recurring "
+                    "maintenance reviews."
+                ),
+                "deliverables": [
+                    "scheduled upgrade-audit artifact",
+                    "dashboard-friendly JSON export",
+                    "docs page for maintenance review flow",
+                ],
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --format json --top 10",
+                    "sdetkit agent dashboard build --format html",
+                ],
+            }
+        )
+
+    if "validation-command-index" in innovation_ids:
+        candidates.append(
+            {
+                "id": "validation-route-map",
+                "title": "Validation route map",
+                "priority": "now",
+                "effort": "small",
+                "summary": (
+                    "Expose the hottest package-to-validation lanes as a searchable route map so "
+                    "refactors and upgrades point to the smallest safe proof loop."
+                ),
+                "deliverables": [
+                    "searchable command index",
+                    "markdown export for docs",
+                    "json payload for CI comments",
+                ],
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --format md",
+                    "python -m sdetkit doctor --upgrade-audit --format md",
+                ],
+                "primary_validation": str(top_validation.get("command", "")),
+            }
+        )
+
+    if "adapter-activation" in innovation_ids:
+        candidates.append(
+            {
+                "id": "adapter-smoke-pack",
+                "title": "Adapter smoke pack",
+                "priority": "next",
+                "effort": "medium",
+                "summary": (
+                    "Turn optional notification adapters into a clearer product surface with smoke "
+                    "tests, quickstarts, and contributor-friendly examples."
+                ),
+                "deliverables": [
+                    "adapter quickstart docs",
+                    "smoke coverage for optional channels",
+                    "integration-ready sample payloads",
+                ],
+                "commands": [
+                    "python -m pytest -q tests/test_notify_plugins.py tests/test_notify_plugins_extra.py",
+                    "python -m sdetkit kits describe integration",
+                ],
+            }
+        )
+
+    if "runtime-core-fast-follow" in innovation_ids:
+        candidates.append(
+            {
+                "id": "runtime-watchlist",
+                "title": "Runtime fast-follow watchlist",
+                "priority": "next",
+                "effort": "small",
+                "summary": (
+                    "Create a dedicated watchlist for hot-path runtime packages so release-critical "
+                    "dependencies receive faster follow-up than broader maintenance batches."
+                ),
+                "deliverables": [
+                    "runtime-only upgrade report",
+                    "fast-follow review cadence",
+                    "quality gate linkage",
+                ],
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --format md",
+                    "bash quality.sh cov",
+                ],
+            }
+        )
+
+    if "manifest-drift-scorecard" in innovation_ids:
+        candidates.append(
+            {
+                "id": "manifest-drift-control",
+                "title": "Manifest drift control",
+                "priority": "next",
+                "effort": "medium",
+                "summary": (
+                    "Productize cross-manifest visibility so flexible project metadata and pinned CI "
+                    "constraints stay aligned during repo evolution."
+                ),
+                "deliverables": [
+                    "drift scorecard",
+                    "source-by-source manifest summary",
+                    "promotion checklist for pin refreshes",
+                ],
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --format json",
+                    f'sdetkit kits optimize --goal "{goal_text}" --format json',
+                ],
+            }
+        )
+
+    if repo_signals.get("agent_templates") and repo_signals.get("quality_script"):
+        candidates.append(
+            {
+                "id": "optimization-control-center",
+                "title": "Optimization control center",
+                "priority": "later",
+                "effort": "medium",
+                "summary": (
+                    "Join optimize, boost, and AgentOS dashboard outputs into one recurring control "
+                    "center for repo-wide upgrade execution."
+                ),
+                "deliverables": [
+                    "single control-center report",
+                    "recurring AgentOS workflow",
+                    "history export for upgrade cycles",
+                ],
+                "commands": [
+                    "bash quality.sh boost",
+                    'sdetkit agent run "umbrella architecture optimization blueprint" --approve',
+                    "sdetkit agent dashboard build --format html",
+                ],
+            }
+        )
+
+    return candidates[:6]
+
+
+def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> list[Payload]:
+    goal_text = goal or "umbrella optimization"
+    missions: list[Payload] = []
+    for candidate in feature_candidates:
+        candidate_id = str(candidate.get("id", ""))
+        if candidate_id == "dependency-radar-dashboard":
+            missions.append(
+                {
+                    "topic": "dependency-radar",
+                    "query": f"{goal_text} dependency radar recurring upgrade report",
+                    "intent": "Find the best recurring review loop for dependency visibility.",
+                }
+            )
+        elif candidate_id == "validation-route-map":
+            missions.append(
+                {
+                    "topic": "validation-route-map",
+                    "query": f"{goal_text} validation command index package coverage",
+                    "intent": "Find the smallest safe validation routes for upgrades and refactors.",
+                }
+            )
+        elif candidate_id == "adapter-smoke-pack":
+            missions.append(
+                {
+                    "topic": "adapter-activation",
+                    "query": f"{goal_text} optional adapter smoke coverage integration quickstart",
+                    "intent": "Expand optional adapters into a more discoverable integration surface.",
+                }
+            )
+        elif candidate_id == "runtime-watchlist":
+            missions.append(
+                {
+                    "topic": "runtime-fast-follow",
+                    "query": f"{goal_text} runtime core fast follow release watchlist",
+                    "intent": "Keep hot-path dependencies on a tighter release-review cadence.",
+                }
+            )
+        elif candidate_id == "manifest-drift-control":
+            missions.append(
+                {
+                    "topic": "manifest-drift",
+                    "query": f"{goal_text} manifest drift scorecard constraints pyproject",
+                    "intent": "Reduce hidden drift between flexible metadata and pinned CI inputs.",
+                }
+            )
+        elif candidate_id == "optimization-control-center":
+            missions.append(
+                {
+                    "topic": "optimization-control-center",
+                    "query": f"{goal_text} agentos control center quality boost dashboard",
+                    "intent": "Combine optimize, boost, and AgentOS history into one operating view.",
+                }
+            )
+    return missions[:6]
+
+
+def expand_payload(
+    *,
+    root: Path,
+    goal: str | None,
+    selected_kits: list[str],
+    limit: int = 3,
+) -> dict[str, object]:
+    optimize_result = optimize_payload(
+        root=root,
+        goal=goal,
+        selected_kits=selected_kits,
+        limit=limit,
+    )
+    feature_candidates = _feature_candidates(goal, optimize_result)
+    search_missions = _search_missions(goal, feature_candidates)
+    rollout_tracks = [
+        {
+            "track": "now",
+            "focus": "Land the highest-leverage documentation and dashboard upgrades first.",
+            "candidate_ids": [
+                str(item.get("id", ""))
+                for item in feature_candidates
+                if str(item.get("priority", "")) == "now"
+            ],
+        },
+        {
+            "track": "next",
+            "focus": "Promote validation-linked feature additions after the core route map is live.",
+            "candidate_ids": [
+                str(item.get("id", ""))
+                for item in feature_candidates
+                if str(item.get("priority", "")) == "next"
+            ],
+        },
+        {
+            "track": "later",
+            "focus": "Collapse the strongest lanes into a recurring control-center workflow.",
+            "candidate_ids": [
+                str(item.get("id", ""))
+                for item in feature_candidates
+                if str(item.get("priority", "")) == "later"
+            ],
+        },
+    ]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "goal": goal,
+        "selected_kits": optimize_result.get("selected_kits", []),
+        "optimize": optimize_result,
+        "feature_candidates": feature_candidates,
+        "search_missions": search_missions,
+        "rollout_tracks": rollout_tracks,
+    }
+
+
 def _auto_fix_lane(
     repo_signals: dict[str, bool], quality_lane: Payload, goal: str | None
 ) -> Payload:
@@ -1361,7 +1628,7 @@ def main(argv: list[str] | None = None) -> int:
         "action",
         nargs="?",
         default="list",
-        choices=["list", "describe", "search", "blueprint", "optimize"],
+        choices=["list", "describe", "search", "blueprint", "optimize", "expand"],
     )
     parser.add_argument("target", nargs="?", default=None)
     parser.add_argument("--format", choices=["json", "text"], default="text")
@@ -1526,6 +1793,38 @@ def main(argv: list[str] | None = None) -> int:
         print("next boosts:")
         for item in _payload_list(optimize_result.get("next_boosts")):
             print(f"- {item['title']}: {item['summary']}")
+        return 0
+
+    if ns.action == "expand":
+        goal = str(ns.goal or ns.target or "").strip() or None
+        expand_result = expand_payload(
+            root=Path(str(ns.repo_root)).resolve(),
+            goal=goal,
+            selected_kits=[str(item) for item in ns.selected_kits],
+            limit=ns.limit,
+        )
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(expand_result))
+            return 0
+        print("Umbrella expansion plan")
+        if goal:
+            print(f"goal: {goal}")
+        print("feature candidates:")
+        for item in _payload_list(expand_result.get("feature_candidates")):
+            print(
+                f"- {item['title']} [{item['priority']}/{item['effort']}]: {item['summary']}"
+            )
+            for deliverable in _string_list(item.get("deliverables")):
+                print(f"  - deliverable: {deliverable}")
+        print("search missions:")
+        for item in _payload_list(expand_result.get("search_missions")):
+            print(f"- {item['topic']}: {item['query']}")
+            print(f"  intent: {item['intent']}")
+        print("rollout tracks:")
+        for item in _payload_list(expand_result.get("rollout_tracks")):
+            ids = ", ".join(_string_list(item.get("candidate_ids"))) or "none"
+            print(f"- {item['track']}: {item['focus']}")
+            print(f"  candidates: {ids}")
         return 0
 
     if ns.target:

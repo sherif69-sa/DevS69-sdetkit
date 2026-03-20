@@ -35,6 +35,7 @@ python -m sdetkit kits describe forensics
 python -m sdetkit kits search topology
 python -m sdetkit kits blueprint --goal "agentized release upgrade search"
 python -m sdetkit kits optimize --goal "upgrade umbrella architecture with agentos optimization"
+python -m sdetkit kits expand --goal "upgrade umbrella architecture with agentos optimization"
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 ```
 
@@ -152,6 +153,8 @@ The new optimize surface takes the blueprint one step further by inspecting the 
 When you want that alignment to execute as a single repo-safe lane instead of a planning artifact, `bash quality.sh boost` now chains doctor, intelligent premium auto-fix, the fast gate, premium validation, topology proof, and an umbrella optimization summary into one command.
 
 It now also emits an alignment score so the umbrella architecture has a single numeric readiness signal that can be tracked in CI, dashboards, and AgentOS history exports while the repo keeps getting upgraded.
+
+When you want the repo to go beyond alignment planning and explicitly suggest what to add next, `sdetkit kits expand --goal "..."` turns those optimize signals into prioritized feature candidates, targeted search missions, and rollout tracks. That makes it easier to decide which new addition should land now, which should be queued next, and which search direction is most likely to unlock the next repo-wide upgrade.
 
 The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, can merge in repo-local smart fix scripts from `.sdetkit/premium-remediation-scripts.json`, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 

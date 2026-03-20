@@ -84,3 +84,46 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
     assert payload["doctor_quality_contract"]["auto_fix_commands"]
     assert payload["operating_sequence"][1]["stage"] == "intelligent-autofix"
     assert payload["next_boosts"][0]["id"] == "quality-boost"
+
+
+def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname='x'\nversion='0.1.0'\ndependencies=['httpx>=0.28.1,<1']\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "ci.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "constraints-ci.txt").write_text("ruff==0.15.7\n", encoding="utf-8")
+    (tmp_path / ".sdetkit").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".sdetkit" / "gate.fast.snapshot.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "examples" / "kits" / "integration").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "examples" / "kits" / "integration" / "profile.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+    (tmp_path / "examples" / "kits" / "integration" / "heterogeneous-topology.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+    (tmp_path / "templates" / "automations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "templates" / "automations" / "repo-health-audit.yaml").write_text(
+        "metadata:\n  id: repo-health-audit\n", encoding="utf-8"
+    )
+
+    payload = kits.expand_payload(
+        root=tmp_path,
+        goal="upgrade umbrella architecture with agentos optimization",
+        selected_kits=["release", "integration"],
+        limit=3,
+    )
+
+    candidate_ids = {item["id"] for item in payload["feature_candidates"]}
+    mission_topics = {item["topic"] for item in payload["search_missions"]}
+    track_names = {item["track"] for item in payload["rollout_tracks"]}
+
+    assert payload["optimize"]["alignment_score"]["status"] in {"strong", "maximized"}
+    assert "dependency-radar-dashboard" in candidate_ids
+    assert "validation-route-map" in candidate_ids
+    assert "runtime-watchlist" in candidate_ids
+    assert "dependency-radar" in mission_topics
+    assert "validation-route-map" in mission_topics
+    assert track_names == {"now", "next", "later"}
