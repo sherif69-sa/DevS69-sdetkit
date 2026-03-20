@@ -96,6 +96,7 @@ nav:
       - Test Intelligence Kit: kits/test-intelligence.md
       - Integration Assurance Kit: kits/integration-assurance.md
       - Failure Forensics Kit: kits/failure-forensics.md
+      - Validation route map: kits/validation-route-map.md
       - Expansion lab: kits/expansion-lab.md
   - Team adoption:
       - Adopt in your repository (canonical): adoption.md

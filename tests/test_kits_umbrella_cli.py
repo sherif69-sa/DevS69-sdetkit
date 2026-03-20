@@ -138,3 +138,14 @@ def test_kits_expand_emits_feature_candidates_and_search_missions() -> None:
     candidate_ids = {item["id"] for item in payload["feature_candidates"]}
     assert "dependency-radar-dashboard" in candidate_ids
     assert payload["optimize"]["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
+
+
+def test_kits_route_map_emits_searchable_validation_routes() -> None:
+    result = _run("kits", "route-map", "httpx", "--repo-usage-tier", "hot-path", "--format", "json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
+    assert payload["matches"]
+    top = payload["matches"][0]
+    assert top["package"] == "httpx"
+    assert top["primary_validation"]
