@@ -93,5 +93,9 @@ def test_kits_optimize_emits_alignment_plan_json() -> None:
     assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
     assert payload["doctor_lane"]["command"].startswith("sdetkit doctor ")
     assert payload["quality_gate_lane"]["commands"]
+    assert payload["alignment_score"]["score"] > 0
+    assert payload["doctor_quality_contract"]["entrypoint"] == payload["doctor_lane"]["command"]
+    assert payload["operating_sequence"][0]["stage"] == "doctor-first"
+    assert payload["search_queries"][0]["topic"] == "doctor-upgrade-lane"
     assert any(item["domain"] == "agentos" for item in payload["alignment_matrix"])
     assert payload["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
