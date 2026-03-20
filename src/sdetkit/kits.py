@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Final, TypedDict
 
+from . import upgrade_audit
 from .atomicio import canonical_json_dumps
 
 SCHEMA_VERSION: Final[str] = "sdetkit.kits.catalog.v1"
@@ -666,6 +667,143 @@ def _search_queries(goal: str | None) -> list[dict[str, str]]:
     ]
 
 
+def _upgrade_inventory(root: Path) -> Payload:
+    pyproject_path = root / "pyproject.toml"
+    if not pyproject_path.exists():
+        return {
+            "status": "missing",
+            "summary": "No pyproject.toml was found, so upgrade inventory could not be derived.",
+            "packages_audited": 0,
+            "priority_packages": [],
+            "impact_summary": [],
+            "validation_summary": [],
+            "group_summary": [],
+            "source_summary": [],
+            "recommended_commands": [],
+        }
+
+    requirement_paths = upgrade_audit._discover_requirement_files(root, include_lockfiles=False)
+    dependencies = upgrade_audit._load_dependencies(pyproject_path, requirement_paths)
+    if not dependencies:
+        return {
+            "status": "empty",
+            "summary": "No dependency manifests were discovered for upgrade inventory planning.",
+            "packages_audited": 0,
+            "priority_packages": [],
+            "impact_summary": [],
+            "validation_summary": [],
+            "group_summary": [],
+            "source_summary": [],
+            "recommended_commands": [],
+        }
+
+    by_package: dict[str, list[upgrade_audit.Dependency]] = {}
+    for dep in dependencies:
+        by_package.setdefault(dep.name, []).append(dep)
+
+    package_names = sorted(by_package)
+    project_python_requires = upgrade_audit._load_project_python_requires(pyproject_path)
+    repo_usage = upgrade_audit._collect_repo_usage(root, package_names)
+    reports: list[upgrade_audit.PackageReport] = []
+    for package in package_names:
+        deps = by_package[package]
+        baseline_version = upgrade_audit._pick_current_version(deps)
+        reports.append(
+            upgrade_audit._build_package_report(
+                package,
+                deps,
+                latest_version=baseline_version,
+                release_date=None,
+                project_python_requires=project_python_requires,
+                compatible_version=baseline_version,
+                compatible_release_date=None,
+                compatibility_status="manifest-baseline",
+                metadata_source="manifest",
+                repo_usage_files=repo_usage.get(package, []),
+            )
+        )
+
+    reports = upgrade_audit._sort_reports(reports)
+    priority_packages = sorted(
+        reports,
+        key=lambda report: (
+            -report.repo_usage_count,
+            report.impact_area != "runtime-core",
+            report.name,
+        ),
+    )[:5]
+    hot_path_present = any(report.repo_usage_tier == "hot-path" for report in reports)
+    runtime_core_present = any(report.impact_area == "runtime-core" for report in reports)
+    top_validation = upgrade_audit._validation_summary(reports)
+    recommended_commands = [
+        "python -m sdetkit intelligence upgrade-audit --format json --top 5",
+    ]
+    if hot_path_present:
+        recommended_commands.append(
+            "python -m sdetkit intelligence upgrade-audit --used-in-repo-only "
+            "--repo-usage-tier hot-path --top 5 --format md"
+        )
+    if runtime_core_present:
+        recommended_commands.append(
+            "python -m sdetkit intelligence upgrade-audit --impact-area runtime-core "
+            "--repo-usage-tier hot-path --top 3 --format json"
+        )
+    if top_validation:
+        recommended_commands.append(
+            "python -m sdetkit intelligence upgrade-audit --validation-command "
+            f"\"{top_validation[0]['command']}\" --format md"
+        )
+
+    return {
+        "status": "ready",
+        "summary": (
+            "Manifest-aware upgrade inventory built from declared dependencies, observed repo usage, "
+            "impact areas, and validation lanes."
+        ),
+        "packages_audited": len(reports),
+        "priority_packages": [
+            {
+                "name": report.name,
+                "impact_area": report.impact_area,
+                "repo_usage_tier": report.repo_usage_tier,
+                "repo_usage_count": report.repo_usage_count,
+                "groups": report.groups,
+                "validation_commands": report.validation_commands,
+            }
+            for report in priority_packages
+        ],
+        "impact_summary": upgrade_audit._impact_summary(reports)[:4],
+        "validation_summary": top_validation[:4],
+        "group_summary": upgrade_audit._group_summary(reports)[:4],
+        "source_summary": upgrade_audit._source_summary(reports)[:4],
+        "recommended_commands": recommended_commands,
+    }
+
+
+def _upgrade_execution_lane(upgrade_inventory: Payload) -> Payload:
+    recommended_commands = [str(item) for item in _string_list(upgrade_inventory.get("recommended_commands"))]
+    priority_packages = _payload_list(upgrade_inventory.get("priority_packages"))
+    focus = []
+    if priority_packages:
+        top = priority_packages[0]
+        focus.append(
+            f"Start with {top['name']} because it is {top['repo_usage_tier']} in the repo "
+            f"and lands in the {top['impact_area']} impact area."
+        )
+    if any(item.get("impact_area") == "quality-tooling" for item in priority_packages):
+        focus.append("Keep quality-tooling upgrades coupled to the same validation lane as release confidence.")
+    if any(item.get("impact_area") == "runtime-core" for item in priority_packages):
+        focus.append("Treat runtime-core dependencies as first-class release inputs before broader maintenance batches.")
+    return {
+        "summary": (
+            "Translate upgrade inventory into a narrow execution lane so dependency maintenance stays "
+            "aligned with repo usage and validation coverage."
+        ),
+        "focus": focus,
+        "commands": recommended_commands,
+    }
+
+
 def _auto_fix_lane(
     repo_signals: dict[str, bool], quality_lane: Payload, goal: str | None
 ) -> Payload:
@@ -784,6 +922,7 @@ def optimize_payload(
     limit: int = 3,
 ) -> dict[str, object]:
     blueprint = blueprint_payload(goal=goal, selected_kits=selected_kits, limit=limit)
+    upgrade_inventory = _upgrade_inventory(root)
     repo_signals = {
         "pyproject": _repo_signal(root, "pyproject.toml"),
         "quality_script": _repo_signal(root, "quality.sh"),
@@ -811,6 +950,7 @@ def optimize_payload(
         doctor_lane, quality_lane, integration_lane, auto_fix_lane
     )
     search_queries = _search_queries(goal)
+    upgrade_execution_lane = _upgrade_execution_lane(upgrade_inventory)
     next_boosts = [
         {
             "id": "quality-boost",
@@ -903,6 +1043,8 @@ def optimize_payload(
         "doctor_quality_contract": doctor_quality_contract,
         "operating_sequence": operating_sequence,
         "search_queries": search_queries,
+        "upgrade_inventory": upgrade_inventory,
+        "upgrade_execution_lane": upgrade_execution_lane,
         "missing_domains": missing_domains,
         "performance_boosters": _performance_boosters(repo_signals),
         "next_boosts": next_boosts,
