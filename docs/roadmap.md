@@ -12,7 +12,9 @@ To keep security and maintenance work visible and actionable, the repo runs an a
 - Weekly GHAS alert SLA tracker issue is maintained by `.github/workflows/ghas-alert-sla-bot.yml`.
 - Weekly GHAS metrics snapshot issue/artifact is maintained by `.github/workflows/ghas-metrics-export-bot.yml`.
 - Monthly GHAS configuration audit issue is maintained by `.github/workflows/security-configuration-audit-bot.yml`.
+- Weekly secret protection review issue is maintained by `.github/workflows/secret-protection-review-bot.yml`.
 - Weekly dependency radar issue is maintained by `.github/workflows/dependency-radar-bot.yml`.
+- Weekly repo optimization control-loop issue is maintained by `.github/workflows/repo-optimization-bot.yml`.
 - Security triage should include Dependabot, Code Scanning, Secret Scanning, Dependency Audit, SBOM freshness, dependency review posture, security-configuration visibility, and Actions workflow status review.
 - At least one open enhancement intake issue should exist and be labeled with `enhancement` plus a `priority:*` label.
 
