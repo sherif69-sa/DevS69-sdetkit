@@ -65,6 +65,10 @@ This improves deterministic behavior and repeatability for local-provider runs.
 - `sdetkit agent dashboard build --format {json,md,html,csv}`
   - Builds deterministic dashboard artifacts from `.sdetkit/agent/history/`
   - HTML mode also emits a PR-ready Markdown summary
+- `sdetkit kits search <query>`
+  - Ranks the best umbrella kit for a repo problem statement such as `topology`, `release evidence`, or `upgrade risk`
+- `sdetkit kits blueprint --goal "agentized release upgrade search"`
+  - Produces an umbrella architecture plan that composes kits with AgentOS as the control plane
 - `sdetkit agent demo --scenario repo-enterprise-audit`
   - Runs an offline deterministic end-to-end enterprise audit scenario
 
