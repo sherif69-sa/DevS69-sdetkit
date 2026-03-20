@@ -21,6 +21,7 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
         "ghas-campaign-bot.yml": ("GHAS campaign planner bot", True),
         "ghas-alert-sla-bot.yml": ("GHAS alert SLA tracker bot", True),
         "ghas-metrics-export-bot.yml": ("GHAS metrics export bot", True),
+        "ghas-codeql-hotspots-bot.yml": ("GHAS CodeQL hotspots bot", True),
         "security-configuration-audit-bot.yml": (
             "GHAS security-configuration audit bot",
             True,
@@ -31,6 +32,7 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
     "upgrade_bots": {
         "dependency-radar-bot.yml": ("Dependency radar bot", True),
         "repo-optimization-bot.yml": ("Repo optimization control-loop bot", True),
+        "workflow-governance-bot.yml": ("Workflow governance bot", True),
         "dependency-auto-merge.yml": ("Dependabot auto-merge bot", False),
         "pre-commit-autoupdate.yml": ("Pre-commit auto-update bot", False),
     },
@@ -85,6 +87,15 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
         "workflow": "ghas-metrics-export-bot.yml",
     },
     {
+        "id": "codeql_hotspots",
+        "title": "CodeQL hotspot batching",
+        "description": (
+            "Group open code-scanning alerts by rule and file so maintainers can batch-fix "
+            "the hottest CodeQL hotspots instead of triaging alerts one-by-one."
+        ),
+        "workflow": "ghas-codeql-hotspots-bot.yml",
+    },
+    {
         "id": "security_configurations",
         "title": "Security configuration audits",
         "description": (
@@ -119,6 +130,15 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
             "keep producing actionable backlog slices."
         ),
         "workflow": "repo-optimization-bot.yml",
+    },
+    {
+        "id": "workflow_governance",
+        "title": "Workflow governance audit",
+        "description": (
+            "Audit workflow permissions, action pinning, and manual-recovery coverage so the "
+            "automation surface stays deterministic and least-privilege."
+        ),
+        "workflow": "workflow-governance-bot.yml",
     },
 ]
 

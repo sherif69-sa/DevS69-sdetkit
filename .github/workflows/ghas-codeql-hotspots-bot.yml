@@ -1,0 +1,218 @@
+name: GHAS CodeQL Hotspots Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "45 6 * * 3"
+
+permissions:
+  contents: read
+  issues: write
+  security-events: read
+
+jobs:
+  codeql-hotspots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Build CodeQL hotspot snapshot
+        id: collect
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        env:
+          GHAS_TOKEN: ${{ secrets.GHAS_READ_TOKEN }}
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'security', color: 'b60205', description: 'Security operations and hardening work' },
+              { name: 'ghas', color: '5319e7', description: 'GitHub Advanced Security automation and triage' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const ghasToken = process.env.GHAS_TOKEN || github.token;
+            const headers = {
+              accept: 'application/vnd.github+json',
+              authorization: `Bearer ${ghasToken}`,
+              'x-github-api-version': '2022-11-28',
+            };
+            const notes = [];
+            const dayMs = 24 * 60 * 60 * 1000;
+
+            function ageDays(alert) {
+              const raw = alert.created_at || alert.updated_at || alert.fixed_at;
+              const value = new Date(raw).getTime();
+              if (!Number.isFinite(value)) return 0;
+              return Math.max(0, Math.floor((Date.now() - value) / dayMs));
+            }
+
+            function increment(map, key, template = {}) {
+              const stableKey = key || 'unknown';
+              if (!map.has(stableKey)) map.set(stableKey, { key: stableKey, count: 0, ...template });
+              const bucket = map.get(stableKey);
+              bucket.count += 1;
+              return bucket;
+            }
+
+            let alerts = [];
+            try {
+              alerts = await github.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts', {
+                owner,
+                repo,
+                state: 'open',
+                per_page: 100,
+                headers,
+              });
+            } catch (error) {
+              notes.push(`Code scanning alerts unavailable: ${error.message}. Add GHAS_READ_TOKEN if broader security scopes are required.`);
+            }
+
+            const ruleCounts = new Map();
+            const fileCounts = new Map();
+            const severityCounts = new Map();
+            let aged14 = 0;
+            let aged30 = 0;
+
+            for (const alert of alerts) {
+              const location = alert.most_recent_instance?.location?.path || alert.instances_url || 'unknown';
+              const ruleId = alert.rule?.id || alert.rule?.name || 'unknown-rule';
+              const ruleName = alert.rule?.name || ruleId;
+              const toolName = alert.tool?.name || 'unknown-tool';
+              const severity = String(alert.rule?.security_severity_level || alert.rule?.severity || 'unknown').toLowerCase();
+              const age = ageDays(alert);
+
+              const ruleBucket = increment(ruleCounts, ruleId, {
+                rule_name: ruleName,
+                tool: toolName,
+                severity,
+                oldest_age_days: age,
+              });
+              ruleBucket.oldest_age_days = Math.max(ruleBucket.oldest_age_days || 0, age);
+
+              increment(fileCounts, location, {
+                file: location,
+                highest_severity: severity,
+              });
+              increment(severityCounts, severity, { severity });
+
+              if (age >= 14) aged14 += 1;
+              if (age >= 30) aged30 += 1;
+            }
+
+            const topRules = [...ruleCounts.values()].sort((a, b) => b.count - a.count || b.oldest_age_days - a.oldest_age_days).slice(0, 10);
+            const topFiles = [...fileCounts.values()].sort((a, b) => b.count - a.count).slice(0, 10);
+            const severitySummary = [...severityCounts.values()].sort((a, b) => b.count - a.count);
+            const snapshot = {
+              generated_at: new Date().toISOString(),
+              repository: `${owner}/${repo}`,
+              totals: {
+                open_alerts: alerts.length,
+                alerts_aged_14_days_or_more: aged14,
+                alerts_aged_30_days_or_more: aged30,
+              },
+              top_rules: topRules,
+              top_files: topFiles,
+              severity: severitySummary,
+              notes,
+            };
+
+            fs.mkdirSync('build', { recursive: true });
+            fs.writeFileSync('build/ghas-codeql-hotspots.json', JSON.stringify(snapshot, null, 2) + '\n');
+
+            const body = [
+              'This issue is auto-generated to turn the current CodeQL/code-scanning queue into a hotspot-oriented remediation lane.',
+              '',
+              '## Queue snapshot',
+              `- Open code scanning alerts: **${snapshot.totals.open_alerts}**`,
+              `- Alerts aged 14+ days: **${snapshot.totals.alerts_aged_14_days_or_more}**`,
+              `- Alerts aged 30+ days: **${snapshot.totals.alerts_aged_30_days_or_more}**`,
+              '',
+              '## Top rules to batch-fix',
+              ...(topRules.length
+                ? topRules.map((item) => `- **${item.rule_name}** (\`${item.key}\`, ${item.tool}) — ${item.count} open alert(s), oldest ${item.oldest_age_days} day(s)`)
+                : ['- No open code scanning alerts were returned.']),
+              '',
+              '## Top files / paths',
+              ...(topFiles.length
+                ? topFiles.map((item) => `- **${item.file}** — ${item.count} open alert(s)`)
+                : ['- No file hotspots were returned.']),
+              '',
+              '## Severity mix',
+              ...(severitySummary.length
+                ? severitySummary.map((item) => `- ${item.severity}: **${item.count}**`)
+                : ['- No severity data was returned.']),
+              '',
+              '## Suggested follow-up',
+              '- [ ] Batch the top rule into one remediation PR or issue cluster.',
+              '- [ ] Start with any 14+ day hotspot that touches a hot-path file.',
+              '- [ ] Re-run the GHAS campaign planner after closing the top hotspot to verify backlog reduction.',
+              '',
+              '## Artifact',
+              '- Action artifact: `ghas-codeql-hotspots` (`build/ghas-codeql-hotspots.json`)',
+              '',
+              '## Notes',
+              ...(notes.length ? notes.map((note) => `- ${note}`) : ['- Code scanning APIs responded without fallback warnings.']),
+            ].join('\n');
+
+            fs.writeFileSync('build/ghas-codeql-hotspots.md', body + '\n');
+            core.setOutput('issue_title', `🧪 GHAS CodeQL hotspots (${weekOf})`);
+
+      - name: Upload hotspot artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: ghas-codeql-hotspots
+          path: |
+            build/ghas-codeql-hotspots.json
+            build/ghas-codeql-hotspots.md
+
+      - name: Publish hotspot issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        env:
+          ISSUE_TITLE: ${{ steps.collect.outputs.issue_title }}
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = process.env.ISSUE_TITLE;
+            const body = fs.readFileSync('build/ghas-codeql-hotspots.md', 'utf8');
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'ghas',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧪 GHAS CodeQL hotspots'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'security', 'ghas', 'priority:medium'],
+              });
+            }
