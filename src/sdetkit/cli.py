@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from importlib import metadata
 
 from . import (
+    author_problem,
     apiget,
     community_activation,
     continuous_upgrade_cycle8_closeout,
@@ -265,6 +266,11 @@ Start here:
     )
     _add_passthrough_subcommand(
         sub, "integration", help_text="[Stable/Core] Integration Assurance Kit (primary surface)"
+    )
+    _add_passthrough_subcommand(
+        sub,
+        "author",
+        help_text="[Stable/Core] Platform-style Python problem authoring workflow",
     )
     _add_passthrough_subcommand(
         sub,
@@ -1264,6 +1270,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "integration":
         return integration.main(ns.args)
+
+    if ns.cmd == "author":
+        return author_problem.main(ns.args)
 
     if ns.cmd == "forensics":
         return forensics.main(ns.args)
