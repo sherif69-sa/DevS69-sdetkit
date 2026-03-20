@@ -34,6 +34,7 @@ python -m sdetkit kits describe integration
 python -m sdetkit kits describe forensics
 python -m sdetkit kits search topology
 python -m sdetkit kits blueprint --goal "agentized release upgrade search"
+python -m sdetkit kits optimize --goal "upgrade umbrella architecture with agentos optimization"
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 ```
 
@@ -138,9 +139,12 @@ The blueprint surface now goes further for umbrella-architecture upgrades: it em
 
 ```bash
 python -m sdetkit kits blueprint --goal "upgrade umbrella architecture with agentos optimization"
+python -m sdetkit kits optimize --goal "upgrade umbrella architecture with agentos optimization" --format json
 python -m sdetkit agent run "umbrella architecture optimization blueprint" --approve
 python -m sdetkit agent demo --scenario umbrella-upgrade-control-plane
 ```
+
+The new optimize surface takes the blueprint one step further by inspecting the repo and aligning the umbrella kits with the operational lanes that actually keep the platform healthy: doctor, `quality.sh`, premium gate, integration topology, and AgentOS. That gives you a single alignment payload showing which lanes are ready, which command should lead each domain, and which performance boosters are already available in the repo.
 
 The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, can merge in repo-local smart fix scripts from `.sdetkit/premium-remediation-scripts.json`, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 
