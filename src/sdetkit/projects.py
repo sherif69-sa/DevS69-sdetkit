@@ -312,7 +312,9 @@ def _csproj_project_name(csproj: Path) -> str | None:
     return csproj.stem or None
 
 
-def _detect_project_identity(project_dir: Path, filenames: set[str]) -> tuple[str | None, str | None]:
+def _detect_project_identity(
+    project_dir: Path, filenames: set[str]
+) -> tuple[str | None, str | None]:
     if "pyproject.toml" in filenames:
         if name := _pyproject_project_name(project_dir / "pyproject.toml"):
             return name, "python"
@@ -329,7 +331,9 @@ def _detect_project_identity(project_dir: Path, filenames: set[str]) -> tuple[st
         if name := _maven_project_name(project_dir / "pom.xml"):
             return name, "maven"
     if "settings.gradle" in filenames or "settings.gradle.kts" in filenames:
-        settings_name = "settings.gradle" if "settings.gradle" in filenames else "settings.gradle.kts"
+        settings_name = (
+            "settings.gradle" if "settings.gradle" in filenames else "settings.gradle.kts"
+        )
         if name := _gradle_project_name(project_dir / settings_name):
             return name, "gradle"
     csproj_files = sorted(name for name in filenames if name.endswith(".csproj"))

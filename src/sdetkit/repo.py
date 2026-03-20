@@ -3643,12 +3643,11 @@ def main(argv: list[str] | None = None) -> int:
         if source:
             print(f"Manifest: {source}")
         for rec in records:
-            print(
-                f"- {rec['name']} [{rec['kind']}]: root={rec['root']} baseline={rec['baseline']}"
-            )
+            print(f"- {rec['name']} [{rec['kind']}]: root={rec['root']} baseline={rec['baseline']}")
         if records:
             kind_summary = ", ".join(
-                f"{kind}={count}" for kind, count in sorted(kind_counts.items(), key=lambda item: item[0])
+                f"{kind}={count}"
+                for kind, count in sorted(kind_counts.items(), key=lambda item: item[0])
             )
             print(f"Summary: count={len(records)} kinds={kind_summary}")
         return 0

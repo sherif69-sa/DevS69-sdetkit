@@ -32,8 +32,10 @@ That turns the umbrella architecture from a static catalog into an execution-rea
 
 - an **alignment matrix** for doctor / quality gate / premium gate / topology / AgentOS readiness,
 - a **doctor lane** with the recommended readiness command for the current upgrade goal,
+- an **auto-fix lane** that promotes premium-gate intelligent remediation before the main merge bar reruns,
 - a **quality gate lane** that sequences `quality.sh`, premium gate, and CI in one plan,
 - an **integration lane** that keeps topology proof wired into the umbrella,
+- a **doctor-quality contract** that keeps promotion and remediation commands in one place,
 - and **performance boosters** that highlight reusable fast-path assets such as pinned CI constraints and gate snapshots.
 
 This makes the umbrella architecture operationally opinionated instead of merely descriptive: the repo can now tell you not just which kit to use, but how to align the major control loops into one upgrade motion.

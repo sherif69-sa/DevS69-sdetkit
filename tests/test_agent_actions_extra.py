@@ -97,7 +97,9 @@ def test_action_registry_repo_audit_and_report_build(tmp_path: Path, monkeypatch
 
 
 def test_action_registry_can_write_optimize_artifact(tmp_path: Path) -> None:
-    reg = ActionRegistry(root=tmp_path, write_allowlist=(".sdetkit/agent/workdir",), shell_allowlist=())
+    reg = ActionRegistry(
+        root=tmp_path, write_allowlist=(".sdetkit/agent/workdir",), shell_allowlist=()
+    )
     (tmp_path / "pyproject.toml").write_text(
         '[project]\nname = "demo"\nversion = "1.0.0"\n',
         encoding="utf-8",

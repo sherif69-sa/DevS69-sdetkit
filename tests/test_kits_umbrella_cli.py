@@ -55,6 +55,16 @@ def test_kits_search_ranks_topology_queries_to_integration() -> None:
     assert top["recommended_start"].startswith("sdetkit integration")
 
 
+def test_kits_search_recognizes_umbrella_upgrade_queries() -> None:
+    result = _run("kits", "search", "umbrella architecture agentos quality", "--format", "json")
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["matches"]
+    matched_ids = {item["kit"]["id"] for item in payload["matches"]}
+    assert "integration-assurance" in matched_ids
+    assert "release-confidence" in matched_ids or "test-intelligence" in matched_ids
+
+
 def test_kits_blueprint_connects_agentos_control_plane_and_cross_kit_plan() -> None:
     result = _run(
         "kits",
@@ -93,8 +103,11 @@ def test_kits_optimize_emits_alignment_plan_json() -> None:
     assert payload["schema_version"] == "sdetkit.kits.catalog.v1"
     assert payload["doctor_lane"]["command"].startswith("sdetkit doctor ")
     assert payload["quality_gate_lane"]["commands"]
+    assert payload["auto_fix_lane"]["commands"]
     assert payload["alignment_score"]["score"] > 0
     assert payload["doctor_quality_contract"]["entrypoint"] == payload["doctor_lane"]["command"]
+    assert payload["doctor_quality_contract"]["auto_fix_commands"]
+    assert payload["operating_sequence"][1]["stage"] == "intelligent-autofix"
     assert payload["operating_sequence"][0]["stage"] == "doctor-first"
     assert payload["search_queries"][0]["topic"] == "doctor-upgrade-lane"
     assert any(item["domain"] == "agentos" for item in payload["alignment_matrix"])

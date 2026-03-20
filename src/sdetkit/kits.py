@@ -4,7 +4,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Final, TypedDict
+from typing import Any, Final, TypedDict
 
 from .atomicio import canonical_json_dumps
 
@@ -25,6 +25,9 @@ class Kit(TypedDict):
     search_terms: list[str]
     agent_workflows: list[str]
     composes_with: list[str]
+
+
+Payload = dict[str, Any]
 
 
 _KITS: Final[list[Kit]] = [
@@ -70,6 +73,8 @@ _KITS: Final[list[Kit]] = [
             "readiness",
             "approval",
             "compliance",
+            "quality",
+            "umbrella",
         ],
         "agent_workflows": [
             "sdetkit agent init",
@@ -123,6 +128,8 @@ _KITS: Final[list[Kit]] = [
             "search",
             "classification",
             "risk",
+            "agentos",
+            "optimization",
         ],
         "agent_workflows": [
             "sdetkit agent run 'template:report-dashboard' --approve",
@@ -171,6 +178,8 @@ _KITS: Final[list[Kit]] = [
             "readiness",
             "matrix",
             "profile",
+            "umbrella",
+            "architecture",
         ],
         "agent_workflows": [
             "sdetkit agent init",
@@ -219,6 +228,7 @@ _KITS: Final[list[Kit]] = [
             "incident",
             "debugging",
             "evidence",
+            "quality",
         ],
         "agent_workflows": [
             "sdetkit agent run 'template:report-dashboard' --approve",
@@ -303,7 +313,23 @@ def _goal_tokens(goal: str | None) -> set[str]:
     return set(_tokenize(goal))
 
 
-def _architecture_layers(selected: list[Kit]) -> list[dict[str, object]]:
+def _string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value]
+
+
+def _payload_list(value: object) -> list[Payload]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, dict)]
+
+
+def _payload_dict(value: object) -> Payload:
+    return value if isinstance(value, dict) else {}
+
+
+def _architecture_layers(selected: list[Kit]) -> list[Payload]:
     return [
         {
             "name": "experience-surface",
@@ -332,7 +358,7 @@ def _architecture_layers(selected: list[Kit]) -> list[dict[str, object]]:
     ]
 
 
-def _operating_model(selected: list[Kit], goal: str | None) -> list[dict[str, object]]:
+def _operating_model(selected: list[Kit], goal: str | None) -> list[Payload]:
     goal_text = goal or "umbrella upgrade"
     return [
         {
@@ -360,9 +386,9 @@ def _operating_model(selected: list[Kit], goal: str | None) -> list[dict[str, ob
     ]
 
 
-def _upgrade_backlog(selected: list[Kit], goal: str | None) -> list[dict[str, object]]:
+def _upgrade_backlog(selected: list[Kit], goal: str | None) -> list[Payload]:
     goal_terms = _goal_tokens(goal)
-    backlog: list[dict[str, object]] = []
+    backlog: list[Payload] = []
 
     def add_upgrade(
         upgrade_id: str,
@@ -458,7 +484,7 @@ def _repo_signal(root: Path, relpath: str) -> bool:
     return (root / relpath).exists()
 
 
-def _doctor_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+def _doctor_lane(goal: str | None, repo_signals: dict[str, bool]) -> Payload:
     goal_terms = _goal_tokens(goal)
     flags = ["--dev", "--ci", "--repo"]
     focus = ["developer-experience", "repo-health"]
@@ -483,7 +509,7 @@ def _doctor_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, o
     }
 
 
-def _quality_gate_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+def _quality_gate_lane(goal: str | None, repo_signals: dict[str, bool]) -> Payload:
     goal_terms = _goal_tokens(goal)
     commands: list[str] = []
     if repo_signals.get("quality_script"):
@@ -502,7 +528,7 @@ def _quality_gate_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[
     }
 
 
-def _integration_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+def _integration_lane(goal: str | None, repo_signals: dict[str, bool]) -> Payload:
     commands: list[str] = []
     if repo_signals.get("integration_profile"):
         commands.append(
@@ -530,7 +556,7 @@ def _integration_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[s
     }
 
 
-def _agentos_lane(goal: str | None, repo_signals: dict[str, bool]) -> dict[str, object]:
+def _agentos_lane(goal: str | None, repo_signals: dict[str, bool]) -> Payload:
     goal_text = goal or "umbrella optimization"
     commands = [
         "sdetkit agent init",
@@ -598,7 +624,7 @@ def _alignment_status(ready: int, total: int) -> str:
     return "needs-work"
 
 
-def _alignment_score(repo_signals: dict[str, bool]) -> dict[str, object]:
+def _alignment_score(repo_signals: dict[str, bool]) -> Payload:
     weighted_signals = [
         ("quality_script", 2),
         ("premium_gate", 2),
@@ -640,25 +666,57 @@ def _search_queries(goal: str | None) -> list[dict[str, str]]:
     ]
 
 
+def _auto_fix_lane(
+    repo_signals: dict[str, bool], quality_lane: Payload, goal: str | None
+) -> Payload:
+    commands: list[str] = []
+    if repo_signals.get("quality_script"):
+        commands.append("bash quality.sh type")
+    if repo_signals.get("premium_gate"):
+        commands.append(
+            "python -m sdetkit.premium_gate_engine --out-dir .sdetkit/out "
+            "--double-check --auto-fix --auto-run-scripts --format markdown"
+        )
+    if repo_signals.get("quality_script"):
+        commands.extend(_string_list(quality_lane.get("commands"))[:1])
+    if goal and {"umbrella", "architecture", "agentos"} & _goal_tokens(goal):
+        commands.append(
+            'sdetkit agent run "upgrade umbrella architecture with agentos optimization" --approve'
+        )
+    return {
+        "commands": commands,
+        "policy": (
+            "Use the premium gate engine as the intelligent remediation layer so typing, "
+            "doctor follow-ups, and scripted repairs converge before the main merge bar reruns."
+        ),
+    }
+
+
 def _operating_sequence(
-    doctor_lane: dict[str, object],
-    quality_lane: dict[str, object],
-    integration_lane: dict[str, object],
-    agentos_lane: dict[str, object],
-) -> list[dict[str, object]]:
-    quality_commands = quality_lane.get("commands", [])
-    integration_commands = integration_lane.get("commands", [])
-    agent_commands = agentos_lane.get("commands", [])
+    doctor_lane: Payload,
+    quality_lane: Payload,
+    integration_lane: Payload,
+    agentos_lane: Payload,
+    auto_fix_lane: Payload,
+) -> list[Payload]:
+    quality_commands = _string_list(quality_lane.get("commands"))
+    integration_commands = _string_list(integration_lane.get("commands"))
+    agent_commands = _string_list(agentos_lane.get("commands"))
     return [
         {
             "stage": "doctor-first",
             "summary": "Start with readiness, dependency drift, and repo-health diagnostics.",
-            "commands": [doctor_lane["command"]],
+            "commands": [str(doctor_lane["command"])],
+        },
+        {
+            "stage": "intelligent-autofix",
+            "summary": "Promote premium auto-fix and scripted remediation before the full gate reruns.",
+            "commands": _string_list(auto_fix_lane.get("commands")),
         },
         {
             "stage": "quality-gate",
             "summary": "Use the deterministic merge bar and premium lane as the execution guardrail.",
-            "commands": [str(item) for item in quality_commands],
+            "commands": quality_commands,
         },
         {
             "stage": "integration-proof",
@@ -674,22 +732,27 @@ def _operating_sequence(
 
 
 def _doctor_quality_contract(
-    doctor_lane: dict[str, object],
-    quality_lane: dict[str, object],
-    integration_lane: dict[str, object],
-) -> dict[str, object]:
-    quality_commands = [str(item) for item in quality_lane.get("commands", [])]
-    integration_commands = [str(item) for item in integration_lane.get("commands", [])]
+    doctor_lane: Payload,
+    quality_lane: Payload,
+    integration_lane: Payload,
+    auto_fix_lane: Payload,
+) -> Payload:
+    quality_commands = _string_list(quality_lane.get("commands"))
+    integration_commands = _string_list(integration_lane.get("commands"))
     promotion_blockers = [
         "doctor must run before premium gate",
         "quality gate should inherit doctor upgrade-readiness findings",
+        "auto-fix lane should repair obvious issues before the premium gate reruns",
     ]
     if integration_commands:
-        promotion_blockers.append("topology checks must stay in the same review loop as premium gate")
+        promotion_blockers.append(
+            "topology checks must stay in the same review loop as premium gate"
+        )
     return {
         "entrypoint": doctor_lane["command"],
         "promotion_commands": quality_commands,
         "integration_commands": integration_commands,
+        "auto_fix_commands": _string_list(auto_fix_lane.get("commands")),
         "promotion_blockers": promotion_blockers,
     }
 
@@ -719,12 +782,13 @@ def optimize_payload(
     quality_lane = _quality_gate_lane(goal, repo_signals)
     integration_lane = _integration_lane(goal, repo_signals)
     agentos_lane = _agentos_lane(goal, repo_signals)
+    auto_fix_lane = _auto_fix_lane(repo_signals, quality_lane, goal)
     alignment_score = _alignment_score(repo_signals)
     operating_sequence = _operating_sequence(
-        doctor_lane, quality_lane, integration_lane, agentos_lane
+        doctor_lane, quality_lane, integration_lane, agentos_lane, auto_fix_lane
     )
     doctor_quality_contract = _doctor_quality_contract(
-        doctor_lane, quality_lane, integration_lane
+        doctor_lane, quality_lane, integration_lane, auto_fix_lane
     )
     search_queries = _search_queries(goal)
     next_boosts = [
@@ -732,19 +796,28 @@ def optimize_payload(
             "id": "doctor-quality-sync",
             "title": "Align doctor with the quality gate",
             "summary": "Run doctor first, then quality.sh ci, so follow-up fixes land before premium-gate orchestration.",
-            "commands": [doctor_lane["command"], *(quality_lane["commands"][:1])],
+            "commands": [
+                str(doctor_lane["command"]),
+                *_string_list(quality_lane.get("commands"))[:1],
+            ],
+        },
+        {
+            "id": "intelligent-auto-fix",
+            "title": "Auto-fix quality and premium-gate regressions intelligently",
+            "summary": "Use the premium engine and targeted typing gates to repair issues before rerunning the umbrella flow.",
+            "commands": _string_list(auto_fix_lane.get("commands"))[:3],
         },
         {
             "id": "umbrella-control-plane",
             "title": "Promote AgentOS as the umbrella review loop",
             "summary": "Capture blueprint, history, and dashboard outputs as the operating layer above the kits.",
-            "commands": agentos_lane["commands"][:3],
+            "commands": _string_list(agentos_lane.get("commands"))[:3],
         },
         {
             "id": "integration-proof",
             "title": "Keep topology proof in the release lane",
             "summary": "Make topology-check part of premium validation so umbrella architecture changes stay contract-safe.",
-            "commands": integration_lane["commands"][:2],
+            "commands": _string_list(integration_lane.get("commands"))[:2],
         },
     ]
     alignment_matrix = [
@@ -756,16 +829,18 @@ def optimize_payload(
         {
             "domain": "quality-gate",
             "status": "ready" if repo_signals["quality_script"] else "gap",
-            "primary_command": quality_lane["commands"][0] if quality_lane["commands"] else "",
+            "primary_command": _string_list(quality_lane.get("commands"))[0]
+            if _string_list(quality_lane.get("commands"))
+            else "",
         },
         {
             "domain": "premium-gate",
             "status": "ready" if repo_signals["premium_gate"] else "gap",
             "primary_command": (
-                quality_lane["commands"][1]
-                if len(quality_lane["commands"]) > 1
-                else quality_lane["commands"][0]
-                if quality_lane["commands"]
+                _string_list(quality_lane.get("commands"))[1]
+                if len(_string_list(quality_lane.get("commands"))) > 1
+                else _string_list(quality_lane.get("commands"))[0]
+                if _string_list(quality_lane.get("commands"))
                 else ""
             ),
         },
@@ -773,13 +848,15 @@ def optimize_payload(
             "domain": "integration-topology",
             "status": "ready" if repo_signals["topology_profile"] else "gap",
             "primary_command": (
-                integration_lane["commands"][-1] if integration_lane["commands"] else ""
+                _string_list(integration_lane.get("commands"))[-1]
+                if _string_list(integration_lane.get("commands"))
+                else ""
             ),
         },
         {
             "domain": "agentos",
             "status": "ready" if repo_signals["agent_templates"] else "partial",
-            "primary_command": agentos_lane["commands"][0],
+            "primary_command": _string_list(agentos_lane.get("commands"))[0],
         },
     ]
     missing_domains = [item["domain"] for item in alignment_matrix if item["status"] != "ready"]
@@ -793,6 +870,7 @@ def optimize_payload(
         "quality_gate_lane": quality_lane,
         "integration_lane": integration_lane,
         "agentos_lane": agentos_lane,
+        "auto_fix_lane": auto_fix_lane,
         "alignment_score": alignment_score,
         "alignment_matrix": alignment_matrix,
         "doctor_quality_contract": doctor_quality_contract,
@@ -812,7 +890,7 @@ def list_payload() -> dict[str, object]:
 
 
 def search_payload(query: str, *, limit: int = 4) -> dict[str, object]:
-    matches: list[dict[str, object]] = []
+    matches: list[Payload] = []
     for kit in _KITS:
         score, matched_terms = _score_kit(kit, query)
         if score <= 0:
@@ -845,9 +923,11 @@ def blueprint_payload(
             seen.add(kit["id"])
 
     if goal:
-        ranked = search_payload(goal, limit=max(limit, 1) + len(resolved)).get("matches", [])
-        for item in ranked:
-            kit_payload = item.get("kit")
+        ranked = _payload_list(
+            search_payload(goal, limit=max(limit, 1) + len(resolved)).get("matches", [])
+        )
+        for ranked_item in ranked:
+            kit_payload = ranked_item.get("kit")
             if not isinstance(kit_payload, dict):
                 continue
             kit_id = str(kit_payload.get("id", ""))
@@ -929,30 +1009,30 @@ def blueprint_payload(
     }
 
 
-def _print_kit_detail(kit: dict[str, object]) -> None:
+def _print_kit_detail(kit: Payload) -> None:
     print(f"{kit['id']} [{kit['stability']}]")
     print(f"route: sdetkit {kit['slug']} ...")
     print(f"summary: {kit['summary']}")
     print("capabilities:")
-    for item in kit["capabilities"]:
+    for item in _string_list(kit["capabilities"]):
         print(f"  - {item}")
     print("typical inputs:")
-    for item in kit["typical_inputs"]:
+    for item in _string_list(kit["typical_inputs"]):
         print(f"  - {item}")
     print("key artifacts:")
-    for item in kit["key_artifacts"]:
+    for item in _string_list(kit["key_artifacts"]):
         print(f"  - {item}")
     print("hero commands:")
-    for cmd in kit["hero_commands"]:
+    for cmd in _string_list(kit["hero_commands"]):
         print(f"  - {cmd}")
     print("learning path:")
-    for cmd in kit["learning_path"]:
+    for cmd in _string_list(kit["learning_path"]):
         print(f"  - {cmd}")
     print("agent workflows:")
-    for cmd in kit["agent_workflows"]:
+    for cmd in _string_list(kit["agent_workflows"]):
         print(f"  - {cmd}")
     print("composes with:")
-    for item in kit["composes_with"]:
+    for item in _string_list(kit["composes_with"]):
         print(f"  - {item}")
 
 
@@ -994,11 +1074,11 @@ def main(argv: list[str] | None = None) -> int:
         if kit is None:
             sys.stderr.write(f"kits error: unknown kit '{ns.target}'\n")
             return 2
-        payload = {"schema_version": SCHEMA_VERSION, "kit": _kit_overview(kit)}
+        detail_payload: Payload = {"schema_version": SCHEMA_VERSION, "kit": _kit_overview(kit)}
         if ns.format == "json":
-            sys.stdout.write(canonical_json_dumps(payload))
+            sys.stdout.write(canonical_json_dumps(detail_payload))
             return 0
-        _print_kit_detail(payload["kit"])
+        _print_kit_detail(detail_payload["kit"])
         return 0
 
     if ns.action == "search":
@@ -1006,15 +1086,16 @@ def main(argv: list[str] | None = None) -> int:
         if not query:
             sys.stderr.write("kits error: expected <query> for `sdetkit kits search <query>`\n")
             return 2
-        payload = search_payload(query, limit=ns.limit)
+        search_result = search_payload(query, limit=ns.limit)
         if ns.format == "json":
-            sys.stdout.write(canonical_json_dumps(payload))
+            sys.stdout.write(canonical_json_dumps(search_result))
             return 0
+        matches = _payload_list(search_result.get("matches"))
         print(f"Kit search results for: {query}")
-        if not payload["matches"]:
+        if not matches:
             print("- no matches")
             return 0
-        for item in payload["matches"]:
+        for item in matches:
             kit = item["kit"]
             print(f"- {kit['id']} score={item['score']}")
             print(f"  matched: {', '.join(item['matched_terms']) or 'none'}")
@@ -1025,91 +1106,101 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.action == "blueprint":
         goal = str(ns.goal or ns.target or "").strip() or None
-        payload = blueprint_payload(
+        blueprint_result = blueprint_payload(
             goal=goal,
             selected_kits=[str(item) for item in ns.selected_kits],
             limit=ns.limit,
         )
         if ns.format == "json":
-            sys.stdout.write(canonical_json_dumps(payload))
+            sys.stdout.write(canonical_json_dumps(blueprint_result))
             return 0
         print("Umbrella architecture blueprint")
         if goal:
             print(f"goal: {goal}")
         print("selected kits:")
-        for kit in payload["selected_kits"]:
-            print(f"- {kit['id']} ({kit['slug']})")
-            print(f"  summary: {kit['summary']}")
-            print(f"  compose with: {', '.join(kit['composes_with'])}")
-            print(f"  start with: {kit['learning_path'][0]}")
+        for kit_item in _payload_list(blueprint_result.get("selected_kits")):
+            print(f"- {kit_item['id']} ({kit_item['slug']})")
+            print(f"  summary: {kit_item['summary']}")
+            print(f"  compose with: {', '.join(_string_list(kit_item['composes_with']))}")
+            print(f"  start with: {_string_list(kit_item['learning_path'])[0]}")
         print("control plane:")
-        print(f"- {payload['control_plane']['name']}: {payload['control_plane']['summary']}")
-        for command in payload["control_plane"]["commands"]:
+        control_plane = _payload_dict(blueprint_result.get("control_plane"))
+        print(f"- {control_plane['name']}: {control_plane['summary']}")
+        for command in _string_list(control_plane["commands"]):
             print(f"  - {command}")
         print("phases:")
-        for phase in payload["phases"]:
+        for phase in _payload_list(blueprint_result.get("phases")):
             print(f"- {phase['phase']}: {phase['summary']}")
         print("architecture layers:")
-        for layer in payload["architecture_layers"]:
+        for layer in _payload_list(blueprint_result.get("architecture_layers")):
             print(f"- {layer['name']}: {layer['summary']}")
         print("operating model:")
-        for lane in payload["operating_model"]:
+        for lane in _payload_list(blueprint_result.get("operating_model")):
             print(f"- {lane['cadence']}: {lane['focus']}")
         print("upgrade backlog:")
-        for item in payload["upgrade_backlog"]:
+        for item in _payload_list(blueprint_result.get("upgrade_backlog")):
             print(f"- {item['title']}: {item['summary']}")
         return 0
 
     if ns.action == "optimize":
         goal = str(ns.goal or ns.target or "").strip() or None
-        payload = optimize_payload(
+        optimize_result = optimize_payload(
             root=Path(str(ns.repo_root)).resolve(),
             goal=goal,
             selected_kits=[str(item) for item in ns.selected_kits],
             limit=ns.limit,
         )
         if ns.format == "json":
-            sys.stdout.write(canonical_json_dumps(payload))
+            sys.stdout.write(canonical_json_dumps(optimize_result))
             return 0
         print("Umbrella optimization plan")
         if goal:
             print(f"goal: {goal}")
-        print(
-            "alignment score: "
-            f"{payload['alignment_score']['score']}% ({payload['alignment_score']['status']})"
-        )
+        alignment_score = _payload_dict(optimize_result.get("alignment_score"))
+        print(f"alignment score: {alignment_score['score']}% ({alignment_score['status']})")
         print("alignment matrix:")
-        for item in payload["alignment_matrix"]:
+        for item in _payload_list(optimize_result.get("alignment_matrix")):
             print(f"- {item['domain']}: {item['status']}")
             if item["primary_command"]:
                 print(f"  command: {item['primary_command']}")
         print("doctor/quality contract:")
-        print(f"- entrypoint: {payload['doctor_quality_contract']['entrypoint']}")
-        for command in payload["doctor_quality_contract"]["promotion_commands"]:
+        contract = _payload_dict(optimize_result.get("doctor_quality_contract"))
+        print(f"- entrypoint: {contract['entrypoint']}")
+        for command in _string_list(contract["promotion_commands"]):
             print(f"  - promote with: {command}")
+        for command in _string_list(contract.get("auto_fix_commands")):
+            print(f"  - auto-fix with: {command}")
         print("doctor lane:")
-        print(f"- {payload['doctor_lane']['command']}")
-        print(f"  why: {payload['doctor_lane']['why']}")
+        doctor_lane = _payload_dict(optimize_result.get("doctor_lane"))
+        print(f"- {doctor_lane['command']}")
+        print(f"  why: {doctor_lane['why']}")
         print("quality gate lane:")
-        for command in payload["quality_gate_lane"]["commands"]:
+        quality_gate_lane = _payload_dict(optimize_result.get("quality_gate_lane"))
+        for command in _string_list(quality_gate_lane["commands"]):
+            print(f"- {command}")
+        print("auto-fix lane:")
+        auto_fix_lane = _payload_dict(optimize_result.get("auto_fix_lane"))
+        for command in _string_list(auto_fix_lane["commands"]):
             print(f"- {command}")
         print("integration lane:")
-        for command in payload["integration_lane"]["commands"]:
+        integration_lane = _payload_dict(optimize_result.get("integration_lane"))
+        for command in _string_list(integration_lane["commands"]):
             print(f"- {command}")
         print("agentos lane:")
-        for command in payload["agentos_lane"]["commands"]:
+        agentos_lane = _payload_dict(optimize_result.get("agentos_lane"))
+        for command in _string_list(agentos_lane["commands"]):
             print(f"- {command}")
         print("operating sequence:")
-        for item in payload["operating_sequence"]:
+        for item in _payload_list(optimize_result.get("operating_sequence")):
             print(f"- {item['stage']}: {item['summary']}")
         print("search queries:")
-        for item in payload["search_queries"]:
+        for item in _payload_list(optimize_result.get("search_queries")):
             print(f"- {item['topic']}: {item['query']}")
         print("performance boosters:")
-        for item in payload["performance_boosters"]:
+        for item in _payload_list(optimize_result.get("performance_boosters")):
             print(f"- {item['title']}: {item['detail']}")
         print("next boosts:")
-        for item in payload["next_boosts"]:
+        for item in _payload_list(optimize_result.get("next_boosts")):
             print(f"- {item['title']}: {item['summary']}")
         return 0
 
@@ -1117,17 +1208,17 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write("kits error: unexpected <target> for list action\n")
         return 2
 
-    payload = list_payload()
+    list_result = list_payload()
     if ns.format == "json":
-        sys.stdout.write(canonical_json_dumps(payload))
+        sys.stdout.write(canonical_json_dumps(list_result))
         return 0
 
     print("SDETKit umbrella kits")
-    for kit in payload["kits"]:
-        print(f"- {kit['id']} [{kit['stability']}]")
-        print(f"  {kit['summary']}")
-        print(f"  capabilities: {', '.join(kit['capabilities'])}")
-        print(f"  start with: {kit['learning_path'][0]}")
+    for kit_item in _payload_list(list_result.get("kits")):
+        print(f"- {kit_item['id']} [{kit_item['stability']}]")
+        print(f"  {kit_item['summary']}")
+        print(f"  capabilities: {', '.join(_string_list(kit_item['capabilities']))}")
+        print(f"  start with: {_string_list(kit_item['learning_path'])[0]}")
     return 0
 
 

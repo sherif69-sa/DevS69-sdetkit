@@ -1401,6 +1401,28 @@ def collect_signals(out_dir: Path) -> dict[str, Any]:
     }
 
 
+def _payload_list(payload: dict[str, Any], key: str) -> list[Any]:
+    value = payload.get(key, [])
+    return value if isinstance(value, list) else []
+
+
+def _payload_dict(payload: dict[str, Any], key: str) -> dict[str, Any]:
+    value = payload.get(key, {})
+    return value if isinstance(value, dict) else {}
+
+
+def _payload_int(payload: dict[str, Any], key: str, default: int = 0) -> int:
+    value = payload.get(key, default)
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, int):
+        return value
+    try:
+        return int(str(value))
+    except (TypeError, ValueError):
+        return default
+
+
 def _apply_learned_guideline_actions(payload: dict[str, Any], db_path: Path) -> dict[str, Any]:
     if not db_path.exists():
         return payload
@@ -1423,7 +1445,7 @@ def _apply_learned_guideline_actions(payload: dict[str, Any], db_path: Path) -> 
             )
         )
 
-    action_plan = list(payload.get("manual_fix_plan", []))
+    action_plan = list(_payload_list(payload, "manual_fix_plan"))
 
     for warning in warnings:
         if not isinstance(warning, dict):
@@ -1463,7 +1485,10 @@ def _apply_learned_guideline_actions(payload: dict[str, Any], db_path: Path) -> 
     out["recommendations"] = [asdict(s) for s in deduped]
     if action_plan:
         out["manual_fix_plan"] = action_plan
-    out["counts"] = {**out.get("counts", {}), "recommendations": len(out["recommendations"])}
+    out["counts"] = {
+        **_payload_dict(out, "counts"),
+        "recommendations": len(_payload_list(out, "recommendations")),
+    }
     return out
 
 
@@ -1473,7 +1498,7 @@ def _apply_double_check(payload: dict[str, Any], second: dict[str, Any]) -> dict
     ):
         return payload
     out = dict(payload)
-    checks = list(out["engine_checks"])
+    checks = list(_payload_list(out, "engine_checks"))
     checks.append(
         asdict(
             _make_signal(
@@ -1485,7 +1510,7 @@ def _apply_double_check(payload: dict[str, Any], second: dict[str, Any]) -> dict
         )
     )
     out["engine_checks"] = checks
-    out["counts"] = {**out["counts"], "engine_checks": len(checks)}
+    out["counts"] = {**_payload_dict(out, "counts"), "engine_checks": len(checks)}
     out["ok"] = False
     return out
 
@@ -1749,7 +1774,8 @@ def main(argv: list[str] | None = None) -> int:
         if manual_plan:
             payload["manual_fix_plan"] = manual_plan
         if any(x.status in {"manual", "skipped"} for x in fixes):
-            payload.setdefault("recommendations", []).append(
+            recommendations = list(_payload_list(payload, "recommendations"))
+            recommendations.append(
                 asdict(
                     _make_signal(
                         "engine",
@@ -1759,9 +1785,10 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
             )
+            payload["recommendations"] = recommendations
 
     if ns.auto_run_scripts:
-        pre_script_score = int(payload.get("score", 0))
+        pre_script_score = _payload_int(payload, "score", 0)
         plan = _build_script_plan(
             payload,
             out_dir=out_dir,
@@ -1791,7 +1818,7 @@ def main(argv: list[str] | None = None) -> int:
         }
         payload = {**refreshed, **extras}
         payload["script_runs"] = [asdict(item) for item in script_results]
-        payload["smart_remediation"] = {
+        smart_remediation: dict[str, Any] = {
             "selected_scripts": [item.script_id for item in selected_scripts],
             "selected_count": len(selected_scripts),
             "successful_scripts": sum(1 for item in script_results if item.status == "passed"),
@@ -1800,12 +1827,13 @@ def main(argv: list[str] | None = None) -> int:
             "post_script_score": int(refreshed.get("score", 0)),
             "plan": plan,
         }
-        payload["smart_remediation"]["score_delta"] = (
-            payload["smart_remediation"]["post_script_score"]
-            - payload["smart_remediation"]["pre_script_score"]
+        smart_remediation["score_delta"] = int(smart_remediation["post_script_score"]) - int(
+            smart_remediation["pre_script_score"]
         )
+        payload["smart_remediation"] = smart_remediation
         if any(item.status != "passed" for item in script_results):
-            payload.setdefault("recommendations", []).append(
+            recommendations = list(_payload_list(payload, "recommendations"))
+            recommendations.append(
                 asdict(
                     _make_signal(
                         "engine",
@@ -1815,9 +1843,10 @@ def main(argv: list[str] | None = None) -> int:
                     )
                 )
             )
+            payload["recommendations"] = recommendations
         payload["counts"] = {
-            **payload.get("counts", {}),
-            "recommendations": len(payload.get("recommendations", [])),
+            **_payload_dict(payload, "counts"),
+            "recommendations": len(_payload_list(payload, "recommendations")),
             "script_runs": len(script_results),
         }
 
