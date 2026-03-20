@@ -776,6 +776,7 @@ def _upgrade_inventory(root: Path) -> Payload:
         "validation_summary": top_validation[:4],
         "group_summary": upgrade_audit._group_summary(reports)[:4],
         "source_summary": upgrade_audit._source_summary(reports)[:4],
+        "release_freshness_summary": upgrade_audit._release_freshness_summary(reports)[:4],
         "recommended_commands": recommended_commands,
     }
 
@@ -802,6 +803,150 @@ def _upgrade_execution_lane(upgrade_inventory: Payload) -> Payload:
         "focus": focus,
         "commands": recommended_commands,
     }
+
+
+def _innovation_opportunities(
+    goal: str | None,
+    repo_signals: dict[str, bool],
+    upgrade_inventory: Payload,
+) -> list[Payload]:
+    goal_text = goal or "umbrella optimization"
+    opportunities: list[Payload] = []
+    validation_summary = _payload_list(upgrade_inventory.get("validation_summary"))
+    impact_summary = _payload_list(upgrade_inventory.get("impact_summary"))
+    source_summary = _payload_list(upgrade_inventory.get("source_summary"))
+    fresh_release_present = any(
+        item.get("release_freshness") == "fresh-release"
+        for item in _payload_list(upgrade_inventory.get("release_freshness_summary"))
+    )
+
+    if upgrade_inventory.get("status") == "ready":
+        commands = [
+            "python -m sdetkit intelligence upgrade-audit --format json --top 10",
+        ]
+        if repo_signals.get("agent_templates"):
+            commands.append(
+                "sdetkit agent run 'template:dependency-outdated-report' --approve"
+            )
+        commands.append("sdetkit agent dashboard build --format html")
+        opportunities.append(
+            {
+                "id": "dependency-radar",
+                "title": "Create a recurring dependency radar",
+                "summary": (
+                    "Turn the manifest-aware upgrade inventory into a scheduled artifact so hot-path "
+                    "packages, validation lanes, and maintenance drift stay visible between releases."
+                ),
+                "why_now": (
+                    f"The repo already exposes upgrade-aware inventory for "
+                    f"{upgrade_inventory.get('packages_audited', 0)} packages."
+                ),
+                "commands": commands,
+            }
+        )
+
+    if validation_summary:
+        top_validation = validation_summary[0]
+        opportunities.append(
+            {
+                "id": "validation-command-index",
+                "title": "Publish a package-to-validation command index",
+                "summary": (
+                    "Materialize the strongest validation lanes into a searchable map so dependency "
+                    "changes and refactors always point to the smallest safe verification loop."
+                ),
+                "why_now": (
+                    "The optimize inventory already knows which validation commands cover the hottest "
+                    f"dependency sets, starting with `{top_validation.get('command', '')}`."
+                ),
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --format md",
+                    "python -m sdetkit doctor --upgrade-audit --format md",
+                ],
+            }
+        )
+
+    if any(item.get("impact_area") == "integration-adapters" for item in impact_summary):
+        opportunities.append(
+            {
+                "id": "adapter-activation",
+                "title": "Activate optional notification adapters with smoke coverage",
+                "summary": (
+                    "Convert declared integration-adapter dependencies into clearly documented and "
+                    "lightly validated quickstarts so optional channels feel productized, not latent."
+                ),
+                "why_now": (
+                    "The upgrade inventory shows optional adapter surface area that can become a more "
+                    "discoverable feature set for contributors and operators."
+                ),
+                "commands": [
+                    "python -m pytest -q tests/test_notify_plugins.py",
+                    "python -m sdetkit kits describe integration",
+                ],
+            }
+        )
+
+    if any(item.get("impact_area") == "runtime-core" for item in impact_summary):
+        opportunities.append(
+            {
+                "id": "runtime-core-fast-follow",
+                "title": "Add a runtime-core fast-follow watchlist",
+                "summary": (
+                    "Keep the repo's hottest runtime dependencies on a tighter review cadence so "
+                    "transport, API, and security surfaces do not age silently."
+                ),
+                "why_now": (
+                    "The optimize inventory identifies runtime-core packages as first-class upgrade "
+                    "inputs, which makes them good candidates for a separate watchlist artifact."
+                ),
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --format md",
+                    "bash quality.sh cov",
+                ],
+            }
+        )
+
+    if repo_signals.get("constraints") and source_summary:
+        opportunities.append(
+            {
+                "id": "manifest-drift-scorecard",
+                "title": "Add a manifest drift scorecard",
+                "summary": (
+                    "Summarize which manifests dominate the maintenance surface so lockfiles, test "
+                    "constraints, and package metadata evolve with less hidden drift."
+                ),
+                "why_now": (
+                    "The repo already mixes pyproject and requirement manifests, making cross-source "
+                    "visibility a useful maintenance feature."
+                ),
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --format json",
+                    f'sdetkit kits optimize --goal "{goal_text}" --format json',
+                ],
+            }
+        )
+
+    if fresh_release_present and repo_signals.get("quality_script"):
+        opportunities.append(
+            {
+                "id": "fresh-release-fast-lane",
+                "title": "Create a fresh-release fast lane",
+                "summary": (
+                    "Treat newly published upstream releases as a separate queue that reruns the "
+                    "smallest quality bar before they age into larger maintenance batches."
+                ),
+                "why_now": (
+                    "Fast-follow validation is cheaper when fresh releases are reviewed explicitly "
+                    "instead of being mixed into a generic backlog."
+                ),
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --max-release-age-days 14 --format md",
+                    "bash quality.sh ci",
+                ],
+            }
+        )
+
+    return opportunities[:5]
 
 
 def _auto_fix_lane(
@@ -951,6 +1096,7 @@ def optimize_payload(
     )
     search_queries = _search_queries(goal)
     upgrade_execution_lane = _upgrade_execution_lane(upgrade_inventory)
+    innovation_opportunities = _innovation_opportunities(goal, repo_signals, upgrade_inventory)
     next_boosts = [
         {
             "id": "quality-boost",
@@ -1045,6 +1191,7 @@ def optimize_payload(
         "search_queries": search_queries,
         "upgrade_inventory": upgrade_inventory,
         "upgrade_execution_lane": upgrade_execution_lane,
+        "innovation_opportunities": innovation_opportunities,
         "missing_domains": missing_domains,
         "performance_boosters": _performance_boosters(repo_signals),
         "next_boosts": next_boosts,
@@ -1372,6 +1519,10 @@ def main(argv: list[str] | None = None) -> int:
         print("performance boosters:")
         for item in _payload_list(optimize_result.get("performance_boosters")):
             print(f"- {item['title']}: {item['detail']}")
+        print("innovation opportunities:")
+        for item in _payload_list(optimize_result.get("innovation_opportunities")):
+            print(f"- {item['title']}: {item['summary']}")
+            print(f"  why now: {item['why_now']}")
         print("next boosts:")
         for item in _payload_list(optimize_result.get("next_boosts")):
             print(f"- {item['title']}: {item['summary']}")
