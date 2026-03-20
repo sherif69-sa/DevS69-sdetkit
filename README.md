@@ -36,6 +36,7 @@ python -m sdetkit kits search topology
 python -m sdetkit kits blueprint --goal "agentized release upgrade search"
 python -m sdetkit kits optimize --goal "upgrade umbrella architecture with agentos optimization"
 python -m sdetkit kits expand --goal "upgrade umbrella architecture with agentos optimization"
+python -m sdetkit kits route-map httpx --repo-usage-tier hot-path --format json
 python -m sdetkit intelligence upgrade-audit --format json --top 5
 ```
 
@@ -155,6 +156,8 @@ When you want that alignment to execute as a single repo-safe lane instead of a 
 It now also emits an alignment score so the umbrella architecture has a single numeric readiness signal that can be tracked in CI, dashboards, and AgentOS history exports while the repo keeps getting upgraded.
 
 When you want the repo to go beyond alignment planning and explicitly suggest what to add next, `sdetkit kits expand --goal "..."` turns those optimize signals into prioritized feature candidates, targeted search missions, and rollout tracks. That makes it easier to decide which new addition should land now, which should be queued next, and which search direction is most likely to unlock the next repo-wide upgrade.
+
+One of those additions is now implemented directly as `sdetkit kits route-map`, which turns the dependency inventory into a searchable package-to-validation route map. That gives refactors and upgrade work a smaller proof loop by surfacing the best-fit validation command, impact area, repo usage tier, and next action for each package instead of forcing operators to guess which broad lane to run first.
 
 The premium gate intelligence layer now goes further as well: it ranks remediation scripts by observed hotspot severity, can merge in repo-local smart fix scripts from `.sdetkit/premium-remediation-scripts.json`, emits a first-class `premium-remediation-plan.json` artifact, refreshes integration topology when contract drift is detected, and supports focused search across rendered findings plus learned guideline lookup from the premium insights database.
 

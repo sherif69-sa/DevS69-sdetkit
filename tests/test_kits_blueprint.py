@@ -127,3 +127,36 @@ def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path:
     assert "dependency-radar" in mission_topics
     assert "validation-route-map" in mission_topics
     assert track_names == {"now", "next", "later"}
+
+
+def test_route_map_payload_surfaces_primary_validation_routes(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        "name='x'\n"
+        "version='0.1.0'\n"
+        "dependencies=['httpx>=0.28.1,<1']\n"
+        "[project.optional-dependencies]\n"
+        "docs=['mkdocs==1.6.1']\n",
+        encoding="utf-8",
+    )
+    src_dir = tmp_path / "src" / "demo"
+    src_dir.mkdir(parents=True, exist_ok=True)
+    (src_dir / "api.py").write_text("import httpx\n", encoding="utf-8")
+    tests_dir = tmp_path / "tests"
+    tests_dir.mkdir(parents=True, exist_ok=True)
+    (tests_dir / "test_docs.py").write_text("import mkdocs\n", encoding="utf-8")
+
+    payload = kits.route_map_payload(
+        root=tmp_path,
+        query="httpx runtime",
+        repo_usage_tier="edge",
+        impact_area="runtime-core",
+        limit=5,
+    )
+
+    assert payload["status"] == "ready"
+    assert payload["total_matches"] == 1
+    match = payload["matches"][0]
+    assert match["package"] == "httpx"
+    assert match["primary_validation"]
+    assert "src/demo/api.py" in match["repo_usage_files"]

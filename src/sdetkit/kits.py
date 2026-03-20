@@ -675,6 +675,7 @@ def _upgrade_inventory(root: Path) -> Payload:
             "summary": "No pyproject.toml was found, so upgrade inventory could not be derived.",
             "packages_audited": 0,
             "priority_packages": [],
+            "route_map": [],
             "impact_summary": [],
             "validation_summary": [],
             "group_summary": [],
@@ -690,6 +691,7 @@ def _upgrade_inventory(root: Path) -> Payload:
             "summary": "No dependency manifests were discovered for upgrade inventory planning.",
             "packages_audited": 0,
             "priority_packages": [],
+            "route_map": [],
             "impact_summary": [],
             "validation_summary": [],
             "group_summary": [],
@@ -754,6 +756,25 @@ def _upgrade_inventory(root: Path) -> Payload:
             f"\"{top_validation[0]['command']}\" --format md"
         )
 
+    route_map = [
+        {
+            "package": report.name,
+            "impact_area": report.impact_area,
+            "repo_usage_tier": report.repo_usage_tier,
+            "repo_usage_count": report.repo_usage_count,
+            "groups": report.groups,
+            "sources": report.sources,
+            "validation_commands": report.validation_commands,
+            "primary_validation": report.validation_commands[0]
+            if report.validation_commands
+            else "python -m sdetkit intelligence upgrade-audit --package "
+            f"\"{report.name}\" --format md",
+            "next_action": report.next_action,
+            "repo_usage_files": report.repo_usage_files[:5],
+        }
+        for report in reports
+    ]
+
     return {
         "status": "ready",
         "summary": (
@@ -772,12 +793,75 @@ def _upgrade_inventory(root: Path) -> Payload:
             }
             for report in priority_packages
         ],
+        "route_map": route_map,
         "impact_summary": upgrade_audit._impact_summary(reports)[:4],
         "validation_summary": top_validation[:4],
         "group_summary": upgrade_audit._group_summary(reports)[:4],
         "source_summary": upgrade_audit._source_summary(reports)[:4],
         "release_freshness_summary": upgrade_audit._release_freshness_summary(reports)[:4],
         "recommended_commands": recommended_commands,
+    }
+
+
+def route_map_payload(
+    *,
+    root: Path,
+    query: str | None = None,
+    repo_usage_tier: str | None = None,
+    impact_area: str | None = None,
+    limit: int = 10,
+) -> dict[str, object]:
+    upgrade_inventory = _upgrade_inventory(root)
+    route_map = _payload_list(upgrade_inventory.get("route_map"))
+    query_terms = _tokenize(query or "")
+    normalized_repo_usage_tier = str(repo_usage_tier or "").strip().lower()
+    normalized_impact_area = str(impact_area or "").strip().lower()
+
+    matches: list[Payload] = []
+    for entry in route_map:
+        if normalized_repo_usage_tier and str(entry.get("repo_usage_tier", "")).lower() != normalized_repo_usage_tier:
+            continue
+        if normalized_impact_area and str(entry.get("impact_area", "")).lower() != normalized_impact_area:
+            continue
+
+        search_blob = " ".join(
+            [
+                str(entry.get("package", "")),
+                str(entry.get("impact_area", "")),
+                str(entry.get("repo_usage_tier", "")),
+                " ".join(_string_list(entry.get("groups"))),
+                " ".join(_string_list(entry.get("sources"))),
+                " ".join(_string_list(entry.get("validation_commands"))),
+                " ".join(_string_list(entry.get("repo_usage_files"))),
+                str(entry.get("next_action", "")),
+            ]
+        ).lower()
+
+        if query_terms and not all(term in search_blob for term in query_terms):
+            continue
+        matches.append(entry)
+
+    matches.sort(
+        key=lambda item: (
+            str(item.get("repo_usage_tier", "")) != "hot-path",
+            -int(item.get("repo_usage_count", 0)),
+            str(item.get("package", "")),
+        )
+    )
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "status": upgrade_inventory.get("status", "missing"),
+        "summary": (
+            "Searchable package-to-validation route map derived from the repo's manifest-aware "
+            "upgrade inventory."
+        ),
+        "query": query,
+        "repo_usage_tier": repo_usage_tier,
+        "impact_area": impact_area,
+        "matches": matches[: max(limit, 1)],
+        "total_matches": len(matches),
+        "recommended_commands": _string_list(upgrade_inventory.get("recommended_commands")),
     }
 
 
@@ -1628,7 +1712,7 @@ def main(argv: list[str] | None = None) -> int:
         "action",
         nargs="?",
         default="list",
-        choices=["list", "describe", "search", "blueprint", "optimize", "expand"],
+        choices=["list", "describe", "search", "blueprint", "optimize", "expand", "route-map"],
     )
     parser.add_argument("target", nargs="?", default=None)
     parser.add_argument("--format", choices=["json", "text"], default="text")
@@ -1642,6 +1726,16 @@ def main(argv: list[str] | None = None) -> int:
         help="Explicit kit to include in `blueprint` (repeatable).",
     )
     parser.add_argument("--limit", type=int, default=4, help="Maximum search or blueprint results.")
+    parser.add_argument(
+        "--repo-usage-tier",
+        default=None,
+        help="Filter route-map results by repo usage tier (for example: hot-path, active, supporting).",
+    )
+    parser.add_argument(
+        "--impact-area",
+        default=None,
+        help="Filter route-map results by impact area (for example: runtime-core, quality-tooling).",
+    )
     parser.add_argument(
         "--repo-root",
         default=".",
@@ -1825,6 +1919,43 @@ def main(argv: list[str] | None = None) -> int:
             ids = ", ".join(_string_list(item.get("candidate_ids"))) or "none"
             print(f"- {item['track']}: {item['focus']}")
             print(f"  candidates: {ids}")
+        return 0
+
+    if ns.action == "route-map":
+        query = str(ns.query or ns.target or "").strip() or None
+        route_map_result = route_map_payload(
+            root=Path(str(ns.repo_root)).resolve(),
+            query=query,
+            repo_usage_tier=ns.repo_usage_tier,
+            impact_area=ns.impact_area,
+            limit=ns.limit,
+        )
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(route_map_result))
+            return 0
+        print("Validation route map")
+        if query:
+            print(f"query: {query}")
+        if ns.repo_usage_tier:
+            print(f"repo usage tier: {ns.repo_usage_tier}")
+        if ns.impact_area:
+            print(f"impact area: {ns.impact_area}")
+        print(f"matches: {route_map_result['total_matches']}")
+        for item in _payload_list(route_map_result.get("matches")):
+            print(
+                f"- {item['package']} [{item['impact_area']} / {item['repo_usage_tier']}] "
+                f"count={item['repo_usage_count']}"
+            )
+            print(f"  primary validation: {item['primary_validation']}")
+            for command in _string_list(item.get("validation_commands"))[1:3]:
+                print(f"  alternate validation: {command}")
+            for source in _string_list(item.get("sources")):
+                print(f"  source: {source}")
+            for group in _string_list(item.get("groups")):
+                print(f"  group: {group}")
+            for path in _string_list(item.get("repo_usage_files"))[:2]:
+                print(f"  usage: {path}")
+            print(f"  next action: {item['next_action']}")
         return 0
 
     if ns.target:

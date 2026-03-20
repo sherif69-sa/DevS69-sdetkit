@@ -31,6 +31,13 @@ Depending on the repo signals and dependency inventory, the expansion lab can su
 - a **runtime fast-follow watchlist** for hot-path dependencies,
 - or an **optimization control center** that collapses boost + AgentOS outputs into one recurring operating view.
 
+The validation route map is now available directly via `sdetkit kits route-map`, so one strong follow-up pattern is:
+
+```bash
+python -m sdetkit kits expand --goal "upgrade umbrella architecture with agentos optimization"
+python -m sdetkit kits route-map --impact-area runtime-core --limit 5
+```
+
 ## How to use it well
 
 1. Run `sdetkit kits optimize --goal "..."` first if you need the full alignment payload.
