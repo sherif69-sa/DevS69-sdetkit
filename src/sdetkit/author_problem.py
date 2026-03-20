@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import shutil
 import subprocess
 import sys
@@ -63,6 +64,18 @@ class DockerCommandRunner:
 
     def which(self, program: str) -> str | None:
         return shutil.which(program)
+
+
+def _current_host_uid_gid() -> tuple[int, int] | None:
+    getuid = getattr(os, "getuid", None)
+    getgid = getattr(os, "getgid", None)
+    if not callable(getuid) or not callable(getgid):
+        return None
+    uid = int(getuid())
+    gid = int(getgid())
+    if uid < 0 or gid < 0:
+        return None
+    return uid, gid
 
 
 @dataclass(frozen=True)
@@ -644,6 +657,7 @@ def run_authoring_container(
 ) -> DockerInvocation:
     runner = runner or DockerCommandRunner()
     toolkit_root = (toolkit_root or _repo_root()).resolve()
+    host_identity = _current_host_uid_gid()
     command = command or [
         "python3",
         "-m",
@@ -660,6 +674,10 @@ def run_authoring_container(
         "docker",
         "run",
         "--rm",
+    ]
+    if host_identity is not None:
+        argv.extend(["--user", f"{host_identity[0]}:{host_identity[1]}"])
+    argv.extend([
         "-v",
         f"{Path(repo_root).resolve()}:/app",
         "-v",
@@ -672,7 +690,7 @@ def run_authoring_container(
         f"PYTHONPATH={_TOOLKIT_MOUNT}/src",
         image,
         *command,
-    ]
+    ])
     return runner.run(argv)
 
 
@@ -1097,12 +1115,61 @@ def _copy_docker_artifact(app_dir: Path, workdir: Path) -> None:
         atomic_write_text(workdir / "docker.file", dockerfile_problem.read_text(encoding="utf-8"))
 
 
+def _repair_remove_path(path: str) -> None:
+    target = Path(path)
+    identity = _current_host_uid_gid()
+    if identity is not None:
+        try:
+            os.chown(target, identity[0], identity[1], follow_symlinks=False)
+        except OSError:
+            pass
+    try:
+        mode = stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR
+        if target.is_dir():
+            mode |= stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP
+        os.chmod(target, mode, follow_symlinks=False)
+    except OSError:
+        pass
+
+
+def _handle_rmtree_error(func: Any, path: str, exc_info: Any) -> None:
+    _repair_remove_path(path)
+    parent = Path(path).parent
+    if parent.exists():
+        _repair_remove_path(str(parent))
+    func(path)
+
+
+def _quarantine_checkout_dir(app_dir: Path) -> Path:
+    app_dir = Path(app_dir)
+    for index in range(1, 1000):
+        candidate = app_dir.with_name(f"{app_dir.name}.stale.{index:03d}")
+        if not candidate.exists():
+            app_dir.rename(candidate)
+            return candidate
+    raise RuntimeError(f"could not quarantine stale checkout: {app_dir.as_posix()}")
+
+
 def _reset_checkout_dir(app_dir: Path) -> None:
     if app_dir.is_symlink() or app_dir.is_file():
-        app_dir.unlink()
+        try:
+            app_dir.unlink()
+        except PermissionError:
+            quarantined = _quarantine_checkout_dir(app_dir)
+            try:
+                quarantined.unlink()
+            except OSError:
+                pass
         return
     if app_dir.exists():
-        shutil.rmtree(app_dir)
+        try:
+            shutil.rmtree(app_dir, onerror=_handle_rmtree_error)
+        except OSError:
+            quarantined = _quarantine_checkout_dir(app_dir)
+            try:
+                shutil.rmtree(quarantined, onerror=_handle_rmtree_error)
+            except OSError:
+                pass
 
 
 def _shell_command(name: str, command: str, *, cwd: Path) -> StageCommand:

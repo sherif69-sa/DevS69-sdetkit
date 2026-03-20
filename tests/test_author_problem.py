@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from sdetkit.author_problem import (
     DockerCommandRunner,
     WorkflowContract,
     _git_restore_paths,
+    _reset_checkout_dir,
     _rich_strategy_matches,
     bootstrap_workdir,
     build_docker_image,
@@ -327,6 +329,9 @@ def test_render_dockerfile_and_docker_helpers(tmp_path: Path) -> None:
     assert run.returncode == 0
     assert runner.calls[0][:3] == ["docker", "build", "-f"]
     assert runner.calls[1][:3] == ["docker", "run", "--rm"]
+    assert "--user" in runner.calls[1]
+    user_index = runner.calls[1].index("--user")
+    assert runner.calls[1][user_index + 1] == f"{os.getuid()}:{os.getgid()}"
 
 
 def test_author_problem_doctor_verify_and_triad(tmp_path: Path) -> None:
@@ -613,6 +618,31 @@ def test_git_restore_paths_restores_tracked_and_deletes_untracked(tmp_path: Path
 
     assert (repo / "tracked.py").read_text(encoding="utf-8") == "value = 1\n"
     assert not (repo / "new_helper.py").exists()
+
+
+def test_reset_checkout_dir_quarantines_stale_tree_when_rmtree_hits_permission_error(
+    tmp_path: Path, monkeypatch
+) -> None:
+    app_dir = tmp_path / "app"
+    (app_dir / "__pycache__").mkdir(parents=True)
+    (app_dir / "__pycache__" / "test_progress.cpython-312-pytest-9.0.2.pyc").write_bytes(b"pyc")
+    original_rmtree = shutil.rmtree
+    seen_paths: list[str] = []
+
+    def fake_rmtree(path, *args, **kwargs):
+        target = Path(path)
+        seen_paths.append(target.name)
+        if target == app_dir:
+            raise PermissionError("stale root-owned pycache")
+        return original_rmtree(path, *args, **kwargs)
+
+    monkeypatch.setattr(shutil, "rmtree", fake_rmtree)
+
+    _reset_checkout_dir(app_dir)
+
+    assert not app_dir.exists()
+    assert any(name.startswith("app.stale.") for name in seen_paths)
+    assert not any(tmp_path.glob("app.stale.*"))
 
 
 def test_main_cli_dispatches_author_problem_init_and_help_lists_author(capsys) -> None:
