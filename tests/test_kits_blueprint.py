@@ -24,7 +24,8 @@ def test_blueprint_payload_exposes_upgrade_layers_and_operating_model() -> None:
 
 def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_path: Path) -> None:
     (tmp_path / "pyproject.toml").write_text(
-        "[project]\nname='x'\nversion='0.1.0'\n", encoding="utf-8"
+        "[project]\nname='x'\nversion='0.1.0'\ndependencies=['httpx>=0.28.1,<1']\n",
+        encoding="utf-8",
     )
     (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
     (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
@@ -59,6 +60,13 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
     assert payload["quality_boost_lane"]["command"] == "bash quality.sh boost"
     assert payload["quality_boost_lane"]["phases"][0] == "doctor-first"
     assert payload["integration_lane"]["coverage"] == "topology-aware"
+    assert payload["upgrade_inventory"]["status"] == "ready"
+    assert payload["upgrade_inventory"]["packages_audited"] == 1
+    assert payload["upgrade_inventory"]["priority_packages"][0]["name"] == "httpx"
+    assert payload["upgrade_execution_lane"]["commands"][0].startswith(
+        "python -m sdetkit intelligence upgrade-audit"
+    )
+    assert payload["upgrade_execution_lane"]["focus"]
     assert (
         payload["agentos_lane"]["commands"][1]
         == "sdetkit agent run 'template:repo-health-audit' --approve"

@@ -111,6 +111,8 @@ def test_kits_optimize_emits_alignment_plan_json() -> None:
     assert payload["operating_sequence"][1]["stage"] == "intelligent-autofix"
     assert payload["operating_sequence"][0]["stage"] == "doctor-first"
     assert payload["search_queries"][0]["topic"] == "doctor-upgrade-lane"
+    assert payload["upgrade_inventory"]["status"] in {"ready", "empty"}
+    assert payload["upgrade_execution_lane"]["commands"]
     assert any(item["domain"] == "agentos" for item in payload["alignment_matrix"])
     assert payload["next_boosts"][0]["id"] == "quality-boost"
     assert payload["blueprint"]["control_plane"]["name"] == "agentos-control-plane"
