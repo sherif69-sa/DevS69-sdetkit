@@ -28,6 +28,8 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`security-maintenance-bot.yml`** — creates the weekly maintenance checklist and weak-spot report.
 - **`ghas-review-bot.yml`** — creates the weekly GHAS digest issue with open-alert counts, workflow freshness, and follow-up prompts.
 - **`ghas-campaign-bot.yml`** — creates a weekly GHAS campaign planner issue for Copilot Autofix-aware code scanning backlog slices, secret scanning age buckets, and push-protection follow-up.
+- **`ghas-alert-sla-bot.yml`** — creates a weekly GHAS SLA tracker issue that forces 7/14/30-day backlog slices into an owned remediation lane.
+- **`ghas-metrics-export-bot.yml`** — exports a weekly GHAS metrics artifact plus an issue-driven snapshot of alert totals, age buckets, and workflow freshness.
 - **`security-configuration-audit-bot.yml`** — creates a monthly GHAS configuration audit issue covering repo-local workflow coverage, code security configuration visibility, and dependency submission posture.
 - **`dependency-review.yml`** — blocks pull requests that introduce vulnerable dependencies or denied license drift before they merge.
 
@@ -79,6 +81,30 @@ It now:
 - snapshots open alert counts across code scanning, secret scanning, and Dependabot,
 - opens a date-scoped `🧱 GHAS configuration audit (...)` issue.
 
+### `ghas-alert-sla-bot.yml`
+
+This bot adds an explicit age-based operating contract to the GHAS queue so stale findings cannot sit in the Security tab indefinitely without an owner.
+
+It now:
+
+- counts 7+, 14+, and 30+ day backlog slices across **code scanning**, **Dependabot**, and **secret scanning**,
+- highlights 14+ day **high-severity** code/dependency findings,
+- tracks **push-protection bypass** secret alerts that should be treated as same-week work,
+- groups older CodeQL findings by rule so maintainers can batch-fix them instead of triaging one-by-one,
+- opens a date-scoped `⏱️ GHAS alert SLA tracker (...)` issue.
+
+### `ghas-metrics-export-bot.yml`
+
+This bot turns GHAS operations into reusable evidence instead of ephemeral issue text.
+
+It now:
+
+- exports `build/ghas-metrics.json` as a workflow artifact,
+- captures alert totals, age buckets, and severity distributions for **code scanning**, **Dependabot**, and **secret scanning**,
+- records workflow freshness for the repo's GHAS automation surface,
+- opens a date-scoped `📊 GHAS metrics snapshot (...)` issue,
+- gives dashboards, weekly reviews, and future evidence packs a machine-readable GHAS baseline.
+
 ### `dependency-radar-bot.yml`
 
 This bot turns the repo's existing `upgrade-audit` intelligence into a scheduled maintenance surface.
@@ -95,10 +121,12 @@ It now:
 
 1. Open the latest **GHAS digest** issue.
 2. Open the latest **GHAS campaign planner** issue and group any 14+ day backlog into a focused remediation lane.
-3. Clear or triage high-severity security findings first.
-4. Open the latest **dependency radar** issue.
-5. Pick one upgrade candidate that already maps to a small validation command.
-6. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+3. Open the latest **GHAS alert SLA tracker** issue and convert every 14+ day breach into an owned issue or PR.
+4. Review the **GHAS metrics snapshot** artifact before reporting progress or trend direction.
+5. Clear or triage high-severity security findings first.
+6. Open the latest **dependency radar** issue.
+7. Pick one upgrade candidate that already maps to a small validation command.
+8. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 
@@ -118,6 +146,8 @@ These bots make the repo more than a set of commands; they turn it into a contin
 
 - **better GHAS visibility**,
 - **campaign-oriented GHAS backlog planning**,
+- **age-based GHAS SLA enforcement**,
+- **machine-readable GHAS metrics snapshots for dashboards and audits**,
 - **coverage checks for newer GHAS operating-model features**,
 - **scheduled dependency prioritization**,
 - **clearer issue-driven follow-up**,

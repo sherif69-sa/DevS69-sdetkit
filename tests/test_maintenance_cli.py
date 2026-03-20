@@ -708,6 +708,8 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
         ".github/workflows/dependency-review.yml",
         ".github/workflows/ghas-review-bot.yml",
         ".github/workflows/ghas-campaign-bot.yml",
+        ".github/workflows/ghas-alert-sla-bot.yml",
+        ".github/workflows/ghas-metrics-export-bot.yml",
         ".github/workflows/security-configuration-audit-bot.yml",
         ".github/workflows/security-maintenance-bot.yml",
         ".github/workflows/dependency-radar-bot.yml",
@@ -737,6 +739,8 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
     assert result.details["missing_configs"] == []
     tracks = {item["id"]: item for item in result.details["ghas_update_tracks"]}
     assert tracks["copilot_autofix"]["present"] is True
+    assert tracks["alert_sla_tracking"]["present"] is True
+    assert tracks["metrics_exports"]["present"] is True
     assert tracks["security_configurations"]["present"] is True
     assert tracks["dependency_review"]["present"] is True
 

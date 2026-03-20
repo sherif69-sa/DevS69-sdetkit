@@ -49,6 +49,8 @@ jobs:
               'sbom.yml',
               'ghas-review-bot.yml',
               'ghas-campaign-bot.yml',
+              'ghas-alert-sla-bot.yml',
+              'ghas-metrics-export-bot.yml',
               'security-configuration-audit-bot.yml',
               'dependency-review.yml',
               'dependency-radar-bot.yml',

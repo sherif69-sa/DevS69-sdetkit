@@ -49,6 +49,8 @@ The repository includes always-on security maintenance so it behaves like an aut
 - **SBOM refresh** (`sbom.yml`) keeps dependency inventory artifacts current for downstream review.
 - **GHAS review bot** (`ghas-review-bot.yml`) creates a weekly digest issue for code scanning, Dependabot, secret scanning, workflow freshness, and campaign follow-up prompts.
 - **GHAS campaign bot** (`ghas-campaign-bot.yml`) creates a weekly planner issue for Copilot Autofix-aware code scanning campaigns, secret scanning age buckets, and push-protection follow-up.
+- **GHAS alert SLA bot** (`ghas-alert-sla-bot.yml`) creates a weekly issue that tracks 7/14/30-day backlog breaches across code scanning, Dependabot, and secret scanning.
+- **GHAS metrics export bot** (`ghas-metrics-export-bot.yml`) exports a reusable `ghas-metrics.json` artifact and opens a weekly metrics snapshot issue for dashboards and audits.
 - **Security configuration audit bot** (`security-configuration-audit-bot.yml`) runs monthly to audit repo-local GHAS workflow coverage, code security configuration visibility, and dependency submission posture.
 - **Dependency review gate** (`dependency-review.yml`) blocks pull requests that introduce high-severity dependency risk or denied licenses.
 - **Weekly maintenance issue** (`security-maintenance-bot.yml`) is refreshed automatically with checklist items, weak-spot reports, and links.
