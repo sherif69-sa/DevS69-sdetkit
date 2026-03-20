@@ -30,12 +30,68 @@ need_cmd() {
   exit 127
 }
 
+valid_modes=(all ci fmt lint type doctor test full-test cov mut muthtml boost)
+
+mode_suggestion() {
+  python3 - "$1" "${valid_modes[@]}" <<'PY'
+import difflib
+import sys
+
+unknown = sys.argv[1]
+choices = sys.argv[2:]
+match = difflib.get_close_matches(unknown, choices, n=1)
+if match:
+    print(match[0])
+PY
+}
+
 run_fmt()     { need_cmd ruff; python -m ruff format .; }
 run_fmt_check() { need_cmd ruff; python -m ruff format --check .; }
 run_lint()    { need_cmd ruff; python -m ruff check .; }
 run_type()    { need_cmd mypy; python -m mypy --config-file pyproject.toml src; }
 run_doctor()  { python -m sdetkit doctor --dev --ci --deps --repo --upgrade-audit --format md; }
 run_gate_fast() { python -m sdetkit gate fast; }
+run_premium_autofix() {
+  if [[ -f "premium-gate.sh" ]]; then
+    python -m sdetkit.premium_gate_engine \
+      --out-dir .sdetkit/out \
+      --double-check \
+      --auto-fix \
+      --auto-run-scripts \
+      --format markdown
+  else
+    echo "skip premium auto-fix: premium-gate.sh not found"
+  fi
+}
+run_premium_fast() {
+  if [[ -f "premium-gate.sh" ]]; then
+    bash premium-gate.sh --mode "${SDETKIT_BOOST_PREMIUM_MODE:-fast}"
+  else
+    echo "skip premium gate: premium-gate.sh not found"
+  fi
+}
+run_topology_check() {
+  local profile="${SDETKIT_BOOST_TOPOLOGY_PROFILE:-examples/kits/integration/heterogeneous-topology.json}"
+  if [[ -f "$profile" ]]; then
+    python -m sdetkit integration topology-check --profile "$profile"
+  else
+    echo "skip topology check: $profile not found"
+  fi
+}
+run_optimize_summary() {
+  python -m sdetkit kits optimize \
+    --goal "${SDETKIT_BOOST_GOAL:-upgrade umbrella architecture with agentos optimization}" \
+    --format text
+}
+run_boost() {
+  run_doctor
+  run_type
+  run_premium_autofix
+  run_gate_fast
+  run_premium_fast
+  run_topology_check
+  run_optimize_summary
+}
 run_full_test() { need_cmd pytest; python -m pytest -q -o addopts=; }
 run_test()    { need_cmd pytest; python -m pytest; }
 run_cov() {
@@ -76,6 +132,7 @@ case "$mode" in
   full-test) run_full_test ;;
   mut) run_mut ;;
   muthtml) run_muthtml ;;
+  boost) run_boost ;;
   ci)
     run_fmt_check
     run_lint
@@ -90,7 +147,11 @@ case "$mode" in
     run_cov
     ;;
   *)
-    echo "Usage: bash quality.sh {all|ci|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml}" >&2
+    echo "Usage: bash quality.sh {all|ci|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost}" >&2
+    suggestion="$(mode_suggestion "$mode" || true)"
+    if [[ -n "$suggestion" ]]; then
+      echo "Did you mean: bash quality.sh $suggestion" >&2
+    fi
     exit 2
     ;;
 esac
