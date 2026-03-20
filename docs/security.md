@@ -47,7 +47,10 @@ The repository includes always-on security maintenance so it behaves like an aut
 - **OSV vulnerability scanning** (`osv-scanner.yml`) runs daily and uploads SARIF into code scanning.
 - **Dependency Audit** (`dependency-audit.yml`) runs `pip-audit` against the repo dependency surface.
 - **SBOM refresh** (`sbom.yml`) keeps dependency inventory artifacts current for downstream review.
-- **GHAS review bot** (`ghas-review-bot.yml`) creates a weekly digest issue for code scanning, Dependabot, secret scanning, and workflow freshness.
+- **GHAS review bot** (`ghas-review-bot.yml`) creates a weekly digest issue for code scanning, Dependabot, secret scanning, workflow freshness, and campaign follow-up prompts.
+- **GHAS campaign bot** (`ghas-campaign-bot.yml`) creates a weekly planner issue for Copilot Autofix-aware code scanning campaigns, secret scanning age buckets, and push-protection follow-up.
+- **Security configuration audit bot** (`security-configuration-audit-bot.yml`) runs monthly to audit repo-local GHAS workflow coverage, code security configuration visibility, and dependency submission posture.
+- **Dependency review gate** (`dependency-review.yml`) blocks pull requests that introduce high-severity dependency risk or denied licenses.
 - **Weekly maintenance issue** (`security-maintenance-bot.yml`) is refreshed automatically with checklist items, weak-spot reports, and links.
 - **Dependency radar bot** (`dependency-radar-bot.yml`) publishes a recurring upgrade radar and runtime fast-follow watchlist.
 - **Pre-commit hooks auto-update** (`pre-commit-autoupdate.yml`) runs weekly and opens a maintenance PR.

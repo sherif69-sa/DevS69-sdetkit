@@ -174,6 +174,9 @@ For remediation playbooks, use:
 If you want the hosted repo to keep surfacing upgrade and security work between manual reviews, add these companion automations from this repo as-is or adapt them to your org:
 
 - `.github/workflows/ghas-review-bot.yml` for a weekly GitHub Advanced Security digest issue.
+- `.github/workflows/ghas-campaign-bot.yml` for a weekly GHAS campaign planner with Copilot Autofix-aware alert grouping.
+- `.github/workflows/security-configuration-audit-bot.yml` for a monthly GHAS configuration audit and coverage report.
+- `.github/workflows/dependency-review.yml` for a pull-request dependency guardrail before merge.
 - `.github/workflows/dependency-radar-bot.yml` for a weekly dependency radar and runtime fast-follow watchlist.
 - `.github/workflows/security-maintenance-bot.yml` for the broader weekly security checklist and weak-spot report.
 
