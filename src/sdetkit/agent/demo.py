@@ -11,7 +11,11 @@ _DEMO_SCENARIOS: dict[str, tuple[str, ...]] = {
         "repo-health-audit",
         "security-governance-summary",
         "report-dashboard",
-    )
+    ),
+    "umbrella-upgrade-control-plane": (
+        "repo-health-audit",
+        "report-dashboard",
+    ),
 }
 
 
@@ -37,6 +41,14 @@ def run_demo(*, root: Path, scenario: str) -> dict[str, object]:
             root,
             config_path=root / ".sdetkit/agent/config.yaml",
             task=f"template:{template_id}",
+            auto_approve=True,
+        )
+
+    if scenario == "umbrella-upgrade-control-plane":
+        run_agent(
+            root,
+            config_path=root / ".sdetkit/agent/config.yaml",
+            task="umbrella architecture optimization blueprint",
             auto_approve=True,
         )
 

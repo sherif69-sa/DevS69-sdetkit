@@ -125,7 +125,7 @@ _KITS: Final[list[Kit]] = [
         ],
         "agent_workflows": [
             "sdetkit agent run 'template:report-dashboard' --approve",
-            "sdetkit agent run 'action repo.audit {\"profile\":\"default\"}' --approve",
+            'sdetkit agent run \'action repo.audit {"profile":"default"}\' --approve',
             "sdetkit agent dashboard build --format md",
         ],
         "composes_with": ["release-confidence", "integration-assurance"],
@@ -296,6 +296,163 @@ def _kit_overview(kit: Kit) -> dict[str, object]:
     }
 
 
+def _goal_tokens(goal: str | None) -> set[str]:
+    if goal is None:
+        return set()
+    return set(_tokenize(goal))
+
+
+def _architecture_layers(selected: list[Kit]) -> list[dict[str, object]]:
+    return [
+        {
+            "name": "experience-surface",
+            "summary": "Umbrella kits stay the product entrypoint so teams discover the right lane quickly.",
+            "components": [f"sdetkit {kit['slug']} ..." for kit in selected],
+        },
+        {
+            "name": "control-plane",
+            "summary": (
+                "AgentOS coordinates recurring runs, review loops, history capture, and artifact "
+                "exports above the kit surfaces."
+            ),
+            "components": [
+                "sdetkit agent init",
+                "sdetkit agent run '<goal>' --approve",
+                "sdetkit agent dashboard build --format html",
+            ],
+        },
+        {
+            "name": "artifact-plane",
+            "summary": "Every lane emits deterministic artifacts that can be wired into CI, reviews, and evidence packs.",
+            "components": sorted(
+                {artifact for kit in selected for artifact in kit["key_artifacts"]}
+            ),
+        },
+    ]
+
+
+def _operating_model(selected: list[Kit], goal: str | None) -> list[dict[str, object]]:
+    goal_text = goal or "umbrella upgrade"
+    return [
+        {
+            "cadence": "continuous",
+            "focus": "Discovery and routing",
+            "commands": [
+                "sdetkit kits search topology",
+                f'sdetkit kits blueprint --goal "{goal_text}"',
+            ],
+        },
+        {
+            "cadence": "per-change",
+            "focus": "Execution and deterministic artifact generation",
+            "commands": [kit["learning_path"][0] for kit in selected],
+        },
+        {
+            "cadence": "daily-or-release",
+            "focus": "AgentOS control-plane review",
+            "commands": [
+                f'sdetkit agent run "{goal_text}" --approve',
+                "sdetkit agent history list --limit 10",
+                "sdetkit agent dashboard build --format html",
+            ],
+        },
+    ]
+
+
+def _upgrade_backlog(selected: list[Kit], goal: str | None) -> list[dict[str, object]]:
+    goal_terms = _goal_tokens(goal)
+    backlog: list[dict[str, object]] = []
+
+    def add_upgrade(
+        upgrade_id: str,
+        title: str,
+        summary: str,
+        commands: list[str],
+        triggers: set[str],
+    ) -> None:
+        if triggers and goal_terms and goal_terms.isdisjoint(triggers):
+            return
+        backlog.append(
+            {
+                "id": upgrade_id,
+                "title": title,
+                "summary": summary,
+                "commands": commands,
+            }
+        )
+
+    add_upgrade(
+        "umbrella-routing",
+        "Tighten umbrella routing",
+        "Use kit search and kit composition to route incoming work to the smallest reliable lane.",
+        [
+            "sdetkit kits list",
+            "sdetkit kits search upgrade risk",
+            "sdetkit kits blueprint --goal 'umbrella routing hardening'",
+        ],
+        {"umbrella", "architecture", "search", "upgrade"},
+    )
+    add_upgrade(
+        "agent-control-plane",
+        "Promote AgentOS to the recurring control plane",
+        "Run repeatable orchestration, history export, and dashboard builds as the management layer over kits.",
+        [
+            "sdetkit agent init",
+            "sdetkit agent run 'template:repo-health-audit' --approve",
+            "sdetkit agent dashboard build --format html",
+        ],
+        {"agent", "agentos", "automation", "control", "orchestration", "upgrade"},
+    )
+    add_upgrade(
+        "integration-topology",
+        "Expand topology-aware integration assurance",
+        "Treat heterogeneous dependency maps and environment contracts as first-class release inputs.",
+        [
+            "sdetkit integration check --profile examples/kits/integration/profile.json",
+            "sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json",
+        ],
+        {"integration", "topology", "umbrella", "architecture"},
+    )
+    add_upgrade(
+        "release-upgrade-audit",
+        "Fold dependency maintenance into release readiness",
+        "Prioritize upgrade work using the intelligence lane so release decisions carry freshness and validation guidance.",
+        [
+            "sdetkit intelligence upgrade-audit --format json --top 5",
+            "sdetkit release doctor",
+        ],
+        {"upgrade", "dependency", "release", "optimization"},
+    )
+    add_upgrade(
+        "forensics-feedback-loop",
+        "Feed forensics back into the umbrella",
+        "Close the loop by comparing run deltas and using evidence bundles to improve the release and integration lanes.",
+        [
+            "sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json",
+            "sdetkit forensics bundle --run examples/kits/forensics/run-b.json --output build/repro.zip",
+        ],
+        {"forensics", "failure", "incident", "optimization"},
+    )
+
+    if not backlog:
+        for upgrade in (
+            {
+                "id": "umbrella-routing",
+                "title": "Tighten umbrella routing",
+                "summary": "Use kit search and blueprinting to keep the public surface crisp as capabilities grow.",
+                "commands": ["sdetkit kits search release evidence"],
+            },
+            {
+                "id": "agent-control-plane",
+                "title": "Promote AgentOS to the recurring control plane",
+                "summary": "Capture deterministic history and dashboards above the execution kits.",
+                "commands": ["sdetkit agent dashboard build --format html"],
+            },
+        ):
+            backlog.append(upgrade)
+    return backlog
+
+
 def list_payload() -> dict[str, object]:
     return {
         "schema_version": SCHEMA_VERSION,
@@ -398,6 +555,15 @@ def blueprint_payload(
             "sdetkit agent dashboard build --format html",
         ],
     }
+    architecture_layers = _architecture_layers(resolved[: max(limit, 1)])
+    operating_model = _operating_model(resolved[: max(limit, 1)], goal)
+    upgrade_backlog = _upgrade_backlog(resolved[: max(limit, 1)], goal)
+    metrics = [
+        "kit routing accuracy",
+        "artifact coverage per execution lane",
+        "AgentOS run success rate",
+        "time-to-evidence for release and incident review",
+    ]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -405,6 +571,10 @@ def blueprint_payload(
         "selected_kits": [_kit_overview(kit) for kit in resolved[: max(limit, 1)]],
         "control_plane": control_plane,
         "phases": phases,
+        "architecture_layers": architecture_layers,
+        "operating_model": operating_model,
+        "upgrade_backlog": upgrade_backlog,
+        "metrics": metrics,
     }
 
 
@@ -523,6 +693,15 @@ def main(argv: list[str] | None = None) -> int:
         print("phases:")
         for phase in payload["phases"]:
             print(f"- {phase['phase']}: {phase['summary']}")
+        print("architecture layers:")
+        for layer in payload["architecture_layers"]:
+            print(f"- {layer['name']}: {layer['summary']}")
+        print("operating model:")
+        for lane in payload["operating_model"]:
+            print(f"- {lane['cadence']}: {lane['focus']}")
+        print("upgrade backlog:")
+        for item in payload["upgrade_backlog"]:
+            print(f"- {item['title']}: {item['summary']}")
         return 0
 
     if ns.target:

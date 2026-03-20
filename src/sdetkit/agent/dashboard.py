@@ -59,16 +59,39 @@ def summarize_history(history_dir: Path) -> dict[str, Any]:
 
     template_counter: Counter[str] = Counter()
     action_counter: Counter[str] = Counter()
+    worker_counter: Counter[str] = Counter()
+    task_family_counter: Counter[str] = Counter()
     failure_tasks: list[dict[str, Any]] = []
+    approvals = {
+        "approved": 0,
+        "denied": 0,
+        "failed_after_approval": 0,
+    }
 
     for run in runs:
         task = str(run.get("task", ""))
         template_id = _extract_template_id(task)
         if template_id:
             template_counter[template_id] += 1
+            task_family_counter["template"] += 1
+        elif task.strip().startswith("action "):
+            task_family_counter["action"] += 1
+        elif "blueprint" in task.lower() or "umbrella" in task.lower():
+            task_family_counter["blueprint"] += 1
+        elif "audit" in task.lower():
+            task_family_counter["audit"] += 1
+        else:
+            task_family_counter["other"] += 1
         for action in run.get("actions", []):
             if isinstance(action, dict):
                 action_counter[str(action.get("action", "unknown"))] += 1
+                worker_counter[str(action.get("worker_id", "unknown"))] += 1
+                if bool(action.get("denied")):
+                    approvals["denied"] += 1
+                elif bool(action.get("approved")):
+                    approvals["approved"] += 1
+                    if not bool(action.get("ok")):
+                        approvals["failed_after_approval"] += 1
         if str(run.get("status", "")) != "ok":
             failure_tasks.append(
                 {
@@ -80,6 +103,12 @@ def summarize_history(history_dir: Path) -> dict[str, Any]:
             )
 
     failure_tasks.sort(key=lambda x: (x["captured_at"], x["hash"]))
+    latest_status = str(runs[-1].get("status", "")) if runs else "unknown"
+    success_streak = 0
+    for run in reversed(runs):
+        if str(run.get("status", "")) != "ok":
+            break
+        success_streak += 1
 
     return {
         "runs": {
@@ -87,9 +116,14 @@ def summarize_history(history_dir: Path) -> dict[str, Any]:
             "success": success,
             "failed": failed,
             "success_rate": success_rate,
+            "latest_status": latest_status,
+            "success_streak": success_streak,
         },
         "top_templates": _counter_to_rows(template_counter),
         "top_actions": _counter_to_rows(action_counter),
+        "workers": _counter_to_rows(worker_counter),
+        "task_families": _counter_to_rows(task_family_counter),
+        "approvals": approvals,
         "failures": failure_tasks,
         "records": [
             {
@@ -115,6 +149,8 @@ def render_markdown(summary: dict[str, Any]) -> str:
         f"- Successful runs: {runs['success']}",
         f"- Failed runs: {runs['failed']}",
         f"- Success rate: {runs['success_rate']:.2f}%",
+        f"- Latest status: {runs['latest_status']}",
+        f"- Success streak: {runs['success_streak']}",
         "",
         "## Top templates",
     ]
@@ -132,6 +168,33 @@ def render_markdown(summary: dict[str, Any]) -> str:
             lines.append(f"- `{item['name']}`: {item['count']}")
     else:
         lines.append("- none")
+
+    lines.extend(["", "## Worker utilization"])
+    workers = summary.get("workers", [])
+    if workers:
+        for item in workers:
+            lines.append(f"- `{item['name']}`: {item['count']}")
+    else:
+        lines.append("- none")
+
+    lines.extend(["", "## Task families"])
+    task_families = summary.get("task_families", [])
+    if task_families:
+        for item in task_families:
+            lines.append(f"- `{item['name']}`: {item['count']}")
+    else:
+        lines.append("- none")
+
+    approvals = summary.get("approvals", {})
+    lines.extend(
+        [
+            "",
+            "## Approvals",
+            f"- approved actions: {approvals.get('approved', 0)}",
+            f"- denied actions: {approvals.get('denied', 0)}",
+            f"- failed after approval: {approvals.get('failed_after_approval', 0)}",
+        ]
+    )
 
     lines.extend(["", "## Failed runs"])
     failures = summary.get("failures", [])
@@ -184,10 +247,24 @@ def render_html(summary: dict[str, Any]) -> str:
             f"<p>Successful runs: {runs['success']}</p>",
             f"<p>Failed runs: {runs['failed']}</p>",
             f"<p>Success rate: {runs['success_rate']:.2f}%</p>",
+            f"<p>Latest status: {html.escape(str(runs['latest_status']))}</p>",
+            f"<p>Success streak: {runs['success_streak']}</p>",
             "<h2>Top templates</h2>",
             _table(summary.get("top_templates", []), "name", "count"),
             "<h2>Top actions</h2>",
             _table(summary.get("top_actions", []), "name", "count"),
+            "<h2>Worker utilization</h2>",
+            _table(summary.get("workers", []), "name", "count"),
+            "<h2>Task families</h2>",
+            _table(summary.get("task_families", []), "name", "count"),
+            "<h2>Approvals</h2>",
+            (
+                "<table><thead><tr><th>Metric</th><th>Count</th></tr></thead><tbody>"
+                f"<tr><td>approved</td><td>{int(summary.get('approvals', {}).get('approved', 0))}</td></tr>"
+                f"<tr><td>denied</td><td>{int(summary.get('approvals', {}).get('denied', 0))}</td></tr>"
+                f"<tr><td>failed_after_approval</td><td>{int(summary.get('approvals', {}).get('failed_after_approval', 0))}</td></tr>"
+                "</tbody></table>"
+            ),
             "<h2>Failed runs</h2>",
             (
                 "<table><thead><tr><th>Captured at</th><th>Hash</th><th>Status</th><th>Task</th></tr></thead>"

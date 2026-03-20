@@ -58,6 +58,9 @@ def test_dashboard_and_history_export_formats(tmp_path: Path, monkeypatch, capsy
     assert payload["format"] == "json"
     parsed = json.loads((tmp_path / "dashboard.json").read_text(encoding="utf-8"))
     assert parsed["runs"]["total"] == 2
+    assert "latest_status" in parsed["runs"]
+    assert "workers" in parsed
+    assert "approvals" in parsed
 
     assert cli.main(["dashboard", "build", "--format", "csv", "--output", "dashboard.csv"]) == 0
     csv_lines = (tmp_path / "dashboard.csv").read_text(encoding="utf-8").splitlines()
@@ -102,3 +105,21 @@ def test_demo_repo_enterprise_audit_outputs_artifacts(tmp_path: Path, monkeypatc
     assert Path(artifacts["dashboard_html"]).exists()
     assert Path(artifacts["dashboard_md"]).exists()
     assert Path(artifacts["history_dir"]).exists()
+
+
+def test_demo_umbrella_upgrade_control_plane_outputs_blueprint(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.setenv("SOURCE_DATE_EPOCH", "1700000000")
+    for template_id in ["repo-health-audit", "report-dashboard"]:
+        _write_template(tmp_path, template_id)
+
+    monkeypatch.chdir(tmp_path)
+    assert cli.main(["demo", "--scenario", "umbrella-upgrade-control-plane"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["status"] == "ok"
+    blueprint = tmp_path / ".sdetkit" / "agent" / "workdir" / "umbrella-blueprint.json"
+    assert blueprint.exists()
+    blueprint_payload = json.loads(blueprint.read_text(encoding="utf-8"))
+    assert blueprint_payload["architecture_layers"][0]["name"] == "experience-surface"

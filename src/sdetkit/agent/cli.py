@@ -161,7 +161,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     demo_p.add_argument(
         "--scenario",
-        choices=["repo-enterprise-audit"],
+        choices=["repo-enterprise-audit", "umbrella-upgrade-control-plane"],
         required=True,
         help="Demo scenario identifier.",
     )
