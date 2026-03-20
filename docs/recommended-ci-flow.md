@@ -169,6 +169,16 @@ For remediation playbooks, use:
 - `docs/adoption-troubleshooting.md`
 - `docs/remediation-cookbook.md`
 
+## Optional maintenance-bot layer
+
+If you want the hosted repo to keep surfacing upgrade and security work between manual reviews, add these companion automations from this repo as-is or adapt them to your org:
+
+- `.github/workflows/ghas-review-bot.yml` for a weekly GitHub Advanced Security digest issue.
+- `.github/workflows/dependency-radar-bot.yml` for a weekly dependency radar and runtime fast-follow watchlist.
+- `.github/workflows/security-maintenance-bot.yml` for the broader weekly security checklist and weak-spot report.
+
+These do not replace the CI merge bar; they make the maintenance backlog visible so the team can act before the merge bar starts failing.
+
 ## Keep it lighter for smaller repositories
 
 If your repo is small or early-stage, keep only:
