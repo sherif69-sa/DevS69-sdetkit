@@ -284,6 +284,17 @@ def _rule_based_plan(task: str, *, max_actions: int) -> list[tuple[str, dict[str
                 },
             )
         ][:max_actions]
+    if any(term in normalized for term in ("expand", "feature", "worker", "workers", "bot", "bots", "search")):
+        return [
+            (
+                "kits.expand",
+                {
+                    "goal": task,
+                    "output": ".sdetkit/agent/workdir/umbrella-expand.json",
+                    "limit": 3,
+                },
+            )
+        ][:max_actions]
     if any(term in normalized for term in ("umbrella", "architecture", "blueprint")):
         return [
             (

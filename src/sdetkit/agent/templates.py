@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from sdetkit.kits import expand_payload, optimize_payload
 from sdetkit import repo
 from sdetkit.atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
 from sdetkit.report import build_dashboard
@@ -367,6 +368,47 @@ def run_template(
             if isinstance(params.get("output_sarif"), str):
                 target = Path(str(params["output_sarif"]))
                 _write_json(target, repo._to_sarif(audit))
+                artifacts.append(target.as_posix())
+        elif step.action == "kits.optimize":
+            goal = str(params.get("goal", "")).strip() or None
+            limit = int(params.get("limit", 3) or 3)
+            selected = params.get("kits") or []
+            selected_kits = [str(item) for item in selected] if isinstance(selected, list) else []
+            payload = optimize_payload(
+                root=root,
+                goal=goal,
+                selected_kits=selected_kits,
+                limit=limit,
+            )
+            result = {
+                "goal": goal,
+                "alignment_score": payload["alignment_score"],
+                "missing_domains": payload["missing_domains"],
+            }
+            if isinstance(params.get("output"), str):
+                target = Path(str(params["output"]))
+                _write_json(target, payload)
+                artifacts.append(target.as_posix())
+            payload = result
+        elif step.action == "kits.expand":
+            goal = str(params.get("goal", "")).strip() or None
+            limit = int(params.get("limit", 3) or 3)
+            selected = params.get("kits") or []
+            selected_kits = [str(item) for item in selected] if isinstance(selected, list) else []
+            expand_result = expand_payload(
+                root=root,
+                goal=goal,
+                selected_kits=selected_kits,
+                limit=limit,
+            )
+            payload = {
+                "goal": goal,
+                "feature_candidates": len(expand_result.get("feature_candidates", [])),
+                "recommended_workers": len(expand_result.get("recommended_workers", [])),
+            }
+            if isinstance(params.get("output"), str):
+                target = Path(str(params["output"]))
+                _write_json(target, expand_result)
                 artifacts.append(target.as_posix())
         elif step.action == "report.build":
             fmt = str(params.get("format", "html"))

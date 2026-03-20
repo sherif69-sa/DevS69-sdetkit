@@ -119,6 +119,8 @@ def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path:
     candidate_ids = {item["id"] for item in payload["feature_candidates"]}
     mission_topics = {item["topic"] for item in payload["search_missions"]}
     track_names = {item["track"] for item in payload["rollout_tracks"]}
+    worker_ids = {item["id"] for item in payload["recommended_workers"]}
+    launch_templates = {item["template"] for item in payload["worker_launch_pack"]}
 
     assert payload["optimize"]["alignment_score"]["status"] in {"strong", "maximized"}
     assert "dependency-radar-dashboard" in candidate_ids
@@ -126,6 +128,9 @@ def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path:
     assert "runtime-watchlist" in candidate_ids
     assert "dependency-radar" in mission_topics
     assert "validation-route-map" in mission_topics
+    assert "worker-optimization-control" in worker_ids
+    assert "repo-expansion-control" in launch_templates
+    assert payload["worker_launch_pack"]
     assert track_names == {"now", "next", "later"}
 
 

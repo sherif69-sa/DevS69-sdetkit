@@ -79,7 +79,7 @@ def test_deterministic_pack_output(tmp_path: Path) -> None:
 def test_template_run_produces_artifacts_for_two_real_templates(tmp_path: Path) -> None:
     repo_root = Path.cwd()
     templates = discover_templates(repo_root)
-    assert len(templates) >= 8
+    assert len(templates) >= 11
 
     audit_template = template_by_id(repo_root, "repo-health-audit")
     audit_out = tmp_path / "audit"
@@ -103,3 +103,33 @@ def test_template_run_produces_artifacts_for_two_real_templates(tmp_path: Path) 
     run_record = json.loads((bundle_out / "run-record.json").read_text(encoding="utf-8"))
     assert run_record["status"] == "ok"
     assert "hash" in run_record
+
+
+def test_template_run_supports_repo_expansion_and_release_workers(tmp_path: Path) -> None:
+    repo_root = Path.cwd()
+
+    expansion_template = template_by_id(repo_root, "repo-expansion-control")
+    expansion_out = tmp_path / "expansion"
+    expansion_record = run_template(
+        repo_root,
+        template=expansion_template,
+        set_values={"goal": "add more bots workers search and repo expansion"},
+        output_dir=expansion_out,
+    )
+    assert expansion_record["status"] == "ok"
+    assert (expansion_out / "optimize.json").exists()
+    assert (expansion_out / "expand.json").exists()
+    assert (expansion_out / "bundle.tar").exists()
+
+    release_template = template_by_id(repo_root, "release-readiness-worker")
+    release_out = tmp_path / "release"
+    release_record = run_template(
+        repo_root,
+        template=release_template,
+        set_values={},
+        output_dir=release_out,
+    )
+    assert release_record["status"] == "ok"
+    assert (release_out / "doctor.json").exists()
+    assert (release_out / "automation-check.json").exists()
+    assert (release_out / "bundle.tar").exists()

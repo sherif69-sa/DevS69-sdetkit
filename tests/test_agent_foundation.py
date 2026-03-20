@@ -86,6 +86,21 @@ def test_manager_plan_routes_optimize_tasks_to_optimize_action(tmp_path: Path) -
     assert plan[0].params["goal"].startswith("optimize umbrella architecture")
 
 
+def test_manager_plan_routes_expansion_worker_tasks_to_expand_action(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    cfg = load_config(tmp_path / ".sdetkit/agent/config.yaml")
+
+    _message, plan = _manager_plan(
+        task="add more bots workers search and repo expansion",
+        config=cfg,
+        provider=CountingProvider(),
+        worker_ids=["worker-1", "worker-2"],
+    )
+
+    assert plan[0].action == "kits.expand"
+    assert plan[0].params["output"] == ".sdetkit/agent/workdir/umbrella-expand.json"
+
+
 def test_worker_action_execution_success(tmp_path: Path) -> None:
     registry = ActionRegistry(
         root=tmp_path,
@@ -167,6 +182,55 @@ def test_worker_can_write_umbrella_optimize_artifact(tmp_path: Path) -> None:
     payload = json.loads(artifact.read_text(encoding="utf-8"))
     assert payload["alignment_score"]["score"] > 0
     assert payload["doctor_quality_contract"]["entrypoint"].startswith("sdetkit doctor ")
+
+
+def test_worker_can_write_umbrella_expand_artifact(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "ci.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "constraints-ci.txt").write_text("ruff==0.15.7\n", encoding="utf-8")
+    (tmp_path / "mkdocs.yml").write_text("site_name: demo\n", encoding="utf-8")
+    (tmp_path / "RELEASE.md").write_text("# release\n", encoding="utf-8")
+    (tmp_path / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".github" / "workflows" / "pages.yml").write_text("name: pages\n", encoding="utf-8")
+    (tmp_path / "examples" / "kits" / "integration").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "examples" / "kits" / "integration" / "profile.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "examples" / "kits" / "integration" / "heterogeneous-topology.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "templates" / "automations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "templates" / "automations" / "repo-health-audit.yaml").write_text(
+        "metadata:\n  id: repo-health-audit\n  title: x\n  version: 1\n  description: x\nworkflow:\n  - action: fs.write\n    with:\n      path: out.txt\n",
+        encoding="utf-8",
+    )
+    registry = ActionRegistry(
+        root=tmp_path,
+        write_allowlist=(".sdetkit/agent/workdir",),
+        shell_allowlist=(),
+    )
+
+    result = registry.run(
+        "kits.expand",
+        {
+            "goal": "add more bots workers search and repo expansion",
+            "output": ".sdetkit/agent/workdir/umbrella-expand.json",
+        },
+    )
+
+    assert result.ok is True
+    artifact = tmp_path / ".sdetkit/agent/workdir/umbrella-expand.json"
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    assert payload["recommended_workers"]
+    assert payload["worker_launch_pack"]
 
 
 def test_reviewer_rejects_failed_action(tmp_path: Path, monkeypatch) -> None:

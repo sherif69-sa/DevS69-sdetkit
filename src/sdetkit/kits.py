@@ -1530,6 +1530,145 @@ def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> lis
     return missions[:7]
 
 
+def _recommended_workers(
+    goal: str | None, optimize_result: Payload, feature_candidates: list[Payload]
+) -> list[Payload]:
+    goal_text = goal or "umbrella optimization"
+    repo_signals = _payload_dict(optimize_result.get("repo_signals"))
+    candidate_map = {
+        str(item.get("id", "")): item for item in feature_candidates if isinstance(item, dict)
+    }
+    workers: list[Payload] = []
+
+    if "dependency-radar-dashboard" in candidate_map:
+        workers.append(
+            {
+                "id": "worker-dependency-radar",
+                "role": "upgrade-scout",
+                "focus": "Turn dependency heat into a recurring maintenance watchlist.",
+                "template": "repo-expansion-control",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/repo-expansion-control/expand.json",
+                    ".sdetkit/agent/template-runs/repo-expansion-control/bundle.tar",
+                ],
+                "commands": [
+                    "python -m sdetkit kits radar --repo-usage-tier hot-path --format json",
+                    "python -m sdetkit intelligence upgrade-audit --format json --top 10",
+                ],
+            }
+        )
+
+    if "validation-route-map" in candidate_map:
+        workers.append(
+            {
+                "id": "worker-validation-route",
+                "role": "refactor-router",
+                "focus": "Map refactors and upgrades to the smallest safe proof loop.",
+                "template": "repo-expansion-control",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/repo-expansion-control/expand.json",
+                    ".sdetkit/agent/template-runs/repo-expansion-control/plan.md",
+                ],
+                "commands": [
+                    "python -m sdetkit kits route-map httpx --repo-usage-tier hot-path --format json",
+                    "python -m sdetkit doctor --upgrade-audit --format md",
+                ],
+            }
+        )
+
+    if repo_signals.get("docs_site"):
+        workers.append(
+            {
+                "id": "worker-docs-radar",
+                "role": "docs-navigator",
+                "focus": "Keep flagship docs, search posture, and nav coverage aligned as the repo grows.",
+                "template": "docs-search-radar",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/docs-search-radar/mkdocs-build.log",
+                    ".sdetkit/agent/template-runs/docs-search-radar/bundle.tar",
+                ],
+                "commands": [
+                    "python -m mkdocs build --strict",
+                    "python -m sdetkit maintenance --include-check github_automation_check --format md",
+                ],
+            }
+        )
+
+    if repo_signals.get("release_playbook"):
+        workers.append(
+            {
+                "id": "worker-release-radar",
+                "role": "release-guardian",
+                "focus": "Keep release readiness visible before publish windows and docs pushes.",
+                "template": "release-readiness-worker",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/release-readiness-worker/doctor.json",
+                    ".sdetkit/agent/template-runs/release-readiness-worker/bundle.tar",
+                ],
+                "commands": [
+                    "python -m sdetkit doctor --format json",
+                    "python -m sdetkit maintenance --include-check github_automation_check --format json",
+                ],
+            }
+        )
+
+    workers.append(
+        {
+            "id": "worker-optimization-control",
+            "role": "control-plane-operator",
+            "focus": "Join optimize, expand, and dashboard artifacts into one repeatable control loop.",
+            "template": "repo-expansion-control",
+            "outputs": [
+                ".sdetkit/agent/template-runs/repo-expansion-control/optimize.json",
+                ".sdetkit/agent/template-runs/repo-expansion-control/dashboard.html",
+            ],
+            "commands": [
+                f'sdetkit agent run "{goal_text}" --approve',
+                "sdetkit agent dashboard build --format html",
+            ],
+        }
+    )
+
+    return workers[:5]
+
+
+def _worker_launch_pack(
+    goal: str | None, recommended_workers: list[Payload], search_missions: list[Payload]
+) -> list[Payload]:
+    goal_text = goal or "umbrella optimization"
+    mission_map = {
+        str(item.get("topic", "")): str(item.get("query", ""))
+        for item in search_missions
+        if isinstance(item, dict)
+    }
+    pack: list[Payload] = []
+    for worker in recommended_workers:
+        worker_id = str(worker.get("id", ""))
+        template_id = str(worker.get("template", ""))
+        topic = worker_id.removeprefix("worker-").replace("-", " ")
+        search_query = next(
+            (
+                query
+                for key, query in mission_map.items()
+                if key in worker_id or worker_id.endswith(key.replace("_", "-"))
+            ),
+            f"{goal_text} {topic}",
+        )
+        pack.append(
+            {
+                "worker_id": worker_id,
+                "template": template_id,
+                "launch_command": (
+                    f"python -m sdetkit agent templates run {template_id} "
+                    f"--output-dir .sdetkit/agent/template-runs/{template_id}"
+                ),
+                "search_query": search_query,
+                "outputs": _string_list(worker.get("outputs")),
+            }
+        )
+    return pack
+
+
 def expand_payload(
     *,
     root: Path,
@@ -1545,6 +1684,8 @@ def expand_payload(
     )
     feature_candidates = _feature_candidates(goal, optimize_result)
     search_missions = _search_missions(goal, feature_candidates)
+    recommended_workers = _recommended_workers(goal, optimize_result, feature_candidates)
+    worker_launch_pack = _worker_launch_pack(goal, recommended_workers, search_missions)
     rollout_tracks = [
         {
             "track": "now",
@@ -1581,6 +1722,8 @@ def expand_payload(
         "optimize": optimize_result,
         "feature_candidates": feature_candidates,
         "search_missions": search_missions,
+        "recommended_workers": recommended_workers,
+        "worker_launch_pack": worker_launch_pack,
         "rollout_tracks": rollout_tracks,
     }
 
@@ -2210,6 +2353,16 @@ def main(argv: list[str] | None = None) -> int:
         for item in _payload_list(expand_result.get("search_missions")):
             print(f"- {item['topic']}: {item['query']}")
             print(f"  intent: {item['intent']}")
+        print("recommended workers:")
+        for item in _payload_list(expand_result.get("recommended_workers")):
+            print(f"- {item['id']} ({item['role']}): {item['focus']}")
+            print(f"  template: {item['template']}")
+            for command in _string_list(item.get("commands"))[:2]:
+                print(f"  command: {command}")
+        print("worker launch pack:")
+        for item in _payload_list(expand_result.get("worker_launch_pack")):
+            print(f"- {item['worker_id']}: {item['launch_command']}")
+            print(f"  search: {item['search_query']}")
         print("rollout tracks:")
         for item in _payload_list(expand_result.get("rollout_tracks")):
             ids = ", ".join(_string_list(item.get("candidate_ids"))) or "none"

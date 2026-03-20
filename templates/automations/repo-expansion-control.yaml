@@ -1,0 +1,32 @@
+metadata:
+  id: repo-expansion-control
+  title: Repo Expansion Control Worker
+  version: 1.0.0
+  description: Generate optimize/expand worker artifacts and bundle them for recurring control-loop reviews.
+inputs:
+  goal:
+    default: add more bots workers search and repo expansion
+    description: Repo expansion goal statement to analyze.
+workflow:
+  - id: optimize
+    action: kits.optimize
+    with:
+      goal: ${{inputs.goal}}
+      output: ${{run.output_dir}}/optimize.json
+      limit: 4
+  - id: expand
+    action: kits.expand
+    with:
+      goal: ${{inputs.goal}}
+      output: ${{run.output_dir}}/expand.json
+      limit: 4
+  - id: plan-md
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/plan.md
+      content: "Repo expansion worker plan: goal=${{inputs.goal}}; artifacts=optimize.json, expand.json, bundle.tar"
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

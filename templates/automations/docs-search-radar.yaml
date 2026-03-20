@@ -1,0 +1,21 @@
+metadata:
+  id: docs-search-radar
+  title: Docs Search Radar Worker
+  version: 1.0.0
+  description: Validate docs build/search posture and capture a deterministic worker artifact bundle.
+workflow:
+  - id: mkdocs-build
+    action: shell.run
+    with:
+      cmd: python -m mkdocs build --strict
+      save_stdout: ${{run.output_dir}}/mkdocs-build.log
+  - id: docs-summary
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/summary.md
+      content: "Docs search radar worker summary: strict MkDocs build log captured for search/navigation review."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

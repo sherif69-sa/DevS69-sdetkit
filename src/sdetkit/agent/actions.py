@@ -10,7 +10,7 @@ from typing import Any
 
 from sdetkit import repo
 from sdetkit.atomicio import atomic_write_text
-from sdetkit.kits import blueprint_payload, optimize_payload
+from sdetkit.kits import blueprint_payload, expand_payload, optimize_payload
 from sdetkit.report import build_dashboard
 
 
@@ -60,6 +60,7 @@ class ActionRegistry:
             "report.build": self._report_build,
             "kits.blueprint": self._kits_blueprint,
             "kits.optimize": self._kits_optimize,
+            "kits.expand": self._kits_expand,
         }
 
     def run(self, name: str, params: dict[str, Any]) -> ActionResult:
@@ -251,6 +252,49 @@ class ActionRegistry:
                 "missing_domains": [
                     str(item) for item in _value_list(payload.get("missing_domains"))
                 ],
+            },
+        )
+
+    def _kits_expand(self, params: dict[str, Any]) -> ActionResult:
+        goal = str(params.get("goal", "")).strip() or None
+        output = str(params.get("output", ".sdetkit/agent/workdir/umbrella-expand.json"))
+        limit = int(params.get("limit", 3) or 3)
+        selected = params.get("kits") or []
+        selected_kits = [str(item) for item in selected] if isinstance(selected, list) else []
+        if not self._is_write_allowed(output):
+            return ActionResult(
+                "kits.expand",
+                False,
+                {
+                    "error": "write denied by allowlist",
+                    "path": output,
+                    "allowlist": list(self.write_allowlist),
+                },
+            )
+        try:
+            target = self._safe_rel(output)
+            payload = expand_payload(
+                root=self.root,
+                goal=goal,
+                selected_kits=selected_kits,
+                limit=limit,
+            )
+            atomic_write_text(
+                target, json.dumps(payload, ensure_ascii=True, sort_keys=True, indent=2) + "\n"
+            )
+        except (OSError, ValueError) as exc:
+            return ActionResult("kits.expand", False, {"error": str(exc), "path": output})
+        return ActionResult(
+            "kits.expand",
+            True,
+            {
+                "goal": goal,
+                "output": output,
+                "selected_kits": [
+                    str(kit["id"]) for kit in _dict_list(payload.get("selected_kits"))
+                ],
+                "feature_candidates": len(_dict_list(payload.get("feature_candidates"))),
+                "recommended_workers": len(_dict_list(payload.get("recommended_workers"))),
             },
         )
 

@@ -19,6 +19,23 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 
 ## Current bot inventory
 
+## Worker templates that align with the bot surface
+
+In addition to scheduled GitHub bots, the repo now ships **AgentOS worker templates** that let maintainers run the same expansion/review loops on demand and keep the outputs deterministic:
+
+- **`repo-expansion-control`** — runs `kits optimize` + `kits expand`, writes JSON artifacts, and bundles them for roadmap / dashboard follow-up.
+- **`docs-search-radar`** — runs a strict MkDocs build, captures the build log, and bundles docs-search evidence for later review.
+- **`release-readiness-worker`** — snapshots `doctor` plus `github_automation_check` so release-readiness follow-up can happen outside of a publish crunch.
+
+Recommended local launches:
+
+```bash
+python -m sdetkit agent templates run repo-expansion-control
+python -m sdetkit agent templates run docs-search-radar
+python -m sdetkit agent templates run release-readiness-worker
+python -m sdetkit kits expand --goal "add more bots workers search and repo expansion" --format json
+```
+
 ### Security and GitHub Advanced Security bots
 
 - **`security.yml`** — runs CodeQL.
