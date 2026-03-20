@@ -1061,6 +1061,7 @@ def _check_upgrade_audit(
     queries: list[str] | None = None,
     impact_areas: list[str] | None = None,
     manifest_actions: list[str] | None = None,
+    validation_commands: list[str] | None = None,
     repo_usage_tiers: list[str] | None = None,
     release_freshness: list[str] | None = None,
     used_in_repo_only: bool = False,
@@ -1153,6 +1154,7 @@ def _check_upgrade_audit(
         queries=queries,
         min_release_age_days=min_release_age_days,
         max_release_age_days=max_release_age_days,
+        validation_commands=validation_commands,
         used_in_repo_only=used_in_repo_only,
         outdated_only=outdated_only,
         top=top,
@@ -1244,6 +1246,7 @@ def _check_upgrade_audit(
             "queries": queries or [],
             "impact_areas": impact_areas or [],
             "manifest_actions": manifest_actions or [],
+            "validation_commands": validation_commands or [],
             "repo_usage_tiers": repo_usage_tiers or [],
             "release_freshness": release_freshness or [],
             "min_release_age_days": min_release_age_days,
@@ -1531,6 +1534,7 @@ def main(argv: list[str] | None = None) -> int:
         "--upgrade-audit-query",
         "--upgrade-audit-impact-area",
         "--upgrade-audit-manifest-action",
+        "--upgrade-audit-validation-command",
         "--upgrade-audit-repo-usage-tier",
         "--upgrade-audit-release-freshness",
         "--upgrade-audit-top",
@@ -1668,6 +1672,16 @@ def main(argv: list[str] | None = None) -> int:
         ],
         default=None,
         help="Focus doctor upgrade-audit hints on specific manifest actions.",
+    )
+    parser.add_argument(
+        "--upgrade-audit-validation-command",
+        dest="upgrade_audit_validation_commands",
+        action="append",
+        default=None,
+        help=(
+            "Focus doctor upgrade-audit hints on packages whose suggested validation commands "
+            "match a command or glob pattern."
+        ),
     )
     parser.add_argument(
         "--upgrade-audit-top",
@@ -2151,6 +2165,7 @@ def main(argv: list[str] | None = None) -> int:
             queries=ns.upgrade_audit_queries,
             impact_areas=ns.upgrade_audit_impact_areas,
             manifest_actions=ns.upgrade_audit_manifest_actions,
+            validation_commands=ns.upgrade_audit_validation_commands,
             repo_usage_tiers=ns.upgrade_audit_repo_usage_tiers,
             release_freshness=ns.upgrade_audit_release_freshness,
             min_release_age_days=ns.upgrade_audit_min_release_age_days,

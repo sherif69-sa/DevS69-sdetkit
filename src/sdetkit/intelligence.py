@@ -252,6 +252,21 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
     )
     ua.add_argument(
+        "--lane",
+        action="append",
+        choices=[
+            "stabilize-manifests",
+            "refresh-baselines",
+            "upgrade-now",
+            "next-maintenance-batch",
+            "investigate-metadata",
+            "policy-covered-watchlist",
+            "backlog-watchlist",
+        ],
+        default=None,
+    )
+    ua.add_argument("--query", action="append", default=None)
+    ua.add_argument(
         "--impact-area",
         action="append",
         choices=[
@@ -279,12 +294,21 @@ def main(argv: list[str] | None = None) -> int:
         ],
         default=None,
     )
+    ua.add_argument("--validation-command", action="append", default=None)
     ua.add_argument(
         "--repo-usage-tier",
         action="append",
         choices=["hot-path", "active", "edge", "declared-only"],
         default=None,
     )
+    ua.add_argument(
+        "--release-freshness",
+        action="append",
+        choices=list(upgrade_audit.RELEASE_FRESHNESS_BUCKETS),
+        default=None,
+    )
+    ua.add_argument("--min-release-age-days", type=int, default=None)
+    ua.add_argument("--max-release-age-days", type=int, default=None)
     ua.add_argument("--used-in-repo-only", action="store_true")
     ua.add_argument("--outdated-only", action="store_true")
     ua.add_argument("--top", type=int, default=None)
@@ -334,9 +358,15 @@ def main(argv: list[str] | None = None) -> int:
                 groups=ns.group,
                 sources=ns.source,
                 metadata_sources=ns.metadata_source,
+                lanes=ns.lane,
+                queries=ns.query,
                 impact_areas=ns.impact_area,
                 manifest_actions=ns.manifest_action,
+                validation_commands=ns.validation_command,
                 repo_usage_tiers=ns.repo_usage_tier,
+                release_freshness=ns.release_freshness,
+                min_release_age_days=ns.min_release_age_days,
+                max_release_age_days=ns.max_release_age_days,
                 used_in_repo_only=bool(ns.used_in_repo_only),
                 outdated_only=bool(ns.outdated_only),
                 top=ns.top,

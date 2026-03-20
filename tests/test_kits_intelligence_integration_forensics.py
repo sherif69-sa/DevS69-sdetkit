@@ -83,7 +83,7 @@ dependencies = ["httpx==0.28.1"]
                     "httpx": {
                         "fetched_at": 1_767_000_000.0,
                         "latest_version": "0.28.1",
-                        "release_date": "2026-01-01T00:00:00Z",
+                        "release_date": "2026-03-18T00:00:00Z",
                     }
                 },
             }
@@ -107,6 +107,10 @@ dependencies = ["httpx==0.28.1"]
         "pyproject.toml",
         "--manifest-action",
         "none",
+        "--validation-command",
+        "bash ci.sh quick --skip-docs --artifact-dir build",
+        "--release-freshness",
+        "fresh-release",
         "--include-prereleases",
     )
 
@@ -118,6 +122,7 @@ dependencies = ["httpx==0.28.1"]
     assert payload["groups"][0]["group"] == "default"
     assert payload["sources"][0]["source"] == "pyproject.toml"
     assert payload["actions"][0]["manifest_action"] == "none"
+    assert payload["validations"][0]["command"] == "bash ci.sh quick --skip-docs --artifact-dir build"
 
 
 def test_intelligence_failure_mode_invalid_failures_file(tmp_path: Path) -> None:
