@@ -13,8 +13,10 @@ from sdetkit.author_problem import (
     _git_restore_paths,
     _reset_checkout_dir,
     _rich_strategy_matches,
+    _scaffold_novelty_gate,
     bootstrap_workdir,
     build_docker_image,
+    inspect_repo_metadata,
     load_workflow_contract,
     render_dockerfile_problem,
     run_author_doctor,
@@ -365,6 +367,29 @@ def test_author_problem_doctor_verify_and_triad(tmp_path: Path) -> None:
     assert summary["triad"]["phases"][1]["expected"] == "fail"
 
 
+def test_author_problem_recovers_from_unreadable_novelty_gate(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    _write_demo_repo(repo_root)
+    _init_git_repo(repo_root)
+
+    workdir = tmp_path / "work"
+    bootstrap_workdir(workdir, topic="refresh")
+    novelty_gate = workdir / "novelty_gate.txt"
+    novelty_gate.write_text("# novelty gate\n", encoding="utf-8")
+    novelty_gate.chmod(0)
+
+    try:
+        novelty = _scaffold_novelty_gate(workdir, inspect_repo_metadata(repo_root), "refresh")
+    finally:
+        novelty_gate.chmod(0o644)
+
+    assert novelty["status"] == "scaffolded"
+    text = novelty_gate.read_text(encoding="utf-8")
+    assert "## machine-notes" in text
+    assert "candidate topic: refresh" in text
+
+
 def test_author_problem_run_emits_failure_summary_when_artifacts_missing(tmp_path: Path) -> None:
     source = tmp_path / "source"
     source.mkdir()
@@ -412,6 +437,52 @@ test = ["pytest>=8"]
     assert (_export_dir(tmp_path) / "final_failure.json").exists()
     assert manifest["success"] is False
     assert manifest["exports"]["final_failure.json"]["source"].endswith("/work/final_failure.json")
+
+
+def test_author_problem_failed_run_export_omits_stale_success_artifacts(tmp_path: Path) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "pkg").mkdir()
+    (source / "tests").mkdir()
+    (source / "pyproject.toml").write_text(
+        """
+[project]
+name = "minimal"
+version = "0.1.0"
+dependencies = []
+[project.optional-dependencies]
+test = ["pytest>=8"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    (source / "pkg/__init__.py").write_text("", encoding="utf-8")
+    (source / "pkg/core.py").write_text("def value():\n    return 1\n", encoding="utf-8")
+    (source / "tests/test_existing.py").write_text(
+        "from pkg.core import value\n\ndef test_value():\n    assert value() == 1\n",
+        encoding="utf-8",
+    )
+    _init_git_repo(source)
+    sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=source, check=True, capture_output=True, text=True
+    ).stdout.strip()
+
+    result = run_problem_workflow(
+        str(source),
+        sha,
+        tmp_path / "work",
+        skip_docker=True,
+        min_test_patch_bytes=1,
+        min_solution_patch_bytes=1,
+        artifact_export_root=tmp_path,
+    )
+
+    assert result.ok is False
+    manifest = json.loads((_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8"))
+    for name in ("test.patch", "solution.patch", "final_title.txt", "final_description.txt"):
+        assert name not in manifest["exports"]
+        assert not (_export_dir(tmp_path) / name).exists()
+
 
 
 def test_author_problem_run_can_succeed_end_to_end_with_demo_fixture(tmp_path: Path) -> None:

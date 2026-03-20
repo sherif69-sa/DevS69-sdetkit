@@ -322,6 +322,31 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     atomic_write_text(path, canonical_json_dumps(payload))
 
 
+def _read_workfile_text(path: Path) -> str:
+    if not path.exists():
+        return ""
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError:
+        return ""
+
+
+def _clear_run_artifacts(workdir: Path, preserve: tuple[str, ...] = ()) -> None:
+    for name in (
+        "test.patch",
+        "solution.patch",
+        "docker.file",
+        "final_title.txt",
+        "final_description.txt",
+        "run_summary.json",
+        "final_failure.json",
+        "author_doctor.json",
+    ):
+        if name in preserve:
+            continue
+        (workdir / name).unlink(missing_ok=True)
+
+
 def bootstrap_workdir(workdir: Path, *, topic: str | None = None) -> WorkBootstrap:
     workdir = Path(workdir).resolve()
     workdir.mkdir(parents=True, exist_ok=True)
@@ -404,6 +429,12 @@ def _export_final_artifacts(
     export_dir = _artifact_export_root(export_root)
     export_dir.mkdir(parents=True, exist_ok=True)
     exported: dict[str, dict[str, str]] = {}
+    placeholder_sensitive = {
+        "test.patch",
+        "solution.patch",
+        "final_title.txt",
+        "final_description.txt",
+    }
     for name in [
         "test.patch",
         "solution.patch",
@@ -414,6 +445,8 @@ def _export_final_artifacts(
     ]:
         source = workdir / name
         if not source.exists():
+            continue
+        if not success and name in placeholder_sensitive and source.stat().st_size == 0:
             continue
         destination = export_dir / name
         shutil.copy2(source, destination)
@@ -1178,7 +1211,7 @@ def _shell_command(name: str, command: str, *, cwd: Path) -> StageCommand:
 
 
 def _append_note(path: Path, heading: str, lines: list[str]) -> None:
-    text = path.read_text(encoding="utf-8") if path.exists() else ""
+    text = _read_workfile_text(path)
     addition = heading + "\n" + "\n".join(lines) + "\n"
     atomic_write_text(path, text.rstrip() + "\n\n" + addition)
 
@@ -1519,6 +1552,7 @@ def run_container_authoring(
     workdir = Path(workdir).resolve()
     repo_root = Path(repo_root).resolve()
     bootstrap = bootstrap_workdir(workdir, topic=topic)
+    _clear_run_artifacts(workdir, preserve=("docker.file", "author_doctor.json"))
     inspection = inspect_repo_metadata(repo_root)
     topic_slug = _slugify(topic or inspection.repo_name)
     novelty = _scaffold_novelty_gate(workdir, inspection, topic_slug)
