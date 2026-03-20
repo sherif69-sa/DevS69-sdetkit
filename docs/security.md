@@ -52,9 +52,11 @@ The repository includes always-on security maintenance so it behaves like an aut
 - **GHAS alert SLA bot** (`ghas-alert-sla-bot.yml`) creates a weekly issue that tracks 7/14/30-day backlog breaches across code scanning, Dependabot, and secret scanning.
 - **GHAS metrics export bot** (`ghas-metrics-export-bot.yml`) exports a reusable `ghas-metrics.json` artifact and opens a weekly metrics snapshot issue for dashboards and audits.
 - **Security configuration audit bot** (`security-configuration-audit-bot.yml`) runs monthly to audit repo-local GHAS workflow coverage, code security configuration visibility, and dependency submission posture.
+- **Secret protection review bot** (`secret-protection-review-bot.yml`) runs weekly to review push protection, delegated bypass, validity checks, generic/non-provider secret coverage, and the open secret-scanning backlog.
 - **Dependency review gate** (`dependency-review.yml`) blocks pull requests that introduce high-severity dependency risk or denied licenses.
 - **Weekly maintenance issue** (`security-maintenance-bot.yml`) is refreshed automatically with checklist items, weak-spot reports, and links.
 - **Dependency radar bot** (`dependency-radar-bot.yml`) publishes a recurring upgrade radar and runtime fast-follow watchlist.
+- **Repo optimization bot** (`repo-optimization-bot.yml`) turns `kits optimize`, `kits expand`, and automation coverage into a weekly action backlog for upgrades, refactors, and new feature candidates.
 - **Pre-commit hooks auto-update** (`pre-commit-autoupdate.yml`) runs weekly and opens a maintenance PR.
 
 Use the GitHub Security tab to review alerts:

@@ -178,8 +178,10 @@ If you want the hosted repo to keep surfacing upgrade and security work between 
 - `.github/workflows/ghas-alert-sla-bot.yml` for a weekly GHAS SLA tracker covering 7/14/30-day alert backlog slices.
 - `.github/workflows/ghas-metrics-export-bot.yml` for a weekly GHAS metrics artifact and snapshot issue.
 - `.github/workflows/security-configuration-audit-bot.yml` for a monthly GHAS configuration audit and coverage report.
+- `.github/workflows/secret-protection-review-bot.yml` for a weekly secret protection posture and backlog review.
 - `.github/workflows/dependency-review.yml` for a pull-request dependency guardrail before merge.
 - `.github/workflows/dependency-radar-bot.yml` for a weekly dependency radar and runtime fast-follow watchlist.
+- `.github/workflows/repo-optimization-bot.yml` for a weekly optimize/expand-driven feature and automation backlog.
 - `.github/workflows/security-maintenance-bot.yml` for the broader weekly security checklist and weak-spot report.
 
 These do not replace the CI merge bar; they make the maintenance backlog visible so the team can act before the merge bar starts failing.

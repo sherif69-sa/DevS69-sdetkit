@@ -26,6 +26,7 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`dependency-audit.yml`** — runs `pip-audit` against the repo dependency surface.
 - **`sbom.yml`** — refreshes SBOM coverage for downstream review.
 - **`security-maintenance-bot.yml`** — creates the weekly maintenance checklist and weak-spot report.
+- **`secret-protection-review-bot.yml`** — creates a weekly secret-protection review issue for push protection, delegated bypass, validity checks, and open secret-scanning backlog slices.
 - **`ghas-review-bot.yml`** — creates the weekly GHAS digest issue with open-alert counts, workflow freshness, and follow-up prompts.
 - **`ghas-campaign-bot.yml`** — creates a weekly GHAS campaign planner issue for Copilot Autofix-aware code scanning backlog slices, secret scanning age buckets, and push-protection follow-up.
 - **`ghas-alert-sla-bot.yml`** — creates a weekly GHAS SLA tracker issue that forces 7/14/30-day backlog slices into an owned remediation lane.
@@ -38,6 +39,7 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`dependency-auto-merge.yml`** — auto-merges safe Dependabot updates after checks pass.
 - **`pre-commit-autoupdate.yml`** — refreshes pre-commit hook pins.
 - **`dependency-radar-bot.yml`** — publishes a recurring dependency radar issue plus a runtime fast-follow watchlist.
+- **`repo-optimization-bot.yml`** — publishes a weekly repo-optimization control loop issue from `kits optimize`, `kits expand`, and the GitHub automation maintenance check.
 - **`contributor-onboarding-bot.yml`** — keeps contributor guidance discoverable.
 - **`pr-helper-bot.yml` / `pr-quality-comment.yml`** — keep pull requests reviewable and actionable.
 
@@ -93,6 +95,17 @@ It now:
 - groups older CodeQL findings by rule so maintainers can batch-fix them instead of triaging one-by-one,
 - opens a date-scoped `⏱️ GHAS alert SLA tracker (...)` issue.
 
+### `secret-protection-review-bot.yml`
+
+This bot adds a focused control loop for the newer GHAS secret-protection settings that are easy to enable once and then forget.
+
+It now:
+
+- reviews the open **secret scanning** backlog together with **push-protection bypass** follow-up volume,
+- audits repository-level secret-protection settings such as **push protection**, **delegated bypass**, **delegated alert dismissal**, **validity checks**, **generic secrets**, and **non-provider patterns**,
+- highlights the most common open secret types for faster triage,
+- opens a date-scoped `🔑 Secret protection review (...)` issue.
+
 ### `ghas-metrics-export-bot.yml`
 
 This bot turns GHAS operations into reusable evidence instead of ephemeral issue text.
@@ -104,6 +117,17 @@ It now:
 - records workflow freshness for the repo's GHAS automation surface,
 - opens a date-scoped `📊 GHAS metrics snapshot (...)` issue,
 - gives dashboards, weekly reviews, and future evidence packs a machine-readable GHAS baseline.
+
+### `repo-optimization-bot.yml`
+
+This bot turns the repo's own umbrella-intelligence surfaces into a recurring enhancement and refactor control loop.
+
+It now:
+
+- runs `sdetkit kits optimize` and `sdetkit kits expand` with the repo's automation/GHAS goal,
+- snapshots the `github_automation_check` maintenance signal beside those results,
+- publishes a single issue with top feature candidates, GHAS update tracks, search missions, rollout tracks, and innovation opportunities,
+- uploads reusable JSON artifacts for future roadmap, dashboard, or AgentOS consumption.
 
 ### `dependency-radar-bot.yml`
 
@@ -123,10 +147,11 @@ It now:
 2. Open the latest **GHAS campaign planner** issue and group any 14+ day backlog into a focused remediation lane.
 3. Open the latest **GHAS alert SLA tracker** issue and convert every 14+ day breach into an owned issue or PR.
 4. Review the **GHAS metrics snapshot** artifact before reporting progress or trend direction.
-5. Clear or triage high-severity security findings first.
-6. Open the latest **dependency radar** issue.
-7. Pick one upgrade candidate that already maps to a small validation command.
-8. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+5. Review the **secret protection review** issue and clear any push-protection bypass or delegated-bypass follow-up.
+6. Clear or triage high-severity security findings first.
+7. Open the latest **dependency radar** issue.
+8. Open the latest **repo optimization control loop** issue and pick one `now` candidate or search mission.
+9. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 

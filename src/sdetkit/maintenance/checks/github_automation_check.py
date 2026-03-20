@@ -25,10 +25,12 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
             "GHAS security-configuration audit bot",
             True,
         ),
+        "secret-protection-review-bot.yml": ("Secret protection review bot", True),
         "security-maintenance-bot.yml": ("Weekly security maintenance bot", True),
     },
     "upgrade_bots": {
         "dependency-radar-bot.yml": ("Dependency radar bot", True),
+        "repo-optimization-bot.yml": ("Repo optimization control-loop bot", True),
         "dependency-auto-merge.yml": ("Dependabot auto-merge bot", False),
         "pre-commit-autoupdate.yml": ("Pre-commit auto-update bot", False),
     },
@@ -92,6 +94,15 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
         "workflow": "security-configuration-audit-bot.yml",
     },
     {
+        "id": "secret_protection_controls",
+        "title": "Secret protection control review",
+        "description": (
+            "Track push protection, delegated bypass, validity checks, and newer secret "
+            "protection controls against the live secret-scanning backlog."
+        ),
+        "workflow": "secret-protection-review-bot.yml",
+    },
+    {
         "id": "dependency_review",
         "title": "Dependency review gate",
         "description": (
@@ -99,6 +110,15 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
             "license drift."
         ),
         "workflow": "dependency-review.yml",
+    },
+    {
+        "id": "repo_optimization_loop",
+        "title": "Repo optimization control loop",
+        "description": (
+            "Schedule optimize/expand intelligence so automation, feature, and search lanes "
+            "keep producing actionable backlog slices."
+        ),
+        "workflow": "repo-optimization-bot.yml",
     },
 ]
 

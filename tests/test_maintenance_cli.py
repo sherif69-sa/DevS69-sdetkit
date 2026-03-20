@@ -711,8 +711,10 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
         ".github/workflows/ghas-alert-sla-bot.yml",
         ".github/workflows/ghas-metrics-export-bot.yml",
         ".github/workflows/security-configuration-audit-bot.yml",
+        ".github/workflows/secret-protection-review-bot.yml",
         ".github/workflows/security-maintenance-bot.yml",
         ".github/workflows/dependency-radar-bot.yml",
+        ".github/workflows/repo-optimization-bot.yml",
         ".github/dependabot.yml",
         ".github/codeql-config.yml",
         ".github/pip-audit-baseline.json",
@@ -742,7 +744,9 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
     assert tracks["alert_sla_tracking"]["present"] is True
     assert tracks["metrics_exports"]["present"] is True
     assert tracks["security_configurations"]["present"] is True
+    assert tracks["secret_protection_controls"]["present"] is True
     assert tracks["dependency_review"]["present"] is True
+    assert tracks["repo_optimization_loop"]["present"] is True
 
 
 def test_github_automation_check_flags_missing_workflows(tmp_path: Path) -> None:

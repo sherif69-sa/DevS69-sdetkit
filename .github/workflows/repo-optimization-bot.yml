@@ -1,0 +1,196 @@
+name: Repo Optimization Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 7 * * 6"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  repo-optimization:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+            requirements-test.txt
+            requirements-docs.txt
+            constraints-ci.txt
+
+      - name: Install repo
+        run: python -m pip install -c constraints-ci.txt -e .[dev,test]
+
+      - name: Generate optimization artifacts
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          python -m sdetkit kits optimize --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json > build/repo-optimization.json
+          python -m sdetkit kits expand --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json > build/repo-expansion.json
+          python -m sdetkit maintenance --include-check github_automation_check --format json > build/github-automation-check.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          optimize = json.loads(Path('build/repo-optimization.json').read_text(encoding='utf-8'))
+          expand = json.loads(Path('build/repo-expansion.json').read_text(encoding='utf-8'))
+          maintenance = json.loads(Path('build/github-automation-check.json').read_text(encoding='utf-8'))
+
+          candidates = expand.get('feature_candidates', [])[:5]
+          missions = expand.get('search_missions', [])[:5]
+          tracks = expand.get('rollout_tracks', [])[:3]
+          innovation = optimize.get('innovation_opportunities', [])[:5]
+          boosts = optimize.get('next_boosts', [])[:5]
+          automation = maintenance.get('checks', {}).get('github_automation_check', {})
+          automation_details = automation.get('details', {})
+          ghas_tracks = automation_details.get('ghas_update_tracks', [])
+
+          lines = [
+              '# Repo optimization control loop',
+              '',
+              "This issue is auto-generated from the repo's own optimize/expand surfaces so upgrade, refactor, automation, and search work stay actionable.",
+              '',
+              '## Current alignment score',
+              f"- Alignment status: **{optimize.get('alignment_score', {}).get('status', 'unknown')}**",
+              f"- Alignment score: **{optimize.get('alignment_score', {}).get('score', 'n/a')}**",
+              f"- Ready signals: **{optimize.get('alignment_score', {}).get('ready_signals', 'n/a')} / {optimize.get('alignment_score', {}).get('total_signals', 'n/a')}**",
+              '',
+              '## Highest-priority feature candidates',
+          ]
+
+          if candidates:
+              for item in candidates:
+                  cmd = item.get('primary_validation') or ', '.join(item.get('commands', [])[:2]) or 'n/a'
+                  lines.append(
+                      f"- **{item.get('title', item.get('id', 'candidate'))}** · priority `{item.get('priority', 'n/a')}` · effort `{item.get('effort', 'n/a')}` · validate with `{cmd}`"
+                  )
+                  lines.append(f"  - {item.get('summary', 'No summary provided.')}")
+          else:
+              lines.append('- No feature candidates were emitted for this run.')
+
+          lines.extend(['', '## GHAS and automation update tracks'])
+          if ghas_tracks:
+              for item in ghas_tracks:
+                  present = 'present' if item.get('present') else 'missing'
+                  lines.append(f"- **{item.get('title', item.get('id', 'track'))}** · `{present}` via `{item.get('workflow', 'n/a')}`")
+          else:
+              lines.append('- No GHAS update tracks were returned by the maintenance check.')
+
+          lines.extend(['', '## Search missions to continue the upgrade loop'])
+          if missions:
+              for item in missions:
+                  lines.append(f"- **{item.get('topic', 'topic')}** — {item.get('intent', 'No intent provided.')}")
+                  lines.append(f"  - Query: `{item.get('query', 'n/a')}`")
+          else:
+              lines.append('- No search missions were suggested for this run.')
+
+          lines.extend(['', '## Rollout tracks'])
+          if tracks:
+              for item in tracks:
+                  ids = ', '.join(item.get('candidate_ids', [])) or 'n/a'
+                  lines.append(f"- **{item.get('track', 'track')}** → {item.get('focus', 'No focus provided.')} ({ids})")
+          else:
+              lines.append('- No rollout tracks were emitted for this run.')
+
+          lines.extend(['', '## Innovation opportunities'])
+          if innovation:
+              for item in innovation:
+                  if isinstance(item, dict):
+                      lines.append(f"- **{item.get('title', item.get('id', 'opportunity'))}** — {item.get('summary', 'No summary provided.')}")
+                  else:
+                      lines.append(f'- {item}')
+          else:
+              lines.append('- No innovation opportunities were surfaced by optimize.')
+
+          lines.extend(['', '## Next boosts'])
+          if boosts:
+              for item in boosts:
+                  lines.append(f'- {item}')
+          else:
+              lines.append('- No next boosts were surfaced by optimize.')
+
+          lines.extend([
+              '',
+              '## Artifacts',
+              '- `build/repo-optimization.json`',
+              '- `build/repo-expansion.json`',
+              '- `build/github-automation-check.json`',
+              '',
+              '## Suggested follow-up',
+              '- [ ] Pick one `now` candidate and open/refresh a scoped implementation issue or PR.',
+              '- [ ] Turn one search mission into a concrete research thread or docs improvement.',
+              '- [ ] Review any missing GHAS update tracks before the next weekly maintenance cycle.',
+          ])
+
+          Path('build/repo-optimization.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+
+      - name: Upload optimization artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: repo-optimization-control-loop
+          path: |
+            build/repo-optimization.json
+            build/repo-expansion.json
+            build/github-automation-check.json
+            build/repo-optimization.md
+
+      - name: Create or update repo optimization issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const title = `🧠 Repo optimization control loop (${weekOf})`;
+            const body = fs.readFileSync('build/repo-optimization.md', 'utf8');
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'enhancement', color: 'a2eeef', description: 'Feature work and product improvements' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'maintenance',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧠 Repo optimization control loop'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'enhancement', 'priority:medium'],
+              });
+            }
