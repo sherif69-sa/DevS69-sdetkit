@@ -1,0 +1,180 @@
+name: Workflow Governance Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 6 2 * *"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  workflow-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Audit workflow governance posture
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          workflow_dir = Path('.github/workflows')
+          files = sorted(workflow_dir.glob('*.yml'))
+          sha_pin = re.compile(r'@[0-9a-f]{40}(?:\s|$)', re.IGNORECASE)
+          uses_re = re.compile(r'^\s*-?\s*uses:\s*(\S+)', re.MULTILINE)
+
+          findings = []
+          summary = {
+              'workflow_count': len(files),
+              'missing_permissions': [],
+              'unpinned_uses': [],
+              'missing_workflow_dispatch': [],
+              'pull_request_target': [],
+          }
+
+          for path in files:
+              text = path.read_text(encoding='utf-8')
+              lines = text.splitlines()
+              top_permissions = any(line.startswith('permissions:') for line in lines[:40])
+              if not top_permissions:
+                  summary['missing_permissions'].append(path.name)
+                  findings.append({
+                      'type': 'missing_permissions',
+                      'workflow': path.name,
+                      'message': 'Workflow does not declare a top-level permissions block.',
+                  })
+
+              if 'schedule:' in text and 'workflow_dispatch:' not in text:
+                  summary['missing_workflow_dispatch'].append(path.name)
+                  findings.append({
+                      'type': 'missing_workflow_dispatch',
+                      'workflow': path.name,
+                      'message': 'Scheduled workflow should also expose workflow_dispatch for manual recovery.',
+                  })
+
+              if 'pull_request_target:' in text:
+                  summary['pull_request_target'].append(path.name)
+                  findings.append({
+                      'type': 'pull_request_target',
+                      'workflow': path.name,
+                      'message': 'Workflow uses pull_request_target and should be reviewed for trust boundaries.',
+                  })
+
+              for match in uses_re.finditer(text):
+                  target = match.group(1)
+                  if target.startswith('./'):
+                      continue
+                  if '@' not in target or sha_pin.search(target):
+                      continue
+                  summary['unpinned_uses'].append({'workflow': path.name, 'target': target})
+                  findings.append({
+                      'type': 'unpinned_action',
+                      'workflow': path.name,
+                      'target': target,
+                      'message': 'Reusable action is not pinned to a full commit SHA.',
+                  })
+
+          report = {
+              'summary': summary,
+              'finding_count': len(findings),
+              'findings': findings,
+          }
+
+          Path('build').mkdir(exist_ok=True)
+          Path('build/workflow-governance-audit.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+
+          lines = [
+              '# Workflow governance audit',
+              '',
+              'This issue is auto-generated to keep GitHub Actions permissions, pinning, and recovery posture in a reviewable state.',
+              '',
+              '## Snapshot',
+              f"- Workflows scanned: **{summary['workflow_count']}**",
+              f"- Findings: **{len(findings)}**",
+              '',
+              '## Missing top-level permissions',
+          ]
+          lines.extend([f'- ⚠️ {name}' for name in summary['missing_permissions']] or ['- None'])
+          lines.extend(['', '## Unpinned reusable actions'])
+          lines.extend([f"- ⚠️ {item['workflow']} → `{item['target']}`" for item in summary['unpinned_uses']] or ['- None'])
+          lines.extend(['', '## Scheduled workflows missing manual recovery'])
+          lines.extend([f'- ⚠️ {name}' for name in summary['missing_workflow_dispatch']] or ['- None'])
+          lines.extend(['', '## pull_request_target usage'])
+          lines.extend([f'- ⚠️ {name}' for name in summary['pull_request_target']] or ['- None'])
+          lines.extend([
+              '',
+              '## Suggested follow-up',
+              '- [ ] Add least-privilege top-level permissions where missing.',
+              '- [ ] Pin reusable actions to full SHAs for deterministic supply-chain posture.',
+              '- [ ] Ensure scheduled workflows can be re-run manually with `workflow_dispatch`.',
+              '',
+              '## Artifact',
+              '- `build/workflow-governance-audit.json`',
+          ])
+          Path('build/workflow-governance-audit.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          PY
+
+      - name: Upload governance artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: workflow-governance-audit
+          path: |
+            build/workflow-governance-audit.json
+            build/workflow-governance-audit.md
+
+      - name: Publish workflow governance issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const monthOf = new Date().toISOString().slice(0, 7);
+            const title = `🧾 Workflow governance audit (${monthOf})`;
+            const body = fs.readFileSync('build/workflow-governance-audit.md', 'utf8');
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'automation', color: '1d76db', description: 'GitHub Actions and automation work' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'maintenance',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🧾 Workflow governance audit'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'automation', 'priority:medium'],
+              });
+            }

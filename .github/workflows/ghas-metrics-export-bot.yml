@@ -105,8 +105,10 @@ jobs:
               'ghas-campaign-bot.yml',
               'ghas-alert-sla-bot.yml',
               'ghas-metrics-export-bot.yml',
+              'ghas-codeql-hotspots-bot.yml',
               'security-configuration-audit-bot.yml',
               'security-maintenance-bot.yml',
+              'workflow-governance-bot.yml',
               'dependency-radar-bot.yml',
             ];
 

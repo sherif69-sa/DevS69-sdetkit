@@ -31,6 +31,7 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`ghas-campaign-bot.yml`** — creates a weekly GHAS campaign planner issue for Copilot Autofix-aware code scanning backlog slices, secret scanning age buckets, and push-protection follow-up.
 - **`ghas-alert-sla-bot.yml`** — creates a weekly GHAS SLA tracker issue that forces 7/14/30-day backlog slices into an owned remediation lane.
 - **`ghas-metrics-export-bot.yml`** — exports a weekly GHAS metrics artifact plus an issue-driven snapshot of alert totals, age buckets, and workflow freshness.
+- **`ghas-codeql-hotspots-bot.yml`** — creates a weekly CodeQL hotspot issue that groups the code-scanning queue by rule and file so fixes can land in batches.
 - **`security-configuration-audit-bot.yml`** — creates a monthly GHAS configuration audit issue covering repo-local workflow coverage, code security configuration visibility, and dependency submission posture.
 - **`dependency-review.yml`** — blocks pull requests that introduce vulnerable dependencies or denied license drift before they merge.
 
@@ -40,6 +41,7 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`pre-commit-autoupdate.yml`** — refreshes pre-commit hook pins.
 - **`dependency-radar-bot.yml`** — publishes a recurring dependency radar issue plus a runtime fast-follow watchlist.
 - **`repo-optimization-bot.yml`** — publishes a weekly repo-optimization control loop issue from `kits optimize`, `kits expand`, and the GitHub automation maintenance check.
+- **`workflow-governance-bot.yml`** — publishes a monthly workflow-governance audit for permissions, SHA pinning, and manual recovery posture.
 - **`contributor-onboarding-bot.yml`** — keeps contributor guidance discoverable.
 - **`pr-helper-bot.yml` / `pr-quality-comment.yml`** — keep pull requests reviewable and actionable.
 
@@ -118,6 +120,17 @@ It now:
 - opens a date-scoped `📊 GHAS metrics snapshot (...)` issue,
 - gives dashboards, weekly reviews, and future evidence packs a machine-readable GHAS baseline.
 
+### `ghas-codeql-hotspots-bot.yml`
+
+This bot gives the repo a CodeQL-first remediation lane instead of treating the code-scanning queue as a flat list.
+
+It now:
+
+- groups open **code scanning** alerts by **rule**, **tool**, and **file/path**,
+- highlights 14+ and 30+ day hotspots so older findings are easier to batch-fix,
+- exports `build/ghas-codeql-hotspots.json` for follow-up automation or dashboard reuse,
+- opens a date-scoped `🧪 GHAS CodeQL hotspots (...)` issue.
+
 ### `repo-optimization-bot.yml`
 
 This bot turns the repo's own umbrella-intelligence surfaces into a recurring enhancement and refactor control loop.
@@ -128,6 +141,18 @@ It now:
 - snapshots the `github_automation_check` maintenance signal beside those results,
 - publishes a single issue with top feature candidates, GHAS update tracks, search missions, rollout tracks, and innovation opportunities,
 - uploads reusable JSON artifacts for future roadmap, dashboard, or AgentOS consumption.
+
+### `workflow-governance-bot.yml`
+
+This bot adds a repo-wide automation hardening loop beyond GHAS-specific alert triage.
+
+It now:
+
+- audits every workflow for a top-level **permissions** block,
+- flags reusable actions that are not pinned to a full commit SHA,
+- flags scheduled workflows that are missing `workflow_dispatch` manual recovery,
+- exports `build/workflow-governance-audit.json` for deterministic review,
+- opens a date-scoped `🧾 Workflow governance audit (...)` issue.
 
 ### `dependency-radar-bot.yml`
 
@@ -147,11 +172,13 @@ It now:
 2. Open the latest **GHAS campaign planner** issue and group any 14+ day backlog into a focused remediation lane.
 3. Open the latest **GHAS alert SLA tracker** issue and convert every 14+ day breach into an owned issue or PR.
 4. Review the **GHAS metrics snapshot** artifact before reporting progress or trend direction.
-5. Review the **secret protection review** issue and clear any push-protection bypass or delegated-bypass follow-up.
-6. Clear or triage high-severity security findings first.
-7. Open the latest **dependency radar** issue.
-8. Open the latest **repo optimization control loop** issue and pick one `now` candidate or search mission.
-9. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+5. Review the **GHAS CodeQL hotspots** issue and batch the top rule or top file into one remediation lane.
+6. Review the **secret protection review** issue and clear any push-protection bypass or delegated-bypass follow-up.
+7. Clear or triage high-severity security findings first.
+8. Open the latest **dependency radar** issue.
+9. Open the latest **repo optimization control loop** issue and pick one `now` candidate or search mission.
+10. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
+11. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 
@@ -163,6 +190,7 @@ python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --repo-u
 python -m sdetkit kits optimize --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json
 python -m sdetkit kits expand --goal "add more helpful automation bots and GitHub Advanced Security coverage" --format json
 python -m sdetkit maintenance --include-check github_automation_check --format md
+python -m sdetkit maintenance --include-check github_automation_check --format json | jq '.checks.github_automation_check.details.ghas_update_tracks'
 ```
 
 ## What this unlocks for the repo
@@ -173,7 +201,9 @@ These bots make the repo more than a set of commands; they turn it into a contin
 - **campaign-oriented GHAS backlog planning**,
 - **age-based GHAS SLA enforcement**,
 - **machine-readable GHAS metrics snapshots for dashboards and audits**,
+- **CodeQL hotspot batching instead of one-alert-at-a-time triage**,
 - **coverage checks for newer GHAS operating-model features**,
+- **workflow-governance audits for permissions, SHA pinning, and manual recovery**,
 - **scheduled dependency prioritization**,
 - **clearer issue-driven follow-up**,
 - **smaller validation loops for upgrades and refactors**,
