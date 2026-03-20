@@ -1,6 +1,7 @@
 ## Unreleased
 
 - add Name 86 launch readiness closeout lane command, docs, checks, and tests (`name86-launch-readiness-closeout`).
+- upgrade audit: parse modern `pyproject.toml` `[dependency-groups]` declarations, including `{include-group = "..."}` expansions.
 
 # Changelog
 ## [1.0.2]

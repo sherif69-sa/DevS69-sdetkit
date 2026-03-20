@@ -85,6 +85,66 @@ ruff==0.15.6
     assert deps[2].pinned_version == "0.28.1"
 
 
+def test_load_dependencies_collects_dependency_groups_and_include_group_entries(
+    tmp_path: Path,
+) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = ["httpx>=0.27,<1"]
+
+[dependency-groups]
+lint = ["ruff==0.15.7"]
+docs = ["mkdocs==1.6.1"]
+dev = [
+  {include-group = "lint"},
+  {include-group = "docs"},
+  "pytest==8.4.2",
+]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    deps = upgrade_audit._load_dependencies(pyproject, [])
+
+    assert [(dep.group, dep.name) for dep in deps] == [
+        ("default", "httpx"),
+        ("lint", "ruff"),
+        ("docs", "mkdocs"),
+        ("dev", "ruff"),
+        ("dev", "mkdocs"),
+        ("dev", "pytest"),
+    ]
+    assert [dep.pinned_version for dep in deps[1:]] == ["0.15.7", "1.6.1", "0.15.7", "1.6.1", "8.4.2"]
+
+
+def test_load_dependencies_ignores_recursive_dependency_group_includes(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+dependencies = []
+
+[dependency-groups]
+lint = [{include-group = "dev"}, "ruff==0.15.7"]
+dev = [{include-group = "lint"}, "pytest==8.4.2"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    deps = upgrade_audit._load_dependencies(pyproject, [])
+
+    assert [(dep.group, dep.name) for dep in deps] == [
+        ("lint", "pytest"),
+        ("lint", "ruff"),
+        ("dev", "ruff"),
+        ("dev", "pytest"),
+    ]
+
+
 def test_load_dependencies_follows_nested_requirement_files(tmp_path: Path) -> None:
     pyproject = tmp_path / "pyproject.toml"
     pyproject.write_text("[project]\ndependencies=[]\n", encoding="utf-8")

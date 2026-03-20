@@ -127,6 +127,8 @@ python -m sdetkit doctor --upgrade-audit --upgrade-audit-max-release-age-days 14
 bash quality.sh doctor
 ```
 
+The audit also understands modern top-level `[dependency-groups]` declarations in `pyproject.toml`, including `{include-group = "..."}` expansion, so repos that have moved beyond legacy dev/test extras still get the same upgrade visibility and maintenance prioritization.
+
 By default, the audit plans against stable releases first so dev/rc tags do not get promoted as normal maintenance work; use `--include-prereleases` when you explicitly want prerelease targets in the queue. When you already know the maintenance lane you want, filter directly by `--manifest-action` to isolate packages that need a pin refresh, floor raise, staged upgrade, or dedicated major-upgrade branch. Use `--query` when you want text search across package names, notes, repo-usage files, recommended lanes, and validation commands without pre-classifying the package first. Use `--max-release-age-days 14` to build a fast-follow watchlist for just-landed releases, or `--min-release-age-days 365 --outdated-only` to isolate older targets that have gone stale and deserve a deliberate cleanup pass.
 
 When you want a surgically targeted maintenance queue, filter by `--validation-command` as well. That lets you answer questions like “show me only upgrades that roll into `make docs-build`” or “which candidates are covered by `bash quality.sh *` smoke validation” without scanning the whole report.
