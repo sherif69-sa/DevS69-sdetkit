@@ -1,0 +1,26 @@
+metadata:
+  id: release-readiness-worker
+  title: Release Readiness Worker
+  version: 1.0.0
+  description: Snapshot release readiness signals and package them for recurring release-ops review.
+workflow:
+  - id: doctor
+    action: shell.run
+    with:
+      cmd: python -m sdetkit doctor --format json
+      save_stdout: ${{run.output_dir}}/doctor.json
+  - id: automation-check
+    action: shell.run
+    with:
+      cmd: python -m sdetkit maintenance --include-check github_automation_check --format json
+      save_stdout: ${{run.output_dir}}/automation-check.json
+  - id: release-brief
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/release-brief.md
+      content: "Release readiness worker summary: generated doctor.json, automation-check.json, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

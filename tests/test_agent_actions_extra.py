@@ -137,3 +137,52 @@ def test_action_registry_can_write_optimize_artifact(tmp_path: Path) -> None:
     payload = json.loads(artifact.read_text(encoding="utf-8"))
     assert payload["alignment_score"]["status"] in {"strong", "maximized"}
     assert payload["operating_sequence"][0]["stage"] == "doctor-first"
+
+
+def test_action_registry_can_write_expand_artifact(tmp_path: Path) -> None:
+    reg = ActionRegistry(
+        root=tmp_path, write_allowlist=(".sdetkit/agent/workdir",), shell_allowlist=()
+    )
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "ci.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "constraints-ci.txt").write_text("ruff==0.15.7\n", encoding="utf-8")
+    (tmp_path / "mkdocs.yml").write_text("site_name: demo\n", encoding="utf-8")
+    (tmp_path / "RELEASE.md").write_text("# release\n", encoding="utf-8")
+    (tmp_path / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".github" / "workflows" / "pages.yml").write_text("name: pages\n", encoding="utf-8")
+    (tmp_path / "examples" / "kits" / "integration").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "examples" / "kits" / "integration" / "profile.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "examples" / "kits" / "integration" / "heterogeneous-topology.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "templates" / "automations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "templates" / "automations" / "repo-health-audit.yaml").write_text(
+        "metadata:\n  id: repo-health-audit\n  title: x\n  version: 1\n  description: x\nworkflow:\n  - action: fs.write\n    with:\n      path: out.txt\n",
+        encoding="utf-8",
+    )
+
+    result = reg.run(
+        "kits.expand",
+        {
+            "goal": "add more bots workers search and repo expansion",
+            "output": ".sdetkit/agent/workdir/umbrella-expand.json",
+        },
+    )
+
+    assert result.ok is True
+    assert result.payload["recommended_workers"] > 0
+    artifact = tmp_path / ".sdetkit" / "agent" / "workdir" / "umbrella-expand.json"
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    assert payload["recommended_workers"]
+    assert payload["worker_launch_pack"][0]["launch_command"].startswith(
+        "python -m sdetkit agent templates run "
+    )
