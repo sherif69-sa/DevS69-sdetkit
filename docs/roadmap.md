@@ -9,6 +9,8 @@ To keep security and maintenance work visible and actionable, the repo runs an a
 - Weekly security checklist issue is maintained by `.github/workflows/security-maintenance-bot.yml`.
 - Weekly GHAS digest issue is maintained by `.github/workflows/ghas-review-bot.yml`.
 - Weekly GHAS campaign planner issue is maintained by `.github/workflows/ghas-campaign-bot.yml`.
+- Weekly GHAS alert SLA tracker issue is maintained by `.github/workflows/ghas-alert-sla-bot.yml`.
+- Weekly GHAS metrics snapshot issue/artifact is maintained by `.github/workflows/ghas-metrics-export-bot.yml`.
 - Monthly GHAS configuration audit issue is maintained by `.github/workflows/security-configuration-audit-bot.yml`.
 - Weekly dependency radar issue is maintained by `.github/workflows/dependency-radar-bot.yml`.
 - Security triage should include Dependabot, Code Scanning, Secret Scanning, Dependency Audit, SBOM freshness, dependency review posture, security-configuration visibility, and Actions workflow status review.

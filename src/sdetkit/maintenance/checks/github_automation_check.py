@@ -19,6 +19,8 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
     "ghas_bots": {
         "ghas-review-bot.yml": ("Weekly GHAS digest bot", True),
         "ghas-campaign-bot.yml": ("GHAS campaign planner bot", True),
+        "ghas-alert-sla-bot.yml": ("GHAS alert SLA tracker bot", True),
+        "ghas-metrics-export-bot.yml": ("GHAS metrics export bot", True),
         "security-configuration-audit-bot.yml": (
             "GHAS security-configuration audit bot",
             True,
@@ -61,6 +63,24 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
             "grouped into targeted burn-down efforts."
         ),
         "workflow": "ghas-campaign-bot.yml",
+    },
+    {
+        "id": "alert_sla_tracking",
+        "title": "Alert SLA tracking",
+        "description": (
+            "Track age-based SLA breaches across code scanning, Dependabot, and secret "
+            "scanning so older backlog slices are forced into an execution lane."
+        ),
+        "workflow": "ghas-alert-sla-bot.yml",
+    },
+    {
+        "id": "metrics_exports",
+        "title": "GHAS metrics export",
+        "description": (
+            "Export recurring GHAS metrics artifacts with severity, age-bucket, and "
+            "workflow-freshness summaries so dashboards and audits have reusable evidence."
+        ),
+        "workflow": "ghas-metrics-export-bot.yml",
     },
     {
         "id": "security_configurations",

@@ -56,6 +56,8 @@ jobs:
               'dependency-review.yml',
               'ghas-review-bot.yml',
               'ghas-campaign-bot.yml',
+              'ghas-alert-sla-bot.yml',
+              'ghas-metrics-export-bot.yml',
               'security-configuration-audit-bot.yml',
               'security-maintenance-bot.yml',
               'dependency-radar-bot.yml',
