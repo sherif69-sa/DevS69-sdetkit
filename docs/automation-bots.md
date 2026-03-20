@@ -42,6 +42,8 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 - **`dependency-radar-bot.yml`** — publishes a recurring dependency radar issue plus a runtime fast-follow watchlist.
 - **`repo-optimization-bot.yml`** — publishes a weekly repo-optimization control loop issue from `kits optimize`, `kits expand`, and the GitHub automation maintenance check.
 - **`workflow-governance-bot.yml`** — publishes a monthly workflow-governance audit for permissions, SHA pinning, and manual recovery posture.
+- **`docs-experience-bot.yml`** — publishes a weekly docs-experience radar issue plus JSON artifact covering navigation coverage, search posture, and flagship-doc visibility.
+- **`release-readiness-radar-bot.yml`** — publishes a weekly release-readiness radar issue with doctor output, release asset freshness, and release-workflow coverage.
 - **`contributor-onboarding-bot.yml`** — keeps contributor guidance discoverable.
 - **`pr-helper-bot.yml` / `pr-quality-comment.yml`** — keep pull requests reviewable and actionable.
 
@@ -166,6 +168,32 @@ It now:
 - uploads those artifacts to Actions,
 - opens a date-scoped `📡 Dependency radar + runtime watchlist (...)` issue.
 
+### `docs-experience-bot.yml`
+
+This bot turns the docs site into a first-class maintenance lane instead of something maintainers only notice after navigation drift has accumulated.
+
+It now:
+
+- audits MkDocs navigation coverage against the actual `docs/` tree,
+- highlights missing nav targets and high-value orphan docs that are outside the primary user journeys,
+- checks that flagship entrypoint pages stay both present and visible in the main nav,
+- records docs-search posture such as search suggest/highlight/share and instant navigation support,
+- opens a date-scoped `📚 Docs experience radar (...)` issue,
+- exports `build/docs-experience-radar.json` for dashboards, docs cleanup planning, or later AgentOS consumption.
+
+### `release-readiness-radar-bot.yml`
+
+This bot gives the repo a recurring release-ops review lane so publishing posture is not reconstructed manually right before a release.
+
+It now:
+
+- runs `python -m sdetkit doctor --format json` and captures the result as part of the release snapshot,
+- reviews the presence of core release workflows such as `release.yml`, `pages.yml`, `versioning.yml`, and `docs-link-check.yml`,
+- audits key release trust assets including `CHANGELOG.md`, `ROADMAP.md`, `RELEASE.md`, and the public release docs,
+- reuses the GitHub automation maintenance check to highlight any required workflow/config gaps,
+- opens a date-scoped `🚀 Release readiness radar (...)` issue,
+- uploads `build/release-readiness-radar.json` plus the raw doctor/maintenance payloads as workflow artifacts.
+
 ## Recommended weekly maintainer flow
 
 1. Open the latest **GHAS digest** issue.
@@ -177,8 +205,10 @@ It now:
 7. Clear or triage high-severity security findings first.
 8. Open the latest **dependency radar** issue.
 9. Open the latest **repo optimization control loop** issue and pick one `now` candidate or search mission.
-10. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
-11. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+10. Open the latest **docs experience radar** issue and fold the highest-value orphan docs or missing flagship links back into the canonical journeys.
+11. Open the latest **release readiness radar** issue before a publish window or docs release push.
+12. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
+13. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 
@@ -205,6 +235,8 @@ These bots make the repo more than a set of commands; they turn it into a contin
 - **coverage checks for newer GHAS operating-model features**,
 - **workflow-governance audits for permissions, SHA pinning, and manual recovery**,
 - **scheduled dependency prioritization**,
+- **a docs information-architecture control loop instead of ad hoc nav cleanup**,
+- **a recurring release-ops radar for trust-asset and workflow freshness**,
 - **clearer issue-driven follow-up**,
 - **smaller validation loops for upgrades and refactors**,
 - **less hidden drift between security posture and maintenance work**.

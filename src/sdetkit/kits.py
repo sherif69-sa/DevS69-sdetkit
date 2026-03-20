@@ -753,7 +753,7 @@ def _upgrade_inventory(root: Path) -> Payload:
     if top_validation:
         recommended_commands.append(
             "python -m sdetkit intelligence upgrade-audit --validation-command "
-            f"\"{top_validation[0]['command']}\" --format md"
+            f'"{top_validation[0]["command"]}" --format md'
         )
 
     route_map = [
@@ -768,7 +768,7 @@ def _upgrade_inventory(root: Path) -> Payload:
             "primary_validation": report.validation_commands[0]
             if report.validation_commands
             else "python -m sdetkit intelligence upgrade-audit --package "
-            f"\"{report.name}\" --format md",
+            f'"{report.name}" --format md',
             "next_action": report.next_action,
             "repo_usage_files": report.repo_usage_files[:5],
         }
@@ -819,9 +819,15 @@ def route_map_payload(
 
     matches: list[Payload] = []
     for entry in route_map:
-        if normalized_repo_usage_tier and str(entry.get("repo_usage_tier", "")).lower() != normalized_repo_usage_tier:
+        if (
+            normalized_repo_usage_tier
+            and str(entry.get("repo_usage_tier", "")).lower() != normalized_repo_usage_tier
+        ):
             continue
-        if normalized_impact_area and str(entry.get("impact_area", "")).lower() != normalized_impact_area:
+        if (
+            normalized_impact_area
+            and str(entry.get("impact_area", "")).lower() != normalized_impact_area
+        ):
             continue
 
         search_blob = " ".join(
@@ -918,8 +924,7 @@ def radar_payload(
     recommended_commands = _string_list(upgrade_inventory.get("recommended_commands"))
     if repo_usage_tier:
         recommended_commands.append(
-            "python -m sdetkit kits route-map "
-            f"--repo-usage-tier {repo_usage_tier} --format json"
+            f"python -m sdetkit kits route-map --repo-usage-tier {repo_usage_tier} --format json"
         )
     if impact_area:
         recommended_commands.append(
@@ -1038,7 +1043,9 @@ def radar_payload(
 
 
 def _upgrade_execution_lane(upgrade_inventory: Payload) -> Payload:
-    recommended_commands = [str(item) for item in _string_list(upgrade_inventory.get("recommended_commands"))]
+    recommended_commands = [
+        str(item) for item in _string_list(upgrade_inventory.get("recommended_commands"))
+    ]
     priority_packages = _payload_list(upgrade_inventory.get("priority_packages"))
     focus = []
     if priority_packages:
@@ -1048,9 +1055,13 @@ def _upgrade_execution_lane(upgrade_inventory: Payload) -> Payload:
             f"and lands in the {top['impact_area']} impact area."
         )
     if any(item.get("impact_area") == "quality-tooling" for item in priority_packages):
-        focus.append("Keep quality-tooling upgrades coupled to the same validation lane as release confidence.")
+        focus.append(
+            "Keep quality-tooling upgrades coupled to the same validation lane as release confidence."
+        )
     if any(item.get("impact_area") == "runtime-core" for item in priority_packages):
-        focus.append("Treat runtime-core dependencies as first-class release inputs before broader maintenance batches.")
+        focus.append(
+            "Treat runtime-core dependencies as first-class release inputs before broader maintenance batches."
+        )
     return {
         "summary": (
             "Translate upgrade inventory into a narrow execution lane so dependency maintenance stays "
@@ -1081,9 +1092,7 @@ def _innovation_opportunities(
             "python -m sdetkit intelligence upgrade-audit --format json --top 10",
         ]
         if repo_signals.get("agent_templates"):
-            commands.append(
-                "sdetkit agent run 'template:dependency-outdated-report' --approve"
-            )
+            commands.append("sdetkit agent run 'template:dependency-outdated-report' --approve")
         commands.append("sdetkit agent dashboard build --format html")
         opportunities.append(
             {
@@ -1162,6 +1171,48 @@ def _innovation_opportunities(
             }
         )
 
+    if repo_signals.get("docs_site") and repo_signals.get("docs_link_check"):
+        opportunities.append(
+            {
+                "id": "docs-experience-radar",
+                "title": "Create a docs experience radar",
+                "summary": (
+                    "Treat the docs surface as a product lane by exporting nav coverage, search "
+                    "posture, flagship entrypoint health, and high-value orphan pages into a "
+                    "recurring issue and artifact."
+                ),
+                "why_now": (
+                    "The repo already ships a large Material for MkDocs site plus a docs-link "
+                    "check workflow, so the next step is a maintainer-friendly radar instead of "
+                    "periodic manual spot checks."
+                ),
+                "commands": [
+                    "python -m mkdocs build --strict",
+                    "python -m sdetkit maintenance --include-check github_automation_check --format md",
+                ],
+            }
+        )
+
+    if repo_signals.get("release_playbook") and repo_signals.get("pages_workflow"):
+        opportunities.append(
+            {
+                "id": "release-readiness-radar",
+                "title": "Create a release readiness radar",
+                "summary": (
+                    "Join doctor output, release workflows, changelog/roadmap freshness, and "
+                    "publishing assets into one recurring release-ops issue."
+                ),
+                "why_now": (
+                    "The repo already carries release docs, Pages publishing, and deterministic "
+                    "quality lanes, so a weekly readiness summary can shrink pre-release drift."
+                ),
+                "commands": [
+                    "python -m sdetkit doctor --format json",
+                    "python -m sdetkit maintenance --include-check github_automation_check --format json",
+                ],
+            }
+        )
+
     if repo_signals.get("constraints") and source_summary:
         opportunities.append(
             {
@@ -1202,7 +1253,7 @@ def _innovation_opportunities(
             }
         )
 
-    return opportunities[:5]
+    return opportunities[:6]
 
 
 def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payload]:
@@ -1212,9 +1263,9 @@ def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payl
         str(item.get("id", ""))
         for item in _payload_list(optimize_result.get("innovation_opportunities"))
     }
-    validation_summary = _payload_list(_payload_dict(optimize_result.get("upgrade_inventory")).get(
-        "validation_summary"
-    ))
+    validation_summary = _payload_list(
+        _payload_dict(optimize_result.get("upgrade_inventory")).get("validation_summary")
+    )
     top_validation = _payload_dict(validation_summary[0]) if validation_summary else {}
     candidates: list[Payload] = []
 
@@ -1334,6 +1385,52 @@ def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payl
             }
         )
 
+    if "docs-experience-radar" in innovation_ids:
+        candidates.append(
+            {
+                "id": "docs-experience-control-loop",
+                "title": "Docs experience control loop",
+                "priority": "now",
+                "effort": "small",
+                "summary": (
+                    "Create a recurring docs radar so the flagship paths, search surface, and "
+                    "navigation architecture stay aligned as the repo expands."
+                ),
+                "deliverables": [
+                    "scheduled docs radar artifact",
+                    "issue-driven docs information architecture review",
+                    "flagship-docs visibility checklist",
+                ],
+                "commands": [
+                    "python -m mkdocs build --strict",
+                    "python -m sdetkit maintenance --include-check github_automation_check --format md",
+                ],
+            }
+        )
+
+    if "release-readiness-radar" in innovation_ids:
+        candidates.append(
+            {
+                "id": "release-readiness-control-loop",
+                "title": "Release readiness control loop",
+                "priority": "now",
+                "effort": "small",
+                "summary": (
+                    "Publish a recurring release-ops summary that keeps doctor output, release "
+                    "assets, and automation coverage in one predictable review lane."
+                ),
+                "deliverables": [
+                    "weekly readiness radar issue",
+                    "release asset freshness snapshot",
+                    "doctor + maintenance follow-up checklist",
+                ],
+                "commands": [
+                    "python -m sdetkit doctor --format json",
+                    "python -m sdetkit maintenance --include-check github_automation_check --format json",
+                ],
+            }
+        )
+
     if repo_signals.get("agent_templates") and repo_signals.get("quality_script"):
         candidates.append(
             {
@@ -1358,7 +1455,7 @@ def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payl
             }
         )
 
-    return candidates[:6]
+    return candidates[:7]
 
 
 def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> list[Payload]:
@@ -1406,6 +1503,22 @@ def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> lis
                     "intent": "Reduce hidden drift between flexible metadata and pinned CI inputs.",
                 }
             )
+        elif candidate_id == "docs-experience-control-loop":
+            missions.append(
+                {
+                    "topic": "docs-experience-radar",
+                    "query": f"{goal_text} docs experience radar navigation search onboarding",
+                    "intent": "Keep docs discoverability and flagship entrypoints healthy as content grows.",
+                }
+            )
+        elif candidate_id == "release-readiness-control-loop":
+            missions.append(
+                {
+                    "topic": "release-readiness-radar",
+                    "query": f"{goal_text} release readiness radar doctor changelog roadmap pages",
+                    "intent": "Reduce pre-release drift by reviewing doctor, release assets, and publishing posture together.",
+                }
+            )
         elif candidate_id == "optimization-control-center":
             missions.append(
                 {
@@ -1414,7 +1527,7 @@ def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> lis
                     "intent": "Combine optimize, boost, and AgentOS history into one operating view.",
                 }
             )
-    return missions[:6]
+    return missions[:7]
 
 
 def expand_payload(
@@ -1603,6 +1716,10 @@ def optimize_payload(
             root, "examples/kits/integration/heterogeneous-topology.json"
         ),
         "agent_templates": _repo_signal(root, "templates/automations/repo-health-audit.yaml"),
+        "docs_site": _repo_signal(root, "mkdocs.yml"),
+        "docs_link_check": _repo_signal(root, ".github/workflows/docs-link-check.yml"),
+        "release_playbook": _repo_signal(root, "RELEASE.md"),
+        "pages_workflow": _repo_signal(root, ".github/workflows/pages.yml"),
     }
     doctor_lane = _doctor_lane(goal, repo_signals)
     quality_lane = _quality_gate_lane(goal, repo_signals)
@@ -2086,9 +2203,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"goal: {goal}")
         print("feature candidates:")
         for item in _payload_list(expand_result.get("feature_candidates")):
-            print(
-                f"- {item['title']} [{item['priority']}/{item['effort']}]: {item['summary']}"
-            )
+            print(f"- {item['title']} [{item['priority']}/{item['effort']}]: {item['summary']}")
             for deliverable in _string_list(item.get("deliverables")):
                 print(f"  - deliverable: {deliverable}")
         print("search missions:")
