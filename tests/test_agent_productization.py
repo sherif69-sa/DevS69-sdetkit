@@ -120,6 +120,10 @@ def test_demo_umbrella_upgrade_control_plane_outputs_blueprint(
 
     assert payload["status"] == "ok"
     blueprint = tmp_path / ".sdetkit" / "agent" / "workdir" / "umbrella-blueprint.json"
+    optimize = tmp_path / ".sdetkit" / "agent" / "workdir" / "umbrella-optimize.json"
     assert blueprint.exists()
+    assert optimize.exists()
     blueprint_payload = json.loads(blueprint.read_text(encoding="utf-8"))
+    optimize_payload = json.loads(optimize.read_text(encoding="utf-8"))
     assert blueprint_payload["architecture_layers"][0]["name"] == "experience-surface"
+    assert optimize_payload["operating_sequence"][0]["stage"] == "doctor-first"

@@ -585,6 +585,115 @@ def _performance_boosters(repo_signals: dict[str, bool]) -> list[dict[str, str]]
     return boosters
 
 
+def _alignment_status(ready: int, total: int) -> str:
+    if total <= 0:
+        return "unknown"
+    ratio = ready / total
+    if ratio >= 0.9:
+        return "maximized"
+    if ratio >= 0.7:
+        return "strong"
+    if ratio >= 0.4:
+        return "partial"
+    return "needs-work"
+
+
+def _alignment_score(repo_signals: dict[str, bool]) -> dict[str, object]:
+    weighted_signals = [
+        ("quality_script", 2),
+        ("premium_gate", 2),
+        ("ci_script", 1),
+        ("constraints", 1),
+        ("gate_snapshot", 1),
+        ("integration_profile", 1),
+        ("topology_profile", 2),
+        ("agent_templates", 2),
+        ("pyproject", 1),
+    ]
+    total = sum(weight for _signal, weight in weighted_signals)
+    earned = sum(weight for signal, weight in weighted_signals if repo_signals.get(signal))
+    score = int(round((earned / total) * 100)) if total else 0
+    ready = sum(1 for signal, _weight in weighted_signals if repo_signals.get(signal))
+    return {
+        "score": score,
+        "ready_signals": ready,
+        "total_signals": len(weighted_signals),
+        "status": _alignment_status(ready, len(weighted_signals)),
+    }
+
+
+def _search_queries(goal: str | None) -> list[dict[str, str]]:
+    goal_text = goal or "umbrella optimization"
+    return [
+        {
+            "topic": "doctor-upgrade-lane",
+            "query": f"{goal_text} doctor upgrade audit quality gate",
+        },
+        {
+            "topic": "agentos-control-plane",
+            "query": f"{goal_text} agentos control plane dashboard history",
+        },
+        {
+            "topic": "integration-topology",
+            "query": f"{goal_text} integration topology premium gate",
+        },
+    ]
+
+
+def _operating_sequence(
+    doctor_lane: dict[str, object],
+    quality_lane: dict[str, object],
+    integration_lane: dict[str, object],
+    agentos_lane: dict[str, object],
+) -> list[dict[str, object]]:
+    quality_commands = quality_lane.get("commands", [])
+    integration_commands = integration_lane.get("commands", [])
+    agent_commands = agentos_lane.get("commands", [])
+    return [
+        {
+            "stage": "doctor-first",
+            "summary": "Start with readiness, dependency drift, and repo-health diagnostics.",
+            "commands": [doctor_lane["command"]],
+        },
+        {
+            "stage": "quality-gate",
+            "summary": "Use the deterministic merge bar and premium lane as the execution guardrail.",
+            "commands": [str(item) for item in quality_commands],
+        },
+        {
+            "stage": "integration-proof",
+            "summary": "Refresh topology-aware proof so architecture changes stay contract-safe.",
+            "commands": [str(item) for item in integration_commands],
+        },
+        {
+            "stage": "agentos-governance",
+            "summary": "Capture the execution lane in AgentOS so history and dashboards stay in sync.",
+            "commands": [str(item) for item in agent_commands],
+        },
+    ]
+
+
+def _doctor_quality_contract(
+    doctor_lane: dict[str, object],
+    quality_lane: dict[str, object],
+    integration_lane: dict[str, object],
+) -> dict[str, object]:
+    quality_commands = [str(item) for item in quality_lane.get("commands", [])]
+    integration_commands = [str(item) for item in integration_lane.get("commands", [])]
+    promotion_blockers = [
+        "doctor must run before premium gate",
+        "quality gate should inherit doctor upgrade-readiness findings",
+    ]
+    if integration_commands:
+        promotion_blockers.append("topology checks must stay in the same review loop as premium gate")
+    return {
+        "entrypoint": doctor_lane["command"],
+        "promotion_commands": quality_commands,
+        "integration_commands": integration_commands,
+        "promotion_blockers": promotion_blockers,
+    }
+
+
 def optimize_payload(
     *,
     root: Path,
@@ -610,6 +719,14 @@ def optimize_payload(
     quality_lane = _quality_gate_lane(goal, repo_signals)
     integration_lane = _integration_lane(goal, repo_signals)
     agentos_lane = _agentos_lane(goal, repo_signals)
+    alignment_score = _alignment_score(repo_signals)
+    operating_sequence = _operating_sequence(
+        doctor_lane, quality_lane, integration_lane, agentos_lane
+    )
+    doctor_quality_contract = _doctor_quality_contract(
+        doctor_lane, quality_lane, integration_lane
+    )
+    search_queries = _search_queries(goal)
     next_boosts = [
         {
             "id": "doctor-quality-sync",
@@ -665,6 +782,7 @@ def optimize_payload(
             "primary_command": agentos_lane["commands"][0],
         },
     ]
+    missing_domains = [item["domain"] for item in alignment_matrix if item["status"] != "ready"]
     return {
         "schema_version": SCHEMA_VERSION,
         "goal": goal,
@@ -675,7 +793,12 @@ def optimize_payload(
         "quality_gate_lane": quality_lane,
         "integration_lane": integration_lane,
         "agentos_lane": agentos_lane,
+        "alignment_score": alignment_score,
         "alignment_matrix": alignment_matrix,
+        "doctor_quality_contract": doctor_quality_contract,
+        "operating_sequence": operating_sequence,
+        "search_queries": search_queries,
+        "missing_domains": missing_domains,
         "performance_boosters": _performance_boosters(repo_signals),
         "next_boosts": next_boosts,
     }
@@ -951,11 +1074,19 @@ def main(argv: list[str] | None = None) -> int:
         print("Umbrella optimization plan")
         if goal:
             print(f"goal: {goal}")
+        print(
+            "alignment score: "
+            f"{payload['alignment_score']['score']}% ({payload['alignment_score']['status']})"
+        )
         print("alignment matrix:")
         for item in payload["alignment_matrix"]:
             print(f"- {item['domain']}: {item['status']}")
             if item["primary_command"]:
                 print(f"  command: {item['primary_command']}")
+        print("doctor/quality contract:")
+        print(f"- entrypoint: {payload['doctor_quality_contract']['entrypoint']}")
+        for command in payload["doctor_quality_contract"]["promotion_commands"]:
+            print(f"  - promote with: {command}")
         print("doctor lane:")
         print(f"- {payload['doctor_lane']['command']}")
         print(f"  why: {payload['doctor_lane']['why']}")
@@ -968,6 +1099,12 @@ def main(argv: list[str] | None = None) -> int:
         print("agentos lane:")
         for command in payload["agentos_lane"]["commands"]:
             print(f"- {command}")
+        print("operating sequence:")
+        for item in payload["operating_sequence"]:
+            print(f"- {item['stage']}: {item['summary']}")
+        print("search queries:")
+        for item in payload["search_queries"]:
+            print(f"- {item['topic']}: {item['query']}")
         print("performance boosters:")
         for item in payload["performance_boosters"]:
             print(f"- {item['title']}: {item['detail']}")

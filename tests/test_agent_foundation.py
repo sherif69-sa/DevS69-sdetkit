@@ -71,6 +71,21 @@ def test_manager_plan_routes_umbrella_tasks_to_blueprint_action(tmp_path: Path) 
     assert plan[0].params["goal"] == "umbrella architecture optimization blueprint"
 
 
+def test_manager_plan_routes_optimize_tasks_to_optimize_action(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    cfg = load_config(tmp_path / ".sdetkit/agent/config.yaml")
+
+    _message, plan = _manager_plan(
+        task="optimize umbrella architecture and align doctor quality gate integration agentos",
+        config=cfg,
+        provider=CountingProvider(),
+        worker_ids=["worker-1", "worker-2"],
+    )
+
+    assert plan[0].action == "kits.optimize"
+    assert plan[0].params["goal"].startswith("optimize umbrella architecture")
+
+
 def test_worker_action_execution_success(tmp_path: Path) -> None:
     registry = ActionRegistry(
         root=tmp_path,
@@ -107,6 +122,51 @@ def test_worker_can_write_umbrella_blueprint_artifact(tmp_path: Path) -> None:
     payload = json.loads(artifact.read_text(encoding="utf-8"))
     assert payload["upgrade_backlog"]
     assert payload["selected_kits"][0]["id"] == "release-confidence"
+
+
+def test_worker_can_write_umbrella_optimize_artifact(tmp_path: Path) -> None:
+    init_agent(tmp_path, tmp_path / ".sdetkit/agent/config.yaml")
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "ci.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "constraints-ci.txt").write_text("ruff==0.15.7\n", encoding="utf-8")
+    (tmp_path / "examples" / "kits" / "integration").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "examples" / "kits" / "integration" / "profile.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "examples" / "kits" / "integration" / "heterogeneous-topology.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "templates" / "automations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "templates" / "automations" / "repo-health-audit.yaml").write_text(
+        "metadata:\n  id: repo-health-audit\nworkflow: []\n",
+        encoding="utf-8",
+    )
+    registry = ActionRegistry(
+        root=tmp_path,
+        write_allowlist=(".sdetkit/agent/workdir",),
+        shell_allowlist=(),
+    )
+
+    result = registry.run(
+        "kits.optimize",
+        {
+            "goal": "upgrade umbrella architecture with agentos optimization",
+            "output": ".sdetkit/agent/workdir/umbrella-optimize.json",
+        },
+    )
+
+    assert result.ok is True
+    artifact = tmp_path / ".sdetkit/agent/workdir/umbrella-optimize.json"
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    assert payload["alignment_score"]["score"] > 0
+    assert payload["doctor_quality_contract"]["entrypoint"].startswith("sdetkit doctor ")
 
 
 def test_reviewer_rejects_failed_action(tmp_path: Path, monkeypatch) -> None:

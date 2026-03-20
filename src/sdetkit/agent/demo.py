@@ -51,6 +51,12 @@ def run_demo(*, root: Path, scenario: str) -> dict[str, object]:
             task="umbrella architecture optimization blueprint",
             auto_approve=True,
         )
+        run_agent(
+            root,
+            config_path=root / ".sdetkit/agent/config.yaml",
+            task="optimize umbrella architecture and align doctor quality gate integration agentos",
+            auto_approve=True,
+        )
 
     run_agent(
         root,

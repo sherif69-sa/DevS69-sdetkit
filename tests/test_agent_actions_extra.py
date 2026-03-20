@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -93,3 +94,44 @@ def test_action_registry_repo_audit_and_report_build(tmp_path: Path, monkeypatch
     assert seen["fmt"] == "html"
     assert str(seen["history_dir"]).endswith(".sdetkit/agent/history")
     assert (tmp_path / ".sdetkit" / "out.html").read_text(encoding="utf-8") == "dashboard"
+
+
+def test_action_registry_can_write_optimize_artifact(tmp_path: Path) -> None:
+    reg = ActionRegistry(root=tmp_path, write_allowlist=(".sdetkit/agent/workdir",), shell_allowlist=())
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname = "demo"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+    (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "ci.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "constraints-ci.txt").write_text("ruff==0.15.7\n", encoding="utf-8")
+    (tmp_path / "examples" / "kits" / "integration").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "examples" / "kits" / "integration" / "profile.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "examples" / "kits" / "integration" / "heterogeneous-topology.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "templates" / "automations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "templates" / "automations" / "repo-health-audit.yaml").write_text(
+        "metadata:\n  id: repo-health-audit\nworkflow: []\n",
+        encoding="utf-8",
+    )
+
+    result = reg.run(
+        "kits.optimize",
+        {
+            "goal": "upgrade umbrella architecture with agentos optimization",
+            "output": ".sdetkit/agent/workdir/umbrella-optimize.json",
+        },
+    )
+
+    assert result.ok is True
+    assert result.payload["alignment_score"] > 0
+    artifact = tmp_path / ".sdetkit" / "agent" / "workdir" / "umbrella-optimize.json"
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    assert payload["alignment_score"]["status"] in {"strong", "maximized"}
+    assert payload["operating_sequence"][0]["stage"] == "doctor-first"
