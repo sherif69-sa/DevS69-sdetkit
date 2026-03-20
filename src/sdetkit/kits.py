@@ -692,6 +692,25 @@ def _auto_fix_lane(
     }
 
 
+def _quality_boost_lane(goal: str | None) -> Payload:
+    goal_text = goal or "umbrella optimization"
+    return {
+        "command": "bash quality.sh boost",
+        "goal": goal_text,
+        "why": (
+            "Use a single boost lane to align doctor, intelligent auto-fix, deterministic quality "
+            "checks, topology proof, and umbrella optimization output."
+        ),
+        "phases": [
+            "doctor-first",
+            "intelligent-autofix",
+            "quality-gate",
+            "integration-proof",
+            "umbrella-optimize",
+        ],
+    }
+
+
 def _operating_sequence(
     doctor_lane: Payload,
     quality_lane: Payload,
@@ -783,6 +802,7 @@ def optimize_payload(
     integration_lane = _integration_lane(goal, repo_signals)
     agentos_lane = _agentos_lane(goal, repo_signals)
     auto_fix_lane = _auto_fix_lane(repo_signals, quality_lane, goal)
+    quality_boost_lane = _quality_boost_lane(goal)
     alignment_score = _alignment_score(repo_signals)
     operating_sequence = _operating_sequence(
         doctor_lane, quality_lane, integration_lane, agentos_lane, auto_fix_lane
@@ -792,6 +812,12 @@ def optimize_payload(
     )
     search_queries = _search_queries(goal)
     next_boosts = [
+        {
+            "id": "quality-boost",
+            "title": "Collapse the umbrella flow into a single boost command",
+            "summary": "Run doctor, auto-fix, premium validation, topology proof, and optimization reporting in one lane.",
+            "commands": [str(quality_boost_lane["command"])],
+        },
         {
             "id": "doctor-quality-sync",
             "title": "Align doctor with the quality gate",
@@ -871,6 +897,7 @@ def optimize_payload(
         "integration_lane": integration_lane,
         "agentos_lane": agentos_lane,
         "auto_fix_lane": auto_fix_lane,
+        "quality_boost_lane": quality_boost_lane,
         "alignment_score": alignment_score,
         "alignment_matrix": alignment_matrix,
         "doctor_quality_contract": doctor_quality_contract,
@@ -1182,6 +1209,10 @@ def main(argv: list[str] | None = None) -> int:
         auto_fix_lane = _payload_dict(optimize_result.get("auto_fix_lane"))
         for command in _string_list(auto_fix_lane["commands"]):
             print(f"- {command}")
+        print("quality boost lane:")
+        quality_boost_lane = _payload_dict(optimize_result.get("quality_boost_lane"))
+        print(f"- {quality_boost_lane['command']}")
+        print(f"  why: {quality_boost_lane['why']}")
         print("integration lane:")
         integration_lane = _payload_dict(optimize_result.get("integration_lane"))
         for command in _string_list(integration_lane["commands"]):

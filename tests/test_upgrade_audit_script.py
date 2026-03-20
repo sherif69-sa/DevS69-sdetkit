@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from sdetkit import upgrade_audit
@@ -1435,3 +1437,35 @@ def test_resolve_requirement_paths_supports_outdated_only_cli_defaults(tmp_path:
     assert args.used_in_repo_only is True
     assert args.include_prereleases is False
     assert requirement_paths == []
+
+
+def test_upgrade_audit_script_wrapper_emits_json(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        """
+[project]
+name = "demo"
+version = "0.1.0"
+dependencies = ["httpx==0.28.1"]
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/upgrade_audit.py",
+            "--pyproject",
+            str(pyproject),
+            "--format",
+            "json",
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["pyproject"] == str(pyproject)
+    assert payload["packages"][0]["name"] == "httpx"

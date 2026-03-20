@@ -140,11 +140,14 @@ The blueprint surface now goes further for umbrella-architecture upgrades: it em
 ```bash
 python -m sdetkit kits blueprint --goal "upgrade umbrella architecture with agentos optimization"
 python -m sdetkit kits optimize --goal "upgrade umbrella architecture with agentos optimization" --format json
+bash quality.sh boost
 python -m sdetkit agent run "umbrella architecture optimization blueprint" --approve
 python -m sdetkit agent demo --scenario umbrella-upgrade-control-plane
 ```
 
 The new optimize surface takes the blueprint one step further by inspecting the repo and aligning the umbrella kits with the operational lanes that actually keep the platform healthy: doctor, `quality.sh`, premium gate, integration topology, and AgentOS. That gives you a single alignment payload showing which lanes are ready, which command should lead each domain, which operating sequence should be used, which search queries help continue the maintenance loop, the explicit doctor-to-quality promotion contract, any missing domains, and which performance boosters are already available in the repo.
+
+When you want that alignment to execute as a single repo-safe lane instead of a planning artifact, `bash quality.sh boost` now chains doctor, intelligent premium auto-fix, the fast gate, premium validation, topology proof, and an umbrella optimization summary into one command.
 
 It now also emits an alignment score so the umbrella architecture has a single numeric readiness signal that can be tracked in CI, dashboards, and AgentOS history exports while the repo keeps getting upgraded.
 

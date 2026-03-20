@@ -56,6 +56,8 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
     assert payload["quality_gate_lane"]["commands"][0] == "bash quality.sh ci"
     assert payload["quality_gate_lane"]["commands"][1] == "bash premium-gate.sh --mode full"
     assert payload["auto_fix_lane"]["commands"][0] == "bash quality.sh type"
+    assert payload["quality_boost_lane"]["command"] == "bash quality.sh boost"
+    assert payload["quality_boost_lane"]["phases"][0] == "doctor-first"
     assert payload["integration_lane"]["coverage"] == "topology-aware"
     assert (
         payload["agentos_lane"]["commands"][1]
@@ -70,3 +72,4 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
     assert "topology-premium-loop" in booster_ids
     assert payload["doctor_quality_contract"]["auto_fix_commands"]
     assert payload["operating_sequence"][1]["stage"] == "intelligent-autofix"
+    assert payload["next_boosts"][0]["id"] == "quality-boost"
