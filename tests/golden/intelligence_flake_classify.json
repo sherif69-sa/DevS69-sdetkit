@@ -1,0 +1,30 @@
+{
+  "schema_version": "sdetkit.intelligence.flake.v1",
+  "summary": {
+    "flaky": 1,
+    "stable_failing": 0,
+    "stable_passing": 1
+  },
+  "tests": [
+    {
+      "classification": "flaky",
+      "failures": 2,
+      "fingerprint": "eb5fc721901b1182",
+      "next_step": "Quarantine test and capture deterministic seed/fixture isolation evidence.",
+      "passes": 1,
+      "runs": 3,
+      "signal": "nondeterministic-rerun",
+      "test_id": "tests/test_api.py::test_retry"
+    },
+    {
+      "classification": "stable-passing",
+      "failures": 0,
+      "fingerprint": "be1f2e6abae95415",
+      "next_step": "Keep in baseline suite.",
+      "passes": 2,
+      "runs": 2,
+      "signal": "stable",
+      "test_id": "tests/test_auth.py::test_login"
+    }
+  ]
+}

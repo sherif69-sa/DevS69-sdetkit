@@ -1,0 +1,57 @@
+{
+  "changed": [
+    {
+      "changed_fields": [
+        "severity"
+      ],
+      "fingerprint": "fp-auth",
+      "from": {
+        "path": "src/auth.py",
+        "rule_id": "AUTH-001",
+        "severity": "warn"
+      },
+      "to": {
+        "path": "src/auth.py",
+        "rule_id": "AUTH-001",
+        "severity": "error"
+      }
+    }
+  ],
+  "counts": {
+    "changed": 1,
+    "new": 1,
+    "new_by_severity": {
+      "error": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "resolved": 0,
+    "unchanged": 0
+  },
+  "from": {},
+  "new": [
+    {
+      "fingerprint": "fp-cache",
+      "fixable": true,
+      "line": 4,
+      "message": "cache fallback",
+      "pack": "core",
+      "path": "src/cache.py",
+      "rule_id": "CACHE-002",
+      "severity": "warn",
+      "suppressed": false,
+      "suppression_reason": null,
+      "tags": []
+    }
+  ],
+  "next_step": "No new error regressions detected.",
+  "regression_summary": {
+    "changed_failures": 1,
+    "new_failures": 1,
+    "regression": false,
+    "resolved_failures": 0
+  },
+  "resolved": [],
+  "schema_version": "sdetkit.forensics.compare.v1",
+  "to": {}
+}
