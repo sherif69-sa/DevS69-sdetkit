@@ -171,6 +171,8 @@ The premium gate intelligence layer now goes further as well: it ranks remediati
 
 The security auto-remediation lane is stronger too: premium gate can now prioritize a built-in `security_fix_apply` smart script before baseline-aware security re-triage, and the security fixer now safely rewrites `shell=True` to `shell=False` alongside request timeout injection and `yaml.safe_load` upgrades for deterministic repo-safe cleanup.
 
+The GitHub-native maintenance layer is stronger too: beyond the existing GHAS digest, campaign planner, and configuration audit bots, the repo now carries a weekly **GHAS alert SLA tracker** for 7/14/30-day backlog enforcement and a weekly **GHAS metrics export bot** that publishes reusable JSON evidence for dashboards, audits, and roadmap reviews.
+
 To make those upgrade lanes reproducible in CI, the repo now pins the validated toolchain in `constraints-ci.txt` while leaving `pyproject.toml` flexible enough for package consumers.
 
 ## Sample artifacts
