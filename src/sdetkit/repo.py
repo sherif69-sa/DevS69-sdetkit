@@ -935,7 +935,7 @@ def _scan_python_ast(rel: str, text: str) -> list[Finding]:
                                 node.lineno,
                                 node.col_offset + 1,
                                 "subprocess_shell_true",
-                                "subprocess with shell=True",
+                                "subprocess with shell=False",
                                 remediation="pass argv list and keep shell=False",
                             )
                         )

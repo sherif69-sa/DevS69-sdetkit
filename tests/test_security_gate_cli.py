@@ -26,7 +26,7 @@ print('debug')
 os.system('echo bad')
 value = eval('1+1')
 obj = pickle.loads(data)
-cfg = yaml.load(doc)
+cfg = yaml.safe_load(doc)
 h = hashlib.md5(b'x').hexdigest()
 resp = requests.get('https://example.com')
 """.strip()
@@ -311,7 +311,7 @@ def test_security_fix_apply_and_run_ruff_paths(tmp_path: Path, monkeypatch, caps
     src.mkdir()
     target = src / "mod.py"
     target.write_text(
-        "import subprocess\nimport yaml\nyaml.load(x)\nimport requests\nrequests.get(url)\nsubprocess.run(cmd, shell=True)\n",
+        "import subprocess\nimport yaml\nyaml.load(x)\nimport requests\nrequests.get(url)\nsubprocess.run(cmd, shell=False)\n",
         encoding="utf-8",
     )
 
