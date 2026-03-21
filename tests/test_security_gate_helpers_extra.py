@@ -21,7 +21,7 @@ def test_ast_helper_detectors() -> None:
     assert sg._is_write_mode_open(c1)
     assert sg._is_absolute_literal(c1)
 
-    c2 = _call("yaml.safe_load(data, Loader=yaml.SafeLoader)")
+    c2 = _call("yaml.load(data, Loader=yaml.SafeLoader)")
     assert sg._is_safe_yaml_loader(c2)
 
     c3 = _call("requests.get(url)")
@@ -156,7 +156,7 @@ def test_security_gate_fix_and_dep_helpers(tmp_path: Path, monkeypatch: pytest.M
     assert sbom["bomFormat"] == "CycloneDX"
 
     py = tmp_path / "x.py"
-    py.write_text("import yaml\na = yaml.safe_load(x)\n", encoding="utf-8")
+    py.write_text("import yaml\na = yaml.load(x)\n", encoding="utf-8")
     assert sg._fix_yaml_safe_load(py) is True
     assert "safe_load" in py.read_text(encoding="utf-8")
 
