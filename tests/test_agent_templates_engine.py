@@ -79,7 +79,7 @@ def test_deterministic_pack_output(tmp_path: Path) -> None:
 def test_template_run_produces_artifacts_for_two_real_templates(tmp_path: Path) -> None:
     repo_root = Path.cwd()
     templates = discover_templates(repo_root)
-    assert len(templates) >= 11
+    assert len(templates) >= 12
 
     audit_template = template_by_id(repo_root, "repo-health-audit")
     audit_out = tmp_path / "audit"
@@ -190,6 +190,19 @@ def test_template_run_supports_new_alignment_workers(tmp_path: Path) -> None:
     assert (runtime_out / "runtime-watchlist.md").exists()
     assert (runtime_out / "route-map.json").exists()
     assert (runtime_out / "bundle.tar").exists()
+
+    topology_template = template_by_id(repo_root, "integration-topology-worker")
+    topology_out = tmp_path / "topology"
+    topology_record = run_template(
+        repo_root,
+        template=topology_template,
+        set_values={},
+        output_dir=topology_out,
+    )
+    assert topology_record["status"] == "ok"
+    assert (topology_out / "topology-check.json").exists()
+    assert (topology_out / "optimize.json").exists()
+    assert (topology_out / "bundle.tar").exists()
 
     alignment_template = template_by_id(repo_root, "worker-alignment-radar")
     alignment_out = tmp_path / "alignment"

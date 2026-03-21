@@ -1213,6 +1213,27 @@ def _innovation_opportunities(
             }
         )
 
+    if repo_signals.get("topology_profile") and repo_signals.get("premium_gate"):
+        opportunities.append(
+            {
+                "id": "integration-topology-radar",
+                "title": "Create an integration topology radar",
+                "summary": (
+                    "Turn heterogeneous-topology proof into a recurring worker and issue lane so "
+                    "service graph drift, owner gaps, and premium-gate alignment stay reviewable."
+                ),
+                "why_now": (
+                    "The repo already ships topology-aware integration proof plus premium-gate "
+                    "orchestration, which makes topology drift a good candidate for its own "
+                    "deterministic review loop."
+                ),
+                "commands": [
+                    "python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json",
+                    'python -m sdetkit kits optimize --goal "integration topology premium gate alignment" --format json',
+                ],
+            }
+        )
+
     if repo_signals.get("constraints") and source_summary:
         opportunities.append(
             {
@@ -1253,7 +1274,7 @@ def _innovation_opportunities(
             }
         )
 
-    return opportunities[:6]
+    return opportunities[:7]
 
 
 def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payload]:
@@ -1431,6 +1452,29 @@ def _feature_candidates(goal: str | None, optimize_result: Payload) -> list[Payl
             }
         )
 
+    if "integration-topology-radar" in innovation_ids:
+        candidates.append(
+            {
+                "id": "integration-topology-control-loop",
+                "title": "Integration topology control loop",
+                "priority": "now",
+                "effort": "small",
+                "summary": (
+                    "Keep topology proof, service ownership signals, and premium-gate alignment in "
+                    "one recurring control loop before larger umbrella refactors land."
+                ),
+                "deliverables": [
+                    "topology worker artifact bundle",
+                    "weekly topology drift issue",
+                    "premium-gate follow-up checklist",
+                ],
+                "commands": [
+                    "python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json",
+                    'python -m sdetkit kits optimize --goal "integration topology premium gate alignment" --format json',
+                ],
+            }
+        )
+
     if repo_signals.get("agent_templates") and repo_signals.get("quality_script"):
         candidates.append(
             {
@@ -1519,6 +1563,14 @@ def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> lis
                     "intent": "Reduce pre-release drift by reviewing doctor, release assets, and publishing posture together.",
                 }
             )
+        elif candidate_id == "integration-topology-control-loop":
+            missions.append(
+                {
+                    "topic": "integration-topology-control",
+                    "query": f"{goal_text} integration topology drift premium gate service graph",
+                    "intent": "Keep topology-aware integration proof aligned with premium validation and worker automation.",
+                }
+            )
         elif candidate_id == "optimization-control-center":
             missions.append(
                 {
@@ -1527,7 +1579,7 @@ def _search_missions(goal: str | None, feature_candidates: list[Payload]) -> lis
                     "intent": "Combine optimize, boost, and AgentOS history into one operating view.",
                 }
             )
-    return missions[:7]
+    return missions[:8]
 
 
 def _recommended_workers(
@@ -1659,6 +1711,28 @@ def _recommended_workers(
             }
         )
 
+    if "integration-topology-control-loop" in candidate_map:
+        workers.append(
+            {
+                "id": "worker-integration-topology",
+                "role": "topology-guardian",
+                "focus": (
+                    "Keep service-topology proof, premium-gate alignment, and architecture drift "
+                    "visible before umbrella refactors or release pushes."
+                ),
+                "template": "integration-topology-worker",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/integration-topology-worker/topology-check.json",
+                    ".sdetkit/agent/template-runs/integration-topology-worker/optimize.json",
+                    ".sdetkit/agent/template-runs/integration-topology-worker/bundle.tar",
+                ],
+                "commands": [
+                    "python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json",
+                    'python -m sdetkit kits optimize --goal "integration topology premium gate alignment" --format json',
+                ],
+            }
+        )
+
     workers.append(
         {
             "id": "worker-automation-alignment",
@@ -1696,7 +1770,7 @@ def _recommended_workers(
         }
     )
 
-    return workers[:8]
+    return workers[:9]
 
 
 def _worker_launch_pack(

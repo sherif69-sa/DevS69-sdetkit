@@ -184,6 +184,7 @@ The worker layer is stronger too: `sdetkit kits expand --goal "..." --format jso
 - `validation-route-worker` for refactor-safe route mapping tied to doctor upgrade guidance,
 - `runtime-watchlist-worker` for runtime-core fast-follow watchlists plus route-map evidence,
 - `docs-search-radar` for strict docs/search validation with bundled evidence,
+- `integration-topology-worker` for heterogeneous topology proof plus optimize guidance before premium-gate-sensitive refactors,
 - `release-readiness-worker` for doctor + automation-readiness snapshots before publish windows.
 - `worker-alignment-radar` for keeping the worker pack aligned with automation inventory and expansion signals.
 
@@ -197,6 +198,7 @@ python -m sdetkit agent templates run dependency-radar-worker
 python -m sdetkit agent templates run validation-route-worker --set query=httpx
 python -m sdetkit agent templates run runtime-watchlist-worker
 python -m sdetkit agent templates run docs-search-radar
+python -m sdetkit agent templates run integration-topology-worker
 python -m sdetkit agent templates run release-readiness-worker
 python -m sdetkit agent templates run worker-alignment-radar
 ```
