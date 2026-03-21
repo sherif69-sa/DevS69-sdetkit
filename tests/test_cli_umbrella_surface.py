@@ -58,3 +58,10 @@ def test_kits_describe_text_includes_capability_map() -> None:
     assert "typical inputs:" in proc.stdout
     assert "key artifacts:" in proc.stdout
     assert "learning path:" in proc.stdout
+
+
+def test_release_doctor_subcommand_stays_available() -> None:
+    proc = _run("release", "doctor", "--help")
+    assert proc.returncode == 0
+    assert "usage: doctor" in proc.stdout
+    assert "--ascii" in proc.stdout

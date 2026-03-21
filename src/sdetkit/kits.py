@@ -945,8 +945,7 @@ def radar_payload(
             "metric": hot_path_packages,
             "summary": "Packages with the highest observed repo usage and the smallest safe proof loops.",
             "commands": [
-                "python -m sdetkit intelligence upgrade-audit --used-in-repo-only "
-                "--repo-usage-tier hot-path --top 5 --format md",
+                "python -m sdetkit intelligence upgrade-audit --used-in-repo-only --repo-usage-tier hot-path --top 5 --format md",
                 "python -m sdetkit kits route-map --repo-usage-tier hot-path --format json",
             ],
         },

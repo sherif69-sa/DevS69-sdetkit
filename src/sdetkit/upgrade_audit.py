@@ -314,7 +314,6 @@ def _latest_pypi_metadata(
     version = str(info.get("version") or "unknown")
     release_date: str | None = None
     releases = payload.get("releases", {})
-    info = payload.get("info", {})
     if isinstance(releases, dict):
         release_files = releases.get(version) or []
         if isinstance(release_files, list):
@@ -1883,28 +1882,28 @@ def _render_markdown(
         lines.append(
             f"- `{item['name']}` [{item['signal']}, risk {item['risk_score']}, lane {item['lane']}, action {item['manifest_action']}]"
             + (f" target `{item['suggested_version']}`" if item["suggested_version"] else "")
-            + f" → {item['next_action']}"
+            + f" -> {item['next_action']}"
         )
     lines.extend(["", "## Recommended upgrade lanes", ""])
     for item in _lane_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['lane']}**: {item['count']} package(s), max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Risk bands", ""])
     for item in _risk_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['risk_band']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Repo usage tiers", ""])
     for item in _repo_usage_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['repo_usage_tier']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max repo usage {item['max_repo_usage_count']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Repo hotspots", ""])
     for item in _repo_hotspots(reports):
@@ -1915,9 +1914,9 @@ def _render_markdown(
         )
         lines.append(
             f"- **{item['path']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
-            + (f" — lanes {lane_list}" if lane_list else "")
-            + (f" — validate with {validations}" if validations else "")
+            + (f" - {pkg_list}" if pkg_list else "")
+            + (f" - lanes {lane_list}" if lane_list else "")
+            + (f" - validate with {validations}" if validations else "")
         )
     lines.extend(["", "## Repo impact map", ""])
     for item in _impact_summary(reports):
@@ -1927,43 +1926,43 @@ def _render_markdown(
         )
         lines.append(
             f"- **{item['impact_area']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
-            + (f" — validate with {validations}" if validations else "")
+            + (f" - {pkg_list}" if pkg_list else "")
+            + (f" - validate with {validations}" if validations else "")
         )
     lines.extend(["", "## Release freshness", ""])
     for item in _release_freshness_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['release_freshness']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Manifest actions", ""])
     for item in _action_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['manifest_action']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Validation commands", ""])
     for item in _validation_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- `{item['command']}`: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Dependency groups", ""])
     for item in _group_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['group']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Manifest sources", ""])
     for item in _source_summary(reports):
         pkg_list = ", ".join(f"`{name}`" for name in _as_str_list(item["packages"]))
         lines.append(
             f"- **{item['source']}**: {item['count']} package(s), actionable {item['actionable_packages']}, max risk {item['max_risk_score']}"
-            + (f" — {pkg_list}" if pkg_list else "")
+            + (f" - {pkg_list}" if pkg_list else "")
         )
     lines.extend(["", "## Focus notes", ""])
     for report in reports:

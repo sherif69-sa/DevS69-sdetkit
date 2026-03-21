@@ -10,7 +10,7 @@ import sqlite3
 import subprocess
 import sys
 import urllib.parse
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -536,22 +536,22 @@ def _apply_autofix_for_finding(root: Path, finding: dict[str, Any]) -> AutoFixRe
         return AutoFixResult(rule, rel_path, "skipped", "target file missing")
 
     text = target.read_text(encoding="utf-8", errors="replace")
-    patched = text
-    changed = False
-
+    handler: Callable[[str], tuple[str, bool]] | None = None
     if rule in {"SEC_REQUESTS_NO_TIMEOUT", "SEC_NETWORK_TIMEOUT"}:
-        patched, changed = _autofix_timeout(text)
+        handler = _autofix_timeout
     elif rule == "SEC_SUBPROCESS_SHELL_TRUE":
-        patched, changed = _autofix_shell_true(text)
+        handler = _autofix_shell_true
     elif rule in {"SEC_YAML_LOAD", "SEC_YAML_UNSAFE_LOAD"}:
-        patched, changed = _autofix_yaml_load(text)
-    else:
+        handler = _autofix_yaml_load
+
+    if handler is None:
         return AutoFixResult(rule, rel_path, "manual", "no safe auto-fix handler for this rule")
 
+    patched_text, changed = handler(text)
     if not changed:
         return AutoFixResult(rule, rel_path, "manual", "auto-fix handler found no editable pattern")
 
-    target.write_text(patched, encoding="utf-8")
+    target.write_text(patched_text, encoding="utf-8")
     return AutoFixResult(rule, rel_path, "fixed", "applied safe auto-fix")
 
 
@@ -1708,7 +1708,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
                 lines.append("### deferred scripts")
                 for item in plan["deferred"][:10]:
                     lines.append(
-                        f"- \u23ed️ `{item['script_id']}` ({item['priority']}, score={item['score']}): {item['reason']}"
+                        f"- NEXT `{item['script_id']}` ({item['priority']}, score={item['score']}): {item['reason']}"
                     )
     return "\n".join(lines)
 

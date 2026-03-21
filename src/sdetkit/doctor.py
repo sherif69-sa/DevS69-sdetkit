@@ -863,7 +863,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 if part
             ]
             if parts:
-                hints.append(" — ".join(parts))
+                hints.append(" - ".join(parts))
 
     upgrade_meta = data.get("checks", {}).get("upgrade_audit", {}).get("meta", {})
     priority_queue = upgrade_meta.get("priority_queue", [])
@@ -889,14 +889,14 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 if lane:
                     detail += f" [{lane}]"
                 if validation:
-                    detail += f" — validate with {validation}"
+                    detail += f" - validate with {validation}"
                 hints.append(detail)
                 continue
             detail = f"watchlist {name}"
             if lane:
                 detail += f" [{lane}]"
             if validation:
-                detail += f" — keep validating with {validation}"
+                detail += f" - keep validating with {validation}"
             hints.append(detail)
 
     lane_summary = upgrade_meta.get("lane_summary", [])
@@ -918,7 +918,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 if actionable_count > 0:
                     detail += f", actionable {actionable_count}"
                 if package_text:
-                    detail += f" — focus on {package_text}"
+                    detail += f" - focus on {package_text}"
                 hints.append(detail)
 
     impact_summary = upgrade_meta.get("impact_summary", [])
@@ -935,7 +935,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if impact_area and actionable_count > 0:
                 detail = f"impact {impact_area}: {actionable_count} actionable package(s)"
                 if command_text:
-                    detail += f" — validate with {command_text}"
+                    detail += f" - validate with {command_text}"
                 hints.append(detail)
 
     release_freshness_summary = upgrade_meta.get("release_freshness_summary", [])
@@ -957,7 +957,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 if actionable_count > 0:
                     detail += f", actionable {actionable_count}"
                 if package_text:
-                    detail += f" — includes {package_text}"
+                    detail += f" - includes {package_text}"
                 hints.append(detail)
 
     action_summary = upgrade_meta.get("action_summary", [])
@@ -976,7 +976,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if action and count > 0:
                 detail = f"action {action}: {count} package(s)"
                 if package_text:
-                    detail += f" — includes {package_text}"
+                    detail += f" - includes {package_text}"
                 hints.append(detail)
 
     hotspots = upgrade_meta.get("hotspots", [])
@@ -999,9 +999,9 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
             if path:
                 detail = f"hotspot {path}: {actionable_count} actionable package(s)"
                 if package_text:
-                    detail += f" — packages {package_text}"
+                    detail += f" - packages {package_text}"
                 if command_text:
-                    detail += f" — validate with {command_text}"
+                    detail += f" - validate with {command_text}"
                 hints.append(detail)
 
     risk_summary = upgrade_meta.get("risk_summary", [])
@@ -1023,7 +1023,7 @@ def _build_hints(data: dict[str, Any], *, limit: int = 8) -> list[str]:
                 if actionable_count > 0:
                     detail += f", actionable {actionable_count}"
                 if package_text:
-                    detail += f" — includes {package_text}"
+                    detail += f" - includes {package_text}"
                 hints.append(detail)
 
     for key, label in (("group_summary", "group"), ("source_summary", "source")):
@@ -1216,9 +1216,9 @@ def _check_upgrade_audit(
         if impact_area:
             message += f" [{impact_area}]"
         if next_action:
-            message += f" — {next_action}"
+            message += f" - {next_action}"
         elif not actionable_item:
-            message += " — no immediate manifest change required"
+            message += " - no immediate manifest change required"
         evidence.append({"type": "upgrade_priority", "message": message, "path": "pyproject.toml"})
 
     fix = [

@@ -1274,14 +1274,16 @@ def _repair_remove_path(path: str) -> None:
         try:
             os.chown(target, identity[0], identity[1], follow_symlinks=False)
         except OSError:
-            pass
+            if target.exists():
+                raise
     try:
         mode = stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR
         if target.is_dir():
             mode |= stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP
         os.chmod(target, mode, follow_symlinks=False)
     except OSError:
-        pass
+        if target.exists():
+            raise
 
 
 def _handle_rmtree_error(func: Any, path: str, exc_info: Any) -> None:
@@ -1311,7 +1313,8 @@ def _reset_checkout_dir(app_dir: Path) -> None:
             try:
                 quarantined.unlink()
             except OSError:
-                pass
+                if quarantined.exists():
+                    raise
         return
     if app_dir.exists():
         try:
@@ -1321,7 +1324,8 @@ def _reset_checkout_dir(app_dir: Path) -> None:
             try:
                 shutil.rmtree(quarantined, onerror=_handle_rmtree_error)
             except OSError:
-                pass
+                if quarantined.exists():
+                    raise
 
 
 def _shell_command(name: str, command: str, *, cwd: Path) -> StageCommand:
