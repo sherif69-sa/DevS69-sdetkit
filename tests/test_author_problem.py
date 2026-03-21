@@ -37,7 +37,18 @@ class _FakeRunner(DockerCommandRunner):
         return type(
             "Invocation",
             (),
-            {"argv": argv, "returncode": 0, "stdout": "ok", "stderr": "", "to_dict": lambda self: {"argv": argv, "returncode": 0, "stdout": "ok", "stderr": ""}},
+            {
+                "argv": argv,
+                "returncode": 0,
+                "stdout": "ok",
+                "stderr": "",
+                "to_dict": lambda self: {
+                    "argv": argv,
+                    "returncode": 0,
+                    "stdout": "ok",
+                    "stderr": "",
+                },
+            },
         )()
 
     def which(self, program: str) -> str | None:  # type: ignore[override]
@@ -138,7 +149,9 @@ dependencies = []
     )
     (path / "rich/__init__.py").write_text("", encoding="utf-8")
     (path / "rich/text.py").write_text("class Text: ...\n", encoding="utf-8")
-    (path / "tests/test_text.py").write_text("def test_placeholder():\n    assert True\n", encoding="utf-8")
+    (path / "tests/test_text.py").write_text(
+        "def test_placeholder():\n    assert True\n", encoding="utf-8"
+    )
 
 
 def _write_rich_poetry_repo(path: Path) -> None:
@@ -157,12 +170,14 @@ authors = ["Author <author@example.com>"]
     )
     (path / "rich/__init__.py").write_text("", encoding="utf-8")
     (path / "rich/text.py").write_text("class Text: ...\n", encoding="utf-8")
-    (path / "tests/test_text.py").write_text("def test_placeholder():\n    assert True\n", encoding="utf-8")
+    (path / "tests/test_text.py").write_text(
+        "def test_placeholder():\n    assert True\n", encoding="utf-8"
+    )
 
 
 def _make_problem_patches(repo_root: Path, workdir: Path) -> None:
     (repo_root / "test.sh").write_text(
-        "#!/usr/bin/env bash\n\nset -euo pipefail\n\nmode=${1:-}\ncase \"$mode\" in\n  new) PYTHONPATH=src python3 -m pytest tests/test_refresh_problem.py ;;\n  base) PYTHONPATH=src python3 -m pytest tests --ignore=tests/test_refresh_problem.py ;;\n  *) echo \"Usage: $0 {base|new}\" >&2; exit 2 ;;\nesac\n",
+        '#!/usr/bin/env bash\n\nset -euo pipefail\n\nmode=${1:-}\ncase "$mode" in\n  new) PYTHONPATH=src python3 -m pytest tests/test_refresh_problem.py ;;\n  base) PYTHONPATH=src python3 -m pytest tests --ignore=tests/test_refresh_problem.py ;;\n  *) echo "Usage: $0 {base|new}" >&2; exit 2 ;;\nesac\n',
         encoding="utf-8",
     )
     (repo_root / "tests/test_refresh_problem.py").write_text(
@@ -275,13 +290,24 @@ def perform_refresh(snapshot):
         text=True,
     ).stdout
     (workdir / "solution.patch").write_text(solution_patch, encoding="utf-8")
-    subprocess.run(["git", "checkout", "--", "src/demoapp/api.py", "src/demoapp/service.py", "src/demoapp/storage.py"], cwd=repo_root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        [
+            "git",
+            "checkout",
+            "--",
+            "src/demoapp/api.py",
+            "src/demoapp/service.py",
+            "src/demoapp/storage.py",
+        ],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
 
 def _write_final_metadata(workdir: Path) -> None:
-    (workdir / "final_title.txt").write_text(
-        "Durable session refresh contract\n", encoding="utf-8"
-    )
+    (workdir / "final_title.txt").write_text("Durable session refresh contract\n", encoding="utf-8")
     (workdir / "final_description.txt").write_text(
         "Implement the repository contract for durable session refresh behavior.\n"
         "- preserve rotation metadata across repeated refresh operations\n"
@@ -349,7 +375,9 @@ def test_author_problem_doctor_verify_and_triad(tmp_path: Path) -> None:
         (repo_root / "Dockerfile.problem").read_text(encoding="utf-8"), encoding="utf-8"
     )
 
-    doctor = run_author_doctor(repo_root, workdir, contract=_low_threshold_contract(tmp_path), runner=_FakeRunner())
+    doctor = run_author_doctor(
+        repo_root, workdir, contract=_low_threshold_contract(tmp_path), runner=_FakeRunner()
+    )
     summary = verify_artifacts(
         repo_root,
         workdir,
@@ -406,8 +434,13 @@ test = ["pytest>=8"]
     assert result.ok is False
     failure = json.loads((tmp_path / "work/final_failure.json").read_text(encoding="utf-8"))
     summary = json.loads((tmp_path / "work/run_summary.json").read_text(encoding="utf-8"))
-    manifest = json.loads((_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8"))
-    assert failure["reason"] == "no automated authoring strategy matched target repository after baseline and fit gating"
+    manifest = json.loads(
+        (_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8")
+    )
+    assert (
+        failure["reason"]
+        == "no automated authoring strategy matched target repository after baseline and fit gating"
+    )
     assert summary["verification"]["ok"] is False
     assert (_export_dir(tmp_path) / "final_failure.json").exists()
     assert manifest["success"] is False
@@ -435,7 +468,9 @@ def test_author_problem_run_can_succeed_end_to_end_with_demo_fixture(tmp_path: P
 
     assert result.ok is True
     summary = json.loads((tmp_path / "work/run_summary.json").read_text(encoding="utf-8"))
-    manifest = json.loads((_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (_export_dir(tmp_path) / "export_manifest.json").read_text(encoding="utf-8")
+    )
     assert (tmp_path / "work/test.patch").exists()
     assert (tmp_path / "work/solution.patch").exists()
     assert (tmp_path / "work/docker.file").exists()

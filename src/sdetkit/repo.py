@@ -52,6 +52,7 @@ SKIP_DIRS: frozenset[str] = frozenset(
         ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
+        ".sdetkit",
         ".hypothesis",
         ".nox",
         ".tox",
@@ -117,6 +118,9 @@ SENSITIVE_WORDS = (
     "auth",
     "credential",
 )
+SENSITIVE_WORD_PATTERNS = tuple(
+    re.compile(rf"(?<![A-Za-z0-9]){re.escape(word)}(?![A-Za-z0-9])") for word in SENSITIVE_WORDS
+)
 WORKFLOW_USE_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*([^\s]+)\s*$")
 UNPINNED_DEP_RE = re.compile(r"^(?:[A-Za-z0-9_.-]+)(?:\[[^\]]+\])?\s*(?:>=|>|~=|\*|$)")
 PRIVATE_KEY_FILES: frozenset[str] = frozenset({"id_rsa", "id_dsa"})
@@ -136,6 +140,14 @@ def _shannon_entropy(s: str) -> float:
         p = count / n
         entropy -= p * (0 if p == 0 else math.log2(p))
     return entropy
+
+
+def _looks_like_secret_token(token: str) -> bool:
+    if "/" in token and not any(ch.isdigit() for ch in token):
+        return False
+    if not any(ch.isdigit() for ch in token) and not any(ch in "+=" for ch in token):
+        return False
+    return _shannon_entropy(token) >= 4.0
 
 
 def _safe_snippet(line: str) -> str:
@@ -795,9 +807,10 @@ def run_checks(
                         )
                     )
 
-            if any(w in text_line.lower() for w in SENSITIVE_WORDS):
+            lowered_line = text_line.lower()
+            if any(pattern.search(lowered_line) for pattern in SENSITIVE_WORD_PATTERNS):
                 for tok in HIGH_ENTROPY_TOKEN.findall(text_line):
-                    if _shannon_entropy(tok) >= 4.0:
+                    if _looks_like_secret_token(tok):
                         findings.append(
                             Finding(
                                 "secret_scan",
@@ -949,7 +962,7 @@ def _scan_workflow(rel: str, text: str) -> list[Finding]:
                     )
                 )
         lower = line.lower()
-        if "pull_request_target" in lower:
+        if re.match(r"^\s*(?:on:\s*)?pull_request_target\s*(?::|$)", lower):
             out.append(
                 Finding(
                     "gha_hardening",

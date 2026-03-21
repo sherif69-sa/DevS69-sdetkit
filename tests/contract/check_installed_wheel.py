@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import zipfile
@@ -10,12 +11,15 @@ from typing import Any, cast
 
 
 def _run(cli_python: Path, repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env.pop("CI", None)
     return subprocess.run(
         [str(cli_python), "-m", "sdetkit", *args],
         cwd=repo_root,
         text=True,
         capture_output=True,
         check=False,
+        env=env,
     )
 
 
@@ -35,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     ns = parser.parse_args(argv)
 
-    cli_python = Path(ns.python).resolve()
+    cli_python = Path(ns.python)
     repo_root = Path(ns.repo_root).resolve()
 
     failures: list[str] = []

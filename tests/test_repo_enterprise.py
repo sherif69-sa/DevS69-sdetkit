@@ -40,6 +40,40 @@ def test_enterprise_workflow_and_sarif_output(tmp_path: Path, capsys) -> None:
     assert "gha_hardening/pull_request_target" in ids
 
 
+def test_enterprise_workflow_does_not_flag_pull_request_target_mentions_in_strings(
+    tmp_path: Path, capsys
+) -> None:
+    wf = tmp_path / ".github" / "workflows"
+    wf.mkdir(parents=True)
+    (wf / "governance.yml").write_text(
+        "name: Governance\n"
+        "on:\n"
+        "  workflow_dispatch:\n"
+        "jobs:\n"
+        "  report:\n"
+        "    runs-on: ubuntu-latest\n"
+        "    steps:\n"
+        "      - run: |\n"
+        "          echo 'pull_request_target requires strict hardening'\n",
+        encoding="utf-8",
+    )
+    rc = cli.main(
+        [
+            "repo",
+            "check",
+            str(tmp_path),
+            "--allow-absolute-path",
+            "--profile",
+            "enterprise",
+            "--format",
+            "json",
+        ]
+    )
+    assert rc == 0
+    report = json.loads(capsys.readouterr().out)
+    assert not report["findings"]
+
+
 def test_enterprise_baseline_suppresses_findings(tmp_path: Path, capsys) -> None:
     (tmp_path / "secrets.txt").write_text("token=shhh\n", encoding="utf-8")
     baseline = tmp_path / "baseline.json"
