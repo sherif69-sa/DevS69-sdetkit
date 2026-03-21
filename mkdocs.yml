@@ -86,6 +86,7 @@ nav:
       - Choose your path (30-second router): choose-your-path.md
       - Install (canonical): install.md
       - First run quickstart (canonical): ready-to-use.md
+      - Repo structure and file guide: project-structure.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - Release confidence (core commands): release-confidence.md
       - Doctor checks: doctor.md

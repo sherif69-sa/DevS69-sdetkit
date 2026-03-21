@@ -30,6 +30,7 @@ If this is your first PR to this repository, use this shortest safe path:
 
 For a condensed version, see `docs/first-contribution-quickstart.md`.
 For concrete, repo-grounded starter categories, use `docs/starter-work-inventory.md`.
+For file-placement and root-directory guidance, see `docs/project-structure.md`.
 
 ## Starter contribution types
 
