@@ -174,13 +174,15 @@ The premium gate intelligence layer now goes further as well: it ranks remediati
 
 The security auto-remediation lane is stronger too: premium gate can now prioritize a built-in `security_fix_apply` smart script before baseline-aware security re-triage, and the security fixer now safely rewrites `shell=True` to `shell=False` alongside request timeout injection and `yaml.safe_load` upgrades for deterministic repo-safe cleanup.
 
-The GitHub-native maintenance layer is stronger too: beyond the existing GHAS digest, campaign planner, and configuration audit bots, the repo now carries a weekly **GHAS alert SLA tracker** for 7/14/30-day backlog enforcement, a weekly **GHAS metrics export bot** that publishes reusable JSON evidence for dashboards, audits, and roadmap reviews, a weekly **secret protection review bot** for push protection / delegated bypass / validity-check posture, a weekly **repo optimization control-loop bot** that turns `kits optimize`, `kits expand`, and automation coverage into actionable backlog slices, a weekly **docs experience radar bot** that keeps flagship docs, navigation, and search discoverability healthy, and a weekly **release readiness radar bot** that keeps doctor output, release assets, and publishing workflows visible in one operating lane.
+The GitHub-native maintenance layer is stronger too: beyond the existing GHAS digest, campaign planner, and configuration audit bots, the repo now carries a weekly **GHAS alert SLA tracker** for 7/14/30-day backlog enforcement, a weekly **GHAS metrics export bot** that publishes reusable JSON evidence for dashboards, audits, and roadmap reviews, a weekly **secret protection review bot** for push protection / delegated bypass / validity-check posture, a weekly **repo optimization control-loop bot** that turns `kits optimize`, `kits expand`, and automation coverage into actionable backlog slices, a weekly **docs experience radar bot** that keeps flagship docs, navigation, and search discoverability healthy, a weekly **adapter smoke bot** that validates optional notification channels and route-map coverage, a weekly **runtime watchlist bot** that keeps runtime-core upgrades on a fast-follow lane, and a weekly **release readiness radar bot** that keeps doctor output, release assets, and publishing workflows visible in one operating lane.
 
 The worker layer is stronger too: `sdetkit kits expand --goal "..." --format json` now recommends **worker roles** plus a **worker launch pack** so teams can turn expansion ideas into deterministic AgentOS runs instead of leaving them as backlog text. The repo also ships multiple aligned worker templates out of the box:
 
 - `repo-expansion-control` for optimize/expand control-loop artifacts,
+- `adapter-smoke-worker` for optional notification adapter smoke coverage plus expansion-ready quickstarts,
 - `dependency-radar-worker` for upgrade inventory, hotspot radar, and validation-route evidence,
 - `validation-route-worker` for refactor-safe route mapping tied to doctor upgrade guidance,
+- `runtime-watchlist-worker` for runtime-core fast-follow watchlists plus route-map evidence,
 - `docs-search-radar` for strict docs/search validation with bundled evidence,
 - `release-readiness-worker` for doctor + automation-readiness snapshots before publish windows.
 - `worker-alignment-radar` for keeping the worker pack aligned with automation inventory and expansion signals.
@@ -190,8 +192,10 @@ You can run them directly with:
 ```bash
 python -m sdetkit kits expand --goal "add more bots workers search and repo expansion" --format json
 python -m sdetkit agent templates run repo-expansion-control
+python -m sdetkit agent templates run adapter-smoke-worker
 python -m sdetkit agent templates run dependency-radar-worker
 python -m sdetkit agent templates run validation-route-worker --set query=httpx
+python -m sdetkit agent templates run runtime-watchlist-worker
 python -m sdetkit agent templates run docs-search-radar
 python -m sdetkit agent templates run release-readiness-worker
 python -m sdetkit agent templates run worker-alignment-radar

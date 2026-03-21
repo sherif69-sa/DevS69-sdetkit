@@ -1,0 +1,26 @@
+metadata:
+  id: adapter-smoke-worker
+  title: Adapter Smoke Worker
+  version: 1.0.0
+  description: Validate optional notification adapters and capture integration-ready quickstart artifacts.
+workflow:
+  - id: adapter-route-map
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits route-map --impact-area integration-adapters --limit 5 --format json
+      save_stdout: ${{run.output_dir}}/adapter-smoke.json
+  - id: adapter-tests
+    action: shell.run
+    with:
+      cmd: python -m pytest -q tests/test_notify_plugins.py tests/test_notify_plugins_extra.py tests/test_notify_core_extra.py tests/test_notify_plugins_control_plane.py
+      save_stdout: ${{run.output_dir}}/adapter-tests.log
+  - id: adapter-quickstart
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/adapter-quickstart.md
+      content: "Adapter smoke worker summary: validated notification adapters, captured adapter-smoke.json, adapter-tests.log, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

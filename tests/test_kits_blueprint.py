@@ -88,7 +88,12 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
 
 def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path: Path) -> None:
     (tmp_path / "pyproject.toml").write_text(
-        "[project]\nname='x'\nversion='0.1.0'\ndependencies=['httpx>=0.28.1,<1']\n",
+        "[project]\n"
+        "name='x'\n"
+        "version='0.1.0'\n"
+        "dependencies=['httpx>=0.28.1,<1']\n"
+        "[project.optional-dependencies]\n"
+        "telegram=['python-telegram-bot>=22.7,<23']\n",
         encoding="utf-8",
     )
     (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
@@ -125,11 +130,18 @@ def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path:
     assert payload["optimize"]["alignment_score"]["status"] in {"strong", "maximized"}
     assert "dependency-radar-dashboard" in candidate_ids
     assert "validation-route-map" in candidate_ids
+    assert "adapter-smoke-pack" in candidate_ids
     assert "runtime-watchlist" in candidate_ids
     assert "dependency-radar" in mission_topics
     assert "validation-route-map" in mission_topics
+    assert "adapter-activation" in mission_topics
+    assert "runtime-fast-follow" in mission_topics
+    assert "worker-adapter-smoke" in worker_ids
+    assert "worker-runtime-watchlist" in worker_ids
     assert "worker-automation-alignment" in worker_ids
     assert "worker-optimization-control" in worker_ids
+    assert "adapter-smoke-worker" in launch_templates
+    assert "runtime-watchlist-worker" in launch_templates
     assert "dependency-radar-worker" in launch_templates
     assert "validation-route-worker" in launch_templates
     assert "worker-alignment-radar" in launch_templates

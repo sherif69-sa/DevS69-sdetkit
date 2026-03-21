@@ -1579,6 +1579,50 @@ def _recommended_workers(
             }
         )
 
+    if "adapter-smoke-pack" in candidate_map:
+        workers.append(
+            {
+                "id": "worker-adapter-smoke",
+                "role": "adapter-productizer",
+                "focus": (
+                    "Keep optional notification adapters discoverable, smoke-tested, and ready "
+                    "for expansion work."
+                ),
+                "template": "adapter-smoke-worker",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/adapter-smoke-worker/adapter-smoke.json",
+                    ".sdetkit/agent/template-runs/adapter-smoke-worker/adapter-quickstart.md",
+                    ".sdetkit/agent/template-runs/adapter-smoke-worker/bundle.tar",
+                ],
+                "commands": [
+                    "python -m pytest -q tests/test_notify_plugins.py tests/test_notify_plugins_extra.py",
+                    "python -m sdetkit kits route-map --impact-area integration-adapters --format json",
+                ],
+            }
+        )
+
+    if "runtime-watchlist" in candidate_map:
+        workers.append(
+            {
+                "id": "worker-runtime-watchlist",
+                "role": "runtime-scout",
+                "focus": (
+                    "Keep runtime-core dependencies on a fast-follow review lane before larger "
+                    "upgrade batches land."
+                ),
+                "template": "runtime-watchlist-worker",
+                "outputs": [
+                    ".sdetkit/agent/template-runs/runtime-watchlist-worker/runtime-watchlist.md",
+                    ".sdetkit/agent/template-runs/runtime-watchlist-worker/route-map.json",
+                    ".sdetkit/agent/template-runs/runtime-watchlist-worker/bundle.tar",
+                ],
+                "commands": [
+                    "python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --format md",
+                    "python -m sdetkit kits route-map --impact-area runtime-core --format json",
+                ],
+            }
+        )
+
     if repo_signals.get("docs_site"):
         workers.append(
             {
@@ -1652,7 +1696,7 @@ def _recommended_workers(
         }
     )
 
-    return workers[:6]
+    return workers[:8]
 
 
 def _worker_launch_pack(

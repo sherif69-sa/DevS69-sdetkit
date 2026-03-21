@@ -165,6 +165,32 @@ def test_template_run_supports_new_alignment_workers(tmp_path: Path) -> None:
     assert (validation_out / "doctor-upgrade-audit.md").exists()
     assert (validation_out / "bundle.tar").exists()
 
+    adapter_template = template_by_id(repo_root, "adapter-smoke-worker")
+    adapter_out = tmp_path / "adapter"
+    adapter_record = run_template(
+        repo_root,
+        template=adapter_template,
+        set_values={},
+        output_dir=adapter_out,
+    )
+    assert adapter_record["status"] == "ok"
+    assert (adapter_out / "adapter-smoke.json").exists()
+    assert (adapter_out / "adapter-tests.log").exists()
+    assert (adapter_out / "bundle.tar").exists()
+
+    runtime_template = template_by_id(repo_root, "runtime-watchlist-worker")
+    runtime_out = tmp_path / "runtime"
+    runtime_record = run_template(
+        repo_root,
+        template=runtime_template,
+        set_values={},
+        output_dir=runtime_out,
+    )
+    assert runtime_record["status"] == "ok"
+    assert (runtime_out / "runtime-watchlist.md").exists()
+    assert (runtime_out / "route-map.json").exists()
+    assert (runtime_out / "bundle.tar").exists()
+
     alignment_template = template_by_id(repo_root, "worker-alignment-radar")
     alignment_out = tmp_path / "alignment"
     alignment_record = run_template(

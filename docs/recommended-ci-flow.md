@@ -181,8 +181,10 @@ If you want the hosted repo to keep surfacing upgrade and security work between 
 - `.github/workflows/secret-protection-review-bot.yml` for a weekly secret protection posture and backlog review.
 - `.github/workflows/dependency-review.yml` for a pull-request dependency guardrail before merge.
 - `.github/workflows/dependency-radar-bot.yml` for a weekly dependency radar and runtime fast-follow watchlist.
+- `.github/workflows/adapter-smoke-bot.yml` for a weekly adapter smoke pack over optional notification adapters and integration-adapter route-map coverage.
 - `.github/workflows/repo-optimization-bot.yml` for a weekly optimize/expand-driven feature and automation backlog.
 - `.github/workflows/docs-experience-bot.yml` for a weekly docs experience radar over nav coverage, search posture, and flagship entrypoints.
+- `.github/workflows/runtime-watchlist-bot.yml` for a weekly runtime fast-follow watchlist over hot-path runtime-core packages.
 - `.github/workflows/release-readiness-radar-bot.yml` for a weekly release readiness radar over doctor output, release assets, and publish workflows.
 - `.github/workflows/security-maintenance-bot.yml` for the broader weekly security checklist and weak-spot report.
 
