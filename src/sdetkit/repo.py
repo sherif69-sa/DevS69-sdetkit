@@ -962,7 +962,7 @@ def _scan_workflow(rel: str, text: str) -> list[Finding]:
                     )
                 )
         lower = line.lower()
-        if "pull_request_target" in lower:
+        if re.match(r"^\s*(?:on:\s*)?pull_request_target\s*(?::|$)", lower):
             out.append(
                 Finding(
                     "gha_hardening",

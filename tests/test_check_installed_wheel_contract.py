@@ -21,10 +21,10 @@ def _load_module():
 def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> None:
     module = _load_module()
     requested_python = Path(".venv-smoke/bin/python")
-    calls: list[tuple[Path, tuple[str, ...]]] = []
+    calls: list[tuple[Path, tuple[str, ...], str | None]] = []
 
     def fake_run(cli_python: Path, repo_root: Path, *args: str) -> subprocess.CompletedProcess[str]:
-        calls.append((cli_python, args))
+        calls.append((cli_python, args, None))
         if args[:2] == ("integration", "check"):
             payload = {
                 "summary": {"failed": 1, "passed": False},
@@ -72,4 +72,22 @@ def test_main_preserves_virtualenv_python_path(tmp_path: Path, monkeypatch) -> N
 
     assert rc == 0
     assert calls
-    assert all(cli_python == requested_python for cli_python, _ in calls)
+    assert all(cli_python == requested_python for cli_python, _, _ in calls)
+
+
+def test_run_clears_ci_environment_for_local_smoke(tmp_path: Path, monkeypatch) -> None:
+    module = _load_module()
+    monkeypatch.setenv("CI", "true")
+
+    captured: dict[str, str | None] = {}
+
+    def fake_subprocess_run(*args, **kwargs):
+        env = kwargs.get("env", {})
+        captured["CI"] = env.get("CI")
+        return subprocess.CompletedProcess(args[0], 0, stdout="{}", stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_subprocess_run)
+
+    module._run(Path(".venv-smoke/bin/python"), tmp_path, "kits", "list", "--format", "json")
+
+    assert captured["CI"] is None

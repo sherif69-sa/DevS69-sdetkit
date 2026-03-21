@@ -1325,10 +1325,9 @@ def _reset_checkout_dir(app_dir: Path) -> None:
 
 
 def _shell_command(name: str, command: str, *, cwd: Path) -> StageCommand:
-    proc = subprocess.run(command, shell=True, cwd=str(cwd), text=True, capture_output=True)
-    return StageCommand(
-        name, ["bash", "-lc", command], cwd, proc.returncode, proc.stdout, proc.stderr
-    )
+    argv = ["bash", "-lc", command]
+    proc = subprocess.run(argv, cwd=str(cwd), text=True, capture_output=True, check=False)
+    return StageCommand(name, argv, cwd, proc.returncode, proc.stdout, proc.stderr)
 
 
 def _append_note(path: Path, heading: str, lines: list[str]) -> None:
