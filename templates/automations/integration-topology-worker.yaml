@@ -1,0 +1,26 @@
+metadata:
+  id: integration-topology-worker
+  title: Integration Topology Worker
+  version: 1.0.0
+  description: Validate heterogeneous topology proof, capture optimize guidance, and bundle architecture-ready artifacts.
+workflow:
+  - id: topology-check
+    action: shell.run
+    with:
+      cmd: python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json
+      save_stdout: ${{run.output_dir}}/topology-check.json
+  - id: topology-optimize
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits optimize --goal "integration topology premium gate alignment" --format json
+      save_stdout: ${{run.output_dir}}/optimize.json
+  - id: topology-summary
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/summary.md
+      content: "Integration topology worker summary: captured topology-check.json, optimize.json, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

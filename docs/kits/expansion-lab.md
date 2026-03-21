@@ -29,6 +29,7 @@ Depending on the repo signals and dependency inventory, the expansion lab can su
 - a **validation route map** that links packages to the smallest safe proof loop,
 - an **adapter smoke pack** that makes optional integrations feel productized,
 - a **runtime fast-follow watchlist** for hot-path dependencies,
+- an **integration topology control loop** for premium-gate-sensitive architecture changes,
 - or an **optimization control center** that collapses boost + AgentOS outputs into one recurring operating view.
 
 The validation route map is now available directly via `sdetkit kits route-map`, so one strong follow-up pattern is:

@@ -70,6 +70,7 @@ def test_optimize_payload_aligns_doctor_quality_gate_agentos_and_topology(tmp_pa
     innovation_ids = {item["id"] for item in payload["innovation_opportunities"]}
     assert "dependency-radar" in innovation_ids
     assert "runtime-core-fast-follow" in innovation_ids
+    assert "integration-topology-radar" in innovation_ids
     assert (
         payload["agentos_lane"]["commands"][1]
         == "sdetkit agent run 'template:repo-health-audit' --approve"
@@ -132,16 +133,20 @@ def test_expand_payload_turns_optimize_signals_into_feature_candidates(tmp_path:
     assert "validation-route-map" in candidate_ids
     assert "adapter-smoke-pack" in candidate_ids
     assert "runtime-watchlist" in candidate_ids
+    assert "integration-topology-control-loop" in candidate_ids
     assert "dependency-radar" in mission_topics
     assert "validation-route-map" in mission_topics
     assert "adapter-activation" in mission_topics
     assert "runtime-fast-follow" in mission_topics
+    assert "integration-topology-control" in mission_topics
     assert "worker-adapter-smoke" in worker_ids
     assert "worker-runtime-watchlist" in worker_ids
+    assert "worker-integration-topology" in worker_ids
     assert "worker-automation-alignment" in worker_ids
     assert "worker-optimization-control" in worker_ids
     assert "adapter-smoke-worker" in launch_templates
     assert "runtime-watchlist-worker" in launch_templates
+    assert "integration-topology-worker" in launch_templates
     assert "dependency-radar-worker" in launch_templates
     assert "validation-route-worker" in launch_templates
     assert "worker-alignment-radar" in launch_templates

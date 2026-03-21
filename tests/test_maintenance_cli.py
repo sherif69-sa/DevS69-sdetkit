@@ -718,6 +718,7 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
         ".github/workflows/repo-optimization-bot.yml",
         ".github/workflows/workflow-governance-bot.yml",
         ".github/workflows/docs-experience-bot.yml",
+        ".github/workflows/integration-topology-radar-bot.yml",
         ".github/workflows/release-readiness-radar-bot.yml",
         ".github/workflows/worker-alignment-bot.yml",
         ".github/workflows/adapter-smoke-bot.yml",
@@ -760,6 +761,7 @@ def test_github_automation_check_reports_new_ghas_workflows(tmp_path: Path) -> N
     assert expansion_tracks["adapter_smoke"]["present"] is True
     assert expansion_tracks["docs_experience_radar"]["present"] is True
     assert expansion_tracks["release_readiness_radar"]["present"] is True
+    assert expansion_tracks["integration_topology_radar"]["present"] is True
     assert expansion_tracks["runtime_watchlist"]["present"] is True
     assert expansion_tracks["worker_alignment"]["present"] is True
 

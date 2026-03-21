@@ -39,6 +39,7 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
     "expansion_bots": {
         "adapter-smoke-bot.yml": ("Adapter smoke bot", True),
         "docs-experience-bot.yml": ("Docs experience radar bot", True),
+        "integration-topology-radar-bot.yml": ("Integration topology radar bot", True),
         "release-readiness-radar-bot.yml": ("Release readiness radar bot", True),
         "runtime-watchlist-bot.yml": ("Runtime watchlist bot", True),
         "worker-alignment-bot.yml": ("Worker alignment bot", True),
@@ -176,6 +177,15 @@ _EXPANSION_UPDATE_TRACKS: list[dict[str, str]] = [
             "freshness checks for roadmap, changelog, and release playbook assets."
         ),
         "workflow": "release-readiness-radar-bot.yml",
+    },
+    {
+        "id": "integration_topology_radar",
+        "title": "Integration topology radar",
+        "description": (
+            "Run the topology worker lane so heterogeneous service proof and premium-gate follow-up "
+            "stay visible as the repo's architecture expands."
+        ),
+        "workflow": "integration-topology-radar-bot.yml",
     },
     {
         "id": "runtime_watchlist",

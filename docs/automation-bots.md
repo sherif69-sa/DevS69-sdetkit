@@ -29,6 +29,7 @@ In addition to scheduled GitHub bots, the repo now ships **AgentOS worker templa
 - **`validation-route-worker`** — turns a package or domain query into a route map plus doctor-linked upgrade guidance.
 - **`runtime-watchlist-worker`** — emits a runtime-core fast-follow watchlist plus a route map for the hottest runtime validation lanes.
 - **`docs-search-radar`** — runs a strict MkDocs build, captures the build log, and bundles docs-search evidence for later review.
+- **`integration-topology-worker`** — validates heterogeneous topology proof, snapshots optimize guidance, and bundles architecture-ready evidence for premium-gate follow-up.
 - **`release-readiness-worker`** — snapshots `doctor` plus `github_automation_check` so release-readiness follow-up can happen outside of a publish crunch.
 - **`worker-alignment-radar`** — keeps expansion recommendations, automation coverage, and template inventory aligned with the repo's active worker surface.
 
@@ -41,6 +42,7 @@ python -m sdetkit agent templates run dependency-radar-worker
 python -m sdetkit agent templates run validation-route-worker --set query=httpx
 python -m sdetkit agent templates run runtime-watchlist-worker
 python -m sdetkit agent templates run docs-search-radar
+python -m sdetkit agent templates run integration-topology-worker
 python -m sdetkit agent templates run release-readiness-worker
 python -m sdetkit agent templates run worker-alignment-radar
 python -m sdetkit kits expand --goal "add more bots workers search and repo expansion" --format json
@@ -71,9 +73,10 @@ python -m sdetkit kits expand --goal "add more bots workers search and repo expa
 - **`repo-optimization-bot.yml`** — publishes a weekly repo-optimization control loop issue from `kits optimize`, `kits expand`, and the GitHub automation maintenance check.
 - **`workflow-governance-bot.yml`** — publishes a monthly workflow-governance audit for permissions, SHA pinning, and manual recovery posture.
 - **`docs-experience-bot.yml`** — publishes a weekly docs-experience radar issue plus JSON artifact covering navigation coverage, search posture, and flagship-doc visibility.
+- **`integration-topology-radar-bot.yml`** — publishes a weekly integration-topology radar issue and worker artifacts so topology proof stays aligned with premium-gate-ready refactors.
 - **`release-readiness-radar-bot.yml`** — publishes a weekly release-readiness radar issue with doctor output, release asset freshness, and release-workflow coverage.
 - **`runtime-watchlist-bot.yml`** — publishes a weekly runtime fast-follow issue and worker artifacts so hot-path runtime upgrades stay reviewable.
-- **`worker-alignment-bot.yml`** — runs the aligned worker templates together and publishes a weekly worker/radar issue with deterministic artifact links.
+- **`worker-alignment-bot.yml`** — runs the aligned worker templates together and publishes a weekly worker/radar issue with deterministic artifact links, including topology coverage.
 - **`contributor-onboarding-bot.yml`** — keeps contributor guidance discoverable.
 - **`pr-helper-bot.yml` / `pr-quality-comment.yml`** — keep pull requests reviewable and actionable.
 
@@ -224,13 +227,24 @@ It now:
 - opens a date-scoped `🚀 Release readiness radar (...)` issue,
 - uploads `build/release-readiness-radar.json` plus the raw doctor/maintenance payloads as workflow artifacts.
 
+### `integration-topology-radar-bot.yml`
+
+This bot turns the repo's topology-aware integration proof into a recurring architecture review lane instead of something maintainers only inspect during large refactors.
+
+It now:
+
+- runs `integration-topology-worker` on a weekly cadence,
+- captures the bundled topology-check and optimize payloads as reusable worker artifacts,
+- opens a date-scoped `🕸️ Integration topology radar (...)` issue,
+- keeps heterogeneous service proof aligned with premium-gate-ready umbrella changes.
+
 ### `worker-alignment-bot.yml`
 
 This bot turns the worker layer into a first-class operating lane instead of leaving the templates as individual commands maintainers have to remember.
 
 It now:
 
-- runs `dependency-radar-worker`, `docs-search-radar`, `release-readiness-worker`, and `worker-alignment-radar` on a weekly cadence,
+- runs `dependency-radar-worker`, `docs-search-radar`, `integration-topology-worker`, `release-readiness-worker`, and `worker-alignment-radar` on a weekly cadence,
 - uploads both the per-worker run records and the template output directories as reusable artifacts,
 - opens a date-scoped `🤖 Worker alignment radar (...)` issue,
 - keeps the worker surface aligned with dependency, docs, release, and automation-review loops.
@@ -247,10 +261,11 @@ It now:
 8. Open the latest **dependency radar** issue.
 9. Open the latest **repo optimization control loop** issue and pick one `now` candidate or search mission.
 10. Open the latest **docs experience radar** issue and fold the highest-value orphan docs or missing flagship links back into the canonical journeys.
-11. Open the latest **release readiness radar** issue before a publish window or docs release push.
-12. Open the latest **worker alignment radar** issue and refresh any stale worker/template lanes before they drift from the base automation surface.
-13. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
-14. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
+11. Open the latest **integration topology radar** issue before topology, platform, or premium-gate changes expand.
+12. Open the latest **release readiness radar** issue before a publish window or docs release push.
+13. Open the latest **worker alignment radar** issue and refresh any stale worker/template lanes before they drift from the base automation surface.
+14. Review the monthly **workflow governance audit** issue and close any pinning/permissions drift.
+15. Record implementation follow-up in `docs/roadmap.md` and the weekly maintenance issue.
 
 ## Optional local dry runs
 

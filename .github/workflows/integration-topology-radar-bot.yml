@@ -1,0 +1,124 @@
+name: Integration Topology Radar Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 6 * * 4"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  integration-topology-radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+            requirements-test.txt
+            constraints-ci.txt
+
+      - name: Install repo
+        run: python -m pip install -c constraints-ci.txt -e .[test]
+
+      - name: Run integration topology worker
+        run: |
+          set -euo pipefail
+          mkdir -p build .sdetkit/agent/template-runs
+          python -m sdetkit agent templates run integration-topology-worker --output-dir .sdetkit/agent/template-runs/integration-topology-worker > build/integration-topology-worker-run.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("build/integration-topology-worker-run.json").read_text(encoding="utf-8"))
+          artifacts = payload.get("artifacts", [])
+
+          lines = [
+              "# Integration topology radar",
+              "",
+              "This issue is auto-generated to keep heterogeneous topology proof aligned with premium-gate-ready upgrade work.",
+              "",
+              "## Worker status",
+              f"- Status: **{payload.get('status', 'unknown')}**",
+              f"- Artifacts captured: **{len(artifacts)}**",
+              "",
+              "## Suggested follow-up",
+              "- [ ] Review topology-check.json before landing umbrella integration refactors or platform workflow changes.",
+              "- [ ] Compare the optimize snapshot against the current release and worker lanes for any premium-gate drift.",
+              "- [ ] Convert any service-owner, telemetry, or deployment gaps into scoped issues or PRs.",
+              "",
+              "## Artifacts",
+              "- `build/integration-topology-worker-run.json`",
+              "- `.sdetkit/agent/template-runs/integration-topology-worker`",
+          ]
+
+          Path("build/integration-topology-radar.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload integration topology artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: integration-topology-radar
+          path: |
+            build/integration-topology-worker-run.json
+            build/integration-topology-radar.md
+            .sdetkit/agent/template-runs/integration-topology-worker
+
+      - name: Create or update integration topology issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const title = `🕸️ Integration topology radar (${weekOf})`;
+            const body = fs.readFileSync('build/integration-topology-radar.md', 'utf8');
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'integration', color: '5319e7', description: 'Integration assurance and topology work' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'integration',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('🕸️ Integration topology radar'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'integration', 'priority:medium'],
+              });
+            }
