@@ -7,8 +7,8 @@ from collections.abc import Sequence
 from importlib import metadata
 
 from . import (
-    author_problem,
     apiget,
+    author_problem,
     community_activation,
     continuous_upgrade_cycle8_closeout,
     continuous_upgrade_cycle9_closeout,

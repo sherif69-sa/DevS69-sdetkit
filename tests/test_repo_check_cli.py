@@ -111,3 +111,26 @@ def test_repo_check_out_writes_file_and_matches_stdout(tmp_path: Path) -> None:
     assert result.exit_code == 1
     assert result.stderr == ""
     assert out.read_text(encoding="utf-8") == result.stdout
+
+
+def test_repo_check_avoids_false_positives_for_workflow_names_and_author_symbols(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "docs.md").write_text(
+        (
+            "- .github/workflows/secret-protection-review-bot.yml keeps weekly posture visible.\n"
+            "def test_author_problem_run_reuses_existing_workdir_app_checkout():\n"
+            "    pass\n"
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        ["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json"]
+    )
+
+    assert result.exit_code == 0
+    assert result.stderr == ""
+    payload = json.loads(result.stdout)
+    assert payload["summary"]["findings"] == 0

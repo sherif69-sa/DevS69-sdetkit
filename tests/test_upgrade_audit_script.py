@@ -117,7 +117,13 @@ dev = [
         ("dev", "mkdocs"),
         ("dev", "pytest"),
     ]
-    assert [dep.pinned_version for dep in deps[1:]] == ["0.15.7", "1.6.1", "0.15.7", "1.6.1", "8.4.2"]
+    assert [dep.pinned_version for dep in deps[1:]] == [
+        "0.15.7",
+        "1.6.1",
+        "0.15.7",
+        "1.6.1",
+        "8.4.2",
+    ]
 
 
 def test_load_dependencies_ignores_recursive_dependency_group_includes(tmp_path: Path) -> None:

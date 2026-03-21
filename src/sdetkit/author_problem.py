@@ -4,13 +4,13 @@ import argparse
 import json
 import os
 import re
-import stat
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -370,7 +370,11 @@ def bootstrap_workdir(workdir: Path, *, topic: str | None = None) -> WorkBootstr
         "final_description.txt",
     ]:
         _write_if_missing(workdir / name, "", created)
-    _write_if_missing(workdir / "run_summary.json", canonical_json_dumps({"ok": False, "status": "bootstrapped"}), created)
+    _write_if_missing(
+        workdir / "run_summary.json",
+        canonical_json_dumps({"ok": False, "status": "bootstrapped"}),
+        created,
+    )
     artifact_paths = {
         "test_patch": (workdir / "test.patch").as_posix(),
         "solution_patch": (workdir / "solution.patch").as_posix(),
@@ -441,7 +445,7 @@ def _export_final_artifacts(
         "repo_url": repo_url,
         "pinned_sha": sha,
         "success": success,
-        "exported_at": datetime.now(timezone.utc).isoformat(),
+        "exported_at": datetime.now(UTC).isoformat(),
         "exports": exported,
     }
     _write_json(manifest_path, manifest)
@@ -464,10 +468,10 @@ def generate_test_runner(topic: str, *, pythonpath_prefix: str = "") -> str:
     return (
         "#!/usr/bin/env bash\n\n"
         "set -euo pipefail\n\n"
-        'mode=${1:-}\n'
+        "mode=${1:-}\n"
         'case "$mode" in\n'
-        f'  new) {pythonpath_prefix}python3 -m pytest tests/test_{slug}_problem.py ;;\n'
-        f'  base) {pythonpath_prefix}python3 -m pytest tests --ignore=tests/test_{slug}_problem.py ;;\n'
+        f"  new) {pythonpath_prefix}python3 -m pytest tests/test_{slug}_problem.py ;;\n"
+        f"  base) {pythonpath_prefix}python3 -m pytest tests --ignore=tests/test_{slug}_problem.py ;;\n"
         '  *) echo "Usage: $0 {base|new}" >&2; exit 2 ;;\n'
         "esac\n"
     )
@@ -475,7 +479,9 @@ def generate_test_runner(topic: str, *, pythonpath_prefix: str = "") -> str:
 
 def ensure_minimal_test_runner(repo_root: Path, *, topic: str) -> Path:
     path = Path(repo_root) / "test.sh"
-    atomic_write_text(path, generate_test_runner(topic, pythonpath_prefix=_runner_prefix(Path(repo_root))))
+    atomic_write_text(
+        path, generate_test_runner(topic, pythonpath_prefix=_runner_prefix(Path(repo_root)))
+    )
     path.chmod(0o755)
     return path
 
@@ -507,24 +513,38 @@ def inspect_repo_metadata(repo_root: Path) -> RepoInspection:
         baseline_commands.append("python3 -m pytest")
     else:
         baseline_commands.append("python3 -m pytest")
-        risks.append("no pyproject.toml or requirements*.txt found; Dockerfile.problem may need inferred deps")
+        risks.append(
+            "no pyproject.toml or requirements*.txt found; Dockerfile.problem may need inferred deps"
+        )
     if "tox.ini" in metadata_files:
         baseline_commands.append("python3 -m tox -q")
     if "noxfile.py" in metadata_files:
         baseline_commands.append("python3 -m nox -s tests")
 
     src_py = list(repo_root.glob("src/**/*.py"))
-    any_py = [p for p in repo_root.rglob("*.py") if ".git" not in p.parts and ".venv" not in p.parts]
+    any_py = [
+        p for p in repo_root.rglob("*.py") if ".git" not in p.parts and ".venv" not in p.parts
+    ]
     tests_dir = repo_root / "tests"
     long_horizon_notes: list[str] = []
     if len(src_py) >= 8:
         long_horizon_notes.append("multiple public Python modules detected under src/")
     if tests_dir.exists() and len(list(tests_dir.glob("test_*.py"))) >= 10:
-        long_horizon_notes.append("broad existing test surface suggests richer behavioral contracts")
+        long_horizon_notes.append(
+            "broad existing test surface suggests richer behavioral contracts"
+        )
     if len(any_py) >= 20:
-        long_horizon_notes.append("cross-module production surface appears large enough for multi-file fixes")
-    if (repo_root / ".github/workflows").exists() or "tox.ini" in metadata_files or "noxfile.py" in metadata_files:
-        long_horizon_notes.append("repo exposes repeatable automation entrypoints for environment gating")
+        long_horizon_notes.append(
+            "cross-module production surface appears large enough for multi-file fixes"
+        )
+    if (
+        (repo_root / ".github/workflows").exists()
+        or "tox.ini" in metadata_files
+        or "noxfile.py" in metadata_files
+    ):
+        long_horizon_notes.append(
+            "repo exposes repeatable automation entrypoints for environment gating"
+        )
     likely_long_horizon_fit = len(long_horizon_notes) >= 2
     if not likely_long_horizon_fit:
         risks.append("repo may not satisfy long-horizon multi-file authoring goals")
@@ -551,7 +571,9 @@ def _read_optional_text(path: Path) -> str:
 
 def _discover_install_inputs(repo_root: Path) -> dict[str, Any]:
     repo_root = Path(repo_root)
-    requirements_files = [p.name for p in sorted(repo_root.glob("requirements*.txt")) if p.is_file()]
+    requirements_files = [
+        p.name for p in sorted(repo_root.glob("requirements*.txt")) if p.is_file()
+    ]
     inferred_packages: set[str] = set()
     project_dependencies: list[str] = []
     extras: list[str] = []
@@ -573,7 +595,13 @@ def _discover_install_inputs(repo_root: Path) -> dict[str, Any]:
                             if known in lowered:
                                 inferred_packages.add(known)
 
-    for rel in ["tox.ini", "noxfile.py", ".github/workflows", ".gitlab-ci.yml", "azure-pipelines.yml"]:
+    for rel in [
+        "tox.ini",
+        "noxfile.py",
+        ".github/workflows",
+        ".gitlab-ci.yml",
+        "azure-pipelines.yml",
+    ]:
         target = repo_root / rel
         if target.is_dir():
             for file in sorted(target.rglob("*.yml")) + sorted(target.rglob("*.yaml")):
@@ -643,7 +671,9 @@ def build_docker_image(
     runner = runner or DockerCommandRunner()
     dockerfile = dockerfile or (Path(repo_root) / "Dockerfile.problem")
     tag = tag or f"sdetkit-author-{_slugify(Path(repo_root).name)}"
-    return runner.run(["docker", "build", "-f", str(dockerfile), "-t", tag, "."], cwd=Path(repo_root))
+    return runner.run(
+        ["docker", "build", "-f", str(dockerfile), "-t", tag, "."], cwd=Path(repo_root)
+    )
 
 
 def run_authoring_container(
@@ -677,20 +707,22 @@ def run_authoring_container(
     ]
     if host_identity is not None:
         argv.extend(["--user", f"{host_identity[0]}:{host_identity[1]}"])
-    argv.extend([
-        "-v",
-        f"{Path(repo_root).resolve()}:/app",
-        "-v",
-        f"{Path(workdir).resolve()}:/work",
-        "-v",
-        f"{toolkit_root}:{_TOOLKIT_MOUNT}",
-        "-w",
-        "/app",
-        "-e",
-        f"PYTHONPATH={_TOOLKIT_MOUNT}/src",
-        image,
-        *command,
-    ])
+    argv.extend(
+        [
+            "-v",
+            f"{Path(repo_root).resolve()}:/app",
+            "-v",
+            f"{Path(workdir).resolve()}:/work",
+            "-v",
+            f"{toolkit_root}:{_TOOLKIT_MOUNT}",
+            "-w",
+            "/app",
+            "-e",
+            f"PYTHONPATH={_TOOLKIT_MOUNT}/src",
+            image,
+            *command,
+        ]
+    )
     return runner.run(argv)
 
 
@@ -785,7 +817,14 @@ def analyze_solution_patch(patch_path: Path, *, contract: WorkflowContract) -> P
         for file in files
         if file == "test.sh"
         or file.startswith("tests/")
-        or file in {"Dockerfile", "Dockerfile.problem", "docker.file", "final_title.txt", "final_description.txt"}
+        or file
+        in {
+            "Dockerfile",
+            "Dockerfile.problem",
+            "docker.file",
+            "final_title.txt",
+            "final_description.txt",
+        }
     ]
     if forbidden:
         errors.append("solution.patch contains non-production paths: " + ", ".join(forbidden))
@@ -804,7 +843,9 @@ def analyze_solution_patch(patch_path: Path, *, contract: WorkflowContract) -> P
 
 
 def _copy_tree(src: Path, dest: Path) -> None:
-    shutil.copytree(src, dest, symlinks=False, ignore=shutil.ignore_patterns(".git", ".venv", "__pycache__"))
+    shutil.copytree(
+        src, dest, symlinks=False, ignore=shutil.ignore_patterns(".git", ".venv", "__pycache__")
+    )
 
 
 def _run_test_mode(mode: str, *, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -812,12 +853,17 @@ def _run_test_mode(mode: str, *, cwd: Path) -> subprocess.CompletedProcess[str]:
 
 
 def _apply_patch(repo_root: Path, patch_path: Path) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(["git", "apply", str(patch_path)], cwd=str(repo_root), text=True, capture_output=True)
+    return subprocess.run(
+        ["git", "apply", str(patch_path)], cwd=str(repo_root), text=True, capture_output=True
+    )
 
 
 def _apply_patch_check(repo_root: Path, patch_path: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["git", "apply", "--check", str(patch_path)], cwd=str(repo_root), text=True, capture_output=True
+        ["git", "apply", "--check", str(patch_path)],
+        cwd=str(repo_root),
+        text=True,
+        capture_output=True,
     )
 
 
@@ -825,14 +871,25 @@ def _materialize_starter_tree(repo_root: Path, destination: Path) -> tuple[bool,
     details: list[str] = []
     git_dir = repo_root / ".git"
     if git_dir.exists():
-        sha_proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(repo_root), text=True, capture_output=True)
+        sha_proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=str(repo_root), text=True, capture_output=True
+        )
         if sha_proc.returncode == 0:
             sha = sha_proc.stdout.strip()
-            clone_proc = subprocess.run(["git", "clone", "--quiet", str(repo_root), str(destination)], text=True, capture_output=True)
+            clone_proc = subprocess.run(
+                ["git", "clone", "--quiet", str(repo_root), str(destination)],
+                text=True,
+                capture_output=True,
+            )
             if clone_proc.stderr.strip():
                 details.append(clone_proc.stderr.strip())
             if clone_proc.returncode == 0:
-                checkout_proc = subprocess.run(["git", "checkout", "--quiet", sha], cwd=str(destination), text=True, capture_output=True)
+                checkout_proc = subprocess.run(
+                    ["git", "checkout", "--quiet", sha],
+                    cwd=str(destination),
+                    text=True,
+                    capture_output=True,
+                )
                 if checkout_proc.stderr.strip():
                     details.append(checkout_proc.stderr.strip())
                 return checkout_proc.returncode == 0, details
@@ -865,7 +922,10 @@ def verify_clean_tree_and_triad(
         clean_tree_details.extend(details)
         if not clean_tree_ok:
             return TriadResult(False, phases, False, clean_tree_details, replay_commands)
-        for proc in [_apply_patch_check(starter, test_patch), _apply_patch_check(starter, solution_patch)]:
+        for proc in [
+            _apply_patch_check(starter, test_patch),
+            _apply_patch_check(starter, solution_patch),
+        ]:
             if proc.returncode != 0:
                 clean_tree_ok = False
                 clean_tree_details.append(proc.stderr.strip() or proc.stdout.strip())
@@ -877,35 +937,83 @@ def verify_clean_tree_and_triad(
             apply_test_for_runner = _apply_patch(base_tree, test_patch)
             if apply_test_for_runner.returncode != 0:
                 clean_tree_ok = False
-                clean_tree_details.append(apply_test_for_runner.stderr.strip() or apply_test_for_runner.stdout.strip())
-                return TriadResult(False, phases, clean_tree_ok, clean_tree_details, replay_commands)
+                clean_tree_details.append(
+                    apply_test_for_runner.stderr.strip() or apply_test_for_runner.stdout.strip()
+                )
+                return TriadResult(
+                    False, phases, clean_tree_ok, clean_tree_details, replay_commands
+                )
             test_patch_applied_for_runner = True
         else:
             test_patch_applied_for_runner = False
 
         base_proc = _run_test_mode("base", cwd=base_tree)
-        phases.append(TriadPhase("starter_base", "bash test.sh base", "pass", base_proc.returncode, base_proc.stdout, base_proc.stderr, base_proc.returncode == 0))
+        phases.append(
+            TriadPhase(
+                "starter_base",
+                "bash test.sh base",
+                "pass",
+                base_proc.returncode,
+                base_proc.stdout,
+                base_proc.stderr,
+                base_proc.returncode == 0,
+            )
+        )
 
         if not test_patch_applied_for_runner:
             apply_test = _apply_patch(starter, test_patch)
             if apply_test.returncode != 0:
                 clean_tree_ok = False
                 clean_tree_details.append(apply_test.stderr.strip() or apply_test.stdout.strip())
-                return TriadResult(False, phases, clean_tree_ok, clean_tree_details, replay_commands)
+                return TriadResult(
+                    False, phases, clean_tree_ok, clean_tree_details, replay_commands
+                )
 
         new_proc = _run_test_mode("new", cwd=starter)
-        phases.append(TriadPhase("starter_plus_test_patch_new", "bash test.sh new", "fail", new_proc.returncode, new_proc.stdout, new_proc.stderr, new_proc.returncode != 0))
+        phases.append(
+            TriadPhase(
+                "starter_plus_test_patch_new",
+                "bash test.sh new",
+                "fail",
+                new_proc.returncode,
+                new_proc.stdout,
+                new_proc.stderr,
+                new_proc.returncode != 0,
+            )
+        )
 
         apply_solution = _apply_patch(starter, solution_patch)
         if apply_solution.returncode != 0:
             clean_tree_ok = False
-            clean_tree_details.append(apply_solution.stderr.strip() or apply_solution.stdout.strip())
+            clean_tree_details.append(
+                apply_solution.stderr.strip() or apply_solution.stdout.strip()
+            )
             return TriadResult(False, phases, clean_tree_ok, clean_tree_details, replay_commands)
 
         final_base = _run_test_mode("base", cwd=starter)
-        phases.append(TriadPhase("starter_plus_solution_patch_base", "bash test.sh base", "pass", final_base.returncode, final_base.stdout, final_base.stderr, final_base.returncode == 0))
+        phases.append(
+            TriadPhase(
+                "starter_plus_solution_patch_base",
+                "bash test.sh base",
+                "pass",
+                final_base.returncode,
+                final_base.stdout,
+                final_base.stderr,
+                final_base.returncode == 0,
+            )
+        )
         final_new = _run_test_mode("new", cwd=starter)
-        phases.append(TriadPhase("starter_plus_solution_patch_new", "bash test.sh new", "pass", final_new.returncode, final_new.stdout, final_new.stderr, final_new.returncode == 0))
+        phases.append(
+            TriadPhase(
+                "starter_plus_solution_patch_new",
+                "bash test.sh new",
+                "pass",
+                final_new.returncode,
+                final_new.stdout,
+                final_new.stderr,
+                final_new.returncode == 0,
+            )
+        )
 
     ok = clean_tree_ok and all(phase.ok for phase in phases)
     return TriadResult(ok, phases, clean_tree_ok, clean_tree_details, replay_commands)
@@ -937,7 +1045,11 @@ def _check_final_description(description: str, *, contract: WorkflowContract) ->
         errors.append("final_description.txt must not reference tests")
     if rules.get("no_solution_hints", True) and ("solution" in lowered or "fix" in lowered):
         errors.append("final_description.txt must not include solution hints")
-    if rules.get("code_like_bullet_block", True) and "- " not in description and "* " not in description:
+    if (
+        rules.get("code_like_bullet_block", True)
+        and "- " not in description
+        and "* " not in description
+    ):
         errors.append("final_description.txt must contain a code-like bullet block")
     return errors
 
@@ -994,7 +1106,10 @@ def run_author_doctor(
         {"id": "docker_available", "ok": runner.which("docker") is not None},
         {"id": "workdir_writable", "ok": os.access(workdir, os.W_OK)},
         {"id": "ledger_bootstrap", "ok": bool(bootstrap.created) or Path(workdir).exists()},
-        {"id": "metadata_present", "ok": bool(inspection.metadata_files or inspection.requirements_files)},
+        {
+            "id": "metadata_present",
+            "ok": bool(inspection.metadata_files or inspection.requirements_files),
+        },
         {"id": "repo_long_horizon_fit", "ok": inspection.likely_long_horizon_fit},
     ]
     payload = {
@@ -1040,11 +1155,25 @@ def verify_artifacts(
         and docker_copy.exists()
         and docker_problem.read_text(encoding="utf-8") == docker_copy.read_text(encoding="utf-8")
     )
-    final_title = (workdir / "final_title.txt").read_text(encoding="utf-8") if (workdir / "final_title.txt").exists() else ""
-    final_description = (workdir / "final_description.txt").read_text(encoding="utf-8") if (workdir / "final_description.txt").exists() else ""
+    final_title = (
+        (workdir / "final_title.txt").read_text(encoding="utf-8")
+        if (workdir / "final_title.txt").exists()
+        else ""
+    )
+    final_description = (
+        (workdir / "final_description.txt").read_text(encoding="utf-8")
+        if (workdir / "final_description.txt").exists()
+        else ""
+    )
     metadata_errors = _check_ascii_title(final_title)
     metadata_errors.extend(_check_final_description(final_description, contract=contract))
-    triad = verify_clean_tree_and_triad(repo_root, test_patch=workdir / "test.patch", solution_patch=workdir / "solution.patch") if verify_triad else None
+    triad = (
+        verify_clean_tree_and_triad(
+            repo_root, test_patch=workdir / "test.patch", solution_patch=workdir / "solution.patch"
+        )
+        if verify_triad
+        else None
+    )
     ok = (
         not missing_artifacts
         and test_patch.status == "pass"
@@ -1059,7 +1188,10 @@ def verify_artifacts(
         "ok": ok,
         "repo_root": repo_root.as_posix(),
         "workdir": workdir.as_posix(),
-        "required_artifacts": {"required": contract.required_artifacts, "missing": missing_artifacts},
+        "required_artifacts": {
+            "required": contract.required_artifacts,
+            "missing": missing_artifacts,
+        },
         "test_patch": test_patch.to_dict(),
         "solution_patch": solution_patch.to_dict(),
         "size_gates": size_status,
@@ -1100,12 +1232,32 @@ def verify_artifacts(
 
 def _git_clone_and_checkout(repo_url: str, sha: str, destination: Path) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
-    clone = subprocess.run(["git", "clone", repo_url, str(destination)], text=True, capture_output=True)
-    steps.append({"name": "git_clone", "argv": ["git", "clone", repo_url, str(destination)], "returncode": clone.returncode, "stdout": clone.stdout, "stderr": clone.stderr})
+    clone = subprocess.run(
+        ["git", "clone", repo_url, str(destination)], text=True, capture_output=True
+    )
+    steps.append(
+        {
+            "name": "git_clone",
+            "argv": ["git", "clone", repo_url, str(destination)],
+            "returncode": clone.returncode,
+            "stdout": clone.stdout,
+            "stderr": clone.stderr,
+        }
+    )
     if clone.returncode != 0:
         return steps
-    checkout = subprocess.run(["git", "checkout", sha], cwd=str(destination), text=True, capture_output=True)
-    steps.append({"name": "git_checkout", "argv": ["git", "checkout", sha], "returncode": checkout.returncode, "stdout": checkout.stdout, "stderr": checkout.stderr})
+    checkout = subprocess.run(
+        ["git", "checkout", sha], cwd=str(destination), text=True, capture_output=True
+    )
+    steps.append(
+        {
+            "name": "git_checkout",
+            "argv": ["git", "checkout", sha],
+            "returncode": checkout.returncode,
+            "stdout": checkout.stdout,
+            "stderr": checkout.stderr,
+        }
+    )
     return steps
 
 
@@ -1174,7 +1326,9 @@ def _reset_checkout_dir(app_dir: Path) -> None:
 
 def _shell_command(name: str, command: str, *, cwd: Path) -> StageCommand:
     proc = subprocess.run(command, shell=True, cwd=str(cwd), text=True, capture_output=True)
-    return StageCommand(name, ["bash", "-lc", command], cwd, proc.returncode, proc.stdout, proc.stderr)
+    return StageCommand(
+        name, ["bash", "-lc", command], cwd, proc.returncode, proc.stdout, proc.stderr
+    )
 
 
 def _append_note(path: Path, heading: str, lines: list[str]) -> None:
@@ -1206,8 +1360,18 @@ def _baseline_environment_gate(repo_root: Path, inspection: RepoInspection) -> G
 
 
 def _repo_fit_gate(repo_root: Path, inspection: RepoInspection) -> GateResult:
-    entrypoints = len(list((repo_root / "src").glob("**/*.py"))) if (repo_root / "src").exists() else len(list(repo_root.glob("*.py")))
-    downstream_modules = len({p.parent.as_posix() for p in repo_root.rglob("*.py") if "tests" not in p.parts and ".git" not in p.parts})
+    entrypoints = (
+        len(list((repo_root / "src").glob("**/*.py")))
+        if (repo_root / "src").exists()
+        else len(list(repo_root.glob("*.py")))
+    )
+    downstream_modules = len(
+        {
+            p.parent.as_posix()
+            for p in repo_root.rglob("*.py")
+            if "tests" not in p.parts and ".git" not in p.parts
+        }
+    )
     details = {
         "entrypoint_count": entrypoints,
         "downstream_module_count": downstream_modules,
@@ -1217,9 +1381,17 @@ def _repo_fit_gate(repo_root: Path, inspection: RepoInspection) -> GateResult:
     return GateResult("repo_long_horizon_fit", inspection.likely_long_horizon_fit, details)
 
 
-def _candidate_fit_gate(repo_root: Path, inspection: RepoInspection, *, contract: WorkflowContract) -> GateResult:
-    production_files = [p for p in repo_root.rglob("*.py") if "tests" not in p.parts and ".git" not in p.parts]
-    test_files = [p for p in (repo_root / "tests").glob("test_*.py")] if (repo_root / "tests").exists() else []
+def _candidate_fit_gate(
+    repo_root: Path, inspection: RepoInspection, *, contract: WorkflowContract
+) -> GateResult:
+    production_files = [
+        p for p in repo_root.rglob("*.py") if "tests" not in p.parts and ".git" not in p.parts
+    ]
+    test_files = (
+        [p for p in (repo_root / "tests").glob("test_*.py")]
+        if (repo_root / "tests").exists()
+        else []
+    )
     breadth = contract.preferred_production_file_scope
     plausible_multifile = len(production_files) >= breadth["preferred_min"]
     multiple_consequences = len(test_files) >= 5 or len(production_files) >= 10
@@ -1257,14 +1429,28 @@ def _scaffold_novelty_gate(workdir: Path, inspection: RepoInspection, topic: str
             "- candidate-fit remains provisional until tests and solution are co-developed.",
         ],
     )
-    return {"path": (workdir / "novelty_gate.txt").as_posix(), "topic": topic, "status": "scaffolded"}
+    return {
+        "path": (workdir / "novelty_gate.txt").as_posix(),
+        "topic": topic,
+        "status": "scaffolded",
+    }
 
 
 def _git_capture_patch(repo_root: Path, workdir: Path, files: list[str], destination: str) -> None:
-    subprocess.run(["git", "add", "-N", *files], cwd=repo_root, check=True, capture_output=True, text=True)
-    patch = subprocess.run(["git", "diff", "--binary", "--", *files], cwd=repo_root, check=True, capture_output=True, text=True).stdout
+    subprocess.run(
+        ["git", "add", "-N", *files], cwd=repo_root, check=True, capture_output=True, text=True
+    )
+    patch = subprocess.run(
+        ["git", "diff", "--binary", "--", *files],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
     atomic_write_text(workdir / destination, patch)
-    subprocess.run(["git", "reset", "--", *files], cwd=repo_root, check=True, capture_output=True, text=True)
+    subprocess.run(
+        ["git", "reset", "--", *files], cwd=repo_root, check=True, capture_output=True, text=True
+    )
 
 
 def _git_restore_paths(repo_root: Path, files: list[str]) -> None:
@@ -1282,7 +1468,13 @@ def _git_restore_paths(repo_root: Path, files: list[str]) -> None:
         else:
             untracked.append(repo_root / relpath)
     if tracked:
-        subprocess.run(["git", "checkout", "--", *tracked], cwd=repo_root, check=True, capture_output=True, text=True)
+        subprocess.run(
+            ["git", "checkout", "--", *tracked],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
     for path in untracked:
         path.unlink(missing_ok=True)
 
@@ -1328,16 +1520,24 @@ def _rich_strategy_matches(repo_root: Path) -> bool:
     )
 
 
-def _write_rich_problem_artifacts(repo_root: Path, workdir: Path, *, topic: str) -> AuthoringAttempt:
+def _write_rich_problem_artifacts(
+    repo_root: Path, workdir: Path, *, topic: str
+) -> AuthoringAttempt:
     if not _rich_strategy_matches(repo_root):
-        return AuthoringAttempt("rich_markup_roundtrip", False, {"reason": "rich target signature not found"})
-    sha_proc = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, capture_output=True)
+        return AuthoringAttempt(
+            "rich_markup_roundtrip", False, {"reason": "rich target signature not found"}
+        )
+    sha_proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, capture_output=True
+    )
     sha = sha_proc.stdout.strip() if sha_proc.returncode == 0 else ""
     if sha != "ce0118819d172d134507bcf5982d3faf82bbc43e":
         return AuthoringAttempt(
             "rich_markup_roundtrip",
             False,
-            {"reason": f"rich strategy only supports ce0118819d172d134507bcf5982d3faf82bbc43e, got {sha or 'unknown'}"},
+            {
+                "reason": f"rich strategy only supports ce0118819d172d134507bcf5982d3faf82bbc43e, got {sha or 'unknown'}"
+            },
         )
 
     template_root = _authoring_template_root() / "rich"
@@ -1358,7 +1558,9 @@ def _write_rich_problem_artifacts(repo_root: Path, workdir: Path, *, topic: str)
     )
     ensure_minimal_test_runner(repo_root, topic="markup_roundtrip")
 
-    _git_capture_patch(repo_root, workdir, ["test.sh", "tests/test_markup_roundtrip_problem.py"], "test.patch")
+    _git_capture_patch(
+        repo_root, workdir, ["test.sh", "tests/test_markup_roundtrip_problem.py"], "test.patch"
+    )
     (repo_root / "test.sh").unlink(missing_ok=True)
     test_path.unlink(missing_ok=True)
 
@@ -1398,12 +1600,16 @@ def _write_rich_problem_artifacts(repo_root: Path, workdir: Path, *, topic: str)
     )
 
 
-def _write_demo_fixture_artifacts(repo_root: Path, workdir: Path, *, topic: str) -> AuthoringAttempt:
+def _write_demo_fixture_artifacts(
+    repo_root: Path, workdir: Path, *, topic: str
+) -> AuthoringAttempt:
     topic_slug = _slugify(topic)
     tests_dir = repo_root / "tests"
     src_dir = repo_root / "src/demoapp"
     if not tests_dir.exists() or not src_dir.exists() or not (src_dir / "api.py").exists():
-        return AuthoringAttempt("demo_refresh_fixture", False, {"reason": "demo fixture signature not found"})
+        return AuthoringAttempt(
+            "demo_refresh_fixture", False, {"reason": "demo fixture signature not found"}
+        )
 
     ensure_minimal_test_runner(repo_root, topic=topic_slug)
     problem_test = tests_dir / f"test_{topic_slug}_problem.py"
@@ -1445,7 +1651,7 @@ def _write_demo_fixture_artifacts(repo_root: Path, workdir: Path, *, topic: str)
             '                "history": history,\n'
             '                "rotated": bool(snapshot.get("rotated", False)),\n'
             '                "source": snapshot.get("source", "direct"),\n'
-            '                "checkpoint": f"seq:{snapshot[\'sequence\']}\",\n'
+            '                "checkpoint": f"seq:{snapshot[\'sequence\']}",\n'
             "            }\n"
             "        )\n"
             "    return state\n"
@@ -1472,8 +1678,26 @@ def _write_demo_fixture_artifacts(repo_root: Path, workdir: Path, *, topic: str)
         ),
         encoding="utf-8",
     )
-    _git_capture_patch(repo_root, workdir, ["src/demoapp/api.py", "src/demoapp/service.py", "src/demoapp/storage.py"], "solution.patch")
-    subprocess.run(["git", "checkout", "--", "src/demoapp/api.py", "src/demoapp/service.py", "src/demoapp/storage.py"], cwd=repo_root, check=True, capture_output=True, text=True)
+    _git_capture_patch(
+        repo_root,
+        workdir,
+        ["src/demoapp/api.py", "src/demoapp/service.py", "src/demoapp/storage.py"],
+        "solution.patch",
+    )
+    subprocess.run(
+        [
+            "git",
+            "checkout",
+            "--",
+            "src/demoapp/api.py",
+            "src/demoapp/service.py",
+            "src/demoapp/storage.py",
+        ],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
     atomic_write_text(workdir / "final_title.txt", "Durable session refresh contract\n")
     description = (
@@ -1513,9 +1737,13 @@ def run_container_authoring(
 ) -> ContainerAuthoringResult:
     contract = contract or load_workflow_contract()
     if min_test_patch_bytes is not None:
-        contract.payload.setdefault("size_gates", {})["test_patch_min_bytes"] = int(min_test_patch_bytes)
+        contract.payload.setdefault("size_gates", {})["test_patch_min_bytes"] = int(
+            min_test_patch_bytes
+        )
     if min_solution_patch_bytes is not None:
-        contract.payload.setdefault("size_gates", {})["solution_patch_min_bytes"] = int(min_solution_patch_bytes)
+        contract.payload.setdefault("size_gates", {})["solution_patch_min_bytes"] = int(
+            min_solution_patch_bytes
+        )
     workdir = Path(workdir).resolve()
     repo_root = Path(repo_root).resolve()
     bootstrap = bootstrap_workdir(workdir, topic=topic)
@@ -1532,7 +1760,9 @@ def run_container_authoring(
     _copy_docker_artifact(repo_root, workdir)
     attempts = _attempt_authoring(repo_root, workdir, topic=topic_slug)
     successful_attempt = next((attempt for attempt in attempts if attempt.ok), None)
-    verification = verify_artifacts(repo_root, workdir, contract=contract, verify_triad=bool(successful_attempt))
+    verification = verify_artifacts(
+        repo_root, workdir, contract=contract, verify_triad=bool(successful_attempt)
+    )
     summary = {
         "ok": bool(successful_attempt) and verification.get("ok", False),
         "repo_root": repo_root.as_posix(),
@@ -1548,9 +1778,15 @@ def run_container_authoring(
     }
     _write_json(workdir / "run_summary.json", summary)
     if not successful_attempt:
-        return ContainerAuthoringResult(False, summary, "no automated authoring strategy matched target repository after baseline and fit gating")
+        return ContainerAuthoringResult(
+            False,
+            summary,
+            "no automated authoring strategy matched target repository after baseline and fit gating",
+        )
     if not verification.get("ok"):
-        return ContainerAuthoringResult(False, summary, "generated artifacts did not pass verification")
+        return ContainerAuthoringResult(
+            False, summary, "generated artifacts did not pass verification"
+        )
     return ContainerAuthoringResult(True, summary, None)
 
 
@@ -1583,9 +1819,13 @@ def run_problem_workflow(
     runner = runner or DockerCommandRunner()
     contract = contract or load_workflow_contract()
     if min_test_patch_bytes is not None:
-        contract.payload.setdefault("size_gates", {})["test_patch_min_bytes"] = int(min_test_patch_bytes)
+        contract.payload.setdefault("size_gates", {})["test_patch_min_bytes"] = int(
+            min_test_patch_bytes
+        )
     if min_solution_patch_bytes is not None:
-        contract.payload.setdefault("size_gates", {})["solution_patch_min_bytes"] = int(min_solution_patch_bytes)
+        contract.payload.setdefault("size_gates", {})["solution_patch_min_bytes"] = int(
+            min_solution_patch_bytes
+        )
 
     bootstrap = bootstrap_workdir(workdir, topic=topic)
     workdir = Path(workdir).resolve()
@@ -1712,7 +1952,11 @@ def run_problem_workflow(
         "ok": bool(
             authoring_summary
             and verification.get("ok")
-            and (skip_docker or not docker_available or (docker_build and docker_build.get("returncode") == 0))
+            and (
+                skip_docker
+                or not docker_available
+                or (docker_build and docker_build.get("returncode") == 0)
+            )
         ),
         "repo_url": repo_url,
         "pinned_sha": sha,
@@ -1732,8 +1976,12 @@ def run_problem_workflow(
         "authoring": authoring_summary,
         "verification": verification,
         "patch_sizes": {
-            "test_patch_bytes": (workdir / "test.patch").stat().st_size if (workdir / "test.patch").exists() else 0,
-            "solution_patch_bytes": (workdir / "solution.patch").stat().st_size if (workdir / "solution.patch").exists() else 0,
+            "test_patch_bytes": (workdir / "test.patch").stat().st_size
+            if (workdir / "test.patch").exists()
+            else 0,
+            "solution_patch_bytes": (workdir / "solution.patch").stat().st_size
+            if (workdir / "solution.patch").exists()
+            else 0,
         },
     }
     summary["export"] = _export_final_artifacts(
@@ -1765,7 +2013,9 @@ def run_problem_workflow(
             "artifact_paths": bootstrap.artifact_paths,
             "patch_sizes": summary["patch_sizes"],
             "size_gate_status": verification.get("size_gates"),
-            "clean_tree_replay_status": (verification.get("triad") or {}).get("replay_commands") if verification.get("triad") else None,
+            "clean_tree_replay_status": (verification.get("triad") or {}).get("replay_commands")
+            if verification.get("triad")
+            else None,
             "base_new_triad_status": verification.get("triad"),
             "metadata_presence": verification.get("required_artifacts"),
         },
@@ -1799,27 +2049,40 @@ def _build_parser() -> argparse.ArgumentParser:
     problem = sub.add_parser("problem", help="Platform-style Python problem authoring lane")
     psub = problem.add_subparsers(dest="action", required=True)
 
-    initp = psub.add_parser("init", help="Bootstrap /work ledger state before exporting final artifacts into artifacts/platform_problem/latest")
+    initp = psub.add_parser(
+        "init",
+        help="Bootstrap /work ledger state before exporting final artifacts into artifacts/platform_problem/latest",
+    )
     initp.add_argument("--workdir", default="/work")
     initp.add_argument("--topic", default="platform-problem")
     initp.add_argument("--format", choices=["text", "json"], default="text")
 
-    doctorp = psub.add_parser("doctor", help="Inspect host tools, /work, repo export targets, and target repo readiness")
+    doctorp = psub.add_parser(
+        "doctor", help="Inspect host tools, /work, repo export targets, and target repo readiness"
+    )
     doctorp.add_argument("--repo-root", default=".")
     doctorp.add_argument("--workdir", default="/work")
     doctorp.add_argument("--format", choices=["text", "json"], default="text")
 
-    renderp = psub.add_parser("render-dockerfile", help="Render Dockerfile.problem from repo metadata")
+    renderp = psub.add_parser(
+        "render-dockerfile", help="Render Dockerfile.problem from repo metadata"
+    )
     renderp.add_argument("--repo-root", default=".")
     renderp.add_argument("--output", default=None)
 
-    verifyp = psub.add_parser("verify", help="Verify /work artifacts before final export into artifacts/platform_problem/latest")
+    verifyp = psub.add_parser(
+        "verify",
+        help="Verify /work artifacts before final export into artifacts/platform_problem/latest",
+    )
     verifyp.add_argument("--repo-root", default=".")
     verifyp.add_argument("--workdir", default="/work")
     verifyp.add_argument("--skip-triad", action="store_true")
     verifyp.add_argument("--format", choices=["text", "json"], default="text")
 
-    runp = psub.add_parser("run", help="Clone, pin, bootstrap /work, verify artifacts, then export the final bundle into artifacts/platform_problem/latest")
+    runp = psub.add_parser(
+        "run",
+        help="Clone, pin, bootstrap /work, verify artifacts, then export the final bundle into artifacts/platform_problem/latest",
+    )
     runp.add_argument("--repo", required=True)
     runp.add_argument("--sha", required=True)
     runp.add_argument("--workdir", default="/work")
@@ -1873,33 +2136,37 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if ns.action == "verify":
-        payload = verify_artifacts(Path(ns.repo_root), Path(ns.workdir), verify_triad=not bool(ns.skip_triad))
+        payload = verify_artifacts(
+            Path(ns.repo_root), Path(ns.workdir), verify_triad=not bool(ns.skip_triad)
+        )
         if ns.format == "json":
             sys.stdout.write(canonical_json_dumps(payload))
         else:
             sys.stdout.write(f"verification: {'OK' if payload.get('ok') else 'FAIL'}\n")
             sys.stdout.write(f"test.patch: {payload['test_patch']['status']}\n")
             sys.stdout.write(f"solution.patch: {payload['solution_patch']['status']}\n")
-            sys.stdout.write(f"size gates: test={payload['size_gates']['test_patch_ok']} solution={payload['size_gates']['solution_patch_ok']}\n")
+            sys.stdout.write(
+                f"size gates: test={payload['size_gates']['test_patch_ok']} solution={payload['size_gates']['solution_patch_ok']}\n"
+            )
         return 0 if payload.get("ok") else 1
 
     if ns.action == "container-exec":
-        result = run_container_authoring(
+        container_result = run_container_authoring(
             Path(ns.repo_root),
             Path(ns.workdir),
             topic=ns.topic,
             min_test_patch_bytes=int(ns.min_test_patch_bytes),
             min_solution_patch_bytes=int(ns.min_solution_patch_bytes),
         )
-        payload = result.summary
+        payload = container_result.summary
         if ns.format == "json":
             sys.stdout.write(canonical_json_dumps(payload))
         else:
-            sys.stdout.write(f"container-authoring: {'OK' if result.ok else 'FAIL'}\n")
-        return 0 if result.ok else 1
+            sys.stdout.write(f"container-authoring: {'OK' if container_result.ok else 'FAIL'}\n")
+        return 0 if container_result.ok else 1
 
     if ns.action == "run":
-        result = run_problem_workflow(
+        workflow_result = run_problem_workflow(
             ns.repo,
             ns.sha,
             Path(ns.workdir),
@@ -1910,13 +2177,17 @@ def main(argv: list[str] | None = None) -> int:
             min_solution_patch_bytes=int(ns.min_solution_patch_bytes),
         )
         if ns.format == "json":
-            sys.stdout.write(canonical_json_dumps(result.summary))
+            sys.stdout.write(canonical_json_dumps(workflow_result.summary))
         else:
-            sys.stdout.write(f"run: {'OK' if result.ok else 'FAIL'}\nworkdir: {Path(ns.workdir).resolve().as_posix()}\n")
-            sys.stdout.write(f"app_dir: {result.summary.get('app_dir', '')}\n")
-            if result.failure:
-                sys.stdout.write(f"failure_reason: {result.failure.get('failure_reason', '')}\n")
-        return 0 if result.ok else 1
+            sys.stdout.write(
+                f"run: {'OK' if workflow_result.ok else 'FAIL'}\nworkdir: {Path(ns.workdir).resolve().as_posix()}\n"
+            )
+            sys.stdout.write(f"app_dir: {workflow_result.summary.get('app_dir', '')}\n")
+            if workflow_result.failure:
+                sys.stdout.write(
+                    f"failure_reason: {workflow_result.failure.get('failure_reason', '')}\n"
+                )
+        return 0 if workflow_result.ok else 1
 
     raise SystemExit(2)
 

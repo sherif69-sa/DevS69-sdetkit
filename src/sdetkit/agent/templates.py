@@ -13,9 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from sdetkit.kits import expand_payload, optimize_payload
 from sdetkit import repo
 from sdetkit.atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
+from sdetkit.kits import expand_payload, optimize_payload
 from sdetkit.report import build_dashboard
 
 
@@ -401,10 +401,16 @@ def run_template(
                 selected_kits=selected_kits,
                 limit=limit,
             )
+            feature_candidates = expand_result.get("feature_candidates")
+            recommended_workers = expand_result.get("recommended_workers")
             payload = {
                 "goal": goal,
-                "feature_candidates": len(expand_result.get("feature_candidates", [])),
-                "recommended_workers": len(expand_result.get("recommended_workers", [])),
+                "feature_candidates": (
+                    len(feature_candidates) if isinstance(feature_candidates, list) else 0
+                ),
+                "recommended_workers": (
+                    len(recommended_workers) if isinstance(recommended_workers, list) else 0
+                ),
             }
             if isinstance(params.get("output"), str):
                 target = Path(str(params["output"]))

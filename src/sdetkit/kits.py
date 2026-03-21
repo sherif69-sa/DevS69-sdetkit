@@ -2512,10 +2512,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if ns.action == "route-map":
-        query = str(ns.query or ns.target or "").strip() or None
+        route_query = str(ns.query or ns.target or "").strip() or None
         route_map_result = route_map_payload(
             root=Path(str(ns.repo_root)).resolve(),
-            query=query,
+            query=route_query,
             repo_usage_tier=ns.repo_usage_tier,
             impact_area=ns.impact_area,
             limit=ns.limit,
@@ -2524,8 +2524,8 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(canonical_json_dumps(route_map_result))
             return 0
         print("Validation route map")
-        if query:
-            print(f"query: {query}")
+        if route_query:
+            print(f"query: {route_query}")
         if ns.repo_usage_tier:
             print(f"repo usage tier: {ns.repo_usage_tier}")
         if ns.impact_area:
@@ -2549,10 +2549,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if ns.action == "radar":
-        query = str(ns.query or ns.target or "").strip() or None
+        radar_query = str(ns.query or ns.target or "").strip() or None
         radar_result = radar_payload(
             root=Path(str(ns.repo_root)).resolve(),
-            query=query,
+            query=radar_query,
             repo_usage_tier=ns.repo_usage_tier,
             impact_area=ns.impact_area,
             limit=ns.limit,
@@ -2561,8 +2561,8 @@ def main(argv: list[str] | None = None) -> int:
             sys.stdout.write(canonical_json_dumps(radar_result))
             return 0
         print("Dependency radar dashboard")
-        if query:
-            print(f"query: {query}")
+        if radar_query:
+            print(f"query: {radar_query}")
         if ns.repo_usage_tier:
             print(f"repo usage tier: {ns.repo_usage_tier}")
         if ns.impact_area:
