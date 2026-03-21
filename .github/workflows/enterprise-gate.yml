@@ -38,9 +38,28 @@ jobs:
 
       - name: Repo check (enterprise)
         run: |
-          rm -rf .sdetkit/cache .sdetkit/ops-artifacts sdet_check.json
-          sdetkit repo check . --profile enterprise --format json > sdet_check.json
-          python -c "import json; d=json.load(open('sdet_check.json','r',encoding='utf-8')); f=d.get('findings', []); (_ for _ in ()).throw(SystemExit(f'enterprise gate failed: findings={len(f)}')) if f else print('enterprise gate ok: findings=0')"
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+
+          for path in (Path(".sdetkit/cache"), Path(".sdetkit/ops-artifacts")):
+              shutil.rmtree(path, ignore_errors=True)
+          Path("sdet_check.json").unlink(missing_ok=True)
+          PY
+          rc=0
+          sdetkit repo check . --profile enterprise --format json --out sdet_check.json --force || rc=$?
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("sdet_check.json", "r", encoding="utf-8") as fh:
+              payload = json.load(fh)
+          findings = payload.get("findings", [])
+          if findings:
+              raise SystemExit(f"enterprise gate failed: findings={len(findings)}")
+          print("enterprise gate ok: findings=0")
+          PY
+          test "$rc" -eq 0
 
       - name: Upload report
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f

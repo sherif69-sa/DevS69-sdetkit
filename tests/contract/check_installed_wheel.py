@@ -35,7 +35,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     ns = parser.parse_args(argv)
 
-    cli_python = Path(ns.python).resolve()
+    cli_python = Path(ns.python)
     repo_root = Path(ns.repo_root).resolve()
 
     failures: list[str] = []

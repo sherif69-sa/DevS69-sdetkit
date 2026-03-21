@@ -118,7 +118,7 @@ jobs:
             build/intelligence-flake.json
             build/integration-check.json
             build/forensics-compare.json
-          retention-names: 14
+          retention-days: 14
           if-no-files-found: warn
 
   ci-demo-60s:
