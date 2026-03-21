@@ -346,11 +346,12 @@ def _detect_project_identity(
 def _infer_project_kind(repo_root: Path, root_rel: str, config_rel: str | None) -> str | None:
     candidate_dir = repo_root / root_rel
     filenames: set[str] = set()
-    try:
-        if candidate_dir.is_dir():
+    if candidate_dir.is_dir():
+        try:
             filenames.update(path.name for path in candidate_dir.iterdir() if path.is_file())
-    except OSError:
-        pass
+        except OSError:
+            if candidate_dir.exists():
+                raise
     if config_rel:
         config_name = Path(config_rel).name
         filenames.add(config_name)

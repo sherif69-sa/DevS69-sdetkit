@@ -1253,7 +1253,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if subcmd == "gate":
             return gate_cmd.main(rest)
         if subcmd == "doctor":
-            return doctor.main(rest)
+            from . import doctor as doctor_cmd
+
+            return doctor_cmd.main(rest)
         if subcmd == "security":
             return security_main(rest)
         if subcmd == "evidence":

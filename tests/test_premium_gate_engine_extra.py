@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from sdetkit import premium_gate_engine as eng
 
 
@@ -26,3 +28,17 @@ def test_build_fix_plan_item_fields() -> None:
     )
     assert item.rule_id == "SEC_X"
     assert item.priority == "medium"
+
+
+def test_apply_autofix_for_finding_reports_manual_for_unknown_rules(tmp_path: Path) -> None:
+    target = tmp_path / "src" / "app.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("print('ok')\n", encoding="utf-8")
+
+    result = eng._apply_autofix_for_finding(
+        tmp_path,
+        {"rule_id": "SEC_UNKNOWN", "path": "src/app.py"},
+    )
+
+    assert result.status == "manual"
+    assert result.path == "src/app.py"

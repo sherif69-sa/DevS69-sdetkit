@@ -314,7 +314,6 @@ def _latest_pypi_metadata(
     version = str(info.get("version") or "unknown")
     release_date: str | None = None
     releases = payload.get("releases", {})
-    info = payload.get("info", {})
     if isinstance(releases, dict):
         release_files = releases.get(version) or []
         if isinstance(release_files, list):

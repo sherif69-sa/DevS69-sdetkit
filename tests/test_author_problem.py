@@ -680,6 +680,31 @@ def test_reset_checkout_dir_quarantines_stale_tree_when_rmtree_hits_permission_e
     assert not any(tmp_path.glob("app.stale.*"))
 
 
+def test_reset_checkout_dir_ignores_missing_quarantined_symlink(
+    tmp_path: Path, monkeypatch
+) -> None:
+    app_dir = tmp_path / "app"
+    app_dir.write_text("sentinel", encoding="utf-8")
+    original_unlink = Path.unlink
+    unlinked: list[str] = []
+
+    def fake_unlink(self: Path, *args, **kwargs) -> None:
+        unlinked.append(self.name)
+        if self == app_dir:
+            raise PermissionError("busy")
+        if self.name.startswith("app.stale."):
+            original_unlink(self, *args, **kwargs)
+            raise FileNotFoundError("already cleaned up")
+        original_unlink(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "unlink", fake_unlink)
+
+    _reset_checkout_dir(app_dir)
+
+    assert not app_dir.exists()
+    assert any(name.startswith("app.stale.") for name in unlinked)
+
+
 def test_main_cli_dispatches_author_problem_init_and_help_lists_author(capsys) -> None:
     rc = cli.main(["author", "problem", "init", "--workdir", "build/work", "--format", "json"])
     assert rc == 0

@@ -82,14 +82,6 @@ _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
 }
 
 
-_DISABLED_SERIES_CLOSEOUT_ALIAS_MODULES: set[str] = {
-    "day42_optimization_closeout",
-}
-_DISABLED_SERIES_GENERIC_ALIAS_MODULES: set[str] = {
-    "day42_optimization_closeout",
-}
-
-
 def _contains_day_token(name: str) -> bool:
     return "day" in re.split(r"[^a-z0-9]+", name.lower())
 

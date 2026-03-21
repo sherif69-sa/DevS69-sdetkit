@@ -222,3 +222,32 @@ def test_autodiscover_xml_parsers_execute_when_safe_et_present(
         ("Acme.Payments", "libs/payments"),
         ("billing-svc", "services/billing"),
     ]
+
+
+def test_infer_project_kind_ignores_disappearing_directory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    project_dir = repo / "services" / "api"
+    project_dir.mkdir(parents=True)
+
+    original_exists = Path.exists
+    original_iterdir = Path.iterdir
+    seen_iterdir = False
+
+    def fake_iterdir(self: Path):
+        nonlocal seen_iterdir
+        if self == project_dir and not seen_iterdir:
+            seen_iterdir = True
+            raise FileNotFoundError("directory disappeared during scan")
+        return original_iterdir(self)
+
+    def fake_exists(self: Path) -> bool:
+        if self == project_dir and seen_iterdir:
+            return False
+        return original_exists(self)
+
+    monkeypatch.setattr(Path, "iterdir", fake_iterdir)
+    monkeypatch.setattr(Path, "exists", fake_exists)
+
+    assert projects._infer_project_kind(repo, "services/api", None) is None
