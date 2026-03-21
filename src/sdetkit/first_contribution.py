@@ -325,7 +325,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(["## Contributor trust assets", ""])
     for asset in payload["trust_assets"].values():
         lines.append(
-            f"- [{'x' if asset['exists'] else ' '}] `{asset['path']}` — {asset['label']}: {asset['why']}"
+            f"- [{'x' if asset['exists'] else ' '}] `{asset['path']}` - {asset['label']}: {asset['why']}"
         )
     lines.extend(["", "## Guide coverage gaps", ""])
     if payload["missing"]:

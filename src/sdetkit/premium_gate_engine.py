@@ -1708,7 +1708,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
                 lines.append("### deferred scripts")
                 for item in plan["deferred"][:10]:
                     lines.append(
-                        f"- \u23ed️ `{item['script_id']}` ({item['priority']}, score={item['score']}): {item['reason']}"
+                        f"- NEXT `{item['script_id']}` ({item['priority']}, score={item['score']}): {item['reason']}"
                     )
     return "\n".join(lines)
 
