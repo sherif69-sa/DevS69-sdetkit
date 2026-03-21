@@ -1,0 +1,26 @@
+metadata:
+  id: runtime-watchlist-worker
+  title: Runtime Watchlist Worker
+  version: 1.0.0
+  description: Track runtime-core fast-follow upgrades and route them to the smallest safe validation loop.
+workflow:
+  - id: runtime-watchlist
+    action: shell.run
+    with:
+      cmd: python -m sdetkit intelligence upgrade-audit --impact-area runtime-core --format md --offline
+      save_stdout: ${{run.output_dir}}/runtime-watchlist.md
+  - id: runtime-route-map
+    action: shell.run
+    with:
+      cmd: python -m sdetkit kits route-map --impact-area runtime-core --limit 5 --format json
+      save_stdout: ${{run.output_dir}}/route-map.json
+  - id: summary
+    action: fs.write
+    with:
+      path: ${{run.output_dir}}/summary.md
+      content: "Runtime watchlist worker summary: captured runtime-watchlist.md, route-map.json, and bundle.tar."
+  - id: bundle
+    action: artifacts.bundle
+    with:
+      source_dir: ${{run.output_dir}}
+      output: ${{run.output_dir}}/bundle.tar

@@ -37,8 +37,10 @@ _WORKFLOW_GROUPS: dict[str, dict[str, tuple[str, bool]]] = {
         "pre-commit-autoupdate.yml": ("Pre-commit auto-update bot", False),
     },
     "expansion_bots": {
+        "adapter-smoke-bot.yml": ("Adapter smoke bot", True),
         "docs-experience-bot.yml": ("Docs experience radar bot", True),
         "release-readiness-radar-bot.yml": ("Release readiness radar bot", True),
+        "runtime-watchlist-bot.yml": ("Runtime watchlist bot", True),
         "worker-alignment-bot.yml": ("Worker alignment bot", True),
     },
     "collaboration_bots": {
@@ -149,6 +151,15 @@ _GHAS_UPDATE_TRACKS: list[dict[str, str]] = [
 
 _EXPANSION_UPDATE_TRACKS: list[dict[str, str]] = [
     {
+        "id": "adapter_smoke",
+        "title": "Adapter smoke pack",
+        "description": (
+            "Run the adapter worker lane so optional notification channels stay smoke-tested, "
+            "documented, and ready for contributor-friendly expansion."
+        ),
+        "workflow": "adapter-smoke-bot.yml",
+    },
+    {
         "id": "docs_experience_radar",
         "title": "Docs experience radar",
         "description": (
@@ -165,6 +176,15 @@ _EXPANSION_UPDATE_TRACKS: list[dict[str, str]] = [
             "freshness checks for roadmap, changelog, and release playbook assets."
         ),
         "workflow": "release-readiness-radar-bot.yml",
+    },
+    {
+        "id": "runtime_watchlist",
+        "title": "Runtime fast-follow watchlist",
+        "description": (
+            "Keep runtime-core dependencies on a recurring fast-follow lane so transport, API, "
+            "and security-critical upgrades do not age silently."
+        ),
+        "workflow": "runtime-watchlist-bot.yml",
     },
     {
         "id": "worker_alignment",

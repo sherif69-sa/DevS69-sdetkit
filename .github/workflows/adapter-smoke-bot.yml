@@ -1,0 +1,124 @@
+name: Adapter Smoke Bot
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "35 6 * * 4"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  adapter-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+            requirements-test.txt
+            constraints-ci.txt
+
+      - name: Install repo
+        run: python -m pip install -c constraints-ci.txt -e .[test]
+
+      - name: Run adapter smoke worker
+        run: |
+          set -euo pipefail
+          mkdir -p build .sdetkit/agent/template-runs
+          python -m sdetkit agent templates run adapter-smoke-worker --output-dir .sdetkit/agent/template-runs/adapter-smoke-worker > build/adapter-smoke-worker-run.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("build/adapter-smoke-worker-run.json").read_text(encoding="utf-8"))
+          artifacts = payload.get("artifacts", [])
+
+          lines = [
+              "# Adapter smoke pack",
+              "",
+              "This issue is auto-generated to keep optional notification adapters productized, smoke-tested, and easy to expand.",
+              "",
+              "## Worker status",
+              f"- Status: **{payload.get('status', 'unknown')}**",
+              f"- Artifacts captured: **{len(artifacts)}**",
+              "",
+              "## Suggested follow-up",
+              "- [ ] Review adapter route-map output before changing optional integration dependencies.",
+              "- [ ] Keep adapter quickstarts aligned with environment variables and offline defaults.",
+              "- [ ] Use the worker bundle as the baseline before expanding notify channels or plugins.",
+              "",
+              "## Artifacts",
+              "- `build/adapter-smoke-worker-run.json`",
+              "- `.sdetkit/agent/template-runs/adapter-smoke-worker`",
+          ]
+
+          Path("build/adapter-smoke.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Upload adapter smoke artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: adapter-smoke-pack
+          path: |
+            build/adapter-smoke-worker-run.json
+            build/adapter-smoke.md
+            .sdetkit/agent/template-runs/adapter-smoke-worker
+
+      - name: Create or update adapter smoke issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const weekOf = new Date().toISOString().slice(0, 10);
+            const title = `📣 Adapter smoke pack (${weekOf})`;
+            const body = fs.readFileSync('build/adapter-smoke.md', 'utf8');
+            const labels = [
+              { name: 'maintenance', color: '0E8A16', description: 'Automated maintenance tracking' },
+              { name: 'automation', color: '5319e7', description: 'Automation and worker alignment' },
+              { name: 'priority:medium', color: 'fbca04', description: 'Medium-priority work item' },
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+              }
+            }
+
+            const openIssues = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open',
+              labels: 'automation',
+              per_page: 100,
+            });
+            const priorIssues = openIssues.data.filter((issue) => issue.title.startsWith('📣 Adapter smoke pack'));
+
+            for (const oldIssue of priorIssues) {
+              if (oldIssue.title !== title) {
+                await github.rest.issues.update({ owner, repo, issue_number: oldIssue.number, state: 'closed' });
+              }
+            }
+
+            const existing = priorIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, body });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['maintenance', 'automation', 'priority:medium'],
+              });
+            }

@@ -24,8 +24,10 @@ The bots turn those same maintenance signals into a recurring GitHub-native oper
 In addition to scheduled GitHub bots, the repo now ships **AgentOS worker templates** that let maintainers run the same expansion/review loops on demand and keep the outputs deterministic:
 
 - **`repo-expansion-control`** — runs `kits optimize` + `kits expand`, writes JSON artifacts, and bundles them for roadmap / dashboard follow-up.
+- **`adapter-smoke-worker`** — validates optional notification adapters, captures integration-adapter route maps, and packages a quickstart-ready bundle.
 - **`dependency-radar-worker`** — captures an offline-safe upgrade inventory, radar snapshot, and validation route map for refactor / dependency review.
 - **`validation-route-worker`** — turns a package or domain query into a route map plus doctor-linked upgrade guidance.
+- **`runtime-watchlist-worker`** — emits a runtime-core fast-follow watchlist plus a route map for the hottest runtime validation lanes.
 - **`docs-search-radar`** — runs a strict MkDocs build, captures the build log, and bundles docs-search evidence for later review.
 - **`release-readiness-worker`** — snapshots `doctor` plus `github_automation_check` so release-readiness follow-up can happen outside of a publish crunch.
 - **`worker-alignment-radar`** — keeps expansion recommendations, automation coverage, and template inventory aligned with the repo's active worker surface.
@@ -34,8 +36,10 @@ Recommended local launches:
 
 ```bash
 python -m sdetkit agent templates run repo-expansion-control
+python -m sdetkit agent templates run adapter-smoke-worker
 python -m sdetkit agent templates run dependency-radar-worker
 python -m sdetkit agent templates run validation-route-worker --set query=httpx
+python -m sdetkit agent templates run runtime-watchlist-worker
 python -m sdetkit agent templates run docs-search-radar
 python -m sdetkit agent templates run release-readiness-worker
 python -m sdetkit agent templates run worker-alignment-radar
@@ -63,10 +67,12 @@ python -m sdetkit kits expand --goal "add more bots workers search and repo expa
 - **`dependency-auto-merge.yml`** — auto-merges safe Dependabot updates after checks pass.
 - **`pre-commit-autoupdate.yml`** — refreshes pre-commit hook pins.
 - **`dependency-radar-bot.yml`** — publishes a recurring dependency radar issue plus a runtime fast-follow watchlist.
+- **`adapter-smoke-bot.yml`** — publishes a weekly adapter smoke issue and artifact bundle for notification adapter quality and expansion readiness.
 - **`repo-optimization-bot.yml`** — publishes a weekly repo-optimization control loop issue from `kits optimize`, `kits expand`, and the GitHub automation maintenance check.
 - **`workflow-governance-bot.yml`** — publishes a monthly workflow-governance audit for permissions, SHA pinning, and manual recovery posture.
 - **`docs-experience-bot.yml`** — publishes a weekly docs-experience radar issue plus JSON artifact covering navigation coverage, search posture, and flagship-doc visibility.
 - **`release-readiness-radar-bot.yml`** — publishes a weekly release-readiness radar issue with doctor output, release asset freshness, and release-workflow coverage.
+- **`runtime-watchlist-bot.yml`** — publishes a weekly runtime fast-follow issue and worker artifacts so hot-path runtime upgrades stay reviewable.
 - **`worker-alignment-bot.yml`** — runs the aligned worker templates together and publishes a weekly worker/radar issue with deterministic artifact links.
 - **`contributor-onboarding-bot.yml`** — keeps contributor guidance discoverable.
 - **`pr-helper-bot.yml` / `pr-quality-comment.yml`** — keep pull requests reviewable and actionable.

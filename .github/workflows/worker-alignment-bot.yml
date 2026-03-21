@@ -33,9 +33,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build .sdetkit/agent/template-runs
+          python -m sdetkit agent templates run adapter-smoke-worker --output-dir .sdetkit/agent/template-runs/adapter-smoke-worker > build/adapter-smoke-worker-run.json
           python -m sdetkit agent templates run dependency-radar-worker --output-dir .sdetkit/agent/template-runs/dependency-radar-worker > build/dependency-radar-worker-run.json
           python -m sdetkit agent templates run docs-search-radar --output-dir .sdetkit/agent/template-runs/docs-search-radar > build/docs-search-radar-run.json
           python -m sdetkit agent templates run release-readiness-worker --output-dir .sdetkit/agent/template-runs/release-readiness-worker > build/release-readiness-worker-run.json
+          python -m sdetkit agent templates run runtime-watchlist-worker --output-dir .sdetkit/agent/template-runs/runtime-watchlist-worker > build/runtime-watchlist-worker-run.json
           python -m sdetkit agent templates run worker-alignment-radar --output-dir .sdetkit/agent/template-runs/worker-alignment-radar > build/worker-alignment-radar-run.json
           python - <<'PY'
           import json
@@ -43,16 +45,18 @@ jobs:
 
           build = Path("build")
           runs = {
+              "adapter-smoke-worker": json.loads((build / "adapter-smoke-worker-run.json").read_text(encoding="utf-8")),
               "dependency-radar-worker": json.loads((build / "dependency-radar-worker-run.json").read_text(encoding="utf-8")),
               "docs-search-radar": json.loads((build / "docs-search-radar-run.json").read_text(encoding="utf-8")),
               "release-readiness-worker": json.loads((build / "release-readiness-worker-run.json").read_text(encoding="utf-8")),
+              "runtime-watchlist-worker": json.loads((build / "runtime-watchlist-worker-run.json").read_text(encoding="utf-8")),
               "worker-alignment-radar": json.loads((build / "worker-alignment-radar-run.json").read_text(encoding="utf-8")),
           }
 
           lines = [
               "# Worker alignment radar",
               "",
-              "This issue is auto-generated from the repo's aligned worker templates so dependency, docs, release, and expansion lanes stay in sync.",
+              "This issue is auto-generated from the repo's aligned worker templates so adapter, dependency, docs, release, runtime, and expansion lanes stay in sync.",
               "",
               "## Worker run status",
           ]
@@ -69,14 +73,18 @@ jobs:
               [
                   "",
                   "## Follow-up prompts",
+                  "- [ ] Review adapter-smoke-worker outputs before expanding notification adapters or integration plugins.",
                   "- [ ] Review dependency-radar-worker outputs before large upgrade or refactor batches.",
                   "- [ ] Use docs-search-radar and release-readiness-worker outputs before docs or release pushes.",
+                  "- [ ] Use runtime-watchlist-worker outputs to keep runtime-core upgrades on a fast-follow loop.",
                   "- [ ] Use worker-alignment-radar outputs to keep recommended workers matched to the repo's active automation surface.",
                   "",
                   "## Artifacts",
+                  "- `build/adapter-smoke-worker-run.json`",
                   "- `build/dependency-radar-worker-run.json`",
                   "- `build/docs-search-radar-run.json`",
                   "- `build/release-readiness-worker-run.json`",
+                  "- `build/runtime-watchlist-worker-run.json`",
                   "- `build/worker-alignment-radar-run.json`",
               ]
           )
@@ -89,14 +97,18 @@ jobs:
         with:
           name: worker-alignment-radar
           path: |
+            build/adapter-smoke-worker-run.json
             build/dependency-radar-worker-run.json
             build/docs-search-radar-run.json
             build/release-readiness-worker-run.json
+            build/runtime-watchlist-worker-run.json
             build/worker-alignment-radar-run.json
             build/worker-alignment-radar.md
+            .sdetkit/agent/template-runs/adapter-smoke-worker
             .sdetkit/agent/template-runs/dependency-radar-worker
             .sdetkit/agent/template-runs/docs-search-radar
             .sdetkit/agent/template-runs/release-readiness-worker
+            .sdetkit/agent/template-runs/runtime-watchlist-worker
             .sdetkit/agent/template-runs/worker-alignment-radar
 
       - name: Create or update worker alignment issue
