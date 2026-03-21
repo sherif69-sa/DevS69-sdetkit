@@ -141,8 +141,8 @@ def test_auto_fix_applies_supported_security_rules(tmp_path: Path) -> None:
     target.write_text(
         "import requests\nimport subprocess\nimport yaml\n"
         "requests.get('https://example.com')\n"
-        "subprocess.run('echo hi', shell=False)\n"
-        "yaml.safe_load(data)\n",
+        "subprocess.run('echo hi', shell=True)\n"
+        "yaml.load(data)\n",
         encoding="utf-8",
     )
 
@@ -284,7 +284,7 @@ def test_guideline_store_is_editable(tmp_path: Path) -> None:
         db_path,
         gid,
         "secure-subprocess-v2",
-        "replace shell=False with args list",
+        "replace shell=True with args list",
         ["security", "critical"],
     )
     assert updated is True

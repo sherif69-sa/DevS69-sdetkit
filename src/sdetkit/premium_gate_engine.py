@@ -77,7 +77,7 @@ RECOMMENDATION_CATALOG: dict[str, tuple[str, str]] = {
     ),
     "security:SEC_SUBPROCESS_SHELL_TRUE": (
         "Subprocess shell invocation risk detected.",
-        "Replace shell=False with shell=False or structured argument invocation.",
+        "Replace shell=True with shell=False or structured argument invocation.",
     ),
     "security:SEC_REQUESTS_NO_TIMEOUT": (
         "Network calls without timeout threaten reliability.",
@@ -511,12 +511,12 @@ def _autofix_timeout(text: str) -> tuple[str, bool]:
 
 
 def _autofix_shell_true(text: str) -> tuple[str, bool]:
-    new = text.replace("shell=False", "shell=False")
+    new = text.replace("shell=True", "shell=False")
     return new, new != text
 
 
 def _autofix_yaml_load(text: str) -> tuple[str, bool]:
-    new = text.replace("yaml.safe_load(", "yaml.safe_load(")
+    new = text.replace("yaml.load(", "yaml.safe_load(")
     return new, new != text
 
 

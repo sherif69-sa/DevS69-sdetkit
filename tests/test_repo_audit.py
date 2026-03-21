@@ -188,9 +188,9 @@ eval('1')
 exec('2')
 import pickle, yaml, subprocess
 pickle.loads(data)
-yaml.safe_load(doc)
-subprocess.run('echo x', shell=False)
-subprocess.Popen('echo y', shell=False)
+yaml.load(doc)
+subprocess.run('echo x', shell=True)
+subprocess.Popen('echo y', shell=True)
 """.strip()
     py_findings = repo_mod._scan_python_ast("src/a.py", py_text)
     codes = {f.code for f in py_findings}

@@ -100,8 +100,8 @@ RULES: dict[str, RuleMeta] = {
     "SEC_SUBPROCESS_SHELL_TRUE": RuleMeta(
         "SEC_SUBPROCESS_SHELL_TRUE",
         "error",
-        "subprocess shell=False",
-        "Avoid shell=False in subprocess calls.",
+        "subprocess shell=True",
+        "Avoid shell=True in subprocess calls.",
     ),
     "SEC_OS_SYSTEM": RuleMeta(
         "SEC_OS_SYSTEM",
@@ -256,7 +256,7 @@ class _RuleVisitor(ast.NodeVisitor):
             self._add(
                 "SEC_SUBPROCESS_SHELL_TRUE",
                 node,
-                "subprocess call uses shell=False.",
+                "subprocess call uses shell=True.",
                 suggestion="Set shell=False and pass command as a list.",
             )
         if name in {"pickle.load", "pickle.loads"} or name.startswith("dill"):
@@ -1116,7 +1116,7 @@ def _fix_yaml_safe_load(path: Path) -> bool:
 
 def _fix_subprocess_shell_false(path: Path) -> bool:
     text = path.read_text(encoding="utf-8")
-    out = text.replace("shell=False", "shell=False")
+    out = text.replace("shell=True", "shell=False")
     if out != text:
         path.write_text(out, encoding="utf-8")
         return True
@@ -1322,7 +1322,7 @@ def main(argv: list[str] | None = None) -> int:
                 ) or did_change
                 if not should_apply:
                     candidate = re.sub(r"\byaml\.load\s*\(", "yaml.safe_load(", before)
-                    candidate = candidate.replace("shell=False", "shell=False")
+                    candidate = candidate.replace("shell=True", "shell=False")
                     candidate = _inject_requests_timeout(candidate, ns.timeout)
                     if candidate != before:
                         rel = py_file.relative_to(root).as_posix()
