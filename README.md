@@ -9,6 +9,42 @@ DevS69 SDETKit is a unified SDET platform for:
 
 It turns CI and test signals into deterministic contracts, machine-readable artifacts, and clear go/no-go guidance.
 
+## Repo at a glance
+
+If the repository feels busy at first, use this map:
+
+| Area | What belongs here | Start with |
+| --- | --- | --- |
+| `src/` | Python package code and CLI implementation | `src/sdetkit/cli.py` |
+| `tests/` | automated tests and behavioral coverage | `tests/` matching the changed feature |
+| `docs/` | user, operator, and maintainer documentation | `docs/index.md` |
+| `scripts/` | repo helper scripts and local workflows | `scripts/check.sh`, `scripts/bootstrap.sh` |
+| `templates/` | reusable templates and scaffolding assets | `templates/` |
+| `examples/` | runnable examples and sample input/output payloads | `examples/kits/` |
+| `.sdetkit/` | generated outputs and repo-local automation assets | `.sdetkit/out/` |
+| `.github/` | CI, issue templates, and GitHub automation | `.github/workflows/` |
+| `artifacts/` | generated problem/automation artifacts | `artifacts/platform_problem/latest/` |
+| Root files | project-wide policy, packaging, and entry docs | `pyproject.toml`, `mkdocs.yml`, `README.md` |
+
+For a fuller directory walkthrough, see [`docs/project-structure.md`](docs/project-structure.md).
+
+## Root file guide
+
+Keep the repository root focused on project-wide entrypoints only:
+
+- **Project entry docs**: `README.md`, `CONTRIBUTING.md`, `RELEASE.md`, `ROADMAP.md`, `CHANGELOG.md`
+- **Policy/trust docs**: `SECURITY.md`, `SUPPORT.md`, `CODE_OF_CONDUCT.md`, `LICENSE`
+- **Build/config files**: `pyproject.toml`, `poetry.lock`, `mkdocs.yml`, `noxfile.py`, `Makefile`
+- **Top-level runners**: `quality.sh`, `ci.sh`, `premium-gate.sh`, `security.sh`
+
+Prefer these placement rules when adding new files:
+
+1. Put **implementation** in `src/`, not in ad hoc root scripts.
+2. Put **deep documentation** in `docs/`, and link to it from the root instead of growing root markdown files indefinitely.
+3. Put **examples and fixtures** in `examples/` or `tests/fixtures/`, not beside product docs.
+4. Put **generated outputs** in `.sdetkit/out/` or `artifacts/`, not mixed with hand-written source.
+5. Add a **new top-level file only** when it affects the entire project.
+
 ## Umbrella kits (primary surface)
 
 - **Release Confidence Kit** — `sdetkit release ...`
