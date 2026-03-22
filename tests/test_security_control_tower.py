@@ -109,7 +109,11 @@ def test_security_fix_dry_run_previews_and_applies_shell_false(tmp_path: Path, c
 
 def test_premium_gate_script_smoke_contains_commands() -> None:
     text = Path("premium-gate.sh").read_text(encoding="utf-8")
+    assert "bash quality.sh verify" in text
     assert "bash quality.sh ci" in text
+    assert "Quality (full verification)" in text
+    assert "Quality (fast/smoke)" in text
+    assert "fast=smoke confidence, full=pre-merge verification" in text
     assert "bash ci.sh" in text
     assert "python3 -m sdetkit doctor --ascii" in text
     assert "python3 -m sdetkit doctor --json --out" in text

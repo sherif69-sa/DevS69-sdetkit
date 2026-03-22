@@ -71,7 +71,7 @@ The script emits:
 
 Useful flags:
 
-- `--mode full|fast|engine-only`
+- `--mode full|fast|engine-only` (`fast` = smoke confidence only, `full` = pre-merge verification)
 - `--continue-on-error` (collect all failures in one run)
 - `--engine-min-score <int>`
 - `--out-dir <path>`
@@ -83,6 +83,8 @@ Useful flags:
 Examples:
 
 ```bash
+bash quality.sh ci       # fast/smoke confidence while iterating
+bash quality.sh verify   # full verification before merge
 bash premium-gate.sh --mode full
 bash premium-gate.sh --mode full --continue-on-error
 bash premium-gate.sh --mode fast --engine-min-score 75

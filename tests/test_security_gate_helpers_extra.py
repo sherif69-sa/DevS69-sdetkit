@@ -172,3 +172,25 @@ def test_security_gate_fix_and_dep_helpers(tmp_path: Path, monkeypatch: pytest.M
     ok, msg = sg._run_ruff_fix(tmp_path)
     assert ok is False
     assert "not available" in msg
+
+
+def test_security_gate_iter_files_skips_generated_dirs(tmp_path: Path) -> None:
+    (tmp_path / ".nox" / "session").mkdir(parents=True)
+    (tmp_path / ".nox" / "session" / "bad.py").write_text(
+        "import os\nos.system('x')\n", encoding="utf-8"
+    )
+    (tmp_path / ".venv" / "bin").mkdir(parents=True)
+    (tmp_path / ".venv" / "bin" / "activate.py").write_text(
+        "import os\nos.system('x')\n", encoding="utf-8"
+    )
+    (tmp_path / "site").mkdir()
+    (tmp_path / "site" / "generated.py").write_text("import os\nos.system('x')\n", encoding="utf-8")
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "good.py").write_text("print('ok')\n", encoding="utf-8")
+
+    files = [p.relative_to(tmp_path).as_posix() for p in sg._iter_files(tmp_path)]
+
+    assert "src/good.py" in files
+    assert all(not item.startswith(".nox/") for item in files)
+    assert all(not item.startswith(".venv/") for item in files)
+    assert all(not item.startswith("site/") for item in files)

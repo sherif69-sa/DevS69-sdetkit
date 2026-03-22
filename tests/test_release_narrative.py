@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from sdetkit import cli
@@ -134,3 +136,27 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     assert "Day 20 release narrative" in capsys.readouterr().out
+
+
+def test_execute_commands_run_inside_requested_root(monkeypatch, tmp_path: Path) -> None:
+    calls: list[dict[str, object]] = []
+
+    def _fake_run(argv, **kwargs):
+        calls.append({"argv": argv, **kwargs})
+        return subprocess.CompletedProcess(argv, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(rn.subprocess, "run", _fake_run)
+
+    rows = rn._execute_commands(
+        tmp_path,
+        [
+            "python -m sdetkit release-narrative --format json --strict",
+            "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
+        ],
+        5,
+    )
+
+    assert len(rows) == 2
+    assert all(call["cwd"] == str(tmp_path) for call in calls)
+    assert calls[0]["argv"][0] == sys.executable
+    assert calls[1]["argv"][1].endswith("scripts/check_day20_release_narrative_contract.py")

@@ -19,6 +19,9 @@ ensure_venv
 python3 scripts/check_repo_layout.py
 
 mode=${1:-all}
+if [[ "$mode" == "-h" || "$mode" == "--help" || "$mode" == "help" ]]; then
+  mode=help
+fi
 # Keep the default gate realistic for full-repo runs, while still allowing
 # stricter enforcement in CI/release jobs via COV_FAIL_UNDER=95.
 cov_fail_under=${COV_FAIL_UNDER:-80}
@@ -30,7 +33,28 @@ need_cmd() {
   exit 127
 }
 
-valid_modes=(all ci fmt lint type doctor test full-test cov mut muthtml boost)
+valid_modes=(all ci verify fmt lint type doctor test full-test cov mut muthtml boost help)
+
+usage() {
+  cat <<'USAGE' >&2
+Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost}
+
+Modes:
+  ci         Fast/smoke lane for local confidence; not merge truth.
+  verify     Full verification lane before merge (format, lint, typing, full tests).
+  all        Auto-format plus lint, typing, pytest, and coverage.
+  fmt        Apply Ruff formatting.
+  lint       Run Ruff lint checks.
+  type       Run mypy typing checks.
+  doctor     Run the repo doctor report.
+  test       Run the fast smoke gate.
+  full-test  Run the full pytest -q suite.
+  cov        Run the coverage lane.
+  mut        Run mutation testing.
+  muthtml    Build mutation HTML output.
+  boost      Chain doctor, fast gate, premium fast gate, and optimization summary.
+USAGE
+}
 
 mode_suggestion() {
   python3 - "$1" "${valid_modes[@]}" <<'PY'
@@ -134,10 +158,18 @@ case "$mode" in
   muthtml) run_muthtml ;;
   boost) run_boost ;;
   ci)
+    echo "[quality] Fast/smoke lane for local confidence (not full merge verification)."
     run_fmt_check
     run_lint
     run_type
     run_gate_fast
+    ;;
+  verify)
+    echo "[quality] Full verification lane before merge (format, lint, typing, full tests)."
+    run_fmt_check
+    run_lint
+    run_type
+    run_full_test
     ;;
   all)
     run_fmt
@@ -146,8 +178,11 @@ case "$mode" in
     run_test
     run_cov
     ;;
+  help)
+    usage
+    ;;
   *)
-    echo "Usage: bash quality.sh {all|ci|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost}" >&2
+    usage
     suggestion="$(mode_suggestion "$mode" || true)"
     if [[ -n "$suggestion" ]]; then
       echo "Did you mean: bash quality.sh $suggestion" >&2
