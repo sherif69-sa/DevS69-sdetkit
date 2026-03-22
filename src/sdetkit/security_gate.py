@@ -33,7 +33,9 @@ INLINE_ALLOW_PREFIX = "# sdetkit: allow-security"
 
 SKIP_DIRS = {
     ".git",
+    ".nox",
     ".venv",
+    "__pycache__",
     "node_modules",
     "dist",
     "build",

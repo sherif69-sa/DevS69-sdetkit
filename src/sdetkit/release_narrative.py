@@ -279,15 +279,19 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     ]
 
 
-def _execute_commands(commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
+def _execute_commands(root: Path, commands: list[str], timeout_sec: int) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
+    script_root = Path(__file__).resolve().parents[2]
     for idx, command in enumerate(commands, start=1):
         try:
             argv = shlex.split(command)
             if argv and argv[0] == "python":
                 argv[0] = sys.executable
+            if len(argv) >= 2 and argv[1] == "scripts/check_day20_release_narrative_contract.py":
+                argv[1] = str(script_root / "scripts" / "check_day20_release_narrative_contract.py")
             proc = subprocess.run(
                 argv,
+                cwd=str(root),
                 shell=False,
                 capture_output=True,
                 text=True,
@@ -437,7 +441,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["execution_artifacts"] = _write_execution_evidence(
             root,
             ns.evidence_dir,
-            _execute_commands(_EXECUTION_COMMANDS, ns.timeout_sec),
+            _execute_commands(root, _EXECUTION_COMMANDS, ns.timeout_sec),
         )
 
     strict_failed = (

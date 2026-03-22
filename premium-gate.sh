@@ -18,7 +18,7 @@ usage() {
 Usage: bash premium-gate.sh [options]
 
 Options:
-  --mode <full|fast|engine-only>   Run profile (default: full)
+  --mode <full|fast|engine-only>   Run profile: fast=smoke confidence, full=pre-merge verification (default: full)
   --out-dir <path>                 Artifact/log directory (default: .sdetkit/out)
   --engine-min-score <int>         Minimum premium engine score (default: 70)
   --ops-jobs <int>                 Parallel jobs for ops run (default: 2)
@@ -93,7 +93,8 @@ runtime_recommendation() {
   local title="$1"
   local elapsed="$2"
   case "$title" in
-    "Quality") info "Recommendation: keep changed modules above baseline coverage to preserve premium quality." ;;
+    "Quality (fast/smoke)") info "Recommendation: use this fast/smoke lane for local confidence only; run full verification before merge." ;;
+    "Quality (full verification)") info "Recommendation: treat this full verification lane as the pre-merge truth path and fix failures before merge." ;;
     "Ruff (format check)"|"Ruff (lint)") info "Recommendation: wire pre-commit hooks so lint and formatting warnings are caught before CI." ;;
     "CI") info "Recommendation: if CI is slow, shard tests by module while preserving deterministic ordering." ;;
     "Doctor JSON") info "Recommendation: review doctor output for high-severity checks first, then medium recommendations." ;;
@@ -217,7 +218,16 @@ run_plan() {
     return
   fi
 
-  run_step "quality" "Head-1 Foundation & Quality" "Quality" "bash quality.sh ci"
+  local quality_title quality_cmd
+  if [[ "$MODE" == "full" ]]; then
+    quality_title="Quality (full verification)"
+    quality_cmd="bash quality.sh verify"
+  else
+    quality_title="Quality (fast/smoke)"
+    quality_cmd="bash quality.sh ci"
+  fi
+
+  run_step "quality" "Head-1 Foundation & Quality" "$quality_title" "$quality_cmd"
 
   if [[ "$MODE" == "full" ]]; then
     run_step "ruff_format" "Head-2 Source Truth & Style" "Ruff (format check)" "python3 -m ruff format --check ."

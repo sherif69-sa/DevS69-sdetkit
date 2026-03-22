@@ -122,6 +122,8 @@ python -m sdetkit intelligence failure-fingerprint --failures examples/kits/inte
 python -m sdetkit integration check --profile examples/kits/integration/profile.json
 python -m sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json
 # validates service owners, dependency edges, mocked platform coverage, deployments, telemetry, and data resilience
+bash quality.sh ci        # fast/smoke confidence while iterating
+bash quality.sh verify    # full verification before merge
 bash premium-gate.sh --mode full
 # premium gate now emits .sdetkit/out/integration-topology.json as a first-class operational artifact
 # head-5 also auto-runs repo-safe remediation scripts unless you pass --no-auto-run-scripts
