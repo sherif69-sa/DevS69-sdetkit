@@ -96,10 +96,25 @@ class FinalVerdict:
         ]
         if self.profile_notes:
             lines.append(f"- profile notes: {self.profile_notes}")
+        execution = self.metadata.get("execution", {}) if isinstance(self.metadata, dict) else {}
+        if isinstance(execution, dict) and execution:
+            lines.append(
+                f"- execution: mode=`{execution.get('mode', 'sequential')}`, workers=`{execution.get('workers', 1)}`"
+            )
         lines.extend(["", "### Checks run"])
         for record in self.checks_run:
+            mode = (
+                record.metadata.get("target_mode", "full")
+                if isinstance(record.metadata, dict)
+                else "full"
+            )
+            cache = record.metadata.get("cache", {}) if isinstance(record.metadata, dict) else {}
+            cache_status = cache.get("status") if isinstance(cache, dict) else None
+            extra = [f"target={mode}"]
+            if cache_status:
+                extra.append(f"cache={cache_status}")
             lines.append(
-                f"- `{record.id}` - {record.title}: **{record.status.upper()}**"
+                f"- `{record.id}` - {record.title}: **{record.status.upper()}** [{' '.join(extra)}]"
                 + (f" (`{record.reason}`)" if record.reason else "")
             )
         lines.extend(["", "### Checks skipped"])
@@ -165,7 +180,7 @@ def build_final_verdict(
     )
     return FinalVerdict(
         profile=profile,
-        verdict_contract="sdetkit.final-verdict.v1",
+        verdict_contract="sdetkit.final-verdict.v2",
         checks_run=checks_run,
         checks_skipped=checks_skipped,
         blocking_failures=blocking_failures,

@@ -31,6 +31,7 @@ CheckCost = Literal["cheap", "moderate", "expensive"]
 CheckTruthLevel = Literal["smoke", "standard", "merge", "adaptive"]
 CheckProfileName = Literal["quick", "standard", "strict", "adaptive"]
 CheckStatus = Literal["passed", "failed", "skipped"]
+CheckTargetMode = Literal["full", "smoke", "targeted"]
 CheckRunner = Callable[["CheckContext"], "CheckRecord"]
 
 
@@ -40,12 +41,39 @@ class CheckContext:
     out_dir: Path
     env: Mapping[str, str] = field(default_factory=lambda: dict(os.environ))
     python_executable: str = sys.executable
+    profile: CheckProfileName = "standard"
+    changed_paths: tuple[str, ...] = ()
+    check_id: str = ""
+    target_mode: CheckTargetMode = "full"
+    target_reason: str = ""
+    selected_targets: tuple[str, ...] = ()
 
     def resolve(self, *parts: str) -> Path:
         return self.repo_root.joinpath(*parts)
 
     def artifact_path(self, name: str) -> Path:
         return self.out_dir / name
+
+    def for_check(
+        self,
+        *,
+        check_id: str,
+        target_mode: CheckTargetMode,
+        target_reason: str = "",
+        selected_targets: Sequence[str] = (),
+    ) -> CheckContext:
+        return CheckContext(
+            repo_root=self.repo_root,
+            out_dir=self.out_dir,
+            env=self.env,
+            python_executable=self.python_executable,
+            profile=self.profile,
+            changed_paths=self.changed_paths,
+            check_id=check_id,
+            target_mode=target_mode,
+            target_reason=target_reason,
+            selected_targets=tuple(selected_targets),
+        )
 
 
 @dataclass(frozen=True)
@@ -65,6 +93,7 @@ class CheckDefinition:
     evidence_outputs: tuple[str, ...] = ()
     run: CheckRunner | None = None
     notes: str = ""
+    cacheable: bool = True
 
 
 @dataclass(frozen=True)
@@ -83,7 +112,7 @@ class PlannerHint:
     profile: CheckProfileName
     reasons: tuple[str, ...] = ()
     changed_paths: tuple[str, ...] = ()
-    targeted: bool = False
+    targeted: bool = True
     cache_keys: tuple[str, ...] = ()
 
 
