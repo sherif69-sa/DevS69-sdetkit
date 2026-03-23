@@ -63,7 +63,7 @@ DEFAULT_PROFILES: tuple[CheckProfile, ...] = (
             "security_source_scan",
         ),
         planner_selected=True,
-        notes="Phase-2 adaptive mode resolves conservatively to quick, standard, or strict.",
+        notes="Adaptive mode resolves explainably from changed files, CI/local context, tooling, and repo hints.",
     ),
 )
 

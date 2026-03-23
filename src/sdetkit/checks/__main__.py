@@ -25,11 +25,14 @@ def _build_parser() -> argparse.ArgumentParser:
         command.add_argument("--out-dir", default=".sdetkit/out")
         command.add_argument("--changed-path", action="append", default=None)
         command.add_argument("--reason", action="append", default=None)
+        command.add_argument("--no-targeting", action="store_true")
         command.add_argument("--format", choices=["json", "text"], default="json")
         if name == "run":
             command.add_argument("--json-output", default=None)
             command.add_argument("--markdown-output", default=None)
             command.add_argument("--emit-legacy-summary", action="store_true")
+            command.add_argument("--no-cache", action="store_true")
+            command.add_argument("--max-workers", type=int, default=None)
     return parser
 
 
@@ -38,6 +41,7 @@ def _planner_hint(ns: argparse.Namespace) -> PlannerHint:
         profile=ns.profile,
         reasons=tuple(ns.reason or ()),
         changed_paths=tuple(ns.changed_path or ()),
+        targeted=not bool(getattr(ns, "no_targeting", False)),
     )
 
 
@@ -68,6 +72,11 @@ def _print_legacy_summary(payload: dict[str, object]) -> None:
     print(f"[quality] merge/release recommendation: {payload['recommendation']}")
     metadata = payload.get("metadata", {})
     if isinstance(metadata, dict):
+        execution = metadata.get("execution", {})
+        if isinstance(execution, dict):
+            print(
+                f"[quality] execution: {execution.get('mode', 'sequential')} with {execution.get('workers', 1)} worker(s)"
+            )
         json_out = metadata.get("json_output")
         md_out = metadata.get("markdown_output")
         if json_out:
@@ -92,15 +101,20 @@ def main(argv: list[str] | None = None) -> int:
             "selected_checks": [item.__dict__ for item in plan.selected_checks],
             "skipped_checks": [item.__dict__ for item in plan.skipped_checks],
             "notes": list(plan.notes),
+            "changed_files": list(plan.changed_files),
+            "changed_areas": list(plan.changed_areas),
+            "adaptive_reason": plan.adaptive_reason,
         }
         if ns.format == "json":
             sys.stdout.write(json.dumps(payload, sort_keys=True, indent=2) + "\n")
         else:
             print(f"profile: {plan.profile}")
             print(f"requested: {plan.requested_profile}")
+            if plan.adaptive_reason:
+                print(f"adaptive reason: {plan.adaptive_reason}")
             print("selected:")
             for item in plan.selected_checks:
-                print(f"- {item.id}")
+                print(f"- {item.id} [{item.target_mode}]")
             print("skipped:")
             for skipped in plan.skipped_checks:
                 print(f"- {skipped.id}: {skipped.reason}")
@@ -113,6 +127,8 @@ def main(argv: list[str] | None = None) -> int:
         out_dir=out_dir,
         env=dict(os.environ),
         python_executable=sys.executable,
+        use_cache=not ns.no_cache,
+        max_workers=ns.max_workers,
     )
     verdict_payload = report.as_dict()
 

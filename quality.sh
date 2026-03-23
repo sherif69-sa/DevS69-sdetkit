@@ -43,7 +43,7 @@ Profiles:
   quick     Fast local confidence / smoke profile.
   standard  Default repository validation profile.
   strict    Merge/release truth profile.
-  adaptive  Planner-selected profile scaffold for future targeted scheduling.
+  adaptive  Planner-selected profile with explainable targeting and adaptive resolution.
 
 Modes:
   ci         Fast/smoke lane for local confidence; not merge truth.

@@ -51,6 +51,14 @@ def _run_subprocess(
         status = "failed"
     reason = "" if proc.returncode == 0 else f"command failed (rc={proc.returncode})"
     evidence_paths = _existing_evidence(ctx, check.evidence_outputs)
+    metadata = {
+        "returncode": proc.returncode,
+        "target_mode": ctx.target_mode,
+        "target_reason": ctx.target_reason,
+        "changed_paths": list(ctx.changed_paths),
+        "selected_targets": list(ctx.selected_targets),
+        "cache": {"status": "fresh"},
+    }
     return CheckRecord(
         id=check.id,
         title=check.title,
@@ -62,7 +70,7 @@ def _run_subprocess(
         log_path=str(log_path.relative_to(ctx.repo_root)),
         evidence_paths=evidence_paths,
         elapsed_seconds=round(elapsed, 3),
-        metadata={"returncode": proc.returncode},
+        metadata=metadata,
     )
 
 
@@ -77,6 +85,13 @@ def _skip_missing_prereqs(check: CheckDefinition, ctx: CheckContext) -> CheckRec
             reason=f"missing required tool(s): {', '.join(sorted(missing_tools))}",
             command=_stringify_command(check.command),
             advisory=("planner skipped a check with unavailable tools",),
+            metadata={
+                "target_mode": ctx.target_mode,
+                "target_reason": ctx.target_reason,
+                "changed_paths": list(ctx.changed_paths),
+                "selected_targets": list(ctx.selected_targets),
+                "cache": {"status": "not-applicable"},
+            },
         )
 
     missing_paths = [path for path in check.required_paths if not ctx.resolve(path).exists()]
@@ -89,6 +104,13 @@ def _skip_missing_prereqs(check: CheckDefinition, ctx: CheckContext) -> CheckRec
             reason=f"missing required path(s): {', '.join(sorted(missing_paths))}",
             command=_stringify_command(check.command),
             advisory=("planner skipped a check with missing required paths",),
+            metadata={
+                "target_mode": ctx.target_mode,
+                "target_reason": ctx.target_reason,
+                "changed_paths": list(ctx.changed_paths),
+                "selected_targets": list(ctx.selected_targets),
+                "cache": {"status": "not-applicable"},
+            },
         )
     return None
 
@@ -124,10 +146,30 @@ def _typing_command(ctx: CheckContext) -> tuple[str, ...]:
 
 
 def _tests_smoke_command(ctx: CheckContext) -> tuple[str, ...]:
+    if ctx.target_mode == "targeted" and ctx.selected_targets:
+        return (
+            ctx.python_executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-o",
+            "addopts=",
+            *ctx.selected_targets,
+        )
     return (ctx.python_executable, "-m", "sdetkit", "gate", "fast")
 
 
 def _tests_full_command(ctx: CheckContext) -> tuple[str, ...]:
+    if ctx.target_mode == "targeted" and ctx.selected_targets:
+        return (
+            ctx.python_executable,
+            "-m",
+            "pytest",
+            "-q",
+            "-o",
+            "addopts=",
+            *ctx.selected_targets,
+        )
     return (ctx.python_executable, "-m", "pytest", "-q", "-o", "addopts=")
 
 

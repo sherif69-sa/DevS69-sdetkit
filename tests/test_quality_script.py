@@ -26,7 +26,10 @@ def test_quality_script_help_documents_fast_and_full_lanes() -> None:
     assert "quick     Fast local confidence / smoke profile." in text
     assert "standard  Default repository validation profile." in text
     assert "strict    Merge/release truth profile." in text
-    assert "adaptive  Planner-selected profile scaffold for future targeted scheduling." in text
+    assert (
+        "adaptive  Planner-selected profile with explainable targeting and adaptive resolution."
+        in text
+    )
     assert "Fast/smoke lane for local confidence; not merge truth." in text
     assert (
         "Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."

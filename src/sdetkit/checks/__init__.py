@@ -1,5 +1,13 @@
 from .base import CheckContext, CheckDefinition, CheckProfile, PlannerHint, RegistrySnapshot
-from .planner import CheckPlan, CheckPlanner, PlannedCheck, SkippedCheck
+from .cache import CheckCache
+from .planner import (
+    CheckPlan,
+    CheckPlanner,
+    PlannedCheck,
+    SkippedCheck,
+    classify_changed_files,
+    discover_changed_files,
+)
 from .registry import (
     CheckRegistry,
     check_ids_for_profile,
@@ -17,10 +25,13 @@ __all__ = [
     "CheckProfile",
     "PlannerHint",
     "RegistrySnapshot",
+    "CheckCache",
     "CheckPlan",
     "PlannedCheck",
     "SkippedCheck",
     "CheckPlanner",
+    "classify_changed_files",
+    "discover_changed_files",
     "CheckRegistry",
     "check_ids_for_profile",
     "default_registry",

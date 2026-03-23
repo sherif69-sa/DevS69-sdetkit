@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import threading
+import time
 from pathlib import Path
 
 from sdetkit.checks import CheckPlanner, CheckRunner, build_final_verdict, default_registry
@@ -84,9 +86,45 @@ def test_adaptive_profile_returns_valid_conservative_plan(tmp_path: Path) -> Non
 
     assert standard_like.profile == "standard"
     assert standard_like.planner_selected is True
-    assert standard_like.selected_ids
+    assert "adaptive resolved to `standard`" in " ".join(standard_like.notes)
     assert quick_like.profile == "quick"
     assert quick_like.selected_ids[-1] == "tests_smoke"
+    assert quick_like.adaptive_reason == "docs/examples-only changes allow the honest smoke lane"
+
+
+def test_changed_file_targeting_marks_targeted_tests_for_non_strict_profiles(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "src" / "sdetkit").mkdir(parents=True)
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "src" / "sdetkit" / "demo.py").write_text("print('x')\n", encoding="utf-8")
+    (tmp_path / "tests" / "test_demo.py").write_text(
+        "def test_demo():\n    assert True\n", encoding="utf-8"
+    )
+
+    plan = CheckPlanner(default_registry().snapshot()).plan(
+        "quick",
+        repo_root=tmp_path,
+        hint=PlannerHint(profile="quick", changed_paths=("src/sdetkit/demo.py",)),
+    )
+    tests_check = next(item for item in plan.selected_checks if item.id == "tests_smoke")
+
+    assert tests_check.target_mode == "targeted"
+    assert tests_check.selected_targets == ("tests/test_demo.py",)
+    assert "targeted pytest scope" in tests_check.targeting_reason
+
+
+def test_strict_mode_preserves_full_truth_even_when_changed_files_exist(tmp_path: Path) -> None:
+    (tmp_path / "tests").mkdir()
+    plan = CheckPlanner(default_registry().snapshot()).plan(
+        "strict",
+        repo_root=tmp_path,
+        hint=PlannerHint(profile="strict", changed_paths=("src/sdetkit/demo.py",)),
+    )
+    tests_check = next(item for item in plan.selected_checks if item.id == "tests_full")
+
+    assert tests_check.target_mode == "full"
+    assert tests_check.targeting_reason == "strict mode preserves the full truth path"
 
 
 def test_planner_respects_dependencies() -> None:
@@ -180,6 +218,7 @@ def test_runner_marks_dependency_blocked_checks_as_skipped(tmp_path: Path) -> No
         out_dir=tmp_path / ".sdetkit" / "out",
         env={},
         python_executable="python",
+        use_cache=False,
     )
     records = {record.id: record for record in report.records}
 
@@ -187,6 +226,110 @@ def test_runner_marks_dependency_blocked_checks_as_skipped(tmp_path: Path) -> No
     assert records["child"].status == "skipped"
     assert records["child"].reason == "dependency not satisfied: dep"
     assert report.verdict.ok is False
+
+
+def test_runner_cache_records_hit_and_miss(tmp_path: Path) -> None:
+    calls = {"count": 0}
+
+    def run(_ctx: object) -> CheckRecord:
+        calls["count"] += 1
+        return CheckRecord(id="alpha", title="Alpha", status="passed")
+
+    snapshot = RegistrySnapshot(
+        profiles={
+            "quick": CheckProfile(
+                name="quick",
+                description="",
+                default_truth_level="smoke",
+                merge_truth=False,
+                check_ids=("alpha",),
+            )
+        },
+        checks={
+            "alpha": CheckDefinition(
+                id="alpha",
+                title="Alpha",
+                category="repo",
+                cost="cheap",
+                truth_level="smoke",
+                run=run,
+            )
+        },
+    )
+    plan = CheckPlanner(snapshot).plan("quick", repo_root=tmp_path)
+    runner = CheckRunner(snapshot)
+    first = runner.run(
+        plan,
+        repo_root=tmp_path,
+        out_dir=tmp_path / ".sdetkit" / "out",
+        env={},
+        python_executable="python",
+    )
+    second = runner.run(
+        plan,
+        repo_root=tmp_path,
+        out_dir=tmp_path / ".sdetkit" / "out",
+        env={},
+        python_executable="python",
+    )
+
+    assert calls["count"] == 1
+    assert first.records[0].metadata["cache"]["status"] == "fresh"
+    assert second.records[0].metadata["cache"]["status"] == "hit"
+
+
+def test_runner_parallelizes_safe_independent_checks_and_keeps_order(tmp_path: Path) -> None:
+    active = {"count": 0, "peak": 0}
+    lock = threading.Lock()
+
+    def make_runner(name: str):
+        def _run(_ctx: object) -> CheckRecord:
+            with lock:
+                active["count"] += 1
+                active["peak"] = max(active["peak"], active["count"])
+            time.sleep(0.05)
+            with lock:
+                active["count"] -= 1
+            return CheckRecord(id=name, title=name, status="passed")
+
+        return _run
+
+    snapshot = RegistrySnapshot(
+        profiles={
+            "quick": CheckProfile(
+                name="quick",
+                description="",
+                default_truth_level="smoke",
+                merge_truth=False,
+                check_ids=("alpha", "beta", "gamma"),
+            )
+        },
+        checks={
+            key: CheckDefinition(
+                id=key,
+                title=key,
+                category="repo",
+                cost="cheap",
+                truth_level="smoke",
+                run=make_runner(key),
+            )
+            for key in ("alpha", "beta", "gamma")
+        },
+    )
+    plan = CheckPlanner(snapshot).plan("quick", repo_root=tmp_path)
+    report = CheckRunner(snapshot).run(
+        plan,
+        repo_root=tmp_path,
+        out_dir=tmp_path / ".sdetkit" / "out",
+        env={},
+        python_executable="python",
+        use_cache=False,
+        max_workers=3,
+    )
+
+    assert active["peak"] >= 2
+    assert [record.id for record in report.records] == ["alpha", "beta", "gamma"]
+    assert report.verdict.metadata["execution"]["mode"] == "parallel"
 
 
 def test_final_verdict_contract_separates_run_skipped_and_failures() -> None:
@@ -203,11 +346,12 @@ def test_final_verdict_contract_separates_run_skipped_and_failures() -> None:
                 reason="quick profile favors faster validation; run strict for merge truth",
             ),
         ],
+        metadata={"execution": {"mode": "sequential", "workers": 1}},
     )
 
     payload = verdict.as_dict()
 
-    assert payload["verdict_contract"] == "sdetkit.final-verdict.v1"
+    assert payload["verdict_contract"] == "sdetkit.final-verdict.v2"
     assert payload["profile"] == "quick"
     assert payload["confidence_level"] == "low (smoke-only)"
     assert payload["blocking_failures"] == ["tests_smoke: Fast/smoke tests"]
