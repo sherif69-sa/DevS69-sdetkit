@@ -232,3 +232,27 @@ def test_all_projects_audit_idempotent_json(tmp_path: Path) -> None:
         ]
     )
     assert first.stdout == second.stdout
+
+
+def test_projects_autodiscovery_skips_generated_site_and_nox_dirs(tmp_path: Path) -> None:
+    _seed_project(tmp_path / "services" / "api")
+    generated = tmp_path / "site" / "nested"
+    generated.mkdir(parents=True)
+    (generated / "pyproject.toml").write_text(
+        "[project]\nname='generated-site'\n", encoding="utf-8"
+    )
+    nox_dir = tmp_path / ".nox" / "pkg"
+    nox_dir.mkdir(parents=True)
+    (nox_dir / "pyproject.toml").write_text("[project]\nname='generated-nox'\n", encoding="utf-8")
+
+    runner = CliRunner()
+    out_json = runner.invoke(
+        ["repo", "projects", "list", str(tmp_path), "--allow-absolute-path", "--json"]
+    )
+
+    assert out_json.exit_code == 0
+    payload = json.loads(out_json.stdout)
+    names = [item["name"] for item in payload["projects"]]
+    assert "generated-site" not in names
+    assert "generated-nox" not in names
+    assert "x" in names

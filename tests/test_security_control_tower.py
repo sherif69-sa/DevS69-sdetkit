@@ -113,7 +113,8 @@ def test_premium_gate_script_smoke_contains_commands() -> None:
     assert "bash quality.sh ci" in text
     assert "Quality (full verification)" in text
     assert "Quality (fast/smoke)" in text
-    assert "fast=smoke confidence, full=pre-merge verification" in text
+    assert "fast=honest smoke confidence" in text
+    assert "full=merge/release truth via `bash quality.sh verify`" in text
     assert "bash ci.sh" in text
     assert "python3 -m sdetkit doctor --ascii" in text
     assert "python3 -m sdetkit doctor --json --out" in text
@@ -127,7 +128,15 @@ def test_premium_gate_script_smoke_contains_commands() -> None:
     assert "Head-5 Intelligence Brain" in text
     assert "premium-step-index.json" in text
     assert "premium-step-results.ndjson" in text
+    assert "premium-verdict.json" in text
+    assert "premium-summary.md" in text
     assert "emit_step_index()" in text
+    assert "emit_final_verdict()" in text
+    assert "final verdict contract:" in text
+    assert "verdict.verdict_contract" in text
+    assert "profile used" in text
+    assert "checks skipped" in text
+    assert "merge/release recommendation" in text
     assert "import sys" in text
 
 

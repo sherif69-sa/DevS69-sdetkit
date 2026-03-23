@@ -61,6 +61,7 @@ SKIP_DIRS: frozenset[str] = frozenset(
         "node_modules",
         "dist",
         "build",
+        "site",
     }
 )
 

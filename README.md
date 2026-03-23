@@ -128,6 +128,8 @@ bash premium-gate.sh --mode full
 # premium gate now emits .sdetkit/out/integration-topology.json as a first-class operational artifact
 # head-5 also auto-runs repo-safe remediation scripts unless you pass --no-auto-run-scripts
 # and writes .sdetkit/out/premium-remediation-plan.json so PRs can review selected vs deferred fixes
+# quality.sh and premium-gate.sh also emit aligned final verdict artifacts in .sdetkit/out/
+# including quality-verdict.json / premium-verdict.json and matching markdown summaries
 python -m sdetkit.premium_gate_engine --out-dir .sdetkit/out --search doctor --format json
 python -m sdetkit.premium_gate_engine --db-path .sdetkit/out/premium-insights.db --list-guidelines --search security
 python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
@@ -136,6 +138,37 @@ python -m sdetkit continuous-upgrade-cycle9-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle10-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 ```
+
+
+## Unified gate architecture (phase 1 foundation)
+
+The repo now treats gate execution as honest profiles instead of ambiguous green lights:
+
+- `quick`: fast local confidence / smoke only.
+- `standard`: default repository validation.
+- `strict`: merge/release truth.
+- `adaptive`: planner-selected scaffold for targeted future execution.
+
+Operationally, that means:
+
+- `bash quality.sh ci` stays a smoke lane and explicitly says it is **not** merge truth.
+- `bash quality.sh verify` is the full truth path for merge/release decisions.
+- `bash premium-gate.sh --mode fast` stays honest smoke confidence.
+- `bash premium-gate.sh --mode full` delegates to `bash quality.sh verify` for the quality truth path.
+- both runners now emit a shared final verdict contract with profile used, checks run, checks skipped with reasons, blocking failures, advisory findings, confidence level, and merge/release recommendation.
+
+### What is implemented now
+
+- phase-1 gate/profile alignment and honest fast-vs-full wording.
+- generated-path exclusions for repo/security scanning (`.nox/`, `.venv/`, `site/`, `__pycache__/`, `.pytest_cache/`, `build/`, `dist/`).
+- a new `sdetkit.checks` foundation with a shared data model, registry metadata, and final-verdict model.
+
+### What is scaffolded for later phases
+
+- adaptive planning and scheduler-driven targeting/concurrency.
+- broader migration of every existing check into the shared registry.
+- enterprise artifact expansion beyond the initial verdict/summary contract.
+- external repo/zip/commit onboarding flows built on the same shared model.
 
 ## Upgrade planning (first step)
 
