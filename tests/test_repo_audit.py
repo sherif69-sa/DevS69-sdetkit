@@ -182,6 +182,21 @@ def test_repo_check_skips_venv_prefix_and_dist_build_dirs(tmp_path: Path) -> Non
     assert rc == 0
 
 
+def test_repo_check_skips_site_and_nox_generated_dirs(tmp_path: Path) -> None:
+    nox_dir = tmp_path / ".nox" / "py311"
+    nox_dir.mkdir(parents=True)
+    (nox_dir / "artifact.py").write_text("print('generated')\n", encoding="utf-8")
+
+    site_dir = tmp_path / "site"
+    site_dir.mkdir()
+    (site_dir / "index.html").write_text("<html></html>", encoding="utf-8")
+
+    (tmp_path / "clean.txt").write_text("clean\n", encoding="utf-8")
+
+    rc = cli.main(["repo", "check", str(tmp_path), "--allow-absolute-path", "--format", "json"])
+    assert rc == 0
+
+
 def test_repo_scanner_helpers_cover_workflow_dependency_and_baseline(tmp_path: Path) -> None:
     py_text = """
 eval('1')

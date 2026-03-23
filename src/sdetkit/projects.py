@@ -123,11 +123,14 @@ _SKIP_DIRS: set[str] = {
     "node_modules",
     "__pycache__",
     ".tox",
+    ".nox",
     ".mypy_cache",
     ".pytest_cache",
+    ".ruff_cache",
     ".sdetkit",
     "dist",
     "build",
+    "site",
 }
 
 _AUTODISCOVER_BASES: tuple[str, ...] = ("packages", "apps", "services", "libs", "crates")
