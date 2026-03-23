@@ -31,6 +31,8 @@ class SkippedCheck:
     title: str
     reason: str
     blocking: bool
+    category: str = "uncategorized"
+    truth_level: str = "adaptive"
 
 
 @dataclass(frozen=True)
@@ -151,6 +153,8 @@ class CheckPlanner:
                     title=check.title,
                     reason=reason,
                     blocking=not check.advisory_only,
+                    category=check.category,
+                    truth_level=check.truth_level,
                 )
             )
 
@@ -164,6 +168,8 @@ class CheckPlanner:
                         title=check.title,
                         reason=prereq_reason,
                         blocking=not check.advisory_only,
+                        category=check.category,
+                        truth_level=check.truth_level,
                     )
                 )
                 continue
