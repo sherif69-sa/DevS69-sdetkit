@@ -1,3 +1,4 @@
+from .artifacts import artifact_paths_for, render_record_artifacts, render_report_artifacts
 from .base import CheckContext, CheckDefinition, CheckProfile, PlannerHint, RegistrySnapshot
 from .cache import CheckCache
 from .planner import (
@@ -25,6 +26,9 @@ __all__ = [
     "CheckProfile",
     "PlannerHint",
     "RegistrySnapshot",
+    "artifact_paths_for",
+    "render_record_artifacts",
+    "render_report_artifacts",
     "CheckCache",
     "CheckPlan",
     "PlannedCheck",

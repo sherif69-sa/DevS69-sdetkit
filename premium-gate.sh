@@ -84,6 +84,9 @@ STEP_INDEX_JSON="$OUT_DIR/premium-step-index.json"
 STEP_RESULTS_NDJSON="$OUT_DIR/premium-step-results.ndjson"
 PREMIUM_VERDICT_JSON="$OUT_DIR/premium-verdict.json"
 PREMIUM_SUMMARY_MD="$OUT_DIR/premium-summary.md"
+PREMIUM_FIX_PLAN_JSON="$OUT_DIR/premium-fix-plan.json"
+PREMIUM_RISK_SUMMARY_JSON="$OUT_DIR/premium-risk-summary.json"
+PREMIUM_EVIDENCE_ZIP="$OUT_DIR/premium-evidence.zip"
 : > "$STEP_RESULTS_NDJSON"
 
 section() { printf '\n==> %s\n' "$1"; }
@@ -227,67 +230,64 @@ PY
 }
 
 emit_final_verdict() {
-  python3 - "$STEP_RESULTS_NDJSON" "$MODE" "$PREMIUM_VERDICT_JSON" "$PREMIUM_SUMMARY_MD" <<'PY'
+  local profile requested_profile notes metadata_json
+  profile="adaptive"
+  requested_profile="adaptive"
+  case "$MODE" in
+    fast)
+      profile="quick"
+      requested_profile="quick"
+      notes="Honest smoke confidence lane. Passing here is not the merge truth."
+      ;;
+    full)
+      profile="strict"
+      requested_profile="strict"
+      notes="Full premium verification lane. This wraps bash quality.sh verify as the truth path."
+      ;;
+    engine-only)
+      profile="adaptive"
+      requested_profile="adaptive"
+      notes="Adaptive/planner scaffold lane that isolates premium engine evidence collection."
+      ;;
+  esac
+  metadata_json="$(python3 - "$MODE" "$STEP_RESULTS_NDJSON" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-from sdetkit.checks.results import CheckRecord, build_final_verdict
-
-mode = sys.argv[2]
-profile = {"fast": "quick", "full": "strict", "engine-only": "adaptive"}[mode]
-records = []
-for raw in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+rows = []
+for raw in Path(sys.argv[2]).read_text(encoding="utf-8").splitlines():
     raw = raw.strip()
     if not raw:
         continue
-    item = json.loads(raw)
-    records.append(
-        CheckRecord(
-            id=str(item["id"]),
-            title=str(item["title"]),
-            status=str(item["status"]),
-            blocking=bool(item.get("blocking", True)),
-            reason=str(item.get("reason", "")),
-            command=str(item.get("cmd", "")),
-            log_path=str(item.get("log", "")),
-        )
+    rows.append(json.loads(raw))
+print(
+    json.dumps(
+        {
+            "source": "premium-gate.sh",
+            "mode": sys.argv[1],
+            "checks_recorded": len(rows),
+            "execution": {"mode": "sequential", "workers": 1},
+        },
+        sort_keys=True,
     )
-
-notes = {
-    "fast": "Honest smoke confidence lane. Passing here is not the merge truth.",
-    "full": "Full premium verification lane. This wraps bash quality.sh verify as the truth path.",
-    "engine-only": "Adaptive/planner scaffold lane that isolates premium engine evidence collection.",
-}[mode]
-verdict = build_final_verdict(
-    profile=profile,
-    checks=records,
-    profile_notes=notes,
-    metadata={"source": "premium-gate.sh", "mode": mode, "checks_recorded": len(records)},
 )
-Path(sys.argv[3]).write_text(verdict.to_json(), encoding="utf-8")
-Path(sys.argv[4]).write_text(verdict.to_markdown(), encoding="utf-8")
-print(f"[premium] final verdict contract: {verdict.verdict_contract}")
-print(f"[premium] profile used: {verdict.profile}")
-print(f"[premium] checks run: {len(verdict.checks_run)}")
-print(f"[premium] checks skipped: {len(verdict.checks_skipped)}")
-if verdict.blocking_failures:
-    print("[premium] blocking failures:")
-    for item in verdict.blocking_failures:
-        print(f"- {item}")
-else:
-    print("[premium] blocking failures: none")
-if verdict.advisory_findings:
-    print("[premium] advisory findings:")
-    for item in verdict.advisory_findings:
-        print(f"- {item}")
-else:
-    print("[premium] advisory findings: none")
-print(f"[premium] confidence level: {verdict.confidence_level}")
-print(f"[premium] merge/release recommendation: {verdict.recommendation}")
-print(f"[premium] verdict json: {sys.argv[3]}")
-print(f"[premium] summary md: {sys.argv[4]}")
 PY
+)"
+  python3 -m sdetkit.checks render-ledger \
+    --profile "$profile" \
+    --requested-profile "$requested_profile" \
+    --ledger "$STEP_RESULTS_NDJSON" \
+    --repo-root "$ROOT_DIR" \
+    --out-dir "$OUT_DIR" \
+    --profile-notes "$notes" \
+    --metadata-json "$metadata_json" \
+    --format text \
+    --json-output "$PREMIUM_VERDICT_JSON" \
+    --markdown-output "$PREMIUM_SUMMARY_MD" \
+    --fix-plan-output "$PREMIUM_FIX_PLAN_JSON" \
+    --risk-summary-output "$PREMIUM_RISK_SUMMARY_JSON" \
+    --evidence-output "$PREMIUM_EVIDENCE_ZIP"
 }
 
 run_plan() {
@@ -388,6 +388,9 @@ PY
   info "Step run ledger: $STEP_RESULTS_NDJSON"
   info "Verdict JSON: $PREMIUM_VERDICT_JSON"
   info "Summary MD: $PREMIUM_SUMMARY_MD"
+  info "Fix plan JSON: $PREMIUM_FIX_PLAN_JSON"
+  info "Risk summary JSON: $PREMIUM_RISK_SUMMARY_JSON"
+  info "Evidence ZIP: $PREMIUM_EVIDENCE_ZIP"
 }
 
 export MODE OUT_DIR STEP_RESULTS_NDJSON TOPOLOGY_PROFILE
@@ -397,4 +400,4 @@ run_plan
 run_engine
 final_report
 
-echo "Premium gate passed. Artifacts: $OUT_DIR/doctor.json, $OUT_DIR/maintenance.json, $OUT_DIR/integration-topology.json, $OUT_DIR/security.sarif, $OUT_DIR/security-check.json, $OUT_DIR/premium-summary.json, $OUT_DIR/premium-remediation-plan.json, $OUT_DIR/evidence.zip"
+echo "Premium gate passed. Artifacts: $OUT_DIR/doctor.json, $OUT_DIR/maintenance.json, $OUT_DIR/integration-topology.json, $OUT_DIR/security.sarif, $OUT_DIR/security-check.json, $OUT_DIR/premium-summary.json, $OUT_DIR/premium-remediation-plan.json, $PREMIUM_VERDICT_JSON, $PREMIUM_SUMMARY_MD, $PREMIUM_FIX_PLAN_JSON, $PREMIUM_RISK_SUMMARY_JSON, $PREMIUM_EVIDENCE_ZIP, $OUT_DIR/evidence.zip"

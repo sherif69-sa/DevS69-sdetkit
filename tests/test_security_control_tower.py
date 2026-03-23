@@ -130,14 +130,12 @@ def test_premium_gate_script_smoke_contains_commands() -> None:
     assert "premium-step-results.ndjson" in text
     assert "premium-verdict.json" in text
     assert "premium-summary.md" in text
+    assert "premium-fix-plan.json" in text
+    assert "premium-risk-summary.json" in text
+    assert "premium-evidence.zip" in text
+    assert "python3 -m sdetkit.checks render-ledger" in text
     assert "emit_step_index()" in text
     assert "emit_final_verdict()" in text
-    assert "final verdict contract:" in text
-    assert "verdict.verdict_contract" in text
-    assert "profile used" in text
-    assert "checks skipped" in text
-    assert "merge/release recommendation" in text
-    assert "import sys" in text
 
 
 def test_scan_online_mode_without_cmd_falls_back(tmp_path: Path, capsys) -> None:

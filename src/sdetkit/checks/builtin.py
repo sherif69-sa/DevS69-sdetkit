@@ -53,6 +53,8 @@ def _run_subprocess(
     evidence_paths = _existing_evidence(ctx, check.evidence_outputs)
     metadata = {
         "returncode": proc.returncode,
+        "category": check.category,
+        "truth_level": check.truth_level,
         "target_mode": ctx.target_mode,
         "target_reason": ctx.target_reason,
         "changed_paths": list(ctx.changed_paths),
@@ -86,6 +88,8 @@ def _skip_missing_prereqs(check: CheckDefinition, ctx: CheckContext) -> CheckRec
             command=_stringify_command(check.command),
             advisory=("planner skipped a check with unavailable tools",),
             metadata={
+                "category": check.category,
+                "truth_level": check.truth_level,
                 "target_mode": ctx.target_mode,
                 "target_reason": ctx.target_reason,
                 "changed_paths": list(ctx.changed_paths),
@@ -105,6 +109,8 @@ def _skip_missing_prereqs(check: CheckDefinition, ctx: CheckContext) -> CheckRec
             command=_stringify_command(check.command),
             advisory=("planner skipped a check with missing required paths",),
             metadata={
+                "category": check.category,
+                "truth_level": check.truth_level,
                 "target_mode": ctx.target_mode,
                 "target_reason": ctx.target_reason,
                 "changed_paths": list(ctx.changed_paths),

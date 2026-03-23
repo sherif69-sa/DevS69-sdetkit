@@ -89,6 +89,8 @@ class CheckRunner:
                 blocking=skipped.blocking,
                 reason=skipped.reason,
                 metadata={
+                    "category": skipped.category,
+                    "truth_level": skipped.truth_level,
                     "target_mode": "full",
                     "cache": {"status": "not-applicable"},
                     "execution": {"status": "skipped"},
@@ -129,6 +131,8 @@ class CheckRunner:
                             reason=f"dependency not satisfied: {', '.join(blocked_by)}",
                             command=item.command,
                             metadata={
+                                "category": item.category,
+                                "truth_level": item.truth_level,
                                 "target_mode": item.target_mode,
                                 "target_reason": item.targeting_reason,
                                 "changed_paths": list(item.changed_evidence),
@@ -236,6 +240,8 @@ class CheckRunner:
             cached = cache.load(cache_key)
             if cached is not None:
                 metadata = dict(cached.metadata)
+                metadata.setdefault("category", item.category)
+                metadata.setdefault("truth_level", item.truth_level)
                 metadata.setdefault("target_mode", item.target_mode)
                 metadata.setdefault("target_reason", item.targeting_reason)
                 metadata.setdefault("changed_paths", list(item.changed_evidence))
@@ -251,6 +257,8 @@ class CheckRunner:
                 reason="check has no execution wiring yet",
                 command=item.command,
                 metadata={
+                    "category": item.category,
+                    "truth_level": item.truth_level,
                     "target_mode": item.target_mode,
                     "target_reason": item.targeting_reason,
                     "changed_paths": list(item.changed_evidence),
@@ -262,6 +270,8 @@ class CheckRunner:
         else:
             record = definition.run(ctx)
             metadata = dict(record.metadata)
+            metadata.setdefault("category", item.category)
+            metadata.setdefault("truth_level", item.truth_level)
             metadata.setdefault("target_mode", item.target_mode)
             metadata.setdefault("target_reason", item.targeting_reason)
             metadata.setdefault("changed_paths", list(item.changed_evidence))
