@@ -38,10 +38,14 @@ class CheckRecord:
     command: str = ""
     advisory: tuple[str, ...] = ()
     log_path: str = ""
+    evidence_paths: tuple[str, ...] = ()
+    elapsed_seconds: float = 0.0
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         payload["advisory"] = list(self.advisory)
+        payload["evidence_paths"] = list(self.evidence_paths)
         return payload
 
 
@@ -147,9 +151,7 @@ def build_final_verdict(
     recommendation: Recommendation
     if ok and profile == "quick":
         recommendation = "run-full-verification-before-merge"
-    elif ok and profile == "standard":
-        recommendation = "ready-for-merge-review"
-    elif ok and profile == "strict":
+    elif ok and profile in {"standard", "strict"}:
         recommendation = "ready-for-merge-review"
     elif ok:
         recommendation = "run-standard-validation"

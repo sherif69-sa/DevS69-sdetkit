@@ -1,8 +1,14 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+import os
+import sys
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from .results import CheckRecord
 
 CheckCategory = Literal[
     "repo",
@@ -25,7 +31,21 @@ CheckCost = Literal["cheap", "moderate", "expensive"]
 CheckTruthLevel = Literal["smoke", "standard", "merge", "adaptive"]
 CheckProfileName = Literal["quick", "standard", "strict", "adaptive"]
 CheckStatus = Literal["passed", "failed", "skipped"]
-CheckRunner = Callable[[], int | dict[str, Any] | None]
+CheckRunner = Callable[["CheckContext"], "CheckRecord"]
+
+
+@dataclass(frozen=True)
+class CheckContext:
+    repo_root: Path
+    out_dir: Path
+    env: Mapping[str, str] = field(default_factory=lambda: dict(os.environ))
+    python_executable: str = sys.executable
+
+    def resolve(self, *parts: str) -> Path:
+        return self.repo_root.joinpath(*parts)
+
+    def artifact_path(self, name: str) -> Path:
+        return self.out_dir / name
 
 
 @dataclass(frozen=True)

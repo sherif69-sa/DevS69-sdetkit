@@ -47,7 +47,7 @@ Profiles:
 
 Modes:
   ci         Fast/smoke lane for local confidence; not merge truth.
-  verify     Full verification lane before merge (format, lint, typing, full tests).
+  verify     Full verification lane before merge (doctor, format, lint, typing, full tests, security scan).
   all        Standard repo validation lane (auto-format, lint, typing, pytest, coverage).
   fmt        Apply Ruff formatting.
   lint       Run Ruff lint checks.
@@ -348,23 +348,15 @@ case "$mode" in
     profile_used="quick"
     profile_notes="Fast local confidence / smoke profile. Honest smoke lane only; not merge truth."
     echo "[quality] Fast/smoke lane for local confidence (not full merge verification)."
-    run_required "format_check" "Ruff format check" 1 "run_fmt_check"
-    run_required "lint" "Ruff lint" 1 "run_lint"
-    run_required "typing" "Mypy typing" 1 "run_type"
-    run_required "tests_smoke" "Fast/smoke tests" 1 "run_gate_fast"
-    skip_tracked "tests_full" "Full pytest suite" 1 "quick profile uses smoke gate only; run verify for merge truth"
-    skip_tracked "coverage" "Coverage lane" 0 "quick profile omits coverage to stay fast"
+    python -m sdetkit.checks run       --profile quick       --repo-root .       --out-dir "$SDETKIT_OUT_DIR"       --format text       --json-output "$QUALITY_VERDICT_JSON"       --markdown-output "$QUALITY_SUMMARY_MD"
+    exit $? 
     ;;
   verify)
     profile_used="strict"
     profile_notes="Merge/release truth profile. Full verification before merge."
-    echo "[quality] Full verification lane before merge (format, lint, typing, full tests)."
-    run_required "format_check" "Ruff format check" 1 "run_fmt_check"
-    run_required "lint" "Ruff lint" 1 "run_lint"
-    run_required "typing" "Mypy typing" 1 "run_type"
-    run_required "tests_full" "Full pytest suite" 1 "run_full_test"
-    skip_tracked "tests_smoke" "Fast/smoke tests" 1 "strict profile uses full tests instead of smoke gate"
-    skip_tracked "coverage" "Coverage lane" 0 "verify focuses on merge-truth checks; coverage remains a separate standard lane"
+    echo "[quality] Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."
+    python -m sdetkit.checks run       --profile strict       --repo-root .       --out-dir "$SDETKIT_OUT_DIR"       --format text       --json-output "$QUALITY_VERDICT_JSON"       --markdown-output "$QUALITY_SUMMARY_MD"
+    exit $? 
     ;;
   all)
     profile_used="standard"
