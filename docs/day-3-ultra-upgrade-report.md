@@ -30,20 +30,20 @@ Without a dedicated Day 3 command, proof gathering was manual and inconsistent.
   - Added Day 3 ultra section and report/artifact links.
 - `docs/cli.md`
   - Added command reference for `sdetkit proof`.
-- `docs/artifacts/day3-proof-sample.md`
+- `docs/artifacts/evidence-assets-sample.md`
   - Added generated Day 3 proof artifact sample.
 - `docs/impact-3-ultra-upgrade-report.md`
   - Added Day 3 implementation and validation record.
 
 ## Validation checklist
 
-- `python -m sdetkit proof --execute --strict --format markdown --output docs/artifacts/day3-proof-sample.md`
+- `python -m sdetkit evidence-assets --execute --strict --format markdown --output docs/artifacts/evidence-assets-sample.md`
 - `python -m pytest -q tests/test_proof_cli.py tests/test_cli_help_lists_subcommands.py`
 - `python scripts/check_day3_proof_contract.py`
 
 ## Artifact
 
-This document is the Day 3 artifact for proof-pack traceability and operational handoff.
+This document is the Day 3 artifact for evidence-assets-pack traceability and operational handoff.
 
 ## Rollback plan
 

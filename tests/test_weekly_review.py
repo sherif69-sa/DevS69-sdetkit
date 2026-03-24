@@ -93,9 +93,9 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
     for artifact in (
         "day15-github-actions-quickstart-sample.md",
         "day16-gitlab-ci-quickstart-sample.md",
-        "day17-quality-contribution-delta-sample.md",
-        "day18-reliability-evidence-pack-sample.md",
-        "day19-release-readiness-board-sample.md",
+        "contribution-quality-report-sample.md",
+        "reliability-evidence-pack-sample.md",
+        "release-readiness-sample.md",
         "day20-release-narrative-sample.md",
     ):
         (root / "docs" / "artifacts" / artifact).write_text("ok\n", encoding="utf-8")

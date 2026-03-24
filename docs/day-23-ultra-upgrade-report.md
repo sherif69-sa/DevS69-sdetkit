@@ -41,7 +41,7 @@ python scripts/check_day23_faq_objections_contract.py
 
 ## Artifacts
 
-- `docs/artifacts/day23-faq-objections-sample.md`
+- `docs/artifacts/objection-handling-sample.md`
 - `docs/artifacts/day23-faq-pack/day23-faq-summary.json`
 - `docs/artifacts/day23-faq-pack/day23-faq-scorecard.md`
 - `docs/artifacts/day23-faq-pack/day23-objection-response-matrix.md`

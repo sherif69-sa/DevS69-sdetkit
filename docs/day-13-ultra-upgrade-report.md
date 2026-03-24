@@ -39,12 +39,12 @@
 - `python -m sdetkit enterprise-use-case --write-defaults --format json --strict`
 - `python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict`
 - `python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict`
-- `python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md`
+- `python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/enterprise-readiness-sample.md`
 - `python scripts/check_day13_enterprise_use_case_contract.py`
 
 ## Output artifacts
 
-- `docs/artifacts/day13-enterprise-use-case-sample.md`
+- `docs/artifacts/enterprise-readiness-sample.md`
 - `docs/artifacts/day13-enterprise-pack/enterprise-day13-checklist.md`
 - `docs/artifacts/day13-enterprise-pack/enterprise-day13-ci.yml`
 - `docs/artifacts/day13-enterprise-pack/enterprise-day13-controls-register.md`

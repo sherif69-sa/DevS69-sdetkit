@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-reliability-evidence-pack.md"
+_PAGE_PATH = "docs/reliability-evidence-pack.md"
 
 _SECTION_HEADER = "# Reliability evidence pack (Day 18)"
 _REQUIRED_SECTIONS = [
@@ -345,7 +345,7 @@ def _write_defaults(base: Path) -> list[str]:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit reliability-evidence-pack",
-        description="Build Day 18 reliability evidence by combining Day 15/16/17 outputs.",
+        description="Build reliability evidence by combining release-quality and contribution signals.",
     )
     parser.add_argument(
         "--root", default=".", help="Repository root where docs and artifacts live."
@@ -364,7 +364,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-reliability-score", type=float, default=90.0)
     parser.add_argument("--strict", action="store_true")
     parser.add_argument(
-        "--write-defaults", action="store_true", help="Write default Day 18 reliability docs page."
+        "--write-defaults",
+        action="store_true",
+        help="Write default reliability evidence docs page.",
     )
     parser.add_argument("--emit-pack-dir", default="")
     parser.add_argument(
@@ -373,7 +375,9 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Execute Day 18 validation commands and capture evidence.",
     )
     parser.add_argument(
-        "--evidence-dir", default="", help="Output directory for Day 18 command execution logs."
+        "--evidence-dir",
+        default="",
+        help="Output directory for reliability command execution logs.",
     )
     parser.add_argument("--timeout-sec", type=int, default=120)
     parser.add_argument("--format", choices=["text", "markdown", "json"], default="text")

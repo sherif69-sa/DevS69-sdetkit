@@ -5,6 +5,26 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+_CANONICAL_ARTIFACT_FALLBACKS: dict[str, str] = {
+    "docs/artifacts/evidence-assets-sample.md": "docs/artifacts/day3-proof-sample.md",
+    "docs/artifacts/docs-governance-sample.md": "docs/artifacts/day11-docs-navigation-sample.md",
+    "docs/artifacts/startup-readiness-sample.md": "docs/artifacts/day12-startup-use-case-sample.md",
+    "docs/artifacts/enterprise-readiness-sample.md": "docs/artifacts/day13-enterprise-use-case-sample.md",
+    "docs/artifacts/contribution-quality-report-sample.md": "docs/artifacts/day17-quality-contribution-delta-sample.md",
+    "docs/artifacts/reliability-evidence-pack-sample.md": "docs/artifacts/day18-reliability-evidence-pack-sample.md",
+    "docs/artifacts/release-readiness-sample.md": "docs/artifacts/day19-release-readiness-board-sample.md",
+}
+
+
+def _artifact_exists_with_compat(root: Path, artifact_path: str) -> bool:
+    artifact = root / artifact_path
+    if artifact.exists():
+        return True
+    fallback = _CANONICAL_ARTIFACT_FALLBACKS.get(artifact_path)
+    if fallback is None:
+        return False
+    return (root / fallback).exists()
+
 
 @dataclass(frozen=True)
 class DayShipped:
@@ -86,22 +106,22 @@ DAY8_TO_13: tuple[DayShipped, ...] = (
         11,
         "Docs navigation tune-up",
         "docs/impact-11-ultra-upgrade-report.md",
-        "docs/artifacts/day11-docs-navigation-sample.md",
-        "python -m sdetkit docs-governance --format markdown --output docs/artifacts/day11-docs-navigation-sample.md --strict",
+        "docs/artifacts/docs-governance-sample.md",
+        "python -m sdetkit docs-governance --format markdown --output docs/artifacts/docs-governance-sample.md --strict",
     ),
     DayShipped(
         12,
         "Startup/small-team workflow",
         "docs/impact-12-ultra-upgrade-report.md",
-        "docs/artifacts/day12-startup-use-case-sample.md",
-        "python -m sdetkit startup-readiness --format markdown --output docs/artifacts/day12-startup-use-case-sample.md --strict",
+        "docs/artifacts/startup-readiness-sample.md",
+        "python -m sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md --strict",
     ),
     DayShipped(
         13,
         "Enterprise/regulated workflow",
         "docs/impact-13-ultra-upgrade-report.md",
-        "docs/artifacts/day13-enterprise-use-case-sample.md",
-        "python -m sdetkit enterprise-readiness --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict",
+        "docs/artifacts/enterprise-readiness-sample.md",
+        "python -m sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md --strict",
     ),
 )
 
@@ -124,21 +144,21 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
         17,
         "Quality + contribution delta evidence",
         "docs/impact-17-ultra-upgrade-report.md",
-        "docs/artifacts/day17-quality-contribution-delta-sample.md",
+        "docs/artifacts/contribution-quality-report-sample.md",
         "python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict",
     ),
     DayShipped(
         18,
         "Reliability evidence operating pack",
         "docs/impact-18-ultra-upgrade-report.md",
-        "docs/artifacts/day18-reliability-evidence-pack-sample.md",
+        "docs/artifacts/reliability-evidence-pack-sample.md",
         "python -m sdetkit reliability-evidence-pack --format json --strict",
     ),
     DayShipped(
         19,
         "Release readiness board",
         "docs/impact-19-ultra-upgrade-report.md",
-        "docs/artifacts/day19-release-readiness-board-sample.md",
+        "docs/artifacts/release-readiness-sample.md",
         "python -m sdetkit release-readiness --format json --strict",
     ),
     DayShipped(
@@ -213,12 +233,11 @@ def build_weekly_review(
     shipped: list[dict[str, object]] = []
     for impact in shipped_days:
         report_path = repo_root / impact.report_path
-        artifact_path = repo_root / impact.artifact_path
         report_exists = report_path.exists() or (
             "impact-" in impact.report_path
             and (repo_root / impact.report_path.replace("impact-", "day-")).exists()
         )
-        artifact_exists = artifact_path.exists()
+        artifact_exists = _artifact_exists_with_compat(repo_root, impact.artifact_path)
         shipped.append(
             {
                 "impact": impact.impact,

@@ -44,11 +44,11 @@ The docs home page had many valuable links, but maintainers lacked an executable
 - `python scripts/check_day11_docs_navigation_contract.py`
 - `python -m sdetkit docs-nav --format json --strict`
 - `python -m sdetkit docs-nav --write-defaults --format json --strict`
-- `python -m sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md`
+- `python -m sdetkit docs-nav --format markdown --output docs/artifacts/docs-governance-sample.md`
 
 ## Artifacts
 
-- `docs/artifacts/day11-docs-navigation-sample.md`
+- `docs/artifacts/docs-governance-sample.md`
 
 ## Rollback plan
 

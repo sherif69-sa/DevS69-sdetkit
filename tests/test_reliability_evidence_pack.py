@@ -38,7 +38,7 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
 
 
 def _write_page(root: Path) -> None:
-    page = root / "docs/integrations-reliability-evidence-pack.md"
+    page = root / "docs/reliability-evidence-pack.md"
     page.parent.mkdir(parents=True, exist_ok=True)
     page.write_text(rep._DAY18_DEFAULT_PAGE, encoding="utf-8")
 
@@ -119,7 +119,7 @@ def test_write_defaults(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "docs/integrations-reliability-evidence-pack.md").exists()
+    assert (tmp_path / "docs/reliability-evidence-pack.md").exists()
 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
@@ -253,9 +253,7 @@ def test_reliability_pack_strict_fails_when_page_missing_and_score_low(
     )
     # Write a page that is missing the required header/sections/commands.
     (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "docs/integrations-reliability-evidence-pack.md").write_text(
-        "# empty\n", encoding="utf-8"
-    )
+    (tmp_path / "docs/reliability-evidence-pack.md").write_text("# empty\n", encoding="utf-8")
 
     rc = rep.main(
         [
