@@ -171,7 +171,7 @@ def run_docs_qa(root: Path) -> Report:
 
 def _render_markdown(report: Report) -> str:
     lines = [
-        "# Docs QA report",
+        "# Docs quality report",
         "",
         "## Summary",
         "",
@@ -199,7 +199,7 @@ def _render_markdown(report: Report) -> str:
 
 def _render_text(report: Report) -> str:
     lines = [
-        "Docs QA report",
+        "Docs quality report",
         f"- files checked: {report.files_checked}",
         f"- internal markdown links checked: {report.links_checked}",
         f"- status: {'pass' if report.ok else 'fail'}",
@@ -214,7 +214,7 @@ def _render_text(report: Report) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="sdetkit docs-qa",
+        prog="sdetkit docs-quality",
         description="Validate markdown links and heading anchors across README.md and docs/.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")

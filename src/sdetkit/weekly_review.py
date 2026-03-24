@@ -34,8 +34,8 @@ DAY1_TO_6: tuple[DayShipped, ...] = (
         3,
         "Proof pack with runnable checks",
         "docs/impact-3-ultra-upgrade-report.md",
-        "docs/artifacts/day3-proof-sample.md",
-        "python -m sdetkit proof --execute --strict --format text",
+        "docs/artifacts/evidence-assets-sample.md",
+        "python -m sdetkit evidence-assets --execute --strict --format text",
     ),
     DayShipped(
         4,
@@ -56,7 +56,7 @@ DAY1_TO_6: tuple[DayShipped, ...] = (
         "Docs conversion QA gate",
         "docs/impact-6-ultra-upgrade-report.md",
         "docs/artifacts/day6-conversion-qa-sample.md",
-        "python -m sdetkit docs-qa --format text",
+        "python -m sdetkit docs-quality --format text",
     ),
 )
 
@@ -87,21 +87,21 @@ DAY8_TO_13: tuple[DayShipped, ...] = (
         "Docs navigation tune-up",
         "docs/impact-11-ultra-upgrade-report.md",
         "docs/artifacts/day11-docs-navigation-sample.md",
-        "python -m sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md --strict",
+        "python -m sdetkit docs-governance --format markdown --output docs/artifacts/day11-docs-navigation-sample.md --strict",
     ),
     DayShipped(
         12,
         "Startup/small-team workflow",
         "docs/impact-12-ultra-upgrade-report.md",
         "docs/artifacts/day12-startup-use-case-sample.md",
-        "python -m sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md --strict",
+        "python -m sdetkit startup-readiness --format markdown --output docs/artifacts/day12-startup-use-case-sample.md --strict",
     ),
     DayShipped(
         13,
         "Enterprise/regulated workflow",
         "docs/impact-13-ultra-upgrade-report.md",
         "docs/artifacts/day13-enterprise-use-case-sample.md",
-        "python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict",
+        "python -m sdetkit enterprise-readiness --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md --strict",
     ),
 )
 
@@ -111,21 +111,21 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
         "GitHub Actions integration quickstart",
         "docs/impact-15-ultra-upgrade-report.md",
         "docs/artifacts/day15-github-actions-quickstart-sample.md",
-        "python -m sdetkit github-actions-quickstart --format json --strict",
+        "python -m sdetkit github-actions-onboarding --format json --strict",
     ),
     DayShipped(
         16,
         "GitLab CI integration quickstart",
         "docs/impact-16-ultra-upgrade-report.md",
         "docs/artifacts/day16-gitlab-ci-quickstart-sample.md",
-        "python -m sdetkit gitlab-ci-quickstart --format json --strict",
+        "python -m sdetkit gitlab-ci-onboarding --format json --strict",
     ),
     DayShipped(
         17,
         "Quality + contribution delta evidence",
         "docs/impact-17-ultra-upgrade-report.md",
         "docs/artifacts/day17-quality-contribution-delta-sample.md",
-        "python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict",
+        "python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict",
     ),
     DayShipped(
         18,
@@ -139,7 +139,7 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
         "Release readiness board",
         "docs/impact-19-ultra-upgrade-report.md",
         "docs/artifacts/day19-release-readiness-board-sample.md",
-        "python -m sdetkit release-readiness-board --format json --strict",
+        "python -m sdetkit release-readiness --format json --strict",
     ),
     DayShipped(
         20,

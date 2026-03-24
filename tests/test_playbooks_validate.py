@@ -31,7 +31,8 @@ def test_playbooks_validate_legacy_selection_only_has_legacy(capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
     assert all(
-        item["name"] not in {"onboarding", "weekly-review", "proof"} for item in payload["results"]
+        item["name"] not in {"onboarding", "weekly-review", "evidence-assets"}
+        for item in payload["results"]
     )
     assert any(item["name"] == "continuous-upgrade-cycle7-closeout" for item in payload["results"])
 
@@ -41,14 +42,16 @@ def test_playbooks_validate_aliases_are_only_alias_names(capsys) -> None:
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["ok"] is True
-    assert payload["results"] == []
+    assert payload["results"]
+    assert all(item["name"] != item["canonical"] for item in payload["results"])
 
 
 def test_playbooks_validate_aliases_include_non_closeout_day_aliases(capsys) -> None:
     rc = playbooks_cli.main(["validate", "--aliases", "--format", "json"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["results"] == []
+    assert payload["results"]
+    assert any(item["name"] == "proof" for item in payload["results"])
 
 
 def test_playbooks_validate_all_includes_multiple_groups(capsys) -> None:

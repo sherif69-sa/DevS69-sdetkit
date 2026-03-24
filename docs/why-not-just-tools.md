@@ -39,7 +39,7 @@ SDETKit extends beyond one gate command with operational tools teams repeatedly 
 - `sdetkit doctor` for environment/repo diagnostics
 - `sdetkit repo ...` and repo audit workflows for repository health checks
 - `sdetkit ci validate-templates` for CI template verification
-- `sdetkit docs-qa` and `sdetkit docs-nav` for documentation quality/navigation integrity
+- `sdetkit docs-quality` and `sdetkit docs-governance` for documentation quality/navigation integrity
 
 This layer reduces ad-hoc shell scripting and "tribal runbook" drift.
 

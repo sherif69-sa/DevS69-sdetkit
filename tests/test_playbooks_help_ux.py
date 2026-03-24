@@ -8,7 +8,7 @@ def test_playbooks_help_describes_surface(capsys):
         playbooks_cli.main(["--help"])
     assert excinfo.value.code == 0
     out = capsys.readouterr().out
-    assert "Discover, run, and validate recommended playbooks and incubator workflows." in out
+    assert "Discover, run, and validate recommended adoption and rollout playbooks." in out
     assert "list" in out
     assert "run" in out
     assert "validate" in out
@@ -19,7 +19,7 @@ def test_playbooks_list_help_describes_catalog_filters(capsys):
         playbooks_cli.main(["list", "--help"])
     assert excinfo.value.code == 0
     out = capsys.readouterr().out
-    assert "List recommended playbooks, incubator workflows, and aliases." in out
+    assert "List recommended playbooks, legacy catalog entries, and aliases." in out
     assert "--recommended" in out
     assert "--legacy" in out
     assert "--aliases" in out

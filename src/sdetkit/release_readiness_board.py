@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-release-readiness-board.md"
+_PAGE_PATH = "docs/release-readiness.md"
 
-_SECTION_HEADER = "# Release readiness board (Day 19)"
+_SECTION_HEADER = "# Release readiness (Day 19)"
 _REQUIRED_SECTIONS = [
     "## Who should run Day 19",
     "## Score model",
@@ -20,19 +20,19 @@ _REQUIRED_SECTIONS = [
 ]
 
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit release-readiness-board --format json --strict",
-    "python -m sdetkit release-readiness-board --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
-    "python -m sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict",
+    "python -m sdetkit release-readiness --format json --strict",
+    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
+    "python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict",
     "python scripts/check_day19_release_readiness_board_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit release-readiness-board --format json --strict",
-    "python -m sdetkit release-readiness-board --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
+    "python -m sdetkit release-readiness --format json --strict",
+    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
     "python scripts/check_day19_release_readiness_board_contract.py --skip-evidence",
 ]
 
-_DAY19_DEFAULT_PAGE = """# Release readiness board (Day 19)
+_DAY19_DEFAULT_PAGE = """# Release readiness (Day 19)
 
 Day 19 composes Day 14 weekly trend health and Day 18 reliability posture into one release-candidate gate.
 
@@ -50,9 +50,9 @@ Day 19 composes Day 14 weekly trend health and Day 18 reliability posture into o
 ## Fast verification commands
 
 ```bash
-python -m sdetkit release-readiness-board --format json --strict
-python -m sdetkit release-readiness-board --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict
-python -m sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict
+python -m sdetkit release-readiness --format json --strict
+python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict
+python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict
 python scripts/check_day19_release_readiness_board_contract.py
 ```
 
@@ -138,7 +138,7 @@ def build_release_board(
         )
 
     return {
-        "name": "day19-release-readiness-board",
+        "name": "day19-release-readiness",
         "inputs": {
             "day18": {
                 "reliability_score": reliability_score,
@@ -325,7 +325,7 @@ def _write_execution_evidence(
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit release-readiness-board",
+        prog="sdetkit release-readiness",
         description="Build Day 19 release readiness signal from Day 18 and Day 14 summaries.",
     )
     parser.add_argument("--root", default=".")

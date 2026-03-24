@@ -151,11 +151,44 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
 def _is_hidden_cmd(name: str) -> bool:
     if name == "playbooks":
         return False
+    if name in {
+        "onboarding-time-upgrade",
+        "external-contribution-push",
+        "faq-objections",
+        "docs-qa",
+        "docs-nav",
+        "startup-use-case",
+        "enterprise-use-case",
+        "github-actions-quickstart",
+        "gitlab-ci-quickstart",
+        "quality-contribution-delta",
+        "release-readiness-board",
+        "release-narrative",
+        "trust-signal-upgrade",
+        "proof",
+    }:
+        return True
     if name.startswith("impact") and len(name) > 3 and name[3].isdigit():
         return True
     if name.endswith("-closeout"):
         return True
     return False
+
+
+def _filter_hidden_subcommands(parser: argparse.ArgumentParser) -> None:
+    for action in parser._actions:
+        if not hasattr(action, "_choices_actions"):
+            continue
+        filtered = []
+        for choice_action in list(getattr(action, "_choices_actions", [])):
+            name = getattr(choice_action, "dest", "")
+            help_text = getattr(choice_action, "help", None)
+            if help_text == argparse.SUPPRESS:
+                continue
+            if _is_hidden_cmd(name):
+                continue
+            filtered.append(choice_action)
+        action._choices_actions = filtered
 
 
 def _hide_help_subcommands(sub) -> None:
@@ -355,16 +388,26 @@ Start here:
     onb = sub.add_parser("onboarding", help="Role-based onboarding playbook")
     onb.add_argument("args", nargs=argparse.REMAINDER)
 
-    otu = sub.add_parser("onboarding-time-upgrade", help="Onboarding-time improvement playbook")
-    otu.add_argument("args", nargs=argparse.REMAINDER)
+    ono = sub.add_parser("onboarding-optimization", help="Onboarding optimization playbook")
+    ono.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "onboarding-time-upgrade",
+        help_text=argparse.SUPPRESS,
+        default_cmd="onboarding-optimization",
+    )
 
     cau = sub.add_parser("community-activation", help="Community activation rollout playbook")
     cau.add_argument("args", nargs=argparse.REMAINDER)
 
-    ecp = sub.add_parser(
-        "external-contribution-push", help="External contribution rollout playbook"
+    exc = sub.add_parser("external-contribution", help="External contribution rollout playbook")
+    exc.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "external-contribution-push",
+        help_text=argparse.SUPPRESS,
+        default_cmd="external-contribution",
     )
-    ecp.add_argument("args", nargs=argparse.REMAINDER)
 
     kpa = sub.add_parser("kpi-audit", help="KPI audit and tracking playbook")
     kpa.add_argument("args", nargs=argparse.REMAINDER)
@@ -692,8 +735,14 @@ Start here:
     d101.set_defaults(cmd="continuous-upgrade-cycle11-closeout")
     d101.add_argument("args", nargs=argparse.REMAINDER)
 
-    fqo = sub.add_parser("faq-objections", help="FAQ objections playbook")
-    fqo.add_argument("args", nargs=argparse.REMAINDER)
+    obj = sub.add_parser("objection-handling", help="Objection handling playbook")
+    obj.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "faq-objections",
+        help_text=argparse.SUPPRESS,
+        default_cmd="objection-handling",
+    )
 
     dmo = sub.add_parser("demo")
     dmo.add_argument("args", nargs=argparse.REMAINDER)
@@ -704,52 +753,119 @@ Start here:
     ctf = sub.add_parser("contributor-funnel", help="Contributor funnel playbook")
     ctf.add_argument("args", nargs=argparse.REMAINDER)
 
-    prf = sub.add_parser("proof", help="Proof and evidence workflows")
-    prf.add_argument("args", nargs=argparse.REMAINDER)
+    eva = sub.add_parser("evidence-assets", help="Evidence assets and trust collateral")
+    eva.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "proof",
+        help_text=argparse.SUPPRESS,
+        default_cmd="evidence-assets",
+    )
 
     ttp = sub.add_parser("triage-templates", help="Issue and triage template workflows")
     ttp.add_argument("args", nargs=argparse.REMAINDER)
 
-    dqa = sub.add_parser("docs-qa", help="Docs quality and link checks")
-    dqa.add_argument("args", nargs=argparse.REMAINDER)
+    dql = sub.add_parser("docs-quality", help="Docs quality and link checks")
+    dql.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "docs-qa",
+        help_text=argparse.SUPPRESS,
+        default_cmd="docs-quality",
+    )
 
     wrv = sub.add_parser("weekly-review", help="Weekly review playbook")
     wrv.add_argument("args", nargs=argparse.REMAINDER)
 
-    dnv = sub.add_parser("docs-nav", help="Docs navigation validation")
-    dnv.add_argument("args", nargs=argparse.REMAINDER)
+    dgo = sub.add_parser("docs-governance", help="Docs navigation validation")
+    dgo.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "docs-nav",
+        help_text=argparse.SUPPRESS,
+        default_cmd="docs-governance",
+    )
     rdm = sub.add_parser("roadmap")
     rdm.add_argument("args", nargs=argparse.REMAINDER)
 
-    suc = sub.add_parser("startup-use-case", help="Startup use-case playbook")
+    suc = sub.add_parser("startup-readiness", help="Startup readiness playbook")
     suc.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "startup-use-case",
+        help_text=argparse.SUPPRESS,
+        default_cmd="startup-readiness",
+    )
 
     spk = sub.add_parser("sdet-package")
     spk.add_argument("args", nargs=argparse.REMAINDER)
 
-    euc = sub.add_parser("enterprise-use-case", help="Enterprise use-case playbook")
-    euc.add_argument("args", nargs=argparse.REMAINDER)
+    eur = sub.add_parser("enterprise-readiness", help="Enterprise readiness playbook")
+    eur.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "enterprise-use-case",
+        help_text=argparse.SUPPRESS,
+        default_cmd="enterprise-readiness",
+    )
 
-    gha = sub.add_parser("github-actions-quickstart", help="GitHub Actions quickstart playbook")
+    gha = sub.add_parser("github-actions-onboarding", help="GitHub Actions onboarding playbook")
     gha.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "github-actions-quickstart",
+        help_text=argparse.SUPPRESS,
+        default_cmd="github-actions-onboarding",
+    )
 
-    glc = sub.add_parser("gitlab-ci-quickstart", help="GitLab CI quickstart playbook")
+    glc = sub.add_parser("gitlab-ci-onboarding", help="GitLab CI onboarding playbook")
     glc.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "gitlab-ci-quickstart",
+        help_text=argparse.SUPPRESS,
+        default_cmd="gitlab-ci-onboarding",
+    )
 
-    qcd = sub.add_parser("quality-contribution-delta", help="Quality contribution delta report")
-    qcd.add_argument("args", nargs=argparse.REMAINDER)
+    qcr = sub.add_parser("contribution-quality-report", help="Contribution quality report")
+    qcr.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "quality-contribution-delta",
+        help_text=argparse.SUPPRESS,
+        default_cmd="contribution-quality-report",
+    )
 
     rep = sub.add_parser("reliability-evidence-pack", help="Reliability evidence pack")
     rep.add_argument("args", nargs=argparse.REMAINDER)
 
-    rrb = sub.add_parser("release-readiness-board", help="Release readiness board")
-    rrb.add_argument("args", nargs=argparse.REMAINDER)
+    rrd = sub.add_parser("release-readiness", help="Release readiness board")
+    rrd.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "release-readiness-board",
+        help_text=argparse.SUPPRESS,
+        default_cmd="release-readiness",
+    )
 
-    rn = sub.add_parser("release-narrative", help="Release narrative playbook")
-    rn.add_argument("args", nargs=argparse.REMAINDER)
+    rnc = sub.add_parser("release-communications", help="Release communications playbook")
+    rnc.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "release-narrative",
+        help_text=argparse.SUPPRESS,
+        default_cmd="release-communications",
+    )
 
-    tsu = sub.add_parser("trust-signal-upgrade", help="Trust signal upgrade playbook")
-    tsu.add_argument("args", nargs=argparse.REMAINDER)
+    tsa = sub.add_parser("trust-assets", help="Trust assets playbook")
+    tsa.add_argument("args", nargs=argparse.REMAINDER)
+    _add_passthrough_subcommand(
+        sub,
+        "trust-signal-upgrade",
+        help_text=argparse.SUPPRESS,
+        default_cmd="trust-assets",
+    )
+    _filter_hidden_subcommands(p)
     return p, sub
 
 
@@ -827,7 +943,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "onboarding":
         return onboarding.main(list(argv[1:]))
 
-    if argv and argv[0] == "onboarding-time-upgrade":
+    if argv and argv[0] in {"onboarding-optimization", "onboarding-time-upgrade"}:
         return onboarding_time_upgrade.main(list(argv[1:]))
 
     if argv and argv[0] == "phase-boost":
@@ -839,7 +955,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "community-activation":
         return community_activation.main(list(argv[1:]))
 
-    if argv and argv[0] == "external-contribution-push":
+    if argv and argv[0] in {"external-contribution", "external-contribution-push"}:
         return external_contribution_push.main(list(argv[1:]))
 
     if argv and argv[0] == "kpi-audit":
@@ -1120,7 +1236,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "continuous-upgrade-cycle11-closeout":
         return continuous_upgrade_cycle11_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "faq-objections":
+    if argv and argv[0] in {"objection-handling", "faq-objections"}:
         return faq_objections.main(list(argv[1:]))
 
     if argv and argv[0] == "first-contribution":
@@ -1132,51 +1248,51 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "contributor-funnel":
         return contributor_funnel.main(list(argv[1:]))
 
-    if argv and argv[0] == "proof":
+    if argv and argv[0] in {"evidence-assets", "proof"}:
         return proof.main(list(argv[1:]))
 
     if argv and argv[0] == "triage-templates":
         return triage_templates.main(list(argv[1:]))
 
-    if argv and argv[0] == "docs-qa":
+    if argv and argv[0] in {"docs-quality", "docs-qa"}:
         return docs_qa.main(list(argv[1:]))
 
     if argv and argv[0] == "weekly-review":
         return weekly_review.main(list(argv[1:]))
 
-    if argv and argv[0] == "docs-nav":
+    if argv and argv[0] in {"docs-governance", "docs-nav"}:
         return docs_navigation.main(list(argv[1:]))
     if argv and argv[0] == "roadmap":
         return roadmap.main(list(argv[1:]))
 
-    if argv and argv[0] == "startup-use-case":
+    if argv and argv[0] in {"startup-readiness", "startup-use-case"}:
         return startup_use_case.main(list(argv[1:]))
 
     if argv and argv[0] == "sdet-package":
         return sdet_package.main(list(argv[1:]))
 
-    if argv and argv[0] == "enterprise-use-case":
+    if argv and argv[0] in {"enterprise-readiness", "enterprise-use-case"}:
         return enterprise_use_case.main(list(argv[1:]))
 
-    if argv and argv[0] == "github-actions-quickstart":
+    if argv and argv[0] in {"github-actions-onboarding", "github-actions-quickstart"}:
         return github_actions_quickstart.main(list(argv[1:]))
 
-    if argv and argv[0] == "gitlab-ci-quickstart":
+    if argv and argv[0] in {"gitlab-ci-onboarding", "gitlab-ci-quickstart"}:
         return gitlab_ci_quickstart.main(list(argv[1:]))
 
-    if argv and argv[0] == "quality-contribution-delta":
+    if argv and argv[0] in {"contribution-quality-report", "quality-contribution-delta"}:
         return quality_contribution_delta.main(list(argv[1:]))
 
     if argv and argv[0] == "reliability-evidence-pack":
         return reliability_evidence_pack.main(list(argv[1:]))
 
-    if argv and argv[0] == "release-readiness-board":
+    if argv and argv[0] in {"release-readiness", "release-readiness-board"}:
         return release_readiness_board.main(list(argv[1:]))
 
-    if argv and argv[0] == "release-narrative":
+    if argv and argv[0] in {"release-communications", "release-narrative"}:
         return release_narrative.main(list(argv[1:]))
 
-    if argv and argv[0] == "trust-signal-upgrade":
+    if argv and argv[0] in {"trust-assets", "trust-signal-upgrade"}:
         return trust_signal_upgrade.main(list(argv[1:]))
 
     p, sub = _build_root_parser()
@@ -1350,13 +1466,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd == "onboarding":
         return onboarding.main(ns.args)
 
-    if ns.cmd == "onboarding-time-upgrade":
+    if ns.cmd == "onboarding-optimization":
         return onboarding_time_upgrade.main(ns.args)
 
     if ns.cmd == "community-activation":
         return community_activation.main(ns.args)
 
-    if ns.cmd == "external-contribution-push":
+    if ns.cmd == "external-contribution":
         return external_contribution_push.main(ns.args)
 
     if ns.cmd == "kpi-audit":
@@ -1539,7 +1655,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd == "continuous-upgrade-cycle11-closeout":
         return continuous_upgrade_cycle11_closeout.main(ns.args)
 
-    if ns.cmd == "faq-objections":
+    if ns.cmd == "objection-handling":
         return faq_objections.main(ns.args)
 
     if ns.cmd == "demo":
@@ -1551,51 +1667,51 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd == "contributor-funnel":
         return contributor_funnel.main(ns.args)
 
-    if ns.cmd == "proof":
+    if ns.cmd == "evidence-assets":
         return proof.main(ns.args)
 
     if ns.cmd == "triage-templates":
         return triage_templates.main(ns.args)
 
-    if ns.cmd == "docs-qa":
+    if ns.cmd == "docs-quality":
         return docs_qa.main(ns.args)
 
     if ns.cmd == "weekly-review":
         return weekly_review.main(ns.args)
 
-    if ns.cmd == "docs-nav":
+    if ns.cmd == "docs-governance":
         return docs_navigation.main(ns.args)
     if ns.cmd == "roadmap":
         return roadmap.main(ns.args)
 
-    if ns.cmd == "startup-use-case":
+    if ns.cmd == "startup-readiness":
         return startup_use_case.main(ns.args)
 
     if ns.cmd == "sdet-package":
         return sdet_package.main(ns.args)
 
-    if ns.cmd == "enterprise-use-case":
+    if ns.cmd == "enterprise-readiness":
         return enterprise_use_case.main(ns.args)
 
-    if ns.cmd == "github-actions-quickstart":
+    if ns.cmd == "github-actions-onboarding":
         return github_actions_quickstart.main(ns.args)
 
-    if ns.cmd == "gitlab-ci-quickstart":
+    if ns.cmd == "gitlab-ci-onboarding":
         return gitlab_ci_quickstart.main(ns.args)
 
-    if ns.cmd == "quality-contribution-delta":
+    if ns.cmd == "contribution-quality-report":
         return quality_contribution_delta.main(ns.args)
 
     if ns.cmd == "reliability-evidence-pack":
         return reliability_evidence_pack.main(ns.args)
 
-    if ns.cmd == "release-readiness-board":
+    if ns.cmd == "release-readiness":
         return release_readiness_board.main(ns.args)
 
-    if ns.cmd == "release-narrative":
+    if ns.cmd == "release-communications":
         return release_narrative.main(ns.args)
 
-    if ns.cmd == "trust-signal-upgrade":
+    if ns.cmd == "trust-assets":
         return trust_signal_upgrade.main(ns.args)
 
     if ns.cmd == "apiget":

@@ -10,21 +10,22 @@ from pathlib import Path
 
 RECOMMENDED_PLAYBOOKS: list[str] = [
     "onboarding",
+    "onboarding-optimization",
     "weekly-review",
-    "proof",
+    "evidence-assets",
     "demo",
     "first-contribution",
     "contributor-funnel",
     "triage-templates",
-    "startup-use-case",
-    "enterprise-use-case",
-    "github-actions-quickstart",
-    "gitlab-ci-quickstart",
-    "quality-contribution-delta",
+    "startup-readiness",
+    "enterprise-readiness",
+    "github-actions-onboarding",
+    "gitlab-ci-onboarding",
+    "contribution-quality-report",
     "reliability-evidence-pack",
-    "faq-objections",
+    "objection-handling",
     "community-activation",
-    "external-contribution-push",
+    "external-contribution",
     "kpi-audit",
 ]
 
@@ -47,14 +48,14 @@ CORE_COMMANDS: set[str] = {
 }
 
 DOC_AND_GOV_COMMANDS: set[str] = {
-    "docs-qa",
-    "docs-nav",
+    "docs-quality",
+    "docs-governance",
     "roadmap",
     "policy",
     "evidence",
-    "release-narrative",
-    "release-readiness-board",
-    "trust-signal-upgrade",
+    "release-communications",
+    "release-readiness",
+    "trust-assets",
 }
 
 RESERVED_NAMES: set[str] = (
@@ -79,6 +80,32 @@ _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
     "day49_weekly_review_closeout": "weekly-review-closeout",
     "day50_execution_prioritization_closeout": "execution-prioritization-closeout",
     "day65_weekly_review_closeout": "weekly-review-closeout-cycle2",
+}
+
+_PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {
+    "evidence-assets": "proof",
+    "onboarding-optimization": "onboarding_time_upgrade",
+    "external-contribution": "external_contribution_push",
+    "objection-handling": "faq_objections",
+    "startup-readiness": "startup_use_case",
+    "enterprise-readiness": "enterprise_use_case",
+    "github-actions-onboarding": "github_actions_quickstart",
+    "gitlab-ci-onboarding": "gitlab_ci_quickstart",
+    "contribution-quality-report": "quality_contribution_delta",
+    "release-communications": "release_narrative",
+}
+
+_PLAYBOOK_ALIAS_TO_CANONICAL: dict[str, str] = {
+    "proof": "evidence-assets",
+    "onboarding-time-upgrade": "onboarding-optimization",
+    "external-contribution-push": "external-contribution",
+    "faq-objections": "objection-handling",
+    "startup-use-case": "startup-readiness",
+    "enterprise-use-case": "enterprise-readiness",
+    "github-actions-quickstart": "github-actions-onboarding",
+    "gitlab-ci-quickstart": "gitlab-ci-onboarding",
+    "quality-contribution-delta": "contribution-quality-report",
+    "release-narrative": "release-communications",
 }
 
 
@@ -151,19 +178,31 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     alias_to_canonical: dict[str, str] = {}
 
     for cmd in RECOMMENDED_PLAYBOOKS:
-        mod = _cmd_to_mod(cmd)
+        mod = (
+            _PLAYBOOK_MODULE_BY_CANONICAL[cmd]
+            if cmd in _PLAYBOOK_MODULE_BY_CANONICAL
+            else _cmd_to_mod(cmd)
+        )
         if (pkg_dir / f"{mod}.py").exists():
             cmd_to_mod[cmd] = mod
 
+    for alias, alias_canonical in _PLAYBOOK_ALIAS_TO_CANONICAL.items():
+        alias_mod = cmd_to_mod.get(alias_canonical)
+        if alias_mod is not None:
+            alias_to_canonical[alias] = alias_canonical
+            cmd_to_mod[alias] = alias_mod
+
     for mod in _discover_legacy_modules(pkg_dir):
-        canonical = _PRODUCT_CANONICAL_BY_LEGACY_MODULE.get(mod)
-        if canonical is None:
-            canonical = _alias_for_series_module(mod) or _mod_to_cmd(mod)
+        legacy_canonical = (
+            _PRODUCT_CANONICAL_BY_LEGACY_MODULE.get(mod)
+            or _alias_for_series_module(mod)
+            or _mod_to_cmd(mod)
+        )
 
-        if canonical in cmd_to_mod and cmd_to_mod[canonical] != mod:
-            canonical = _mod_to_cmd(mod)
+        if legacy_canonical in cmd_to_mod and cmd_to_mod[legacy_canonical] != mod:
+            legacy_canonical = _mod_to_cmd(mod)
 
-        cmd_to_mod[canonical] = mod
+        cmd_to_mod[legacy_canonical] = mod
 
     return cmd_to_mod, alias_to_canonical
 
@@ -232,7 +271,11 @@ def _list_payload(
     legacy = sorted(_apply_search_list(legacy, search))
 
     aliases = _apply_search_aliases(dict(sorted(alias_to_canonical.items())), search)
-    all_names = sorted(_apply_search_list(sorted(cmd_to_mod.keys()), search))
+    all_names = sorted(
+        _apply_search_list(
+            sorted([n for n in cmd_to_mod.keys() if n not in alias_to_canonical]), search
+        )
+    )
 
     if want_recommended:
         payload: dict[str, object] = {
@@ -427,14 +470,14 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     p = argparse.ArgumentParser(
         prog="sdetkit playbooks",
-        description="Discover, run, and validate recommended playbooks and incubator workflows.",
+        description="Discover, run, and validate recommended adoption and rollout playbooks.",
     )
     sub = p.add_subparsers(dest="cmd", required=True)
 
     listp = sub.add_parser(
         "list",
-        help="List recommended playbooks, incubator workflows, and aliases.",
-        description="List recommended playbooks, incubator workflows, and aliases.",
+        help="List recommended playbooks, legacy catalog entries, and aliases.",
+        description="List recommended playbooks, legacy catalog entries, and aliases.",
     )
     listp.add_argument("--format", choices=["text", "json"], default="text")
     g = listp.add_mutually_exclusive_group()

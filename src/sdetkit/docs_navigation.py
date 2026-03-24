@@ -44,8 +44,8 @@ _DAY11_JOURNEYS_BLOCK = """### Top journeys
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="sdetkit docs-nav",
-        description="Render and validate a docs-navigation report.",
+        prog="sdetkit docs-governance",
+        description="Render and validate a docs governance report.",
     )
     p.add_argument(
         "--format",
@@ -57,7 +57,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--output",
         default="",
-        help="Optional file path to also write the rendered docs-navigation report.",
+        help="Optional file path to also write the rendered docs-governance report.",
     )
     p.add_argument(
         "--strict",
@@ -174,7 +174,7 @@ def build_docs_navigation_status(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day11-docs-navigation",
+        "name": "docs-governance",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,
@@ -187,7 +187,7 @@ def build_docs_navigation_status(root: str = ".") -> dict[str, Any]:
             "open_docs_home": "docs/index.md",
             "validate": "sdetkit docs-nav --format json --strict",
             "write_defaults": "sdetkit docs-nav --write-defaults --format json --strict",
-            "artifact": "sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md",
+            "artifact": "sdetkit docs-nav --format markdown --output docs/artifacts/docs-governance-sample.md",
         },
     }
 

@@ -12,7 +12,7 @@ def test_enterprise_use_case_default_text(capsys):
     rc = enterprise_use_case.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Enterprise use-case report" in out
+    assert "Enterprise readiness report" in out
     assert "Required sections:" in out
     assert "Page:" in out
 
@@ -29,7 +29,7 @@ def test_enterprise_use_case_markdown_output_uses_productized_headings(capsys):
     rc = enterprise_use_case.main(["--format", "markdown"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "# Enterprise use-case report" in out
+    assert "# Enterprise readiness report" in out
     assert "## Required sections" in out
     assert "## Required commands" in out
     assert "## Use-case coverage gaps" in out
@@ -41,7 +41,7 @@ def test_enterprise_use_case_json_and_strict_success(capsys):
     rc = enterprise_use_case.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day13-enterprise-use-case"
+    assert data["name"] == "day13-enterprise-readiness"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 15
 
@@ -146,7 +146,7 @@ def test_enterprise_use_case_execute_strict_fails_on_command_error(monkeypatch, 
 
 
 def test_main_cli_dispatches_enterprise_use_case(capsys):
-    rc = cli.main(["enterprise-use-case", "--format", "text"])
+    rc = cli.main(["enterprise-readiness", "--format", "text"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Enterprise use-case report" in out
+    assert "Enterprise readiness report" in out

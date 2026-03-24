@@ -12,7 +12,7 @@ def test_startup_use_case_default_text(capsys):
     rc = startup_use_case.main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Startup use-case report" in out
+    assert "Startup readiness report" in out
     assert "Required sections:" in out
     assert "Page:" in out
 
@@ -29,7 +29,7 @@ def test_startup_use_case_markdown_output_uses_productized_headings(capsys):
     rc = startup_use_case.main(["--format", "markdown"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "# Startup use-case report" in out
+    assert "# Startup readiness report" in out
     assert "## Required sections" in out
     assert "## Required commands" in out
     assert "## Use-case coverage gaps" in out
@@ -41,7 +41,7 @@ def test_startup_use_case_json_and_strict_success(capsys):
     rc = startup_use_case.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day12-startup-use-case"
+    assert data["name"] == "day12-startup-readiness"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 14
 
@@ -92,7 +92,7 @@ def test_startup_use_case_emit_pack(tmp_path, capsys):
 
 
 def test_main_cli_dispatches_startup_use_case(capsys):
-    rc = cli.main(["startup-use-case", "--format", "text"])
+    rc = cli.main(["startup-readiness", "--format", "text"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Startup use-case report" in out
+    assert "Startup readiness report" in out

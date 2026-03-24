@@ -8,7 +8,7 @@ from sdetkit import trust_signal_upgrade as tsu
 
 
 def _write_day22_page(root: Path) -> None:
-    path = root / "docs/integrations-trust-signal-upgrade.md"
+    path = root / "docs/trust-assets.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(tsu._DAY22_DEFAULT_PAGE, encoding="utf-8")
 
@@ -55,7 +55,7 @@ def test_trust_signal_json(tmp_path: Path, capsys) -> None:
     rc = tsu.main(["--root", str(tmp_path), "--format", "json"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day22-trust-signal-upgrade"
+    assert out["name"] == "day22-trust-assets"
     assert out["summary"]["trust_label"] == "strong"
     assert out["summary"]["trust_score"] == 100.0
     assert out["score"] == 100.0
@@ -89,7 +89,7 @@ def test_trust_signal_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
-    path = tmp_path / "docs/integrations-trust-signal-upgrade.md"
+    path = tmp_path / "docs/trust-assets.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("# Trust signal upgrade (Day 22)\n", encoding="utf-8")
 
@@ -119,6 +119,6 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _write_repo_basics(tmp_path)
     _write_day22_page(tmp_path)
 
-    rc = cli.main(["trust-signal-upgrade", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["trust-assets", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 22 trust signal upgrade" in capsys.readouterr().out

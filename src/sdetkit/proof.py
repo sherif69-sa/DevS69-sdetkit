@@ -34,20 +34,20 @@ _DAY3_PROOF_FLOW = [
 ]
 
 _DAY3_HINTS = [
-    "Capture terminal screenshots immediately after each successful proof command.",
-    "Use --strict in CI to enforce that all three proof snapshots are valid.",
-    "Use --format markdown --output proof.md to publish a shareable evidence bundle.",
+    "Capture terminal screenshots immediately after each successful evidence-assets command.",
+    "Use --strict in CI to enforce that all three evidence snapshots are valid.",
+    "Use --format markdown --output evidence-assets.md to publish a shareable evidence bundle.",
 ]
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="sdetkit proof")
+    p = argparse.ArgumentParser(prog="sdetkit evidence-assets")
     p.add_argument("--format", choices=["text", "markdown", "json"], default="text")
     p.add_argument("--output", default="", help="Optional output file path.")
     p.add_argument(
         "--execute",
         action="store_true",
-        help="Run each proof command and attach pass/fail status.",
+        help="Run each evidence command and attach pass/fail status.",
     )
     p.add_argument(
         "--timeout-seconds",
@@ -58,7 +58,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--strict",
         action="store_true",
-        help="Return non-zero if any proof command fails.",
+        help="Return non-zero if any evidence command fails.",
     )
     return p
 
@@ -179,7 +179,7 @@ def _as_markdown(execution: list[dict[str, object]]) -> str:
 
 def _as_json(execution: list[dict[str, object]]) -> str:
     payload = {
-        "name": "proof-pack",
+        "name": "evidence-assets-pack",
         "steps": _DAY3_PROOF_FLOW,
         "execution": execution,
         "hints": _DAY3_HINTS,

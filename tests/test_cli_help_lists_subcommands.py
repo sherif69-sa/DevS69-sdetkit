@@ -27,25 +27,38 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "author" in out
     assert "maintenance" in out
     assert "agent" in out
-    assert "proof" in out
-    assert "docs-qa" in out
+    assert "evidence-assets" in out
+    assert "proof" not in out
+    assert "docs-quality" in out
+    assert "docs-qa" not in out
     assert "weekly-review" in out
     assert "first-contribution" in out
     assert "contributor-funnel" in out
     assert "triage-templates" in out
-    assert "docs-nav" in out
-    assert "startup-use-case" in out
-    assert "enterprise-use-case" in out
-    assert "github-actions-quickstart" in out
-    assert "gitlab-ci-quickstart" in out
-    assert "quality-contribution-delta" in out
+    assert "docs-governance" in out
+    assert "docs-nav" not in out
+    assert "startup-readiness" in out
+    assert "startup-use-case" not in out
+    assert "enterprise-readiness" in out
+    assert "enterprise-use-case" not in out
+    assert "github-actions-onboarding" in out
+    assert "github-actions-quickstart" not in out
+    assert "gitlab-ci-onboarding" in out
+    assert "gitlab-ci-quickstart" not in out
+    assert "contribution-quality-report" in out
+    assert "quality-contribution-delta" not in out
     assert "reliability-evidence-pack" in out
-    assert "release-readiness-board" in out
-    assert "release-narrative" in out
-    assert "trust-signal-upgrade" in out
-    assert "faq-objections" in out
+    assert "release-readiness" in out
+    assert "release-readiness-board" not in out
+    assert "release-communications" in out
+    assert "release-narrative" not in out
+    assert "trust-assets" in out
+    assert "trust-signal-upgrade" not in out
+    assert "objection-handling" in out
+    assert "faq-objections" not in out
     assert "community-activation" in out
-    assert "external-contribution-push" in out
+    assert "external-contribution" in out
+    assert "external-contribution-push" not in out
     assert "kpi-audit" in out
     assert "day29-phase1-hardening" not in out
     assert "day30-phase1-wrap" not in out
@@ -73,6 +86,16 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
 
     j = _json.loads(r3.stdout)
     assert "playbooks" in j
+    assert "startup-readiness" in j["playbooks"]
+    assert "enterprise-readiness" in j["playbooks"]
+    assert "external-contribution" in j["playbooks"]
+    assert "objection-handling" in j["playbooks"]
+    assert "onboarding-optimization" in j["playbooks"]
+    assert j["aliases"]["startup-use-case"] == "startup-readiness"
+    assert j["aliases"]["enterprise-use-case"] == "enterprise-readiness"
+    assert j["aliases"]["external-contribution-push"] == "external-contribution"
+    assert j["aliases"]["faq-objections"] == "objection-handling"
+    assert j["aliases"]["onboarding-time-upgrade"] == "onboarding-optimization"
     assert "phase1-hardening" in j["playbooks"]
     assert "day29-phase1-hardening" not in j["playbooks"]
     r2 = subprocess.run(

@@ -114,7 +114,7 @@
     "docs_index": "docs/index.md",
     "readme": "README.md"
   },
-  "name": "day22-trust-signal-upgrade",
+  "name": "day22-trust-assets",
   "policy_checks": {
     "policy_baseline_exists": false,
     "security_doc_exists": false,
@@ -125,8 +125,20 @@
     "Ensure policy documents exist and are linked from README governance references.",
     "Keep CI/security/pages workflows and docs index trust references present for reviewers."
   ],
-  "score": 100.0,
-  "strict_failures": [],
+  "score": 0.0,
+  "strict_failures": [
+    "# Trust assets (Day 22)",
+    "## Who should run Day 22",
+    "## Trust signal inputs",
+    "## Fast verification commands",
+    "## Scoring model",
+    "## Execution evidence mode",
+    "## Visibility checklist",
+    "python -m sdetkit trust-assets --format json --strict",
+    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
+    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict",
+    "python scripts/check_day22_trust_signal_upgrade_contract.py"
+  ],
   "summary": {
     "category_coverage": {
       "badges": {
