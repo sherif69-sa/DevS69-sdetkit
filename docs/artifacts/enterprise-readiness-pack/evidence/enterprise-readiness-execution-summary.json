@@ -1,5 +1,5 @@
 {
-  "name": "day13-enterprise-execution",
+  "name": "enterprise-readiness-execution",
   "total_commands": 5,
   "passed_commands": 5,
   "failed_commands": 0,
@@ -41,7 +41,7 @@
       "command": "python scripts/check_day13_enterprise_use_case_contract.py",
       "returncode": 0,
       "ok": true,
-      "stdout": "day13-enterprise-use-case-contract check passed\n",
+      "stdout": "enterprise-readiness-contract check passed\n",
       "stderr": ""
     }
   ]

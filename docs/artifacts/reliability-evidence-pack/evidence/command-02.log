@@ -2,6 +2,6 @@ command: python scripts/check_name18_reliability_evidence_pack_contract.py --ski
 returncode: 0
 ok: True
 --- stdout ---
-day18-reliability-evidence-pack-contract check passed
+reliability-evidence-pack-contract check passed
 
 --- stderr ---

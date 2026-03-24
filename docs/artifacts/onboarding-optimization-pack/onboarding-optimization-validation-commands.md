@@ -1,4 +1,4 @@
-# Name 24 validation commands
+# Onboarding optimization validation commands
 
 ```bash
 python -m sdetkit onboarding-optimization --format json --strict

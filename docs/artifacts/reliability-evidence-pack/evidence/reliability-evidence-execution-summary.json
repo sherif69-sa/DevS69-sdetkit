@@ -9,7 +9,7 @@
       "command": "python -m sdetkit reliability-evidence-pack --format json --strict",
       "returncode": 0,
       "ok": true,
-      "stdout": "{\n  \"emitted_files\": [],\n  \"inputs\": {\n    \"day15\": {\n      \"pass_rate\": 100.0,\n      \"score\": 100.0,\n      \"strict\": true\n    },\n    \"day16\": {\n      \"pass_rate\": 100.0,\n      \"score\": 100.0,\n      \"strict\": true\n    },\n    \"day17\": {\n      \"stability_score\": 100.0,\n      \"strict_failures\": [],\n      \"velocity_score\": 75.44\n    }\n  },\n  \"missing\": [],\n  \"name\": \"day18-reliability-evidence-pack\",\n  \"page\": \"docs/reliability-evidence-pack.md\",\n  \"recommendations\": [\n    \"Reliability posture is strong; keep current CI and closeout operating cadence.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"reliability_score\": 95.09,\n    \"strict_all_green\": true\n  },\n  \"touched_files\": []\n}\n",
+      "stdout": "{\n  \"emitted_files\": [],\n  \"inputs\": {\n    \"day15\": {\n      \"pass_rate\": 100.0,\n      \"score\": 100.0,\n      \"strict\": true\n    },\n    \"day16\": {\n      \"pass_rate\": 100.0,\n      \"score\": 100.0,\n      \"strict\": true\n    },\n    \"day17\": {\n      \"stability_score\": 100.0,\n      \"strict_failures\": [],\n      \"velocity_score\": 75.44\n    }\n  },\n  \"missing\": [],\n  \"name\": \"reliability-evidence-pack\",\n  \"page\": \"docs/reliability-evidence-pack.md\",\n  \"recommendations\": [\n    \"Reliability posture is strong; keep current CI and closeout operating cadence.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"reliability_score\": 95.09,\n    \"strict_all_green\": true\n  },\n  \"touched_files\": []\n}\n",
       "stderr": ""
     },
     {
@@ -17,7 +17,7 @@
       "command": "python scripts/check_name18_reliability_evidence_pack_contract.py --skip-evidence",
       "returncode": 0,
       "ok": true,
-      "stdout": "day18-reliability-evidence-pack-contract check passed\n",
+      "stdout": "reliability-evidence-pack-contract check passed\n",
       "stderr": ""
     },
     {

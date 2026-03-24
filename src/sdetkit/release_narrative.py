@@ -155,7 +155,7 @@ def build_release_narrative(
     }
 
     return {
-        "name": "day20-release-narrative",
+        "name": "release-communications",
         "inputs": {
             "day19_summary": day19_label or str(day19_summary),
             "changelog": changelog_label or str(changelog),
@@ -330,7 +330,7 @@ def _write_execution_evidence(
     out.mkdir(parents=True, exist_ok=True)
     summary = out / "release-communications-execution-summary.json"
     payload = {
-        "name": "day20-release-narrative-execution",
+        "name": "release-communications-execution",
         "total_commands": len(rows),
         "passed_commands": len([r for r in rows if r["ok"]]),
         "failed_commands": len([r for r in rows if not r["ok"]]),

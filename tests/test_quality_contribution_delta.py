@@ -103,7 +103,7 @@ def test_delta_default_json(tmp_path, capsys):
     )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day17-contribution-quality-report"
+    assert data["name"] == "contribution-quality-report"
     assert data["contributions"]["deltas"]["traffic"] == 400
     assert data["contributions"]["delta_percent"]["traffic"] == 22.22
     assert "velocity_score" in data["contributions"]

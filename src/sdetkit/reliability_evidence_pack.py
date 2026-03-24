@@ -160,7 +160,7 @@ def build_reliability_pack(
         )
 
     return {
-        "name": "day18-reliability-evidence-pack",
+        "name": "reliability-evidence-pack",
         "inputs": {
             "day15": {
                 "score": float(day15["score"]),
@@ -304,7 +304,7 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
 
     summary = root / "reliability-evidence-execution-summary.json"
     payload = {
-        "name": "day18-reliability-execution",
+        "name": "reliability-evidence-execution",
         "total_commands": len(results),
         "passed_commands": len([r for r in results if r.get("ok")]),
         "failed_commands": len([r for r in results if not r.get("ok")]),

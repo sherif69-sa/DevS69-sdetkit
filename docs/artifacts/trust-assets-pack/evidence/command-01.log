@@ -103,14 +103,14 @@ ok: True
     {
       "category": "governance",
       "evidence": "name-22-ultra-upgrade-report.md",
-      "key": "docs_index_day22",
+      "key": "docs_index_trust_assets",
       "passed": true,
       "weight": 2
     }
   ],
   "governance_checks": {
     "ci_workflow": true,
-    "docs_index_day22": true,
+    "docs_index_trust_assets": true,
     "pages_workflow": true,
     "security_workflow": true
   },
@@ -118,7 +118,7 @@ ok: True
     "docs_index": "docs/index.md",
     "readme": "README.md"
   },
-  "name": "day22-trust-signal-upgrade",
+  "name": "trust-assets",
   "policy_checks": {
     "policy_baseline_exists": true,
     "security_doc_exists": true,

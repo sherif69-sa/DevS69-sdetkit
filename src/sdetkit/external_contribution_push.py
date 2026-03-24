@@ -247,7 +247,7 @@ def build_external_contribution_push_summary(
         )
 
     return {
-        "name": "day26-external-contribution",
+        "name": "external-contribution",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,

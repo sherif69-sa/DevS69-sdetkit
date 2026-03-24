@@ -115,14 +115,14 @@ _SIGNALS = [
         "source": "onboarding_module",
     },
     {
-        "check_id": "readme_day24_link",
+        "check_id": "readme_onboarding_optimization_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "docs/onboarding-optimization.md",
         "source": "readme",
     },
     {
-        "check_id": "docs_index_day24_link",
+        "check_id": "docs_index_onboarding_optimization_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "impact-24-ultra-upgrade-report.md",
@@ -249,7 +249,7 @@ def build_onboarding_time_summary(
         )
 
     return {
-        "name": "day24-onboarding-optimization",
+        "name": "onboarding-optimization",
         "summary": {
             "onboarding_score": score,
             "readiness": "strong" if score >= 90 and not critical_failures else "review",

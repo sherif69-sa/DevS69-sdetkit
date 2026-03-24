@@ -23,7 +23,7 @@ def test_faq_json(tmp_path: Path, capsys) -> None:
     assert rc == 0
 
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day23-objection-handling"
+    assert out["name"] == "objection-handling"
     assert out["summary"]["faq_score"] == 100.0
 
 

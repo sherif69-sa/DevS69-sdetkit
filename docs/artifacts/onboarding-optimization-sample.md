@@ -1,4 +1,4 @@
-Name 24 onboarding time upgrade
+Onboarding optimization onboarding time upgrade
 
 Onboarding score: 70.0
 Readiness: review
@@ -12,6 +12,6 @@ Checks:
 - [x] onboarding_role_support (onboarding, w=15)
 - [x] onboarding_platform_support (onboarding, w=15)
 - [x] onboarding_quick_start_command (onboarding, w=10)
-- [ ] readme_day24_link (discoverability, w=10)
-- [ ] docs_index_day24_link (discoverability, w=10)
+- [ ] readme_onboarding_optimization_link (discoverability, w=10)
+- [ ] docs_index_onboarding_optimization_link (discoverability, w=10)
 - [ ] readme_onboarding_command (discoverability, w=10)

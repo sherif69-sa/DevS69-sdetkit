@@ -134,7 +134,7 @@ def build_delta_report(
     recommendations = _build_recommendations(quality_deltas, contribution_deltas)
 
     return {
-        "name": "day17-contribution-quality-report",
+        "name": "contribution-quality-report",
         "quality": {
             "week1": week1.kpis,
             "week2": week2.kpis,

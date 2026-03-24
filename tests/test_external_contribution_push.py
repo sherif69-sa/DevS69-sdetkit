@@ -28,7 +28,7 @@ def test_external_contribution_push_json(tmp_path: Path, capsys) -> None:
 
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day26-external-contribution"
+    assert out["name"] == "external-contribution"
     assert out["summary"]["activation_score"] == 100.0
 
 

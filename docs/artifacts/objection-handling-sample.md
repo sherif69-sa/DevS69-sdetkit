@@ -1,4 +1,4 @@
-# Name 23 FAQ and objections summary
+# Objection handling FAQ and objections summary
 
 - FAQ score: **100.0**
 - Readiness: **strong**
@@ -15,8 +15,8 @@
 | `when_to_use_clarity` | adoption | 10 | ✅ |
 | `when_not_to_use_clarity` | adoption | 10 | ✅ |
 | `objection_responses` | adoption | 10 | ✅ |
-| `readme_day23_link` | discoverability | 8 | ✅ |
-| `docs_index_day23` | discoverability | 7 | ✅ |
+| `readme_objection_handling_link` | discoverability | 8 | ✅ |
+| `docs_index_objection_handling` | discoverability | 7 | ✅ |
 | `release_narrative_alignment` | operational | 5 | ✅ |
 
 ## Recommendations

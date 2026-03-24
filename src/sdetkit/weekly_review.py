@@ -6,18 +6,18 @@ from dataclasses import dataclass
 from pathlib import Path
 
 _CANONICAL_ARTIFACT_FALLBACKS: dict[str, str] = {
-    "docs/artifacts/evidence-assets-sample.md": "docs/artifacts/day3-proof-sample.md",
-    "docs/artifacts/docs-governance-sample.md": "docs/artifacts/day11-docs-navigation-sample.md",
-    "docs/artifacts/startup-readiness-sample.md": "docs/artifacts/day12-startup-use-case-sample.md",
-    "docs/artifacts/enterprise-readiness-sample.md": "docs/artifacts/day13-enterprise-use-case-sample.md",
-    "docs/artifacts/contribution-quality-report-sample.md": "docs/artifacts/day17-quality-contribution-delta-sample.md",
-    "docs/artifacts/reliability-evidence-pack-sample.md": "docs/artifacts/day18-reliability-evidence-pack-sample.md",
-    "docs/artifacts/release-readiness-sample.md": "docs/artifacts/day19-release-readiness-board-sample.md",
-    "docs/artifacts/release-communications-sample.md": "docs/artifacts/day20-release-narrative-sample.md",
-    "docs/artifacts/trust-assets-sample.md": "docs/artifacts/day22-trust-signal-upgrade-sample.md",
-    "docs/artifacts/objection-handling-sample.md": "docs/artifacts/day23-faq-objections-sample.md",
-    "docs/artifacts/onboarding-optimization-sample.md": "docs/artifacts/day24-onboarding-time-upgrade-sample.md",
-    "docs/artifacts/external-contribution-sample.md": "docs/artifacts/day26-external-contribution-push-sample.md",
+    "docs/artifacts/evidence-assets-sample.md": "docs/artifacts/evidence-assets-sample.md",
+    "docs/artifacts/docs-governance-sample.md": "docs/artifacts/docs-governance-sample.md",
+    "docs/artifacts/startup-readiness-sample.md": "docs/artifacts/startup-readiness-sample.md",
+    "docs/artifacts/enterprise-readiness-sample.md": "docs/artifacts/enterprise-readiness-sample.md",
+    "docs/artifacts/contribution-quality-report-sample.md": "docs/artifacts/contribution-quality-report-sample.md",
+    "docs/artifacts/reliability-evidence-pack-sample.md": "docs/artifacts/reliability-evidence-pack-sample.md",
+    "docs/artifacts/release-readiness-sample.md": "docs/artifacts/release-readiness-sample.md",
+    "docs/artifacts/release-communications-sample.md": "docs/artifacts/release-communications-sample.md",
+    "docs/artifacts/trust-assets-sample.md": "docs/artifacts/trust-assets-sample.md",
+    "docs/artifacts/objection-handling-sample.md": "docs/artifacts/objection-handling-sample.md",
+    "docs/artifacts/onboarding-optimization-sample.md": "docs/artifacts/onboarding-optimization-sample.md",
+    "docs/artifacts/external-contribution-sample.md": "docs/artifacts/external-contribution-push-sample.md",
 }
 
 

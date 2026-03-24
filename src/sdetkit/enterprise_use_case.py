@@ -291,7 +291,7 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
 
     summary = root / "day13-execution-summary.json"
     payload = {
-        "name": "day13-enterprise-execution",
+        "name": "enterprise-readiness-execution",
         "total_commands": len(results),
         "passed_commands": len([r for r in results if r.get("ok")]),
         "failed_commands": len([r for r in results if not r.get("ok")]),
@@ -340,7 +340,7 @@ def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day13-enterprise-readiness",
+        "name": "enterprise-readiness",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,

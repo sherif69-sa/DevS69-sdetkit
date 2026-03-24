@@ -2,6 +2,6 @@ command: python scripts/check_day19_release_readiness_board_contract.py --skip-e
 returncode: 0
 ok: True
 --- stdout ---
-day19-release-readiness-board-contract check passed
+release-readiness-contract check passed
 
 --- stderr ---

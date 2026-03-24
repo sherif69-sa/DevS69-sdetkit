@@ -2,6 +2,6 @@ command: python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evid
 returncode: 0
 ok: True
 --- stdout ---
-day22-trust-signal-upgrade-contract check passed
+trust-assets-contract check passed
 
 --- stderr ---

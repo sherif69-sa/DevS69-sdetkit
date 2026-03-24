@@ -46,7 +46,7 @@ def test_release_narrative_json(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day20-release-narrative"
+    assert out["name"] == "release-communications"
     assert out["summary"]["readiness_label"] == "ready"
     assert out["score"] == 100.0
 

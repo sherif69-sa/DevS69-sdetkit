@@ -127,14 +127,14 @@ _SIGNALS = [
         "marker": "## Top objections and responses",
     },
     {
-        "check_id": "readme_day23_link",
+        "check_id": "readme_objection_handling_link",
         "category": "discoverability",
         "weight": 8,
         "marker": "docs/objection-handling.md",
         "source": "readme",
     },
     {
-        "check_id": "docs_index_day23",
+        "check_id": "docs_index_objection_handling",
         "category": "discoverability",
         "weight": 7,
         "marker": "impact-23-ultra-upgrade-report.md",
@@ -257,7 +257,7 @@ def build_faq_objections_summary(
         )
 
     return {
-        "name": "day23-objection-handling",
+        "name": "objection-handling",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,

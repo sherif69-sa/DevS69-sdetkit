@@ -117,7 +117,7 @@ _GOVERNANCE_SIGNALS = [
     {"key": "ci_workflow", "path": ".github/workflows/ci.yml", "weight": 6},
     {"key": "security_workflow", "path": ".github/workflows/security.yml", "weight": 8},
     {"key": "pages_workflow", "path": ".github/workflows/pages.yml", "weight": 4},
-    {"key": "docs_index_day22", "marker": "impact-22-ultra-upgrade-report.md", "weight": 2},
+    {"key": "docs_index_trust_assets", "marker": "impact-22-ultra-upgrade-report.md", "weight": 2},
 ]
 
 _CRITICAL_FAILURE_KEYS = {"security_doc_exists", "security_workflow", "ci_workflow"}
@@ -227,7 +227,7 @@ def build_trust_signal_summary(
         )
 
     return {
-        "name": "day22-trust-assets",
+        "name": "trust-assets",
         "inputs": {"readme": readme_path, "docs_index": docs_index_path},
         "summary": {
             "trust_score": trust_score,

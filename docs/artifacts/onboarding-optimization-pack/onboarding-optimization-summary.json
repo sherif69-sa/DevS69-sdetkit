@@ -49,14 +49,14 @@
     {
       "category": "discoverability",
       "evidence": "docs/onboarding-optimization.md",
-      "key": "readme_day24_link",
+      "key": "readme_onboarding_optimization_link",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
       "evidence": "name-24-ultra-upgrade-report.md",
-      "key": "docs_index_day24_link",
+      "key": "docs_index_onboarding_optimization_link",
       "passed": true,
       "weight": 10
     },
@@ -74,9 +74,9 @@
     "onboarding_module": "src/sdetkit/onboarding.py",
     "readme": "README.md"
   },
-  "name": "day24-onboarding-time-upgrade",
+  "name": "onboarding-optimization",
   "recommendations": [
-    "Name 24 onboarding lane is healthy; keep execution evidence attached to releases."
+    "Onboarding optimization onboarding lane is healthy; keep execution evidence attached to releases."
   ],
   "strict_failures": [],
   "summary": {

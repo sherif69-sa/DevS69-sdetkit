@@ -46,7 +46,7 @@ def test_board_builds_json(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day19-release-readiness"
+    assert out["name"] == "release-readiness"
     assert out["summary"]["strict_all_green"] is True
     assert out["summary"]["release_score"] >= 90
 

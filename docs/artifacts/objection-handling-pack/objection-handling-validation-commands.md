@@ -1,4 +1,4 @@
-# Name 23 validation commands
+# Objection handling validation commands
 
 ```bash
 python -m sdetkit objection-handling --format json --strict

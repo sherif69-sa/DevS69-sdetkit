@@ -33,6 +33,6 @@
 
 ## Next-week focus
 
-- Name 22: strengthen trust signals across security and reliability entry points.
-- Name 23: publish FAQ responses for recurring adoption objections.
-- Name 24: cut onboarding time-to-first-success below three minutes.
+- Trust assets: strengthen trust signals across security and reliability entry points.
+- Objection handling: publish FAQ responses for recurring adoption objections.
+- Onboarding optimization: cut onboarding time-to-first-success below three minutes.

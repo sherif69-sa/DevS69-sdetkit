@@ -13,7 +13,7 @@ ok: True
       "reliability_score": 95.09
     }
   },
-  "name": "day19-release-readiness-board",
+  "name": "release-readiness",
   "recommendations": [
     "Release posture is strong; proceed with release candidate tagging and notes preparation."
   ],

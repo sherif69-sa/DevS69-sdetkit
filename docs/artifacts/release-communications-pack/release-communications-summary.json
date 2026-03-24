@@ -17,7 +17,7 @@
     "changelog": "CHANGELOG.md",
     "day19_summary": "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
   },
-  "name": "day20-release-narrative",
+  "name": "release-communications",
   "narrative_channels": {
     "community_post": "Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.",
     "internal_update": "Day 20 narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.",

@@ -27,7 +27,7 @@ def test_onboarding_json(tmp_path: Path, capsys) -> None:
     assert rc == 0
 
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day24-onboarding-optimization"
+    assert out["name"] == "onboarding-optimization"
     assert out["summary"]["onboarding_score"] == 100.0
 
 

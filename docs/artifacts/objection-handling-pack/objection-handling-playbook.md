@@ -1,4 +1,4 @@
-# Name 23 adoption objection playbook
+# Objection handling adoption objection playbook
 
 1. Collect objections from issues, PR reviews, and contributor onboarding notes.
 2. Map each objection to one deterministic command and one docs page.

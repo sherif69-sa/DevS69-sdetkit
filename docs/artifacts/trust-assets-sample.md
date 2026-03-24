@@ -1,4 +1,4 @@
-# Name 22 trust signal upgrade
+# Trust assets trust signal upgrade
 
 ## Trust posture
 
@@ -21,7 +21,7 @@
 - **governance::ci_workflow** (6 pts): pass
 - **governance::security_workflow** (8 pts): pass
 - **governance::pages_workflow** (4 pts): pass
-- **governance::docs_index_day22** (2 pts): pass
+- **governance::docs_index_trust_assets** (2 pts): pass
 
 ## Recommendations
 

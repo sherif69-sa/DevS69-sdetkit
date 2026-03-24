@@ -49,14 +49,14 @@
     {
       "category": "discoverability",
       "evidence": "docs/objection-handling.md",
-      "key": "readme_day23_link",
+      "key": "readme_objection_handling_link",
       "passed": true,
       "weight": 8
     },
     {
       "category": "discoverability",
       "evidence": "name-23-ultra-upgrade-report.md",
-      "key": "docs_index_day23",
+      "key": "docs_index_objection_handling",
       "passed": true,
       "weight": 7
     },
@@ -73,7 +73,7 @@
     "docs_page": "docs/objection-handling.md",
     "readme": "README.md"
   },
-  "name": "day23-faq-objections",
+  "name": "objection-handling",
   "recommendations": [
     "FAQ objections lane is healthy; keep objections refreshed from real issue/discussion trends."
   ],

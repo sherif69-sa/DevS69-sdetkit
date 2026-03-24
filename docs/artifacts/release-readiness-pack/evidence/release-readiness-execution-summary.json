@@ -1,5 +1,5 @@
 {
-  "name": "day19-release-readiness-execution",
+  "name": "release-readiness-execution",
   "total_commands": 3,
   "passed_commands": 3,
   "failed_commands": 0,
@@ -9,7 +9,7 @@
       "command": "python -m sdetkit release-readiness --format json --strict",
       "returncode": 0,
       "ok": true,
-      "stdout": "{\n  \"inputs\": {\n    \"name14\": {\n      \"score\": 100.0,\n      \"status\": \"pass\"\n    },\n    \"name18\": {\n      \"gate_status\": \"pass\",\n      \"reliability_score\": 95.09\n    }\n  },\n  \"name\": \"day19-release-readiness-board\",\n  \"recommendations\": [\n    \"Release posture is strong; proceed with release candidate tagging and notes preparation.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"release_score\": 96.56,\n    \"strict_all_green\": true\n  }\n}\n",
+      "stdout": "{\n  \"inputs\": {\n    \"name14\": {\n      \"score\": 100.0,\n      \"status\": \"pass\"\n    },\n    \"name18\": {\n      \"gate_status\": \"pass\",\n      \"reliability_score\": 95.09\n    }\n  },\n  \"name\": \"release-readiness\",\n  \"recommendations\": [\n    \"Release posture is strong; proceed with release candidate tagging and notes preparation.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"release_score\": 96.56,\n    \"strict_all_green\": true\n  }\n}\n",
       "stderr": ""
     },
     {
@@ -17,7 +17,7 @@
       "command": "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict",
       "returncode": 0,
       "ok": true,
-      "stdout": "{\n  \"emitted_pack_files\": [\n    \"docs/artifacts/release-readiness-pack/release-readiness-summary.json\",\n    \"docs/artifacts/release-readiness-pack/release-readiness-scorecard.md\",\n    \"docs/artifacts/release-readiness-pack/release-readiness-checklist.md\",\n    \"docs/artifacts/release-readiness-pack/release-readiness-validation-commands.md\",\n    \"docs/artifacts/release-readiness-pack/release-decision.md\"\n  ],\n  \"inputs\": {\n    \"name14\": {\n      \"score\": 100.0,\n      \"status\": \"pass\"\n    },\n    \"name18\": {\n      \"gate_status\": \"pass\",\n      \"reliability_score\": 95.09\n    }\n  },\n  \"name\": \"day19-release-readiness-board\",\n  \"recommendations\": [\n    \"Release posture is strong; proceed with release candidate tagging and notes preparation.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"release_score\": 96.56,\n    \"strict_all_green\": true\n  }\n}\n",
+      "stdout": "{\n  \"emitted_pack_files\": [\n    \"docs/artifacts/release-readiness-pack/release-readiness-summary.json\",\n    \"docs/artifacts/release-readiness-pack/release-readiness-scorecard.md\",\n    \"docs/artifacts/release-readiness-pack/release-readiness-checklist.md\",\n    \"docs/artifacts/release-readiness-pack/release-readiness-validation-commands.md\",\n    \"docs/artifacts/release-readiness-pack/release-decision.md\"\n  ],\n  \"inputs\": {\n    \"name14\": {\n      \"score\": 100.0,\n      \"status\": \"pass\"\n    },\n    \"name18\": {\n      \"gate_status\": \"pass\",\n      \"reliability_score\": 95.09\n    }\n  },\n  \"name\": \"release-readiness\",\n  \"recommendations\": [\n    \"Release posture is strong; proceed with release candidate tagging and notes preparation.\"\n  ],\n  \"score\": 100.0,\n  \"strict_failures\": [],\n  \"summary\": {\n    \"gate_status\": \"pass\",\n    \"release_score\": 96.56,\n    \"strict_all_green\": true\n  }\n}\n",
       "stderr": ""
     },
     {
@@ -25,7 +25,7 @@
       "command": "python scripts/check_day19_release_readiness_board_contract.py --skip-evidence",
       "returncode": 0,
       "ok": true,
-      "stdout": "day19-release-readiness-board-contract check passed\n",
+      "stdout": "release-readiness-contract check passed\n",
       "stderr": ""
     }
   ]

@@ -99,14 +99,14 @@
     {
       "category": "governance",
       "evidence": "impact-22-ultra-upgrade-report.md",
-      "key": "docs_index_day22",
+      "key": "docs_index_trust_assets",
       "passed": false,
       "weight": 2
     }
   ],
   "governance_checks": {
     "ci_workflow": true,
-    "docs_index_day22": false,
+    "docs_index_trust_assets": false,
     "pages_workflow": true,
     "security_workflow": true
   },
@@ -114,7 +114,7 @@
     "docs_index": "docs/index.md",
     "readme": "README.md"
   },
-  "name": "day22-trust-assets",
+  "name": "trust-assets",
   "policy_checks": {
     "policy_baseline_exists": false,
     "security_doc_exists": false,

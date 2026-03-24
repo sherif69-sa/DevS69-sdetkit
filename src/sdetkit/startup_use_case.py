@@ -230,7 +230,7 @@ def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day12-startup-readiness",
+        "name": "startup-readiness",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,

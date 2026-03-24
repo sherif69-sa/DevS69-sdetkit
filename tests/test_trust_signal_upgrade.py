@@ -55,7 +55,7 @@ def test_trust_signal_json(tmp_path: Path, capsys) -> None:
     rc = tsu.main(["--root", str(tmp_path), "--format", "json"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day22-trust-assets"
+    assert out["name"] == "trust-assets"
     assert out["summary"]["trust_label"] == "strong"
     assert out["summary"]["trust_score"] == 100.0
     assert out["score"] == 100.0

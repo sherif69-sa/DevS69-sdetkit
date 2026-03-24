@@ -138,7 +138,7 @@ def build_release_board(
         )
 
     return {
-        "name": "day19-release-readiness",
+        "name": "release-readiness",
         "inputs": {
             "day18": {
                 "reliability_score": reliability_score,
@@ -292,7 +292,7 @@ def _write_execution_evidence(
     out.mkdir(parents=True, exist_ok=True)
     summary = out / "release-readiness-execution-summary.json"
     payload = {
-        "name": "day19-release-readiness-execution",
+        "name": "release-readiness-execution",
         "total_commands": len(rows),
         "passed_commands": len([r for r in rows if r["ok"]]),
         "failed_commands": len([r for r in rows if not r["ok"]]),

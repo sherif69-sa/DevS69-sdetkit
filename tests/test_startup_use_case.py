@@ -41,7 +41,7 @@ def test_startup_use_case_json_and_strict_success(capsys):
     rc = startup_use_case.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day12-startup-readiness"
+    assert data["name"] == "startup-readiness"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 14
 
