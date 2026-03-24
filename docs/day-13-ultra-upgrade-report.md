@@ -6,7 +6,7 @@
 
 ## What changed
 
-- Added `sdetkit enterprise-use-case` command and status pipeline:
+- Added `sdetkit enterprise-readiness` command and status pipeline:
   - `src/sdetkit/enterprise_use_case.py`
   - Supports `--strict`, `--write-defaults`, `--format`, `--output`, `--emit-pack-dir`, `--execute`, and `--evidence-dir`.
   - Emits enterprise operating pack files:
@@ -35,11 +35,11 @@
 ## Validation commands
 
 - `python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py`
-- `python -m sdetkit enterprise-use-case --format json --strict`
-- `python -m sdetkit enterprise-use-case --write-defaults --format json --strict`
-- `python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict`
-- `python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict`
-- `python -m sdetkit enterprise-use-case --format markdown --output docs/artifacts/enterprise-readiness-sample.md`
+- `python -m sdetkit enterprise-readiness --format json --strict`
+- `python -m sdetkit enterprise-readiness --write-defaults --format json --strict`
+- `python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict`
+- `python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict`
+- `python -m sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md`
 - `python scripts/check_day13_enterprise_use_case_contract.py`
 
 ## Output artifacts

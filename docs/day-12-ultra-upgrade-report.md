@@ -20,7 +20,7 @@ Startups and small teams need a focused workflow page that converts repository c
     - `startup-day12-risk-register.md`
   - Kept `--write-defaults` recovery path and multi-format rendering (text/markdown/json).
 - `src/sdetkit/cli.py`
-  - Preserved top-level command wiring for `python -m sdetkit startup-use-case ...`.
+  - Preserved top-level command wiring for `python -m sdetkit startup-readiness ...`.
 
 ### Docs surface
 
@@ -43,10 +43,10 @@ Startups and small teams need a focused workflow page that converts repository c
 ## Validation checklist
 
 - `python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py`
-- `python -m sdetkit startup-use-case --format json --strict`
-- `python -m sdetkit startup-use-case --write-defaults --format json --strict`
-- `python -m sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`
-- `python -m sdetkit startup-use-case --format markdown --output docs/artifacts/startup-readiness-sample.md`
+- `python -m sdetkit startup-readiness --format json --strict`
+- `python -m sdetkit startup-readiness --write-defaults --format json --strict`
+- `python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`
+- `python -m sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md`
 - `python scripts/check_day12_startup_use_case_contract.py`
 
 ## Artifacts

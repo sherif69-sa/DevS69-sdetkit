@@ -2,7 +2,7 @@
   "checks": [
     {
       "category": "coverage",
-      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-faq-objections.md",
+      "evidence": "/workspace/DevS69-sdetkit/docs/objection-handling.md",
       "key": "docs_page_exists",
       "passed": true,
       "weight": 15
@@ -48,15 +48,15 @@
     },
     {
       "category": "discoverability",
-      "evidence": "docs/integrations-faq-objections.md",
-      "key": "readme_name23_link",
+      "evidence": "docs/objection-handling.md",
+      "key": "readme_day23_link",
       "passed": true,
       "weight": 8
     },
     {
       "category": "discoverability",
       "evidence": "name-23-ultra-upgrade-report.md",
-      "key": "docs_index_name23",
+      "key": "docs_index_day23",
       "passed": true,
       "weight": 7
     },
@@ -70,10 +70,10 @@
   ],
   "inputs": {
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-faq-objections.md",
+    "docs_page": "docs/objection-handling.md",
     "readme": "README.md"
   },
-  "name": "name23-faq-objections",
+  "name": "day23-faq-objections",
   "recommendations": [
     "FAQ objections lane is healthy; keep objections refreshed from real issue/discussion trends."
   ],

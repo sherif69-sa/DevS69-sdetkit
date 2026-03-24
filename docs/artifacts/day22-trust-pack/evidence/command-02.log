@@ -1,4 +1,4 @@
-command: python -m sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/name22-trust-pack --format json --strict
+command: python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict
 returncode: 0
 ok: True
 --- stdout ---
@@ -103,21 +103,21 @@ ok: True
     {
       "category": "governance",
       "evidence": "name-22-ultra-upgrade-report.md",
-      "key": "docs_index_name22",
+      "key": "docs_index_day22",
       "passed": true,
       "weight": 2
     }
   ],
   "emitted_pack_files": [
-    "docs/artifacts/name22-trust-pack/name22-trust-summary.json",
-    "docs/artifacts/name22-trust-pack/name22-trust-scorecard.md",
-    "docs/artifacts/name22-trust-pack/name22-visibility-checklist.md",
-    "docs/artifacts/name22-trust-pack/name22-trust-action-plan.md",
-    "docs/artifacts/name22-trust-pack/name22-validation-commands.md"
+    "docs/artifacts/day22-trust-pack/day22-trust-summary.json",
+    "docs/artifacts/day22-trust-pack/day22-trust-scorecard.md",
+    "docs/artifacts/day22-trust-pack/day22-visibility-checklist.md",
+    "docs/artifacts/day22-trust-pack/day22-trust-action-plan.md",
+    "docs/artifacts/day22-trust-pack/day22-validation-commands.md"
   ],
   "governance_checks": {
     "ci_workflow": true,
-    "docs_index_name22": true,
+    "docs_index_day22": true,
     "pages_workflow": true,
     "security_workflow": true
   },
@@ -125,7 +125,7 @@ ok: True
     "docs_index": "docs/index.md",
     "readme": "README.md"
   },
-  "name": "name22-trust-signal-upgrade",
+  "name": "day22-trust-signal-upgrade",
   "policy_checks": {
     "policy_baseline_exists": true,
     "security_doc_exists": true,

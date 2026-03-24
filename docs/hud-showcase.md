@@ -24,6 +24,6 @@ Large, clickable visual cards with quick usage hints.
 
 [![DevS69 Diff-to-Decision](assets/devs69-card-diff-flow.svg)](diff-flow-live.md)
 
-**Quick hint:** Follow the sequence: tests → repo audit → security → proof pack → release narrative.
+**Quick hint:** Follow the sequence: tests → repo audit → security → evidence assets pack → release narrative.
 
 [Open full Diff-to-Decision view](diff-flow-live.md)

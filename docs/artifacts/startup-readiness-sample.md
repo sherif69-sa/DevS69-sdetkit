@@ -38,5 +38,5 @@ python -m sdetkit report --out reports/startup-weekly.json
 - `docs/use-cases-startup-small-team.md`
 - `sdetkit startup-readiness --format json --strict`
 - `sdetkit startup-readiness --write-defaults --format json --strict`
-- `sdetkit startup-readiness --format markdown --output docs/artifacts/day12-startup-use-case-sample.md`
+- `sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md`
 - `sdetkit startup-readiness --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`

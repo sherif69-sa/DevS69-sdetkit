@@ -1,9 +1,9 @@
 metric,segment,source_command,cadence,owner,threshold,notes
 docs_unique_visitors,acquisition,python -m sdetkit report --input docs/traffic.json --format json,daily,growth-owner,>=1500,Docs traffic stability
-readme_to_command_ctr,activation,python -m sdetkit proof --json,daily,growth-owner,>=12%,README conversion
+readme_to_command_ctr,activation,python -m sdetkit evidence-assets --format json,daily,growth-owner,>=12%,README conversion
 first_successful_run_rate,activation,python -m sdetkit doctor --json,weekly,qa-owner,>=85%,Onboarding quality
 returning_users_7d,retention,python -m sdetkit report --input analytics.json --format json,weekly,pm-owner,>=25%,Retention baseline
 discussion_reply_time_hours,reliability,python -m sdetkit ops status --format json,daily,community-owner,<=24,Community latency
 ci_flake_rate,reliability,python -m sdetkit repo audit --json,daily,eng-owner,<=3%,Stability
-release_cadence_adherence,reliability,python -m sdetkit release-readiness-board --json,weekly,release-owner,>=95%,Cadence health
+release_cadence_adherence,reliability,python -m sdetkit release-readiness --json,weekly,release-owner,>=95%,Cadence health
 external_pr_conversion,retention,python -m sdetkit contributor-funnel --format json,weekly,community-owner,>=8%,PR funnel health

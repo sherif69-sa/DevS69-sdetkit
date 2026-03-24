@@ -1,7 +1,7 @@
-command: python scripts/check_name13_enterprise_use_case_contract.py
+command: python scripts/check_day13_enterprise_use_case_contract.py
 returncode: 0
 ok: True
 --- stdout ---
-name13-enterprise-use-case-contract check passed
+day13-enterprise-use-case-contract check passed
 
 --- stderr ---

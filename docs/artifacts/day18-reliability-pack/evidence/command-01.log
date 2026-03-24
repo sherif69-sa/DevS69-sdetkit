@@ -23,7 +23,7 @@ ok: True
   },
   "missing": [],
   "name": "day18-reliability-evidence-pack",
-  "page": "docs/integrations-reliability-evidence-pack.md",
+  "page": "docs/reliability-evidence-pack.md",
   "recommendations": [
     "Reliability posture is strong; keep current CI and closeout operating cadence."
   ],

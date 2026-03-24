@@ -8,8 +8,8 @@
 | 9 | Triage-ready issue + PR templates | `docs/name-9-ultra-upgrade-report.md` | `docs/artifacts/name9-triage-templates-sample.md` | shipped ✅ |
 | 10 | First-contribution checklist | `docs/name-10-ultra-upgrade-report.md` | `docs/artifacts/name10-first-contribution-checklist-sample.md` | shipped ✅ |
 | 11 | Docs navigation tune-up | `docs/name-11-ultra-upgrade-report.md` | `docs/artifacts/name11-docs-navigation-sample.md` | shipped ✅ |
-| 12 | Startup/small-team workflow | `docs/name-12-ultra-upgrade-report.md` | `docs/artifacts/name12-startup-use-case-sample.md` | shipped ✅ |
-| 13 | Enterprise/regulated workflow | `docs/name-13-ultra-upgrade-report.md` | `docs/artifacts/name13-enterprise-use-case-sample.md` | shipped ✅ |
+| 12 | Startup/small-team workflow | `docs/day-12-ultra-upgrade-report.md` | `docs/artifacts/startup-readiness-sample.md` | shipped ✅ |
+| 13 | Enterprise/regulated workflow | `docs/day-13-ultra-upgrade-report.md` | `docs/artifacts/enterprise-readiness-sample.md` | shipped ✅ |
 
 ## KPI movement
 
