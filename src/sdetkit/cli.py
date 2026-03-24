@@ -306,6 +306,18 @@ Start here:
         help_text="Utility: record/replay HTTP captures for deterministic checks",
     )
 
+    initp = sub.add_parser(
+        "init",
+        help="[Stable/Core] Bootstrap repo adoption with preset templates and optional config",
+    )
+    initp.add_argument("--preset", choices=["enterprise_python"], default="enterprise_python")
+    initp.add_argument("--root", default=".")
+    initp.add_argument("--dry-run", action="store_true")
+    initp.add_argument("--force", action="store_true")
+    initp.add_argument("--diff", action="store_true")
+    initp.add_argument("--format", choices=["text", "json"], default="text")
+    initp.add_argument("--write-config", action="store_true")
+
     _add_passthrough_subcommand(
         sub, "repo", help_text="[Stable/Compatibility] Repository automation tasks"
     )
@@ -1284,6 +1296,26 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "patch":
         return patch.main(ns.args)
+
+    if ns.cmd == "init":
+        forwarded = [
+            "init",
+            "--preset",
+            ns.preset,
+            "--root",
+            ns.root,
+            "--format",
+            ns.format,
+        ]
+        if ns.dry_run:
+            forwarded.append("--dry-run")
+        if ns.force:
+            forwarded.append("--force")
+        if ns.diff:
+            forwarded.append("--diff")
+        if ns.write_config:
+            forwarded.append("--write-config")
+        return repo.main(forwarded)
 
     if ns.cmd == "repo":
         return repo.main(ns.args)

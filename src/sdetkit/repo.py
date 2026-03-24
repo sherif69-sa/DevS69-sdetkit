@@ -25,6 +25,7 @@ from typing import Any, cast
 
 from . import _toml as _tomllib
 from .atomicio import atomic_write_text
+from .ops_control import init_layout_at
 from .plugins import (
     Finding as PluginFinding,
 )
@@ -40,6 +41,7 @@ from .plugins import (
     select_rules,
 )
 from .projects import ProjectsConfigError, discover_projects, resolve_project
+from .repo_adoption import build_init_payload, render_init_payload
 from .report import build_run_record, diff_runs, load_run_record
 from .security import SecurityError, ensure_allowed_scheme, safe_path
 
@@ -1499,7 +1501,15 @@ def _print_repo_init_diff(changes: list[RepoInitChange]) -> None:
 
 
 def _run_repo_init(
-    root: Path, *, preset: str, command: str, dry_run: bool, force: bool, diff: bool
+    root: Path,
+    *,
+    preset: str,
+    command: str,
+    dry_run: bool,
+    force: bool,
+    diff: bool,
+    output_format: str = "text",
+    write_config: bool = False,
 ) -> int:
     changes, conflicts = _plan_repo_init(root, preset=preset, force=force)
     if conflicts and command == "init":
@@ -1512,13 +1522,28 @@ def _run_repo_init(
     _print_repo_init_plan(changes, command=command, dry_run=dry_run)
     if diff and changes:
         _print_repo_init_diff(changes)
+    payload = build_init_payload(root, preset=preset)
+    config_path = root / ".sdetkit" / "config.toml"
     if dry_run:
+        if write_config:
+            print(
+                f"repo {command} (dry-run): would create {config_path.relative_to(root)} if missing"
+            )
+        print(render_init_payload(payload, fmt=output_format))
         return 0
     for change in changes:
         target = safe_path(root, change.path, allow_absolute=False)
         target.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_text(target, change.desired)
     print(f"repo {command}: wrote {len(changes)} file(s)")
+    if write_config:
+        existed = config_path.exists()
+        init_layout_at(root, force=False)
+        if existed:
+            print(f"repo {command}: kept existing {config_path.relative_to(root)}")
+        else:
+            print(f"repo {command}: wrote {config_path.relative_to(root)}")
+    print(render_init_payload(payload, fmt=output_format))
     return 0
 
 
@@ -3367,6 +3392,8 @@ def main(argv: list[str] | None = None) -> int:
     ip.add_argument("--dry-run", action="store_true")
     ip.add_argument("--force", action="store_true")
     ip.add_argument("--diff", action="store_true")
+    ip.add_argument("--format", choices=["text", "json"], default="text")
+    ip.add_argument("--write-config", action="store_true")
     ip.add_argument("--allow-absolute-path", action="store_true")
 
     aply = sub.add_parser("apply")
@@ -3375,6 +3402,7 @@ def main(argv: list[str] | None = None) -> int:
     aply.add_argument("--dry-run", action="store_true")
     aply.add_argument("--force", action="store_true")
     aply.add_argument("--diff", action="store_true")
+    aply.add_argument("--format", choices=["text", "json"], default="text")
     aply.add_argument("--allow-absolute-path", action="store_true")
 
     bp = sub.add_parser("baseline")
@@ -4756,6 +4784,8 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=bool(ns.dry_run),
             force=bool(ns.force),
             diff=bool(ns.diff),
+            output_format=ns.format,
+            write_config=bool(getattr(ns, "write_config", False)),
         )
 
     if ns.check and ns.dry_run:

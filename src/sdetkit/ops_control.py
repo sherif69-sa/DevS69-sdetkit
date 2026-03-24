@@ -108,23 +108,29 @@ def _sdetkit_dir() -> Path:
     return _root() / ".sdetkit"
 
 
-def init_layout(force: bool = False) -> int:
-    base = _sdetkit_dir()
+DEFAULT_CONFIG_TEXT = (
+    "[ops]\n"
+    'default_profile = "default"\n'
+    "[profiles]\n"
+    'default = ["quality", "doctor", "repo-audit", "security-scan", "report-build"]\n'
+    'ci = ["quality", "ci", "doctor", "repo-audit", "security-scan", "security-fix", "report-build"]\n'
+    'local = ["quality", "doctor", "repo-audit", "report-build"]\n'
+)
+
+
+def init_layout_at(root: Path, force: bool = False) -> int:
+    base = root / ".sdetkit"
     for rel in ("policies", "playbooks", "cache", "out"):
         (base / rel).mkdir(parents=True, exist_ok=True)
     cfg = base / "config.toml"
     if cfg.exists() and not force:
         return 0
-    text = (
-        "[ops]\n"
-        'default_profile = "default"\n'
-        "[profiles]\n"
-        'default = ["quality", "doctor", "repo-audit", "security-scan", "report-build"]\n'
-        'ci = ["quality", "ci", "doctor", "repo-audit", "security-scan", "security-fix", "report-build"]\n'
-        'local = ["quality", "doctor", "repo-audit", "report-build"]\n'
-    )
-    atomic_write_text(cfg, text)
+    atomic_write_text(cfg, DEFAULT_CONFIG_TEXT)
     return 0
+
+
+def init_layout(force: bool = False) -> int:
+    return init_layout_at(_root(), force=force)
 
 
 def _load_config() -> dict[str, Any]:
