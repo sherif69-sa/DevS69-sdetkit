@@ -1,0 +1,7 @@
+command: python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evidence
+returncode: 0
+ok: True
+--- stdout ---
+trust-assets-contract check passed
+
+--- stderr ---

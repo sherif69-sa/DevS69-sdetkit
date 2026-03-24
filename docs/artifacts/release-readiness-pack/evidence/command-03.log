@@ -1,0 +1,7 @@
+command: python scripts/check_day19_release_readiness_board_contract.py --skip-evidence
+returncode: 0
+ok: True
+--- stdout ---
+release-readiness-contract check passed
+
+--- stderr ---

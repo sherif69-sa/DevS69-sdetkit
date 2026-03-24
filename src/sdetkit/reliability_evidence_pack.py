@@ -21,8 +21,8 @@ _REQUIRED_SECTIONS = [
 
 _REQUIRED_COMMANDS = [
     "python -m sdetkit reliability-evidence-pack --format json --strict",
-    "python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict",
-    "python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict",
+    "python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict",
+    "python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict",
     "python scripts/check_day18_reliability_evidence_pack_contract.py",
 ]
 
@@ -53,8 +53,8 @@ Day 18 score uses weighted Day 15/16 execution quality plus Day 17 stability/vel
 
 ```bash
 python -m sdetkit reliability-evidence-pack --format json --strict
-python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict
-python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict
+python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict
 python scripts/check_day18_reliability_evidence_pack_contract.py
 ```
 
@@ -160,7 +160,7 @@ def build_reliability_pack(
         )
 
     return {
-        "name": "day18-reliability-evidence-pack",
+        "name": "reliability-evidence-pack",
         "inputs": {
             "day15": {
                 "score": float(day15["score"]),
@@ -221,13 +221,13 @@ def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
     out_dir = base / path
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    summary_path = out_dir / "day18-reliability-summary.json"
+    summary_path = out_dir / "reliability-evidence-summary.json"
     summary_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    scorecard_path = out_dir / "day18-reliability-scorecard.md"
+    scorecard_path = out_dir / "reliability-evidence-scorecard.md"
     scorecard_path.write_text(_render_markdown(payload), encoding="utf-8")
 
-    checklist_path = out_dir / "day18-reliability-checklist.md"
+    checklist_path = out_dir / "reliability-evidence-checklist.md"
     checklist_path.write_text(
         "\n".join(
             [
@@ -244,7 +244,7 @@ def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
         encoding="utf-8",
     )
 
-    validation_path = out_dir / "day18-validation-commands.md"
+    validation_path = out_dir / "reliability-evidence-validation-commands.md"
     validation_path.write_text(
         "\n".join(["# Day 18 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
         encoding="utf-8",
@@ -302,9 +302,9 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    summary = root / "day18-execution-summary.json"
+    summary = root / "reliability-evidence-execution-summary.json"
     payload = {
-        "name": "day18-reliability-execution",
+        "name": "reliability-evidence-execution",
         "total_commands": len(results),
         "passed_commands": len([r for r in results if r.get("ok")]),
         "failed_commands": len([r for r in results if not r.get("ok")]),
@@ -359,7 +359,8 @@ def _build_parser() -> argparse.ArgumentParser:
         default="docs/artifacts/day16-gitlab-pack/evidence/day16-execution-summary.json",
     )
     parser.add_argument(
-        "--day17-summary", default="docs/artifacts/day17-delta-pack/day17-delta-summary.json"
+        "--day17-summary",
+        default="docs/artifacts/contribution-quality-report-pack/contribution-quality-report-summary.json",
     )
     parser.add_argument("--min-reliability-score", type=float, default=90.0)
     parser.add_argument("--strict", action="store_true")

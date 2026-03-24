@@ -21,8 +21,8 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit external-contribution --format json --strict",
-    "python -m sdetkit external-contribution --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict",
-    "python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict",
+    "python -m sdetkit external-contribution --emit-pack-dir docs/artifacts/external-contribution-pack --format json --strict",
+    "python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/external-contribution-pack/evidence --format json --strict",
     "python scripts/check_day26_external_contribution_push_contract.py",
 ]
 _EXECUTION_COMMANDS = [
@@ -48,8 +48,8 @@ A Day 26 pass means at least 10 starter tasks are publicly spotlighted with labe
 
 ```bash
 python -m sdetkit external-contribution --format json --strict
-python -m sdetkit external-contribution --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict
-python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict
+python -m sdetkit external-contribution --emit-pack-dir docs/artifacts/external-contribution-pack --format json --strict
+python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/external-contribution-pack/evidence --format json --strict
 python scripts/check_day26_external_contribution_push_contract.py
 ```
 
@@ -247,7 +247,7 @@ def build_external_contribution_push_summary(
         )
 
     return {
-        "name": "day26-external-contribution",
+        "name": "external-contribution",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -283,11 +283,11 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day26-external-contribution-summary.json"
-    scorecard = out_dir / "day26-external-contribution-scorecard.md"
-    spotlight = out_dir / "day26-starter-task-spotlight.md"
-    triage = out_dir / "day26-external-contribution-triage-board.md"
-    validation = out_dir / "day26-validation-commands.md"
+    summary = out_dir / "external-contribution-summary.json"
+    scorecard = out_dir / "external-contribution-scorecard.md"
+    spotlight = out_dir / "external-contribution-starter-task-spotlight.md"
+    triage = out_dir / "external-contribution-triage-board.md"
+    validation = out_dir / "external-contribution-validation-commands.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_text(payload) + "\n", encoding="utf-8")
@@ -390,7 +390,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day26-external-contribution-pack/evidence",
+        default="docs/artifacts/external-contribution-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
     parser.add_argument(

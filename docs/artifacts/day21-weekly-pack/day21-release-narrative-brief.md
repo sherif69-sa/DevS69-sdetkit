@@ -13,5 +13,5 @@ Week 3 converts integration work into a measurable release lane with determinist
 ## Messaging channels
 
 - Engineering sync: share week-3 scorecard + next-week trust-signal focus.
-- OSS community post: publish contributor-response plan and open Name 22-24 asks.
+- OSS community post: publish contributor-response plan and open Trust assets-24 asks.
 - Release notes: link Name 18/19/21 artifacts for non-maintainer context.

@@ -6,7 +6,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | Core positioning + role onboarding | `docs/impact-1-ultra-upgrade-report.md` | `docs/artifacts/day1-onboarding-sample.md` | shipped ✅ |
 | 2 | 60-second demo workflow | `docs/impact-2-ultra-upgrade-report.md` | `docs/artifacts/day2-demo-sample.md` | shipped ✅ |
-| 3 | Evidence assets with runnable checks | `docs/day-3-ultra-upgrade-report.md` | `docs/artifacts/evidence-assets-sample.md` | shipped ✅ |
+| 3 | Evidence assets with runnable checks | `docs/evidence-assets-report.md` | `docs/artifacts/evidence-assets-sample.md` | shipped ✅ |
 | 4 | Template/skill expansion run-all | `docs/impact-4-ultra-upgrade-report.md` | `docs/artifacts/day4-skills-sample.md` | shipped ✅ |
 | 5 | Cross-platform onboarding snippets | `docs/impact-5-ultra-upgrade-report.md` | `docs/artifacts/day5-platform-onboarding-sample.md` | shipped ✅ |
 | 6 | Docs conversion QA gate | `docs/impact-6-ultra-upgrade-report.md` | `docs/artifacts/day6-conversion-qa-sample.md` | shipped ✅ |

@@ -1,0 +1,50 @@
+command: python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "audience_blurbs": {
+    "engineering": "Ship with confidence by tying Release readiness release score to concrete checklist and evidence artifacts.",
+    "non_maintainers": "What changed: clearer quality gates, faster release confidence, and traceable evidence for audits.",
+    "support": "Use highlights + risks sections to pre-brief known changes and probable user questions."
+  },
+  "call_to_action": "Share this narrative in release notes, weekly updates, and community announcements.",
+  "emitted_pack_files": [
+    "docs/artifacts/release-communications-pack/release-communications-summary.json",
+    "docs/artifacts/release-communications-pack/release-communications.md",
+    "docs/artifacts/release-communications-pack/release-communications-audience-blurbs.md",
+    "docs/artifacts/release-communications-pack/release-communications-channel-posts.md",
+    "docs/artifacts/release-communications-pack/release-communications-validation-commands.md"
+  ],
+  "highlights": [
+    "Packaging: modernize license metadata.",
+    "CI gate: run `sdetkit doctor --all` and `sdetkit repo check --profile enterprise` on every PR.",
+    "Enterprise hardening: GitHub Actions pinned to commit SHAs.",
+    "Dependency hygiene: requirements pinned and lockfiles added.",
+    "Repo init/apply reliability: tolerate non-UTF-8 preset template files.",
+    "Repo cleanliness: ignore local SDETKit workspace and docs build output."
+  ],
+  "inputs": {
+    "changelog": "CHANGELOG.md",
+    "day19_summary": "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
+  },
+  "name": "release-communications",
+  "narrative_channels": {
+    "community_post": "Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.",
+    "internal_update": "Release communications narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.",
+    "release_notes": "This release is ready to communicate broadly with a stable quality posture. Key highlights: Packaging: modernize license metadata."
+  },
+  "risks": [
+    "Release posture is strong; proceed with release candidate tagging and notes preparation."
+  ],
+  "score": 100.0,
+  "strict_failures": [],
+  "summary": {
+    "gate_status": "pass",
+    "headline": "This release is ready to communicate broadly with a stable quality posture.",
+    "readiness_label": "ready",
+    "release_score": 96.56
+  }
+}
+
+--- stderr ---

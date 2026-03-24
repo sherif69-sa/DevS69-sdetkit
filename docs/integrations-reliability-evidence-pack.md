@@ -23,8 +23,8 @@ Day 18 score uses weighted Day 15/16 execution quality plus Day 17 stability/vel
 
 ```bash
 python -m sdetkit reliability-evidence-pack --format json --strict
-python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict
-python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict
+python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict
 python scripts/check_day18_reliability_evidence_pack_contract.py
 ```
 

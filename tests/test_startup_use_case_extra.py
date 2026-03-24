@@ -30,7 +30,7 @@ def test_main_markdown_output_and_emit_pack(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert out.exists()
-    risk = tmp_path / "docs/artifacts/day12-pack/startup-day12-risk-register.md"
+    risk = tmp_path / "docs/artifacts/day12-pack/startup-readiness-risk-register.md"
     assert risk.exists()
 
 

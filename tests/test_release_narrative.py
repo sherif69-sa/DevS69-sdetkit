@@ -46,7 +46,7 @@ def test_release_narrative_json(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day20-release-narrative"
+    assert out["name"] == "release-communications"
     assert out["summary"]["readiness_label"] == "ready"
     assert out["score"] == 100.0
 
@@ -71,12 +71,16 @@ def test_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day20-pack/day20-release-narrative-summary.json").exists()
-    assert (tmp_path / "artifacts/day20-pack/day20-release-narrative.md").exists()
-    assert (tmp_path / "artifacts/day20-pack/day20-audience-blurbs.md").exists()
-    assert (tmp_path / "artifacts/day20-pack/day20-channel-posts.md").exists()
-    assert (tmp_path / "artifacts/day20-pack/day20-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day20-pack/evidence/day20-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day20-pack/release-communications-summary.json").exists()
+    assert (tmp_path / "artifacts/day20-pack/release-communications.md").exists()
+    assert (tmp_path / "artifacts/day20-pack/release-communications-audience-blurbs.md").exists()
+    assert (tmp_path / "artifacts/day20-pack/release-communications-channel-posts.md").exists()
+    assert (
+        tmp_path / "artifacts/day20-pack/release-communications-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day20-pack/evidence/release-communications-execution-summary.json"
+    ).exists()
 
 
 def test_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> None:

@@ -1,0 +1,7 @@
+command: python scripts/check_name18_reliability_evidence_pack_contract.py --skip-evidence
+returncode: 0
+ok: True
+--- stdout ---
+reliability-evidence-pack-contract check passed
+
+--- stderr ---

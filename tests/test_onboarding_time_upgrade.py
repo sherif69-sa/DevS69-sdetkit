@@ -27,7 +27,7 @@ def test_onboarding_json(tmp_path: Path, capsys) -> None:
     assert rc == 0
 
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day24-onboarding-optimization"
+    assert out["name"] == "onboarding-optimization"
     assert out["summary"]["onboarding_score"] == 100.0
 
 
@@ -49,12 +49,16 @@ def test_onboarding_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day24-pack/day24-onboarding-summary.json").exists()
-    assert (tmp_path / "artifacts/day24-pack/day24-onboarding-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day24-pack/day24-onboarding-checklist.md").exists()
-    assert (tmp_path / "artifacts/day24-pack/day24-time-to-first-success-runbook.md").exists()
-    assert (tmp_path / "artifacts/day24-pack/day24-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day24-pack/evidence/day24-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-summary.json").exists()
+    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-scorecard.md").exists()
+    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-checklist.md").exists()
+    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-runbook.md").exists()
+    assert (
+        tmp_path / "artifacts/day24-pack/onboarding-optimization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day24-pack/evidence/onboarding-optimization-execution-summary.json"
+    ).exists()
 
 
 def test_onboarding_strict_fails_when_sections_missing(tmp_path: Path) -> None:

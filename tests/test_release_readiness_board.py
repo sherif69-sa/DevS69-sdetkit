@@ -46,7 +46,7 @@ def test_board_builds_json(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day19-release-readiness"
+    assert out["name"] == "release-readiness"
     assert out["summary"]["strict_all_green"] is True
     assert out["summary"]["release_score"] >= 90
 
@@ -73,11 +73,13 @@ def test_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day19-pack/day19-release-readiness-summary.json").exists()
-    assert (tmp_path / "artifacts/day19-pack/day19-release-readiness-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day19-pack/day19-release-readiness-checklist.md").exists()
-    assert (tmp_path / "artifacts/day19-pack/day19-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day19-pack/evidence/day19-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day19-pack/release-readiness-summary.json").exists()
+    assert (tmp_path / "artifacts/day19-pack/release-readiness-scorecard.md").exists()
+    assert (tmp_path / "artifacts/day19-pack/release-readiness-checklist.md").exists()
+    assert (tmp_path / "artifacts/day19-pack/release-readiness-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/day19-pack/evidence/release-readiness-execution-summary.json"
+    ).exists()
 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:

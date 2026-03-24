@@ -52,7 +52,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
       - run: python -m sdetkit enterprise-readiness --format json --strict
-      - run: python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+      - run: python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
       - run: python scripts/check_day13_enterprise_use_case_contract.py
 ```
 
@@ -70,7 +70,7 @@ Track these outcomes weekly:
 Generate and persist command outputs in one pass:
 
 ```bash
-python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
 ```
 
 This writes a structured `day13-execution-summary.json` and one per-command log file for audit-ready handoff.

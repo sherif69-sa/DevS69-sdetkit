@@ -1,0 +1,168 @@
+{
+  "badge_checks": {
+    "ci_badge": false,
+    "mutation_badge": false,
+    "pages_badge": false,
+    "quality_badge": false,
+    "security_badge": false
+  },
+  "checks": [
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/ci.yml/badge.svg",
+      "key": "ci_badge",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/quality.yml/badge.svg",
+      "key": "quality_badge",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/mutation-tests.yml/badge.svg",
+      "key": "mutation_badge",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/security.yml/badge.svg",
+      "key": "security_badge",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "badges",
+      "evidence": "actions/workflows/pages.yml/badge.svg",
+      "key": "pages_badge",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "policy",
+      "evidence": {
+        "exists": true,
+        "path": "SECURITY.md",
+        "readme_link": false
+      },
+      "key": "security_doc_exists",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "policy",
+      "evidence": {
+        "exists": true,
+        "path": "docs/security.md",
+        "readme_link": false
+      },
+      "key": "security_guide_exists",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "policy",
+      "evidence": {
+        "exists": true,
+        "path": "docs/policy-and-baselines.md",
+        "readme_link": false
+      },
+      "key": "policy_baseline_exists",
+      "passed": false,
+      "weight": 10
+    },
+    {
+      "category": "governance",
+      "evidence": ".github/workflows/ci.yml",
+      "key": "ci_workflow",
+      "passed": true,
+      "weight": 6
+    },
+    {
+      "category": "governance",
+      "evidence": ".github/workflows/security.yml",
+      "key": "security_workflow",
+      "passed": true,
+      "weight": 8
+    },
+    {
+      "category": "governance",
+      "evidence": ".github/workflows/pages.yml",
+      "key": "pages_workflow",
+      "passed": true,
+      "weight": 4
+    },
+    {
+      "category": "governance",
+      "evidence": "impact-22-ultra-upgrade-report.md",
+      "key": "docs_index_trust_assets",
+      "passed": false,
+      "weight": 2
+    }
+  ],
+  "governance_checks": {
+    "ci_workflow": true,
+    "docs_index_trust_assets": false,
+    "pages_workflow": true,
+    "security_workflow": true
+  },
+  "inputs": {
+    "docs_index": "docs/index.md",
+    "readme": "README.md"
+  },
+  "name": "trust-assets",
+  "policy_checks": {
+    "policy_baseline_exists": false,
+    "security_doc_exists": false,
+    "security_guide_exists": false
+  },
+  "recommendations": [
+    "Restore missing trust badges in README so reliability status is visible at a glance.",
+    "Ensure policy documents exist and are linked from README governance references.",
+    "Keep CI/security/pages workflows and docs index trust references present for reviewers."
+  ],
+  "score": 0.0,
+  "strict_failures": [
+    "# Trust assets (Day 22)",
+    "## Who should run Day 22",
+    "## Trust signal inputs",
+    "## Fast verification commands",
+    "## Scoring model",
+    "## Execution evidence mode",
+    "## Visibility checklist",
+    "python -m sdetkit trust-assets --format json --strict",
+    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict",
+    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict",
+    "python scripts/check_day22_trust_signal_upgrade_contract.py"
+  ],
+  "summary": {
+    "category_coverage": {
+      "badges": {
+        "passed": 0,
+        "total": 5
+      },
+      "governance": {
+        "passed": 3,
+        "total": 4
+      },
+      "policy": {
+        "passed": 0,
+        "total": 3
+      }
+    },
+    "critical_failures": [
+      "security_doc_exists"
+    ],
+    "failed_checks": 9,
+    "trust_label": "review",
+    "trust_score": 18.0,
+    "weighted_points": {
+      "earned": 18,
+      "total": 100
+    }
+  }
+}

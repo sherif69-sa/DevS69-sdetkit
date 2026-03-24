@@ -28,7 +28,7 @@ def test_external_contribution_push_json(tmp_path: Path, capsys) -> None:
 
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day26-external-contribution"
+    assert out["name"] == "external-contribution"
     assert out["summary"]["activation_score"] == 100.0
 
 
@@ -50,11 +50,13 @@ def test_emit_pack_and_execute(tmp_path: Path) -> None:
     )
 
     assert rc == 0
-    assert (tmp_path / "artifacts/day26-pack/day26-external-contribution-summary.json").exists()
-    assert (tmp_path / "artifacts/day26-pack/day26-external-contribution-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day26-pack/day26-starter-task-spotlight.md").exists()
-    assert (tmp_path / "artifacts/day26-pack/day26-external-contribution-triage-board.md").exists()
-    assert (tmp_path / "artifacts/day26-pack/day26-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day26-pack/external-contribution-summary.json").exists()
+    assert (tmp_path / "artifacts/day26-pack/external-contribution-scorecard.md").exists()
+    assert (
+        tmp_path / "artifacts/day26-pack/external-contribution-starter-task-spotlight.md"
+    ).exists()
+    assert (tmp_path / "artifacts/day26-pack/external-contribution-triage-board.md").exists()
+    assert (tmp_path / "artifacts/day26-pack/external-contribution-validation-commands.md").exists()
     assert (tmp_path / "artifacts/day26-pack/evidence/day26-execution-summary.json").exists()
 
 

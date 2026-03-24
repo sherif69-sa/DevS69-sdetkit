@@ -6,10 +6,10 @@
 | --- | --- | --- | --- | --- |
 | 15 | GitHub Actions integration quickstart | `docs/name-15-ultra-upgrade-report.md` | `docs/artifacts/day15-github-actions-quickstart-sample.md` | shipped ✅ |
 | 16 | GitLab CI integration quickstart | `docs/name-16-ultra-upgrade-report.md` | `docs/artifacts/day16-gitlab-ci-quickstart-sample.md` | shipped ✅ |
-| 17 | Quality + contribution delta evidence | `docs/day-17-ultra-upgrade-report.md` | `docs/artifacts/day17-quality-contribution-delta-sample.md` | shipped ✅ |
-| 18 | Reliability evidence operating pack | `docs/day-18-ultra-upgrade-report.md` | `docs/artifacts/day18-reliability-evidence-pack-sample.md` | shipped ✅ |
-| 19 | Release readiness board | `docs/day-19-ultra-upgrade-report.md` | `docs/artifacts/day19-release-readiness-board-sample.md` | shipped ✅ |
-| 20 | Release narrative storytelling pack | `docs/day-20-ultra-upgrade-report.md` | `docs/artifacts/day20-release-narrative-sample.md` | shipped ✅ |
+| 17 | Quality + contribution delta evidence | `docs/contribution-quality-report.md` | `docs/artifacts/contribution-quality-report-sample.md` | shipped ✅ |
+| 18 | Reliability evidence operating pack | `docs/reliability-evidence-report.md` | `docs/artifacts/reliability-evidence-pack-sample.md` | shipped ✅ |
+| 19 | Release readiness board | `docs/release-readiness-report.md` | `docs/artifacts/release-readiness-sample.md` | shipped ✅ |
+| 20 | Release narrative storytelling pack | `docs/release-communications-report.md` | `docs/artifacts/release-communications-sample.md` | shipped ✅ |
 
 ## KPI movement
 
@@ -33,6 +33,6 @@
 
 ## Next-week focus
 
-- Name 22: strengthen trust signals across security and reliability entry points.
-- Name 23: publish FAQ responses for recurring adoption objections.
-- Name 24: cut onboarding time-to-first-success below three minutes.
+- Trust assets: strengthen trust signals across security and reliability entry points.
+- Objection handling: publish FAQ responses for recurring adoption objections.
+- Onboarding optimization: cut onboarding time-to-first-success below three minutes.

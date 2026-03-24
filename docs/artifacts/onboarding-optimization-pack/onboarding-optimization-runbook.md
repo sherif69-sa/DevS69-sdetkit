@@ -1,0 +1,6 @@
+# Onboarding optimization time-to-first-success runbook
+
+1. Run `python -m sdetkit onboarding --platform all --format text`.
+2. Run `python -m sdetkit onboarding-optimization --format json --strict`.
+3. Emit the Onboarding optimization pack and attach it to release readiness notes.
+4. Capture first-success timing and keep the median below three minutes.

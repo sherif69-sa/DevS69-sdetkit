@@ -1,0 +1,7 @@
+command: python scripts/check_day13_enterprise_use_case_contract.py
+returncode: 0
+ok: True
+--- stdout ---
+enterprise-readiness-contract check passed
+
+--- stderr ---

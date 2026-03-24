@@ -173,7 +173,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    checklist = root / "startup-day12-checklist.md"
+    checklist = root / "startup-readiness-checklist.md"
     checklist.write_text(
         "\n".join(
             [
@@ -189,10 +189,10 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
         encoding="utf-8",
     )
 
-    ci_recipe = root / "startup-day12-ci.yml"
+    ci_recipe = root / "startup-readiness-ci.yml"
     ci_recipe.write_text(_CI_FAST_LANE, encoding="utf-8")
 
-    risk_register = root / "startup-day12-risk-register.md"
+    risk_register = root / "startup-readiness-risk-register.md"
     risk_register.write_text(
         "\n".join(
             [
@@ -230,7 +230,7 @@ def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day12-startup-readiness",
+        "name": "startup-readiness",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,
@@ -243,7 +243,7 @@ def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
             "validate": "sdetkit startup-readiness --format json --strict",
             "write_defaults": "sdetkit startup-readiness --write-defaults --format json --strict",
             "artifact": "sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md",
-            "emit_pack": "sdetkit startup-readiness --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
+            "emit_pack": "sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
         },
     }
 

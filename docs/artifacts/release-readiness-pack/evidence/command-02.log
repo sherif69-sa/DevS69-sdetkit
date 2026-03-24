@@ -1,0 +1,36 @@
+command: python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "emitted_pack_files": [
+    "docs/artifacts/release-readiness-pack/release-readiness-summary.json",
+    "docs/artifacts/release-readiness-pack/release-readiness-scorecard.md",
+    "docs/artifacts/release-readiness-pack/release-readiness-checklist.md",
+    "docs/artifacts/release-readiness-pack/release-readiness-validation-commands.md",
+    "docs/artifacts/release-readiness-pack/release-decision.md"
+  ],
+  "inputs": {
+    "name14": {
+      "score": 100.0,
+      "status": "pass"
+    },
+    "name18": {
+      "gate_status": "pass",
+      "reliability_score": 95.09
+    }
+  },
+  "name": "release-readiness",
+  "recommendations": [
+    "Release posture is strong; proceed with release candidate tagging and notes preparation."
+  ],
+  "score": 100.0,
+  "strict_failures": [],
+  "summary": {
+    "gate_status": "pass",
+    "release_score": 96.56,
+    "strict_all_green": true
+  }
+}
+
+--- stderr ---

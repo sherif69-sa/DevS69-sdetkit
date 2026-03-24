@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     d25 = root / "docs/artifacts/day25-community-pack"
-    d26 = root / "docs/artifacts/day26-external-contribution-pack"
+    d26 = root / "docs/artifacts/external-contribution-pack"
     d27 = root / "docs/artifacts/day27-kpi-pack"
     d25.mkdir(parents=True, exist_ok=True)
     d26.mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
     (d25 / "day25-community-summary.json").write_text(
         '{"summary": {"activation_score": 95}}\n', encoding="utf-8"
     )
-    (d26 / "day26-external-contribution-summary.json").write_text(
+    (d26 / "external-contribution-summary.json").write_text(
         '{"summary": {"activation_score": 93}}\n', encoding="utf-8"
     )
     (d27 / "day27-kpi-summary.json").write_text(

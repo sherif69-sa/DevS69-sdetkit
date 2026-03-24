@@ -20,8 +20,8 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit onboarding-optimization --format json --strict",
-    "python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict",
-    "python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict",
+    "python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/onboarding-optimization-pack --format json --strict",
+    "python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/onboarding-optimization-pack/evidence --format json --strict",
     "python scripts/check_day24_onboarding_time_upgrade_contract.py",
 ]
 _EXECUTION_COMMANDS = [
@@ -48,8 +48,8 @@ A Day 24 pass means a new contributor can complete environment setup and run one
 
 ```bash
 python -m sdetkit onboarding-optimization --format json --strict
-python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict
-python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict
+python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/onboarding-optimization-pack --format json --strict
+python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/onboarding-optimization-pack/evidence --format json --strict
 python scripts/check_day24_onboarding_time_upgrade_contract.py
 ```
 
@@ -115,14 +115,14 @@ _SIGNALS = [
         "source": "onboarding_module",
     },
     {
-        "check_id": "readme_day24_link",
+        "check_id": "readme_onboarding_optimization_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "docs/onboarding-optimization.md",
         "source": "readme",
     },
     {
-        "check_id": "docs_index_day24_link",
+        "check_id": "docs_index_onboarding_optimization_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "impact-24-ultra-upgrade-report.md",
@@ -249,7 +249,7 @@ def build_onboarding_time_summary(
         )
 
     return {
-        "name": "day24-onboarding-optimization",
+        "name": "onboarding-optimization",
         "summary": {
             "onboarding_score": score,
             "readiness": "strong" if score >= 90 and not critical_failures else "review",
@@ -290,11 +290,11 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day24-onboarding-summary.json"
-    scorecard = out_dir / "day24-onboarding-scorecard.md"
-    checklist = out_dir / "day24-onboarding-checklist.md"
-    runbook = out_dir / "day24-time-to-first-success-runbook.md"
-    validation = out_dir / "day24-validation-commands.md"
+    summary = out_dir / "onboarding-optimization-summary.json"
+    scorecard = out_dir / "onboarding-optimization-scorecard.md"
+    checklist = out_dir / "onboarding-optimization-checklist.md"
+    runbook = out_dir / "onboarding-optimization-runbook.md"
+    validation = out_dir / "onboarding-optimization-validation-commands.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_text(payload) + "\n", encoding="utf-8")
@@ -359,7 +359,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
-    (evidence_dir / "day24-execution-summary.json").write_text(
+    (evidence_dir / "onboarding-optimization-execution-summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return payload
@@ -388,7 +388,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day24-onboarding-pack/evidence",
+        default="docs/artifacts/onboarding-optimization-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
     parser.add_argument(

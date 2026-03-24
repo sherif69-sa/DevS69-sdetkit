@@ -1,0 +1,17 @@
+name: enterprise-compliance-lane
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  enterprise-compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements-test.txt -e .
+      - run: python -m sdetkit enterprise-readiness --format json --strict
+      - run: python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
+      - run: python scripts/check_day13_enterprise_use_case_contract.py

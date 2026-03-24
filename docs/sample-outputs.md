@@ -78,7 +78,7 @@ python -m sdetkit gate release --format json --out build/release-preflight.json
 
 ```json
 {
-  "name": "day19-release-readiness-board",
+  "name": "release-readiness",
   "summary": {
     "gate_status": "pass",
     "release_score": 96.56,

@@ -25,7 +25,7 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
     day17.write_text(
         json.dumps(
             {
-                "name": "day17-quality-contribution-delta",
+                "name": "contribution-quality-report",
                 "quality": {"stability_score": 100.0},
                 "contributions": {"velocity_score": 92.5},
                 "strict_failures": [],
@@ -64,7 +64,7 @@ def test_pack_builds_json(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day18-reliability-evidence-pack"
+    assert out["name"] == "reliability-evidence-pack"
     assert out["summary"]["strict_all_green"] is True
     assert out["summary"]["reliability_score"] >= 90
     assert out["score"] == 100.0
@@ -94,11 +94,13 @@ def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day18-pack/day18-reliability-summary.json").exists()
-    assert (tmp_path / "artifacts/day18-pack/day18-reliability-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/day18-reliability-checklist.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/day18-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/evidence/day18-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-summary.json").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-scorecard.md").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-checklist.md").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/day18-pack/evidence/reliability-evidence-execution-summary.json"
+    ).exists()
 
 
 def test_write_defaults(tmp_path: Path) -> None:
@@ -248,7 +250,7 @@ def test_reliability_pack_strict_fails_when_page_missing_and_score_low(
         '{"score": 0.0, "strict": true, "checks_passed": 0, "checks_total": 10}\n', encoding="utf-8"
     )
     day17.write_text(
-        '{"name":"day17-quality-contribution-delta","quality":{"stability_score":0.0},"contributions":{"velocity_score":0.0},"strict_failures":[]}\n',
+        '{"name":"contribution-quality-report","quality":{"stability_score":0.0},"contributions":{"velocity_score":0.0},"strict_failures":[]}\n',
         encoding="utf-8",
     )
     # Write a page that is missing the required header/sections/commands.
