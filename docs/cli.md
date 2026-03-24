@@ -33,7 +33,8 @@ Supporting utilities remain available, but are no longer the primary discovery s
 Playbook and transition-era lanes are preserved but intentionally secondary:
 
 - `sdetkit playbooks`
-- `dayNN-*`, `*-closeout`, `continuous-upgrade-cycleX-closeout`
+- legacy compatibility lanes and archived transition commands
+- canonical rename map: [public-surface-rename-map](public-surface-rename-map.md)
 
 ## Contract expectations
 

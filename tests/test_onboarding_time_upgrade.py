@@ -11,11 +11,9 @@ def _write_fixture(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text("impact-24-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "README.md").write_text(
-        "docs/integrations-onboarding-time-upgrade.md\nonboarding-time-upgrade\n", encoding="utf-8"
+        "docs/onboarding-optimization.md\nonboarding-optimization\n", encoding="utf-8"
     )
-    (root / "docs/integrations-onboarding-time-upgrade.md").write_text(
-        otu._DAY24_DEFAULT_PAGE, encoding="utf-8"
-    )
+    (root / "docs/onboarding-optimization.md").write_text(otu._DAY24_DEFAULT_PAGE, encoding="utf-8")
     (root / "src/sdetkit").mkdir(parents=True, exist_ok=True)
     (root / "src/sdetkit/onboarding.py").write_text(
         "--role\n--platform\npython -m sdetkit doctor --format text\n", encoding="utf-8"
@@ -29,7 +27,7 @@ def test_onboarding_json(tmp_path: Path, capsys) -> None:
     assert rc == 0
 
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day24-onboarding-time-upgrade"
+    assert out["name"] == "day24-onboarding-optimization"
     assert out["summary"]["onboarding_score"] == 100.0
 
 
@@ -61,7 +59,7 @@ def test_onboarding_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_onboarding_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _write_fixture(tmp_path)
-    (tmp_path / "docs/integrations-onboarding-time-upgrade.md").write_text(
+    (tmp_path / "docs/onboarding-optimization.md").write_text(
         "# Onboarding time upgrade (Day 24)\n", encoding="utf-8"
     )
 
@@ -72,6 +70,6 @@ def test_onboarding_strict_fails_when_sections_missing(tmp_path: Path) -> None:
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _write_fixture(tmp_path)
 
-    rc = cli.main(["onboarding-time-upgrade", "--root", str(tmp_path), "--format", "text"])
+    rc = cli.main(["onboarding-optimization", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 24 onboarding time upgrade" in capsys.readouterr().out
+    assert "Day 24 onboarding optimization" in capsys.readouterr().out

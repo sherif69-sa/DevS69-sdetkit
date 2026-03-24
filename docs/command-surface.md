@@ -39,7 +39,8 @@ Use these for existing scripts while migrating discovery/docs to umbrella-kit ro
 
 - Supporting utilities: `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `dev`, `ci`, `ops`, `notify`, `agent`
 - Playbooks catalog: `sdetkit playbooks`
-- Transition-era lanes: `dayNN-*`, `*-closeout`, `continuous-upgrade-cycleX-closeout`
+- Transition-era lanes: legacy compatibility lanes and archived transition commands
+- Canonical rename map: [public-surface-rename-map](public-surface-rename-map.md)
 
 Maintainer sync:
 

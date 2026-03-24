@@ -72,7 +72,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
         stability_tier="Experimental",
         first_time_recommended=False,
         transition_legacy_oriented=True,
-        top_level_commands=("dayNN-*", "*-closeout", "continuous-upgrade-cycleX-closeout"),
+        top_level_commands=("legacy compatibility lanes", "archived transition commands"),
     ),
 )
 

@@ -19,9 +19,9 @@ ok: True
   ],
   "inputs": {
     "changelog": "CHANGELOG.md",
-    "name19_summary": "docs/artifacts/name19-release-readiness-pack/name19-release-readiness-summary.json"
+    "day19_summary": "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json"
   },
-  "name": "name20-release-narrative",
+  "name": "day20-release-narrative",
   "narrative_channels": {
     "community_post": "Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.",
     "internal_update": "Name 20 narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.",

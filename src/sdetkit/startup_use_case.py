@@ -41,7 +41,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
-      - run: python -m sdetkit startup-use-case --format json --strict
+      - run: python -m sdetkit startup-readiness --format json --strict
       - run: python scripts/check_day12_startup_use_case_contract.py
 """
 
@@ -108,7 +108,7 @@ Move to the enterprise/regulated path once you need:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit startup-use-case",
+        prog="sdetkit startup-readiness",
         description="Render and validate a startup use-case report.",
     )
     parser.add_argument(
@@ -200,7 +200,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
                 "",
                 "| Risk | Trigger | Mitigation |",
                 "| --- | --- | --- |",
-                "| Docs drift | Required sections are removed | Run `startup-use-case --strict` in CI |",
+                "| Docs drift | Required sections are removed | Run `startup-readiness --strict` in CI |",
                 "| Broken command examples | CLI flags change | Keep Day 12 tests in startup fast-lane |",
                 "| Missing artifacts | Report generation skipped | Require artifact publish in weekly cadence |",
             ]
@@ -230,7 +230,7 @@ def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day12-startup-use-case",
+        "name": "day12-startup-readiness",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,
@@ -240,17 +240,17 @@ def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
         "missing": missing,
         "actions": {
             "open_page": _PAGE_PATH,
-            "validate": "sdetkit startup-use-case --format json --strict",
-            "write_defaults": "sdetkit startup-use-case --write-defaults --format json --strict",
-            "artifact": "sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md",
-            "emit_pack": "sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
+            "validate": "sdetkit startup-readiness --format json --strict",
+            "write_defaults": "sdetkit startup-readiness --write-defaults --format json --strict",
+            "artifact": "sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md",
+            "emit_pack": "sdetkit startup-readiness --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
         },
     }
 
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Startup use-case report",
+        "Startup readiness report",
         f"Score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
         "",
         f"Page: {payload['page']}",
@@ -284,7 +284,7 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Startup use-case report",
+        "# Startup readiness report",
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         f"- Page: `{payload['page']}`",

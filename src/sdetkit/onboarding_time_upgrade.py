@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-onboarding-time-upgrade.md"
-_SECTION_HEADER = "# Onboarding time upgrade (Day 24)"
+_PAGE_PATH = "docs/onboarding-optimization.md"
+_SECTION_HEADER = "# Onboarding optimization (Day 24)"
 _REQUIRED_SECTIONS = [
     "## Who should run Day 24",
     "## Three-minute success contract",
@@ -19,18 +19,18 @@ _REQUIRED_SECTIONS = [
     "## Closeout checklist",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit onboarding-time-upgrade --format json --strict",
-    "python -m sdetkit onboarding-time-upgrade --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict",
-    "python -m sdetkit onboarding-time-upgrade --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict",
+    "python -m sdetkit onboarding-optimization --format json --strict",
+    "python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict",
+    "python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict",
     "python scripts/check_day24_onboarding_time_upgrade_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit onboarding --format text --platform all",
-    "python -m sdetkit onboarding-time-upgrade --format json --strict",
+    "python -m sdetkit onboarding-optimization --format json --strict",
     "python scripts/check_day24_onboarding_time_upgrade_contract.py --skip-evidence",
 ]
 
-_DAY24_DEFAULT_PAGE = """# Onboarding time upgrade (Day 24)
+_DAY24_DEFAULT_PAGE = """# Onboarding optimization (Day 24)
 
 Day 24 reduces onboarding time-to-first-success and standardizes a deterministic three-minute activation path.
 
@@ -47,9 +47,9 @@ A Day 24 pass means a new contributor can complete environment setup and run one
 ## Fast path commands
 
 ```bash
-python -m sdetkit onboarding-time-upgrade --format json --strict
-python -m sdetkit onboarding-time-upgrade --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict
-python -m sdetkit onboarding-time-upgrade --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict
+python -m sdetkit onboarding-optimization --format json --strict
+python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/day24-onboarding-pack --format json --strict
+python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/day24-onboarding-pack/evidence --format json --strict
 python scripts/check_day24_onboarding_time_upgrade_contract.py
 ```
 
@@ -118,7 +118,7 @@ _SIGNALS = [
         "check_id": "readme_day24_link",
         "category": "discoverability",
         "weight": 10,
-        "marker": "docs/integrations-onboarding-time-upgrade.md",
+        "marker": "docs/onboarding-optimization.md",
         "source": "readme",
     },
     {
@@ -132,7 +132,7 @@ _SIGNALS = [
         "check_id": "readme_onboarding_command",
         "category": "discoverability",
         "weight": 10,
-        "marker": "onboarding-time-upgrade",
+        "marker": "onboarding-optimization",
         "source": "readme",
     },
 ]
@@ -249,7 +249,7 @@ def build_onboarding_time_summary(
         )
 
     return {
-        "name": "day24-onboarding-time-upgrade",
+        "name": "day24-onboarding-optimization",
         "summary": {
             "onboarding_score": score,
             "readiness": "strong" if score >= 90 and not critical_failures else "review",
@@ -272,7 +272,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "Day 24 onboarding time upgrade",
+        "Day 24 onboarding optimization",
         "",
         f"Onboarding score: {summary['onboarding_score']}",
         f"Readiness: {summary['readiness']}",
@@ -319,7 +319,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
                 "# Day 24 time-to-first-success runbook",
                 "",
                 "1. Run `python -m sdetkit onboarding --platform all --format text`.",
-                "2. Run `python -m sdetkit onboarding-time-upgrade --format json --strict`.",
+                "2. Run `python -m sdetkit onboarding-optimization --format json --strict`.",
                 "3. Emit the Day 24 pack and attach it to release readiness notes.",
                 "4. Capture first-success timing and keep the median below three minutes.",
             ]
@@ -355,7 +355,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
             }
         )
     payload = {
-        "name": "day24-onboarding-time-upgrade-execution",
+        "name": "onboarding-optimization-execution",
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
@@ -367,8 +367,8 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit onboarding-time-upgrade",
-        description="Day 24 onboarding-time reduction and closeout lane.",
+        prog="sdetkit onboarding-optimization",
+        description="Onboarding optimization readiness workflow.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
     parser.add_argument(
@@ -378,7 +378,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--docs-index", default="docs/index.md", help="Docs index path for discoverability checks."
     )
     parser.add_argument(
-        "--write-defaults", action="store_true", help="Create default Day 24 integration page."
+        "--write-defaults", action="store_true", help="Create default onboarding optimization page."
     )
     parser.add_argument(
         "--emit-pack-dir", default="", help="Optional output directory for generated Day 24 files."

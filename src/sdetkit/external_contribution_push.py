@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-external-contribution-push.md"
+_PAGE_PATH = "docs/external-contribution.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _SECTION_HEADER = "# External contribution push (Day 26)"
 _REQUIRED_SECTIONS = [
@@ -20,13 +20,13 @@ _REQUIRED_SECTIONS = [
     "## Execution evidence mode",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit external-contribution-push --format json --strict",
-    "python -m sdetkit external-contribution-push --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict",
-    "python -m sdetkit external-contribution-push --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict",
+    "python -m sdetkit external-contribution --format json --strict",
+    "python -m sdetkit external-contribution --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict",
+    "python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict",
     "python scripts/check_day26_external_contribution_push_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit external-contribution-push --format json --strict",
+    "python -m sdetkit external-contribution --format json --strict",
     "python scripts/check_day26_external_contribution_push_contract.py --skip-evidence",
 ]
 
@@ -47,9 +47,9 @@ A Day 26 pass means at least 10 starter tasks are publicly spotlighted with labe
 ## Launch checklist
 
 ```bash
-python -m sdetkit external-contribution-push --format json --strict
-python -m sdetkit external-contribution-push --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict
-python -m sdetkit external-contribution-push --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict
+python -m sdetkit external-contribution --format json --strict
+python -m sdetkit external-contribution --emit-pack-dir docs/artifacts/day26-external-contribution-pack --format json --strict
+python -m sdetkit external-contribution --execute --evidence-dir docs/artifacts/day26-external-contribution-pack/evidence --format json --strict
 python scripts/check_day26_external_contribution_push_contract.py
 ```
 
@@ -96,14 +96,14 @@ _SIGNALS = [
         "check_id": "readme_day26_link",
         "category": "discoverability",
         "weight": 10,
-        "marker": "docs/integrations-external-contribution-push.md",
+        "marker": "docs/external-contribution.md",
         "source": "readme",
     },
     {
         "check_id": "readme_day26_command",
         "category": "discoverability",
         "weight": 8,
-        "marker": "external-contribution-push",
+        "marker": "external-contribution",
         "source": "readme",
     },
     {
@@ -247,7 +247,7 @@ def build_external_contribution_push_summary(
         )
 
     return {
-        "name": "day26-external-contribution-push",
+        "name": "day26-external-contribution",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -356,7 +356,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
             }
         )
     payload = {
-        "name": "day26-external-contribution-push-execution",
+        "name": "external-contribution-execution",
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
@@ -368,7 +368,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit external-contribution-push",
+        prog="sdetkit external-contribution",
         description="Day 26 external contribution push closeout lane.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")

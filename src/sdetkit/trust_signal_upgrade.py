@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-trust-signal-upgrade.md"
+_PAGE_PATH = "docs/trust-assets.md"
 
-_SECTION_HEADER = "# Trust signal upgrade (Day 22)"
+_SECTION_HEADER = "# Trust assets (Day 22)"
 _REQUIRED_SECTIONS = [
     "## Who should run Day 22",
     "## Trust signal inputs",
@@ -21,19 +21,19 @@ _REQUIRED_SECTIONS = [
 ]
 
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit trust-signal-upgrade --format json --strict",
-    "python -m sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
-    "python -m sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict",
+    "python -m sdetkit trust-assets --format json --strict",
+    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
+    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict",
     "python scripts/check_day22_trust_signal_upgrade_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit trust-signal-upgrade --format json --strict",
-    "python -m sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
+    "python -m sdetkit trust-assets --format json --strict",
+    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
     "python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evidence",
 ]
 
-_DAY22_DEFAULT_PAGE = """# Trust signal upgrade (Day 22)
+_DAY22_DEFAULT_PAGE = """# Trust assets (Day 22)
 
 Day 22 tightens trust posture visibility by keeping reliability badges and policy docs obvious for new adopters.
 
@@ -52,9 +52,9 @@ Day 22 tightens trust posture visibility by keeping reliability badges and polic
 ## Fast verification commands
 
 ```bash
-python -m sdetkit trust-signal-upgrade --format json --strict
-python -m sdetkit trust-signal-upgrade --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict
-python -m sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict
+python -m sdetkit trust-assets --format json --strict
+python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict
+python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict
 python scripts/check_day22_trust_signal_upgrade_contract.py
 ```
 
@@ -227,7 +227,7 @@ def build_trust_signal_summary(
         )
 
     return {
-        "name": "day22-trust-signal-upgrade",
+        "name": "day22-trust-assets",
         "inputs": {"readme": readme_path, "docs_index": docs_index_path},
         "summary": {
             "trust_score": trust_score,
@@ -387,7 +387,7 @@ def _write_execution_evidence(
     out.mkdir(parents=True, exist_ok=True)
     summary = out / "day22-execution-summary.json"
     payload = {
-        "name": "day22-trust-signal-upgrade-execution",
+        "name": "trust-assets-execution",
         "total_commands": len(rows),
         "passed_commands": len([r for r in rows if r["ok"]]),
         "failed_commands": len([r for r in rows if not r["ok"]]),
@@ -419,8 +419,8 @@ def _write_execution_evidence(
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="sdetkit trust-signal-upgrade",
-        description="Generate Day 22 trust signal posture from badges, policy visibility, and governance checks.",
+        prog="sdetkit trust-assets",
+        description="Generate trust-assets posture from badges, policy visibility, and governance checks.",
     )
     p.add_argument("--root", default=".", help="Repository root path.")
     p.add_argument("--readme", default="README.md", help="README path used for trust checks.")
@@ -433,7 +433,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Create default Day 22 integration page if missing.",
+        help="Create default trust-assets page if missing.",
     )
     p.add_argument(
         "--emit-pack-dir", default="", help="Optional output directory for generated Day 22 files."

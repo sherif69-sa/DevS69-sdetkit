@@ -17,12 +17,12 @@ def test_proof_json_machine_readable(capsys):
     rc = proof.main(["--format", "json"])
     assert rc == 0
     payload = json.loads(capsys.readouterr().out)
-    assert payload["name"] == "proof-pack"
+    assert payload["name"] == "evidence-assets-pack"
     assert len(payload["steps"]) == 3
 
 
 def test_cli_dispatches_proof(capsys):
-    rc = cli.main(["proof", "--format", "text"])
+    rc = cli.main(["evidence-assets", "--format", "text"])
     assert rc == 0
     assert "Proof tips" in capsys.readouterr().out
 

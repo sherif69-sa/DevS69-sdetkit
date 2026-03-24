@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-faq-objections.md"
+_PAGE_PATH = "docs/objection-handling.md"
 
 _SECTION_HEADER = "# FAQ and objections (Day 23)"
 _REQUIRED_SECTIONS = [
@@ -21,15 +21,15 @@ _REQUIRED_SECTIONS = [
 ]
 
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit faq-objections --format json --strict",
-    "python -m sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict",
-    "python -m sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict",
+    "python -m sdetkit objection-handling --format json --strict",
+    "python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict",
+    "python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict",
     "python scripts/check_day23_faq_objections_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit faq-objections --format json --strict",
-    "python -m sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict",
+    "python -m sdetkit objection-handling --format json --strict",
+    "python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict",
     "python scripts/check_day23_faq_objections_contract.py --skip-evidence",
 ]
 
@@ -76,9 +76,9 @@ Response: run strict mode, emit a Day 23 FAQ pack, and attach execution logs as 
 ## Fast verification commands
 
 ```bash
-python -m sdetkit faq-objections --format json --strict
-python -m sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict
-python -m sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
+python -m sdetkit objection-handling --format json --strict
+python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict
+python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
 python scripts/check_day23_faq_objections_contract.py
 ```
 
@@ -130,7 +130,7 @@ _SIGNALS = [
         "check_id": "readme_day23_link",
         "category": "discoverability",
         "weight": 8,
-        "marker": "docs/integrations-faq-objections.md",
+        "marker": "docs/objection-handling.md",
         "source": "readme",
     },
     {
@@ -253,11 +253,11 @@ def build_faq_objections_summary(
         )
     if not recommendations:
         recommendations.append(
-            "FAQ objections lane is healthy; keep objections refreshed from real issue/discussion trends."
+            "Objection handling lane is healthy; keep objections refreshed from real issue/discussion trends."
         )
 
     return {
-        "name": "day23-faq-objections",
+        "name": "day23-objection-handling",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -280,7 +280,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "Day 23 FAQ objections",
+        "Day 23 Objection handling",
         "",
         f"FAQ score: {summary['faq_score']}",
         f"Readiness: {summary['objection_readiness']}",
@@ -345,8 +345,8 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         "| Objection | Response | Verification command |",
         "| --- | --- | --- |",
         "| This is too heavy for small teams | Start with doctor + repo + security lanes only. | `python -m sdetkit doctor --json` |",
-        "| We already have scripts | Keep scripts, then enforce deterministic strict gates + artifacts with sdetkit. | `python -m sdetkit faq-objections --format json --strict` |",
-        "| How do we prove readiness? | Emit Day 23 FAQ pack and attach evidence summary in release review. | `python -m sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict` |",
+        "| We already have scripts | Keep scripts, then enforce deterministic strict gates + artifacts with sdetkit. | `python -m sdetkit objection-handling --format json --strict` |",
+        "| How do we prove readiness? | Emit Day 23 FAQ pack and attach evidence summary in release review. | `python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict` |",
     ]
     matrix.write_text("\n".join(matrix_lines) + "\n", encoding="utf-8")
 
@@ -395,7 +395,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 
     summary = evidence_dir / "day23-execution-summary.json"
     payload = {
-        "name": "day23-faq-objections-execution",
+        "name": "objection-handling-execution",
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
@@ -410,7 +410,7 @@ def _write_default_page(path: Path) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit faq-objections",
+        prog="sdetkit objection-handling",
         description="Day 23 FAQ and objections lane for adoption blockers.",
     )
     parser.add_argument("--root", default=".", help="Repository root.")

@@ -22,7 +22,7 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path]:
 
 
 def _write_page(root: Path) -> None:
-    path = root / "docs/integrations-release-readiness-board.md"
+    path = root / "docs/release-readiness.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(rrb._DAY19_DEFAULT_PAGE, encoding="utf-8")
 
@@ -46,7 +46,7 @@ def test_board_builds_json(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day19-release-readiness-board"
+    assert out["name"] == "day19-release-readiness"
     assert out["summary"]["strict_all_green"] is True
     assert out["summary"]["release_score"] >= 90
 
@@ -86,7 +86,7 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
 
     rc = cli.main(
         [
-            "release-readiness-board",
+            "release-readiness",
             "--root",
             str(tmp_path),
             "--day18-summary",

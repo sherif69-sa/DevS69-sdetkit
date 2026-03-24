@@ -134,7 +134,7 @@ def build_delta_report(
     recommendations = _build_recommendations(quality_deltas, contribution_deltas)
 
     return {
-        "name": "day17-quality-contribution-delta",
+        "name": "day17-contribution-quality-report",
         "quality": {
             "week1": week1.kpis,
             "week2": week2.kpis,
@@ -166,7 +166,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     actions = payload.get("actions", {})
 
     lines = [
-        "Quality contribution delta report",
+        "Contribution quality report",
         f"Quality stability score: {payload['quality']['stability_score']}",
         f"Contribution velocity score: {payload['contributions']['velocity_score']}",
         "",
@@ -231,7 +231,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     actions = payload.get("actions", {})
 
     lines = [
-        "# Quality contribution delta report",
+        "# Contribution quality report",
         "",
         f"- Quality stability score: **{payload['quality']['stability_score']}**",
         f"- Contribution velocity score: **{payload['contributions']['velocity_score']}**",
@@ -350,7 +350,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="sdetkit quality-contribution-delta",
+        prog="sdetkit contribution-quality-report",
         description="Build a quality contribution delta report.",
     )
     p.add_argument("--root", default=".", help="Repository root path.")
@@ -435,13 +435,13 @@ def main(argv: list[str] | None = None) -> int:
     payload["strict_failures"] = _evaluate_gates(payload, thresholds)
     payload["actions"] = {
         "validate": (
-            f"sdetkit quality-contribution-delta "
+            f"sdetkit contribution-quality-report "
             f"--current-signals-file {args.current_signals_file} "
             f"--previous-signals-file {args.previous_signals_file} "
             f"--format json --strict"
         ),
         "validate_thresholds": (
-            f"sdetkit quality-contribution-delta "
+            f"sdetkit contribution-quality-report "
             f"--current-signals-file {args.current_signals_file} "
             f"--previous-signals-file {args.previous_signals_file} "
             f"--min-traffic-delta {args.min_traffic_delta} "
@@ -451,13 +451,13 @@ def main(argv: list[str] | None = None) -> int:
             f"--format json --strict"
         ),
         "artifact": (
-            f"sdetkit quality-contribution-delta "
+            f"sdetkit contribution-quality-report "
             f"--current-signals-file {args.current_signals_file} "
             f"--previous-signals-file {args.previous_signals_file} "
-            f"--format markdown --output docs/artifacts/day17-quality-contribution-delta-sample.md"
+            f"--format markdown --output docs/artifacts/contribution-quality-report-sample.md"
         ),
         "emit_pack": (
-            f"sdetkit quality-contribution-delta "
+            f"sdetkit contribution-quality-report "
             f"--current-signals-file {args.current_signals_file} "
             f"--previous-signals-file {args.previous_signals_file} "
             f"--emit-pack-dir docs/artifacts/day17-delta-pack --format json --strict"

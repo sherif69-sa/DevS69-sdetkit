@@ -37,7 +37,7 @@ def test_delta_text_output_is_productized(tmp_path, capsys):
     )
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Quality contribution delta report" in out
+    assert "Contribution quality report" in out
     assert "Inputs:" in out
     assert "Quality deltas:" in out
     assert "Contribution deltas:" in out
@@ -73,7 +73,7 @@ def test_delta_markdown_output_uses_productized_headings(tmp_path, capsys):
     )
     assert rc == 0
     out = capsys.readouterr().out
-    assert "# Quality contribution delta report" in out
+    assert "# Contribution quality report" in out
     assert "## Inputs" in out
     assert "## Quality deltas" in out
     assert "## Contribution deltas" in out
@@ -103,7 +103,7 @@ def test_delta_default_json(tmp_path, capsys):
     )
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day17-quality-contribution-delta"
+    assert data["name"] == "day17-contribution-quality-report"
     assert data["contributions"]["deltas"]["traffic"] == 400
     assert data["contributions"]["delta_percent"]["traffic"] == 22.22
     assert "velocity_score" in data["contributions"]
@@ -170,7 +170,7 @@ def test_cli_dispatch(tmp_path, capsys):
 
     rc = cli.main(
         [
-            "quality-contribution-delta",
+            "contribution-quality-report",
             "--root",
             ".",
             "--current-signals-file",
@@ -183,5 +183,5 @@ def test_cli_dispatch(tmp_path, capsys):
     )
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Quality contribution delta report" in out
+    assert "Contribution quality report" in out
     assert "Recommendations:" in out

@@ -45,8 +45,8 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
-      - run: python -m sdetkit enterprise-use-case --format json --strict
-      - run: python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+      - run: python -m sdetkit enterprise-readiness --format json --strict
+      - run: python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
       - run: python scripts/check_day13_enterprise_use_case_contract.py
 """
 
@@ -106,7 +106,7 @@ Track these outcomes weekly:
 Generate and persist command outputs in one pass:
 
 ```bash
-python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
 ```
 
 This writes a structured `day13-execution-summary.json` and one per-command log file for audit-ready handoff.
@@ -121,7 +121,7 @@ This writes a structured `day13-execution-summary.json` and one per-command log 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit enterprise-use-case",
+        prog="sdetkit enterprise-readiness",
         description="Render and validate an enterprise use-case report.",
     )
     parser.add_argument(
@@ -230,7 +230,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
                 "",
                 "| Control area | Trigger | Mitigation |",
                 "| --- | --- | --- |",
-                "| Documentation drift | Required enterprise sections are removed | Run `enterprise-use-case --strict` in CI |",
+                "| Documentation drift | Required enterprise sections are removed | Run `enterprise-readiness --strict` in CI |",
                 "| Evidence gaps | Compliance artifacts are not published | Require `--execute --evidence-dir` in release pipeline |",
                 "| Policy baseline mismatch | Profile or control set changes unexpectedly | Run `sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json` and diff against baseline |",
             ]
@@ -340,7 +340,7 @@ def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day13-enterprise-use-case",
+        "name": "day13-enterprise-readiness",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,
@@ -350,18 +350,18 @@ def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
         "missing": missing,
         "actions": {
             "open_page": _PAGE_PATH,
-            "validate": "sdetkit enterprise-use-case --format json --strict",
-            "write_defaults": "sdetkit enterprise-use-case --write-defaults --format json --strict",
-            "artifact": "sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md",
-            "emit_pack": "sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-            "execute": "sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+            "validate": "sdetkit enterprise-readiness --format json --strict",
+            "write_defaults": "sdetkit enterprise-readiness --write-defaults --format json --strict",
+            "artifact": "sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md",
+            "emit_pack": "sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
+            "execute": "sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
         },
     }
 
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Enterprise use-case report",
+        "Enterprise readiness report",
         f"Score: {payload['score']} ({payload['passed_checks']}/{payload['total_checks']})",
         "",
         f"Page: {payload['page']}",
@@ -404,7 +404,7 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Enterprise use-case report",
+        "# Enterprise readiness report",
         "",
         f"- Score: **{payload['score']}** ({payload['passed_checks']}/{payload['total_checks']})",
         f"- Page: `{payload['page']}`",

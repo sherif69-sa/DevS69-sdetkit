@@ -1,14 +1,14 @@
-command: python -m sdetkit release-readiness-board --emit-pack-dir docs/artifacts/name19-release-readiness-pack --format json --strict
+command: python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict
 returncode: 0
 ok: True
 --- stdout ---
 {
   "emitted_pack_files": [
-    "docs/artifacts/name19-release-readiness-pack/name19-release-readiness-summary.json",
-    "docs/artifacts/name19-release-readiness-pack/name19-release-readiness-scorecard.md",
-    "docs/artifacts/name19-release-readiness-pack/name19-release-readiness-checklist.md",
-    "docs/artifacts/name19-release-readiness-pack/name19-validation-commands.md",
-    "docs/artifacts/name19-release-readiness-pack/name19-release-decision.md"
+    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json",
+    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-scorecard.md",
+    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-checklist.md",
+    "docs/artifacts/day19-release-readiness-pack/day19-validation-commands.md",
+    "docs/artifacts/day19-release-readiness-pack/day19-release-decision.md"
   ],
   "inputs": {
     "name14": {
@@ -20,7 +20,7 @@ ok: True
       "reliability_score": 95.09
     }
   },
-  "name": "name19-release-readiness-board",
+  "name": "day19-release-readiness-board",
   "recommendations": [
     "Release posture is strong; proceed with release candidate tagging and notes preparation."
   ],

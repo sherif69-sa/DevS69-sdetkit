@@ -16,7 +16,7 @@ Without deterministic answers, onboarding confidence drops and launch momentum s
 
 ## Implementation scope
 
-- Added a new CLI command: `sdetkit faq-objections`.
+- Added a new CLI command: `sdetkit objection-handling`.
 - Added strict scoring + critical-failure gating for FAQ/objection readiness.
 - Added deterministic execution mode for evidence capture.
 - Added artifact-pack emitter for release and review workflows.
@@ -33,15 +33,15 @@ Without deterministic answers, onboarding confidence drops and launch momentum s
 
 ```bash
 python -m pytest tests/test_faq_objections.py tests/test_cli_help_lists_subcommands.py
-python -m sdetkit faq-objections --format json --strict
-python -m sdetkit faq-objections --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict
-python -m sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
+python -m sdetkit objection-handling --format json --strict
+python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict
+python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
 python scripts/check_day23_faq_objections_contract.py
 ```
 
 ## Artifacts
 
-- `docs/artifacts/day23-faq-objections-sample.md`
+- `docs/artifacts/objection-handling-sample.md`
 - `docs/artifacts/day23-faq-pack/day23-faq-summary.json`
 - `docs/artifacts/day23-faq-pack/day23-faq-scorecard.md`
 - `docs/artifacts/day23-faq-pack/day23-objection-response-matrix.md`

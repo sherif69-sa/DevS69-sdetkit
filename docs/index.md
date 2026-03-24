@@ -45,14 +45,14 @@ Utility commands such as `kv`, `apiget`, and `cassette-get` remain available for
 - Validate docs links and anchors before publishing
 - Ship a first contribution with deterministic quality gates
 
-### Latest continuous-upgrade lane
+### Platform upgrade archive
 
-- [Cycle 11 big upgrade report](continuous-upgrade-cycle11-big-upgrade-report.md)
-- [Continuous upgrade impact #11 closeout](integrations-continuous-upgrade-cycle11-closeout.md)
-- [Cycle 10 big upgrade report](continuous-upgrade-cycle10-big-upgrade-report.md)
-- [Continuous upgrade impact #10 closeout](integrations-continuous-upgrade-cycle10-closeout.md)
-- [Cycle 9 big upgrade report](continuous-upgrade-cycle9-big-upgrade-report.md)
-- [Continuous upgrade impact #9 closeout](integrations-continuous-upgrade-cycle9-closeout.md)
-- [Cycle 8 big upgrade report](continuous-upgrade-cycle8-big-upgrade-report.md)
-- [Continuous upgrade impact #8 closeout](integrations-continuous-upgrade-cycle8-closeout.md)
+- [Platform upgrade wave 11 report](continuous-upgrade-cycle11-big-upgrade-report.md)
+- [Integration expansion wave 11 evidence pack](integrations-continuous-upgrade-cycle11-closeout.md)
+- [Platform upgrade wave 10 report](continuous-upgrade-cycle10-big-upgrade-report.md)
+- [Integration expansion wave 10 evidence pack](integrations-continuous-upgrade-cycle10-closeout.md)
+- [Platform upgrade wave 9 report](continuous-upgrade-cycle9-big-upgrade-report.md)
+- [Integration expansion wave 9 evidence pack](integrations-continuous-upgrade-cycle9-closeout.md)
+- [Platform upgrade wave 8 report](continuous-upgrade-cycle8-big-upgrade-report.md)
+- [Integration expansion wave 8 evidence pack](integrations-continuous-upgrade-cycle8-closeout.md)
 - [Upgrade implementation research and recommendations](upgrade-implementation-research.md)

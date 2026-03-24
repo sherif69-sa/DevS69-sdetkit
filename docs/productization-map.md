@@ -73,7 +73,7 @@ Classification is based on current repository contents and naming patterns.
 **Definition:** guided rollout/use-case workflows for adoption and organizational execution.
 
 - Named playbook modules:
-  - `onboarding`, `weekly_review`, `demo`, `proof`, `first_contribution`, `contributor_funnel`, `triage_templates`, `startup_use_case`, `enterprise_use_case`.
+  - `onboarding`, `weekly_review`, `demo`, `evidence-assets`, `first_contribution`, `contributor_funnel`, `triage_templates`, `startup_readiness`, `enterprise_readiness`.
 - Rollout-oriented narrative modules:
   - `release_narrative`, `release_readiness_board`, `reliability_evidence_pack`, `quality_contribution_delta`, `faq_objections`, `community_activation`, `external_contribution_push`, `kpi_audit`.
 - Playbook discovery/routing:

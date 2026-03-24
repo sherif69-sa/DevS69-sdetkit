@@ -414,12 +414,12 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day35-kpi-dictionary.csv",
         "metric,segment,source_command,cadence,owner,threshold,notes\n"
         "docs_unique_visitors,acquisition,python -m sdetkit report --input docs/traffic.json --format json,daily,growth-owner,>=1500,Docs traffic stability\n"
-        "readme_to_command_ctr,activation,python -m sdetkit proof --json,daily,growth-owner,>=12%,README conversion\n"
+        "readme_to_command_ctr,activation,python -m sdetkit evidence-assets --format json,daily,growth-owner,>=12%,README conversion\n"
         "first_successful_run_rate,activation,python -m sdetkit doctor --json,weekly,qa-owner,>=85%,Onboarding quality\n"
         "returning_users_7d,retention,python -m sdetkit report --input analytics.json --format json,weekly,pm-owner,>=25%,Retention baseline\n"
         "discussion_reply_time_hours,reliability,python -m sdetkit ops status --format json,daily,community-owner,<=24,Community latency\n"
         "ci_flake_rate,reliability,python -m sdetkit repo audit --json,daily,eng-owner,<=3%,Stability\n"
-        "release_cadence_adherence,reliability,python -m sdetkit release-readiness-board --json,weekly,release-owner,>=95%,Cadence health\n"
+        "release_cadence_adherence,reliability,python -m sdetkit release-readiness --format json,weekly,release-owner,>=95%,Cadence health\n"
         "external_pr_conversion,retention,python -m sdetkit contributor-funnel --format json,weekly,community-owner,>=8%,PR funnel health\n",
     )
     _write(
