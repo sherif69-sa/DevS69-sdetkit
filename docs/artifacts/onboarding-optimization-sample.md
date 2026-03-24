@@ -12,6 +12,11 @@ Checks:
 - [x] onboarding_role_support (onboarding, w=15)
 - [x] onboarding_platform_support (onboarding, w=15)
 - [x] onboarding_quick_start_command (onboarding, w=10)
+<<<<<<<< HEAD:docs/artifacts/onboarding-optimization-sample.md
 - [ ] readme_onboarding_optimization_link (discoverability, w=10)
 - [ ] docs_index_onboarding_optimization_link (discoverability, w=10)
+========
+- [ ] readme_day24_link (discoverability, w=10)
+- [ ] docs_index_day24_link (discoverability, w=10)
+>>>>>>>> origin/main:docs/artifacts/day24-onboarding-time-upgrade-sample.md
 - [ ] readme_onboarding_command (discoverability, w=10)

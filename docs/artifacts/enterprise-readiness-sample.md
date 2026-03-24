@@ -33,6 +33,12 @@ python scripts/check_day13_enterprise_use_case_contract.py
 - `docs/use-cases-enterprise-regulated.md`
 - `sdetkit enterprise-readiness --format json --strict`
 - `sdetkit enterprise-readiness --write-defaults --format json --strict`
+<<<<<<<< HEAD:docs/artifacts/enterprise-readiness-sample.md
 - `sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md`
 - `sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict`
 - `sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict`
+========
+- `sdetkit enterprise-readiness --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md`
+- `sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict`
+- `sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict`
+>>>>>>>> origin/main:docs/artifacts/day13-enterprise-use-case-sample.md

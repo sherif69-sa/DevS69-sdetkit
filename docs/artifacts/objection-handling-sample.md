@@ -15,8 +15,13 @@
 | `when_to_use_clarity` | adoption | 10 | ✅ |
 | `when_not_to_use_clarity` | adoption | 10 | ✅ |
 | `objection_responses` | adoption | 10 | ✅ |
+<<<<<<<< HEAD:docs/artifacts/objection-handling-sample.md
 | `readme_objection_handling_link` | discoverability | 8 | ✅ |
 | `docs_index_objection_handling` | discoverability | 7 | ✅ |
+========
+| `readme_day23_link` | discoverability | 8 | ✅ |
+| `docs_index_day23` | discoverability | 7 | ✅ |
+>>>>>>>> origin/main:docs/artifacts/day23-faq-objections-sample.md
 | `release_narrative_alignment` | operational | 5 | ✅ |
 
 ## Recommendations
