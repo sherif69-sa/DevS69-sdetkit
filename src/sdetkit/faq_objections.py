@@ -22,14 +22,14 @@ _REQUIRED_SECTIONS = [
 
 _REQUIRED_COMMANDS = [
     "python -m sdetkit objection-handling --format json --strict",
-    "python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict",
-    "python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict",
+    "python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict",
+    "python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict",
     "python scripts/check_day23_faq_objections_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
     "python -m sdetkit objection-handling --format json --strict",
-    "python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict",
+    "python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict",
     "python scripts/check_day23_faq_objections_contract.py --skip-evidence",
 ]
 
@@ -77,8 +77,8 @@ Response: run strict mode, emit a Day 23 FAQ pack, and attach execution logs as 
 
 ```bash
 python -m sdetkit objection-handling --format json --strict
-python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict
-python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict
+python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict
+python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict
 python scripts/check_day23_faq_objections_contract.py
 ```
 
@@ -330,11 +330,11 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 
 def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day23-faq-summary.json"
-    scorecard = out_dir / "day23-faq-scorecard.md"
-    matrix = out_dir / "day23-objection-response-matrix.md"
-    playbook = out_dir / "day23-adoption-playbook.md"
-    validation = out_dir / "day23-validation-commands.md"
+    summary = out_dir / "objection-handling-summary.json"
+    scorecard = out_dir / "objection-handling-scorecard.md"
+    matrix = out_dir / "objection-handling-response-matrix.md"
+    playbook = out_dir / "objection-handling-playbook.md"
+    validation = out_dir / "objection-handling-validation-commands.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_markdown(payload) + "\n", encoding="utf-8")
@@ -346,7 +346,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         "| --- | --- | --- |",
         "| This is too heavy for small teams | Start with doctor + repo + security lanes only. | `python -m sdetkit doctor --json` |",
         "| We already have scripts | Keep scripts, then enforce deterministic strict gates + artifacts with sdetkit. | `python -m sdetkit objection-handling --format json --strict` |",
-        "| How do we prove readiness? | Emit Day 23 FAQ pack and attach evidence summary in release review. | `python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/day23-faq-pack --format json --strict` |",
+        "| How do we prove readiness? | Emit Day 23 FAQ pack and attach evidence summary in release review. | `python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict` |",
     ]
     matrix.write_text("\n".join(matrix_lines) + "\n", encoding="utf-8")
 
@@ -356,7 +356,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         "1. Collect objections from issues, PR reviews, and contributor onboarding notes.",
         "2. Map each objection to one deterministic command and one docs page.",
         "3. Run strict checks before launch posts or roadmap announcements.",
-        "4. Attach day23-faq-summary.json and execution evidence in review threads.",
+        "4. Attach objection-handling-summary.json and execution evidence in review threads.",
         "5. Revisit unresolved objections weekly and update this pack.",
     ]
     playbook.write_text("\n".join(playbook_lines) + "\n", encoding="utf-8")
@@ -393,7 +393,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
             }
         )
 
-    summary = evidence_dir / "day23-execution-summary.json"
+    summary = evidence_dir / "objection-handling-execution-summary.json"
     payload = {
         "name": "objection-handling-execution",
         "total_commands": len(_EXECUTION_COMMANDS),
@@ -452,7 +452,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day23-faq-pack/evidence",
+        default="docs/artifacts/objection-handling-pack/evidence",
         help="Evidence directory for --execute.",
     )
     parser.add_argument(

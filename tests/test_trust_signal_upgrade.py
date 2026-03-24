@@ -79,12 +79,12 @@ def test_trust_signal_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day22-pack/day22-trust-summary.json").exists()
-    assert (tmp_path / "artifacts/day22-pack/day22-trust-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/day22-visibility-checklist.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/day22-trust-action-plan.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/day22-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/evidence/day22-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day22-pack/trust-assets-summary.json").exists()
+    assert (tmp_path / "artifacts/day22-pack/trust-assets-scorecard.md").exists()
+    assert (tmp_path / "artifacts/day22-pack/trust-assets-visibility-checklist.md").exists()
+    assert (tmp_path / "artifacts/day22-pack/trust-assets-action-plan.md").exists()
+    assert (tmp_path / "artifacts/day22-pack/trust-assets-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day22-pack/evidence/trust-assets-execution-summary.json").exists()
 
 
 def test_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Path) -> None:

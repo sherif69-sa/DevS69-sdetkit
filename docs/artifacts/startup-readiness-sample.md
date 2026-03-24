@@ -25,9 +25,9 @@ python -m sdetkit report --out reports/startup-weekly.json
 
 ## Emitted pack files
 
-- `docs/artifacts/day12-startup-pack/startup-day12-checklist.md`
-- `docs/artifacts/day12-startup-pack/startup-day12-ci.yml`
-- `docs/artifacts/day12-startup-pack/startup-day12-risk-register.md`
+- `docs/artifacts/startup-readiness-pack/startup-readiness-checklist.md`
+- `docs/artifacts/startup-readiness-pack/startup-readiness-ci.yml`
+- `docs/artifacts/startup-readiness-pack/startup-readiness-risk-register.md`
 
 ## Missing use-case content
 
@@ -39,4 +39,4 @@ python -m sdetkit report --out reports/startup-weekly.json
 - `sdetkit startup-readiness --format json --strict`
 - `sdetkit startup-readiness --write-defaults --format json --strict`
 - `sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md`
-- `sdetkit startup-readiness --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict`
+- `sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict`

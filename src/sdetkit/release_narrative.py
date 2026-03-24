@@ -22,14 +22,14 @@ _REQUIRED_SECTIONS = [
 
 _REQUIRED_COMMANDS = [
     "python -m sdetkit release-narrative --format json --strict",
-    "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict",
-    "python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict",
+    "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
+    "python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
     "python scripts/check_day20_release_narrative_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
     "python -m sdetkit release-narrative --format json --strict",
-    "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict",
+    "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
     "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
 ]
 
@@ -52,8 +52,8 @@ Day 20 translates release readiness evidence into non-maintainer changelog story
 
 ```bash
 python -m sdetkit release-narrative --format json --strict
-python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/day20-release-narrative-pack --format json --strict
-python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict
+python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict
+python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict
 python scripts/check_day20_release_narrative_contract.py
 ```
 
@@ -233,11 +233,11 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 
 def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day20-release-narrative-summary.json"
-    markdown = out_dir / "day20-release-narrative.md"
-    blurbs = out_dir / "day20-audience-blurbs.md"
-    channels = out_dir / "day20-channel-posts.md"
-    validation = out_dir / "day20-validation-commands.md"
+    summary = out_dir / "release-communications-summary.json"
+    markdown = out_dir / "release-communications.md"
+    blurbs = out_dir / "release-communications-audience-blurbs.md"
+    channels = out_dir / "release-communications-channel-posts.md"
+    validation = out_dir / "release-communications-validation-commands.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     markdown.write_text(_render_markdown(payload), encoding="utf-8")
@@ -328,7 +328,7 @@ def _write_execution_evidence(
 ) -> list[str]:
     out = root / evidence_dir
     out.mkdir(parents=True, exist_ok=True)
-    summary = out / "day20-execution-summary.json"
+    summary = out / "release-communications-execution-summary.json"
     payload = {
         "name": "day20-release-narrative-execution",
         "total_commands": len(rows),
@@ -369,7 +369,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--root", default=".", help="Repository root path.")
     p.add_argument(
         "--day19-summary",
-        default="docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json",
+        default="docs/artifacts/release-readiness-pack/release-readiness-summary.json",
         help="Path to Day 19 release summary JSON.",
     )
     p.add_argument("--changelog", default="CHANGELOG.md", help="Path to changelog markdown file.")
@@ -392,7 +392,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day20-release-narrative-pack/evidence",
+        default="docs/artifacts/release-communications-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
     p.add_argument(

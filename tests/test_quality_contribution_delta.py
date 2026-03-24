@@ -126,7 +126,7 @@ def test_emit_pack(tmp_path, capsys):
             "--previous-signals-file",
             str(previous),
             "--emit-pack-dir",
-            "docs/artifacts/day17-delta-pack",
+            "docs/artifacts/contribution-quality-report-pack",
             "--format",
             "json",
         ]

@@ -46,7 +46,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
       - run: python -m sdetkit enterprise-readiness --format json --strict
-      - run: python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+      - run: python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
       - run: python scripts/check_day13_enterprise_use_case_contract.py
 """
 
@@ -106,7 +106,7 @@ Track these outcomes weekly:
 Generate and persist command outputs in one pass:
 
 ```bash
-python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict
+python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
 ```
 
 This writes a structured `day13-execution-summary.json` and one per-command log file for audit-ready handoff.
@@ -202,7 +202,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    checklist = root / "enterprise-day13-checklist.md"
+    checklist = root / "enterprise-readiness-checklist.md"
     checklist.write_text(
         "\n".join(
             [
@@ -219,10 +219,10 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
         encoding="utf-8",
     )
 
-    ci_recipe = root / "enterprise-day13-ci.yml"
+    ci_recipe = root / "enterprise-readiness-ci.yml"
     ci_recipe.write_text(_CI_COMPLIANCE_LANE, encoding="utf-8")
 
-    controls_register = root / "enterprise-day13-controls-register.md"
+    controls_register = root / "enterprise-readiness-controls-register.md"
     controls_register.write_text(
         "\n".join(
             [
@@ -353,8 +353,8 @@ def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
             "validate": "sdetkit enterprise-readiness --format json --strict",
             "write_defaults": "sdetkit enterprise-readiness --write-defaults --format json --strict",
             "artifact": "sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md",
-            "emit_pack": "sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-            "execute": "sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+            "emit_pack": "sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
+            "execute": "sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
         },
     }
 

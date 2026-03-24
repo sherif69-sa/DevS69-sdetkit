@@ -96,7 +96,7 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
         "contribution-quality-report-sample.md",
         "reliability-evidence-pack-sample.md",
         "release-readiness-sample.md",
-        "day20-release-narrative-sample.md",
+        "release-communications-sample.md",
     ):
         (root / "docs" / "artifacts" / artifact).write_text("ok\n", encoding="utf-8")
 

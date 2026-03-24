@@ -21,14 +21,14 @@ _REQUIRED_SECTIONS = [
 
 _REQUIRED_COMMANDS = [
     "python -m sdetkit release-readiness --format json --strict",
-    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
-    "python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict",
+    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict",
+    "python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict",
     "python scripts/check_day19_release_readiness_board_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
     "python -m sdetkit release-readiness --format json --strict",
-    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
+    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict",
     "python scripts/check_day19_release_readiness_board_contract.py --skip-evidence",
 ]
 
@@ -51,8 +51,8 @@ Day 19 composes Day 14 weekly trend health and Day 18 reliability posture into o
 
 ```bash
 python -m sdetkit release-readiness --format json --strict
-python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict
-python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict
+python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict
+python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict
 python scripts/check_day19_release_readiness_board_contract.py
 ```
 
@@ -192,11 +192,11 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
     out_dir = root / path
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    summary = out_dir / "day19-release-readiness-summary.json"
-    scorecard = out_dir / "day19-release-readiness-scorecard.md"
-    checklist = out_dir / "day19-release-readiness-checklist.md"
-    validation = out_dir / "day19-validation-commands.md"
-    decision = out_dir / "day19-release-decision.md"
+    summary = out_dir / "release-readiness-summary.json"
+    scorecard = out_dir / "release-readiness-scorecard.md"
+    checklist = out_dir / "release-readiness-checklist.md"
+    validation = out_dir / "release-readiness-validation-commands.md"
+    decision = out_dir / "release-decision.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_markdown(payload), encoding="utf-8")
@@ -290,7 +290,7 @@ def _write_execution_evidence(
 ) -> list[str]:
     out = root / evidence_dir
     out.mkdir(parents=True, exist_ok=True)
-    summary = out / "day19-execution-summary.json"
+    summary = out / "release-readiness-execution-summary.json"
     payload = {
         "name": "day19-release-readiness-execution",
         "total_commands": len(rows),
@@ -331,7 +331,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", default=".")
     parser.add_argument(
         "--day18-summary",
-        default="docs/artifacts/day18-reliability-pack/day18-reliability-summary.json",
+        default="docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json",
     )
     parser.add_argument(
         "--day14-summary",
@@ -343,7 +343,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--execute", action="store_true")
     parser.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day19-release-readiness-pack/evidence",
+        default="docs/artifacts/release-readiness-pack/evidence",
     )
     parser.add_argument("--timeout-sec", type=int, default=120)
     parser.add_argument("--strict", action="store_true")

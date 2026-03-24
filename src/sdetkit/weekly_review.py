@@ -13,7 +13,37 @@ _CANONICAL_ARTIFACT_FALLBACKS: dict[str, str] = {
     "docs/artifacts/contribution-quality-report-sample.md": "docs/artifacts/day17-quality-contribution-delta-sample.md",
     "docs/artifacts/reliability-evidence-pack-sample.md": "docs/artifacts/day18-reliability-evidence-pack-sample.md",
     "docs/artifacts/release-readiness-sample.md": "docs/artifacts/day19-release-readiness-board-sample.md",
+    "docs/artifacts/release-communications-sample.md": "docs/artifacts/day20-release-narrative-sample.md",
+    "docs/artifacts/trust-assets-sample.md": "docs/artifacts/day22-trust-signal-upgrade-sample.md",
+    "docs/artifacts/objection-handling-sample.md": "docs/artifacts/day23-faq-objections-sample.md",
+    "docs/artifacts/onboarding-optimization-sample.md": "docs/artifacts/day24-onboarding-time-upgrade-sample.md",
+    "docs/artifacts/external-contribution-sample.md": "docs/artifacts/day26-external-contribution-push-sample.md",
 }
+
+
+_CANONICAL_REPORT_FALLBACKS: dict[str, str] = {
+    "docs/impact-3-ultra-upgrade-report.md": "docs/evidence-assets-report.md",
+    "docs/impact-11-ultra-upgrade-report.md": "docs/docs-governance-report.md",
+    "docs/impact-12-ultra-upgrade-report.md": "docs/startup-readiness-report.md",
+    "docs/impact-13-ultra-upgrade-report.md": "docs/enterprise-readiness-report.md",
+    "docs/impact-17-ultra-upgrade-report.md": "docs/contribution-quality-report.md",
+    "docs/impact-18-ultra-upgrade-report.md": "docs/reliability-evidence-report.md",
+    "docs/impact-19-ultra-upgrade-report.md": "docs/release-readiness-report.md",
+    "docs/impact-20-ultra-upgrade-report.md": "docs/release-communications-report.md",
+    "docs/impact-22-ultra-upgrade-report.md": "docs/trust-assets-report.md",
+    "docs/impact-23-ultra-upgrade-report.md": "docs/objection-handling-report.md",
+    "docs/impact-24-ultra-upgrade-report.md": "docs/onboarding-optimization-report.md",
+    "docs/impact-26-ultra-upgrade-report.md": "docs/external-contribution-report.md",
+}
+
+
+def _report_exists_with_compat(root: Path, report_path: str) -> bool:
+    if (root / report_path).exists():
+        return True
+    if "impact-" in report_path and (root / report_path.replace("impact-", "day-")).exists():
+        return True
+    fallback = _CANONICAL_REPORT_FALLBACKS.get(report_path)
+    return bool(fallback and (root / fallback).exists())
 
 
 def _artifact_exists_with_compat(root: Path, artifact_path: str) -> bool:
@@ -165,8 +195,8 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
         20,
         "Release narrative storytelling pack",
         "docs/impact-20-ultra-upgrade-report.md",
-        "docs/artifacts/day20-release-narrative-sample.md",
-        "python -m sdetkit weekly-review --week 3 --format markdown --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --output docs/artifacts/day21-weekly-review-sample.md",
+        "docs/artifacts/release-communications-sample.md",
+        "python -m sdetkit release-communications --format json --strict",
     ),
 )
 
@@ -232,11 +262,7 @@ def build_weekly_review(
 
     shipped: list[dict[str, object]] = []
     for impact in shipped_days:
-        report_path = repo_root / impact.report_path
-        report_exists = report_path.exists() or (
-            "impact-" in impact.report_path
-            and (repo_root / impact.report_path.replace("impact-", "day-")).exists()
-        )
+        report_exists = _report_exists_with_compat(repo_root, impact.report_path)
         artifact_exists = _artifact_exists_with_compat(repo_root, impact.artifact_path)
         shipped.append(
             {

@@ -290,10 +290,10 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     root = repo_root / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    summary = root / "day17-delta-summary.json"
+    summary = root / "contribution-quality-report-summary.json"
     summary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
-    quality_md = root / "day17-quality-scorecard.md"
+    quality_md = root / "contribution-quality-report-scorecard.md"
     quality_md.write_text(
         "\n".join(
             [
@@ -309,7 +309,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
         encoding="utf-8",
     )
 
-    action_plan = root / "day17-contribution-action-plan.md"
+    action_plan = root / "contribution-quality-report-action-plan.md"
     action_plan.write_text(
         "\n".join(
             [
@@ -327,7 +327,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
         encoding="utf-8",
     )
 
-    checklist = root / "day17-remediation-checklist.md"
+    checklist = root / "contribution-quality-report-remediation-checklist.md"
     checklist.write_text(
         "\n".join(
             [
@@ -335,7 +335,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
                 "",
                 "- [ ] Review quality stability score and confirm no downward regression.",
                 "- [ ] Review contribution velocity score and assign owner for any negative signal.",
-                "- [ ] Attach day17-delta-summary.json to weekly closeout update.",
+                "- [ ] Attach contribution-quality-report-summary.json to weekly closeout update.",
                 "- [ ] Record SLA owner and due date for each recommendation item.",
             ]
         )
@@ -460,7 +460,7 @@ def main(argv: list[str] | None = None) -> int:
             f"sdetkit contribution-quality-report "
             f"--current-signals-file {args.current_signals_file} "
             f"--previous-signals-file {args.previous_signals_file} "
-            f"--emit-pack-dir docs/artifacts/day17-delta-pack --format json --strict"
+            f"--emit-pack-dir docs/artifacts/contribution-quality-report-pack --format json --strict"
         ),
     }
 

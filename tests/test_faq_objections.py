@@ -45,12 +45,14 @@ def test_faq_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day23-pack/day23-faq-summary.json").exists()
-    assert (tmp_path / "artifacts/day23-pack/day23-faq-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/day23-objection-response-matrix.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/day23-adoption-playbook.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/day23-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/evidence/day23-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day23-pack/objection-handling-summary.json").exists()
+    assert (tmp_path / "artifacts/day23-pack/objection-handling-scorecard.md").exists()
+    assert (tmp_path / "artifacts/day23-pack/objection-handling-response-matrix.md").exists()
+    assert (tmp_path / "artifacts/day23-pack/objection-handling-playbook.md").exists()
+    assert (tmp_path / "artifacts/day23-pack/objection-handling-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/day23-pack/evidence/objection-handling-execution-summary.json"
+    ).exists()
 
 
 def test_faq_strict_fails_when_required_sections_missing(tmp_path: Path) -> None:

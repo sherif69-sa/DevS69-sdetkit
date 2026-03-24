@@ -94,11 +94,13 @@ def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day18-pack/day18-reliability-summary.json").exists()
-    assert (tmp_path / "artifacts/day18-pack/day18-reliability-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/day18-reliability-checklist.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/day18-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/evidence/day18-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-summary.json").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-scorecard.md").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-checklist.md").exists()
+    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/day18-pack/evidence/reliability-evidence-execution-summary.json"
+    ).exists()
 
 
 def test_write_defaults(tmp_path: Path) -> None:

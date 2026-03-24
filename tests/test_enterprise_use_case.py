@@ -79,7 +79,7 @@ def test_enterprise_use_case_emit_pack(tmp_path, capsys):
             str(tmp_path),
             "--write-defaults",
             "--emit-pack-dir",
-            "docs/artifacts/day13-enterprise-pack",
+            "docs/artifacts/enterprise-readiness-pack",
             "--format",
             "json",
             "--strict",
@@ -88,7 +88,9 @@ def test_enterprise_use_case_emit_pack(tmp_path, capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert len(data["pack_files"]) == 3
-    assert "docs/artifacts/day13-enterprise-pack/enterprise-day13-ci.yml" in data["pack_files"]
+    assert (
+        "docs/artifacts/enterprise-readiness-pack/enterprise-readiness-ci.yml" in data["pack_files"]
+    )
 
 
 def test_enterprise_use_case_execute_writes_evidence(monkeypatch, tmp_path, capsys):

@@ -22,14 +22,14 @@ _REQUIRED_SECTIONS = [
 
 _REQUIRED_COMMANDS = [
     "python -m sdetkit trust-assets --format json --strict",
-    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
-    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict",
+    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict",
+    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict",
     "python scripts/check_day22_trust_signal_upgrade_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
     "python -m sdetkit trust-assets --format json --strict",
-    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict",
+    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict",
     "python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evidence",
 ]
 
@@ -53,8 +53,8 @@ Day 22 tightens trust posture visibility by keeping reliability badges and polic
 
 ```bash
 python -m sdetkit trust-assets --format json --strict
-python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/day22-trust-pack --format json --strict
-python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict
+python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict
+python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict
 python scripts/check_day22_trust_signal_upgrade_contract.py
 ```
 
@@ -297,11 +297,11 @@ def _render_markdown(payload: dict[str, Any]) -> str:
 
 def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day22-trust-summary.json"
-    markdown = out_dir / "day22-trust-scorecard.md"
-    checklist = out_dir / "day22-visibility-checklist.md"
-    validation = out_dir / "day22-validation-commands.md"
-    action_plan = out_dir / "day22-trust-action-plan.md"
+    summary = out_dir / "trust-assets-summary.json"
+    markdown = out_dir / "trust-assets-scorecard.md"
+    checklist = out_dir / "trust-assets-visibility-checklist.md"
+    validation = out_dir / "trust-assets-validation-commands.md"
+    action_plan = out_dir / "trust-assets-action-plan.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     markdown.write_text(_render_markdown(payload), encoding="utf-8")
@@ -385,7 +385,7 @@ def _write_execution_evidence(
 ) -> list[str]:
     out = root / evidence_dir
     out.mkdir(parents=True, exist_ok=True)
-    summary = out / "day22-execution-summary.json"
+    summary = out / "trust-assets-execution-summary.json"
     payload = {
         "name": "trust-assets-execution",
         "total_commands": len(rows),
@@ -443,7 +443,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day22-trust-pack/evidence",
+        default="docs/artifacts/trust-assets-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
     p.add_argument(
