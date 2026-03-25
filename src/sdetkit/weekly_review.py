@@ -160,14 +160,14 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
         15,
         "GitHub Actions integration quickstart",
         "docs/impact-15-ultra-upgrade-report.md",
-        "docs/artifacts/day15-github-actions-quickstart-sample.md",
+        "docs/artifacts/github-actions-onboarding-sample.md",
         "python -m sdetkit github-actions-onboarding --format json --strict",
     ),
     DayShipped(
         16,
         "GitLab CI integration quickstart",
         "docs/impact-16-ultra-upgrade-report.md",
-        "docs/artifacts/day16-gitlab-ci-quickstart-sample.md",
+        "docs/artifacts/gitlab-ci-onboarding-sample.md",
         "python -m sdetkit gitlab-ci-onboarding --format json --strict",
     ),
     DayShipped(

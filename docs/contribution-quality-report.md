@@ -1,8 +1,8 @@
-# Day 17 ultra upgrade report
+# Contribution quality report
 
-## Day 17 big upgrade
+## Contribution quality report
 
-Day 17 adds a unified **quality + contribution delta evidence pack** so maintainers can compare week-over-week delivery KPIs and growth signals in one command.
+Contribution-quality reporting provides a unified **quality + contribution delta evidence pack** so maintainers can compare week-over-week delivery KPIs and growth signals in one command.
 
 ## What shipped
 
@@ -21,4 +21,4 @@ python scripts/check_day17_quality_contribution_delta_contract.py
 
 ## Closeout
 
-Day 17 now has one deterministic evidence path for week-over-week quality and contribution deltas.
+Contribution-quality reporting now provides one deterministic evidence path for week-over-week quality and contribution deltas.

@@ -34,7 +34,7 @@ python -m sdetkit report --out reports/startup-weekly.json
 
 ## CI fast-lane recipe
 
-Use this minimal workflow to enforce the Day 12 page contract in PRs:
+Use this minimal workflow to enforce the startup-readiness page contract in PRs:
 
 ```yaml
 name: startup-quality-fast-lane

@@ -82,7 +82,7 @@ def test_week3_review_adds_growth_signals_and_deltas() -> None:
     }
 
 
-def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
+def test_week3_emit_pack_writes_weekly_review_artifacts(tmp_path: Path) -> None:
     root = tmp_path / "repo"
     (root / "docs" / "artifacts").mkdir(parents=True)
 
@@ -91,8 +91,8 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
             "ok\n", encoding="utf-8"
         )
     for artifact in (
-        "day15-github-actions-quickstart-sample.md",
-        "day16-gitlab-ci-quickstart-sample.md",
+        "github-actions-onboarding-sample.md",
+        "gitlab-ci-onboarding-sample.md",
         "contribution-quality-report-sample.md",
         "reliability-evidence-pack-sample.md",
         "release-readiness-sample.md",
@@ -110,7 +110,7 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
         "--previous-signals-file",
         "docs/artifacts/growth-signals-baseline.json",
         "--emit-pack-dir",
-        "docs/artifacts/day21-weekly-pack",
+        "docs/artifacts/weekly-review-pack",
         "--format",
         "json",
         "--strict",
@@ -126,7 +126,7 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
 
     assert weekly_review.main(args) == 0
 
-    pack = root / "docs" / "artifacts" / "day21-weekly-pack"
+    pack = root / "docs" / "artifacts" / "weekly-review-pack"
     assert (pack / "weekly-review-checklist.md").exists()
     assert (pack / "weekly-review-kpi-scorecard.json").exists()
     assert (pack / "weekly-review-contributor-response-plan.md").exists()

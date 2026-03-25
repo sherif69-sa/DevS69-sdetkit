@@ -1,8 +1,8 @@
-# Release narrative (Day 20)
+# Release communications
 
-Day 20 translates release readiness evidence into non-maintainer changelog storytelling.
+Release communications translates release-readiness evidence into non-maintainer changelog storytelling.
 
-## Who should run Day 20
+## Who should run release-communications
 
 - Maintainers writing release notes for mixed technical/non-technical audiences.
 - Developer advocates preparing community launch posts.
@@ -10,7 +10,7 @@ Day 20 translates release readiness evidence into non-maintainer changelog story
 
 ## Story inputs
 
-- Day 19 release-readiness summary (`release_score`, `gate_status`, recommendations).
+- Release-readiness summary (`release_score`, `gate_status`, recommendations).
 - Changelog highlights for user-visible updates.
 
 ## Fast verification commands
@@ -24,7 +24,7 @@ python scripts/check_day20_release_narrative_contract.py
 
 ## Execution evidence mode
 
-`--execute` runs the Day 20 command chain and writes deterministic logs into `--evidence-dir`.
+`--execute` runs the release-communications command chain and writes deterministic logs into `--evidence-dir`.
 
 ## Narrative channels
 

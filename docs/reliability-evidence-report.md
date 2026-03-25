@@ -1,16 +1,16 @@
-# Day 18 ultra upgrade report
+# Reliability evidence report
 
-## Day 18 big upgrade
+## Reliability evidence report
 
-Day 18 is now closed with a full **reliability operating lane**: strict docs contracting, deterministic pack emission, and executable evidence logging tied to Day 15/16/17 upstream outputs.
+Reliability evidence now provides a full **reliability operating lane**: strict docs contracting, deterministic pack emission, and executable evidence logging tied to GitHub Actions onboarding, GitLab CI onboarding, and contribution-quality-report upstream outputs.
 
 ## What shipped
 
-- Upgraded `sdetkit reliability-evidence-pack` with Day 18 integration-page validation, strict gates, and weighted reliability score aggregation.
-- Added Day 18 auto-recovery mode with `--write-defaults` to regenerate a hardened integration page.
+- Upgraded `sdetkit reliability-evidence-pack` with reliability-evidence integration-page validation, strict gates, and weighted reliability score aggregation.
+- Added `--write-defaults` auto-recovery mode to regenerate a hardened reliability-evidence page.
 - Added execution mode (`--execute --evidence-dir --timeout-sec`) that records deterministic command-level logs and summary JSON.
 - Expanded emitted pack payloads to include scorecard, checklist, and validation-commands artifact.
-- Added stronger Day 18 contract checker coverage across README/docs/page/report/artifacts/evidence.
+- Added stronger reliability-evidence contract checker coverage across README, docs, page, report, artifacts, and evidence.
 
 ## Validation commands
 
@@ -25,4 +25,4 @@ python scripts/check_day18_reliability_evidence_pack_contract.py
 
 ## Closeout
 
-Day 18 now has one deterministic reliability score, one strict gate lane, and one artifact/evidence bundle ready for weekly closeout and release readiness reviews.
+Reliability evidence now provides one deterministic reliability score, one strict gate lane, and one artifact/evidence bundle ready for weekly review and release-readiness reviews.

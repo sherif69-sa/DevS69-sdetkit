@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-release-narrative.md"
+_PAGE_PATH = "docs/release-communications.md"
 
 _SECTION_HEADER = "# Release narrative (Day 20)"
 _REQUIRED_SECTIONS = [

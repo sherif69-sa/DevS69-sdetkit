@@ -1,8 +1,8 @@
-# Day 13 Ultra Upgrade Report
+# Enterprise readiness report
 
 ## Summary
 
-**Day 13 big upgrade: shipped an enterprise/regulated workflow landing page with compliance-lane automation, controls-register generation, and strict contract validation across docs + CLI + artifacts.**
+**Enterprise-readiness update: shipped an enterprise/regulated workflow landing page with compliance-lane automation, controls-register generation, and strict contract validation across docs, CLI, and artifacts.**
 
 ## What changed
 
@@ -17,17 +17,17 @@
 - Wired CLI dispatch and top-level parser support:
   - `src/sdetkit/cli.py`
 
-- Added Day 13 enterprise workflow landing page:
+- Added the enterprise-readiness workflow landing page:
   - `docs/use-cases-enterprise-regulated.md`
 
-- Added Day 13 contract checker:
+- Added the enterprise-readiness contract checker:
   - `scripts/check_day13_enterprise_use_case_contract.py`
 
 - Added tests for enterprise command behavior and CLI wiring:
   - `tests/test_enterprise_use_case.py`
   - `tests/test_cli_help_lists_subcommands.py`
 
-- Updated docs and command references to include Day 13 flows:
+- Updated docs and command references to include enterprise-readiness flows:
   - `README.md`
   - `docs/index.md`
   - `docs/cli.md`
@@ -52,8 +52,8 @@
 
 ## Rollback plan
 
-1. Revert `src/sdetkit/enterprise_use_case.py` and `src/sdetkit/cli.py` Day 13 command wiring.
-2. Revert Day 13 docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-enterprise-regulated.md`.
-3. Remove Day 13 contract checker and generated artifacts.
+1. Revert `src/sdetkit/enterprise_use_case.py` and `src/sdetkit/cli.py` enterprise-readiness command wiring.
+2. Revert enterprise-readiness docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-enterprise-regulated.md`.
+3. Remove the enterprise-readiness contract checker and generated artifacts.
 
 This document is the enterprise-readiness report for enterprise/regulated workflow hardening.

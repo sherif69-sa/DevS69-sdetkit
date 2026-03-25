@@ -7,7 +7,7 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY22_PAGE = Path("docs/integrations-trust-signal-upgrade.md")
+DAY22_PAGE = Path("docs/trust-assets.md")
 DAY22_REPORT = Path("docs/impact-22-ultra-upgrade-report.md")
 DAY22_ARTIFACT = Path("docs/artifacts/day22-trust-signal-upgrade-sample.md")
 DAY22_PACK_SUMMARY = Path("docs/artifacts/day22-trust-pack/day22-trust-summary.json")

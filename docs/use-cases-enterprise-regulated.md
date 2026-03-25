@@ -34,7 +34,7 @@ python scripts/check_day13_enterprise_use_case_contract.py
 
 ## CI compliance lane recipe
 
-Use this workflow to enforce Day 13 enterprise contract checks on every PR:
+Use this workflow to enforce enterprise-readiness contract checks on every PR:
 
 ```yaml
 name: enterprise-compliance-lane
@@ -73,10 +73,10 @@ Generate and persist command outputs in one pass:
 python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
 ```
 
-This writes a structured `day13-execution-summary.json` and one per-command log file for audit-ready handoff.
+This writes a structured `enterprise-readiness-execution-summary.json` and one per-command log file for audit-ready handoff.
 
 ## Rollout model across business units
 
 1. Pilot with one regulated service and one shared platform repository.
 2. Expand to all critical repositories with a policy baseline and CI lane.
-3. Standardize quarterly audits using generated Day 13 artifacts.
+3. Standardize quarterly audits using generated enterprise-readiness artifacts.

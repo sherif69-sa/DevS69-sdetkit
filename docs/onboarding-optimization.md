@@ -1,8 +1,8 @@
-# Onboarding time upgrade (Day 24)
+# Onboarding optimization
 
-Day 24 reduces onboarding time-to-first-success and standardizes a deterministic three-minute activation path.
+Onboarding optimization reduces time-to-first-success and standardizes a deterministic three-minute activation path.
 
-## Who should run Day 24
+## Who should run onboarding-optimization
 
 - Maintainers improving contributor first-run experience.
 - DevRel owners preparing launch-ready quick-start docs.
@@ -10,7 +10,7 @@ Day 24 reduces onboarding time-to-first-success and standardizes a deterministic
 
 ## Three-minute success contract
 
-A Day 24 pass means a new contributor can complete environment setup and run one successful `sdetkit` command in under three minutes with no hidden prerequisites.
+An onboarding-optimization pass means a new contributor can complete environment setup and run one successful `sdetkit` command in under three minutes with no hidden prerequisites.
 
 ## Fast path commands
 
@@ -23,7 +23,7 @@ python scripts/check_day24_onboarding_time_upgrade_contract.py
 
 ## Time-to-first-success scoring
 
-Day 24 computes weighted readiness score (0-100):
+Onboarding-optimization computes a weighted readiness score (0-100):
 
 - Onboarding command and role/platform coverage: 40 points.
 - Discoverability (README + docs index links): 20 points.
@@ -32,11 +32,11 @@ Day 24 computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs the Day 24 validation chain and stores deterministic logs in `--evidence-dir`.
+`--execute` runs the onboarding-optimization validation chain and stores deterministic logs in `--evidence-dir`.
 
 ## Closeout checklist
 
 - [ ] `onboarding` command supports role and platform targeting.
-- [ ] README links to Day 24 integration and command examples.
-- [ ] Docs index links Day 24 report and artifact references.
-- [ ] Day 24 onboarding pack emitted with summary + checklist + runbook.
+- [ ] README links to onboarding-optimization integration and command examples.
+- [ ] Docs index links the onboarding-optimization report and artifact references.
+- [ ] Onboarding-optimization pack emitted with summary, checklist, and runbook.

@@ -1,8 +1,8 @@
-# Trust signal upgrade (Day 22)
+# Trust assets
 
-Day 22 tightens trust posture visibility by keeping reliability badges and policy docs obvious for new adopters.
+Trust assets tightens trust posture visibility by keeping reliability badges and policy docs obvious for new adopters.
 
-## Who should run Day 22
+## Who should run trust-assets
 
 - Maintainers responsible for external project trust posture.
 - Security/compliance reviewers validating governance visibility.
@@ -25,7 +25,7 @@ python scripts/check_day22_trust_signal_upgrade_contract.py
 
 ## Scoring model
 
-Day 22 computes a weighted trust score (0-100):
+Trust-assets computes a weighted trust score (0-100):
 
 - Badge visibility: 50 points
 - Policy docs + discoverability links: 30 points
@@ -35,11 +35,11 @@ Day 22 computes a weighted trust score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs the Day 22 command chain and writes deterministic logs into `--evidence-dir`.
+`--execute` runs the trust-assets command chain and writes deterministic logs into `--evidence-dir`.
 
 ## Visibility checklist
 
 - [ ] CI/reliability badges are present in README.
 - [ ] Security and policy docs are linked from README governance section.
 - [ ] Core trust workflows (`ci.yml`, `security.yml`, `pages.yml`) are present.
-- [ ] Day 22 trust score summary is emitted for closeout.
+- [ ] Trust-assets score summary is emitted for review.

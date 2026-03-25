@@ -1,9 +1,9 @@
-# Day 24 ultra upgrade report — onboarding time-to-first-success closeout
+# Onboarding optimization report
 
 ## What shipped
 
-- Added `onboarding-time-upgrade` command to score and enforce Day 24 onboarding readiness.
-- Added strict docs-contract checks for the Day 24 integration page.
+- Added `onboarding-optimization` command to score and enforce onboarding readiness.
+- Added strict docs-contract checks for the onboarding-optimization integration page.
 - Added deterministic artifact pack + execution evidence mode.
 - Added contract validation script and dedicated tests.
 
@@ -18,7 +18,7 @@ python scripts/check_day24_onboarding_time_upgrade_contract.py
 
 ## Closeout criteria
 
-- Day 24 score >= 90 with no critical failures.
+- Onboarding-optimization score >= 90 with no critical failures.
 - Integration page includes all required sections + command contract.
 - README/docs index discoverability links in place.
 - Evidence bundle generated and review-ready.

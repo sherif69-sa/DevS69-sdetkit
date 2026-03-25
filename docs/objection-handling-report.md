@@ -1,8 +1,8 @@
-# Day 23 ultra upgrade report
+# Objection handling report
 
 ## FAQ and objections report
 
-Day 23 delivers a production-grade objection-handling lane that translates recurring adoption blockers into strict, testable, and artifact-backed outcomes.
+Objection handling delivers a production-grade objection-handling lane that translates recurring adoption blockers into strict, testable, and artifact-backed outcomes.
 
 ## Problem statement
 
@@ -24,10 +24,10 @@ Without deterministic answers, onboarding confidence drops and launch momentum s
 
 ## Diff target
 
-- Product code: new Day 23 module + CLI wiring.
+- Product code: new objection-handling module and CLI wiring.
 - Tests: command behavior + strict failure modes + CLI dispatch.
-- Docs: Day 23 integration guide, artifacts, and index/README updates.
-- CI/automation: Day 23 contract check script.
+- Docs: objection-handling integration guide, artifacts, and index/README updates.
+- CI/automation: objection-handling contract check script.
 
 ## Validation commands
 
@@ -51,7 +51,7 @@ python scripts/check_day23_faq_objections_contract.py
 
 ## Rollback plan
 
-1. Remove `faq-objections` command dispatch from CLI.
-2. Remove `src/sdetkit/faq_objections.py` and Day 23 docs pages.
-3. Remove Day 23 contract checks from validation scripts.
+1. Remove the legacy objection-handling compatibility alias from CLI dispatch.
+2. Remove `src/sdetkit/faq_objections.py` and objection-handling docs pages.
+3. Remove objection-handling contract checks from validation scripts.
 4. Re-run baseline tests to confirm stable fallback.

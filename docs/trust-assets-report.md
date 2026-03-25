@@ -1,14 +1,14 @@
-# Day 22 ultra upgrade report
+# Trust assets report
 
-## Day 22 big upgrade
+## Trust assets report
 
-Day 22 ships a deterministic **trust signal upgrade lane** so maintainers can prove security/reliability badge and policy visibility before promotion, with weighted scoring and critical-failure gates.
+Trust assets provides a deterministic **trust visibility lane** so maintainers can prove security and policy visibility before promotion, with weighted scoring and critical-failure gates.
 
 ## What shipped
 
 - Upgraded `sdetkit trust-assets` to a weighted trust matrix: badge visibility, policy-doc/link discoverability, and workflow/docs-index governance checks.
-- Added Day 22 integration doc + contract checks for required sections, commands, and generated artifacts.
-- Expanded Day 22 closeout pack outputs with trust action-plan guidance in addition to summary, scorecard, checklist, validation commands, and execution evidence.
+- Added trust-assets integration docs and contract checks for required sections, commands, and generated artifacts.
+- Expanded the trust-assets pack outputs with action-plan guidance in addition to summary, scorecard, checklist, validation commands, and execution evidence.
 - Added README/docs index/CLI references and tests for command dispatch/help coverage.
 
 ## Validation commands
@@ -24,4 +24,4 @@ python scripts/check_day22_trust_signal_upgrade_contract.py
 
 ## Closeout
 
-Day 22 now provides a trust visibility control point that can be run before releases to keep reliability + governance posture obvious to new adopters.
+Trust assets now provides a trust visibility control point that can be run before releases to keep reliability and governance posture obvious to new adopters.

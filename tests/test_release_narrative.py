@@ -25,7 +25,7 @@ def _write_day19_summary(path: Path, gate_status: str = "pass", score: float = 9
 
 
 def _write_day20_page(root: Path) -> None:
-    path = root / "docs/integrations-release-narrative.md"
+    path = root / "docs/release-communications.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(rn._DAY20_DEFAULT_PAGE, encoding="utf-8")
 
@@ -105,7 +105,7 @@ def test_release_narrative_strict_gate_fails_when_docs_contract_missing(
     tmp_path: Path,
 ) -> None:
     summary = _write_day19_summary(tmp_path)
-    path = tmp_path / "docs/integrations-release-narrative.md"
+    path = tmp_path / "docs/release-communications.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("# Release narrative (Day 20)\n", encoding="utf-8")
 

@@ -1,8 +1,8 @@
-# FAQ and objections (Day 23)
+# FAQ and objections
 
-Day 23 turns recurring adoption blockers into deterministic answers that teams can validate before launches.
+Objection handling turns recurring adoption blockers into deterministic answers that teams can validate before launches.
 
-## Who should run Day 23
+## Who should run objection-handling
 
 - Maintainers preparing public launch narratives and onboarding material.
 - Developer advocates collecting recurring objections from discussions/issues.
@@ -36,7 +36,7 @@ Response: sdetkit provides deterministic contracts, evidence artifacts, and stri
 
 ### Objection 3: "How do we prove this is production-ready?"
 
-Response: run strict mode, emit a Day 23 FAQ pack, and attach execution logs as evidence in release reviews.
+Response: run strict mode, emit an objection-handling pack, and attach execution logs as evidence in release reviews.
 
 ## Fast verification commands
 
@@ -51,4 +51,4 @@ python scripts/check_day23_faq_objections_contract.py
 
 - If strict mode fails, pause launch messaging and assign owners for missing FAQ guidance.
 - If objections repeat for two sprints, add dedicated docs links and command examples.
-- Require Day 23 pack attachment in release-readiness review for external promotions.
+- Require objection-handling pack attachment in release-readiness review for external promotions.
