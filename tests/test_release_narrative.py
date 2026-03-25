@@ -154,7 +154,7 @@ def test_execute_commands_run_inside_requested_root(monkeypatch, tmp_path: Path)
     rows = rn._execute_commands(
         tmp_path,
         [
-            "python -m sdetkit release-narrative --format json --strict",
+            "python -m sdetkit release-communications --format json --strict",
             "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
         ],
         5,

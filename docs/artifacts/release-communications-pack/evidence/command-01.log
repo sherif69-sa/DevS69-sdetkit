@@ -1,4 +1,4 @@
-command: python -m sdetkit release-narrative --format json --strict
+command: python -m sdetkit release-communications --format json --strict
 returncode: 0
 ok: True
 --- stdout ---

@@ -26,13 +26,13 @@ MODULE = Path("src/sdetkit/release_narrative.py")
 
 README_EXPECTED = [
     "## ✍️ Day 20 ultra: release narrative",
-    "python -m sdetkit release-narrative --format json --strict",
-    "python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict",
+    "python -m sdetkit release-communications --format json --strict",
+    "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict",
     "python scripts/check_day20_release_narrative_contract.py",
 ]
 INDEX_EXPECTED = [
     "Day 20 ultra upgrades (release narrative)",
-    "sdetkit release-narrative --format json --strict",
+    "sdetkit release-communications --format json --strict",
     "artifacts/day20-release-narrative-pack/day20-channel-posts.md",
 ]
 CLI_EXPECTED = [

@@ -21,15 +21,15 @@ _REQUIRED_SECTIONS = [
 ]
 
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit release-narrative --format json --strict",
-    "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
-    "python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
+    "python -m sdetkit release-communications --format json --strict",
+    "python -m sdetkit release-communications --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
+    "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
     "python scripts/check_day20_release_narrative_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit release-narrative --format json --strict",
-    "python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
+    "python -m sdetkit release-communications --format json --strict",
+    "python -m sdetkit release-communications --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
     "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
 ]
 
@@ -51,9 +51,9 @@ Day 20 translates release readiness evidence into non-maintainer changelog story
 ## Fast verification commands
 
 ```bash
-python -m sdetkit release-narrative --format json --strict
-python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict
-python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict
+python -m sdetkit release-communications --format json --strict
+python -m sdetkit release-communications --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict
+python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict
 python scripts/check_day20_release_narrative_contract.py
 ```
 
@@ -363,7 +363,7 @@ def _write_execution_evidence(
 
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="sdetkit release-narrative",
+        prog="sdetkit release-communications",
         description="Generate Day 20 non-maintainer release storytelling from Day 19 posture.",
     )
     p.add_argument("--root", default=".", help="Repository root path.")
