@@ -137,7 +137,7 @@ _SIGNALS = [
         "check_id": "docs_index_objection_handling",
         "category": "discoverability",
         "weight": 7,
-        "marker": "impact-23-ultra-upgrade-report.md",
+        "marker": "docs/objection-handling.md",
         "source": "docs_index",
     },
     {

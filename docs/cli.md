@@ -53,3 +53,24 @@ Public kit commands are contract-oriented:
 - [Intelligence kit](kits/test-intelligence.md)
 - [Integration kit](kits/integration-assurance.md)
 - [Forensics kit](kits/failure-forensics.md)
+
+## reliability-evidence-pack
+
+--day15-summary
+--day16-summary
+--day17-summary
+--min-reliability-score
+--write-defaults
+--execute
+--evidence-dir
+--timeout-sec
+--emit-pack-dir
+
+## objection-handling
+
+--docs-page
+--min-faq-score
+--execute
+--evidence-dir
+--timeout-sec
+--emit-pack-dir

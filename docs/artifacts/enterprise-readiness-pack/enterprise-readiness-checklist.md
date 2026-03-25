@@ -1,4 +1,4 @@
-# Name 13 enterprise operating checklist
+# Enterprise readiness checklist
 
 - [ ] Validate enterprise landing page contract in strict mode.
 - [ ] Regenerate enterprise artifact markdown for handoff.

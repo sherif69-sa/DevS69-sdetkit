@@ -50,3 +50,21 @@ Utility commands such as `kv`, `apiget`, and `cassette-get` remain available for
 - [Transition-era archive material](archive/index.md)
 - [Migration and compatibility note](migration-compatibility-note.md)
 - [Upgrade implementation research and recommendations](upgrade-implementation-research.md)
+
+## Canonical rollout playbooks
+
+- `docs/trust-assets.md` — `python -m sdetkit trust-assets --format json --strict`
+- `docs/objection-handling.md` — `python -m sdetkit objection-handling --format json --strict`
+- `docs/onboarding-optimization.md` — `python -m sdetkit onboarding-optimization --format json --strict`
+- `docs/external-contribution.md` — `python -m sdetkit external-contribution --format json --strict`
+- `docs/release-communications.md` — `python -m sdetkit release-communications --format json --strict`
+
+## Reliability evidence pack
+
+python -m sdetkit reliability-evidence-pack --format json --strict
+artifacts/reliability-evidence-pack/reliability-evidence-summary.json
+
+## Objection handling
+
+python -m sdetkit objection-handling --format json --strict
+artifacts/objection-handling-pack/objection-handling-summary.json

@@ -1,4 +1,4 @@
-# Day 19 validation commands
+# Release readiness validation commands
 
 ```bash
 python -m sdetkit release-readiness --format json --strict

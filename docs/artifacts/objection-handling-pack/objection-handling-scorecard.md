@@ -1,4 +1,4 @@
-# Objection handling FAQ and objections summary
+# Objection handling summary
 
 - FAQ score: **100.0**
 - Readiness: **strong**
@@ -21,4 +21,4 @@
 
 ## Recommendations
 
-- FAQ objections lane is healthy; keep objections refreshed from real issue/discussion trends.
+- Objection handling lane is healthy; keep objections refreshed from real issue/discussion trends.

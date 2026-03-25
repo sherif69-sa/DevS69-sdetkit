@@ -2,68 +2,68 @@
   "checks": [
     {
       "category": "contract",
-      "evidence": "/workspace/DevS69-sdetkit/docs/onboarding-optimization.md",
-      "key": "docs_page_exists",
+      "check_id": "docs_page_exists",
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/onboarding-optimization.md",
       "passed": true,
       "weight": 10
     },
     {
       "category": "contract",
+      "check_id": "required_sections_present",
       "evidence": {
         "missing_sections": []
       },
-      "key": "required_sections_present",
       "passed": true,
       "weight": 15
     },
     {
       "category": "contract",
+      "check_id": "required_commands_present",
       "evidence": {
         "missing_commands": []
       },
-      "key": "required_commands_present",
       "passed": true,
       "weight": 5
     },
     {
       "category": "onboarding",
+      "check_id": "onboarding_role_support",
       "evidence": "--role",
-      "key": "onboarding_role_support",
       "passed": true,
       "weight": 15
     },
     {
       "category": "onboarding",
+      "check_id": "onboarding_platform_support",
       "evidence": "--platform",
-      "key": "onboarding_platform_support",
       "passed": true,
       "weight": 15
     },
     {
       "category": "onboarding",
+      "check_id": "onboarding_quick_start_command",
       "evidence": "python -m sdetkit doctor --format text",
-      "key": "onboarding_quick_start_command",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
+      "check_id": "readme_onboarding_optimization_link",
       "evidence": "docs/onboarding-optimization.md",
-      "key": "readme_onboarding_optimization_link",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
-      "evidence": "name-24-ultra-upgrade-report.md",
-      "key": "docs_index_onboarding_optimization_link",
+      "check_id": "docs_index_onboarding_optimization_link",
+      "evidence": "docs/onboarding-optimization.md",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
-      "evidence": "onboarding-time-upgrade",
-      "key": "readme_onboarding_command",
+      "check_id": "readme_onboarding_command",
+      "evidence": "onboarding-optimization",
       "passed": true,
       "weight": 10
     }
@@ -76,7 +76,7 @@
   },
   "name": "onboarding-optimization",
   "recommendations": [
-    "Onboarding optimization onboarding lane is healthy; keep execution evidence attached to releases."
+    "Onboarding-optimization is healthy; keep execution evidence attached to releases."
   ],
   "strict_failures": [],
   "summary": {

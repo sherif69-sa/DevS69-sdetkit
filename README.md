@@ -293,3 +293,44 @@ See `docs/migration-compatibility-note.md` for migration and experimental-status
 ## Quality transformation
 
 For the execution blueprint to reach a world-class quality bar across all bundled offerings, see `docs/world-class-quality-program.md`.
+
+## Canonical rollout playbooks
+
+- [Trust assets](docs/trust-assets.md) — `python -m sdetkit trust-assets --format json --strict`
+- [Objection handling](docs/objection-handling.md) — `python -m sdetkit objection-handling --format json --strict`
+- [Onboarding optimization](docs/onboarding-optimization.md) — `python -m sdetkit onboarding-optimization --format json --strict`
+- [External contribution](docs/external-contribution.md) — `python -m sdetkit external-contribution --format json --strict`
+- [Release communications](docs/release-communications.md) — `python -m sdetkit release-communications --format json --strict`
+
+## Governance visibility
+
+- [SECURITY.md](SECURITY.md)
+- [Security guide](docs/security.md)
+- [Policy and baselines](docs/policy-and-baselines.md)
+
+[![CI](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml/badge.svg)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/ci.yml)
+[![Quality](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml/badge.svg)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/quality.yml)
+[![Mutation](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml/badge.svg)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/mutation-tests.yml)
+[![Security](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml/badge.svg)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/security.yml)
+[![Pages](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml/badge.svg)](https://github.com/sherif69-sa/DevS69-sdetkit/actions/workflows/pages.yml)
+
+## Reliability evidence pack
+
+python -m sdetkit reliability-evidence-pack --format text
+python -m sdetkit reliability-evidence-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict
+python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict
+python scripts/check_day18_reliability_evidence_pack_contract.py
+
+## Objection handling
+
+python -m sdetkit objection-handling --format json --strict
+python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict
+python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict
+python scripts/check_day23_faq_objections_contract.py
+
+## Policy document paths
+
+SECURITY.md
+docs/security.md
+docs/policy-and-baselines.md

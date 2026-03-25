@@ -8,28 +8,28 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY18_PAGE = Path("docs/reliability-evidence-pack.md")
-DAY18_REPORT = Path("docs/impact-18-ultra-upgrade-report.md")
-DAY18_ARTIFACT = Path("docs/artifacts/day18-reliability-evidence-pack-sample.md")
-DAY18_PACK_SUMMARY = Path("docs/artifacts/day18-reliability-pack/day18-reliability-summary.json")
-DAY18_PACK_SCORECARD = Path("docs/artifacts/day18-reliability-pack/day18-reliability-scorecard.md")
-DAY18_PACK_CHECKLIST = Path("docs/artifacts/day18-reliability-pack/day18-reliability-checklist.md")
-DAY18_PACK_VALIDATION = Path("docs/artifacts/day18-reliability-pack/day18-validation-commands.md")
-DAY18_EVIDENCE = Path("docs/artifacts/day18-reliability-pack/evidence/day18-execution-summary.json")
+DAY18_REPORT = Path("docs/reliability-evidence-report.md")
+DAY18_ARTIFACT = Path("docs/reliability-evidence-pack.md")
+DAY18_PACK_SUMMARY = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json")
+DAY18_PACK_SCORECARD = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-scorecard.md")
+DAY18_PACK_CHECKLIST = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-checklist.md")
+DAY18_PACK_VALIDATION = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-validation-commands.md")
+DAY18_EVIDENCE = Path("docs/artifacts/reliability-evidence-pack/evidence/reliability-evidence-execution-summary.json")
 MODULE = Path("src/sdetkit/reliability_evidence_pack.py")
 
 README_EXPECTED = [
-    "## 🧱 Day 18 ultra: reliability evidence pack",
+    "## Reliability evidence pack",
     "python -m sdetkit reliability-evidence-pack --format text",
     "python -m sdetkit reliability-evidence-pack --format json --strict",
-    "python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/day18-reliability-pack --format json --strict",
-    "python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/day18-reliability-pack/evidence --format json --strict",
+    "python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict",
+    "python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict",
     "python scripts/check_day18_reliability_evidence_pack_contract.py",
 ]
 
 INDEX_EXPECTED = [
-    "Day 18 ultra upgrades (reliability evidence pack)",
+    "Reliability evidence pack",
     "sdetkit reliability-evidence-pack --format json --strict",
-    "artifacts/day18-reliability-evidence-pack-sample.md",
+    "artifacts/reliability-evidence-pack/reliability-evidence-summary.json",
 ]
 
 CLI_EXPECTED = [
@@ -46,27 +46,27 @@ CLI_EXPECTED = [
 ]
 
 PAGE_EXPECTED = [
-    "# Reliability evidence pack (Day 18)",
+    "# Reliability evidence pack",
     "## Reliability score model",
     "## Fast verification commands",
     "## Execution evidence mode",
 ]
 
 REPORT_EXPECTED = [
-    "Day 18 big upgrade",
+    "Reliability evidence report",
     "reliability score",
     "strict gates",
     "--execute --evidence-dir",
 ]
 
 SUMMARY_EXPECTED = [
-    '"name": "day18-reliability-evidence-pack"',
+    '"name": "reliability-evidence-pack"',
     '"reliability_score":',
     '"strict_all_green":',
 ]
 
 EVIDENCE_EXPECTED = [
-    '"name": "day18-reliability-execution"',
+    '"name": "reliability-evidence-execution"',
     '"total_commands": 3',
 ]
 
@@ -121,12 +121,12 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     if errors:
-        print("day18-reliability-evidence-pack-contract check failed:", file=sys.stderr)
+        print("reliability-evidence-pack-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day18-reliability-evidence-pack-contract check passed")
+    print("reliability-evidence-pack-contract check passed")
     return 0
 
 

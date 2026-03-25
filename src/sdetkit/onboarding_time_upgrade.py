@@ -125,7 +125,7 @@ _SIGNALS = [
         "check_id": "docs_index_onboarding_optimization_link",
         "category": "discoverability",
         "weight": 10,
-        "marker": "impact-24-ultra-upgrade-report.md",
+        "marker": "docs/onboarding-optimization.md",
         "source": "docs_index",
     },
     {
@@ -305,7 +305,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
                 "",
                 "- [ ] Docs contract page includes all required sections.",
                 "- [ ] README links the onboarding-optimization page and command lane.",
-                "- [ ] Docs index links impact-24-ultra-upgrade-report.md.",
+                "- [ ] Docs index links docs/onboarding-optimization.md.",
                 "- [ ] onboarding command retains role + platform selectors.",
                 "- [ ] Execution evidence artifacts attached to release thread.",
             ]

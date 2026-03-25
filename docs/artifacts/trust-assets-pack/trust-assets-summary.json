@@ -1,45 +1,45 @@
 {
   "badge_checks": {
-    "ci_badge": false,
-    "mutation_badge": false,
-    "pages_badge": false,
-    "quality_badge": false,
-    "security_badge": false
+    "ci_badge": true,
+    "mutation_badge": true,
+    "pages_badge": true,
+    "quality_badge": true,
+    "security_badge": true
   },
   "checks": [
     {
       "category": "badges",
       "evidence": "actions/workflows/ci.yml/badge.svg",
       "key": "ci_badge",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/quality.yml/badge.svg",
       "key": "quality_badge",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/mutation-tests.yml/badge.svg",
       "key": "mutation_badge",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/security.yml/badge.svg",
       "key": "security_badge",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/pages.yml/badge.svg",
       "key": "pages_badge",
-      "passed": false,
+      "passed": true,
       "weight": 10
     },
     {
@@ -98,15 +98,15 @@
     },
     {
       "category": "governance",
-      "evidence": "impact-22-ultra-upgrade-report.md",
+      "evidence": "docs/trust-assets.md",
       "key": "docs_index_trust_assets",
-      "passed": false,
+      "passed": true,
       "weight": 2
     }
   ],
   "governance_checks": {
     "ci_workflow": true,
-    "docs_index_trust_assets": false,
+    "docs_index_trust_assets": true,
     "pages_workflow": true,
     "security_workflow": true
   },
@@ -121,32 +121,18 @@
     "security_guide_exists": false
   },
   "recommendations": [
-    "Restore missing trust badges in README so reliability status is visible at a glance.",
-    "Ensure policy documents exist and are linked from README governance references.",
-    "Keep CI/security/pages workflows and docs index trust references present for reviewers."
+    "Ensure policy documents exist and are linked from README governance references."
   ],
-  "score": 0.0,
-  "strict_failures": [
-    "# Trust assets (Day 22)",
-    "## Who should run Day 22",
-    "## Trust signal inputs",
-    "## Fast verification commands",
-    "## Scoring model",
-    "## Execution evidence mode",
-    "## Visibility checklist",
-    "python -m sdetkit trust-assets --format json --strict",
-    "python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict",
-    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict",
-    "python scripts/check_day22_trust_signal_upgrade_contract.py"
-  ],
+  "score": 100.0,
+  "strict_failures": [],
   "summary": {
     "category_coverage": {
       "badges": {
-        "passed": 0,
+        "passed": 5,
         "total": 5
       },
       "governance": {
-        "passed": 3,
+        "passed": 4,
         "total": 4
       },
       "policy": {
@@ -157,11 +143,11 @@
     "critical_failures": [
       "security_doc_exists"
     ],
-    "failed_checks": 9,
+    "failed_checks": 3,
     "trust_label": "review",
-    "trust_score": 18.0,
+    "trust_score": 70.0,
     "weighted_points": {
-      "earned": 18,
+      "earned": 70,
       "total": 100
     }
   }

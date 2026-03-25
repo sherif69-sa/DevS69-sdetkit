@@ -8,43 +8,43 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY19_PAGE = Path("docs/release-readiness.md")
-DAY19_REPORT = Path("docs/impact-19-ultra-upgrade-report.md")
-DAY19_ARTIFACT = Path("docs/artifacts/day19-release-readiness-board-sample.md")
+DAY19_REPORT = Path("docs/release-readiness-report.md")
+DAY19_ARTIFACT = Path("docs/release-readiness.md")
 DAY19_PACK_SUMMARY = Path(
-    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-summary.json"
+    "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
 )
 DAY19_PACK_SCORECARD = Path(
-    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-scorecard.md"
+    "docs/artifacts/release-readiness-pack/release-readiness-scorecard.md"
 )
 DAY19_PACK_CHECKLIST = Path(
-    "docs/artifacts/day19-release-readiness-pack/day19-release-readiness-checklist.md"
+    "docs/artifacts/release-readiness-pack/release-readiness-checklist.md"
 )
 DAY19_PACK_VALIDATION = Path(
-    "docs/artifacts/day19-release-readiness-pack/day19-validation-commands.md"
+    "docs/artifacts/release-readiness-pack/release-readiness-validation-commands.md"
 )
-DAY19_PACK_DECISION = Path("docs/artifacts/day19-release-readiness-pack/day19-release-decision.md")
+DAY19_PACK_DECISION = Path("docs/artifacts/release-readiness-pack/release-decision.md")
 DAY19_EVIDENCE = Path(
-    "docs/artifacts/day19-release-readiness-pack/evidence/day19-execution-summary.json"
+    "docs/artifacts/release-readiness-pack/evidence/release-readiness-execution-summary.json"
 )
 MODULE = Path("src/sdetkit/release_readiness_board.py")
 
 README_EXPECTED = [
-    "## 🧭 Day 19 ultra: release readiness board",
-    "python -m sdetkit release-readiness-board --format text",
-    "python -m sdetkit release-readiness-board --format json --strict",
-    "python -m sdetkit release-readiness-board --emit-pack-dir docs/artifacts/day19-release-readiness-pack --format json --strict",
-    "python -m sdetkit release-readiness-board --execute --evidence-dir docs/artifacts/day19-release-readiness-pack/evidence --format json --strict",
+    "## Release readiness",
+    "python -m sdetkit release-readiness --format text",
+    "python -m sdetkit release-readiness --format json --strict",
+    "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict",
+    "python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict",
     "python scripts/check_day19_release_readiness_board_contract.py",
 ]
 
 INDEX_EXPECTED = [
-    "Day 19 ultra upgrades (release readiness board)",
-    "sdetkit release-readiness-board --format json --strict",
-    "artifacts/day19-release-readiness-board-sample.md",
+    "Release readiness",
+    "sdetkit release-readiness --format json --strict",
+    "artifacts/release-readiness-pack/release-readiness-summary.json",
 ]
 
 CLI_EXPECTED = [
-    "## release-readiness-board",
+    "## release-readiness",
     "--day18-summary",
     "--day14-summary",
     "--min-release-score",
@@ -56,19 +56,19 @@ CLI_EXPECTED = [
 ]
 
 PAGE_EXPECTED = [
-    "# Release readiness board (Day 19)",
+    "# Release readiness board",
     "## Score model",
     "## Fast verification commands",
     "## Execution evidence mode",
 ]
 
-REPORT_EXPECTED = ["Day 19 big upgrade", "release score", "strict", "--execute --evidence-dir"]
+REPORT_EXPECTED = ["Release readiness report", "release score", "strict", "--execute --evidence-dir"]
 SUMMARY_EXPECTED = [
-    '"name": "day19-release-readiness-board"',
+    '"name": "release-readiness"',
     '"release_score":',
     '"strict_all_green":',
 ]
-EVIDENCE_EXPECTED = ['"name": "day19-release-readiness-execution"', '"total_commands": 3']
+EVIDENCE_EXPECTED = ['"name": "release-readiness-execution"', '"total_commands": 3']
 
 
 def _missing(path: Path, expected: list[str]) -> list[str]:
@@ -122,12 +122,12 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     if errors:
-        print("day19-release-readiness-board-contract check failed:", file=sys.stderr)
+        print("release-readiness-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day19-release-readiness-board-contract check passed")
+    print("release-readiness-contract check passed")
     return 0
 
 

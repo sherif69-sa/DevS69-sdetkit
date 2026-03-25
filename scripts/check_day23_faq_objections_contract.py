@@ -8,29 +8,29 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY23_PAGE = Path("docs/objection-handling.md")
-DAY23_REPORT = Path("docs/impact-23-ultra-upgrade-report.md")
-DAY23_ARTIFACT = Path("docs/artifacts/day23-faq-objections-sample.md")
-DAY23_PACK_SUMMARY = Path("docs/artifacts/day23-faq-pack/day23-faq-summary.json")
-DAY23_PACK_SCORECARD = Path("docs/artifacts/day23-faq-pack/day23-faq-scorecard.md")
-DAY23_PACK_MATRIX = Path("docs/artifacts/day23-faq-pack/day23-objection-response-matrix.md")
-DAY23_PACK_PLAYBOOK = Path("docs/artifacts/day23-faq-pack/day23-adoption-playbook.md")
-DAY23_PACK_VALIDATION = Path("docs/artifacts/day23-faq-pack/day23-validation-commands.md")
-DAY23_EVIDENCE = Path("docs/artifacts/day23-faq-pack/evidence/day23-execution-summary.json")
+DAY23_REPORT = Path("docs/objection-handling-report.md")
+DAY23_ARTIFACT = Path("docs/objection-handling.md")
+DAY23_PACK_SUMMARY = Path("docs/artifacts/objection-handling-pack/objection-handling-summary.json")
+DAY23_PACK_SCORECARD = Path("docs/artifacts/objection-handling-pack/objection-handling-scorecard.md")
+DAY23_PACK_MATRIX = Path("docs/artifacts/objection-handling-pack/objection-handling-response-matrix.md")
+DAY23_PACK_PLAYBOOK = Path("docs/artifacts/objection-handling-pack/objection-handling-playbook.md")
+DAY23_PACK_VALIDATION = Path("docs/artifacts/objection-handling-pack/objection-handling-validation-commands.md")
+DAY23_EVIDENCE = Path("docs/artifacts/objection-handling-pack/evidence/objection-handling-execution-summary.json")
 MODULE = Path("src/sdetkit/faq_objections.py")
 
 README_EXPECTED = [
-    "## ❓ Day 23 ultra: FAQ and objections",
-    "python -m sdetkit faq-objections --format json --strict",
-    "python -m sdetkit faq-objections --execute --evidence-dir docs/artifacts/day23-faq-pack/evidence --format json --strict",
+    "## Objection handling",
+    "python -m sdetkit objection-handling --format json --strict",
+    "python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict",
     "python scripts/check_day23_faq_objections_contract.py",
 ]
 INDEX_EXPECTED = [
-    "Day 23 ultra upgrades (FAQ and objections)",
-    "sdetkit faq-objections --format json --strict",
-    "artifacts/day23-faq-pack/day23-faq-summary.json",
+    "Objection handling",
+    "sdetkit objection-handling --format json --strict",
+    "artifacts/objection-handling-pack/objection-handling-summary.json",
 ]
 CLI_EXPECTED = [
-    "## faq-objections",
+    "## objection-handling",
     "--docs-page",
     "--min-faq-score",
     "--execute",
@@ -39,21 +39,21 @@ CLI_EXPECTED = [
     "--emit-pack-dir",
 ]
 PAGE_EXPECTED = [
-    "# FAQ and objections (Day 23)",
+    "# FAQ and objections",
     "## When to use sdetkit",
     "## When not to use sdetkit",
     "## Top objections and responses",
     "## Fast verification commands",
     "## Escalation and rollout policy",
 ]
-REPORT_EXPECTED = ["Day 23 big upgrade", "strict", "--execute", "Validation commands"]
+REPORT_EXPECTED = ["FAQ and objections report", "strict", "--execute", "Validation commands"]
 SUMMARY_EXPECTED = [
-    '"name": "day23-faq-objections"',
+    '"name": "objection-handling"',
     '"faq_score":',
     '"critical_failures":',
     '"recommendations":',
 ]
-EVIDENCE_EXPECTED = ['"name": "day23-faq-objections-execution"', '"total_commands": 3']
+EVIDENCE_EXPECTED = ['"name": "objection-handling-execution"', '"total_commands": 3']
 
 
 def _missing(path: Path, expected: list[str]) -> list[str]:
@@ -107,12 +107,12 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     if errors:
-        print("day23-faq-objections-contract check failed:", file=sys.stderr)
+        print("objection-handling-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day23-faq-objections-contract check passed")
+    print("objection-handling-contract check passed")
     return 0
 
 

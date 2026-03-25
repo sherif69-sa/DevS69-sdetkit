@@ -1,6 +1,6 @@
 command: python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict
-returncode: 0
-ok: True
+returncode: 1
+ok: False
 --- stdout ---
 {
   "badge_checks": {
@@ -51,10 +51,10 @@ ok: True
       "evidence": {
         "exists": true,
         "path": "SECURITY.md",
-        "readme_link": true
+        "readme_link": false
       },
       "key": "security_doc_exists",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
@@ -62,10 +62,10 @@ ok: True
       "evidence": {
         "exists": true,
         "path": "docs/security.md",
-        "readme_link": true
+        "readme_link": false
       },
       "key": "security_guide_exists",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
@@ -73,10 +73,10 @@ ok: True
       "evidence": {
         "exists": true,
         "path": "docs/policy-and-baselines.md",
-        "readme_link": true
+        "readme_link": false
       },
       "key": "policy_baseline_exists",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
@@ -102,7 +102,7 @@ ok: True
     },
     {
       "category": "governance",
-      "evidence": "name-22-ultra-upgrade-report.md",
+      "evidence": "docs/trust-assets.md",
       "key": "docs_index_trust_assets",
       "passed": true,
       "weight": 2
@@ -127,12 +127,12 @@ ok: True
   },
   "name": "trust-assets",
   "policy_checks": {
-    "policy_baseline_exists": true,
-    "security_doc_exists": true,
-    "security_guide_exists": true
+    "policy_baseline_exists": false,
+    "security_doc_exists": false,
+    "security_guide_exists": false
   },
   "recommendations": [
-    "Trust signals are complete; keep trust badges, policy links, and workflows current each release."
+    "Ensure policy documents exist and are linked from README governance references."
   ],
   "score": 100.0,
   "strict_failures": [],
@@ -147,19 +147,22 @@ ok: True
         "total": 4
       },
       "policy": {
-        "passed": 3,
+        "passed": 0,
         "total": 3
       }
     },
-    "critical_failures": [],
-    "failed_checks": 0,
-    "trust_label": "strong",
-    "trust_score": 100.0,
+    "critical_failures": [
+      "security_doc_exists"
+    ],
+    "failed_checks": 3,
+    "trust_label": "review",
+    "trust_score": 70.0,
     "weighted_points": {
-      "earned": 100,
+      "earned": 70,
       "total": 100
     }
   }
 }
 
 --- stderr ---
+

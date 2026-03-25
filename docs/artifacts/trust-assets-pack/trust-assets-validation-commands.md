@@ -1,4 +1,4 @@
-# Day 22 validation commands
+# Trust assets validation commands
 
 ```bash
 python -m sdetkit trust-assets --format json --strict

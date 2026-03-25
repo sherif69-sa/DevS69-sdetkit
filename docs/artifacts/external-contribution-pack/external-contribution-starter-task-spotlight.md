@@ -1,4 +1,4 @@
-# Name 26 starter-task spotlight plan
+# External contribution starter-task spotlight
 
 ## Public call-to-action
 Help wanted: pick one starter task and submit your first contribution this week.

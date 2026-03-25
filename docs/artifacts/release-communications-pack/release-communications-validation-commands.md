@@ -1,4 +1,4 @@
-# Day 20 validation commands
+# Release communications validation commands
 
 ```bash
 python -m sdetkit release-communications --format json --strict

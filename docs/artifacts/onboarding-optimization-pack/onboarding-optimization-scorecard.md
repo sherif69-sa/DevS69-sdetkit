@@ -1,4 +1,4 @@
-Onboarding optimization onboarding time upgrade
+Onboarding optimization
 
 Onboarding score: 100.0
 Readiness: strong

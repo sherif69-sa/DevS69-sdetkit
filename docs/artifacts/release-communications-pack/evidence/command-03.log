@@ -1,7 +1,9 @@
-command: python scripts/check_name20_release_narrative_contract.py --skip-evidence
-returncode: 0
-ok: True
+command: python scripts/check_day20_release_narrative_contract.py --skip-evidence
+returncode: 1
+ok: False
 --- stdout ---
-release-communications-contract check passed
 
 --- stderr ---
+release-communications-contract check failed:
+ - missing required file: docs/impact-20-ultra-upgrade-report.md
+

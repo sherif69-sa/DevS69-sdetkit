@@ -11,13 +11,13 @@ ok: True
     "docs/artifacts/release-readiness-pack/release-decision.md"
   ],
   "inputs": {
-    "name14": {
-      "score": 100.0,
-      "status": "pass"
-    },
-    "name18": {
+    "reliability": {
       "gate_status": "pass",
       "reliability_score": 95.09
+    },
+    "weekly_review": {
+      "score": 100.0,
+      "status": "pass"
     }
   },
   "name": "release-readiness",
@@ -34,3 +34,4 @@ ok: True
 }
 
 --- stderr ---
+

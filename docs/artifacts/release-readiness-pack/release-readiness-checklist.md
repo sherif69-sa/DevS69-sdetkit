@@ -1,6 +1,6 @@
-# Day 19 release readiness closeout checklist
+# Release readiness checklist
 
-- [ ] Day 18 reliability gate status is pass.
+- [ ] Reliability-evidence gate status is pass.
 - [ ] Day 14 KPI status is pass.
-- [ ] Release score is reviewed in closeout meeting.
+- [ ] Release score is reviewed in the release-readiness review.
 - [ ] Recommendations are assigned and tracked.

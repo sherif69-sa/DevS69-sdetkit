@@ -25,7 +25,7 @@ ok: True
   "name": "reliability-evidence-pack",
   "page": "docs/reliability-evidence-pack.md",
   "recommendations": [
-    "Reliability posture is strong; keep current CI and closeout operating cadence."
+    "Reliability posture is strong; keep current CI and review cadence."
   ],
   "score": 100.0,
   "strict_failures": [],
@@ -38,3 +38,4 @@ ok: True
 }
 
 --- stderr ---
+

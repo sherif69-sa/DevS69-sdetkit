@@ -8,29 +8,29 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY22_PAGE = Path("docs/trust-assets.md")
-DAY22_REPORT = Path("docs/impact-22-ultra-upgrade-report.md")
-DAY22_ARTIFACT = Path("docs/artifacts/day22-trust-signal-upgrade-sample.md")
-DAY22_PACK_SUMMARY = Path("docs/artifacts/day22-trust-pack/day22-trust-summary.json")
-DAY22_PACK_SCORECARD = Path("docs/artifacts/day22-trust-pack/day22-trust-scorecard.md")
-DAY22_PACK_CHECKLIST = Path("docs/artifacts/day22-trust-pack/day22-visibility-checklist.md")
-DAY22_PACK_VALIDATION = Path("docs/artifacts/day22-trust-pack/day22-validation-commands.md")
-DAY22_PACK_ACTION_PLAN = Path("docs/artifacts/day22-trust-pack/day22-trust-action-plan.md")
-DAY22_EVIDENCE = Path("docs/artifacts/day22-trust-pack/evidence/day22-execution-summary.json")
+DAY22_REPORT = Path("docs/trust-assets-report.md")
+DAY22_ARTIFACT = Path("docs/trust-assets.md")
+DAY22_PACK_SUMMARY = Path("docs/artifacts/trust-assets-pack/trust-assets-summary.json")
+DAY22_PACK_SCORECARD = Path("docs/artifacts/trust-assets-pack/trust-assets-scorecard.md")
+DAY22_PACK_CHECKLIST = Path("docs/artifacts/trust-assets-pack/trust-assets-visibility-checklist.md")
+DAY22_PACK_VALIDATION = Path("docs/artifacts/trust-assets-pack/trust-assets-validation-commands.md")
+DAY22_PACK_ACTION_PLAN = Path("docs/artifacts/trust-assets-pack/trust-assets-action-plan.md")
+DAY22_EVIDENCE = Path("docs/artifacts/trust-assets-pack/evidence/trust-assets-execution-summary.json")
 MODULE = Path("src/sdetkit/trust_signal_upgrade.py")
 
 README_EXPECTED = [
-    "## 🔐 Day 22 ultra: trust signal upgrade",
-    "python -m sdetkit trust-signal-upgrade --format json --strict",
-    "python -m sdetkit trust-signal-upgrade --execute --evidence-dir docs/artifacts/day22-trust-pack/evidence --format json --strict",
+    "## Trust assets",
+    "python -m sdetkit trust-assets --format json --strict",
+    "python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict",
     "python scripts/check_day22_trust_signal_upgrade_contract.py",
 ]
 INDEX_EXPECTED = [
-    "Day 22 ultra upgrades (trust signal upgrade)",
-    "sdetkit trust-signal-upgrade --format json --strict",
-    "artifacts/day22-trust-pack/day22-trust-summary.json",
+    "Trust assets",
+    "sdetkit trust-assets --format json --strict",
+    "artifacts/trust-assets-pack/trust-assets-summary.json",
 ]
 CLI_EXPECTED = [
-    "## trust-signal-upgrade",
+    "## trust-assets",
     "--readme",
     "--docs-index",
     "--min-trust-score",
@@ -40,21 +40,21 @@ CLI_EXPECTED = [
     "--emit-pack-dir",
 ]
 PAGE_EXPECTED = [
-    "# Trust signal upgrade (Day 22)",
+    "# Trust assets",
     "## Trust signal inputs",
     "## Fast verification commands",
     "## Scoring model",
     "## Execution evidence mode",
     "## Visibility checklist",
 ]
-REPORT_EXPECTED = ["Day 22 big upgrade", "strict", "--execute", "validation commands"]
+REPORT_EXPECTED = ["Trust assets report", "strict", "--execute", "validation commands"]
 SUMMARY_EXPECTED = [
-    '"name": "day22-trust-signal-upgrade"',
+    '"name": "trust-assets"',
     '"trust_score":',
     '"governance_checks":',
     '"critical_failures":',
 ]
-EVIDENCE_EXPECTED = ['"name": "day22-trust-signal-upgrade-execution"', '"total_commands": 3']
+EVIDENCE_EXPECTED = ['"name": "trust-assets-execution"', '"total_commands": 3']
 
 
 def _missing(path: Path, expected: list[str]) -> list[str]:
@@ -108,12 +108,12 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     if errors:
-        print("day22-trust-signal-upgrade-contract check failed:", file=sys.stderr)
+        print("trust-assets-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day22-trust-signal-upgrade-contract check passed")
+    print("trust-assets-contract check passed")
     return 0
 
 

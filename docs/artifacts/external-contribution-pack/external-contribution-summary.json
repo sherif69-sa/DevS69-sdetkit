@@ -2,68 +2,68 @@
   "checks": [
     {
       "category": "contract",
-      "evidence": "/workspace/DevS69-sdetkit/docs/external-contribution.md",
-      "key": "docs_page_exists",
+      "check_id": "docs_page_exists",
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/external-contribution.md",
       "passed": true,
       "weight": 15
     },
     {
       "category": "contract",
+      "check_id": "required_sections_present",
       "evidence": {
         "missing_sections": []
       },
-      "key": "required_sections_present",
       "passed": true,
       "weight": 20
     },
     {
       "category": "contract",
+      "check_id": "required_commands_present",
       "evidence": {
         "missing_commands": []
       },
-      "key": "required_commands_present",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
-      "evidence": "docs/external-contribution.md",
-      "key": "readme_name26_link",
+      "check_id": "readme_day26_link",
+      "evidence": "External contribution",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
-      "evidence": "external-contribution-push",
-      "key": "readme_name26_command",
+      "check_id": "readme_day26_command",
+      "evidence": "external-contribution",
       "passed": true,
       "weight": 8
     },
     {
       "category": "discoverability",
-      "evidence": "name-26-ultra-upgrade-report.md",
-      "key": "docs_index_name26_link",
+      "check_id": "docs_index_day26_link",
+      "evidence": "docs/external-contribution.md",
       "passed": true,
       "weight": 7
     },
     {
       "category": "strategy",
-      "evidence": "Name 26 \u2014 External contribution push",
-      "key": "top10_name26_alignment",
+      "check_id": "top10_day26_alignment",
+      "evidence": "External contribution",
       "passed": true,
       "weight": 10
     },
     {
       "category": "strategy",
+      "check_id": "docs_mentions_starter_tasks",
       "evidence": "starter task",
-      "key": "docs_mentions_starter_tasks",
       "passed": true,
       "weight": 10
     },
     {
       "category": "evidence",
+      "check_id": "docs_mentions_response_sla",
       "evidence": "24 hours",
-      "key": "docs_mentions_response_sla",
       "passed": true,
       "weight": 10
     }
@@ -74,14 +74,14 @@
     "readme": "README.md",
     "top10": "docs/top-10-github-strategy.md"
   },
-  "name": "name26-external-contribution-push",
+  "name": "external-contribution",
   "strict_failures": [],
   "summary": {
     "activation_score": 100.0,
     "critical_failures": [],
     "failed_checks": [],
     "recommendations": [
-      "Name 26 external contribution push lane is healthy; keep weekly conversion summaries flowing."
+      "External-contribution lane is healthy; keep weekly conversion summaries flowing."
     ],
     "total_checks": 9
   }

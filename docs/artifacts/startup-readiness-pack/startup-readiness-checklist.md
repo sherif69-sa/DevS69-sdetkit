@@ -1,4 +1,4 @@
-# Name 12 startup operating checklist
+# Startup readiness checklist
 
 - [ ] Validate landing page contract in strict mode.
 - [ ] Regenerate startup artifact markdown for handoff.

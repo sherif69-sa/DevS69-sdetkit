@@ -1,0 +1,18 @@
+{
+  "name": "external-contribution-execution",
+  "results": [
+    {
+      "command": "python -m sdetkit external-contribution --format json --strict",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"checks\": [\n    {\n      \"category\": \"contract\",\n      \"check_id\": \"docs_page_exists\",\n      \"evidence\": \"/home/sherif/DevS69-sdetkit/docs/external-contribution.md\",\n      \"passed\": true,\n      \"weight\": 15\n    },\n    {\n      \"category\": \"contract\",\n      \"check_id\": \"required_sections_present\",\n      \"evidence\": {\n        \"missing_sections\": []\n      },\n      \"passed\": true,\n      \"weight\": 20\n    },\n    {\n      \"category\": \"contract\",\n      \"check_id\": \"required_commands_present\",\n      \"evidence\": {\n        \"missing_commands\": []\n      },\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"check_id\": \"readme_day26_link\",\n      \"evidence\": \"External contribution\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"discoverability\",\n      \"check_id\": \"readme_day26_command\",\n      \"evidence\": \"external-contribution\",\n      \"passed\": true,\n      \"weight\": 8\n    },\n    {\n      \"category\": \"discoverability\",\n      \"check_id\": \"docs_index_day26_link\",\n      \"evidence\": \"docs/external-contribution.md\",\n      \"passed\": true,\n      \"weight\": 7\n    },\n    {\n      \"category\": \"strategy\",\n      \"check_id\": \"top10_day26_alignment\",\n      \"evidence\": \"External contribution\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"strategy\",\n      \"check_id\": \"docs_mentions_starter_tasks\",\n      \"evidence\": \"starter task\",\n      \"passed\": true,\n      \"weight\": 10\n    },\n    {\n      \"category\": \"evidence\",\n      \"check_id\": \"docs_mentions_response_sla\",\n      \"evidence\": \"24 hours\",\n      \"passed\": true,\n      \"weight\": 10\n    }\n  ],\n  \"inputs\": {\n    \"docs_index\": \"docs/index.md\",\n    \"docs_page\": \"docs/external-contribution.md\",\n    \"readme\": \"README.md\",\n    \"top10\": \"docs/top-10-github-strategy.md\"\n  },\n  \"name\": \"external-contribution\",\n  \"strict_failures\": [],\n  \"summary\": {\n    \"activation_score\": 100.0,\n    \"critical_failures\": [],\n    \"failed_checks\": [],\n    \"recommendations\": [\n      \"External-contribution lane is healthy; keep weekly conversion summaries flowing.\"\n    ],\n    \"total_checks\": 9\n  }\n}\n"
+    },
+    {
+      "command": "python scripts/check_day26_external_contribution_push_contract.py --skip-evidence",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"errors\": [],\n  \"score\": 100.0\n}\n"
+    }
+  ],
+  "total_commands": 2
+}
