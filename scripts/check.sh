@@ -56,10 +56,10 @@ case "$mode" in
     python scripts/check_day16_gitlab_ci_quickstart_contract.py
     python scripts/check_reliability_evidence_pack_contract.py
     ;;
-  day19)
+  release-readiness)
     python scripts/check_release_readiness_contract.py --skip-evidence
     ;;
-  day20)
+  release-communications)
     python scripts/check_release_communications_contract.py
     ;;
   all)
@@ -78,7 +78,7 @@ case "$mode" in
     python scripts/check_release_communications_contract.py
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|day15|day16|day19|day20|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|day15|day16|release-readiness|release-communications|all}" >&2
     exit 2
     ;;
 esac

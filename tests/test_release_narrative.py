@@ -9,8 +9,8 @@ from sdetkit import cli
 from sdetkit import release_narrative as rn
 
 
-def _write_day19_summary(path: Path, gate_status: str = "pass", score: float = 96.4) -> Path:
-    summary = path / "day19.json"
+def _write_release_summary(path: Path, gate_status: str = "pass", score: float = 96.4) -> Path:
+    summary = path / "release-summary.json"
     summary.write_text(
         json.dumps(
             {
@@ -24,21 +24,21 @@ def _write_day19_summary(path: Path, gate_status: str = "pass", score: float = 9
     return summary
 
 
-def _write_day20_page(root: Path) -> None:
+def _write_release_communications_page(root: Path) -> None:
     path = root / "docs/release-communications.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(rn._DAY20_DEFAULT_PAGE, encoding="utf-8")
 
 
 def test_release_narrative_json(tmp_path: Path, capsys) -> None:
-    summary = _write_day19_summary(tmp_path)
-    _write_day20_page(tmp_path)
+    summary = _write_release_summary(tmp_path)
+    _write_release_communications_page(tmp_path)
 
     rc = rn.main(
         [
             "--root",
             str(tmp_path),
-            "--day19-summary",
+            "--release-summary",
             str(summary.relative_to(tmp_path)),
             "--format",
             "json",
@@ -52,46 +52,54 @@ def test_release_narrative_json(tmp_path: Path, capsys) -> None:
 
 
 def test_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
-    summary = _write_day19_summary(tmp_path)
-    _write_day20_page(tmp_path)
+    summary = _write_release_summary(tmp_path)
+    _write_release_communications_page(tmp_path)
 
     rc = rn.main(
         [
             "--root",
             str(tmp_path),
-            "--day19-summary",
+            "--release-summary",
             str(summary.relative_to(tmp_path)),
             "--emit-pack-dir",
-            "artifacts/day20-pack",
+            "artifacts/release-communications-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day20-pack/evidence",
+            "artifacts/release-communications-pack/evidence",
             "--format",
             "json",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day20-pack/release-communications-summary.json").exists()
-    assert (tmp_path / "artifacts/day20-pack/release-communications.md").exists()
-    assert (tmp_path / "artifacts/day20-pack/release-communications-audience-blurbs.md").exists()
-    assert (tmp_path / "artifacts/day20-pack/release-communications-channel-posts.md").exists()
     assert (
-        tmp_path / "artifacts/day20-pack/release-communications-validation-commands.md"
+        tmp_path / "artifacts/release-communications-pack/release-communications-summary.json"
+    ).exists()
+    assert (tmp_path / "artifacts/release-communications-pack/release-communications.md").exists()
+    assert (
+        tmp_path / "artifacts/release-communications-pack/release-communications-audience-blurbs.md"
     ).exists()
     assert (
-        tmp_path / "artifacts/day20-pack/evidence/release-communications-execution-summary.json"
+        tmp_path / "artifacts/release-communications-pack/release-communications-channel-posts.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-communications-pack/release-communications-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-communications-pack/evidence/release-communications-execution-summary.json"
     ).exists()
 
 
 def test_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> None:
-    summary = _write_day19_summary(tmp_path, gate_status="warn", score=83)
-    _write_day20_page(tmp_path)
+    summary = _write_release_summary(tmp_path, gate_status="warn", score=83)
+    _write_release_communications_page(tmp_path)
 
     rc = rn.main(
         [
             "--root",
             str(tmp_path),
-            "--day19-summary",
+            "--release-summary",
             str(summary.relative_to(tmp_path)),
             "--format",
             "json",
@@ -104,16 +112,16 @@ def test_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> N
 def test_release_narrative_strict_gate_fails_when_docs_contract_missing(
     tmp_path: Path,
 ) -> None:
-    summary = _write_day19_summary(tmp_path)
+    summary = _write_release_summary(tmp_path)
     path = tmp_path / "docs/release-communications.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("# Release narrative (Day 20)\n", encoding="utf-8")
+    path.write_text("# Release communications\n", encoding="utf-8")
 
     rc = rn.main(
         [
             "--root",
             str(tmp_path),
-            "--day19-summary",
+            "--release-summary",
             str(summary.relative_to(tmp_path)),
             "--format",
             "json",
@@ -124,22 +132,22 @@ def test_release_narrative_strict_gate_fails_when_docs_contract_missing(
 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
-    summary = _write_day19_summary(tmp_path)
-    _write_day20_page(tmp_path)
+    summary = _write_release_summary(tmp_path)
+    _write_release_communications_page(tmp_path)
 
     rc = cli.main(
         [
-            "release-narrative",
+            "release-communications",
             "--root",
             str(tmp_path),
-            "--day19-summary",
+            "--release-summary",
             str(summary.relative_to(tmp_path)),
             "--format",
             "text",
         ]
     )
     assert rc == 0
-    assert "Day 20 release narrative" in capsys.readouterr().out
+    assert "Release communications" in capsys.readouterr().out
 
 
 def test_execute_commands_run_inside_requested_root(monkeypatch, tmp_path: Path) -> None:

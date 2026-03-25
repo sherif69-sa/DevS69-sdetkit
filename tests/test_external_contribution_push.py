@@ -9,13 +9,16 @@ from sdetkit import external_contribution_push as ecp
 
 def _seed(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("impact-26-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text(
+        "impact-26-ultra-upgrade-report.md\ndocs/external-contribution.md\nExternal contribution\n",
+        encoding="utf-8",
+    )
     (root / "README.md").write_text(
-        "docs/external-contribution.md\nexternal-contribution\n",
+        "External contribution\ndocs/external-contribution.md\nexternal-contribution\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 26 — External contribution push:** spotlight open starter tasks publicly.\n",
+        "- **External contribution:** spotlight open starter tasks publicly.\n",
         encoding="utf-8",
     )
     (root / "docs/external-contribution.md").write_text(ecp._DAY26_DEFAULT_PAGE, encoding="utf-8")
@@ -40,30 +43,43 @@ def test_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day26-pack",
+            "artifacts/external-contribution-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day26-pack/evidence",
+            "artifacts/external-contribution-pack/evidence",
             "--format",
             "json",
         ]
     )
 
     assert rc == 0
-    assert (tmp_path / "artifacts/day26-pack/external-contribution-summary.json").exists()
-    assert (tmp_path / "artifacts/day26-pack/external-contribution-scorecard.md").exists()
     assert (
-        tmp_path / "artifacts/day26-pack/external-contribution-starter-task-spotlight.md"
+        tmp_path / "artifacts/external-contribution-pack/external-contribution-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day26-pack/external-contribution-triage-board.md").exists()
-    assert (tmp_path / "artifacts/day26-pack/external-contribution-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day26-pack/evidence/day26-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/external-contribution-pack/external-contribution-scorecard.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/external-contribution-pack/external-contribution-starter-task-spotlight.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/external-contribution-pack/external-contribution-triage-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/external-contribution-pack/external-contribution-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/external-contribution-pack/evidence/external-contribution-execution-summary.json"
+    ).exists()
 
 
 def test_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed(tmp_path)
     (tmp_path / "docs/external-contribution.md").write_text(
-        "# External contribution push (Day 26)\n", encoding="utf-8"
+        "# External contribution\n", encoding="utf-8"
     )
 
     rc = ecp.main(["--root", str(tmp_path), "--strict", "--format", "json"])
@@ -77,4 +93,4 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["external-contribution", "--root", str(tmp_path), "--format", "text"])
 
     assert rc == 0
-    assert "Day 26 external contribution push summary" in capsys.readouterr().out
+    assert "External contribution summary" in capsys.readouterr().out

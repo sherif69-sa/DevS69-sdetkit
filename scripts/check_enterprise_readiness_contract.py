@@ -9,8 +9,10 @@ DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-enterprise-regulated.md")
 DAY13_REPORT = Path("docs/impact-13-ultra-upgrade-report.md")
 DAY13_ARTIFACT = Path("docs/artifacts/enterprise-readiness-sample.md")
-DAY13_PACK_CI = Path("docs/artifacts/enterprise-readiness-pack/enterprise-day13-ci.yml")
-DAY13_EVIDENCE = Path("docs/artifacts/enterprise-readiness-pack/evidence/day13-execution-summary.json")
+ENTERPRISE_PACK_CI = Path("docs/artifacts/enterprise-readiness-pack/enterprise-readiness-ci.yml")
+ENTERPRISE_EVIDENCE = Path(
+    "docs/artifacts/enterprise-readiness-pack/evidence/enterprise-readiness-execution-summary.json"
+)
 
 README_EXPECTED = [
     "## Enterprise readiness",
@@ -72,7 +74,7 @@ PACK_CI_EXPECTED = [
 ]
 
 EVIDENCE_EXPECTED = [
-    '"name": "day13-enterprise-execution"',
+    '"name": "enterprise-readiness-execution"',
     '"total_commands": 5',
 ]
 
@@ -91,8 +93,8 @@ def main() -> int:
         USE_CASE_PAGE,
         DAY13_REPORT,
         DAY13_ARTIFACT,
-        DAY13_PACK_CI,
-        DAY13_EVIDENCE,
+        ENTERPRISE_PACK_CI,
+        ENTERPRISE_EVIDENCE,
     ]
     for path in required:
         if not path.exists():
@@ -114,10 +116,12 @@ def main() -> int:
             f'{DAY13_ARTIFACT}: missing "{m}"' for m in _missing(DAY13_ARTIFACT, ARTIFACT_EXPECTED)
         )
         errors.extend(
-            f'{DAY13_PACK_CI}: missing "{m}"' for m in _missing(DAY13_PACK_CI, PACK_CI_EXPECTED)
+            f'{ENTERPRISE_PACK_CI}: missing "{m}"'
+            for m in _missing(ENTERPRISE_PACK_CI, PACK_CI_EXPECTED)
         )
         errors.extend(
-            f'{DAY13_EVIDENCE}: missing "{m}"' for m in _missing(DAY13_EVIDENCE, EVIDENCE_EXPECTED)
+            f'{ENTERPRISE_EVIDENCE}: missing "{m}"'
+            for m in _missing(ENTERPRISE_EVIDENCE, EVIDENCE_EXPECTED)
         )
 
     if errors:

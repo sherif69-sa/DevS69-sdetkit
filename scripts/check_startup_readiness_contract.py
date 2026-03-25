@@ -9,7 +9,7 @@ DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-startup-small-team.md")
 DAY12_REPORT = Path("docs/impact-12-ultra-upgrade-report.md")
 DAY12_ARTIFACT = Path("docs/artifacts/startup-readiness-sample.md")
-DAY12_PACK_CI = Path("docs/artifacts/startup-readiness-pack/startup-day12-ci.yml")
+STARTUP_PACK_CI = Path("docs/artifacts/startup-readiness-pack/startup-readiness-ci.yml")
 
 README_EXPECTED = [
     "## Startup readiness",
@@ -78,7 +78,7 @@ def main() -> int:
         USE_CASE_PAGE,
         DAY12_REPORT,
         DAY12_ARTIFACT,
-        DAY12_PACK_CI,
+        STARTUP_PACK_CI,
     ]
     for path in required:
         if not path.exists():
@@ -100,7 +100,7 @@ def main() -> int:
             f'{DAY12_ARTIFACT}: missing "{m}"' for m in _missing(DAY12_ARTIFACT, ARTIFACT_EXPECTED)
         )
         errors.extend(
-            f'{DAY12_PACK_CI}: missing "{m}"' for m in _missing(DAY12_PACK_CI, PACK_CI_EXPECTED)
+            f'{STARTUP_PACK_CI}: missing "{m}"' for m in _missing(STARTUP_PACK_CI, PACK_CI_EXPECTED)
         )
 
     if errors:

@@ -8,17 +8,17 @@ from sdetkit import release_readiness_board as rrb
 
 
 def _write_inputs(tmp_path: Path) -> tuple[Path, Path]:
-    day18 = tmp_path / "day18.json"
-    day14 = tmp_path / "day14.json"
-    day18.write_text(
+    reliability_summary_path = tmp_path / "reliability-summary.json"
+    weekly_review_summary_path = tmp_path / "weekly-review-summary.json"
+    reliability_summary_path.write_text(
         json.dumps({"summary": {"reliability_score": 97.5, "gate_status": "pass"}}) + "\n",
         encoding="utf-8",
     )
-    day14.write_text(
+    weekly_review_summary_path.write_text(
         json.dumps({"summary": {"score": 96.0, "status": "pass"}}) + "\n",
         encoding="utf-8",
     )
-    return day18, day14
+    return reliability_summary_path, weekly_review_summary_path
 
 
 def _write_page(root: Path) -> None:
@@ -28,7 +28,7 @@ def _write_page(root: Path) -> None:
 
 
 def test_board_builds_json(tmp_path: Path, capsys) -> None:
-    day18, day14 = _write_inputs(tmp_path)
+    reliability_summary_path, weekly_review_summary_path = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     rc = rrb.main(
@@ -36,9 +36,9 @@ def test_board_builds_json(tmp_path: Path, capsys) -> None:
             "--root",
             str(tmp_path),
             "--reliability-summary",
-            str(day18.relative_to(tmp_path)),
+            str(reliability_summary_path.relative_to(tmp_path)),
             "--weekly-review-summary",
-            str(day14.relative_to(tmp_path)),
+            str(weekly_review_summary_path.relative_to(tmp_path)),
             "--format",
             "json",
             "--strict",
@@ -52,7 +52,7 @@ def test_board_builds_json(tmp_path: Path, capsys) -> None:
 
 
 def test_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
-    day18, day14 = _write_inputs(tmp_path)
+    reliability_summary_path, weekly_review_summary_path = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     rc = rrb.main(
@@ -60,30 +60,33 @@ def test_board_emits_bundle_and_evidence(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--reliability-summary",
-            str(day18.relative_to(tmp_path)),
+            str(reliability_summary_path.relative_to(tmp_path)),
             "--weekly-review-summary",
-            str(day14.relative_to(tmp_path)),
+            str(weekly_review_summary_path.relative_to(tmp_path)),
             "--emit-pack-dir",
-            "artifacts/day19-pack",
+            "artifacts/release-readiness-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day19-pack/evidence",
+            "artifacts/release-readiness-pack/evidence",
             "--format",
             "json",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day19-pack/release-readiness-summary.json").exists()
-    assert (tmp_path / "artifacts/day19-pack/release-readiness-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day19-pack/release-readiness-checklist.md").exists()
-    assert (tmp_path / "artifacts/day19-pack/release-readiness-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/release-readiness-pack/release-readiness-summary.json").exists()
+    assert (tmp_path / "artifacts/release-readiness-pack/release-readiness-scorecard.md").exists()
+    assert (tmp_path / "artifacts/release-readiness-pack/release-readiness-checklist.md").exists()
     assert (
-        tmp_path / "artifacts/day19-pack/evidence/release-readiness-execution-summary.json"
+        tmp_path / "artifacts/release-readiness-pack/release-readiness-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-readiness-pack/evidence/release-readiness-execution-summary.json"
     ).exists()
 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
-    day18, day14 = _write_inputs(tmp_path)
+    reliability_summary_path, weekly_review_summary_path = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     rc = cli.main(
@@ -92,25 +95,27 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
             "--root",
             str(tmp_path),
             "--reliability-summary",
-            str(day18.relative_to(tmp_path)),
+            str(reliability_summary_path.relative_to(tmp_path)),
             "--weekly-review-summary",
-            str(day14.relative_to(tmp_path)),
+            str(weekly_review_summary_path.relative_to(tmp_path)),
             "--format",
             "text",
         ]
     )
     assert rc == 0
-    assert "Day 19 release readiness board" in capsys.readouterr().out
+    assert "Release readiness board" in capsys.readouterr().out
 
 
 def test_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
-    day18 = tmp_path / "day18.json"
-    day14 = tmp_path / "day14.json"
-    day18.write_text(
+    reliability_summary_path = tmp_path / "reliability-summary.json"
+    weekly_review_summary_path = tmp_path / "weekly-review-summary.json"
+    reliability_summary_path.write_text(
         json.dumps({"summary": {"reliability_score": 92.0, "gate_status": "pass"}}) + "\n",
         encoding="utf-8",
     )
-    day14.write_text(json.dumps({"kpis": {"completion_rate_percent": 95}}) + "\n", encoding="utf-8")
+    weekly_review_summary_path.write_text(
+        json.dumps({"kpis": {"completion_rate_percent": 95}}) + "\n", encoding="utf-8"
+    )
     _write_page(tmp_path)
 
     rc = rrb.main(
@@ -118,9 +123,9 @@ def test_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
             "--root",
             str(tmp_path),
             "--reliability-summary",
-            str(day18.relative_to(tmp_path)),
+            str(reliability_summary_path.relative_to(tmp_path)),
             "--weekly-review-summary",
-            str(day14.relative_to(tmp_path)),
+            str(weekly_review_summary_path.relative_to(tmp_path)),
             "--format",
             "json",
             "--strict",
@@ -128,5 +133,5 @@ def test_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["inputs"]["day14"]["status"] == "pass"
+    assert out["summary"]["strict_all_green"] is True
     assert out["summary"]["release_score"] == 92.9

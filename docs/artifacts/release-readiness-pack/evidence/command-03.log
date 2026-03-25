@@ -15,12 +15,6 @@ release-readiness-contract check failed:
  - docs/index.md: missing 'sdetkit release-readiness --format json --strict'
  - docs/index.md: missing 'artifacts/release-readiness-pack/release-readiness-summary.json'
  - docs/cli.md: missing '## release-readiness'
- - docs/cli.md: missing '--day18-summary'
+ - docs/cli.md: missing '--reliability-summary'
  - docs/cli.md: missing '--day14-summary'
  - docs/cli.md: missing '--min-release-score'
- - docs/cli.md: missing '--write-defaults'
- - docs/cli.md: missing '--execute'
- - docs/cli.md: missing '--evidence-dir'
- - docs/cli.md: missing '--timeout-sec'
- - docs/cli.md: missing '--emit-pack-dir'
-

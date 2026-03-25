@@ -85,21 +85,30 @@ def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
             "--day17-summary",
             str(day17.relative_to(tmp_path)),
             "--emit-pack-dir",
-            "artifacts/day18-pack",
+            "artifacts/reliability-evidence-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day18-pack/evidence",
+            "artifacts/reliability-evidence-pack/evidence",
             "--format",
             "json",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-summary.json").exists()
-    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-checklist.md").exists()
-    assert (tmp_path / "artifacts/day18-pack/reliability-evidence-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day18-pack/evidence/reliability-evidence-execution-summary.json"
+        tmp_path / "artifacts/reliability-evidence-pack/reliability-evidence-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/reliability-evidence-pack/reliability-evidence-scorecard.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/reliability-evidence-pack/reliability-evidence-checklist.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/reliability-evidence-pack/reliability-evidence-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/reliability-evidence-pack/evidence/reliability-evidence-execution-summary.json"
     ).exists()
 
 
@@ -145,7 +154,7 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     )
     assert rc == 0
     out = capsys.readouterr().out
-    assert "Day 18 reliability evidence pack" in out
+    assert "Reliability evidence pack" in out
 
 
 def test_reliability_pack_load_json_requires_object(tmp_path: Path) -> None:
@@ -233,7 +242,7 @@ def test_reliability_pack_main_markdown_writes_output_file(tmp_path: Path) -> No
     )
     assert rc == 0
     assert out_path.exists()
-    assert "Day 18 reliability evidence pack" in out_path.read_text(encoding="utf-8")
+    assert "Reliability evidence pack" in out_path.read_text(encoding="utf-8")
 
 
 def test_reliability_pack_strict_fails_when_page_missing_and_score_low(

@@ -69,8 +69,8 @@ python scripts/check_release_readiness_contract.py
 """
 
 
-_REQUIRED_DAY18_KEYS = ("summary",)
-_REQUIRED_DAY18_SUMMARY_KEYS = ("reliability_score", "gate_status")
+_REQUIRED_RELIABILITY_KEYS = ("summary",)
+_REQUIRED_RELIABILITY_SUMMARY_KEYS = ("reliability_score", "gate_status")
 
 
 def _read(path: Path) -> str:
@@ -106,18 +106,18 @@ def _normalize_day14_summary(day14_summary: dict[str, Any]) -> tuple[float, str]
 
 
 def build_release_board(
-    day18_summary: dict[str, Any],
+    reliability_summary: dict[str, Any],
     day14_summary: dict[str, Any],
 ) -> dict[str, Any]:
-    _require_keys(day18_summary, _REQUIRED_DAY18_KEYS, "reliability summary")
-    if not isinstance(day18_summary["summary"], dict):
+    _require_keys(reliability_summary, _REQUIRED_RELIABILITY_KEYS, "reliability summary")
+    if not isinstance(reliability_summary["summary"], dict):
         raise ValueError("reliability summary.summary must be an object")
 
-    day18 = day18_summary["summary"]
-    _require_keys(day18, _REQUIRED_DAY18_SUMMARY_KEYS, "reliability summary.summary")
+    reliability = reliability_summary["summary"]
+    _require_keys(reliability, _REQUIRED_RELIABILITY_SUMMARY_KEYS, "reliability summary.summary")
 
-    reliability_score = float(day18["reliability_score"])
-    reliability_gate = str(day18["gate_status"])
+    reliability_score = float(reliability["reliability_score"])
+    reliability_gate = str(reliability["gate_status"])
     day14_score, day14_status = _normalize_day14_summary(day14_summary)
 
     release_score = round((reliability_score * 0.70) + (day14_score * 0.30), 2)
@@ -215,7 +215,16 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Release readiness validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(
+            [
+                "# Release readiness validation commands",
+                "",
+                "```bash",
+                *_REQUIRED_COMMANDS,
+                "```",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
     decision.write_text(
@@ -331,7 +340,6 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--root", default=".")
     parser.add_argument(
         "--reliability-summary",
-        "--day18-summary",
         dest="reliability_summary",
         default="docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json",
     )

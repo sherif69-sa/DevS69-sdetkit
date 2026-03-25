@@ -27,7 +27,7 @@ def test_execute_commands_timeout_and_markdown_output(monkeypatch, tmp_path: Pat
 
     monkeypatch.setattr(euc.subprocess, "run", _raise_timeout)
 
-    out_file = tmp_path / "artifacts/day13.md"
+    out_file = tmp_path / "artifacts/enterprise-readiness.md"
     rc = euc.main(
         [
             "--root",
@@ -49,5 +49,7 @@ def test_execute_commands_timeout_and_markdown_output(monkeypatch, tmp_path: Pat
     assert "## Execution summary" in stdout
     assert out_file.exists()
 
-    summary = json.loads((tmp_path / "docs/evidence/day13-execution-summary.json").read_text())
+    summary = json.loads(
+        (tmp_path / "docs/evidence/enterprise-readiness-execution-summary.json").read_text()
+    )
     assert summary["failed_commands"] == summary["total_commands"]

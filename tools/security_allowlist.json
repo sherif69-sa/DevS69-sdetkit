@@ -6,7 +6,7 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day26-external-contribution-pack/day26-external-contribution-summary.json"
+      "path": "docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",

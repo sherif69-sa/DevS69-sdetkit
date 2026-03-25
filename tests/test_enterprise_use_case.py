@@ -122,7 +122,7 @@ def test_enterprise_use_case_execute_writes_evidence(monkeypatch, tmp_path, caps
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["execution"]["failed_commands"] == 0
-    assert (tmp_path / "docs/evidence/day13-execution-summary.json").exists()
+    assert (tmp_path / "docs/evidence/enterprise-readiness-execution-summary.json").exists()
 
 
 def test_enterprise_use_case_execute_strict_fails_on_command_error(monkeypatch, tmp_path, capsys):

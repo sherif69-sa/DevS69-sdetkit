@@ -27,28 +27,28 @@
     },
     {
       "category": "discoverability",
-      "check_id": "readme_day26_link",
+      "check_id": "readme_external_contribution_link",
       "evidence": "External contribution",
       "passed": true,
       "weight": 10
     },
     {
       "category": "discoverability",
-      "check_id": "readme_day26_command",
+      "check_id": "readme_external_contribution_command",
       "evidence": "external-contribution",
       "passed": true,
       "weight": 8
     },
     {
       "category": "discoverability",
-      "check_id": "docs_index_day26_link",
+      "check_id": "docs_index_external_contribution_link",
       "evidence": "docs/external-contribution.md",
       "passed": true,
       "weight": 7
     },
     {
       "category": "strategy",
-      "check_id": "top10_day26_alignment",
+      "check_id": "top10_external_contribution_alignment",
       "evidence": "External contribution",
       "passed": true,
       "weight": 10

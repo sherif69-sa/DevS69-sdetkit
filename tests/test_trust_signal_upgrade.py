@@ -7,7 +7,7 @@ from sdetkit import cli
 from sdetkit import trust_signal_upgrade as tsu
 
 
-def _write_day22_page(root: Path) -> None:
+def _write_trust_assets_page(root: Path) -> None:
     path = root / "docs/trust-assets.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(tsu._DAY22_DEFAULT_PAGE, encoding="utf-8")
@@ -31,6 +31,8 @@ def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:
                 "[Security Docs](docs/security.md)",
                 "[Security docs](docs/security.md)",
                 policy_link,
+                "[Trust assets](docs/trust-assets.md)",
+                "trust-assets",
             ]
         )
         + "\n",
@@ -40,17 +42,20 @@ def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:
     (root / "docs").mkdir(exist_ok=True)
     (root / "docs/security.md").write_text("# Security docs\n", encoding="utf-8")
     (root / "docs/policy-and-baselines.md").write_text("# Policy\n", encoding="utf-8")
-    (root / "docs/index.md").write_text("impact-22-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text(
+        "impact-22-ultra-upgrade-report.md\ndocs/trust-assets.md\nTrust assets\n",
+        encoding="utf-8",
+    )
 
     workflows = root / ".github/workflows"
     workflows.mkdir(parents=True, exist_ok=True)
-    for name in ["ci.yml", "security.yml", "pages.yml"]:
+    for name in ["ci.yml", "quality.yml", "mutation-tests.yml", "security.yml", "pages.yml"]:
         (workflows / name).write_text("name: test\n", encoding="utf-8")
 
 
 def test_trust_signal_json(tmp_path: Path, capsys) -> None:
     _write_repo_basics(tmp_path)
-    _write_day22_page(tmp_path)
+    _write_trust_assets_page(tmp_path)
 
     rc = tsu.main(["--root", str(tmp_path), "--format", "json"])
     assert rc == 0
@@ -63,35 +68,37 @@ def test_trust_signal_json(tmp_path: Path, capsys) -> None:
 
 def test_trust_signal_emit_pack_and_execute(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
-    _write_day22_page(tmp_path)
+    _write_trust_assets_page(tmp_path)
 
     rc = tsu.main(
         [
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day22-pack",
+            "artifacts/trust-assets-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day22-pack/evidence",
+            "artifacts/trust-assets-pack/evidence",
             "--format",
             "json",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day22-pack/trust-assets-summary.json").exists()
-    assert (tmp_path / "artifacts/day22-pack/trust-assets-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/trust-assets-visibility-checklist.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/trust-assets-action-plan.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/trust-assets-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day22-pack/evidence/trust-assets-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/trust-assets-pack/trust-assets-summary.json").exists()
+    assert (tmp_path / "artifacts/trust-assets-pack/trust-assets-scorecard.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-pack/trust-assets-visibility-checklist.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-pack/trust-assets-action-plan.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-pack/trust-assets-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/trust-assets-pack/evidence/trust-assets-execution-summary.json"
+    ).exists()
 
 
 def test_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
     path = tmp_path / "docs/trust-assets.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("# Trust signal upgrade (Day 22)\n", encoding="utf-8")
+    path.write_text("# Trust assets\n", encoding="utf-8")
 
     rc = tsu.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 1
@@ -99,7 +106,7 @@ def test_trust_signal_strict_fails_when_docs_contract_missing(tmp_path: Path) ->
 
 def test_trust_signal_strict_fails_when_critical_check_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path)
-    _write_day22_page(tmp_path)
+    _write_trust_assets_page(tmp_path)
     (tmp_path / ".github/workflows/security.yml").unlink()
 
     rc = tsu.main(["--root", str(tmp_path), "--format", "json", "--strict"])
@@ -108,7 +115,7 @@ def test_trust_signal_strict_fails_when_critical_check_missing(tmp_path: Path) -
 
 def test_trust_signal_score_reduces_when_policy_link_missing(tmp_path: Path) -> None:
     _write_repo_basics(tmp_path, include_policy_link=False)
-    _write_day22_page(tmp_path)
+    _write_trust_assets_page(tmp_path)
 
     payload = tsu.build_trust_signal_summary(tmp_path)
     assert payload["summary"]["trust_score"] < 100.0
@@ -117,8 +124,8 @@ def test_trust_signal_score_reduces_when_policy_link_missing(tmp_path: Path) -> 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _write_repo_basics(tmp_path)
-    _write_day22_page(tmp_path)
+    _write_trust_assets_page(tmp_path)
 
     rc = cli.main(["trust-assets", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 22 trust signal upgrade" in capsys.readouterr().out
+    assert "Trust assets" in capsys.readouterr().out

@@ -10,15 +10,9 @@ DOCS_CLI = Path("docs/cli.md")
 DAY19_PAGE = Path("docs/release-readiness.md")
 DAY19_REPORT = Path("docs/release-readiness-report.md")
 DAY19_ARTIFACT = Path("docs/release-readiness.md")
-DAY19_PACK_SUMMARY = Path(
-    "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
-)
-DAY19_PACK_SCORECARD = Path(
-    "docs/artifacts/release-readiness-pack/release-readiness-scorecard.md"
-)
-DAY19_PACK_CHECKLIST = Path(
-    "docs/artifacts/release-readiness-pack/release-readiness-checklist.md"
-)
+DAY19_PACK_SUMMARY = Path("docs/artifacts/release-readiness-pack/release-readiness-summary.json")
+DAY19_PACK_SCORECARD = Path("docs/artifacts/release-readiness-pack/release-readiness-scorecard.md")
+DAY19_PACK_CHECKLIST = Path("docs/artifacts/release-readiness-pack/release-readiness-checklist.md")
 DAY19_PACK_VALIDATION = Path(
     "docs/artifacts/release-readiness-pack/release-readiness-validation-commands.md"
 )
@@ -45,7 +39,7 @@ INDEX_EXPECTED = [
 
 CLI_EXPECTED = [
     "## release-readiness",
-    "--day18-summary",
+    "--reliability-summary",
     "--day14-summary",
     "--min-release-score",
     "--write-defaults",
@@ -62,7 +56,12 @@ PAGE_EXPECTED = [
     "## Execution evidence mode",
 ]
 
-REPORT_EXPECTED = ["Release readiness report", "release score", "strict", "--execute --evidence-dir"]
+REPORT_EXPECTED = [
+    "Release readiness report",
+    "release score",
+    "strict",
+    "--execute --evidence-dir",
+]
 SUMMARY_EXPECTED = [
     '"name": "release-readiness"',
     '"release_score":',

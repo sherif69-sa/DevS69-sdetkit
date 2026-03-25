@@ -109,7 +109,7 @@ Generate and persist command outputs in one pass:
 python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
 ```
 
-This writes a structured `day13-execution-summary.json` and one per-command log file for audit-ready handoff.
+This writes a structured `enterprise-readiness-execution-summary.json` and one per-command log file for audit-ready handoff.
 
 ## Rollout model across business units
 
@@ -289,7 +289,7 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    summary = root / "day13-execution-summary.json"
+    summary = root / "enterprise-readiness-execution-summary.json"
     payload = {
         "name": "enterprise-readiness-execution",
         "total_commands": len(results),

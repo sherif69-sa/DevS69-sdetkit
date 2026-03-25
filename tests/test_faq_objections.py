@@ -9,9 +9,22 @@ from sdetkit import faq_objections as fqo
 
 def _write_fixture(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("impact-23-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text(
+        "impact-23-ultra-upgrade-report.md\n"
+        "docs/objection-handling.md\n"
+        "Objection handling\n"
+        "objection-handling\n"
+        "python -m sdetkit objection-handling --format json --strict\n"
+        "release-communications\n",
+        encoding="utf-8",
+    )
     (root / "README.md").write_text(
-        "docs/objection-handling.md\nrelease-narrative\n", encoding="utf-8"
+        "Objection handling\n"
+        "docs/objection-handling.md\n"
+        "objection-handling\n"
+        "python -m sdetkit objection-handling --format json --strict\n"
+        "release-communications\n",
+        encoding="utf-8",
     )
     (root / "docs/objection-handling.md").write_text(fqo._DAY23_DEFAULT_PAGE, encoding="utf-8")
 
@@ -38,28 +51,31 @@ def test_faq_emit_pack_and_execute(tmp_path: Path) -> None:
             "json",
             "--strict",
             "--emit-pack-dir",
-            "artifacts/day23-pack",
+            "artifacts/objection-handling-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day23-pack/evidence",
+            "artifacts/objection-handling-pack/evidence",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day23-pack/objection-handling-summary.json").exists()
-    assert (tmp_path / "artifacts/day23-pack/objection-handling-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/objection-handling-response-matrix.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/objection-handling-playbook.md").exists()
-    assert (tmp_path / "artifacts/day23-pack/objection-handling-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/objection-handling-pack/objection-handling-summary.json").exists()
+    assert (tmp_path / "artifacts/objection-handling-pack/objection-handling-scorecard.md").exists()
     assert (
-        tmp_path / "artifacts/day23-pack/evidence/objection-handling-execution-summary.json"
+        tmp_path / "artifacts/objection-handling-pack/objection-handling-response-matrix.md"
+    ).exists()
+    assert (tmp_path / "artifacts/objection-handling-pack/objection-handling-playbook.md").exists()
+    assert (
+        tmp_path / "artifacts/objection-handling-pack/objection-handling-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/objection-handling-pack/evidence/objection-handling-execution-summary.json"
     ).exists()
 
 
 def test_faq_strict_fails_when_required_sections_missing(tmp_path: Path) -> None:
     _write_fixture(tmp_path)
-    (tmp_path / "docs/objection-handling.md").write_text(
-        "# FAQ and objections (Day 23)\n", encoding="utf-8"
-    )
+    (tmp_path / "docs/objection-handling.md").write_text("# Objection handling\n", encoding="utf-8")
 
     rc = fqo.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 1
@@ -70,4 +86,4 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
 
     rc = cli.main(["objection-handling", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 23 Objection handling" in capsys.readouterr().out
+    assert "Objection handling" in capsys.readouterr().out

@@ -8,9 +8,7 @@ from sdetkit import onboarding_time_upgrade as otu
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate onboarding-optimization contract."
-    )
+    parser = argparse.ArgumentParser(description="Validate onboarding-optimization contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -36,7 +34,8 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = (
-            root / "docs/artifacts/day24-onboarding-pack/evidence/day24-execution-summary.json"
+            root
+            / "docs/artifacts/onboarding-optimization-pack/evidence/onboarding-optimization-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")

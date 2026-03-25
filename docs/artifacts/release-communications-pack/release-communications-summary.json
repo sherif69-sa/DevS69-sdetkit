@@ -15,7 +15,7 @@
   ],
   "inputs": {
     "changelog": "CHANGELOG.md",
-    "day19_summary": "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
+    "release_summary": "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
   },
   "name": "release-communications",
   "narrative_channels": {

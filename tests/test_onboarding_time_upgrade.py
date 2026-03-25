@@ -9,9 +9,15 @@ from sdetkit import onboarding_time_upgrade as otu
 
 def _write_fixture(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
-    (root / "docs/index.md").write_text("impact-24-ultra-upgrade-report.md\n", encoding="utf-8")
+    (root / "docs/index.md").write_text(
+        "impact-24-ultra-upgrade-report.md\n"
+        "docs/onboarding-optimization.md\n"
+        "Onboarding optimization\n",
+        encoding="utf-8",
+    )
     (root / "README.md").write_text(
-        "docs/onboarding-optimization.md\nonboarding-optimization\n", encoding="utf-8"
+        "Onboarding optimization\ndocs/onboarding-optimization.md\nonboarding-optimization\n",
+        encoding="utf-8",
     )
     (root / "docs/onboarding-optimization.md").write_text(otu._DAY24_DEFAULT_PAGE, encoding="utf-8")
     (root / "src/sdetkit").mkdir(parents=True, exist_ok=True)
@@ -42,29 +48,39 @@ def test_onboarding_emit_pack_and_execute(tmp_path: Path) -> None:
             "json",
             "--strict",
             "--emit-pack-dir",
-            "artifacts/day24-pack",
+            "artifacts/onboarding-optimization-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day24-pack/evidence",
+            "artifacts/onboarding-optimization-pack/evidence",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-summary.json").exists()
-    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-checklist.md").exists()
-    assert (tmp_path / "artifacts/day24-pack/onboarding-optimization-runbook.md").exists()
     assert (
-        tmp_path / "artifacts/day24-pack/onboarding-optimization-validation-commands.md"
+        tmp_path / "artifacts/onboarding-optimization-pack/onboarding-optimization-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day24-pack/evidence/onboarding-optimization-execution-summary.json"
+        tmp_path / "artifacts/onboarding-optimization-pack/onboarding-optimization-scorecard.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/onboarding-optimization-pack/onboarding-optimization-checklist.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/onboarding-optimization-pack/onboarding-optimization-runbook.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/onboarding-optimization-pack/onboarding-optimization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/onboarding-optimization-pack/evidence/onboarding-optimization-execution-summary.json"
     ).exists()
 
 
 def test_onboarding_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _write_fixture(tmp_path)
     (tmp_path / "docs/onboarding-optimization.md").write_text(
-        "# Onboarding time upgrade (Day 24)\n", encoding="utf-8"
+        "# Onboarding optimization\n", encoding="utf-8"
     )
 
     rc = otu.main(["--root", str(tmp_path), "--format", "json", "--strict"])
@@ -76,4 +92,4 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
 
     rc = cli.main(["onboarding-optimization", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 24 onboarding optimization" in capsys.readouterr().out
+    assert "Onboarding optimization" in capsys.readouterr().out

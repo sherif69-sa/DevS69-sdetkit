@@ -130,7 +130,7 @@ def test_week3_emit_pack_writes_weekly_review_artifacts(tmp_path: Path) -> None:
     assert (pack / "weekly-review-checklist.md").exists()
     assert (pack / "weekly-review-kpi-scorecard.json").exists()
     assert (pack / "weekly-review-contributor-response-plan.md").exists()
-    assert (pack / "weekly-review-release-narrative-brief.md").exists()
+    assert (pack / "weekly-review-release-communications-brief.md").exists()
 
 
 def test_weekly_review_help_describes_product_surface(capsys):

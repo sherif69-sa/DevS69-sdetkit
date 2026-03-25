@@ -303,12 +303,9 @@ def build_weekly_review(
 
 
 def _render_text(review: WeeklyReview) -> str:
-    review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
-    shipped_window = (
-        "Week 3" if review.week == 3 else "Week 2" if review.week == 2 else "Week 1"
-    )
+    shipped_window = "Week 3" if review.week == 3 else "Week 2" if review.week == 2 else "Week 1"
     lines = [
-        f"Day {review_day} weekly review #{review.week}",
+        f"Weekly review #{review.week}",
         "",
         f"What shipped ({shipped_window}):",
     ]
@@ -357,12 +354,9 @@ def _render_text(review: WeeklyReview) -> str:
 
 
 def _render_markdown(review: WeeklyReview) -> str:
-    review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
-    shipped_window = (
-        "Week 3" if review.week == 3 else "Week 2" if review.week == 2 else "Week 1"
-    )
+    shipped_window = "Week 3" if review.week == 3 else "Week 2" if review.week == 2 else "Week 1"
     lines = [
-        f"# Day {review_day} Weekly Review #{review.week}",
+        f"# Weekly Review #{review.week}",
         "",
         f"## What shipped ({shipped_window})",
         "",

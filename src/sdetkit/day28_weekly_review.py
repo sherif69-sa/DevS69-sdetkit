@@ -105,17 +105,17 @@ def build_day28_weekly_review_summary(
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
     day25_path = root / "docs/artifacts/day25-community-pack/day25-community-summary.json"
-    day26_path = (
+    external_contribution_path = (
         root / "docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     )
     day27_path = root / "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
 
     day25_score, day25_ok = _load_score(day25_path)
-    day26_score, day26_ok = _load_score(day26_path)
+    external_contribution_score, external_contribution_ok = _load_score(external_contribution_path)
     day27_score, day27_ok = _load_score(day27_path)
     rollup_avg = (
-        round((day25_score + day26_score + day27_score) / 3, 2)
-        if (day25_ok and day26_ok and day27_ok)
+        round((day25_score + external_contribution_score + day27_score) / 3, 2)
+        if (day25_ok and external_contribution_ok and day27_ok)
         else 0.0
     )
 
@@ -177,11 +177,11 @@ def build_day28_weekly_review_summary(
             "evidence": str(day25_path),
         },
         {
-            "check_id": "day26_input_present",
+            "check_id": "external_contribution_input_present",
             "category": "data",
             "weight": 8,
-            "passed": day26_ok,
-            "evidence": str(day26_path),
+            "passed": external_contribution_ok,
+            "evidence": str(external_contribution_path),
         },
         {
             "check_id": "day27_input_present",
@@ -215,8 +215,8 @@ def build_day28_weekly_review_summary(
         corrective_actions.append(
             "Re-run Day 25 pack generation and restore summary JSON for traceability."
         )
-    if day26_ok and day26_score >= 90:
-        wins.append(f"External contribution stayed healthy ({day26_score}).")
+    if external_contribution_ok and external_contribution_score >= 90:
+        wins.append(f"External contribution stayed healthy ({external_contribution_score}).")
     else:
         misses.append("External-contribution summary missing or below review target.")
         corrective_actions.append(
@@ -245,13 +245,13 @@ def build_day28_weekly_review_summary(
             "docs_page": docs_page_path,
             "top10": top10_path,
             "day25_summary": str(day25_path.relative_to(root)),
-            "day26_summary": str(day26_path.relative_to(root)),
+            "external_contribution_summary": str(external_contribution_path.relative_to(root)),
             "day27_summary": str(day27_path.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
             "day25_activation_score": day25_score,
-            "day26_activation_score": day26_score,
+            "external_contribution_activation_score": external_contribution_score,
             "day27_activation_score": day27_score,
             "average_activation_score": rollup_avg,
         },
@@ -292,7 +292,7 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "## KPI rollup (Day 25-27)",
         "",
         f"- Day 25 score: `{payload['rollup']['day25_activation_score']}`",
-        f"- External-contribution score: `{payload['rollup']['day26_activation_score']}`",
+        f"- External-contribution score: `{payload['rollup']['external_contribution_activation_score']}`",
         f"- Day 27 score: `{payload['rollup']['day27_activation_score']}`",
         f"- Average score: `{payload['rollup']['average_activation_score']}`",
         "",

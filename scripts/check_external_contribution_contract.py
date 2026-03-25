@@ -8,9 +8,7 @@ from sdetkit import external_contribution_push as ecp
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate external-contribution contract."
-    )
+    parser = argparse.ArgumentParser(description="Validate external-contribution contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -37,7 +35,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day26-external-contribution-pack/evidence/external-contribution-execution-summary.json"
+            / "docs/artifacts/external-contribution-pack/evidence/external-contribution-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")

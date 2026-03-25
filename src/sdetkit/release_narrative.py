@@ -87,17 +87,17 @@ def _read_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _load_day19_summary(path: Path) -> tuple[float, str, list[str]]:
+def _load_release_summary(path: Path) -> tuple[float, str, list[str]]:
     payload = _read_json(path)
     summary = payload.get("summary", payload)
     if not isinstance(summary, dict):
-        raise ValueError("day19 summary payload must include a summary object")
+        raise ValueError("release summary payload must include a summary object")
 
     release_score_raw = summary.get("release_score", 0.0)
     try:
         release_score = float(release_score_raw)
     except (TypeError, ValueError):
-        raise ValueError("day19 summary release_score must be numeric") from None
+        raise ValueError("release summary release_score must be numeric") from None
 
     gate_status_raw = summary.get("gate_status", "review")
     gate_status = str(gate_status_raw).strip().lower() or "review"
@@ -130,9 +130,13 @@ def _extract_changelog_bullets(path: Path, limit: int = 6) -> list[str]:
 
 
 def build_release_narrative(
-    day19_summary: Path, changelog: Path, *, day19_label: str = "", changelog_label: str = ""
+    release_summary: Path,
+    changelog: Path,
+    *,
+    release_summary_label: str = "",
+    changelog_label: str = "",
 ) -> dict[str, Any]:
-    release_score, gate_status, recommendations = _load_day19_summary(day19_summary)
+    release_score, gate_status, recommendations = _load_release_summary(release_summary)
     highlights = _extract_changelog_bullets(changelog)
 
     readiness_label = "ready" if gate_status == "pass" and release_score >= 90 else "review"
@@ -157,7 +161,7 @@ def build_release_narrative(
     return {
         "name": "release-communications",
         "inputs": {
-            "day19_summary": day19_label or str(day19_summary),
+            "release_summary": release_summary_label or str(release_summary),
             "changelog": changelog_label or str(changelog),
         },
         "summary": {
@@ -270,7 +274,16 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Release communications validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(
+            [
+                "# Release communications validation commands",
+                "",
+                "```bash",
+                *_REQUIRED_COMMANDS,
+                "```",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
 
@@ -288,7 +301,7 @@ def _execute_commands(root: Path, commands: list[str], timeout_sec: int) -> list
             if argv and argv[0] == "python":
                 argv[0] = sys.executable
             if len(argv) >= 2 and argv[1] == "scripts/check_release_communications_contract.py":
-                argv[1] = str(script_root / "scripts" / "check_day20_release_narrative_contract.py")
+                argv[1] = str(script_root / "scripts" / "check_release_communications_contract.py")
             proc = subprocess.run(
                 argv,
                 cwd=str(root),
@@ -368,7 +381,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--root", default=".", help="Repository root path.")
     p.add_argument(
-        "--day19-summary",
+        "--release-summary",
         default="docs/artifacts/release-readiness-pack/release-readiness-summary.json",
         help="Path to the release-readiness summary JSON.",
     )
@@ -385,10 +398,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Create default release-communications page if missing.",
     )
     p.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated release-communications files."
+        "--emit-pack-dir",
+        default="",
+        help="Optional output directory for generated release-communications files.",
     )
     p.add_argument(
-        "--execute", action="store_true", help="Run release-communications command chain and emit evidence logs."
+        "--execute",
+        action="store_true",
+        help="Run release-communications command chain and emit evidence logs.",
     )
     p.add_argument(
         "--evidence-dir",
@@ -426,9 +443,9 @@ def main(argv: list[str] | None = None) -> int:
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 
     payload = build_release_narrative(
-        root / ns.day19_summary,
+        root / ns.release_summary,
         root / ns.changelog,
-        day19_label=ns.day19_summary,
+        release_summary_label=ns.release_summary,
         changelog_label=ns.changelog,
     )
     payload["strict_failures"] = [*missing_sections, *missing_commands]

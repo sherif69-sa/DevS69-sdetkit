@@ -93,28 +93,28 @@ _SIGNALS = [
         "evaluator": "required_commands",
     },
     {
-        "check_id": "readme_day26_link",
+        "check_id": "readme_external_contribution_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "External contribution",
         "source": "readme",
     },
     {
-        "check_id": "readme_day26_command",
+        "check_id": "readme_external_contribution_command",
         "category": "discoverability",
         "weight": 8,
         "marker": "external-contribution",
         "source": "readme",
     },
     {
-        "check_id": "docs_index_day26_link",
+        "check_id": "docs_index_external_contribution_link",
         "category": "discoverability",
         "weight": 7,
         "marker": "docs/external-contribution.md",
         "source": "docs_index",
     },
     {
-        "check_id": "top10_day26_alignment",
+        "check_id": "top10_external_contribution_alignment",
         "category": "strategy",
         "weight": 10,
         "marker": "External contribution",
@@ -140,7 +140,7 @@ _CRITICAL_FAILURE_KEYS = {
     "docs_page_exists",
     "required_sections_present",
     "required_commands_present",
-    "top10_day26_alignment",
+    "top10_external_contribution_alignment",
 }
 
 
@@ -329,7 +329,15 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# External contribution validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        "\n".join(
+            [
+                "# External contribution validation commands",
+                "",
+                "```bash",
+                *_REQUIRED_COMMANDS,
+                "```",
+            ]
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -383,10 +391,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--write-defaults", action="store_true", help="Create default external-contribution page."
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated external-contribution files."
+        "--emit-pack-dir",
+        default="",
+        help="Optional output directory for generated external-contribution files.",
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Run external-contribution command chain and emit evidence logs."
+        "--execute",
+        action="store_true",
+        help="Run external-contribution command chain and emit evidence logs.",
     )
     parser.add_argument(
         "--evidence-dir",

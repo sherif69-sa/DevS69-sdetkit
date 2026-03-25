@@ -14,8 +14,12 @@ DAY20_PACK_SUMMARY = Path(
     "docs/artifacts/release-communications-pack/release-communications-summary.json"
 )
 DAY20_PACK_MD = Path("docs/artifacts/release-communications-pack/release-communications.md")
-DAY20_PACK_BLURBS = Path("docs/artifacts/release-communications-pack/release-communications-audience-blurbs.md")
-DAY20_PACK_CHANNELS = Path("docs/artifacts/release-communications-pack/release-communications-channel-posts.md")
+DAY20_PACK_BLURBS = Path(
+    "docs/artifacts/release-communications-pack/release-communications-audience-blurbs.md"
+)
+DAY20_PACK_CHANNELS = Path(
+    "docs/artifacts/release-communications-pack/release-communications-channel-posts.md"
+)
 DAY20_PACK_VALIDATION = Path(
     "docs/artifacts/release-communications-pack/release-communications-validation-commands.md"
 )
@@ -37,7 +41,7 @@ INDEX_EXPECTED = [
 ]
 CLI_EXPECTED = [
     "## release-communications",
-    "--day19-summary",
+    "--release-summary",
     "--changelog",
     "--min-release-score",
     "--execute",
