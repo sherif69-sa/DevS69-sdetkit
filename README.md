@@ -340,3 +340,11 @@ case-study-prep4-closeout
 ## Stable closeout commands
 community-touchpoint-closeout
 ecosystem-priorities-closeout
+
+## Scale upgrade command lane
+
+python -m sdetkit scale-upgrade-closeout --format json --strict
+
+## Partner outreach command lane
+
+python -m sdetkit partner-outreach-closeout --format json --strict

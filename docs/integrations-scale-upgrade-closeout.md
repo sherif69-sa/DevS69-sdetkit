@@ -1,10 +1,10 @@
-# Scale Upgrade Closeout
+# Scale upgrade closeout lane
 
 > Legacy mapping: Day 79 remains as history/compatibility alias `day79-scale-upgrade-closeout`. Use `python -m sdetkit scale-upgrade-closeout` as the stable command.
 
 Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
 
-## Why Day 79 matters
+## Why scale upgrade matters
 
 - Turns Day 78 ecosystem priorities into enterprise onboarding readiness proof across docs, rollout, and adoption loops.
 - Protects scale quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -12,17 +12,17 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 
 ## Required inputs (Day 78)
 
-- `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json`
-- `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md`
+- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json`
+- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md`
 - `docs/roadmap/plans/scale-upgrade-plan.json`
 
-## Day 79 command lane
+## Scale upgrade command lane
 
 ```bash
 python -m sdetkit scale-upgrade-closeout --format json --strict
-python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict
-python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict
-python scripts/check_day79_scale_upgrade_closeout_contract.py
+python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/scale-upgrade-closeout-pack --format json --strict
+python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/scale-upgrade-closeout-pack/evidence --format json --strict
+python scripts/check_scale_upgrade_closeout_contract.py
 ```
 
 ## Scale upgrade contract
@@ -40,7 +40,7 @@ python scripts/check_day79_scale_upgrade_closeout_contract.py
 - [ ] Scorecard captures scale score delta, ecosystem carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, scale upgrade plan, execution ledger, KPI scorecard, and execution log
 
-## Day 79 delivery board
+## Scale upgrade delivery board
 
 - [ ] Day 79 integration brief committed
 - [ ] Day 79 scale upgrade plan committed

@@ -78,3 +78,9 @@ impact-77-big-upgrade-report.md
 integrations-community-touchpoint-closeout.md
 impact-78-big-upgrade-report.md
 integrations-ecosystem-priorities-closeout.md
+
+- impact-79-big-upgrade-report.md
+- integrations-scale-upgrade-closeout.md
+
+- impact-80-big-upgrade-report.md
+- integrations-partner-outreach-closeout.md

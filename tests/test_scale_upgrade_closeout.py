@@ -30,20 +30,17 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 78 — Ecosystem priorities closeout:** lock partner workflow baselines.\n"
-        "- **Day 79 — Enterprise onboarding path:** publish role-based onboarding checklist.\n",
+        "Ecosystem priorities + scale upgrade strategy chain\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-scale-upgrade-closeout.md").write_text(
-        d79._DAY79_DEFAULT_PAGE, encoding="utf-8"
-    )
-    (root / "docs/impact-79-big-upgrade-report.md").write_text(
-        "# Day 79 report\n", encoding="utf-8"
+        d79._DAY79_DEFAULT_PAGE,
+        encoding="utf-8",
     )
 
     summary = (
         root
-        / "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json"
+        / "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +53,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -65,7 +65,7 @@ def _seed_repo(root: Path) -> None:
                 "- [ ] Day 78 ecosystem priorities plan committed",
                 "- [ ] Day 78 ecosystem workstream ledger exported",
                 "- [ ] Day 78 ecosystem KPI scorecard snapshot exported",
-                "- [ ] Day 79 scale priorities drafted from Day 78 learnings",
+                "- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings",
             ]
         )
         + "\n",
@@ -105,33 +105,37 @@ def test_day79_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day79-pack",
+            "artifacts/scale-upgrade-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day79-pack/evidence",
+            "artifacts/scale-upgrade-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day79-pack/day79-scale-upgrade-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-scale-upgrade-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-scale-upgrade-plan.md").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-enterprise-execution-ledger.json").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-enterprise-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day79-pack/day79-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day79-pack/evidence/day79-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-plan.md").exists()
+    assert (
+        tmp_path / "artifacts/scale-upgrade-pack/day79-enterprise-execution-ledger.json"
+    ).exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/day79-enterprise-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-execution-log.md").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/scale-upgrade-pack/evidence/scale-upgrade-execution-summary.json"
+    ).exists()
 
 
 def test_day79_strict_fails_without_day78(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json"
+        / "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json"
     ).unlink()
     assert d79.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

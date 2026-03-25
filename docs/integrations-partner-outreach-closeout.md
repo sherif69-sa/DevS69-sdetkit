@@ -1,10 +1,10 @@
-# Partner Outreach Closeout
+# Partner outreach closeout lane
 
 > Legacy mapping: Day 80 remains as history/compatibility alias `day80-partner-outreach-closeout`. Use `python -m sdetkit partner-outreach-closeout` as the stable command.
 
 Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a partner-outreach execution pack.
 
-## Why Day 80 matters
+## Why partner outreach matters
 
 - Turns Day 79 scale outcomes into partner onboarding proof across docs, rollout, and adoption loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -12,11 +12,11 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 
 ## Required inputs (Day 79)
 
-- `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json`
-- `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md`
+- `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json`
+- `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md`
 - `docs/roadmap/plans/partner-outreach-plan.json`
 
-## Day 80 command lane
+## Partner outreach command lane
 
 ```bash
 python -m sdetkit partner-outreach-closeout --format json --strict
@@ -40,7 +40,7 @@ python scripts/check_day80_partner_outreach_closeout_contract.py
 - [ ] Scorecard captures partner score delta, scale carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, partner outreach plan, execution ledger, KPI scorecard, and execution log
 
-## Day 80 delivery board
+## Partner outreach delivery board
 
 - [ ] Day 80 integration brief committed
 - [ ] Day 80 partner outreach plan committed

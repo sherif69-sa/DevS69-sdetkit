@@ -30,20 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 79 — Scale upgrade closeout:** lock enterprise onboarding improvements.\n"
-        "- **Day 80 — Partner outreach closeout:** publish partner onboarding execution checklist.\n",
+        "Scale upgrade + partner outreach strategy chain\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-partner-outreach-closeout.md").write_text(
-        d80._DAY80_DEFAULT_PAGE, encoding="utf-8"
+        d80._DAY80_DEFAULT_PAGE,
+        encoding="utf-8",
     )
-    (root / "docs/impact-80-big-upgrade-report.md").write_text(
-        "# Day 80 report\n", encoding="utf-8"
-    )
-
     summary = (
-        root
-        / "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json"
+        root / "docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -53,10 +48,12 @@ def _seed_repo(root: Path) -> None:
                 "checks": [{"passed": True}],
             },
             indent=2,
-        ),
+        )
+        + "\n",
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md"
+    board = root / "docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md"
+    board.parent.mkdir(parents=True, exist_ok=True)
     board.write_text(
         "\n".join(
             [
@@ -130,8 +127,7 @@ def test_day80_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_day80_strict_fails_without_day79(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path
-        / "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json"
+        tmp_path / "docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json"
     ).unlink()
     assert d80.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

@@ -354,3 +354,7 @@ publication launch
 ## Stable strategy labels
 Contributor recognition + community touchpoint strategy chain
 Community touchpoint + ecosystem priorities strategy chain
+
+Ecosystem priorities + scale upgrade strategy chain
+
+Scale upgrade + partner outreach strategy chain

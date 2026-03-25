@@ -11,18 +11,18 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-partner-outreach-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY79_SUMMARY_PATH = (
-    "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json"
+    "docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json"
 )
-_DAY79_BOARD_PATH = "docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md"
+_DAY79_BOARD_PATH = "docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/partner-outreach-plan.json"
-_SECTION_HEADER = "# Day 80 \u2014 Partner outreach closeout lane"
+_SECTION_HEADER = "# Partner outreach closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 80 matters",
+    "## Why partner outreach matters",
     "## Required inputs (Day 79)",
-    "## Day 80 command lane",
+    "## Partner outreach command lane",
     "## Partner outreach contract",
     "## Partner outreach quality checklist",
-    "## Day 80 delivery board",
+    "## Partner outreach delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -65,11 +65,11 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY80_DEFAULT_PAGE = """# Day 80 \u2014 Partner outreach closeout lane
+_DAY80_DEFAULT_PAGE = """# Partner outreach closeout lane
 
 Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a partner-outreach execution pack.
 
-## Why Day 80 matters
+## Why partner outreach matters
 
 - Turns Day 79 scale outcomes into partner onboarding proof across docs, rollout, and adoption loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -77,11 +77,11 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 
 ## Required inputs (Day 79)
 
-- `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-scale-upgrade-closeout-summary.json`
-- `docs/artifacts/day79-scale-upgrade-closeout-pack/day79-delivery-board.md`
+- `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json`
+- `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md`
 - `docs/roadmap/plans/partner-outreach-plan.json`
 
-## Day 80 command lane
+## Partner outreach command lane
 
 ```bash
 python -m sdetkit partner-outreach-closeout --format json --strict
@@ -105,7 +105,7 @@ python scripts/check_day80_partner_outreach_closeout_contract.py
 - [ ] Scorecard captures partner score delta, scale carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, partner outreach plan, execution ledger, KPI scorecard, and execution log
 
-## Day 80 delivery board
+## Partner outreach delivery board
 
 - [ ] Day 80 integration brief committed
 - [ ] Day 80 partner outreach plan committed
@@ -178,7 +178,7 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_day80_command",
             "weight": 7,
             "passed": ("partner-outreach-closeout" in readme_text),
-            "evidence": "README day80 command lane",
+            "evidence": "README partner-outreach command lane",
         },
         {
             "check_id": "docs_index_day80_links",
@@ -192,8 +192,8 @@ def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_day80_alignment",
             "weight": 5,
-            "passed": ("Day 79" in top10_text and "Day 80" in top10_text),
-            "evidence": "Day 79 + Day 80 strategy chain",
+            "passed": ("Scale upgrade + partner outreach strategy chain" in top10_text),
+            "evidence": "Scale upgrade + partner outreach strategy chain",
         },
         {
             "check_id": "day79_summary_present",

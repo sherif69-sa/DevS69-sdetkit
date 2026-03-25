@@ -10,31 +10,33 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-scale-upgrade-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY78_SUMMARY_PATH = "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json"
+_DAY78_SUMMARY_PATH = (
+    "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json"
+)
 _DAY78_BOARD_PATH = (
-    "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md"
+    "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/scale-upgrade-plan.json"
-_SECTION_HEADER = "# Day 79 \u2014 Scale upgrade closeout lane"
+_SECTION_HEADER = "# Scale upgrade closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 79 matters",
+    "## Why scale upgrade matters",
     "## Required inputs (Day 78)",
-    "## Day 79 command lane",
+    "## Scale upgrade command lane",
     "## Scale upgrade contract",
     "## Scale upgrade quality checklist",
-    "## Day 79 delivery board",
+    "## Scale upgrade delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit scale-upgrade-closeout --format json --strict",
-    "python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict",
-    "python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day79_scale_upgrade_closeout_contract.py",
+    "python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/scale-upgrade-closeout-pack --format json --strict",
+    "python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/scale-upgrade-closeout-pack/evidence --format json --strict",
+    "python scripts/check_scale_upgrade_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit scale-upgrade-closeout --format json --strict",
-    "python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict",
-    "python scripts/check_day79_scale_upgrade_closeout_contract.py --skip-evidence",
+    "python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/scale-upgrade-closeout-pack --format json --strict",
+    "python scripts/check_scale_upgrade_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 79 scale upgrade execution and signoff.",
@@ -65,11 +67,11 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY79_DEFAULT_PAGE = """# Day 79 \u2014 Scale upgrade closeout lane
+_DAY79_DEFAULT_PAGE = """# Scale upgrade closeout lane
 
 Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
 
-## Why Day 79 matters
+## Why scale upgrade matters
 
 - Turns Day 78 ecosystem priorities into enterprise onboarding readiness proof across docs, rollout, and adoption loops.
 - Protects scale quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
@@ -77,17 +79,17 @@ Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities int
 
 ## Required inputs (Day 78)
 
-- `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json`
-- `docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-delivery-board.md`
+- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json`
+- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md`
 - `docs/roadmap/plans/scale-upgrade-plan.json`
 
-## Day 79 command lane
+## Scale upgrade command lane
 
 ```bash
 python -m sdetkit scale-upgrade-closeout --format json --strict
-python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/day79-scale-upgrade-closeout-pack --format json --strict
-python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/day79-scale-upgrade-closeout-pack/evidence --format json --strict
-python scripts/check_day79_scale_upgrade_closeout_contract.py
+python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/scale-upgrade-closeout-pack --format json --strict
+python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/scale-upgrade-closeout-pack/evidence --format json --strict
+python scripts/check_scale_upgrade_closeout_contract.py
 ```
 
 ## Scale upgrade contract
@@ -105,7 +107,7 @@ python scripts/check_day79_scale_upgrade_closeout_contract.py
 - [ ] Scorecard captures scale score delta, ecosystem carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, scale upgrade plan, execution ledger, KPI scorecard, and execution log
 
-## Day 79 delivery board
+## Scale upgrade delivery board
 
 - [ ] Day 79 integration brief committed
 - [ ] Day 79 scale upgrade plan committed
@@ -169,13 +171,13 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day79_command",
+            "check_id": "readme_scale_upgrade_command",
             "weight": 7,
             "passed": ("scale-upgrade-closeout" in readme_text),
-            "evidence": "README day79 command lane",
+            "evidence": "README scale-upgrade command lane",
         },
         {
-            "check_id": "docs_index_day79_links",
+            "check_id": "docs_index_scale_upgrade_links",
             "weight": 8,
             "passed": (
                 "impact-79-big-upgrade-report.md" in docs_index_text
@@ -184,10 +186,10 @@ def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-79-big-upgrade-report.md + integrations-scale-upgrade-closeout.md",
         },
         {
-            "check_id": "top10_day79_alignment",
+            "check_id": "top10_scale_upgrade_alignment",
             "weight": 5,
-            "passed": ("Day 78" in top10_text and "Day 79" in top10_text),
-            "evidence": "Day 78 + Day 79 strategy chain",
+            "passed": ("Ecosystem priorities + scale upgrade strategy chain" in top10_text),
+            "evidence": "Ecosystem priorities + scale upgrade strategy chain",
         },
         {
             "check_id": "day78_summary_present",
@@ -354,12 +356,10 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(
-        target / "day79-scale-upgrade-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
-    _write(target / "day79-scale-upgrade-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day79-integration-brief.md", "# Day 79 integration brief\n")
-    _write(target / "day79-scale-upgrade-plan.md", "# Day 79 scale upgrade plan\n")
+    _write(target / "scale-upgrade-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "scale-upgrade-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "scale-upgrade-integration-brief.md", "# Scale upgrade integration brief\n")
+    _write(target / "scale-upgrade-plan.md", "# Scale upgrade plan\n")
     _write(
         target / "day79-enterprise-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
@@ -367,14 +367,16 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(
         target / "day79-enterprise-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "day79-execution-log.md", "# Day 79 execution log\n")
+    _write(target / "scale-upgrade-execution-log.md", "# Scale upgrade execution log\n")
     _write(
-        target / "day79-delivery-board.md",
-        "\n".join(["# Day 79 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        target / "scale-upgrade-delivery-board.md",
+        "\n".join(["# Scale upgrade delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day79-validation-commands.md",
-        "# Day 79 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        target / "scale-upgrade-validation-commands.md",
+        "# Scale upgrade validation commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
     )
 
 
@@ -396,7 +398,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day79-execution-summary.json",
+        out_dir / "scale-upgrade-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -424,7 +426,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day79-scale-upgrade-closeout-pack/evidence")
+            else Path("docs/artifacts/scale-upgrade-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 
