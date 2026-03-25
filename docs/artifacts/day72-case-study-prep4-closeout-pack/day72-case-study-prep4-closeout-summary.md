@@ -1,5 +1,5 @@
-Day 72 case-study prep #4 closeout summary
-- Activation score: 100
-- Passed checks: 14
-- Failed checks: 0
-- Critical failures: []
+Case Study Prep4 Closeout summary
+- Activation score: 80
+- Passed checks: 12
+- Failed checks: 2
+- Critical failures: ['day71_strict_baseline']

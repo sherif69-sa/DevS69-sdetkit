@@ -68,3 +68,7 @@ artifacts/reliability-evidence-pack/reliability-evidence-summary.json
 
 python -m sdetkit objection-handling --format json --strict
 artifacts/objection-handling-pack/objection-handling-summary.json
+docs/integrations-case-study-prep3-closeout.md
+docs/integrations-case-study-prep4-closeout.md
+day-71-big-upgrade-report.md
+day-72-big-upgrade-report.md

@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY70_SUMMARY_PATH = "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json"
 _DAY70_BOARD_PATH = "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md"
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/escalation-quality-case-study.json"
-_SECTION_HEADER = "# Day 71 \u2014 Case-study prep #3 closeout lane"
+_SECTION_HEADER = "# Case-study prep #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 71 matters",
     "## Required inputs (Day 70)",
@@ -25,14 +25,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit case-study-prep3-closeout --format json --strict",
-    "python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict",
-    "python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day71_case_study_prep3_closeout_contract.py",
+    "python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/case-study-prep3-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/case-study-prep3-closeout-pack/evidence --format json --strict",
+    "python scripts/check_case_study_prep3_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit case-study-prep3-closeout --format json --strict",
-    "python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict",
-    "python scripts/check_day71_case_study_prep3_closeout_contract.py --skip-evidence",
+    "python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/case-study-prep3-closeout-pack --format json --strict",
+    "python scripts/check_case_study_prep3_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 71 escalation-quality case-study prep and signoff.",
@@ -83,9 +83,9 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 
 ```bash
 python -m sdetkit case-study-prep3-closeout --format json --strict
-python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict
-python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict
-python scripts/check_day71_case_study_prep3_closeout_contract.py
+python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/case-study-prep3-closeout-pack --format json --strict
+python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/case-study-prep3-closeout-pack/evidence --format json --strict
+python scripts/check_case_study_prep3_closeout_contract.py
 ```
 
 ## Case-study prep contract
@@ -172,25 +172,28 @@ def build_day71_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day71_command",
+            "check_id": "readme_case_study_prep3_command",
             "weight": 7,
             "passed": ("case-study-prep3-closeout" in readme_text),
-            "evidence": "README day71 command lane",
+            "evidence": "README case-study-prep3 command lane",
         },
         {
-            "check_id": "docs_index_day71_links",
+            "check_id": "docs_index_case_study_prep3_links",
             "weight": 8,
             "passed": (
-                "impact-71-big-upgrade-report.md" in docs_index_text
+                "day-71-big-upgrade-report.md" in docs_index_text
                 and "integrations-case-study-prep3-closeout.md" in docs_index_text
             ),
-            "evidence": "impact-71-big-upgrade-report.md + integrations-case-study-prep3-closeout.md",
+            "evidence": "day-71-big-upgrade-report.md + integrations-case-study-prep3-closeout.md",
         },
         {
-            "check_id": "top10_day71_alignment",
+            "check_id": "top10_case_study_prep3_alignment",
             "weight": 5,
-            "passed": ("Day 71" in top10_text and "Day 72" in top10_text),
-            "evidence": "Day 71 + Day 72 strategy chain",
+            "passed": (
+                "case-study-prep3-closeout" in top10_text
+                and "case-study-prep4-closeout" in top10_text
+            ),
+            "evidence": "Case-study prep #3 + prep #4 strategy chain",
         },
         {
             "check_id": "day70_summary_present",
@@ -362,21 +365,25 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day71-case-study-prep3-closeout-summary.json",
+        target / "case-study-prep3-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day71-case-study-prep3-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day71-integration-brief.md", "# Day 71 integration brief\n")
-    _write(target / "day71-case-study-narrative.md", "# Day 71 case-study narrative\n")
-    _write(target / "day71-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "day71-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day71-execution-log.md", "# Day 71 execution log\n")
+    _write(target / "case-study-prep3-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "case-study-prep3-integration-brief.md", "# Day 71 integration brief\n")
+    _write(target / "case-study-prep3-case-study-narrative.md", "# Day 71 case-study narrative\n")
     _write(
-        target / "day71-delivery-board.md",
+        target / "case-study-prep3-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
+    )
+    _write(
+        target / "case-study-prep3-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
+    _write(target / "case-study-prep3-execution-log.md", "# Day 71 execution log\n")
+    _write(
+        target / "case-study-prep3-delivery-board.md",
         "\n".join(["# Day 71 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day71-validation-commands.md",
+        target / "case-study-prep3-validation-commands.md",
         "# Day 71 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -399,7 +406,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day71-execution-summary.json",
+        out_dir / "case-study-prep3-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -427,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day71-case-study-prep3-closeout-pack/evidence")
+            else Path("docs/artifacts/case-study-prep3-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-71-big-upgrade-report.md\nintegrations-case-study-prep3-closeout.md\n",
+        "day-71-big-upgrade-report.md\nintegrations-case-study-prep3-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,9 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-case-study-prep3-closeout.md").write_text(
         d71._DAY71_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/impact-71-big-upgrade-report.md").write_text(
-        "# Day 71 report\n", encoding="utf-8"
-    )
+    (root / "docs/day-71-big-upgrade-report.md").write_text("# Day 71 report\n", encoding="utf-8")
 
     summary = (
         root
@@ -105,26 +103,45 @@ def test_day71_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day71-pack",
+            "artifacts/case-study-prep3-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day71-pack/evidence",
+            "artifacts/case-study-prep3-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day71-pack/day71-case-study-prep3-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-case-study-prep3-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day71-pack/day71-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day71-pack/evidence/day71-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-case-study-narrative.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-controls-log.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-kpi-scorecard.json"
+    ).exists()
+    assert (tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-execution-log.md").exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep3-pack/case-study-prep3-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-prep3-pack/evidence/case-study-prep3-execution-summary.json"
+    ).exists()
 
 
 def test_day71_strict_fails_without_day70(tmp_path: Path) -> None:

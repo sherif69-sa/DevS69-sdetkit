@@ -347,3 +347,6 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 - **Cycle 97 — Continuous upgrade impact #7 closeout lane:** continue continuous-upgrade execution with Cycle 95 evidence and impact-7 handoff controls.
 - **Cycle 8 — Continuous upgrade closeout lane:** continue continuous-upgrade execution with impact-7 evidence and impact-8 handoff controls.
 - **Cycle 9 — Continuous upgrade closeout lane:** finalize full-upgrade continuity and next-cycle readiness.
+case-study-prep3-closeout
+case-study-prep4-closeout
+publication launch

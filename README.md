@@ -334,3 +334,5 @@ python scripts/check_objection_handling_contract.py
 SECURITY.md
 docs/security.md
 docs/policy-and-baselines.md
+case-study-prep3-closeout
+case-study-prep4-closeout

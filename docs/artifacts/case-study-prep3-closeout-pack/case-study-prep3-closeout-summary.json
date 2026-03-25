@@ -1,44 +1,44 @@
 {
-  "name": "day71-case-study-prep3-closeout",
+  "name": "case-study-prep3-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day71-case-study-prep3-closeout.md",
+    "docs_page": "docs/integrations-case-study-prep3-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "day70_summary": "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json",
     "day70_delivery_board": "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md",
-    "case_study_data": "docs/roadmap/plans/day71-escalation-quality-case-study.json"
+    "case_study_data": "docs/roadmap/plans/escalation-quality-case-study.json"
   },
   "checks": [
     {
-      "check_id": "readme_day71_command",
+      "check_id": "readme_case_study_prep3_command",
       "weight": 7,
       "passed": true,
-      "evidence": "README day71 command lane"
+      "evidence": "README case-study-prep3 command lane"
     },
     {
-      "check_id": "docs_index_day71_links",
+      "check_id": "docs_index_case_study_prep3_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-71-big-upgrade-report.md + integrations-day71-case-study-prep3-closeout.md"
+      "evidence": "day-71-big-upgrade-report.md + integrations-case-study-prep3-closeout.md"
     },
     {
-      "check_id": "top10_day71_alignment",
+      "check_id": "top10_case_study_prep3_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 71 + Day 72 strategy chain"
+      "evidence": "Case-study prep #3 + prep #4 strategy chain"
     },
     {
       "check_id": "day70_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json"
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json"
     },
     {
       "check_id": "day70_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md"
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md"
     },
     {
       "check_id": "day70_quality_floor",
@@ -62,8 +62,8 @@
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
-      "evidence": "# Day 71 \u2014 Case-study prep #3 closeout lane"
+      "passed": false,
+      "evidence": "# Case-study prep #3 closeout lane"
     },
     {
       "check_id": "required_sections",
@@ -99,7 +99,7 @@
       "check_id": "case_study_data_present",
       "weight": 10,
       "passed": true,
-      "evidence": "docs/roadmap/plans/day71-escalation-quality-case-study.json"
+      "evidence": "docs/roadmap/plans/escalation-quality-case-study.json"
     }
   ],
   "rollup": {
@@ -108,17 +108,16 @@
     "day70_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
+    "activation_score": 93,
+    "passed_checks": 13,
+    "failed_checks": 1,
     "critical_failures": [],
-    "strict_pass": true
+    "strict_pass": false
   },
   "wins": [
     "Day 70 continuity is strict-pass with activation score=100.",
     "Day 70 delivery board integrity validated with 5 checklist items.",
-    "Day 71 escalation-quality case-study dataset is available for case-study prep execution.",
-    "Day 71 case-study prep #3 closeout lane is fully complete and ready for Day 72 case-study prep #4."
+    "Day 71 escalation-quality case-study dataset is available for case-study prep execution."
   ],
   "misses": [],
   "handoff_actions": []

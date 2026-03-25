@@ -20,9 +20,9 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 
 ```bash
 python -m sdetkit case-study-prep3-closeout --format json --strict
-python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict
-python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict
-python scripts/check_day71_case_study_prep3_closeout_contract.py
+python -m sdetkit case-study-prep3-closeout --emit-pack-dir docs/artifacts/case-study-prep3-closeout-pack --format json --strict
+python -m sdetkit case-study-prep3-closeout --execute --evidence-dir docs/artifacts/case-study-prep3-closeout-pack/evidence --format json --strict
+python scripts/check_case_study_prep3_closeout_contract.py
 ```
 
 ## Case-study prep contract

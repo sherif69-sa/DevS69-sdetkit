@@ -10,10 +10,14 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-prep4-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY71_SUMMARY_PATH = "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-case-study-prep3-closeout-summary.json"
-_DAY71_BOARD_PATH = "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-delivery-board.md"
+_DAY71_SUMMARY_PATH = (
+    "docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-closeout-summary.json"
+)
+_DAY71_BOARD_PATH = (
+    "docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-delivery-board.md"
+)
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/publication-quality-case-study.json"
-_SECTION_HEADER = "# Day 72 \u2014 Case-study prep #4 closeout lane"
+_SECTION_HEADER = "# Case-study prep #4 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 72 matters",
     "## Required inputs (Day 71)",
@@ -75,8 +79,8 @@ Day 72 closes with a major upgrade that turns Day 71 escalation-quality outputs 
 
 ## Required inputs (Day 71)
 
-- `docs/artifacts/day71-case-study-prep3-closeout-pack/day71-case-study-prep3-closeout-summary.json`
-- `docs/artifacts/day71-case-study-prep3-closeout-pack/day71-delivery-board.md`
+- `docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-closeout-summary.json`
+- `docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-delivery-board.md`
 - `docs/roadmap/plans/publication-quality-case-study.json`
 
 ## Day 72 command lane
@@ -172,28 +176,30 @@ def build_day72_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day72_command",
+            "check_id": "readme_case_study_prep4_command",
             "weight": 7,
             "passed": (
                 "case-study-prep4-closeout" in readme_text
                 or "case-study-prep4-closeout" in readme_text
             ),
-            "evidence": "README day72 command lane",
+            "evidence": "README case-study-prep4 command lane",
         },
         {
-            "check_id": "docs_index_day72_links",
+            "check_id": "docs_index_case_study_prep4_links",
             "weight": 8,
             "passed": (
-                "impact-72-big-upgrade-report.md" in docs_index_text
+                "day-72-big-upgrade-report.md" in docs_index_text
                 and "integrations-case-study-prep4-closeout.md" in docs_index_text
             ),
-            "evidence": "impact-72-big-upgrade-report.md + integrations-case-study-prep4-closeout.md",
+            "evidence": "day-72-big-upgrade-report.md + integrations-case-study-prep4-closeout.md",
         },
         {
-            "check_id": "top10_day72_alignment",
+            "check_id": "top10_case_study_prep4_alignment",
             "weight": 5,
-            "passed": ("Day 72" in top10_text and "Day 73" in top10_text),
-            "evidence": "Day 72 + Day 73 strategy chain",
+            "passed": (
+                "case-study-prep4-closeout" in top10_text and "publication launch" in top10_text
+            ),
+            "evidence": "Case-study prep #4 + publication launch strategy chain",
         },
         {
             "check_id": "day71_summary_present",

@@ -26,7 +26,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-72-big-upgrade-report.md\nintegrations-case-study-prep4-closeout.md\n",
+        "day-72-big-upgrade-report.md\nintegrations-case-study-prep4-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -37,13 +37,11 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-case-study-prep4-closeout.md").write_text(
         d72._DAY72_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/impact-72-big-upgrade-report.md").write_text(
-        "# Day 72 report\n", encoding="utf-8"
-    )
+    (root / "docs/day-72-big-upgrade-report.md").write_text("# Day 72 report\n", encoding="utf-8")
 
     summary = (
         root
-        / "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-case-study-prep3-closeout-summary.json"
+        / "docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +54,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-delivery-board.md"
+    board = (
+        root / "docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -131,7 +131,7 @@ def test_day72_strict_fails_without_day71(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day71-case-study-prep3-closeout-pack/day71-case-study-prep3-closeout-summary.json"
+        / "docs/artifacts/case-study-prep3-closeout-pack/case-study-prep3-closeout-summary.json"
     ).unlink()
     assert d72.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

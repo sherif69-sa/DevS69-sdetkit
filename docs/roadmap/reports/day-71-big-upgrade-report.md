@@ -16,9 +16,9 @@ Close the case-study prep #3 lane with a high-signal package that converts prior
 
 ```bash
 python -m sdetkit day71-case-study-prep3-closeout --format json --strict
-python -m sdetkit day71-case-study-prep3-closeout --emit-pack-dir docs/artifacts/day71-case-study-prep3-closeout-pack --format json --strict
-python -m sdetkit day71-case-study-prep3-closeout --execute --evidence-dir docs/artifacts/day71-case-study-prep3-closeout-pack/evidence --format json --strict
-python scripts/check_day71_case_study_prep3_closeout_contract.py
+python -m sdetkit day71-case-study-prep3-closeout --emit-pack-dir docs/artifacts/case-study-prep3-closeout-pack --format json --strict
+python -m sdetkit day71-case-study-prep3-closeout --execute --evidence-dir docs/artifacts/case-study-prep3-closeout-pack/evidence --format json --strict
+python scripts/check_case_study_prep3_closeout_contract.py
 ```
 
 ## Outcome
