@@ -48,7 +48,7 @@
 - `docs/artifacts/enterprise-readiness-pack/enterprise-readiness-checklist.md`
 - `docs/artifacts/enterprise-readiness-pack/enterprise-readiness-ci.yml`
 - `docs/artifacts/enterprise-readiness-pack/enterprise-readiness-controls-register.md`
-- `docs/artifacts/enterprise-readiness-pack/evidence/day13-execution-summary.json`
+- `docs/artifacts/enterprise-readiness-pack/evidence/enterprise-readiness-execution-summary.json`
 
 ## Rollback plan
 
@@ -56,4 +56,4 @@
 2. Revert Day 13 docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-enterprise-regulated.md`.
 3. Remove Day 13 contract checker and generated artifacts.
 
-This document is the Day 13 closeout report for enterprise/regulated workflow hardening.
+This document is the enterprise-readiness report for enterprise/regulated workflow hardening.

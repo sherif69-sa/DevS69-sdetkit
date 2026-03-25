@@ -26,7 +26,7 @@ _REQUIRED_SECTIONS = [
 _REQUIRED_COMMANDS = [
     "python -m sdetkit repo audit . --profile enterprise --format json",
     "python -m sdetkit security report --format text",
-    "python -m sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json",
+    "python -m sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json",
     "python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py",
     "python scripts/check_day13_enterprise_use_case_contract.py",
 ]
@@ -67,7 +67,7 @@ Use this sequence to establish an enterprise guardrail baseline:
 ```bash
 python -m sdetkit repo audit . --profile enterprise --format json
 python -m sdetkit security report --format text
-python -m sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json
+python -m sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json
 python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py
 python scripts/check_day13_enterprise_use_case_contract.py
 ```
@@ -232,7 +232,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
                 "| --- | --- | --- |",
                 "| Documentation drift | Required enterprise sections are removed | Run `enterprise-readiness --strict` in CI |",
                 "| Evidence gaps | Compliance artifacts are not published | Require `--execute --evidence-dir` in release pipeline |",
-                "| Policy baseline mismatch | Profile or control set changes unexpectedly | Run `sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json` and diff against baseline |",
+                "| Policy baseline mismatch | Profile or control set changes unexpectedly | Run `sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json` and diff against baseline |",
             ]
         )
         + "\n",

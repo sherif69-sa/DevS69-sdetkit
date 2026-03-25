@@ -175,7 +175,7 @@ DAY15_TO_20: tuple[DayShipped, ...] = (
         "Quality + contribution delta evidence",
         "docs/impact-17-ultra-upgrade-report.md",
         "docs/artifacts/contribution-quality-report-sample.md",
-        "python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict",
+        "python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/contribution-quality-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json --format json --strict",
     ),
     DayShipped(
         18,
@@ -305,7 +305,7 @@ def build_weekly_review(
 def _render_text(review: WeeklyReview) -> str:
     review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
     shipped_window = (
-        "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
+        "Week 3" if review.week == 3 else "Week 2" if review.week == 2 else "Week 1"
     )
     lines = [
         f"Day {review_day} weekly review #{review.week}",
@@ -359,7 +359,7 @@ def _render_text(review: WeeklyReview) -> str:
 def _render_markdown(review: WeeklyReview) -> str:
     review_day = 21 if review.week == 3 else 14 if review.week == 2 else 7
     shipped_window = (
-        "Day 15-20" if review.week == 3 else "Day 8-13" if review.week == 2 else "Day 1-6"
+        "Week 3" if review.week == 3 else "Week 2" if review.week == 2 else "Week 1"
     )
     lines = [
         f"# Day {review_day} Weekly Review #{review.week}",
@@ -422,13 +422,13 @@ def _emit_week2_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    checklist = root / "day14-closeout-checklist.md"
+    checklist = root / "weekly-review-checklist.md"
     checklist.write_text(
         "\n".join(
             [
-                "# Day 14 closeout checklist",
+                "# Weekly review checklist",
                 "",
-                "- [ ] Run `sdetkit weekly-review --week 2 --format text` and verify all Day 8-13 items are shipped.",
+                "- [ ] Run `sdetkit weekly-review --week 2 --format text` and verify all planned week-2 items are shipped.",
                 "- [ ] Refresh markdown artifact and attach it to the status update.",
                 "- [ ] Update growth signals JSON (traffic, stars, discussions, blocker_fixes).",
                 "- [ ] Review blocker-fix owners and confirm SLA commitments for next sprint.",
@@ -438,7 +438,7 @@ def _emit_week2_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
         encoding="utf-8",
     )
 
-    scorecard = root / "day14-kpi-scorecard.json"
+    scorecard = root / "weekly-review-kpi-scorecard.json"
     scorecard.write_text(
         json.dumps(
             {
@@ -453,11 +453,11 @@ def _emit_week2_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
         encoding="utf-8",
     )
 
-    action_plan = root / "day14-blocker-action-plan.md"
+    action_plan = root / "weekly-review-blocker-action-plan.md"
     action_plan.write_text(
         "\n".join(
             [
-                "# Day 14 blocker action plan",
+                "# Weekly review blocker action plan",
                 "",
                 "| Blocker | Owner | Target date | Mitigation |",
                 "| --- | --- | --- | --- |",
@@ -477,14 +477,14 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    checklist = root / "day21-closeout-checklist.md"
+    checklist = root / "weekly-review-checklist.md"
     checklist.write_text(
         "\n".join(
             [
-                "# Day 21 closeout checklist",
+                "# Weekly review checklist",
                 "",
-                "- [ ] Run `sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/day21-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json` and verify all Day 15-20 items are shipped.",
-                "- [ ] Refresh markdown artifact and attach it to sprint closeout notes.",
+                "- [ ] Run `sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/weekly-review-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json` and verify all planned week-3 items are shipped.",
+                "- [ ] Refresh markdown artifact and attach it to the weekly review notes.",
                 "- [ ] Publish external contributor response summary with owners and SLA.",
                 "- [ ] Confirm Day 22 trust-signal backlog priorities are assigned.",
             ]
@@ -493,7 +493,7 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
         encoding="utf-8",
     )
 
-    scorecard = root / "day21-kpi-scorecard.json"
+    scorecard = root / "weekly-review-kpi-scorecard.json"
     scorecard.write_text(
         json.dumps(
             {
@@ -515,11 +515,11 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
     stars_delta = review.growth_deltas["stars"] if review.growth_deltas else "n/a"
     blocker_fixes_delta = review.growth_deltas["blocker_fixes"] if review.growth_deltas else "n/a"
 
-    contributor_plan = root / "day21-contributor-response-plan.md"
+    contributor_plan = root / "weekly-review-contributor-response-plan.md"
     contributor_plan.write_text(
         "\n".join(
             [
-                "# Day 21 contributor response plan",
+                "# Weekly review contributor response plan",
                 "",
                 "| Signal | Current | Delta vs week 2 | Owner | Next action |",
                 "| --- | --- | --- | --- | --- |",
@@ -537,11 +537,11 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
         f"{review.growth_deltas['discussions']:+d}" if review.growth_deltas else "n/a"
     )
 
-    narrative_brief = root / "day21-release-narrative-brief.md"
+    narrative_brief = root / "weekly-review-release-narrative-brief.md"
     narrative_brief.write_text(
         "\n".join(
             [
-                "# Day 21 release narrative brief",
+                "# Weekly review release narrative brief",
                 "",
                 "## Storyline",
                 "",
@@ -589,7 +589,7 @@ def _build_parser() -> argparse.ArgumentParser:
         type=int,
         choices=[1, 2, 3],
         default=1,
-        help="Weekly review window (1=Day 1-6, 2=Day 8-13, 3=Day 15-20).",
+        help="Weekly review window (1=week 1, 2=week 2, 3=week 3).",
     )
     p.add_argument(
         "--signals-file",
@@ -604,7 +604,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--emit-pack-dir",
         default="",
-        help="Optional output directory to emit week closeout pack files (week 2 and week 3).",
+        help="Optional output directory to emit weekly-review pack files (week 2 and week 3).",
     )
     p.add_argument(
         "--strict",

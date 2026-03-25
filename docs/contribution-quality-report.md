@@ -7,15 +7,15 @@ Day 17 adds a unified **quality + contribution delta evidence pack** so maintain
 ## What shipped
 
 - New CLI command: `sdetkit quality-contribution-delta` with velocity score, stability score, recommendation engine, and strict delta gates.
-- New Day 17 sample artifact and expanded emitted pack under `docs/artifacts/contribution-quality-report-pack` (summary, scorecard, action plan, remediation checklist).
+- New contribution-quality sample artifact and expanded emitted pack under `docs/artifacts/contribution-quality-report-pack` (summary, scorecard, action plan, remediation checklist).
 - New contract checker: `scripts/check_day17_quality_contribution_delta_contract.py`.
 - CLI dispatcher and help coverage updated to include `quality-contribution-delta`.
 
 ## Validation commands
 
 ```bash
-python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --format json --strict
-python -m sdetkit quality-contribution-delta --current-signals-file docs/artifacts/day17-growth-signals.json --previous-signals-file docs/artifacts/day14-growth-signals.json --emit-pack-dir docs/artifacts/contribution-quality-report-pack --format json --strict
+python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/contribution-quality-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json --format json --strict
+python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/contribution-quality-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json --emit-pack-dir docs/artifacts/contribution-quality-report-pack --format json --strict
 python scripts/check_day17_quality_contribution_delta_contract.py
 ```
 

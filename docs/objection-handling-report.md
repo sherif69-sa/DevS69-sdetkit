@@ -1,6 +1,6 @@
 # Day 23 ultra upgrade report
 
-## Day 23 big upgrade: FAQ and objections closeout lane
+## FAQ and objections report
 
 Day 23 delivers a production-grade objection-handling lane that translates recurring adoption blockers into strict, testable, and artifact-backed outcomes.
 

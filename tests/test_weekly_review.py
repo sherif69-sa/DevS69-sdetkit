@@ -106,9 +106,9 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
         "--week",
         "3",
         "--signals-file",
-        "docs/artifacts/day21-growth-signals.json",
+        "docs/artifacts/weekly-review-growth-signals.json",
         "--previous-signals-file",
-        "docs/artifacts/day14-growth-signals.json",
+        "docs/artifacts/growth-signals-baseline.json",
         "--emit-pack-dir",
         "docs/artifacts/day21-weekly-pack",
         "--format",
@@ -116,21 +116,21 @@ def test_week3_emit_pack_writes_closeout_artifacts(tmp_path: Path) -> None:
         "--strict",
     ]
 
-    (root / "docs" / "artifacts" / "day21-growth-signals.json").write_text(
+    (root / "docs" / "artifacts" / "weekly-review-growth-signals.json").write_text(
         '{"traffic": 2550, "stars": 132, "discussions": 33, "blocker_fixes": 10}\n',
         encoding="utf-8",
     )
-    (root / "docs" / "artifacts" / "day14-growth-signals.json").write_text(
+    (root / "docs" / "artifacts" / "growth-signals-baseline.json").write_text(
         '{"traffic": 1800, "stars": 90, "discussions": 24, "blocker_fixes": 7}\n', encoding="utf-8"
     )
 
     assert weekly_review.main(args) == 0
 
     pack = root / "docs" / "artifacts" / "day21-weekly-pack"
-    assert (pack / "day21-closeout-checklist.md").exists()
-    assert (pack / "day21-kpi-scorecard.json").exists()
-    assert (pack / "day21-contributor-response-plan.md").exists()
-    assert (pack / "day21-release-narrative-brief.md").exists()
+    assert (pack / "weekly-review-checklist.md").exists()
+    assert (pack / "weekly-review-kpi-scorecard.json").exists()
+    assert (pack / "weekly-review-contributor-response-plan.md").exists()
+    assert (pack / "weekly-review-release-narrative-brief.md").exists()
 
 
 def test_weekly_review_help_describes_product_surface(capsys):
@@ -149,7 +149,7 @@ def test_weekly_review_markdown_output_is_structured(capsys):
     rc = weekly_review.main(["--week", "1", "--format", "markdown"])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "# Day 7 Weekly Review #1" in out
-    assert "## What shipped (Day 1-6)" in out
+    assert "# Weekly Review #1" in out
+    assert "## What shipped" in out
     assert "## KPI movement" in out
     assert "## Next-week focus" in out

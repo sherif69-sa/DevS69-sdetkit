@@ -1,4 +1,4 @@
-# Day 26 ultra upgrade report — external contribution push closeout
+# External contribution report
 
 ## What shipped
 

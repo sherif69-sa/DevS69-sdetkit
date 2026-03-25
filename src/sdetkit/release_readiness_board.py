@@ -39,7 +39,7 @@ Day 19 composes Day 14 weekly trend health and Day 18 reliability posture into o
 ## Who should run Day 19
 
 - Maintainers deciding if a release tag can be cut this week.
-- Team leads running closeout meetings and action tracking.
+- Team leads running release-readiness reviews and action tracking.
 - Contributors preparing evidence for release notes.
 
 ## Score model
@@ -101,7 +101,7 @@ def _normalize_day14_summary(day14_summary: dict[str, Any]) -> tuple[float, str]
         return score, "pass" if score >= 90 else "warn"
 
     raise ValueError(
-        "day14 summary must include either summary.score or kpis.completion_rate_percent"
+        "weekly-review summary must include either summary.score or kpis.completion_rate_percent"
     )
 
 
@@ -109,12 +109,12 @@ def build_release_board(
     day18_summary: dict[str, Any],
     day14_summary: dict[str, Any],
 ) -> dict[str, Any]:
-    _require_keys(day18_summary, _REQUIRED_DAY18_KEYS, "day18 summary")
+    _require_keys(day18_summary, _REQUIRED_DAY18_KEYS, "reliability summary")
     if not isinstance(day18_summary["summary"], dict):
-        raise ValueError("day18 summary.summary must be an object")
+        raise ValueError("reliability summary.summary must be an object")
 
     day18 = day18_summary["summary"]
-    _require_keys(day18, _REQUIRED_DAY18_SUMMARY_KEYS, "day18 summary.summary")
+    _require_keys(day18, _REQUIRED_DAY18_SUMMARY_KEYS, "reliability summary.summary")
 
     reliability_score = float(day18["reliability_score"])
     reliability_gate = str(day18["gate_status"])
@@ -140,11 +140,11 @@ def build_release_board(
     return {
         "name": "release-readiness",
         "inputs": {
-            "day18": {
+            "reliability": {
                 "reliability_score": reliability_score,
                 "gate_status": reliability_gate,
             },
-            "day14": {
+            "weekly_review": {
                 "score": day14_score,
                 "status": day14_status,
             },
@@ -203,11 +203,11 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
     checklist.write_text(
         "\n".join(
             [
-                "# Day 19 release readiness closeout checklist",
+                "# Release readiness checklist",
                 "",
                 "- [ ] Day 18 reliability gate status is pass.",
                 "- [ ] Day 14 KPI status is pass.",
-                "- [ ] Release score is reviewed in closeout meeting.",
+                "- [ ] Release score is reviewed in the release-readiness review.",
                 "- [ ] Recommendations are assigned and tracked.",
                 "",
             ]
@@ -227,7 +227,7 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
                 f"- Release score: **{payload['summary']['release_score']}**",
                 f"- Strict all green: **{payload['summary']['strict_all_green']}**",
                 "",
-                "Use this file as the final go/no-go note in release closeout.",
+                "Use this file as the final go/no-go note for release-readiness review.",
                 "",
             ]
         ),
@@ -326,16 +326,20 @@ def _write_execution_evidence(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit release-readiness",
-        description="Build Day 19 release readiness signal from Day 18 and Day 14 summaries.",
+        description="Build release readiness signal from reliability-evidence and weekly-review summaries.",
     )
     parser.add_argument("--root", default=".")
     parser.add_argument(
+        "--reliability-summary",
         "--day18-summary",
+        dest="reliability_summary",
         default="docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json",
     )
     parser.add_argument(
+        "--weekly-review-summary",
         "--day14-summary",
-        default="docs/artifacts/day14-weekly-pack/day14-kpi-scorecard.json",
+        dest="weekly_review_summary",
+        default="docs/artifacts/weekly-review-pack/weekly-review-kpi-scorecard.json",
     )
     parser.add_argument("--min-release-score", type=float, default=90.0)
     parser.add_argument("--write-defaults", action="store_true")
@@ -368,8 +372,8 @@ def main(argv: list[str] | None = None) -> int:
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 
     payload = build_release_board(
-        _load_json(root / args.day18_summary),
-        _load_json(root / args.day14_summary),
+        _load_json(root / args.reliability_summary),
+        _load_json(root / args.weekly_review_summary),
     )
     payload["score"] = 100.0 if not (missing_sections or missing_commands) else 0.0
     payload["strict_failures"] = [*missing_sections, *missing_commands]

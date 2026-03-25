@@ -22,10 +22,10 @@
     },
     {
       "index": 3,
-      "command": "python -m sdetkit policy snapshot --output .sdetkit/day13-policy-snapshot.json",
+      "command": "python -m sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json",
       "returncode": 0,
       "ok": true,
-      "stdout": ".sdetkit/day13-policy-snapshot.json\n",
+      "stdout": ".sdetkit/enterprise-readiness-policy-snapshot.json\n",
       "stderr": ""
     },
     {

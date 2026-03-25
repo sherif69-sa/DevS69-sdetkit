@@ -47,12 +47,6 @@ Utility commands such as `kv`, `apiget`, and `cassette-get` remain available for
 
 ### Platform upgrade archive
 
-- [Platform upgrade wave 11 report](continuous-upgrade-cycle11-big-upgrade-report.md)
-- [Integration expansion wave 11 evidence pack](integrations-continuous-upgrade-cycle11-closeout.md)
-- [Platform upgrade wave 10 report](continuous-upgrade-cycle10-big-upgrade-report.md)
-- [Integration expansion wave 10 evidence pack](integrations-continuous-upgrade-cycle10-closeout.md)
-- [Platform upgrade wave 9 report](continuous-upgrade-cycle9-big-upgrade-report.md)
-- [Integration expansion wave 9 evidence pack](integrations-continuous-upgrade-cycle9-closeout.md)
-- [Platform upgrade wave 8 report](continuous-upgrade-cycle8-big-upgrade-report.md)
-- [Integration expansion wave 8 evidence pack](integrations-continuous-upgrade-cycle8-closeout.md)
+- [Transition-era archive material](archive/index.md)
+- [Migration and compatibility note](migration-compatibility-note.md)
 - [Upgrade implementation research and recommendations](upgrade-implementation-research.md)
