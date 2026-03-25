@@ -537,7 +537,7 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
         f"{review.growth_deltas['discussions']:+d}" if review.growth_deltas else "n/a"
     )
 
-    narrative_brief = root / "weekly-review-release-narrative-brief.md"
+    narrative_brief = root / "weekly-review-release-communications-brief.md"
     narrative_brief.write_text(
         "\n".join(
             [

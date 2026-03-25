@@ -9,34 +9,34 @@ DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY20_PAGE = Path("docs/release-communications.md")
 DAY20_REPORT = Path("docs/impact-20-ultra-upgrade-report.md")
-DAY20_ARTIFACT = Path("docs/artifacts/day20-release-narrative-sample.md")
+DAY20_ARTIFACT = Path("docs/artifacts/release-communications-sample.md")
 DAY20_PACK_SUMMARY = Path(
-    "docs/artifacts/day20-release-narrative-pack/day20-release-narrative-summary.json"
+    "docs/artifacts/release-communications-pack/release-communications-summary.json"
 )
-DAY20_PACK_MD = Path("docs/artifacts/day20-release-narrative-pack/day20-release-narrative.md")
-DAY20_PACK_BLURBS = Path("docs/artifacts/day20-release-narrative-pack/day20-audience-blurbs.md")
-DAY20_PACK_CHANNELS = Path("docs/artifacts/day20-release-narrative-pack/day20-channel-posts.md")
+DAY20_PACK_MD = Path("docs/artifacts/release-communications-pack/release-communications.md")
+DAY20_PACK_BLURBS = Path("docs/artifacts/release-communications-pack/release-communications-audience-blurbs.md")
+DAY20_PACK_CHANNELS = Path("docs/artifacts/release-communications-pack/release-communications-channel-posts.md")
 DAY20_PACK_VALIDATION = Path(
-    "docs/artifacts/day20-release-narrative-pack/day20-validation-commands.md"
+    "docs/artifacts/release-communications-pack/release-communications-validation-commands.md"
 )
 DAY20_EVIDENCE = Path(
-    "docs/artifacts/day20-release-narrative-pack/evidence/day20-execution-summary.json"
+    "docs/artifacts/release-communications-pack/evidence/release-communications-execution-summary.json"
 )
 MODULE = Path("src/sdetkit/release_narrative.py")
 
 README_EXPECTED = [
     "## ✍️ Day 20 ultra: release narrative",
     "python -m sdetkit release-communications --format json --strict",
-    "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/day20-release-narrative-pack/evidence --format json --strict",
+    "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
     "python scripts/check_day20_release_narrative_contract.py",
 ]
 INDEX_EXPECTED = [
-    "Day 20 ultra upgrades (release narrative)",
+    "Release communications",
     "sdetkit release-communications --format json --strict",
-    "artifacts/day20-release-narrative-pack/day20-channel-posts.md",
+    "artifacts/release-communications-pack/release-communications-channel-posts.md",
 ]
 CLI_EXPECTED = [
-    "## release-narrative",
+    "## release-communications",
     "--day19-summary",
     "--changelog",
     "--min-release-score",
@@ -54,11 +54,11 @@ PAGE_EXPECTED = [
 ]
 REPORT_EXPECTED = ["Day 20 big upgrade", "strict", "--execute", "validation commands"]
 SUMMARY_EXPECTED = [
-    '"name": "day20-release-narrative"',
+    '"name": "release-communications"',
     '"readiness_label":',
     '"narrative_channels":',
 ]
-EVIDENCE_EXPECTED = ['"name": "day20-release-narrative-execution"', '"total_commands": 3']
+EVIDENCE_EXPECTED = ['"name": "release-communications-execution"', '"total_commands": 3']
 
 
 def _missing(path: Path, expected: list[str]) -> list[str]:
@@ -112,12 +112,12 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     if errors:
-        print("day20-release-narrative-contract check failed:", file=sys.stderr)
+        print("release-communications-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day20-release-narrative-contract check passed")
+    print("release-communications-contract check passed")
     return 0
 
 

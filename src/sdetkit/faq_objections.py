@@ -144,7 +144,7 @@ _SIGNALS = [
         "check_id": "release_narrative_alignment",
         "category": "operational",
         "weight": 5,
-        "marker": "release-narrative",
+        "marker": "release-communications",
         "source": "readme",
     },
 ]

@@ -2,6 +2,6 @@ command: python scripts/check_name20_release_narrative_contract.py --skip-eviden
 returncode: 0
 ok: True
 --- stdout ---
-name20-release-narrative-contract check passed
+release-communications-contract check passed
 
 --- stderr ---
