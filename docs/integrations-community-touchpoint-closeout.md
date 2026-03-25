@@ -1,4 +1,4 @@
-# Community Touchpoint Closeout
+# Community touchpoint closeout lane
 
 > Legacy mapping: Day 77 remains as history/compatibility alias `day77-community-touchpoint-closeout`. Use `python -m sdetkit community-touchpoint-closeout` as the stable command.
 
@@ -16,13 +16,13 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 - `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md`
 - `docs/roadmap/plans/community-touchpoint-plan.json`
 
-## Day 77 command lane
+## Community touchpoint command lane
 
 ```bash
 python -m sdetkit community-touchpoint-closeout --format json --strict
-python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
-python scripts/check_day77_community_touchpoint_closeout_contract.py
+python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict
+python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict
+python scripts/check_community_touchpoint_closeout_contract.py
 ```
 
 ## Community touchpoint contract
@@ -40,7 +40,7 @@ python scripts/check_day77_community_touchpoint_closeout_contract.py
 - [ ] Scorecard captures touchpoint score delta, trust carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, touchpoint plan, session ledger, KPI scorecard, and execution log
 
-## Day 77 delivery board
+## Community touchpoint delivery board
 
 - [ ] Day 77 integration brief committed
 - [ ] Day 77 community touchpoint plan committed

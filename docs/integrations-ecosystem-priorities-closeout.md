@@ -1,4 +1,4 @@
-# Ecosystem Priorities Closeout
+# Ecosystem priorities closeout lane
 
 > Legacy mapping: Day 78 remains as history/compatibility alias `day78-ecosystem-priorities-closeout`. Use `python -m sdetkit ecosystem-priorities-closeout` as the stable command.
 
@@ -12,16 +12,16 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 
 ## Required inputs (Day 77)
 
-- `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json`
-- `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md`
+- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`
+- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`
 - `docs/roadmap/plans/ecosystem-priorities-plan.json`
 
-## Day 78 command lane
+## Ecosystem priorities command lane
 
 ```bash
 python -m sdetkit ecosystem-priorities-closeout --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict
 python scripts/check_day78_ecosystem_priorities_closeout_contract.py
 ```
 
@@ -40,7 +40,7 @@ python scripts/check_day78_ecosystem_priorities_closeout_contract.py
 - [ ] Scorecard captures ecosystem score delta, touchpoint carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log
 
-## Day 78 delivery board
+## Ecosystem priorities delivery board
 
 - [ ] Day 78 integration brief committed
 - [ ] Day 78 ecosystem priorities plan committed

@@ -107,10 +107,10 @@ def test_day77_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day77-pack",
+            "artifacts/community-touchpoint-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day77-pack/evidence",
+            "artifacts/community-touchpoint-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -118,19 +118,34 @@ def test_day77_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day77-pack/day77-community-touchpoint-closeout-summary.json"
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day77-pack/day77-community-touchpoint-closeout-summary.md"
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-community-touchpoint-plan.md").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-touchpoint-session-ledger.json").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-touchpoint-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day77-pack/day77-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day77-pack/evidence/day77-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-integration-brief.md"
+    ).exists()
+    assert (tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-plan.md").exists()
+    assert (
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-session-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/community-touchpoint-pack/community-touchpoint-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/community-touchpoint-pack/evidence/community-touchpoint-execution-summary.json"
+    ).exists()
 
 
 def test_day77_strict_fails_without_day76(tmp_path: Path) -> None:

@@ -33,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day77-community-touchpoint-closeout-pack/evidence/day77-execution-summary.json"
+            / "docs/artifacts/community-touchpoint-closeout-pack/evidence/community-touchpoint-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day77-community-touchpoint-closeout contract check failed:", file=sys.stderr)
+        print("community-touchpoint-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day77-community-touchpoint-closeout contract check passed")
+    print("community-touchpoint-closeout contract check passed")
     return 0
 
 

@@ -350,3 +350,7 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 case-study-prep3-closeout
 case-study-prep4-closeout
 publication launch
+
+## Stable strategy labels
+Contributor recognition + community touchpoint strategy chain
+Community touchpoint + ecosystem priorities strategy chain

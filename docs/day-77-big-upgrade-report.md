@@ -15,9 +15,9 @@ Close Day 77 with a high-signal community-touchpoint lane that upgrades Day 76 c
 
 ```bash
 python -m sdetkit community-touchpoint-closeout --format json --strict
-python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
-python scripts/check_day77_community_touchpoint_closeout_contract.py
+python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict
+python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict
+python scripts/check_community_touchpoint_closeout_contract.py
 ```
 
 ### Outcome

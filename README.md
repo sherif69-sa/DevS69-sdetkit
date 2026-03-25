@@ -336,3 +336,7 @@ docs/security.md
 docs/policy-and-baselines.md
 case-study-prep3-closeout
 case-study-prep4-closeout
+
+## Stable closeout commands
+community-touchpoint-closeout
+ecosystem-priorities-closeout

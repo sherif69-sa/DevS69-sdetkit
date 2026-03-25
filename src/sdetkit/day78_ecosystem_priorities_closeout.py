@@ -10,30 +10,32 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-ecosystem-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY77_SUMMARY_PATH = "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json"
+_DAY77_SUMMARY_PATH = (
+    "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json"
+)
 _DAY77_BOARD_PATH = (
-    "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
+    "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/ecosystem-priorities-plan.json"
-_SECTION_HEADER = "# Day 78 \u2014 Ecosystem priorities closeout lane"
+_SECTION_HEADER = "# Ecosystem priorities closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 78 matters",
     "## Required inputs (Day 77)",
-    "## Day 78 command lane",
+    "## Ecosystem priorities command lane",
     "## Ecosystem priorities contract",
     "## Ecosystem priorities quality checklist",
-    "## Day 78 delivery board",
+    "## Ecosystem priorities delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
-    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict",
-    "python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict",
     "python scripts/check_day78_ecosystem_priorities_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
-    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict",
+    "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict",
     "python scripts/check_day78_ecosystem_priorities_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -65,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY78_DEFAULT_PAGE = """# Day 78 \u2014 Ecosystem priorities closeout lane
+_DAY78_DEFAULT_PAGE = """# Ecosystem priorities closeout lane
 
 Day 78 closes with a major upgrade that converts Day 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
 
@@ -77,16 +79,16 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 
 ## Required inputs (Day 77)
 
-- `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json`
-- `docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md`
+- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`
+- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`
 - `docs/roadmap/plans/ecosystem-priorities-plan.json`
 
-## Day 78 command lane
+## Ecosystem priorities command lane
 
 ```bash
 python -m sdetkit ecosystem-priorities-closeout --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict
+python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict
 python scripts/check_day78_ecosystem_priorities_closeout_contract.py
 ```
 
@@ -105,7 +107,7 @@ python scripts/check_day78_ecosystem_priorities_closeout_contract.py
 - [ ] Scorecard captures ecosystem score delta, touchpoint carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log
 
-## Day 78 delivery board
+## Ecosystem priorities delivery board
 
 - [ ] Day 78 integration brief committed
 - [ ] Day 78 ecosystem priorities plan committed
@@ -171,13 +173,13 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day78_command",
+            "check_id": "readme_ecosystem_priorities_command",
             "weight": 7,
             "passed": ("ecosystem-priorities-closeout" in readme_text),
-            "evidence": "README day78 command lane",
+            "evidence": "README ecosystem-priorities command lane",
         },
         {
-            "check_id": "docs_index_day78_links",
+            "check_id": "docs_index_ecosystem_priorities_links",
             "weight": 8,
             "passed": (
                 "impact-78-big-upgrade-report.md" in docs_index_text
@@ -186,35 +188,35 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
             "evidence": "impact-78-big-upgrade-report.md + integrations-ecosystem-priorities-closeout.md",
         },
         {
-            "check_id": "top10_day78_alignment",
+            "check_id": "top10_ecosystem_priorities_alignment",
             "weight": 5,
-            "passed": ("Day 77" in top10_text and "Day 78" in top10_text),
-            "evidence": "Day 77 + Day 78 strategy chain",
+            "passed": ("Community touchpoint + ecosystem priorities strategy chain" in top10_text),
+            "evidence": "Community touchpoint + ecosystem priorities strategy chain",
         },
         {
-            "check_id": "day77_summary_present",
+            "check_id": "community_touchpoint_summary_present",
             "weight": 10,
             "passed": day77_summary.exists(),
             "evidence": str(day77_summary),
         },
         {
-            "check_id": "day77_delivery_board_present",
+            "check_id": "community_touchpoint_delivery_board_present",
             "weight": 7,
             "passed": day77_board.exists(),
             "evidence": str(day77_board),
         },
         {
-            "check_id": "day77_quality_floor",
+            "check_id": "community_touchpoint_quality_floor",
             "weight": 13,
             "passed": day77_score >= 85,
             "evidence": {
                 "day77_score": day77_score,
                 "strict_pass": day77_strict,
-                "day77_checks": day77_check_count,
+                "community_touchpoint_checks": day77_check_count,
             },
         },
         {
-            "check_id": "day77_board_integrity",
+            "check_id": "community_touchpoint_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_day77,
             "evidence": {"board_items": board_count, "contains_day77": board_has_day77},
@@ -273,16 +275,18 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
     handoff_actions: list[str] = []
 
     if day77_score >= 85:
-        wins.append(f"Day 77 continuity baseline is stable with activation score={day77_score}.")
+        wins.append(
+            f"Community touchpoint continuity baseline is stable with activation score={day77_score}."
+        )
     else:
-        misses.append("Day 77 continuity baseline is below the floor (<85).")
+        misses.append("Community touchpoint continuity baseline is below the floor (<85).")
         handoff_actions.append(
             "Re-run Day 77 closeout command and raise baseline quality above 85 before Day 78 lock."
         )
 
     if board_count >= 5 and board_has_day77:
         wins.append(
-            f"Day 77 delivery board integrity validated with {board_count} checklist items."
+            f"Community touchpoint delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
@@ -291,7 +295,7 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
         handoff_actions.append("Repair Day 77 delivery board entries to include Day 77 anchors.")
 
     if not missing_plan_keys:
-        wins.append("Day 78 ecosystem priorities dataset is available for launch execution.")
+        wins.append("Ecosystem priorities dataset is available for launch execution.")
     else:
         misses.append("Day 78 ecosystem priorities dataset is missing required keys.")
         handoff_actions.append(
@@ -300,7 +304,7 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 78 ecosystem priorities closeout lane is fully complete and ready for Day 79 scale priorities."
+            "Ecosystem priorities closeout lane is fully complete and ready for scale priorities execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -321,9 +325,9 @@ def build_day78_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, A
         },
         "checks": checks,
         "rollup": {
-            "day77_activation_score": day77_score,
-            "day77_checks": day77_check_count,
-            "day77_delivery_board_items": board_count,
+            "community_touchpoint_activation_score": day77_score,
+            "community_touchpoint_checks": day77_check_count,
+            "community_touchpoint_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -357,25 +361,33 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day78-ecosystem-priorities-closeout-summary.json",
+        target / "ecosystem-priorities-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day78-ecosystem-priorities-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day78-integration-brief.md", "# Day 78 integration brief\n")
-    _write(target / "day78-ecosystem-priorities-plan.md", "# Day 78 ecosystem priorities plan\n")
+    _write(target / "ecosystem-priorities-closeout-summary.md", _render_text(payload) + "\n")
+    _write(
+        target / "ecosystem-priorities-integration-brief.md",
+        "# Ecosystem priorities integration brief\n",
+    )
+    _write(target / "ecosystem-priorities-plan.md", "# Ecosystem priorities plan\n")
     _write(
         target / "day78-ecosystem-workstream-ledger.json",
         json.dumps({"workstreams": []}, indent=2) + "\n",
     )
     _write(target / "day78-ecosystem-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day78-execution-log.md", "# Day 78 execution log\n")
     _write(
-        target / "day78-delivery-board.md",
-        "\n".join(["# Day 78 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        target / "ecosystem-priorities-execution-log.md", "# Ecosystem priorities execution log\n"
     )
     _write(
-        target / "day78-validation-commands.md",
-        "# Day 78 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        target / "ecosystem-priorities-delivery-board.md",
+        "\n".join(["# Ecosystem priorities delivery board", *_REQUIRED_DELIVERY_BOARD_LINES])
+        + "\n",
+    )
+    _write(
+        target / "ecosystem-priorities-validation-commands.md",
+        "# Ecosystem priorities validation commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
     )
 
 
@@ -397,7 +409,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day78-execution-summary.json",
+        out_dir / "ecosystem-priorities-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -425,7 +437,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence")
+            else Path("docs/artifacts/ecosystem-priorities-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

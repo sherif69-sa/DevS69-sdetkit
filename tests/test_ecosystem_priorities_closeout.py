@@ -25,7 +25,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json"
+        / "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -38,7 +38,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md"
+    )
     board.write_text(
         "\n".join(["# Day 77 delivery board", *["- [ ] Day 77 item" for _ in range(5)]]) + "\n",
         encoding="utf-8",
@@ -76,10 +79,10 @@ def test_day78_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day78-pack",
+            "artifacts/ecosystem-priorities-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day78-pack/evidence",
+            "artifacts/ecosystem-priorities-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -87,17 +90,22 @@ def test_day78_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day78-pack/day78-ecosystem-priorities-closeout-summary.json"
+        tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day78-pack/day78-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day78-pack/evidence/day78-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/ecosystem-priorities-pack/evidence/ecosystem-priorities-execution-summary.json"
+    ).exists()
 
 
 def test_day78_strict_fails_without_day77_summary(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day77-community-touchpoint-closeout-pack/day77-community-touchpoint-closeout-summary.json"
+        / "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json"
     ).unlink()
     assert d78.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

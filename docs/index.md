@@ -72,3 +72,9 @@ docs/integrations-case-study-prep3-closeout.md
 docs/integrations-case-study-prep4-closeout.md
 day-71-big-upgrade-report.md
 day-72-big-upgrade-report.md
+
+## Stable closeout docs
+impact-77-big-upgrade-report.md
+integrations-community-touchpoint-closeout.md
+impact-78-big-upgrade-report.md
+integrations-ecosystem-priorities-closeout.md

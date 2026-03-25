@@ -15,26 +15,26 @@ _DAY76_BOARD_PATH = (
     "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/community-touchpoint-plan.json"
-_SECTION_HEADER = "# Day 77 \u2014 Community touchpoint closeout lane"
+_SECTION_HEADER = "# Community touchpoint closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 77 matters",
     "## Required inputs (Day 76)",
-    "## Day 77 command lane",
+    "## Community touchpoint command lane",
     "## Community touchpoint contract",
     "## Touchpoint quality checklist",
-    "## Day 77 delivery board",
+    "## Community touchpoint delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit community-touchpoint-closeout --format json --strict",
-    "python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict",
-    "python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day77_community_touchpoint_closeout_contract.py",
+    "python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict",
+    "python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict",
+    "python scripts/check_community_touchpoint_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit community-touchpoint-closeout --format json --strict",
-    "python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict",
-    "python scripts/check_day77_community_touchpoint_closeout_contract.py --skip-evidence",
+    "python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict",
+    "python scripts/check_community_touchpoint_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 77 community touchpoint execution and signoff.",
@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY77_DEFAULT_PAGE = """# Day 77 \u2014 Community touchpoint closeout lane
+_DAY77_DEFAULT_PAGE = """# Community touchpoint closeout lane
 
 Day 77 closes with a major upgrade that converts Day 76 contributor-recognition outcomes into a community-touchpoint execution pack.
 
@@ -81,13 +81,13 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 - `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md`
 - `docs/roadmap/plans/community-touchpoint-plan.json`
 
-## Day 77 command lane
+## Community touchpoint command lane
 
 ```bash
 python -m sdetkit community-touchpoint-closeout --format json --strict
-python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/day77-community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/day77-community-touchpoint-closeout-pack/evidence --format json --strict
-python scripts/check_day77_community_touchpoint_closeout_contract.py
+python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict
+python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict
+python scripts/check_community_touchpoint_closeout_contract.py
 ```
 
 ## Community touchpoint contract
@@ -105,7 +105,7 @@ python scripts/check_day77_community_touchpoint_closeout_contract.py
 - [ ] Scorecard captures touchpoint score delta, trust carryover delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, touchpoint plan, session ledger, KPI scorecard, and execution log
 
-## Day 77 delivery board
+## Community touchpoint delivery board
 
 - [ ] Day 77 integration brief committed
 - [ ] Day 77 community touchpoint plan committed
@@ -171,13 +171,13 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day77_command",
+            "check_id": "readme_community_touchpoint_command",
             "weight": 7,
             "passed": ("community-touchpoint-closeout" in readme_text),
-            "evidence": "README day77 command lane",
+            "evidence": "README community-touchpoint command lane",
         },
         {
-            "check_id": "docs_index_day77_links",
+            "check_id": "docs_index_community_touchpoint_links",
             "weight": 8,
             "passed": (
                 "impact-77-big-upgrade-report.md" in docs_index_text
@@ -186,10 +186,12 @@ def build_day77_community_touchpoint_closeout_summary(root: Path) -> dict[str, A
             "evidence": "impact-77-big-upgrade-report.md + integrations-community-touchpoint-closeout.md",
         },
         {
-            "check_id": "top10_day77_alignment",
+            "check_id": "top10_community_touchpoint_alignment",
             "weight": 5,
-            "passed": ("Day 76" in top10_text and "Day 77" in top10_text),
-            "evidence": "Day 76 + Day 77 strategy chain",
+            "passed": (
+                "Contributor recognition + community touchpoint strategy chain" in top10_text
+            ),
+            "evidence": "Contributor recognition + community touchpoint strategy chain",
         },
         {
             "check_id": "day76_summary_present",
@@ -359,27 +361,36 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day77-community-touchpoint-closeout-summary.json",
+        target / "community-touchpoint-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day77-community-touchpoint-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day77-integration-brief.md", "# Day 77 integration brief\n")
-    _write(target / "day77-community-touchpoint-plan.md", "# Day 77 community touchpoint plan\n")
+    _write(target / "community-touchpoint-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day77-touchpoint-session-ledger.json",
+        target / "community-touchpoint-integration-brief.md",
+        "# Community touchpoint integration brief\n",
+    )
+    _write(target / "community-touchpoint-plan.md", "# Community touchpoint plan\n")
+    _write(
+        target / "community-touchpoint-session-ledger.json",
         json.dumps({"sessions": []}, indent=2) + "\n",
     )
     _write(
-        target / "day77-touchpoint-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
-    )
-    _write(target / "day77-execution-log.md", "# Day 77 execution log\n")
-    _write(
-        target / "day77-delivery-board.md",
-        "\n".join(["# Day 77 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        target / "community-touchpoint-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
     )
     _write(
-        target / "day77-validation-commands.md",
-        "# Day 77 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        target / "community-touchpoint-execution-log.md", "# Community touchpoint execution log\n"
+    )
+    _write(
+        target / "community-touchpoint-delivery-board.md",
+        "\n".join(["# Community touchpoint delivery board", *_REQUIRED_DELIVERY_BOARD_LINES])
+        + "\n",
+    )
+    _write(
+        target / "community-touchpoint-validation-commands.md",
+        "# Community touchpoint validation commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
     )
 
 
@@ -401,7 +412,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day77-execution-summary.json",
+        out_dir / "community-touchpoint-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -429,7 +440,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day77-community-touchpoint-closeout-pack/evidence")
+            else Path("docs/artifacts/community-touchpoint-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

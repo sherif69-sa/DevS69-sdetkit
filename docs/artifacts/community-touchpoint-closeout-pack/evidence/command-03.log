@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_community_touchpoint_closeout_contract.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "community-touchpoint-closeout contract check passed\n",
+  "stderr": ""
+}
