@@ -96,7 +96,7 @@ _SIGNALS = [
         "check_id": "readme_day26_link",
         "category": "discoverability",
         "weight": 10,
-        "marker": "docs/external-contribution.md",
+        "marker": "External contribution",
         "source": "readme",
     },
     {
