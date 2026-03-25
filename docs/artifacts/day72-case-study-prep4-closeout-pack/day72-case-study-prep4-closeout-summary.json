@@ -43,10 +43,10 @@
     {
       "check_id": "day71_quality_floor",
       "weight": 13,
-      "passed": false,
+      "passed": true,
       "evidence": {
-        "day71_score": 93,
-        "strict_pass": false,
+        "day71_score": 100,
+        "strict_pass": true,
         "day71_checks": 14
       }
     },
@@ -62,8 +62,8 @@
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": false,
-      "evidence": "# Case Study Prep4 Closeout"
+      "passed": true,
+      "evidence": "# Case-study prep #4 closeout lane"
     },
     {
       "check_id": "required_sections",
@@ -103,27 +103,23 @@
     }
   ],
   "rollup": {
-    "day71_activation_score": 93,
+    "day71_activation_score": 100,
     "day71_checks": 14,
     "day71_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 80,
-    "passed_checks": 12,
-    "failed_checks": 2,
-    "critical_failures": [
-      "day71_strict_baseline"
-    ],
-    "strict_pass": false
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
   },
   "wins": [
+    "Day 71 continuity is strict-pass with activation score=100.",
     "Day 71 delivery board integrity validated with 5 checklist items.",
-    "Day 72 publication-quality case-study dataset is available for case-study prep execution."
+    "Day 72 publication-quality case-study dataset is available for case-study prep execution.",
+    "Day 72 case-study prep #4 closeout lane is fully complete and ready for Day 73 publication launch execution."
   ],
-  "misses": [
-    "Day 71 strict continuity signal is missing."
-  ],
-  "handoff_actions": [
-    "Re-run Day 71 closeout command and restore strict baseline before Day 72 lock."
-  ]
+  "misses": [],
+  "handoff_actions": []
 }

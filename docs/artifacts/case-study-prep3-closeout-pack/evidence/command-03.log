@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_case_study_prep3_closeout_contract.py --skip-evidence",
-  "returncode": 1,
-  "stdout": "",
-  "stderr": "case-study-prep3-closeout contract check failed:\n- activation_score too low: 93\n- strict_pass is false\n- failed checks: ['page_header']\n"
+  "returncode": 0,
+  "stdout": "case-study-prep3-closeout contract check passed\n",
+  "stderr": ""
 }

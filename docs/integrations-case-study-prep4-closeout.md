@@ -1,4 +1,4 @@
-# Case Study Prep4 Closeout
+# Case-study prep #4 closeout lane
 
 > Legacy mapping: Day 72 remains as history/compatibility alias `day72-case-study-prep4-closeout`. Use `python -m sdetkit case-study-prep4-closeout` as the stable command.
 
