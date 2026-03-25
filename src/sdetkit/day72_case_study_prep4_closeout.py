@@ -232,8 +232,12 @@ def build_day72_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "page_header",
             "weight": 7,
-            "passed": _SECTION_HEADER in page_text,
-            "evidence": _SECTION_HEADER,
+            "passed": (
+                page_text.splitlines()[0].strip() == "# Case-study prep #4 closeout lane"
+                if page_text.strip()
+                else False
+            ),
+            "evidence": page_text.splitlines()[0].strip() if page_text.strip() else "",
         },
         {
             "check_id": "required_sections",
