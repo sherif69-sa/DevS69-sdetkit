@@ -360,7 +360,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
-    (evidence_dir / "day26-execution-summary.json").write_text(
+    (evidence_dir / "external-contribution-execution-summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return payload
