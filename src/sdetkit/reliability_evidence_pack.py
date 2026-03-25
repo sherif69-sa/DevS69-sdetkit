@@ -10,7 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/reliability-evidence-pack.md"
 
-_SECTION_HEADER = "# Reliability evidence pack (Day 18)"
+_SECTION_HEADER = "# Reliability evidence pack"
 _REQUIRED_SECTIONS = [
     "## Who this pack is for",
     "## Reliability score model",
@@ -28,26 +28,26 @@ _REQUIRED_COMMANDS = [
 
 _REQUIRED_DAY17_KEYS = ("name", "quality", "contributions")
 
-_DAY18_DEFAULT_PAGE = """# Reliability evidence pack (Day 18)
+_DAY18_DEFAULT_PAGE = """# Reliability evidence pack
 
-Operational recipe for rolling Day 15, Day 16, and Day 17 evidence into one reliability closeout signal.
+Operational recipe for rolling GitHub Actions onboarding, GitLab CI onboarding, and contribution-quality-report evidence into one reliability-evidence signal.
 
 ## Who this pack is for
 
 - Maintainers publishing a weekly reliability summary.
-- Engineering leads who need one deterministic pass/fail closeout checkpoint.
+- Engineering leads who need one deterministic pass/fail review checkpoint.
 - Contributors who need actionable evidence before tagging release candidates.
 
 ## Reliability score model
 
-Day 18 score uses weighted Day 15/16 execution quality plus Day 17 stability/velocity.
+The reliability score uses weighted GitHub Actions onboarding and GitLab CI onboarding execution quality plus contribution-quality-report stability and velocity.
 
-- Day 15 score weight: 25%
-- Day 16 score weight: 25%
-- Day 17 velocity score weight: 20%
-- Day 17 stability score weight: 20%
-- Day 15 pass-rate weight: 5%
-- Day 16 pass-rate weight: 5%
+- GitHub Actions onboarding score weight: 25%
+- GitLab CI onboarding score weight: 25%
+- Contribution-quality velocity score weight: 20%
+- Contribution-quality stability score weight: 20%
+- GitHub Actions onboarding pass-rate weight: 5%
+- GitLab CI onboarding pass-rate weight: 5%
 
 ## Fast verification commands
 
@@ -60,15 +60,15 @@ python scripts/check_day18_reliability_evidence_pack_contract.py
 
 ## Execution evidence mode
 
-`--execute` runs the Day 18 command chain and writes deterministic logs for each command into `--evidence-dir`.
+`--execute` runs the reliability-evidence command chain and writes deterministic logs for each command into `--evidence-dir`.
 
 ## Closeout checklist
 
-- [ ] Day 15 execution summary is green.
-- [ ] Day 16 execution summary is green.
-- [ ] Day 17 strict failures list is empty.
+- [ ] GitHub Actions onboarding execution summary is green.
+- [ ] GitLab CI onboarding execution summary is green.
+- [ ] Contribution-quality-report strict failures are empty.
 - [ ] Reliability score meets minimum threshold.
-- [ ] Day 18 pack is attached to closeout notes.
+- [ ] Reliability-evidence pack is attached to review notes.
 """
 
 
@@ -156,7 +156,7 @@ def build_reliability_pack(
         )
     if reliability_score >= 95 and strict_all_green:
         recommendations.append(
-            "Reliability posture is strong; keep current CI and closeout operating cadence."
+            "Reliability posture is strong; keep current CI and review cadence."
         )
 
     return {
@@ -189,7 +189,7 @@ def build_reliability_pack(
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 18 reliability evidence pack",
+        "Reliability evidence pack",
         "",
         f"Reliability score: {payload['summary']['reliability_score']}",
         f"Strict gates green: {payload['summary']['strict_all_green']}",
@@ -204,7 +204,7 @@ def _render_text(payload: dict[str, Any]) -> str:
 def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(
         [
-            "# Day 18 reliability evidence pack",
+            "# Reliability evidence pack",
             "",
             f"- Reliability score: **{payload['summary']['reliability_score']}**",
             f"- Strict gates green: **{payload['summary']['strict_all_green']}**",
@@ -231,12 +231,12 @@ def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
     checklist_path.write_text(
         "\n".join(
             [
-                "# Day 18 reliability closeout checklist",
+                "# Reliability evidence checklist",
                 "",
                 "- [ ] Day 15 GitHub Actions quickstart strict gate still green.",
                 "- [ ] Day 16 GitLab CI quickstart strict gate still green.",
-                "- [ ] Day 17 quality + contribution delta strict gates are green.",
-                "- [ ] Reliability score is reviewed in weekly closeout.",
+                "- [ ] Contribution-quality-report strict gates are green.",
+                "- [ ] Reliability score is reviewed in weekly review.",
                 "- [ ] Recommendations are tracked in planning backlog.",
                 "",
             ]
@@ -246,7 +246,7 @@ def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
 
     validation_path = out_dir / "reliability-evidence-validation-commands.md"
     validation_path.write_text(
-        "\n".join(["# Day 18 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(["# Reliability evidence validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
         encoding="utf-8",
     )
 
@@ -373,7 +373,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="Execute Day 18 validation commands and capture evidence.",
+        help="Execute reliability-evidence validation commands and capture evidence.",
     )
     parser.add_argument(
         "--evidence-dir",

@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/release-readiness.md"
 
-_SECTION_HEADER = "# Release readiness (Day 19)"
+_SECTION_HEADER = "# Release readiness board"
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 19",
+    "## Who should run release-readiness",
     "## Score model",
     "## Fast verification commands",
     "## Execution evidence mode",
@@ -32,11 +32,11 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day19_release_readiness_board_contract.py --skip-evidence",
 ]
 
-_DAY19_DEFAULT_PAGE = """# Release readiness (Day 19)
+_DAY19_DEFAULT_PAGE = """# Release readiness board
 
-Day 19 composes Day 14 weekly trend health and Day 18 reliability posture into one release-candidate gate.
+Release readiness composes weekly-review trend health and reliability-evidence posture into one release-candidate gate.
 
-## Who should run Day 19
+## Who should run release-readiness
 
 - Maintainers deciding if a release tag can be cut this week.
 - Team leads running release-readiness reviews and action tracking.
@@ -44,8 +44,8 @@ Day 19 composes Day 14 weekly trend health and Day 18 reliability posture into o
 
 ## Score model
 
-- Day 18 reliability score weight: 70%
-- Day 14 KPI score weight: 30%
+- Reliability-evidence score weight: 70%
+- Weekly-review score weight: 30%
 
 ## Fast verification commands
 
@@ -58,14 +58,14 @@ python scripts/check_day19_release_readiness_board_contract.py
 
 ## Execution evidence mode
 
-`--execute` runs the Day 19 command chain and writes deterministic logs into `--evidence-dir`.
+`--execute` runs the release-readiness command chain and writes deterministic logs into `--evidence-dir`.
 
 ## Closeout checklist
 
-- [ ] Day 18 reliability gate status is `pass`.
-- [ ] Day 14 KPI score meets threshold.
-- [ ] Day 19 release score is reviewed by maintainers.
-- [ ] Day 19 recommendations are tracked in backlog.
+- [ ] Reliability-evidence gate status is `pass`.
+- [ ] Weekly-review score meets threshold.
+- [ ] Release-readiness score is reviewed by maintainers.
+- [ ] Release-readiness recommendations are tracked in backlog.
 """
 
 
@@ -126,7 +126,7 @@ def build_release_board(
     recommendations: list[str] = []
     if not strict_all_green:
         recommendations.append(
-            "Resolve Day 18 reliability or Day 14 KPI gaps before cutting a release tag."
+            "Resolve reliability-evidence or weekly-review gaps before cutting a release tag."
         )
     if release_score < 95:
         recommendations.append(
@@ -160,7 +160,7 @@ def build_release_board(
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 19 release readiness board",
+        "Release readiness board",
         "",
         f"Release score: {payload['summary']['release_score']}",
         f"Strict gates green: {payload['summary']['strict_all_green']}",
@@ -175,7 +175,7 @@ def _render_text(payload: dict[str, Any]) -> str:
 def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(
         [
-            "# Day 19 release readiness board",
+            "# Release readiness board",
             "",
             f"- Release score: **{payload['summary']['release_score']}**",
             f"- Strict gates green: **{payload['summary']['strict_all_green']}**",
@@ -205,7 +205,7 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
             [
                 "# Release readiness checklist",
                 "",
-                "- [ ] Day 18 reliability gate status is pass.",
+                "- [ ] Reliability-evidence gate status is pass.",
                 "- [ ] Day 14 KPI status is pass.",
                 "- [ ] Release score is reviewed in the release-readiness review.",
                 "- [ ] Recommendations are assigned and tracked.",
@@ -215,13 +215,13 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 19 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(["# Release readiness validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
         encoding="utf-8",
     )
     decision.write_text(
         "\n".join(
             [
-                "# Day 19 release decision",
+                "# Release readiness decision",
                 "",
                 f"- Gate status: **{payload['summary']['gate_status']}**",
                 f"- Release score: **{payload['summary']['release_score']}**",

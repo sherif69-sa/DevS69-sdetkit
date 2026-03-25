@@ -81,7 +81,7 @@ python -m sdetkit report --out reports/startup-weekly.json
 
 ## CI fast-lane recipe
 
-Use this minimal workflow to enforce the Day 12 page contract in PRs:
+Use this minimal workflow to enforce the startup-readiness page contract in PRs:
 
 ```yaml
 {_CI_FAST_LANE.rstrip()}
@@ -177,7 +177,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     checklist.write_text(
         "\n".join(
             [
-                "# Day 12 startup operating checklist",
+                "# Startup readiness checklist",
                 "",
                 "- [ ] Validate landing page contract in strict mode.",
                 "- [ ] Regenerate startup artifact markdown for handoff.",
@@ -196,12 +196,12 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     risk_register.write_text(
         "\n".join(
             [
-                "# Day 12 startup risk register",
+                "# Startup readiness risk register",
                 "",
                 "| Risk | Trigger | Mitigation |",
                 "| --- | --- | --- |",
                 "| Docs drift | Required sections are removed | Run `startup-readiness --strict` in CI |",
-                "| Broken command examples | CLI flags change | Keep Day 12 tests in startup fast-lane |",
+                "| Broken command examples | CLI flags change | Keep startup-readiness tests in startup fast-lane |",
                 "| Missing artifacts | Report generation skipped | Require artifact publish in weekly cadence |",
             ]
         )

@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/release-communications.md"
 
-_SECTION_HEADER = "# Release narrative (Day 20)"
+_SECTION_HEADER = "# Release communications"
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 20",
+    "## Who should run release-communications",
     "## Story inputs",
     "## Fast verification commands",
     "## Execution evidence mode",
@@ -33,11 +33,11 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
 ]
 
-_DAY20_DEFAULT_PAGE = """# Release narrative (Day 20)
+_DAY20_DEFAULT_PAGE = """# Release communications
 
-Day 20 translates release readiness evidence into non-maintainer changelog storytelling.
+Release communications translates release-readiness evidence into non-maintainer changelog storytelling.
 
-## Who should run Day 20
+## Who should run release-communications
 
 - Maintainers writing release notes for mixed technical/non-technical audiences.
 - Developer advocates preparing community launch posts.
@@ -45,7 +45,7 @@ Day 20 translates release readiness evidence into non-maintainer changelog story
 
 ## Story inputs
 
-- Day 19 release-readiness summary (`release_score`, `gate_status`, recommendations).
+- Release-readiness summary (`release_score`, `gate_status`, recommendations).
 - Changelog highlights for user-visible updates.
 
 ## Fast verification commands
@@ -59,7 +59,7 @@ python scripts/check_day20_release_narrative_contract.py
 
 ## Execution evidence mode
 
-`--execute` runs the Day 20 command chain and writes deterministic logs into `--evidence-dir`.
+`--execute` runs the release-communications command chain and writes deterministic logs into `--evidence-dir`.
 
 ## Narrative channels
 
@@ -145,13 +145,13 @@ def build_release_narrative(
     risks = (
         recommendations
         if recommendations
-        else ["No explicit Day 19 recommendations were provided."]
+        else ["No explicit release-readiness recommendations were provided."]
     )
 
     channels = {
         "release_notes": f"{headline} Key highlights: {highlights[0]}",
         "community_post": "Shipping update: stronger quality gates, clearer evidence, and a smoother adoption path for teams.",
-        "internal_update": "Day 20 narrative pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.",
+        "internal_update": "Release communications pack is ready. Reuse the highlights/risks sections in weekly status and customer comms.",
     }
 
     return {
@@ -170,7 +170,7 @@ def build_release_narrative(
         "risks": risks,
         "audience_blurbs": {
             "non_maintainers": "What changed: clearer quality gates, faster release confidence, and traceable evidence for audits.",
-            "engineering": "Ship with confidence by tying Day 19 release score to concrete checklist and evidence artifacts.",
+            "engineering": "Ship with confidence by tying release-readiness score to concrete checklist and evidence artifacts.",
             "support": "Use highlights + risks sections to pre-brief known changes and probable user questions.",
         },
         "narrative_channels": channels,
@@ -180,7 +180,7 @@ def build_release_narrative(
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 20 release narrative",
+        "Release communications",
         "",
         f"Headline: {payload['summary']['headline']}",
         f"Release score: {payload['summary']['release_score']}",
@@ -202,7 +202,7 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def _render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Day 20 release narrative",
+        "# Release communications",
         "",
         f"**Headline:** {payload['summary']['headline']}",
         "",
@@ -244,7 +244,7 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     blurbs.write_text(
         "\n".join(
             [
-                "# Day 20 audience blurbs",
+                "# Release communications audience blurbs",
                 "",
                 *[
                     f"- **{k.replace('_', ' ').title()}:** {v}"
@@ -258,7 +258,7 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     channels.write_text(
         "\n".join(
             [
-                "# Day 20 narrative channels",
+                "# Release communications channels",
                 "",
                 *[
                     f"- **{k.replace('_', ' ').title()}:** {v}"
@@ -270,7 +270,7 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 20 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(["# Release communications validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
         encoding="utf-8",
     )
 
@@ -364,13 +364,13 @@ def _write_execution_evidence(
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sdetkit release-communications",
-        description="Generate Day 20 non-maintainer release storytelling from Day 19 posture.",
+        description="Generate release-communications storytelling from release-readiness posture.",
     )
     p.add_argument("--root", default=".", help="Repository root path.")
     p.add_argument(
         "--day19-summary",
         default="docs/artifacts/release-readiness-pack/release-readiness-summary.json",
-        help="Path to Day 19 release summary JSON.",
+        help="Path to the release-readiness summary JSON.",
     )
     p.add_argument("--changelog", default="CHANGELOG.md", help="Path to changelog markdown file.")
     p.add_argument(
@@ -382,13 +382,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Create default Day 20 integration page if missing.",
+        help="Create default release-communications page if missing.",
     )
     p.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated Day 20 files."
+        "--emit-pack-dir", default="", help="Optional output directory for generated release-communications files."
     )
     p.add_argument(
-        "--execute", action="store_true", help="Run Day 20 command chain and emit evidence logs."
+        "--execute", action="store_true", help="Run release-communications command chain and emit evidence logs."
     )
     p.add_argument(
         "--evidence-dir",

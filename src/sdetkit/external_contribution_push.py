@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/external-contribution.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_SECTION_HEADER = "# External contribution push (Day 26)"
+_SECTION_HEADER = "# External contribution"
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 26",
+    "## Who should run external-contribution",
     "## Starter-task spotlight contract",
     "## Launch checklist",
     "## First-response SLA",
@@ -30,11 +30,11 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day26_external_contribution_push_contract.py --skip-evidence",
 ]
 
-_DAY26_DEFAULT_PAGE = """# External contribution push (Day 26)
+_DAY26_DEFAULT_PAGE = """# External contribution
 
-Day 26 upgrades public contribution pull by spotlighting starter tasks with clear owners, response SLAs, and evidence-ready follow-up.
+External contribution upgrades public contribution pull by spotlighting starter tasks with clear owners, response SLAs, and evidence-ready follow-up.
 
-## Who should run Day 26
+## Who should run external-contribution
 
 - Maintainers who want more first-time external contributions from open starter tasks.
 - DevRel/community owners who promote contributor-friendly backlog slices.
@@ -42,7 +42,7 @@ Day 26 upgrades public contribution pull by spotlighting starter tasks with clea
 
 ## Starter-task spotlight contract
 
-A Day 26 pass means at least 10 starter tasks are publicly spotlighted with labels, acceptance criteria, and explicit maintainer response windows.
+An external-contribution pass means at least 10 starter tasks are publicly spotlighted with labels, acceptance criteria, and explicit maintainer response windows.
 
 ## Launch checklist
 
@@ -61,7 +61,7 @@ python scripts/check_day26_external_contribution_push_contract.py
 
 ## Activation scoring model
 
-Day 26 computes weighted readiness score (0-100):
+External-contribution computes a weighted readiness score (0-100):
 
 - Docs contract + command lane completeness: 45 points.
 - Discoverability links in README/docs index: 25 points.
@@ -70,7 +70,7 @@ Day 26 computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs deterministic Day 26 checks and writes logs to `--evidence-dir` for release review.
+`--execute` runs deterministic external-contribution checks and writes logs to `--evidence-dir` for release review.
 """
 
 _SIGNALS = [
@@ -231,19 +231,19 @@ def build_external_contribution_push_summary(
     recommendations: list[str] = []
     if any(item["category"] == "contract" for item in failed):
         recommendations.append(
-            "Restore Day 26 docs contract sections and required command lane before launch."
+            "Restore external-contribution docs contract sections and required command lane before launch."
         )
     if any(item["category"] == "discoverability" for item in failed):
         recommendations.append(
-            "Add Day 26 links and commands to README/docs index for external contributor visibility."
+            "Add external-contribution links and commands to README/docs index for external contributor visibility."
         )
     if any(item["category"] in {"strategy", "evidence"} for item in failed):
         recommendations.append(
-            "Align Day 26 outputs with starter-task spotlighting and 24-hour first-response SLA."
+            "Align external-contribution outputs with starter-task spotlighting and 24-hour first-response SLA."
         )
     if not recommendations:
         recommendations.append(
-            "Day 26 external contribution push lane is healthy; keep weekly conversion summaries flowing."
+            "External-contribution lane is healthy; keep weekly conversion summaries flowing."
         )
 
     return {
@@ -267,7 +267,7 @@ def build_external_contribution_push_summary(
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 26 external contribution push summary",
+        "External contribution summary",
         f"score={payload['summary']['activation_score']}",
         f"failed={','.join(payload['summary']['failed_checks']) or 'none'}",
         f"critical={','.join(payload['summary']['critical_failures']) or 'none'}",
@@ -294,7 +294,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     spotlight.write_text(
         "\n".join(
             [
-                "# Day 26 starter-task spotlight plan",
+                "# External contribution starter-task spotlight",
                 "",
                 "## Public call-to-action",
                 "Help wanted: pick one starter task and submit your first contribution this week.",
@@ -316,7 +316,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     triage.write_text(
         "\n".join(
             [
-                "# Day 26 external contribution triage board",
+                "# External contribution triage board",
                 "",
                 "| Starter task | Interest signal | Owner | Status | Response SLA |",
                 "| --- | --- | --- | --- | --- |",
@@ -329,7 +329,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 26 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        "\n".join(["# External contribution validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
         + "\n",
         encoding="utf-8",
     )
@@ -369,7 +369,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit external-contribution",
-        description="Day 26 external contribution push closeout lane.",
+        description="External-contribution rollout lane.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
     parser.add_argument(
@@ -380,13 +380,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
     parser.add_argument(
-        "--write-defaults", action="store_true", help="Create default Day 26 integration page."
+        "--write-defaults", action="store_true", help="Create default external-contribution page."
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated Day 26 files."
+        "--emit-pack-dir", default="", help="Optional output directory for generated external-contribution files."
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Run Day 26 command chain and emit evidence logs."
+        "--execute", action="store_true", help="Run external-contribution command chain and emit evidence logs."
     )
     parser.add_argument(
         "--evidence-dir",

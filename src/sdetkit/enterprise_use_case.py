@@ -86,7 +86,7 @@ python scripts/check_day13_enterprise_use_case_contract.py
 
 ## CI compliance lane recipe
 
-Use this workflow to enforce Day 13 enterprise contract checks on every PR:
+Use this workflow to enforce enterprise-readiness contract checks on every PR:
 
 ```yaml
 {_CI_COMPLIANCE_LANE.rstrip()}
@@ -115,7 +115,7 @@ This writes a structured `day13-execution-summary.json` and one per-command log 
 
 1. Pilot with one regulated service and one shared platform repository.
 2. Expand to all critical repositories with a policy baseline and CI lane.
-3. Standardize quarterly audits using generated Day 13 artifacts.
+3. Standardize quarterly audits using generated enterprise-readiness artifacts.
 """
 
 
@@ -206,7 +206,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     checklist.write_text(
         "\n".join(
             [
-                "# Day 13 enterprise operating checklist",
+                "# Enterprise readiness checklist",
                 "",
                 "- [ ] Validate enterprise landing page contract in strict mode.",
                 "- [ ] Regenerate enterprise artifact markdown for handoff.",
@@ -226,7 +226,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     controls_register.write_text(
         "\n".join(
             [
-                "# Day 13 enterprise controls register",
+                "# Enterprise readiness controls register",
                 "",
                 "| Control area | Trigger | Mitigation |",
                 "| --- | --- | --- |",

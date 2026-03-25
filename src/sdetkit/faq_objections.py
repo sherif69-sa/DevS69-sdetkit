@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/objection-handling.md"
 
-_SECTION_HEADER = "# FAQ and objections (Day 23)"
+_SECTION_HEADER = "# FAQ and objections"
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 23",
+    "## Who should run objection-handling",
     "## When to use sdetkit",
     "## When not to use sdetkit",
     "## Top objections and responses",
@@ -33,11 +33,11 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day23_faq_objections_contract.py --skip-evidence",
 ]
 
-_DAY23_DEFAULT_PAGE = """# FAQ and objections (Day 23)
+_DAY23_DEFAULT_PAGE = """# FAQ and objections
 
-Day 23 turns recurring adoption blockers into deterministic answers that teams can validate before launches.
+Objection handling turns recurring adoption blockers into deterministic answers that teams can validate before launches.
 
-## Who should run Day 23
+## Who should run objection-handling
 
 - Maintainers preparing public launch narratives and onboarding material.
 - Developer advocates collecting recurring objections from discussions/issues.
@@ -71,7 +71,7 @@ Response: sdetkit provides deterministic contracts, evidence artifacts, and stri
 
 ### Objection 3: "How do we prove this is production-ready?"
 
-Response: run strict mode, emit a Day 23 FAQ pack, and attach execution logs as evidence in release reviews.
+Response: run strict mode, emit an objection-handling pack, and attach execution logs as evidence in release reviews.
 
 ## Fast verification commands
 
@@ -86,7 +86,7 @@ python scripts/check_day23_faq_objections_contract.py
 
 - If strict mode fails, pause launch messaging and assign owners for missing FAQ guidance.
 - If objections repeat for two sprints, add dedicated docs links and command examples.
-- Require Day 23 pack attachment in release-readiness review for external promotions.
+- Require objection-handling pack attachment in release-readiness review for external promotions.
 """
 
 _SIGNALS = [
@@ -241,7 +241,7 @@ def build_faq_objections_summary(
     recommendations: list[str] = []
     if any(item["category"] == "coverage" for item in failed):
         recommendations.append(
-            "Restore the Day 23 FAQ docs contract sections and command lane before promotion."
+            "Restore the objection-handling docs contract sections and command lane before promotion."
         )
     if any(item["category"] == "adoption" for item in failed):
         recommendations.append(
@@ -249,7 +249,7 @@ def build_faq_objections_summary(
         )
     if any(item["category"] == "discoverability" for item in failed):
         recommendations.append(
-            "Link the Day 23 FAQ guide from README and docs index for fast objection handling."
+            "Link the objection-handling guide from README and docs index for fast objection handling."
         )
     if not recommendations:
         recommendations.append(
@@ -280,7 +280,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "Day 23 Objection handling",
+        "Objection handling",
         "",
         f"FAQ score: {summary['faq_score']}",
         f"Readiness: {summary['objection_readiness']}",
@@ -306,7 +306,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "# Day 23 FAQ and objections summary",
+        "# Objection handling summary",
         "",
         f"- FAQ score: **{summary['faq_score']}**",
         f"- Readiness: **{summary['objection_readiness']}**",
@@ -340,18 +340,18 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     scorecard.write_text(_render_markdown(payload) + "\n", encoding="utf-8")
 
     matrix_lines = [
-        "# Day 23 objection response matrix",
+        "# Objection handling response matrix",
         "",
         "| Objection | Response | Verification command |",
         "| --- | --- | --- |",
         "| This is too heavy for small teams | Start with doctor + repo + security lanes only. | `python -m sdetkit doctor --json` |",
         "| We already have scripts | Keep scripts, then enforce deterministic strict gates + artifacts with sdetkit. | `python -m sdetkit objection-handling --format json --strict` |",
-        "| How do we prove readiness? | Emit Day 23 FAQ pack and attach evidence summary in release review. | `python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict` |",
+        "| How do we prove readiness? | Emit an objection-handling pack and attach evidence summary in release review. | `python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict` |",
     ]
     matrix.write_text("\n".join(matrix_lines) + "\n", encoding="utf-8")
 
     playbook_lines = [
-        "# Day 23 adoption objection playbook",
+        "# Objection handling playbook",
         "",
         "1. Collect objections from issues, PR reviews, and contributor onboarding notes.",
         "2. Map each objection to one deterministic command and one docs page.",
@@ -361,7 +361,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     ]
     playbook.write_text("\n".join(playbook_lines) + "\n", encoding="utf-8")
 
-    validation_lines = ["# Day 23 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]
+    validation_lines = ["# Objection handling validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]
     validation.write_text("\n".join(validation_lines) + "\n", encoding="utf-8")
 
     return [
@@ -411,7 +411,7 @@ def _write_default_page(path: Path) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit objection-handling",
-        description="Day 23 FAQ and objections lane for adoption blockers.",
+        description="Objection-handling lane for adoption blockers.",
     )
     parser.add_argument("--root", default=".", help="Repository root.")
     parser.add_argument("--readme", default="README.md", help="README path relative to root.")
@@ -421,7 +421,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--docs-page",
         default=_PAGE_PATH,
-        help="Day 23 FAQ page path relative to root.",
+        help="Objection-handling page path relative to root.",
     )
     parser.add_argument(
         "--format",
@@ -433,7 +433,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--write-defaults",
         action="store_true",
-        help="Create/overwrite the Day 23 FAQ docs page with defaults.",
+        help="Create/overwrite the objection-handling docs page with defaults.",
     )
     parser.add_argument("--strict", action="store_true", help="Fail if critical checks fail.")
     parser.add_argument(
@@ -445,10 +445,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--emit-pack-dir",
         default=None,
-        help="Emit Day 23 FAQ pack into this directory relative to root.",
+        help="Emit an objection-handling pack into this directory relative to root.",
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Execute deterministic Day 23 command chain."
+        "--execute", action="store_true", help="Execute deterministic objection-handling command chain."
     )
     parser.add_argument(
         "--evidence-dir",

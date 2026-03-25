@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any
 
 _PAGE_PATH = "docs/onboarding-optimization.md"
-_SECTION_HEADER = "# Onboarding optimization (Day 24)"
+_SECTION_HEADER = "# Onboarding optimization"
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 24",
+    "## Who should run onboarding-optimization",
     "## Three-minute success contract",
     "## Fast path commands",
     "## Time-to-first-success scoring",
@@ -30,11 +30,11 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day24_onboarding_time_upgrade_contract.py --skip-evidence",
 ]
 
-_DAY24_DEFAULT_PAGE = """# Onboarding optimization (Day 24)
+_DAY24_DEFAULT_PAGE = """# Onboarding optimization
 
-Day 24 reduces onboarding time-to-first-success and standardizes a deterministic three-minute activation path.
+Onboarding optimization reduces time-to-first-success and standardizes a deterministic three-minute activation path.
 
-## Who should run Day 24
+## Who should run onboarding-optimization
 
 - Maintainers improving contributor first-run experience.
 - DevRel owners preparing launch-ready quick-start docs.
@@ -42,7 +42,7 @@ Day 24 reduces onboarding time-to-first-success and standardizes a deterministic
 
 ## Three-minute success contract
 
-A Day 24 pass means a new contributor can complete environment setup and run one successful `sdetkit` command in under three minutes with no hidden prerequisites.
+An onboarding-optimization pass means a new contributor can complete environment setup and run one successful `sdetkit` command in under three minutes with no hidden prerequisites.
 
 ## Fast path commands
 
@@ -55,7 +55,7 @@ python scripts/check_day24_onboarding_time_upgrade_contract.py
 
 ## Time-to-first-success scoring
 
-Day 24 computes weighted readiness score (0-100):
+Onboarding-optimization computes a weighted readiness score (0-100):
 
 - Onboarding command and role/platform coverage: 40 points.
 - Discoverability (README + docs index links): 20 points.
@@ -64,14 +64,14 @@ Day 24 computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs the Day 24 validation chain and stores deterministic logs in `--evidence-dir`.
+`--execute` runs the onboarding-optimization validation chain and stores deterministic logs in `--evidence-dir`.
 
 ## Closeout checklist
 
 - [ ] `onboarding` command supports role and platform targeting.
-- [ ] README links to Day 24 integration and command examples.
-- [ ] Docs index links Day 24 report and artifact references.
-- [ ] Day 24 onboarding pack emitted with summary + checklist + runbook.
+- [ ] README links to onboarding-optimization integration and command examples.
+- [ ] Docs index links the onboarding-optimization report and artifact references.
+- [ ] Onboarding-optimization pack emitted with summary, checklist, and runbook.
 """
 
 _SIGNALS = [
@@ -233,7 +233,7 @@ def build_onboarding_time_summary(
     recommendations: list[str] = []
     if any(item["category"] == "contract" for item in failed):
         recommendations.append(
-            "Repair Day 24 docs contract sections and command lane before closeout."
+            "Repair onboarding-optimization docs contract sections and command lane before review."
         )
     if any(item["category"] == "onboarding" for item in failed):
         recommendations.append(
@@ -241,11 +241,11 @@ def build_onboarding_time_summary(
         )
     if any(item["category"] == "discoverability" for item in failed):
         recommendations.append(
-            "Link Day 24 guidance from README and docs index for faster adoption."
+            "Link onboarding-optimization guidance from README and docs index for faster adoption."
         )
     if not recommendations:
         recommendations.append(
-            "Day 24 onboarding lane is healthy; keep execution evidence attached to releases."
+            "Onboarding-optimization is healthy; keep execution evidence attached to releases."
         )
 
     return {
@@ -272,7 +272,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "Day 24 onboarding optimization",
+        "Onboarding optimization",
         "",
         f"Onboarding score: {summary['onboarding_score']}",
         f"Readiness: {summary['readiness']}",
@@ -301,10 +301,10 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     checklist.write_text(
         "\n".join(
             [
-                "# Day 24 onboarding closeout checklist",
+                "# Onboarding optimization checklist",
                 "",
                 "- [ ] Docs contract page includes all required sections.",
-                "- [ ] README links the Day 24 integration page and command lane.",
+                "- [ ] README links the onboarding-optimization page and command lane.",
                 "- [ ] Docs index links impact-24-ultra-upgrade-report.md.",
                 "- [ ] onboarding command retains role + platform selectors.",
                 "- [ ] Execution evidence artifacts attached to release thread.",
@@ -316,11 +316,11 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     runbook.write_text(
         "\n".join(
             [
-                "# Day 24 time-to-first-success runbook",
+                "# Onboarding optimization runbook",
                 "",
                 "1. Run `python -m sdetkit onboarding --platform all --format text`.",
                 "2. Run `python -m sdetkit onboarding-optimization --format json --strict`.",
-                "3. Emit the Day 24 pack and attach it to release readiness notes.",
+                "3. Emit the onboarding-optimization pack and attach it to release-readiness notes.",
                 "4. Capture first-success timing and keep the median below three minutes.",
             ]
         )
@@ -328,7 +328,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 24 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        "\n".join(["# Onboarding optimization validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
         + "\n",
         encoding="utf-8",
     )
@@ -381,10 +381,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--write-defaults", action="store_true", help="Create default onboarding optimization page."
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated Day 24 files."
+        "--emit-pack-dir", default="", help="Optional output directory for generated onboarding-optimization files."
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Run Day 24 command chain and emit evidence logs."
+        "--execute", action="store_true", help="Run onboarding-optimization command chain and emit evidence logs."
     )
     parser.add_argument(
         "--evidence-dir",

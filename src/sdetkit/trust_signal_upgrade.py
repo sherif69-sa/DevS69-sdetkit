@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/trust-assets.md"
 
-_SECTION_HEADER = "# Trust assets (Day 22)"
+_SECTION_HEADER = "# Trust assets"
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 22",
+    "## Who should run trust-assets",
     "## Trust signal inputs",
     "## Fast verification commands",
     "## Scoring model",
@@ -33,11 +33,11 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evidence",
 ]
 
-_DAY22_DEFAULT_PAGE = """# Trust assets (Day 22)
+_DAY22_DEFAULT_PAGE = """# Trust assets
 
-Day 22 tightens trust posture visibility by keeping reliability badges and policy docs obvious for new adopters.
+Trust assets tightens trust posture visibility by keeping reliability badges and policy docs obvious for new adopters.
 
-## Who should run Day 22
+## Who should run trust-assets
 
 - Maintainers responsible for external project trust posture.
 - Security/compliance reviewers validating governance visibility.
@@ -60,7 +60,7 @@ python scripts/check_day22_trust_signal_upgrade_contract.py
 
 ## Scoring model
 
-Day 22 computes a weighted trust score (0-100):
+Trust-assets computes a weighted trust score (0-100):
 
 - Badge visibility: 50 points
 - Policy docs + discoverability links: 30 points
@@ -70,14 +70,14 @@ Day 22 computes a weighted trust score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs the Day 22 command chain and writes deterministic logs into `--evidence-dir`.
+`--execute` runs the trust-assets command chain and writes deterministic logs into `--evidence-dir`.
 
 ## Visibility checklist
 
 - [ ] CI/reliability badges are present in README.
 - [ ] Security and policy docs are linked from README governance section.
 - [ ] Core trust workflows (`ci.yml`, `security.yml`, `pages.yml`) are present.
-- [ ] Day 22 trust score summary is emitted for closeout.
+- [ ] Trust-assets score summary is emitted for review.
 """
 
 _BADGE_SIGNALS = [
@@ -255,7 +255,7 @@ def _render_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "Day 22 trust signal upgrade",
+        "Trust assets",
         "",
         f"Trust score: {summary['trust_score']}",
         f"Trust label: {summary['trust_label']}",
@@ -273,7 +273,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     points = summary["weighted_points"]
     lines = [
-        "# Day 22 trust signal upgrade",
+        "# Trust assets",
         "",
         "## Trust posture",
         "",
@@ -308,12 +308,12 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     checklist.write_text(
         "\n".join(
             [
-                "# Day 22 visibility checklist",
+                "# Trust assets visibility checklist",
                 "",
                 "- [ ] README trust badges are up to date.",
                 "- [ ] Security and policy docs are discoverable from README/docs index.",
                 "- [ ] Core trust workflows (ci/security/pages) are present.",
-                "- [ ] Day 22 trust score is attached to release closeout.",
+                "- [ ] Trust-assets score is attached to release review.",
                 "",
             ]
         ),
@@ -322,7 +322,7 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     action_plan.write_text(
         "\n".join(
             [
-                "# Day 22 trust action plan",
+                "# Trust assets action plan",
                 "",
                 *[f"- {item}" for item in payload["recommendations"]],
                 "",
@@ -331,7 +331,7 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 22 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(["# Trust assets validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
         encoding="utf-8",
     )
     return [
@@ -436,10 +436,10 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Create default trust-assets page if missing.",
     )
     p.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated Day 22 files."
+        "--emit-pack-dir", default="", help="Optional output directory for generated trust-assets files."
     )
     p.add_argument(
-        "--execute", action="store_true", help="Run Day 22 command chain and emit evidence logs."
+        "--execute", action="store_true", help="Run trust-assets command chain and emit evidence logs."
     )
     p.add_argument(
         "--evidence-dir",
