@@ -216,11 +216,11 @@ def build_day28_weekly_review_summary(
             "Re-run Day 25 pack generation and restore summary JSON for traceability."
         )
     if day26_ok and day26_score >= 90:
-        wins.append(f"Day 26 external contribution push stayed healthy ({day26_score}).")
+        wins.append(f"External contribution stayed healthy ({day26_score}).")
     else:
-        misses.append("Day 26 summary missing or below closeout target.")
+        misses.append("External-contribution summary missing or below review target.")
         corrective_actions.append(
-            "Re-run Day 26 strict lane and publish updated external contribution summary."
+            "Re-run the external-contribution strict lane and publish an updated external-contribution summary."
         )
     if day27_ok and day27_score >= 90:
         wins.append(f"Day 27 KPI audit preserved positive momentum ({day27_score}).")
@@ -292,7 +292,7 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "## KPI rollup (Day 25-27)",
         "",
         f"- Day 25 score: `{payload['rollup']['day25_activation_score']}`",
-        f"- Day 26 score: `{payload['rollup']['day26_activation_score']}`",
+        f"- External-contribution score: `{payload['rollup']['day26_activation_score']}`",
         f"- Day 27 score: `{payload['rollup']['day27_activation_score']}`",
         f"- Average score: `{payload['rollup']['average_activation_score']}`",
         "",

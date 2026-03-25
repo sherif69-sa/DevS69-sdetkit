@@ -17,7 +17,7 @@ _CANONICAL_ARTIFACT_FALLBACKS: dict[str, str] = {
     "docs/artifacts/trust-assets-sample.md": "docs/artifacts/trust-assets-sample.md",
     "docs/artifacts/objection-handling-sample.md": "docs/artifacts/objection-handling-sample.md",
     "docs/artifacts/onboarding-optimization-sample.md": "docs/artifacts/onboarding-optimization-sample.md",
-    "docs/artifacts/external-contribution-sample.md": "docs/artifacts/external-contribution-push-sample.md",
+    "docs/artifacts/external-contribution-sample.md": "docs/artifacts/external-contribution-sample.md",
 }
 
 
@@ -241,9 +241,9 @@ def build_weekly_review(
     if week == 3:
         shipped_days = DAY15_TO_20
         next_week_focus = (
-            "Day 22: strengthen trust signals across security and reliability entry points.",
-            "Day 23: publish FAQ responses for recurring adoption objections.",
-            "Day 24: cut onboarding time-to-first-success below three minutes.",
+            "Trust assets: strengthen security and reliability entry points.",
+            "Objection handling: publish responses for recurring adoption objections.",
+            "Onboarding optimization: cut time-to-first-success below three minutes.",
         )
     elif week == 2:
         shipped_days = DAY8_TO_13
@@ -486,7 +486,7 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
                 "- [ ] Run `sdetkit weekly-review --week 3 --format text --signals-file docs/artifacts/weekly-review-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json` and verify all planned week-3 items are shipped.",
                 "- [ ] Refresh markdown artifact and attach it to the weekly review notes.",
                 "- [ ] Publish external contributor response summary with owners and SLA.",
-                "- [ ] Confirm Day 22 trust-signal backlog priorities are assigned.",
+                "- [ ] Confirm trust-assets backlog priorities are assigned.",
             ]
         )
         + "\n",
@@ -525,7 +525,7 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
                 "| --- | --- | --- | --- | --- |",
                 f"| Discussions | {discussions} | {discussions_delta} | Community manager | answer open threads and tag good-first-issue candidates |",
                 f"| Stars | {stars} | {stars_delta} | Maintainer on-call | post release highlights and triage incoming watchers |",
-                f"| Blocker fixes | {blocker_fixes} | {blocker_fixes_delta} | QE lead | prioritize unresolved failures before Day 22 hardening |",
+                f"| Blocker fixes | {blocker_fixes} | {blocker_fixes_delta} | QE lead | prioritize unresolved failures before trust-assets hardening |",
             ]
         )
         + "\n",
@@ -556,8 +556,8 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
                 "## Messaging channels",
                 "",
                 "- Engineering sync: share week-3 scorecard + next-week trust-signal focus.",
-                "- OSS community post: publish contributor-response plan and open Day 22-24 asks.",
-                "- Release notes: link Day 18/19/21 artifacts for non-maintainer context.",
+                "- OSS community post: publish contributor-response plan and open trust-assets, objection-handling, and onboarding-optimization asks.",
+                "- Release notes: link reliability-evidence, release-readiness, and weekly-review artifacts for non-maintainer context.",
             ]
         )
         + "\n",

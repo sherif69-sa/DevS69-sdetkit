@@ -12,7 +12,7 @@ This page is the dedicated **full Diff-to-Decision view**.
 | Audit | `python -m sdetkit repo audit --format markdown` | Quality findings |
 | Secure | `python -m sdetkit security report --format sarif --output build/security.sarif` | SARIF output |
 | Publish evidence | `python -m sdetkit evidence-assets --execute --strict --format markdown --output docs/artifacts/evidence-assets-sample.md` | Shareable evidence pack |
-| Decide | `python -m sdetkit release-narrative --format markdown --output docs/artifacts/release-communications-sample.md` | Release decision narrative |
+| Decide | `python -m sdetkit release-communications --format markdown --output docs/artifacts/release-communications-sample.md` | Release decision narrative |
 
 ## Live + auto-updated signals
 

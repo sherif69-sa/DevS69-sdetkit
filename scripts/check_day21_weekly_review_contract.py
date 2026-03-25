@@ -9,7 +9,7 @@ def main() -> int:
     required = [
         ROOT / "docs/impact-20-ultra-upgrade-report.md",
         ROOT / "docs/impact-21-ultra-upgrade-report.md",
-        ROOT / "docs/artifacts/day20-release-narrative-sample.md",
+        ROOT / "docs/artifacts/release-communications-sample.md",
         ROOT / "docs/artifacts/day21-growth-signals.json",
         ROOT / "docs/artifacts/day21-weekly-review-sample.md",
     ]
