@@ -8,29 +8,29 @@ DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-startup-small-team.md")
 DAY12_REPORT = Path("docs/impact-12-ultra-upgrade-report.md")
-DAY12_ARTIFACT = Path("docs/artifacts/day12-startup-use-case-sample.md")
-DAY12_PACK_CI = Path("docs/artifacts/day12-startup-pack/startup-day12-ci.yml")
+DAY12_ARTIFACT = Path("docs/artifacts/startup-readiness-sample.md")
+DAY12_PACK_CI = Path("docs/artifacts/startup-readiness-pack/startup-day12-ci.yml")
 
 README_EXPECTED = [
-    "## 🚀 Day 12 ultra: startup/small-team use-case page",
-    "python -m sdetkit startup-use-case --format text --strict",
-    "python -m sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
+    "## Startup readiness",
+    "python -m sdetkit startup-readiness --format text --strict",
+    "python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
     "python scripts/check_startup_readiness_contract.py",
     "docs/impact-12-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [
-    "## Day 12 ultra upgrades (startup/small-team use-case page)",
+    "## Startup readiness",
     "startup + small-team workflow",
-    "sdetkit startup-use-case --format text --strict",
-    "sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
-    "artifacts/day12-startup-use-case-sample.md",
+    "sdetkit startup-readiness --format text --strict",
+    "sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
+    "artifacts/startup-readiness-sample.md",
 ]
 
 DOCS_CLI_EXPECTED = [
-    "## startup-use-case",
-    "sdetkit startup-use-case --format markdown --output docs/artifacts/day12-startup-use-case-sample.md",
-    "sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
+    "## startup-readiness",
+    "sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md",
+    "sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
     "--write-defaults",
 ]
 
@@ -45,22 +45,22 @@ USE_CASE_EXPECTED = [
 ]
 
 REPORT_EXPECTED = [
-    "Day 12 big upgrade",
-    "python -m sdetkit startup-use-case --format json --strict",
-    "python -m sdetkit startup-use-case --write-defaults --format json --strict",
-    "python -m sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
+    "Startup readiness",
+    "python -m sdetkit startup-readiness --format json --strict",
+    "python -m sdetkit startup-readiness --write-defaults --format json --strict",
+    "python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
     "scripts/check_startup_readiness_contract.py",
 ]
 
 ARTIFACT_EXPECTED = [
-    "# Day 12 startup use-case page",
+    "# Startup readiness",
     "- Score: **100.0** (14/14)",
-    "sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
+    "sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
 ]
 
 PACK_CI_EXPECTED = [
     "name: startup-quality-fast-lane",
-    "python -m sdetkit startup-use-case --format json --strict",
+    "python -m sdetkit startup-readiness --format json --strict",
 ]
 
 
@@ -104,12 +104,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day12-startup-use-case-contract check failed:", file=sys.stderr)
+        print("startup-readiness-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day12-startup-use-case-contract check passed")
+    print("startup-readiness-contract check passed")
     return 0
 
 

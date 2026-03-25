@@ -42,7 +42,7 @@ Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wi
 ## Inputs from Cycles 25-27
 
 - Day 25: `docs/artifacts/day25-community-pack/day25-community-summary.json`
-- Day 26: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
+- External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
 - Day 27: `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
 
 ## Closeout checklist

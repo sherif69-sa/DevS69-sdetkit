@@ -9,7 +9,7 @@ from sdetkit import onboarding_time_upgrade as otu
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 24 onboarding-time-upgrade contract."
+        description="Validate onboarding-optimization contract."
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")

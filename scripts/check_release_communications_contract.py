@@ -25,7 +25,7 @@ DAY20_EVIDENCE = Path(
 MODULE = Path("src/sdetkit/release_narrative.py")
 
 README_EXPECTED = [
-    "## ✍️ Day 20 ultra: release narrative",
+    "## Release communications",
     "python -m sdetkit release-communications --format json --strict",
     "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
     "python scripts/check_release_communications_contract.py",
@@ -46,13 +46,13 @@ CLI_EXPECTED = [
     "--emit-pack-dir",
 ]
 PAGE_EXPECTED = [
-    "# Release narrative (Day 20)",
+    "# Release communications",
     "## Story inputs",
     "## Fast verification commands",
     "## Execution evidence mode",
     "## Narrative channels",
 ]
-REPORT_EXPECTED = ["Day 20 big upgrade", "strict", "--execute", "validation commands"]
+REPORT_EXPECTED = ["Release communications", "strict", "--execute", "validation commands"]
 SUMMARY_EXPECTED = [
     '"name": "release-communications"',
     '"readiness_label":',

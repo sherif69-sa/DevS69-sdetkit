@@ -8,33 +8,33 @@ DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-enterprise-regulated.md")
 DAY13_REPORT = Path("docs/impact-13-ultra-upgrade-report.md")
-DAY13_ARTIFACT = Path("docs/artifacts/day13-enterprise-use-case-sample.md")
-DAY13_PACK_CI = Path("docs/artifacts/day13-enterprise-pack/enterprise-day13-ci.yml")
-DAY13_EVIDENCE = Path("docs/artifacts/day13-enterprise-pack/evidence/day13-execution-summary.json")
+DAY13_ARTIFACT = Path("docs/artifacts/enterprise-readiness-sample.md")
+DAY13_PACK_CI = Path("docs/artifacts/enterprise-readiness-pack/enterprise-day13-ci.yml")
+DAY13_EVIDENCE = Path("docs/artifacts/enterprise-readiness-pack/evidence/day13-execution-summary.json")
 
 README_EXPECTED = [
-    "## 🏢 Day 13 ultra: enterprise/regulated use-case page",
-    "python -m sdetkit enterprise-use-case --format text --strict",
-    "python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-    "python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+    "## Enterprise readiness",
+    "python -m sdetkit enterprise-readiness --format text --strict",
+    "python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
+    "python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
     "python scripts/check_enterprise_readiness_contract.py",
     "docs/impact-13-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [
-    "## Day 13 ultra upgrades (enterprise/regulated use-case page)",
+    "## Enterprise readiness",
     "enterprise + regulated workflow",
-    "sdetkit enterprise-use-case --format text --strict",
-    "sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-    "sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
-    "artifacts/day13-enterprise-use-case-sample.md",
+    "sdetkit enterprise-readiness --format text --strict",
+    "sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
+    "sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
+    "artifacts/enterprise-readiness-sample.md",
 ]
 
 DOCS_CLI_EXPECTED = [
-    "## enterprise-use-case",
-    "sdetkit enterprise-use-case --format markdown --output docs/artifacts/day13-enterprise-use-case-sample.md",
-    "sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-    "sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+    "## enterprise-readiness",
+    "sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md",
+    "sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
+    "sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
     "--write-defaults",
     "--evidence-dir",
 ]
@@ -50,25 +50,25 @@ USE_CASE_EXPECTED = [
 ]
 
 REPORT_EXPECTED = [
-    "Day 13 big upgrade",
-    "python -m sdetkit enterprise-use-case --format json --strict",
-    "python -m sdetkit enterprise-use-case --write-defaults --format json --strict",
-    "python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-    "python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+    "Enterprise readiness",
+    "python -m sdetkit enterprise-readiness --format json --strict",
+    "python -m sdetkit enterprise-readiness --write-defaults --format json --strict",
+    "python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
+    "python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
     "scripts/check_enterprise_readiness_contract.py",
 ]
 
 ARTIFACT_EXPECTED = [
-    "# Day 13 enterprise use-case page",
+    "# Enterprise readiness",
     "- Score: **100.0** (15/15)",
-    "sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
-    "sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+    "sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
+    "sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
 ]
 
 PACK_CI_EXPECTED = [
     "name: enterprise-compliance-lane",
-    "python -m sdetkit enterprise-use-case --format json --strict",
-    "python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
+    "python -m sdetkit enterprise-readiness --format json --strict",
+    "python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
 ]
 
 EVIDENCE_EXPECTED = [
@@ -121,12 +121,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day13-enterprise-use-case-contract check failed:", file=sys.stderr)
+        print("enterprise-readiness-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day13-enterprise-use-case-contract check passed")
+    print("enterprise-readiness-contract check passed")
     return 0
 
 
