@@ -44,7 +44,7 @@ Response: run strict mode, emit an objection-handling pack, and attach execution
 python -m sdetkit objection-handling --format json --strict
 python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict
 python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict
-python scripts/check_day23_faq_objections_contract.py
+python scripts/check_objection_handling_contract.py
 ```
 
 ## Escalation and rollout policy

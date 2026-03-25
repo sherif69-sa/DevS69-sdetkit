@@ -28,7 +28,7 @@ README_EXPECTED = [
     "## ✍️ Day 20 ultra: release narrative",
     "python -m sdetkit release-communications --format json --strict",
     "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
-    "python scripts/check_day20_release_narrative_contract.py",
+    "python scripts/check_release_communications_contract.py",
 ]
 INDEX_EXPECTED = [
     "Release communications",

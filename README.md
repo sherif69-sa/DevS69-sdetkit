@@ -320,14 +320,14 @@ python -m sdetkit reliability-evidence-pack --format text
 python -m sdetkit reliability-evidence-pack --format json --strict
 python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict
 python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict
-python scripts/check_day18_reliability_evidence_pack_contract.py
+python scripts/check_reliability_evidence_pack_contract.py
 
 ## Objection handling
 
 python -m sdetkit objection-handling --format json --strict
 python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict
 python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict
-python scripts/check_day23_faq_objections_contract.py
+python scripts/check_objection_handling_contract.py
 
 ## Policy document paths
 

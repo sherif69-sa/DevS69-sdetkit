@@ -21,7 +21,7 @@
   - `docs/use-cases-enterprise-regulated.md`
 
 - Added the enterprise-readiness contract checker:
-  - `scripts/check_day13_enterprise_use_case_contract.py`
+  - `scripts/check_enterprise_readiness_contract.py`
 
 - Added tests for enterprise command behavior and CLI wiring:
   - `tests/test_enterprise_use_case.py`
@@ -40,7 +40,7 @@
 - `python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict`
 - `python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict`
 - `python -m sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md`
-- `python scripts/check_day13_enterprise_use_case_contract.py`
+- `python scripts/check_enterprise_readiness_contract.py`
 
 ## Output artifacts
 

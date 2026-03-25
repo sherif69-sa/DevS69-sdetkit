@@ -1,4 +1,4 @@
-command: python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evidence
+command: python scripts/check_trust_assets_contract.py --skip-evidence
 returncode: 1
 ok: False
 --- stdout ---
@@ -7,7 +7,7 @@ ok: False
 trust-assets-contract check failed:
  - README.md: missing '## Trust assets'
  - README.md: missing 'python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict'
- - README.md: missing 'python scripts/check_day22_trust_signal_upgrade_contract.py'
+ - README.md: missing 'python scripts/check_trust_assets_contract.py'
  - docs/index.md: missing 'Trust assets'
  - docs/index.md: missing 'artifacts/trust-assets-pack/trust-assets-summary.json'
  - docs/cli.md: missing '## trust-assets'

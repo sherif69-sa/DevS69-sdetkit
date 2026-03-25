@@ -23,13 +23,13 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit release-readiness --format json --strict",
     "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict",
     "python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict",
-    "python scripts/check_day19_release_readiness_board_contract.py",
+    "python scripts/check_release_readiness_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
     "python -m sdetkit release-readiness --format json --strict",
     "python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict",
-    "python scripts/check_day19_release_readiness_board_contract.py --skip-evidence",
+    "python scripts/check_release_readiness_contract.py --skip-evidence",
 ]
 
 _DAY19_DEFAULT_PAGE = """# Release readiness board
@@ -53,7 +53,7 @@ Release readiness composes weekly-review trend health and reliability-evidence p
 python -m sdetkit release-readiness --format json --strict
 python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict
 python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict
-python scripts/check_day19_release_readiness_board_contract.py
+python scripts/check_release_readiness_contract.py
 ```
 
 ## Execution evidence mode

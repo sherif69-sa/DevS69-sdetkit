@@ -1,4 +1,4 @@
-command: python scripts/check_day13_enterprise_use_case_contract.py
+command: python scripts/check_enterprise_readiness_contract.py
 returncode: 0
 ok: True
 --- stdout ---

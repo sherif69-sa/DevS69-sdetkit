@@ -23,7 +23,7 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit reliability-evidence-pack --format json --strict",
     "python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict",
     "python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict",
-    "python scripts/check_day18_reliability_evidence_pack_contract.py",
+    "python scripts/check_reliability_evidence_pack_contract.py",
 ]
 
 _REQUIRED_DAY17_KEYS = ("name", "quality", "contributions")
@@ -55,7 +55,7 @@ The reliability score uses weighted GitHub Actions onboarding and GitLab CI onbo
 python -m sdetkit reliability-evidence-pack --format json --strict
 python -m sdetkit reliability-evidence-pack --emit-pack-dir docs/artifacts/reliability-evidence-pack --format json --strict
 python -m sdetkit reliability-evidence-pack --execute --evidence-dir docs/artifacts/reliability-evidence-pack/evidence --format json --strict
-python scripts/check_day18_reliability_evidence_pack_contract.py
+python scripts/check_reliability_evidence_pack_contract.py
 ```
 
 ## Execution evidence mode
@@ -437,7 +437,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.execute:
         commands = [
             "python -m sdetkit reliability-evidence-pack --format json --strict",
-            "python scripts/check_day18_reliability_evidence_pack_contract.py --skip-evidence",
+            "python scripts/check_reliability_evidence_pack_contract.py --skip-evidence",
             "python -m pytest -q tests/test_cli_help_lists_subcommands.py",
         ]
         results = _execute_commands(commands, timeout_sec=ns.timeout_sec)

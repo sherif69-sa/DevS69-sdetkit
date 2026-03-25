@@ -20,7 +20,7 @@ Trust assets tightens trust posture visibility by keeping reliability badges and
 python -m sdetkit trust-assets --format json --strict
 python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict
 python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict
-python scripts/check_day22_trust_signal_upgrade_contract.py
+python scripts/check_trust_assets_contract.py
 ```
 
 ## Scoring model

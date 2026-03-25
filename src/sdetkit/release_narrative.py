@@ -24,13 +24,13 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit release-communications --format json --strict",
     "python -m sdetkit release-communications --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
     "python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict",
-    "python scripts/check_day20_release_narrative_contract.py",
+    "python scripts/check_release_communications_contract.py",
 ]
 
 _EXECUTION_COMMANDS = [
     "python -m sdetkit release-communications --format json --strict",
     "python -m sdetkit release-communications --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict",
-    "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
+    "python scripts/check_release_communications_contract.py --skip-evidence",
 ]
 
 _DAY20_DEFAULT_PAGE = """# Release communications
@@ -54,7 +54,7 @@ Release communications translates release-readiness evidence into non-maintainer
 python -m sdetkit release-communications --format json --strict
 python -m sdetkit release-communications --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict
 python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict
-python scripts/check_day20_release_narrative_contract.py
+python scripts/check_release_communications_contract.py
 ```
 
 ## Execution evidence mode
@@ -287,7 +287,7 @@ def _execute_commands(root: Path, commands: list[str], timeout_sec: int) -> list
             argv = shlex.split(command)
             if argv and argv[0] == "python":
                 argv[0] = sys.executable
-            if len(argv) >= 2 and argv[1] == "scripts/check_day20_release_narrative_contract.py":
+            if len(argv) >= 2 and argv[1] == "scripts/check_release_communications_contract.py":
                 argv[1] = str(script_root / "scripts" / "check_day20_release_narrative_contract.py")
             proc = subprocess.run(
                 argv,

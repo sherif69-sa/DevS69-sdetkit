@@ -1,4 +1,4 @@
-command: python scripts/check_day19_release_readiness_board_contract.py --skip-evidence
+command: python scripts/check_release_readiness_contract.py --skip-evidence
 returncode: 1
 ok: False
 --- stdout ---
@@ -10,7 +10,7 @@ release-readiness-contract check failed:
  - README.md: missing 'python -m sdetkit release-readiness --format json --strict'
  - README.md: missing 'python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict'
  - README.md: missing 'python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict'
- - README.md: missing 'python scripts/check_day19_release_readiness_board_contract.py'
+ - README.md: missing 'python scripts/check_release_readiness_contract.py'
  - docs/index.md: missing 'Release readiness'
  - docs/index.md: missing 'sdetkit release-readiness --format json --strict'
  - docs/index.md: missing 'artifacts/release-readiness-pack/release-readiness-summary.json'

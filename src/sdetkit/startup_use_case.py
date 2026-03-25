@@ -42,7 +42,7 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
       - run: python -m sdetkit startup-readiness --format json --strict
-      - run: python scripts/check_day12_startup_use_case_contract.py
+      - run: python scripts/check_startup_readiness_contract.py
 """
 
 _DAY12_DEFAULT_PAGE = f"""# Startup + small-team workflow

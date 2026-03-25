@@ -22,12 +22,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit onboarding-optimization --format json --strict",
     "python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/onboarding-optimization-pack --format json --strict",
     "python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/onboarding-optimization-pack/evidence --format json --strict",
-    "python scripts/check_day24_onboarding_time_upgrade_contract.py",
+    "python scripts/check_onboarding_optimization_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit onboarding --format text --platform all",
     "python -m sdetkit onboarding-optimization --format json --strict",
-    "python scripts/check_day24_onboarding_time_upgrade_contract.py --skip-evidence",
+    "python scripts/check_onboarding_optimization_contract.py --skip-evidence",
 ]
 
 _DAY24_DEFAULT_PAGE = """# Onboarding optimization
@@ -50,7 +50,7 @@ An onboarding-optimization pass means a new contributor can complete environment
 python -m sdetkit onboarding-optimization --format json --strict
 python -m sdetkit onboarding-optimization --emit-pack-dir docs/artifacts/onboarding-optimization-pack --format json --strict
 python -m sdetkit onboarding-optimization --execute --evidence-dir docs/artifacts/onboarding-optimization-pack/evidence --format json --strict
-python scripts/check_day24_onboarding_time_upgrade_contract.py
+python scripts/check_onboarding_optimization_contract.py
 ```
 
 ## Time-to-first-success scoring

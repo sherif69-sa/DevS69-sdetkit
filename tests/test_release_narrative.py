@@ -155,7 +155,7 @@ def test_execute_commands_run_inside_requested_root(monkeypatch, tmp_path: Path)
         tmp_path,
         [
             "python -m sdetkit release-communications --format json --strict",
-            "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
+            "python scripts/check_release_communications_contract.py --skip-evidence",
         ],
         5,
     )
@@ -163,4 +163,4 @@ def test_execute_commands_run_inside_requested_root(monkeypatch, tmp_path: Path)
     assert len(rows) == 2
     assert all(call["cwd"] == str(tmp_path) for call in calls)
     assert calls[0]["argv"][0] == sys.executable
-    assert calls[1]["argv"][1].endswith("scripts/check_day20_release_narrative_contract.py")
+    assert calls[1]["argv"][1].endswith("scripts/check_release_communications_contract.py")

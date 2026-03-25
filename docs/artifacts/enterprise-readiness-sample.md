@@ -21,7 +21,7 @@ python -m sdetkit repo audit . --profile enterprise --format json
 python -m sdetkit security report --format text
 python -m sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json
 python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_day13_enterprise_use_case_contract.py
+python scripts/check_enterprise_readiness_contract.py
 ```
 
 ## Missing use-case content

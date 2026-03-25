@@ -19,7 +19,7 @@ python -m sdetkit release-narrative --format json --strict
 python -m sdetkit release-narrative --emit-pack-dir docs/artifacts/release-communications-pack --format json --strict
 python -m sdetkit release-narrative --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict
 python -m sdetkit release-narrative --format markdown --output docs/artifacts/release-communications-sample.md
-python scripts/check_day20_release_narrative_contract.py
+python scripts/check_release_communications_contract.py
 ```
 
 ## Closeout

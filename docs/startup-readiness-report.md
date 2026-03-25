@@ -37,7 +37,7 @@ Startups and small teams need a focused workflow page that converts repository c
 
 - `tests/test_startup_use_case.py`
   - Added coverage for pack emission and updated strict check count assertions.
-- `scripts/check_day12_startup_use_case_contract.py`
+- `scripts/check_startup_readiness_contract.py`
   - Hardened startup-readiness contract checks for pack generation, CI snippet coverage, and docs wiring.
 
 ## Validation checklist
@@ -47,7 +47,7 @@ Startups and small teams need a focused workflow page that converts repository c
 - `python -m sdetkit startup-readiness --write-defaults --format json --strict`
 - `python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict`
 - `python -m sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md`
-- `python scripts/check_day12_startup_use_case_contract.py`
+- `python scripts/check_startup_readiness_contract.py`
 
 ## Artifacts
 

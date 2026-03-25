@@ -17,7 +17,7 @@ README_EXPECTED = [
     "python -m sdetkit enterprise-use-case --format text --strict",
     "python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
     "python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
-    "python scripts/check_day13_enterprise_use_case_contract.py",
+    "python scripts/check_enterprise_readiness_contract.py",
     "docs/impact-13-ultra-upgrade-report.md",
 ]
 
@@ -55,7 +55,7 @@ REPORT_EXPECTED = [
     "python -m sdetkit enterprise-use-case --write-defaults --format json --strict",
     "python -m sdetkit enterprise-use-case --emit-pack-dir docs/artifacts/day13-enterprise-pack --format json --strict",
     "python -m sdetkit enterprise-use-case --execute --evidence-dir docs/artifacts/day13-enterprise-pack/evidence --format json --strict",
-    "scripts/check_day13_enterprise_use_case_contract.py",
+    "scripts/check_enterprise_readiness_contract.py",
 ]
 
 ARTIFACT_EXPECTED = [

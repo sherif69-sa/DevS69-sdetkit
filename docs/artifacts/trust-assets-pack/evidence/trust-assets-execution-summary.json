@@ -22,11 +22,11 @@
     },
     {
       "index": 3,
-      "command": "python scripts/check_day22_trust_signal_upgrade_contract.py --skip-evidence",
+      "command": "python scripts/check_trust_assets_contract.py --skip-evidence",
       "returncode": 1,
       "ok": false,
       "stdout": "",
-      "stderr": "trust-assets-contract check failed:\n - README.md: missing '## Trust assets'\n - README.md: missing 'python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict'\n - README.md: missing 'python scripts/check_day22_trust_signal_upgrade_contract.py'\n - docs/index.md: missing 'Trust assets'\n - docs/index.md: missing 'artifacts/trust-assets-pack/trust-assets-summary.json'\n - docs/cli.md: missing '## trust-assets'\n - docs/cli.md: missing '--readme'\n - docs/cli.md: missing '--docs-index'\n - docs/cli.md: missing '--min-trust-score'\n"
+      "stderr": "trust-assets-contract check failed:\n - README.md: missing '## Trust assets'\n - README.md: missing 'python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict'\n - README.md: missing 'python scripts/check_trust_assets_contract.py'\n - docs/index.md: missing 'Trust assets'\n - docs/index.md: missing 'artifacts/trust-assets-pack/trust-assets-summary.json'\n - docs/cli.md: missing '## trust-assets'\n - docs/cli.md: missing '--readme'\n - docs/cli.md: missing '--docs-index'\n - docs/cli.md: missing '--min-trust-score'\n"
     }
   ]
 }

@@ -14,7 +14,7 @@
     },
     {
       "index": 2,
-      "command": "python scripts/check_day18_reliability_evidence_pack_contract.py --skip-evidence",
+      "command": "python scripts/check_reliability_evidence_pack_contract.py --skip-evidence",
       "returncode": 0,
       "ok": true,
       "stdout": "reliability-evidence-pack-contract check passed\n",

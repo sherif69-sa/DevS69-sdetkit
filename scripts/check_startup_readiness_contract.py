@@ -15,7 +15,7 @@ README_EXPECTED = [
     "## 🚀 Day 12 ultra: startup/small-team use-case page",
     "python -m sdetkit startup-use-case --format text --strict",
     "python -m sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
-    "python scripts/check_day12_startup_use_case_contract.py",
+    "python scripts/check_startup_readiness_contract.py",
     "docs/impact-12-ultra-upgrade-report.md",
 ]
 
@@ -49,7 +49,7 @@ REPORT_EXPECTED = [
     "python -m sdetkit startup-use-case --format json --strict",
     "python -m sdetkit startup-use-case --write-defaults --format json --strict",
     "python -m sdetkit startup-use-case --emit-pack-dir docs/artifacts/day12-startup-pack --format json --strict",
-    "scripts/check_day12_startup_use_case_contract.py",
+    "scripts/check_startup_readiness_contract.py",
 ]
 
 ARTIFACT_EXPECTED = [

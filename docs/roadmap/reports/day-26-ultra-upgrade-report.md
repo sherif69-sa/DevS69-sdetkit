@@ -13,7 +13,7 @@
 python -m sdetkit external-contribution-push --format json --strict
 python -m sdetkit external-contribution-push --emit-pack-dir docs/artifacts/external-contribution-pack --format json --strict
 python -m sdetkit external-contribution-push --execute --evidence-dir docs/artifacts/external-contribution-pack/evidence --format json --strict
-python scripts/check_day26_external_contribution_push_contract.py
+python scripts/check_external_contribution_contract.py
 ```
 
 ## Closeout criteria

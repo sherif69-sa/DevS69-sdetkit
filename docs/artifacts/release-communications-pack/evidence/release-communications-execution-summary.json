@@ -22,7 +22,7 @@
     },
     {
       "index": 3,
-      "command": "python scripts/check_day20_release_narrative_contract.py --skip-evidence",
+      "command": "python scripts/check_release_communications_contract.py --skip-evidence",
       "returncode": 1,
       "ok": false,
       "stdout": "",
