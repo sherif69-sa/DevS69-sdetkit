@@ -45,7 +45,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-continuous-upgrade-cycle8-closeout-summary.json"
+        / "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -58,7 +58,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -126,14 +129,23 @@ def test_cycle9_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-continuous-upgrade-plan.md").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-upgrade-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-upgrade-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-execution-log.md").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/cycle9-pack/cycle9-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-plan.md").exists()
+    assert (
+        tmp_path
+        / "artifacts/cycle9-pack/continuous-upgrade-cycle9-upgrade-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-upgrade-kpi-scorecard.json"
+    ).exists()
+    assert (tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-execution-log.md").exists()
+    assert (tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-delivery-board.md").exists()
+    assert (
+        tmp_path / "artifacts/cycle9-pack/continuous-upgrade-cycle9-validation-commands.md"
+    ).exists()
     execution_summary = tmp_path / "artifacts/cycle9-pack/evidence/cycle9-execution-summary.json"
     assert execution_summary.exists()
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
@@ -167,7 +179,7 @@ def test_cycle9_strict_fails_without_cycle8(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-continuous-upgrade-cycle8-closeout-summary.json"
+        / "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.json"
     ).unlink()
     assert d99.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

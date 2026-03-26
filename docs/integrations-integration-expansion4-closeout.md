@@ -1,6 +1,5 @@
 # Integration Expansion4 Closeout (legacy) — Integration expansion #4 closeout lane
 
-
 Day 68 closes with a major integration upgrade that converts Day 67 outputs into a self-hosted enterprise Tekton reference.
 
 ## Why Integration Expansion4 Closeout matters

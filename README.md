@@ -139,7 +139,6 @@ python -m sdetkit continuous-upgrade-cycle10-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle11-closeout --format json --strict
 ```
 
-
 ## Unified gate architecture (phase 1 foundation)
 
 The repo now treats gate execution as honest profiles instead of ambiguous green lights:
@@ -397,3 +396,16 @@ python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle7-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle7-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle7-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle7-closeout-pack/evidence --format json --strict
 python scripts/check_continuous_upgrade_cycle7_closeout_contract.py
+
+## Continuous upgrade cycle closeout lanes
+- `python -m sdetkit continuous-upgrade-cycle1-closeout --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle1-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle1-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack/evidence --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict`
+
+## Continuous upgrade cycle 8 closeout lane
+- `python -m sdetkit continuous-upgrade-cycle8-closeout --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle8-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle8-closeout-pack --format json --strict`
+- `python -m sdetkit continuous-upgrade-cycle8-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle8-closeout-pack/evidence --format json --strict`

@@ -1,8 +1,5 @@
 # Cycle 3 — Continuous upgrade closeout lane
 
-> Legacy mapping: day93-continuous-upgrade-cycle3-closeout remains a compatibility alias. Use python -m sdetkit continuous-upgrade-cycle3-closeout as the stable command.
-
-
 Cycle 3 closes with a major upgrade that converts Cycle 2 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
 ## Why Continuous Upgrade Cycle3 Closeout matters

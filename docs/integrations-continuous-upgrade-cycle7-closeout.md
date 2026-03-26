@@ -1,8 +1,5 @@
 # Cycle 7 — Continuous upgrade closeout lane
 
-> Legacy mapping: `day97-continuous-upgrade-cycle7-closeout` remains a compatibility alias. Use `python -m sdetkit continuous-upgrade-cycle7-closeout` as the stable command.
-
-
 Cycle 7 closes with a major upgrade that converts Cycle 6 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
 ## Why Cycle 7 matters

@@ -6,7 +6,7 @@
     "docs_page": "docs/integrations-continuous-upgrade-cycle11-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "cycle10_summary": "docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-closeout-summary.json",
-    "cycle10_delivery_board": "docs/artifacts/continuous-upgrade-cycle10-closeout-pack/cycle10-delivery-board.md",
+    "cycle10_delivery_board": "docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-delivery-board.md",
     "continuous_upgrade_plan": "docs/roadmap/plans/continuous-upgrade-cycle11-plan.json"
   },
   "checks": [
@@ -26,19 +26,19 @@
       "check_id": "top10_cycle11_align",
       "weight": 5,
       "passed": true,
-      "evidence": "Cycle 10/Day 100 + Cycle 11 strategy chain"
+      "evidence": "Cycle 10 + Cycle 11 strategy chain"
     },
     {
       "check_id": "cycle10_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-closeout-summary.json"
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-closeout-summary.json"
     },
     {
       "check_id": "cycle10_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle10-closeout-pack/cycle10-delivery-board.md"
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-delivery-board.md"
     },
     {
       "check_id": "cycle10_quality_floor",

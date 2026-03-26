@@ -1,8 +1,5 @@
 # Cycle 6 — Continuous upgrade closeout lane
 
-> Legacy mapping: `day96-continuous-upgrade-cycle6-closeout` remains a compatibility alias. Use `python -m sdetkit continuous-upgrade-cycle6-closeout` as the stable command.
-
-
 Cycle 6 closes with a major upgrade that converts cycle 5 governance scale outcomes into a deterministic publication operating lane.
 
 ## Why cycle 6 matters

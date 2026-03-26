@@ -4,7 +4,7 @@
       "fingerprint": "6b6a043fa9ea4c03494cebe9",
       "line": 245,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/day92_continuous_upgrade_cycle2_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_cycle2_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -28,7 +28,7 @@
       "fingerprint": "9be88be70baceb3e627c835d",
       "line": 249,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/day95_continuous_upgrade_cycle5_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_cycle5_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -36,7 +36,7 @@
       "fingerprint": "15969addd1290d038e3a540d",
       "line": 249,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/day96_continuous_upgrade_cycle6_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_cycle6_closeout.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },

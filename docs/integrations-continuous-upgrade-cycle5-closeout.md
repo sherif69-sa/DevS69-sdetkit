@@ -1,8 +1,5 @@
 # Cycle 5 — Continuous upgrade closeout lane
 
-> Legacy mapping: `day95-continuous-upgrade-cycle5-closeout` remains a compatibility alias. Use `python -m sdetkit continuous-upgrade-cycle5-closeout` as the stable command.
-
-
 Cycle 5 closes with a major upgrade that converts cycle 4 governance scale outcomes into a deterministic publication operating lane.
 
 ## Why cycle 5 matters

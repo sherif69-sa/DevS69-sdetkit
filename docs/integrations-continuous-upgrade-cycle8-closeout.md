@@ -10,8 +10,8 @@ Cycle 8 closes with a major upgrade that converts Cycle 7 continuous-upgrade out
 
 ## Required inputs (Cycle 7)
 
-- `docs/artifacts/continuous-upgrade-cycle7-closeout-pack/cycle7-continuous-upgrade-cycle7-closeout-summary.json`
-- `docs/artifacts/continuous-upgrade-cycle7-closeout-pack/cycle7-delivery-board.md`
+- `docs/artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-closeout-summary.json`
+- `docs/artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle8-plan.json`
 
 ## Cycle 8 command lane

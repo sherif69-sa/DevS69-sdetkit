@@ -23,7 +23,6 @@ python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/art
 python scripts/check_day83_trust_faq_expansion_closeout_contract.py
 ```
 
-
 ## Trust FAQ expansion contract
 
 - Single owner + backup reviewer are assigned for Day 83 trust FAQ expansion execution and signoff.

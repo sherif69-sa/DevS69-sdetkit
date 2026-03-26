@@ -58,7 +58,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/continuous-upgrade-cycle9-closeout-pack/cycle9-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -126,16 +129,30 @@ def test_cycle10_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-continuous-upgrade-plan.md").exists()
     assert (
-        tmp_path / "artifacts/cycle10-pack/cycle10-upgrade-template-upgrade-ledger.json"
+        tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-evidence-brief.md"
     ).exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-upgrade-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-execution-log.md").exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/cycle10-pack/cycle10-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-plan.md").exists()
+    assert (
+        tmp_path
+        / "artifacts/cycle10-pack/continuous-upgrade-cycle10-upgrade-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/cycle10-pack/continuous-upgrade-cycle10-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-upgrade-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/cycle10-pack/continuous-upgrade-cycle10-validation-commands.md"
+    ).exists()
     execution_summary = tmp_path / "artifacts/cycle10-pack/evidence/cycle10-execution-summary.json"
     assert execution_summary.exists()
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))

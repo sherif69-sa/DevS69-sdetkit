@@ -10,6 +10,8 @@ from . import (
     apiget,
     author_problem,
     community_activation,
+    continuous_upgrade_cycle1_closeout,
+    continuous_upgrade_cycle2_closeout,
     continuous_upgrade_cycle3_closeout,
     continuous_upgrade_cycle4_closeout,
     continuous_upgrade_cycle5_closeout,
@@ -82,8 +84,6 @@ from . import (
     day88_governance_priorities_closeout,
     day89_governance_scale_closeout,
     day90_phase3_wrap_publication_closeout,
-    day91_continuous_upgrade_closeout,
-    day92_continuous_upgrade_cycle2_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -685,44 +685,32 @@ Start here:
     )
     d90.set_defaults(cmd="phase3-wrap-publication-closeout")
     d90.add_argument("args", nargs=argparse.REMAINDER)
-    d91 = sub.add_parser(
-        "continuous-upgrade-closeout", aliases=["day91-continuous-upgrade-closeout"]
+    cycle1_parser = sub.add_parser(
+        "continuous-upgrade-cycle1-closeout", aliases=["continuous-upgrade-cycle1-closeout"]
     )
-    d91.set_defaults(cmd="continuous-upgrade-closeout")
-    d91.add_argument("args", nargs=argparse.REMAINDER)
-    d92 = sub.add_parser(
-        "continuous-upgrade-cycle2-closeout", aliases=["day92-continuous-upgrade-cycle2-closeout"]
-    )
-    d92.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
-    d92.add_argument("args", nargs=argparse.REMAINDER)
-    c3 = sub.add_parser(
-        "continuous-upgrade-cycle3-closeout", aliases=["day93-continuous-upgrade-cycle3-closeout"]
-    )
+    cycle1_parser.set_defaults(cmd="continuous-upgrade-cycle1-closeout")
+    cycle1_parser.add_argument("args", nargs=argparse.REMAINDER)
+    cycle2_parser = sub.add_parser("continuous-upgrade-cycle2-closeout")
+    cycle2_parser.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
+    cycle2_parser.add_argument("args", nargs=argparse.REMAINDER)
+    c3 = sub.add_parser("continuous-upgrade-cycle3-closeout")
     c3.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
     c3.add_argument("args", nargs=argparse.REMAINDER)
-    d94 = sub.add_parser(
-        "continuous-upgrade-cycle4-closeout", aliases=["day94-continuous-upgrade-cycle4-closeout"]
-    )
+    d94 = sub.add_parser("continuous-upgrade-cycle4-closeout")
     d94.set_defaults(cmd="continuous-upgrade-cycle4-closeout")
     d94.add_argument("args", nargs=argparse.REMAINDER)
-    d95 = sub.add_parser(
-        "continuous-upgrade-cycle5-closeout", aliases=["day95-continuous-upgrade-cycle5-closeout"]
-    )
+    d95 = sub.add_parser("continuous-upgrade-cycle5-closeout")
     d95.set_defaults(cmd="continuous-upgrade-cycle5-closeout")
     d95.add_argument("args", nargs=argparse.REMAINDER)
-    d96 = sub.add_parser(
-        "continuous-upgrade-cycle6-closeout", aliases=["day96-continuous-upgrade-cycle6-closeout"]
-    )
-    d96.set_defaults(cmd="continuous-upgrade-cycle6-closeout")
-    d96.add_argument("args", nargs=argparse.REMAINDER)
-    d97 = sub.add_parser(
-        "continuous-upgrade-cycle7-closeout", aliases=["day97-continuous-upgrade-cycle7-closeout"]
-    )
+    cycle6_parser = sub.add_parser("continuous-upgrade-cycle6-closeout")
+    cycle6_parser.set_defaults(cmd="continuous-upgrade-cycle6-closeout")
+    cycle6_parser.add_argument("args", nargs=argparse.REMAINDER)
+    d97 = sub.add_parser("continuous-upgrade-cycle7-closeout")
     d97.set_defaults(cmd="continuous-upgrade-cycle7-closeout")
     d97.add_argument("args", nargs=argparse.REMAINDER)
-    d98 = sub.add_parser("continuous-upgrade-cycle8-closeout")
-    d98.set_defaults(cmd="continuous-upgrade-cycle8-closeout")
-    d98.add_argument("args", nargs=argparse.REMAINDER)
+    cycle8_parser = sub.add_parser("continuous-upgrade-cycle8-closeout")
+    cycle8_parser.set_defaults(cmd="continuous-upgrade-cycle8-closeout")
+    cycle8_parser.add_argument("args", nargs=argparse.REMAINDER)
 
     d99 = sub.add_parser("continuous-upgrade-cycle9-closeout")
     d99.set_defaults(cmd="continuous-upgrade-cycle9-closeout")
@@ -1189,39 +1177,33 @@ def main(argv: Sequence[str] | None = None) -> int:
     }:
         return day90_phase3_wrap_publication_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] in {"continuous-upgrade-closeout", "day91-continuous-upgrade-closeout"}:
-        return day91_continuous_upgrade_closeout.main(list(argv[1:]))
+    if argv and argv[0] == "continuous-upgrade-cycle1-closeout":
+        return continuous_upgrade_cycle1_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle2-closeout",
-        "day92-continuous-upgrade-cycle2-closeout",
     }:
-        return day92_continuous_upgrade_cycle2_closeout.main(list(argv[1:]))
+        return continuous_upgrade_cycle2_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle3-closeout",
-        "day93-continuous-upgrade-cycle3-closeout",
     }:
         return continuous_upgrade_cycle3_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle4-closeout",
-        "day94-continuous-upgrade-cycle4-closeout",
     }:
         return continuous_upgrade_cycle4_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle5-closeout",
-        "day95-continuous-upgrade-cycle5-closeout",
     }:
         return continuous_upgrade_cycle5_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle6-closeout",
-        "day96-continuous-upgrade-cycle6-closeout",
     }:
         return continuous_upgrade_cycle6_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle7-closeout",
-        "day97-continuous-upgrade-cycle7-closeout",
     }:
         return continuous_upgrade_cycle7_closeout.main(list(argv[1:]))
     if argv and argv[0] == "continuous-upgrade-cycle8-closeout":
@@ -1625,22 +1607,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd in {"phase3-wrap-publication-closeout", "day90-phase3-wrap-publication-closeout"}:
         return day90_phase3_wrap_publication_closeout.main(ns.args)
 
-    if ns.cmd in {"continuous-upgrade-closeout", "day91-continuous-upgrade-closeout"}:
-        return day91_continuous_upgrade_closeout.main(ns.args)
+    if ns.cmd == "continuous-upgrade-cycle1-closeout":
+        return continuous_upgrade_cycle1_closeout.main(ns.args)
 
-    if ns.cmd in {"continuous-upgrade-cycle2-closeout", "day92-continuous-upgrade-cycle2-closeout"}:
-        return day92_continuous_upgrade_cycle2_closeout.main(ns.args)
+    if ns.cmd == "continuous-upgrade-cycle2-closeout":
+        return continuous_upgrade_cycle2_closeout.main(ns.args)
 
-    if ns.cmd in {"continuous-upgrade-cycle3-closeout", "day93-continuous-upgrade-cycle3-closeout"}:
+    if ns.cmd == "continuous-upgrade-cycle3-closeout":
         return continuous_upgrade_cycle3_closeout.main(ns.args)
 
-    if ns.cmd in {"continuous-upgrade-cycle4-closeout", "day94-continuous-upgrade-cycle4-closeout"}:
+    if ns.cmd == "continuous-upgrade-cycle4-closeout":
         return continuous_upgrade_cycle4_closeout.main(ns.args)
-    if ns.cmd in {"continuous-upgrade-cycle5-closeout", "day95-continuous-upgrade-cycle5-closeout"}:
+    if ns.cmd == "continuous-upgrade-cycle5-closeout":
         return continuous_upgrade_cycle5_closeout.main(ns.args)
-    if ns.cmd in {"continuous-upgrade-cycle6-closeout", "day96-continuous-upgrade-cycle6-closeout"}:
+    if ns.cmd == "continuous-upgrade-cycle6-closeout":
         return continuous_upgrade_cycle6_closeout.main(ns.args)
-    if ns.cmd in {"continuous-upgrade-cycle7-closeout", "day97-continuous-upgrade-cycle7-closeout"}:
+    if ns.cmd == "continuous-upgrade-cycle7-closeout":
         return continuous_upgrade_cycle7_closeout.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle8-closeout":

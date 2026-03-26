@@ -23,7 +23,6 @@ python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/arti
 python scripts/check_day84_evidence_narrative_closeout_contract.py
 ```
 
-
 ## Evidence narrative contract
 
 - Single owner + backup reviewer are assigned for Day 84 evidence narrative execution and signoff.

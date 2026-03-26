@@ -1,6 +1,5 @@
 # Integration Expansion3 Closeout (legacy) — Integration expansion #3 closeout lane
 
-
 Day 67 closes with a major integration upgrade that converts Day 66 integration outputs into an advanced Jenkins reference pipeline.
 
 ## Why Integration Expansion3 Closeout matters

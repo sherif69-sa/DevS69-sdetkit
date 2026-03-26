@@ -23,7 +23,6 @@ python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifa
 python scripts/check_day89_governance_scale_closeout_contract.py
 ```
 
-
 ## Governance scale contract
 
 - Single owner + backup reviewer are assigned for Day 89 governance scale execution and signoff.

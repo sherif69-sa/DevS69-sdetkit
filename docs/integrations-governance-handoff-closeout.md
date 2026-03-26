@@ -23,7 +23,6 @@ python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/arti
 python scripts/check_day87_governance_handoff_closeout_contract.py
 ```
 
-
 ## Governance handoff contract
 
 - Single owner + backup reviewer are assigned for Day 87 governance handoff execution and signoff.

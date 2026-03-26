@@ -23,7 +23,6 @@ python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/ar
 python scripts/check_day82_integration_feedback_closeout_contract.py
 ```
 
-
 ## Integration feedback contract
 
 - Single owner + backup reviewer are assigned for Day 82 integration feedback execution and signoff.

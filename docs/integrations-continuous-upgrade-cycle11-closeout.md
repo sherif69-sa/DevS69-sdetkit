@@ -11,7 +11,7 @@ Cycle 11 closes with a major upgrade that converts Cycle 10 continuous-upgrade o
 ## Required inputs (Cycle 10)
 
 - `docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-closeout-summary.json`
-- `docs/artifacts/continuous-upgrade-cycle10-closeout-pack/cycle10-delivery-board.md`
+- `docs/artifacts/continuous-upgrade-cycle10-closeout-pack/continuous-upgrade-cycle10-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle11-plan.json`
 
 ## Cycle 11 command lane

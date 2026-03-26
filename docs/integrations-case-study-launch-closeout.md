@@ -1,7 +1,5 @@
 # Case Study Launch Closeout
 
-> Legacy mapping: Day 73 remains as history/compatibility alias `day73-case-study-launch-closeout`. Use `python -m sdetkit case-study-launch-closeout` as the stable command.
-
 Day 73 closes with a major upgrade that turns Day 72 publication-quality prep into a published case-study launch pack with rollout safeguards.
 
 ## Why Day 73 matters

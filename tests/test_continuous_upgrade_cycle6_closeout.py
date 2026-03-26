@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import continuous_upgrade_cycle6_closeout as d96
+from sdetkit import continuous_upgrade_cycle6_closeout as c6
 
 
 def _seed_repo(root: Path) -> None:
@@ -29,7 +29,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-cycle6-closeout.md").write_text(
-        d96._CYCLE6_DEFAULT_PAGE, encoding="utf-8"
+        c6._CYCLE6_DEFAULT_PAGE, encoding="utf-8"
     )
     (root / "docs/impact-96-big-upgrade-report.md").write_text(
         "# Cycle 6 report\n", encoding="utf-8"
@@ -99,7 +99,7 @@ def _seed_repo(root: Path) -> None:
 
 def test_cycle6_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = d96.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    rc = c6.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "continuous-upgrade-cycle6-closeout"
@@ -108,7 +108,7 @@ def test_cycle6_json(tmp_path: Path, capsys) -> None:
 
 def test_cycle6_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    rc = d96.main(
+    rc = c6.main(
         [
             "--root",
             str(tmp_path),
@@ -174,8 +174,8 @@ def test_cycle6_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_cycle6_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
     _seed_repo(tmp_path)
-    monkeypatch.setattr(d96, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
-    rc = d96.main(
+    monkeypatch.setattr(c6, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
+    rc = c6.main(
         [
             "--root",
             str(tmp_path),
@@ -203,7 +203,7 @@ def test_cycle6_strict_fails_without_day95(tmp_path: Path) -> None:
         tmp_path
         / "docs/artifacts/continuous-upgrade-cycle5-closeout-pack/continuous-upgrade-cycle5-closeout-summary.json"
     ).unlink()
-    assert d96.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+    assert c6.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
 def test_cycle6_cli_dispatch(tmp_path: Path, capsys) -> None:

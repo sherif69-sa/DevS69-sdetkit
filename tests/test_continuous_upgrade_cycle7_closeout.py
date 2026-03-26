@@ -49,13 +49,13 @@ def _seed_previous_cycle_artifacts(root: Path) -> None:
         ),
         (
             root
-            / "docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack/day96-continuous-upgrade-cycle6-closeout-summary.json",
+            / "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json",
             json.dumps(summary_payload),
         ),
         (
             root
-            / "docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack/day96-delivery-board.md",
-            board_text.replace("Cycle 6", "Day 96").replace("cycle 6", "Day 96"),
+            / "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-delivery-board.md",
+            board_text.replace("Cycle 6", "Cycle 6").replace("cycle 6", "Cycle 6"),
         ),
         (
             root
@@ -237,7 +237,7 @@ def test_cycle7_emit_pack_and_execute(tmp_path: Path) -> None:
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-delivery-board.md",
-            pack / "day97-delivery-board.md",
+            pack / "continuous-upgrade-cycle7-delivery-board.md",
         ]
     )
     _find_existing(
@@ -303,7 +303,7 @@ def test_cycle7_strict_fails_without_previous_cycle(tmp_path: Path) -> None:
         tmp_path
         / "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json",
         tmp_path
-        / "docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack/day96-continuous-upgrade-cycle6-closeout-summary.json",
+        / "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json",
     ]:
         if candidate.exists():
             candidate.unlink()

@@ -1,6 +1,5 @@
 # Integration Expansion Closeout (legacy) — Integration expansion #1 closeout lane
 
-
 Day 64 closes with a major integration upgrade that turns Day 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
 ## Why Integration Expansion Closeout matters

@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-continuous-upgrade-cycle7-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY92_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json"
-_DAY92_BOARD_PATH = "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-delivery-board.md"
+_CYCLE6_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json"
+_CYCLE6_BOARD_PATH = "docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle7-plan.json"
 _SECTION_HEADER = "# Cycle 7 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -199,8 +199,8 @@ def build_continuous_upgrade_cycle7_closeout_summary(root: Path) -> dict[str, An
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    cycle6_summary = root / _DAY92_SUMMARY_PATH
-    cycle6_board = root / _DAY92_BOARD_PATH
+    cycle6_summary = root / _CYCLE6_SUMMARY_PATH
+    cycle6_board = root / _CYCLE6_BOARD_PATH
 
     cycle6_data = _load_json(cycle6_summary)
     cycle6_summary_data = (
@@ -214,7 +214,7 @@ def build_continuous_upgrade_cycle7_closeout_summary(root: Path) -> dict[str, An
 
     board_text = _read_text(cycle6_board)
     board_count = _checklist_count(board_text)
-    board_has_day95 = "Cycle 6" in board_text
+    board_has_cycle6 = "cycle 6" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -274,8 +274,8 @@ def build_continuous_upgrade_cycle7_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "cycle6_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day95,
-            "evidence": {"board_items": board_count, "contains_day95": board_has_day95},
+            "passed": board_count >= 5 and board_has_cycle6,
+            "evidence": {"board_items": board_count, "contains_cycle6": board_has_cycle6},
         },
         {
             "check_id": "page_header",
@@ -351,12 +351,12 @@ def build_continuous_upgrade_cycle7_closeout_summary(root: Path) -> dict[str, An
     if cycle6_score >= 85 and cycle6_strict:
         wins.append(f"Cycle 7 continuity baseline is stable with activation score={cycle6_score}.")
     else:
-        misses.append("Cycle 7 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append("Cycle 6 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Cycle 6 closeout command and raise baseline quality above 85 with strict pass before Cycle 7 lock."
         )
 
-    if board_count >= 5 and board_has_day95:
+    if board_count >= 5 and board_has_cycle6:
         wins.append(
             f"Cycle 6 delivery board integrity validated with {board_count} checklist items."
         )

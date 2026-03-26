@@ -24,7 +24,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 93 — Continuous upgrade closeout lane:** close Day 93 continuous-upgrade quality loop.\n"
+        "- **Cycle 3 — Continuous upgrade closeout lane:** close Cycle 3 continuous-upgrade quality loop.\n"
         "- **Cycle 4 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
         encoding="utf-8",
     )

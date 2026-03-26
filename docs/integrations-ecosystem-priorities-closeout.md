@@ -1,7 +1,5 @@
 # Ecosystem priorities closeout lane
 
-> Legacy mapping: Day 78 remains as history/compatibility alias `day78-ecosystem-priorities-closeout`. Use `python -m sdetkit ecosystem-priorities-closeout` as the stable command.
-
 Day 78 closes with a major upgrade that converts Day 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
 
 ## Why Day 78 matters

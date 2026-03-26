@@ -1,7 +1,5 @@
 # Trust Assets Refresh Closeout
 
-> Legacy mapping: Day 75 remains as history/compatibility alias `day75-trust-assets-refresh-closeout`. Use `python -m sdetkit trust-assets-refresh-closeout` as the stable command.
-
 Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into a governance-grade trust refresh execution pack.
 
 ## Why Day 75 matters

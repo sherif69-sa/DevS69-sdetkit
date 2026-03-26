@@ -23,7 +23,6 @@ python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs
 python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 ```
 
-
 ## Phase-3 wrap publication contract
 
 - Single owner + backup reviewer are assigned for Day 90 phase-3 wrap publication execution and signoff.

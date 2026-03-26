@@ -1,6 +1,5 @@
 # Case Study Prep1 Closeout (legacy) — Case-study prep #1 closeout lane
 
-
 Day 69 closes with a major upgrade that turns Day 68 integration outputs into a measurable reliability case-study prep pack.
 
 ## Why Case Study Prep1 Closeout matters

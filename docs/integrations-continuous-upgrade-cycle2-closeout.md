@@ -1,35 +1,34 @@
-# Continuous Upgrade Cycle 2 Closeout — Continuous upgrade closeout lane
+# Cycle 2 — Continuous upgrade closeout lane
 
-Day 92 starts the next impact by converting Day 91 publication outcomes into a deterministic continuous-upgrade lane.
+Cycle 2 starts the next impact by converting Cycle 1 publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Cycle 2 Closeout matters
 
-- Converts Day 91 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
+- Converts Cycle 1 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 92 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Cycle 2 closeout into the continuous-upgrade backlog.
 
-## Required inputs (Day 91)
+## Required inputs (Cycle 1)
 
-- `docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-continuous-upgrade-closeout-summary.json`
-- `docs/artifacts/day91-continuous-upgrade-closeout-pack/day91-delivery-board.md`
+- `docs/artifacts/continuous-upgrade-cycle1-closeout-pack/continuous-upgrade-cycle1-closeout-summary.json`
+- `docs/artifacts/continuous-upgrade-cycle1-closeout-pack/continuous-upgrade-cycle1-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle2-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack --format json --strict
-python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
-python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
+python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle2_closeout_contract.py
 ```
-
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for Day 92 continuous upgrade execution and signoff.
-- The Day 92 lane references Day 91 outcomes, controls, and trust continuity signals.
-- Every Day 92 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 92 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for Cycle 2 continuous upgrade execution and signoff.
+- The Cycle 2 lane references Cycle 1 outcomes, controls, and trust continuity signals.
+- Every Cycle 2 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 2 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -41,12 +40,12 @@ python scripts/check_day92_continuous_upgrade_cycle2_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 92 evidence brief committed
-- [ ] Day 92 continuous upgrade plan committed
-- [ ] Day 92 upgrade template upgrade ledger exported
-- [ ] Day 92 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Day 92 outcomes
+- [ ] Cycle 2 evidence brief committed
+- [ ] Cycle 2 continuous upgrade plan committed
+- [ ] Cycle 2 upgrade template upgrade ledger exported
+- [ ] Cycle 2 storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Cycle 2 outcomes
 
 ## Scoring model
 
-Day 92 weights continuity + execution contract + upgrade artifact readiness for a 100-point activation score.
+Cycle 2 weights continuity + execution contract + upgrade artifact readiness for a 100-point activation score.

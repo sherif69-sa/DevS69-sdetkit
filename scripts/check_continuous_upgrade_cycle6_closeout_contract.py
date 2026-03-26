@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import continuous_upgrade_cycle6_closeout as d96
+from sdetkit import continuous_upgrade_cycle6_closeout as c6
 
 
 def main() -> int:
@@ -18,7 +18,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d96.build_continuous_upgrade_cycle6_closeout_summary(root)
+    payload = c6.build_continuous_upgrade_cycle6_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):

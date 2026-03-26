@@ -94,7 +94,6 @@ Use this run protocol when you say "start impact X":
 
 This phase now runs as a **impact-by-impact operating plan**. When we say "work cycle 1," we execute that impact's checklist in full and publish the artifacts before moving on.
 
-
 #### Phase-1 non-trivial enforcement gates
 
 - Every impact must ship a production-grade capability upgrade, not messaging-only updates.
@@ -154,7 +153,6 @@ This phase now runs as a **impact-by-impact operating plan**. When we say "work 
 ### Phase 2 (Cycles 31-60): Adoption loops (daily execution)
 
 Phase 2 converts early traction into repeatable growth loops. Each impact ships one concrete asset that increases discoverability, trust, or reuse.
-
 
 #### Phase-2 non-trivial enforcement gates
 
@@ -219,7 +217,6 @@ Phase 2 converts early traction into repeatable growth loops. Each impact ships 
 ### Phase 3 (Cycles 61-90): Ecosystem + trust (daily execution)
 
 Phase 3 turns growth into durable ecosystem trust: stronger community rituals, deeper integrations, and proof-backed outcomes.
-
 
 #### Phase-3 non-trivial enforcement gates
 
@@ -339,7 +336,6 @@ A score of **28+/35 for 3 consecutive months** indicates strong category leaders
 
 - **Cycle 89 — Governance scale closeout lane:** scale Cycle 88 governance priorities outcomes with strict quality gates and deterministic evidence.
 
-
 - **Cycle 92 — Continuous upgrade impact #2 closeout lane:** execute the next deterministic upgrade pass using Cycle 91 continuity evidence.
 - **Cycle 93 — Continuous upgrade impact #3 closeout lane:** extend continuous-upgrade execution with Cycle 92 evidence and impact-3 handoff controls.
 - **Cycle 94 — Continuous upgrade impact #4 closeout lane:** continue continuous-upgrade execution with Cycle 93 evidence and impact-4 handoff controls.
@@ -358,3 +354,8 @@ Community touchpoint + ecosystem priorities strategy chain
 Ecosystem priorities + scale upgrade strategy chain
 
 Scale upgrade + partner outreach strategy chain
+
+- Day 90 + Cycle 1 strategy chain
+- Cycle 1 + Cycle 2 strategy chain
+
+- Cycle 7 + Cycle 8 strategy chain

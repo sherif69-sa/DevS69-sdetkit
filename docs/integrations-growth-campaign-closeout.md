@@ -23,7 +23,6 @@ python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifac
 python scripts/check_day81_growth_campaign_closeout_contract.py
 ```
 
-
 ## Growth campaign contract
 
 - Single owner + backup reviewer are assigned for Day 81 growth campaign execution and signoff.

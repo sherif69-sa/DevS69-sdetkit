@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-continuous-upgrade-cycle5-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY92_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-closeout-summary.json"
-_DAY92_BOARD_PATH = "docs/artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-delivery-board.md"
+_CYCLE4_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-closeout-summary.json"
+_CYCLE4_BOARD_PATH = "docs/artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle5-plan.json"
 _SECTION_HEADER = "# Cycle 5 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -199,22 +199,22 @@ def build_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[str, An
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day90_summary = root / _DAY92_SUMMARY_PATH
-    day90_board = root / _DAY92_BOARD_PATH
+    cycle4_summary = root / _CYCLE4_SUMMARY_PATH
+    cycle4_board = root / _CYCLE4_BOARD_PATH
 
-    day90_data = _load_json(day90_summary)
-    day90_summary_data = (
-        day90_data.get("summary", {}) if isinstance(day90_data.get("summary"), dict) else {}
+    cycle4_data = _load_json(cycle4_summary)
+    cycle4_summary_data = (
+        cycle4_data.get("summary", {}) if isinstance(cycle4_data.get("summary"), dict) else {}
     )
-    day90_score = int(day90_summary_data.get("activation_score", 0) or 0)
-    day90_strict = bool(day90_summary_data.get("strict_pass", False))
-    day90_check_count = (
-        len(day90_data.get("checks", [])) if isinstance(day90_data.get("checks"), list) else 0
+    cycle4_score = int(cycle4_summary_data.get("activation_score", 0) or 0)
+    cycle4_strict = bool(cycle4_summary_data.get("strict_pass", False))
+    cycle4_check_count = (
+        len(cycle4_data.get("checks", [])) if isinstance(cycle4_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day90_board)
+    board_text = _read_text(cycle4_board)
     board_count = _checklist_count(board_text)
-    board_has_day90 = "cycle 4" in board_text.lower() or "day 94" in board_text.lower()
+    board_has_cycle4 = "cycle 4" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -252,30 +252,30 @@ def build_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "cycle4_summary_present",
             "weight": 10,
-            "passed": day90_summary.exists(),
-            "evidence": str(day90_summary),
+            "passed": cycle4_summary.exists(),
+            "evidence": str(cycle4_summary),
         },
         {
             "check_id": "cycle4_delivery_board_present",
             "weight": 7,
-            "passed": day90_board.exists(),
-            "evidence": str(day90_board),
+            "passed": cycle4_board.exists(),
+            "evidence": str(cycle4_board),
         },
         {
             "check_id": "cycle4_quality_floor",
             "weight": 13,
-            "passed": day90_score >= 85 and day90_strict,
+            "passed": cycle4_score >= 85 and cycle4_strict,
             "evidence": {
-                "day90_score": day90_score,
-                "strict_pass": day90_strict,
-                "day90_checks": day90_check_count,
+                "cycle4_score": cycle4_score,
+                "strict_pass": cycle4_strict,
+                "cycle4_checks": cycle4_check_count,
             },
         },
         {
             "check_id": "cycle4_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day90,
-            "evidence": {"board_items": board_count, "contains_cycle4": board_has_day90},
+            "passed": board_count >= 5 and board_has_cycle4,
+            "evidence": {"board_items": board_count, "contains_cycle4": board_has_cycle4},
         },
         {
             "check_id": "page_header",
@@ -341,22 +341,22 @@ def build_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[str, An
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day90_summary.exists() or not day90_board.exists():
-        critical_failures.append("day90_handoff_inputs")
+    if not cycle4_summary.exists() or not cycle4_board.exists():
+        critical_failures.append("cycle4_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day90_score >= 85 and day90_strict:
-        wins.append(f"Cycle 5 continuity baseline is stable with activation score={day90_score}.")
+    if cycle4_score >= 85 and cycle4_strict:
+        wins.append(f"Cycle 5 continuity baseline is stable with activation score={cycle4_score}.")
     else:
-        misses.append("Cycle 5 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append("Cycle 4 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
-            "Re-run cycle 4 closeout command and raise baseline quality above 85 with strict pass before cycle 5 lock."
+            "Re-run Cycle 4 closeout command and raise baseline quality above 85 with strict pass before Cycle 5 lock."
         )
 
-    if board_count >= 5 and board_has_day90:
+    if board_count >= 5 and board_has_cycle4:
         wins.append(
             f"Cycle 4 delivery board integrity validated with {board_count} checklist items."
         )
@@ -415,19 +415,19 @@ def build_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[str, An
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day90_summary": str(day90_summary.relative_to(root))
-            if day90_summary.exists()
-            else str(day90_summary),
-            "day90_delivery_board": str(day90_board.relative_to(root))
-            if day90_board.exists()
-            else str(day90_board),
+            "cycle4_summary": str(cycle4_summary.relative_to(root))
+            if cycle4_summary.exists()
+            else str(cycle4_summary),
+            "cycle4_delivery_board": str(cycle4_board.relative_to(root))
+            if cycle4_board.exists()
+            else str(cycle4_board),
             "continuous_upgrade_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day90_activation_score": day90_score,
-            "day90_checks": day90_check_count,
-            "day90_delivery_board_items": board_count,
+            "cycle4_activation_score": cycle4_score,
+            "cycle4_checks": cycle4_check_count,
+            "cycle4_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

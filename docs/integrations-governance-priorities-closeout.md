@@ -23,7 +23,6 @@ python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/a
 python scripts/check_day88_governance_priorities_closeout_contract.py
 ```
 
-
 ## Governance priorities contract
 
 - Single owner + backup reviewer are assigned for Day 88 governance priorities execution and signoff.

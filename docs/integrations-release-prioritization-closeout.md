@@ -23,7 +23,6 @@ python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/
 python scripts/check_day85_release_prioritization_closeout_contract.py
 ```
 
-
 ## Release prioritization contract
 
 - Single owner + backup reviewer are assigned for Day 85 release prioritization execution and signoff.

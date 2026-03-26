@@ -1,6 +1,5 @@
 # Case Study Prep 2 Closeout (legacy) — Case-study prep #2 closeout lane
 
-
 Day 70 closes with a major upgrade that turns Day 69 integration outputs into a measurable triage-speed case-study prep pack.
 
 ## Why Case Study Prep 2 Closeout matters

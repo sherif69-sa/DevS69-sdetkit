@@ -1,6 +1,5 @@
 # Onboarding Activation Closeout (legacy) — Contributor onboarding activation closeout lane
 
-
 Day 63 closes with a major onboarding activation upgrade that turns Day 62 community operations evidence into deterministic contributor activation, ownership handoffs, and roadmap voting execution.
 
 ## Why Onboarding Activation Closeout matters

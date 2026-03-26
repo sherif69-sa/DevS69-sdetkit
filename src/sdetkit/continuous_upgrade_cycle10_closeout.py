@@ -11,9 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-continuous-upgrade-cycle10-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _PREV_CYCLE_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-closeout-summary.json"
-_PREV_CYCLE_BOARD_PATH = (
-    "docs/artifacts/continuous-upgrade-cycle9-closeout-pack/cycle9-delivery-board.md"
-)
+_PREV_CYCLE_BOARD_PATH = "docs/artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle10-plan.json"
 _SECTION_HEADER = "# Cycle 10 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -81,7 +79,7 @@ Cycle 10 closes with a major upgrade that converts Cycle 9 governance scale outc
 ## Required inputs (Cycle 9)
 
 - `docs/artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-closeout-summary.json`
-- `docs/artifacts/continuous-upgrade-cycle9-closeout-pack/cycle9-delivery-board.md`
+- `docs/artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle10-plan.json`
 
 ## Cycle 10 command lane
@@ -216,7 +214,7 @@ def build_continuous_upgrade_cycle10_closeout_summary(root: Path) -> dict[str, A
 
     board_text = _read_text(cycle9_board)
     board_count = _checklist_count(board_text)
-    board_has_cycle9 = "Cycle 9" in board_text
+    board_has_cycle9 = "cycle 9" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -470,24 +468,30 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "continuous-upgrade-cycle10-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "cycle10-evidence-brief.md", "# Cycle 10 continuous upgrade brief\n")
-    _write(target / "cycle10-continuous-upgrade-plan.md", "# Cycle 10 continuous upgrade plan\n")
     _write(
-        target / "cycle10-upgrade-template-upgrade-ledger.json",
+        target / "continuous-upgrade-cycle10-evidence-brief.md",
+        "# Cycle 10 continuous upgrade brief\n",
+    )
+    _write(target / "continuous-upgrade-cycle10-plan.md", "# Cycle 10 continuous upgrade plan\n")
+    _write(
+        target / "continuous-upgrade-cycle10-upgrade-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
-        target / "cycle10-storyline-outcomes-ledger.json",
+        target / "continuous-upgrade-cycle10-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "cycle10-upgrade-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "cycle10-execution-log.md", "# Cycle 10 execution log\n")
     _write(
-        target / "cycle10-delivery-board.md",
+        target / "continuous-upgrade-cycle10-upgrade-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
+    _write(target / "continuous-upgrade-cycle10-execution-log.md", "# Cycle 10 execution log\n")
+    _write(
+        target / "continuous-upgrade-cycle10-delivery-board.md",
         "\n".join(["# Cycle 10 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "cycle10-validation-commands.md",
+        target / "continuous-upgrade-cycle10-validation-commands.md",
         "# Cycle 10 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 

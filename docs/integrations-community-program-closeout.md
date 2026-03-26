@@ -1,6 +1,5 @@
 # Community Program Closeout (legacy) — Community program setup closeout lane
 
-
 Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
 
 ## Why Community Program Closeout matters

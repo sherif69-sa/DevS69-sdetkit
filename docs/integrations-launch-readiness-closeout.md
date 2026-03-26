@@ -23,7 +23,6 @@ python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifa
 python scripts/check_day86_launch_readiness_closeout_contract.py
 ```
 
-
 ## Launch readiness contract
 
 - Single owner + backup reviewer are assigned for Day 86 launch readiness execution and signoff.

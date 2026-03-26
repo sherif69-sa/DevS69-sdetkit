@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-continuous-upgrade-cycle9-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle8_summary": "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-continuous-upgrade-cycle8-closeout-summary.json",
-    "cycle8_delivery_board": "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-delivery-board.md",
+    "cycle8_summary": "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.json",
+    "cycle8_delivery_board": "docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-delivery-board.md",
     "continuous_upgrade_plan": "docs/roadmap/plans/continuous-upgrade-cycle9-plan.json"
   },
   "checks": [
@@ -32,22 +32,22 @@
       "check_id": "cycle8_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-continuous-upgrade-cycle8-closeout-summary.json"
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.json"
     },
     {
       "check_id": "cycle8_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle8-closeout-pack/cycle8-delivery-board.md"
+      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-delivery-board.md"
     },
     {
       "check_id": "cycle8_quality_floor",
       "weight": 13,
       "passed": true,
       "evidence": {
-        "cycle8_score": 97,
+        "cycle8_score": 100,
         "strict_pass": true,
-        "cycle8_checks": 5
+        "cycle8_checks": 17
       }
     },
     {
@@ -121,8 +121,8 @@
     }
   ],
   "rollup": {
-    "cycle8_activation_score": 97,
-    "cycle8_checks": 5,
+    "cycle8_activation_score": 100,
+    "cycle8_checks": 17,
     "cycle8_delivery_board_items": 5
   },
   "summary": {
@@ -133,7 +133,7 @@
     "strict_pass": true
   },
   "wins": [
-    "Cycle 9 continuity baseline is stable with activation score=97.",
+    "Cycle 9 continuity baseline is stable with activation score=100.",
     "Cycle 9 predecessor delivery board integrity validated with 5 checklist items.",
     "Cycle 9 continuous upgrade dataset is available for governance execution.",
     "Cycle 9 target metrics are non-regressive against baseline metrics.",
