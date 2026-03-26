@@ -349,14 +349,14 @@ case "$mode" in
     profile_notes="Fast local confidence / smoke profile. Honest smoke lane only; not merge truth."
     echo "[quality] Fast/smoke lane for local confidence (not full merge verification)."
     python -m sdetkit.checks run       --profile quick       --repo-root .       --out-dir "$SDETKIT_OUT_DIR"       --format text       --json-output "$QUALITY_VERDICT_JSON"       --markdown-output "$QUALITY_SUMMARY_MD"
-    exit $? 
+    exit $?
     ;;
   verify)
     profile_used="strict"
     profile_notes="Merge/release truth profile. Full verification before merge."
     echo "[quality] Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."
     python -m sdetkit.checks run       --profile strict       --repo-root .       --out-dir "$SDETKIT_OUT_DIR"       --format text       --json-output "$QUALITY_VERDICT_JSON"       --markdown-output "$QUALITY_SUMMARY_MD"
-    exit $? 
+    exit $?
     ;;
   all)
     profile_used="standard"

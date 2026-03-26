@@ -15,7 +15,9 @@ DAY22_PACK_SCORECARD = Path("docs/artifacts/trust-assets-pack/trust-assets-score
 DAY22_PACK_CHECKLIST = Path("docs/artifacts/trust-assets-pack/trust-assets-visibility-checklist.md")
 DAY22_PACK_VALIDATION = Path("docs/artifacts/trust-assets-pack/trust-assets-validation-commands.md")
 DAY22_PACK_ACTION_PLAN = Path("docs/artifacts/trust-assets-pack/trust-assets-action-plan.md")
-DAY22_EVIDENCE = Path("docs/artifacts/trust-assets-pack/evidence/trust-assets-execution-summary.json")
+DAY22_EVIDENCE = Path(
+    "docs/artifacts/trust-assets-pack/evidence/trust-assets-execution-summary.json"
+)
 MODULE = Path("src/sdetkit/trust_signal_upgrade.py")
 
 README_EXPECTED = [

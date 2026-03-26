@@ -74,3 +74,19 @@ Public kit commands are contract-oriented:
 --evidence-dir
 --timeout-sec
 --emit-pack-dir
+
+## release-readiness
+
+```bash
+python -m sdetkit release-readiness --format json --strict
+
+Options:
+
+--reliability-summary
+--weekly-review-summary
+--min-release-score
+--write-defaults
+--execute
+--evidence-dir
+--timeout-sec
+--emit-pack-dir

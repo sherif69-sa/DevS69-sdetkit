@@ -6,19 +6,19 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day93_continuous_upgrade_cycle3_closeout as d93
+from sdetkit import continuous_upgrade_cycle5_closeout as c5
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 93 continuous upgrade closeout contract"
+        description="Validate Cycle 5 continuous upgrade closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d93.build_day93_continuous_upgrade_cycle3_closeout_summary(root)
+    payload = c5.build_continuous_upgrade_cycle5_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):
@@ -33,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day93-continuous-upgrade-cycle3-closeout-pack/evidence/day93-execution-summary.json"
+            / "docs/artifacts/continuous-upgrade-cycle5-closeout-pack/evidence/continuous-upgrade-cycle5-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -43,12 +43,12 @@ def main() -> int:
                 errors.append("evidence total_commands below 3")
 
     if errors:
-        print("day93-continuous-upgrade-cycle3-closeout contract check failed:", file=sys.stderr)
+        print("continuous-upgrade-cycle5-closeout contract check failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("day93-continuous-upgrade-cycle3-closeout contract check passed")
+    print("continuous-upgrade-cycle5-closeout contract check passed")
     return 0
 
 

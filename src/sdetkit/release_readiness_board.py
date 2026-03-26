@@ -32,7 +32,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_release_readiness_contract.py --skip-evidence",
 ]
 
-_DAY19_DEFAULT_PAGE = """# Release readiness board
+_RELEASE_READINESS_DEFAULT_PAGE = """# Release readiness board
 
 Release readiness composes weekly-review trend health and reliability-evidence posture into one release-candidate gate.
 
@@ -90,12 +90,12 @@ def _require_keys(payload: dict[str, Any], keys: tuple[str, ...], label: str) ->
             raise ValueError(f"{label} missing required key: {key}")
 
 
-def _normalize_day14_summary(day14_summary: dict[str, Any]) -> tuple[float, str]:
-    summary = day14_summary.get("summary")
+def _normalize_weekly_review_summary(weekly_review_summary: dict[str, Any]) -> tuple[float, str]:
+    summary = weekly_review_summary.get("summary")
     if isinstance(summary, dict):
         return float(summary.get("score", 0.0)), str(summary.get("status", "unknown"))
 
-    kpis = day14_summary.get("kpis")
+    kpis = weekly_review_summary.get("kpis")
     if isinstance(kpis, dict):
         score = float(kpis.get("completion_rate_percent", 0.0))
         return score, "pass" if score >= 90 else "warn"
@@ -107,7 +107,7 @@ def _normalize_day14_summary(day14_summary: dict[str, Any]) -> tuple[float, str]
 
 def build_release_board(
     reliability_summary: dict[str, Any],
-    day14_summary: dict[str, Any],
+    weekly_review_summary: dict[str, Any],
 ) -> dict[str, Any]:
     _require_keys(reliability_summary, _REQUIRED_RELIABILITY_KEYS, "reliability summary")
     if not isinstance(reliability_summary["summary"], dict):
@@ -118,10 +118,12 @@ def build_release_board(
 
     reliability_score = float(reliability["reliability_score"])
     reliability_gate = str(reliability["gate_status"])
-    day14_score, day14_status = _normalize_day14_summary(day14_summary)
+    weekly_review_score, weekly_review_status = _normalize_weekly_review_summary(
+        weekly_review_summary
+    )
 
-    release_score = round((reliability_score * 0.70) + (day14_score * 0.30), 2)
-    strict_all_green = reliability_gate == "pass" and day14_score >= 90.0
+    release_score = round((reliability_score * 0.70) + (weekly_review_score * 0.30), 2)
+    strict_all_green = reliability_gate == "pass" and weekly_review_score >= 90.0
 
     recommendations: list[str] = []
     if not strict_all_green:
@@ -145,8 +147,8 @@ def build_release_board(
                 "gate_status": reliability_gate,
             },
             "weekly_review": {
-                "score": day14_score,
-                "status": day14_status,
+                "score": weekly_review_score,
+                "status": weekly_review_status,
             },
         },
         "summary": {
@@ -206,7 +208,7 @@ def _emit_pack(path: str, payload: dict[str, Any], root: Path) -> list[str]:
                 "# Release readiness checklist",
                 "",
                 "- [ ] Reliability-evidence gate status is pass.",
-                "- [ ] Day 14 KPI status is pass.",
+                "- [ ] Weekly review status is pass.",
                 "- [ ] Release score is reviewed in the release-readiness review.",
                 "- [ ] Recommendations are assigned and tracked.",
                 "",
@@ -345,7 +347,6 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--weekly-review-summary",
-        "--day14-summary",
         dest="weekly_review_summary",
         default="docs/artifacts/weekly-review-pack/weekly-review-kpi-scorecard.json",
     )
@@ -371,7 +372,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.write_defaults:
         page_path = root / _PAGE_PATH
         page_path.parent.mkdir(parents=True, exist_ok=True)
-        page_path.write_text(_DAY19_DEFAULT_PAGE, encoding="utf-8")
+        page_path.write_text(_RELEASE_READINESS_DEFAULT_PAGE, encoding="utf-8")
 
     page_text = _read(root / _PAGE_PATH)
     missing_sections = [

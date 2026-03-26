@@ -10,11 +10,21 @@ DOCS_CLI = Path("docs/cli.md")
 DAY18_PAGE = Path("docs/reliability-evidence-pack.md")
 DAY18_REPORT = Path("docs/reliability-evidence-report.md")
 DAY18_ARTIFACT = Path("docs/reliability-evidence-pack.md")
-DAY18_PACK_SUMMARY = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json")
-DAY18_PACK_SCORECARD = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-scorecard.md")
-DAY18_PACK_CHECKLIST = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-checklist.md")
-DAY18_PACK_VALIDATION = Path("docs/artifacts/reliability-evidence-pack/reliability-evidence-validation-commands.md")
-DAY18_EVIDENCE = Path("docs/artifacts/reliability-evidence-pack/evidence/reliability-evidence-execution-summary.json")
+DAY18_PACK_SUMMARY = Path(
+    "docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json"
+)
+DAY18_PACK_SCORECARD = Path(
+    "docs/artifacts/reliability-evidence-pack/reliability-evidence-scorecard.md"
+)
+DAY18_PACK_CHECKLIST = Path(
+    "docs/artifacts/reliability-evidence-pack/reliability-evidence-checklist.md"
+)
+DAY18_PACK_VALIDATION = Path(
+    "docs/artifacts/reliability-evidence-pack/reliability-evidence-validation-commands.md"
+)
+DAY18_EVIDENCE = Path(
+    "docs/artifacts/reliability-evidence-pack/evidence/reliability-evidence-execution-summary.json"
+)
 MODULE = Path("src/sdetkit/reliability_evidence_pack.py")
 
 README_EXPECTED = [

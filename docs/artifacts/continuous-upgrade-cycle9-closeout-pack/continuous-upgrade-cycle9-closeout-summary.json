@@ -26,7 +26,7 @@
       "check_id": "top10_cycle9_align",
       "weight": 5,
       "passed": true,
-      "evidence": "Cycle 8/Day 97 + Cycle 9 strategy chain"
+      "evidence": "Cycle 8 + Cycle 9 strategy chain"
     },
     {
       "check_id": "cycle8_summary_present",

@@ -361,7 +361,13 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     ]
     playbook.write_text("\n".join(playbook_lines) + "\n", encoding="utf-8")
 
-    validation_lines = ["# Objection handling validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]
+    validation_lines = [
+        "# Objection handling validation commands",
+        "",
+        "```bash",
+        *_REQUIRED_COMMANDS,
+        "```",
+    ]
     validation.write_text("\n".join(validation_lines) + "\n", encoding="utf-8")
 
     return [
@@ -448,7 +454,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Emit an objection-handling pack into this directory relative to root.",
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Execute deterministic objection-handling command chain."
+        "--execute",
+        action="store_true",
+        help="Execute deterministic objection-handling command chain.",
     )
     parser.add_argument(
         "--evidence-dir",

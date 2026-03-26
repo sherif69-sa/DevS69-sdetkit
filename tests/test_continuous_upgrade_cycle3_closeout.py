@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day93_continuous_upgrade_cycle3_closeout as d93
+from sdetkit import continuous_upgrade_cycle3_closeout as c3
 
 
 def _seed_repo(root: Path) -> None:
@@ -15,27 +15,27 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-continuous-upgrade-cycle3-closeout.md\nday93-continuous-upgrade-cycle3-closeout\n",
+        "docs/integrations-continuous-upgrade-cycle3-closeout.md\ncontinuous-upgrade-cycle3-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "impact-93-big-upgrade-report.md\nintegrations-continuous-upgrade-cycle3-closeout.md\n",
+        "integrations-continuous-upgrade-cycle3-closeout.md\nartifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-closeout-summary.json\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 92 — Continuous upgrade closeout lane:** close Day 92 continuous-upgrade quality loop.\n"
-        "- **Day 93 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
+        "- **Cycle 2 — Continuous upgrade closeout lane:** close cycle 2 continuous-upgrade quality loop.\n"
+        "- **Cycle 3 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-cycle3-closeout.md").write_text(
-        d93._DAY93_DEFAULT_PAGE, encoding="utf-8"
+        (getattr(c3, "_CYCLE3_DEFAULT_PAGE", None) or c3._DAY93_DEFAULT_PAGE), encoding="utf-8"
     )
-    (root / "docs/impact-93-big-upgrade-report.md").write_text(
-        "# Day 93 report\n", encoding="utf-8"
+    (root / "docs/continuous-upgrade-cycle3-report.md").write_text(
+        "# Cycle 3 report\n", encoding="utf-8"
     )
     (root / "scripts").mkdir(parents=True, exist_ok=True)
-    (root / "scripts/check_day93_continuous_upgrade_cycle3_closeout_contract.py").write_text(
+    (root / "scripts/check_continuous_upgrade_cycle3_closeout_contract.py").write_text(
         "from __future__ import annotations\n"
         "\n"
         "if __name__ == '__main__':\n"
@@ -45,7 +45,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-continuous-upgrade-cycle2-closeout-summary.json"
+        / "docs/artifacts/continuous-upgrade-cycle2-closeout-pack/continuous-upgrade-cycle2-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -60,17 +60,17 @@ def _seed_repo(root: Path) -> None:
     )
     board = (
         root
-        / "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-delivery-board.md"
+        / "docs/artifacts/continuous-upgrade-cycle2-closeout-pack/continuous-upgrade-cycle2-delivery-board.md"
     )
     board.write_text(
         "\n".join(
             [
-                "# Day 92 delivery board",
-                "- [ ] Day 92 evidence brief committed",
-                "- [ ] Day 92 continuous upgrade plan committed",
-                "- [ ] Day 92 upgrade template upgrade ledger exported",
-                "- [ ] Day 92 storyline outcomes ledger exported",
-                "- [ ] Next-impact roadmap draft captured from Day 92 outcomes",
+                "# Cycle 2 delivery board",
+                "- [ ] Cycle 2 evidence brief committed",
+                "- [ ] Cycle 2 continuous upgrade plan committed",
+                "- [ ] Cycle 2 template ledger exported",
+                "- [ ] Cycle 2 storyline outcomes ledger exported",
+                "- [ ] Next-impact roadmap draft captured from cycle 2 outcomes",
             ]
         )
         + "\n",
@@ -81,7 +81,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day93-continuous-upgrade-001",
+                "plan_id": "continuous-upgrade-cycle3-001",
                 "contributors": ["maintainers", "release-ops"],
                 "upgrade_channels": ["readme", "docs-index", "cli-lanes"],
                 "baseline": {"strict_pass_rate": 0.9, "doc_link_coverage": 0.88},
@@ -97,26 +97,26 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day93_json(tmp_path: Path, capsys) -> None:
+def test_cycle3_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = d93.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    rc = c3.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "continuous-upgrade-cycle3-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day93_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_cycle3_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    rc = d93.main(
+    rc = c3.main(
         [
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day93-pack",
+            "artifacts/continuous-upgrade-cycle3-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day93-pack/evidence",
+            "artifacts/continuous-upgrade-cycle3-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -124,61 +124,92 @@ def test_day93_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-cycle3-closeout-summary.json"
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-cycle3-closeout-summary.md"
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-continuous-upgrade-plan.md").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-upgrade-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-upgrade-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day93-pack/day93-validation-commands.md").exists()
-    execution_summary = tmp_path / "artifacts/day93-pack/evidence/day93-execution-summary.json"
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-evidence-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-plan.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-template-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-validation-commands.md"
+    ).exists()
+    execution_summary = (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/evidence/continuous-upgrade-cycle3-execution-summary.json"
+    )
     assert execution_summary.exists()
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
     assert execution_data["failed_commands"] == 0
     assert execution_data["strict_pass"] is True
 
 
-def test_day93_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
+def test_cycle3_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
     _seed_repo(tmp_path)
-    monkeypatch.setattr(d93, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
-    rc = d93.main(
+    monkeypatch.setattr(c3, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
+    rc = c3.main(
         [
             "--root",
             str(tmp_path),
             "--execute",
             "--evidence-dir",
-            "artifacts/day93-pack/evidence",
+            "artifacts/continuous-upgrade-cycle3-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 1
-    execution_summary = tmp_path / "artifacts/day93-pack/evidence/day93-execution-summary.json"
+    execution_summary = (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle3-pack/evidence/continuous-upgrade-cycle3-execution-summary.json"
+    )
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
     assert execution_data["failed_commands"] == 1
     assert execution_data["strict_pass"] is False
 
 
-def test_day93_strict_fails_without_day92(tmp_path: Path) -> None:
+def test_cycle3_strict_fails_without_day92(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day92-continuous-upgrade-cycle2-closeout-pack/day92-continuous-upgrade-cycle2-closeout-summary.json"
+        / "docs/artifacts/continuous-upgrade-cycle2-closeout-pack/continuous-upgrade-cycle2-closeout-summary.json"
     ).unlink()
-    assert d93.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+    assert c3.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day93_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cycle3_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
         ["continuous-upgrade-cycle3-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
-    assert "Day 93 continuous upgrade closeout summary" in capsys.readouterr().out
+    assert "Cycle 3 continuous upgrade closeout summary" in capsys.readouterr().out

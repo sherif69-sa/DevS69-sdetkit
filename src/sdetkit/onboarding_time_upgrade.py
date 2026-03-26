@@ -328,7 +328,15 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Onboarding optimization validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        "\n".join(
+            [
+                "# Onboarding optimization validation commands",
+                "",
+                "```bash",
+                *_REQUIRED_COMMANDS,
+                "```",
+            ]
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -381,10 +389,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--write-defaults", action="store_true", help="Create default onboarding optimization page."
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated onboarding-optimization files."
+        "--emit-pack-dir",
+        default="",
+        help="Optional output directory for generated onboarding-optimization files.",
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Run onboarding-optimization command chain and emit evidence logs."
+        "--execute",
+        action="store_true",
+        help="Run onboarding-optimization command chain and emit evidence logs.",
     )
     parser.add_argument(
         "--evidence-dir",

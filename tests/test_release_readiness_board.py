@@ -24,7 +24,7 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path]:
 def _write_page(root: Path) -> None:
     path = root / "docs/release-readiness.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(rrb._DAY19_DEFAULT_PAGE, encoding="utf-8")
+    path.write_text(rrb._RELEASE_READINESS_DEFAULT_PAGE, encoding="utf-8")
 
 
 def test_board_builds_json(tmp_path: Path, capsys) -> None:
@@ -106,7 +106,7 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "Release readiness board" in capsys.readouterr().out
 
 
-def test_board_supports_day14_kpis_payload(tmp_path: Path, capsys) -> None:
+def test_board_supports_weekly_review_payload(tmp_path: Path, capsys) -> None:
     reliability_summary_path = tmp_path / "reliability-summary.json"
     weekly_review_summary_path = tmp_path / "weekly-review-summary.json"
     reliability_summary_path.write_text(

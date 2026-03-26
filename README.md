@@ -348,3 +348,52 @@ python -m sdetkit scale-upgrade-closeout --format json --strict
 ## Partner outreach command lane
 
 python -m sdetkit partner-outreach-closeout --format json --strict
+
+## Release readiness
+
+```bash
+python -m sdetkit release-readiness --format text
+python -m sdetkit release-readiness --format json --strict
+python -m sdetkit release-readiness --emit-pack-dir docs/artifacts/release-readiness-pack --format json --strict
+python -m sdetkit release-readiness --execute --evidence-dir docs/artifacts/release-readiness-pack/evidence --format json --strict
+python scripts/check_release_readiness_contract.py
+```
+
+## Continuous upgrade cycle 6 closeout
+
+python -m sdetkit continuous-upgrade-cycle6-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle6-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle6-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle6-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle6-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle6_closeout_contract.py
+
+## Continuous upgrade cycle 5 closeout
+
+python -m sdetkit continuous-upgrade-cycle5-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle5-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle5-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle5-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle5-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle5_closeout_contract.py
+
+## Continuous upgrade cycle 4 closeout
+
+```bash
+python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle4-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle4_closeout_contract.py
+
+## Continuous upgrade cycle 3 closeout
+
+```bash
+python -m sdetkit continuous-upgrade-cycle3-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle3-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle3-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle3-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle3-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle3_closeout_contract.py
+```
+
+## Continuous upgrade cycle 7 closeout
+
+```bash
+python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle7-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle7-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle7-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle7-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle7_closeout_contract.py

@@ -10,6 +10,11 @@ from . import (
     apiget,
     author_problem,
     community_activation,
+    continuous_upgrade_cycle3_closeout,
+    continuous_upgrade_cycle4_closeout,
+    continuous_upgrade_cycle5_closeout,
+    continuous_upgrade_cycle6_closeout,
+    continuous_upgrade_cycle7_closeout,
     continuous_upgrade_cycle8_closeout,
     continuous_upgrade_cycle9_closeout,
     continuous_upgrade_cycle10_closeout,
@@ -79,11 +84,6 @@ from . import (
     day90_phase3_wrap_publication_closeout,
     day91_continuous_upgrade_closeout,
     day92_continuous_upgrade_cycle2_closeout,
-    day93_continuous_upgrade_cycle3_closeout,
-    day94_continuous_upgrade_cycle4_closeout,
-    day95_continuous_upgrade_cycle5_closeout,
-    day96_continuous_upgrade_cycle6_closeout,
-    day97_continuous_upgrade_cycle7_closeout,
     demo,
     docs_navigation,
     docs_qa,
@@ -695,11 +695,11 @@ Start here:
     )
     d92.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
     d92.add_argument("args", nargs=argparse.REMAINDER)
-    d93 = sub.add_parser(
+    c3 = sub.add_parser(
         "continuous-upgrade-cycle3-closeout", aliases=["day93-continuous-upgrade-cycle3-closeout"]
     )
-    d93.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
-    d93.add_argument("args", nargs=argparse.REMAINDER)
+    c3.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
+    c3.add_argument("args", nargs=argparse.REMAINDER)
     d94 = sub.add_parser(
         "continuous-upgrade-cycle4-closeout", aliases=["day94-continuous-upgrade-cycle4-closeout"]
     )
@@ -1202,28 +1202,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         "continuous-upgrade-cycle3-closeout",
         "day93-continuous-upgrade-cycle3-closeout",
     }:
-        return day93_continuous_upgrade_cycle3_closeout.main(list(argv[1:]))
+        return continuous_upgrade_cycle3_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle4-closeout",
         "day94-continuous-upgrade-cycle4-closeout",
     }:
-        return day94_continuous_upgrade_cycle4_closeout.main(list(argv[1:]))
+        return continuous_upgrade_cycle4_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle5-closeout",
         "day95-continuous-upgrade-cycle5-closeout",
     }:
-        return day95_continuous_upgrade_cycle5_closeout.main(list(argv[1:]))
+        return continuous_upgrade_cycle5_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle6-closeout",
         "day96-continuous-upgrade-cycle6-closeout",
     }:
-        return day96_continuous_upgrade_cycle6_closeout.main(list(argv[1:]))
+        return continuous_upgrade_cycle6_closeout.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle7-closeout",
         "day97-continuous-upgrade-cycle7-closeout",
     }:
-        return day97_continuous_upgrade_cycle7_closeout.main(list(argv[1:]))
+        return continuous_upgrade_cycle7_closeout.main(list(argv[1:]))
     if argv and argv[0] == "continuous-upgrade-cycle8-closeout":
         return continuous_upgrade_cycle8_closeout.main(list(argv[1:]))
 
@@ -1595,53 +1595,53 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd == "partner-outreach-closeout":
         return day80_partner_outreach_closeout.main(ns.args)
 
-    if ns.cmd == "day81-growth-campaign-closeout":
+    if ns.cmd in {"growth-campaign-closeout", "day81-growth-campaign-closeout"}:
         return day81_growth_campaign_closeout.main(ns.args)
 
-    if ns.cmd == "day82-integration-feedback-closeout":
+    if ns.cmd in {"integration-feedback-closeout", "day82-integration-feedback-closeout"}:
         return day82_integration_feedback_closeout.main(ns.args)
 
-    if ns.cmd == "day83-trust-faq-expansion-closeout":
+    if ns.cmd in {"trust-faq-expansion-closeout", "day83-trust-faq-expansion-closeout"}:
         return day83_trust_faq_expansion_closeout.main(ns.args)
 
-    if ns.cmd == "day84-evidence-narrative-closeout":
+    if ns.cmd in {"evidence-narrative-closeout", "day84-evidence-narrative-closeout"}:
         return day84_evidence_narrative_closeout.main(ns.args)
 
-    if ns.cmd == "day85-release-prioritization-closeout":
+    if ns.cmd in {"release-prioritization-closeout", "day85-release-prioritization-closeout"}:
         return day85_release_prioritization_closeout.main(ns.args)
 
-    if ns.cmd == "day86-launch-readiness-closeout":
+    if ns.cmd in {"launch-readiness-closeout", "day86-launch-readiness-closeout"}:
         return day86_launch_readiness_closeout.main(ns.args)
 
-    if ns.cmd == "day87-governance-handoff-closeout":
+    if ns.cmd in {"governance-handoff-closeout", "day87-governance-handoff-closeout"}:
         return day87_governance_handoff_closeout.main(ns.args)
 
-    if ns.cmd == "day88-governance-priorities-closeout":
+    if ns.cmd in {"governance-priorities-closeout", "day88-governance-priorities-closeout"}:
         return day88_governance_priorities_closeout.main(ns.args)
 
-    if ns.cmd == "day89-governance-scale-closeout":
+    if ns.cmd in {"governance-scale-closeout", "day89-governance-scale-closeout"}:
         return day89_governance_scale_closeout.main(ns.args)
 
-    if ns.cmd == "day90-phase3-wrap-publication-closeout":
+    if ns.cmd in {"phase3-wrap-publication-closeout", "day90-phase3-wrap-publication-closeout"}:
         return day90_phase3_wrap_publication_closeout.main(ns.args)
 
-    if ns.cmd == "day91-continuous-upgrade-closeout":
+    if ns.cmd in {"continuous-upgrade-closeout", "day91-continuous-upgrade-closeout"}:
         return day91_continuous_upgrade_closeout.main(ns.args)
 
-    if ns.cmd == "day92-continuous-upgrade-cycle2-closeout":
+    if ns.cmd in {"continuous-upgrade-cycle2-closeout", "day92-continuous-upgrade-cycle2-closeout"}:
         return day92_continuous_upgrade_cycle2_closeout.main(ns.args)
 
-    if ns.cmd == "day93-continuous-upgrade-cycle3-closeout":
-        return day93_continuous_upgrade_cycle3_closeout.main(ns.args)
+    if ns.cmd in {"continuous-upgrade-cycle3-closeout", "day93-continuous-upgrade-cycle3-closeout"}:
+        return continuous_upgrade_cycle3_closeout.main(ns.args)
 
     if ns.cmd in {"continuous-upgrade-cycle4-closeout", "day94-continuous-upgrade-cycle4-closeout"}:
-        return day94_continuous_upgrade_cycle4_closeout.main(ns.args)
+        return continuous_upgrade_cycle4_closeout.main(ns.args)
     if ns.cmd in {"continuous-upgrade-cycle5-closeout", "day95-continuous-upgrade-cycle5-closeout"}:
-        return day95_continuous_upgrade_cycle5_closeout.main(ns.args)
+        return continuous_upgrade_cycle5_closeout.main(ns.args)
     if ns.cmd in {"continuous-upgrade-cycle6-closeout", "day96-continuous-upgrade-cycle6-closeout"}:
-        return day96_continuous_upgrade_cycle6_closeout.main(ns.args)
+        return continuous_upgrade_cycle6_closeout.main(ns.args)
     if ns.cmd in {"continuous-upgrade-cycle7-closeout", "day97-continuous-upgrade-cycle7-closeout"}:
-        return day97_continuous_upgrade_cycle7_closeout.main(ns.args)
+        return continuous_upgrade_cycle7_closeout.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle8-closeout":
         return continuous_upgrade_cycle8_closeout.main(ns.args)

@@ -8,39 +8,37 @@ import sys
 from pathlib import Path
 from typing import Any
 
-_PAGE_PATH = "docs/integrations-continuous-upgrade-cycle5-closeout.md"
+_PAGE_PATH = "docs/integrations-continuous-upgrade-cycle4-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY92_SUMMARY_PATH = "docs/artifacts/day94-continuous-upgrade-cycle4-closeout-pack/day94-continuous-upgrade-cycle4-closeout-summary.json"
-_DAY92_BOARD_PATH = (
-    "docs/artifacts/day94-continuous-upgrade-cycle4-closeout-pack/day94-delivery-board.md"
-)
-_PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle5-plan.json"
-_SECTION_HEADER = "# Day 95 \u2014 Continuous upgrade closeout lane"
+_DAY92_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-closeout-summary.json"
+_DAY92_BOARD_PATH = "docs/artifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-delivery-board.md"
+_PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle4-plan.json"
+_SECTION_HEADER = "# Cycle 4 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 95 matters",
-    "## Required inputs (Day 94)",
-    "## Day 95 command lane",
+    "## Why Cycle 4 matters",
+    "## Required inputs (Cycle 3)",
+    "## Cycle 4 command lane",
     "## Continuous upgrade contract",
     "## Continuous upgrade quality checklist",
-    "## Day 95 delivery board",
+    "## Cycle 4 delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day95-continuous-upgrade-cycle5-closeout --format json --strict",
-    "python -m sdetkit day95-continuous-upgrade-cycle5-closeout --emit-pack-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack --format json --strict",
-    "python -m sdetkit day95-continuous-upgrade-cycle5-closeout --execute --evidence-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day95_continuous_upgrade_cycle5_closeout_contract.py",
+    "python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle4-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack/evidence --format json --strict",
+    "python scripts/check_continuous_upgrade_cycle4_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day95-continuous-upgrade-cycle5-closeout --format json --strict",
-    "python -m sdetkit day95-continuous-upgrade-cycle5-closeout --emit-pack-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack --format json --strict",
-    "python scripts/check_day95_continuous_upgrade_cycle5_closeout_contract.py --skip-evidence",
+    "python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict",
+    "python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict",
+    "python scripts/check_continuous_upgrade_cycle4_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 95 continuous upgrade execution and signoff.",
-    "The Day 95 lane references Day 94 outcomes, controls, and trust continuity signals.",
-    "Every Day 95 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 95 closeout records continuous upgrade outputs, report publication status, and backlog inputs.",
+    "Single owner + backup reviewer are assigned for Cycle 4 continuous upgrade execution and signoff.",
+    "The Cycle 4 lane references Cycle 3 outcomes, controls, and trust continuity signals.",
+    "Every Cycle 4 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "Cycle 4 closeout records continuous upgrade outputs, report publication status, and backlog inputs.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -50,11 +48,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 95 evidence brief committed",
-    "- [ ] Day 95 continuous upgrade plan committed",
-    "- [ ] Day 95 upgrade template upgrade ledger exported",
-    "- [ ] Day 95 storyline outcomes ledger exported",
-    "- [ ] Next-impact roadmap draft captured from Day 95 outcomes",
+    "- [ ] Cycle 4 evidence brief committed",
+    "- [ ] Cycle 4 continuous upgrade plan committed",
+    "- [ ] Cycle 4 upgrade template upgrade ledger exported",
+    "- [ ] Cycle 4 storyline outcomes ledger exported",
+    "- [ ] Next-impact roadmap draft captured from Cycle 4 outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
     "plan_id",
@@ -68,37 +66,37 @@ _REQUIRED_DATA_KEYS = [
     "cadence_days",
 ]
 
-_DAY95_DEFAULT_PAGE = """# Day 95 \u2014 Continuous upgrade closeout lane
+_CYCLE4_DEFAULT_PAGE = """# Cycle 4 \u2014 Continuous upgrade closeout lane
 
-Day 95 closes with a major upgrade that converts Day 94 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Cycle 4 closes with a major upgrade that converts Cycle 3 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
-## Why Day 95 matters
+## Why Cycle 4 matters
 
-- Converts Day 94 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
+- Converts Cycle 3 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 95 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Cycle 4 closeout into the continuous-upgrade backlog.
 
-## Required inputs (Day 94)
+## Required inputs (Cycle 3)
 
-- `docs/artifacts/day94-continuous-upgrade-cycle4-closeout-pack/day94-continuous-upgrade-cycle4-closeout-summary.json`
-- `docs/artifacts/day94-continuous-upgrade-cycle4-closeout-pack/day94-delivery-board.md`
-- `docs/roadmap/plans/continuous-upgrade-cycle5-plan.json`
+- `docs/artifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-closeout-summary.json`
+- `docs/artifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-delivery-board.md`
+- `docs/roadmap/plans/continuous-upgrade-cycle4-plan.json`
 
-## Day 95 command lane
+## Cycle 4 command lane
 
 ```bash
-python -m sdetkit day95-continuous-upgrade-cycle5-closeout --format json --strict
-python -m sdetkit day95-continuous-upgrade-cycle5-closeout --emit-pack-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack --format json --strict
-python -m sdetkit day95-continuous-upgrade-cycle5-closeout --execute --evidence-dir docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/evidence --format json --strict
-python scripts/check_day95_continuous_upgrade_cycle5_closeout_contract.py
+python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict
+python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle4-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle4_closeout_contract.py
 ```
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for Day 95 continuous upgrade execution and signoff.
-- The Day 95 lane references Day 94 outcomes, controls, and trust continuity signals.
-- Every Day 95 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 95 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for Cycle 4 continuous upgrade execution and signoff.
+- The Cycle 4 lane references Cycle 3 outcomes, controls, and trust continuity signals.
+- Every Cycle 4 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 4 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -108,17 +106,17 @@ python scripts/check_day95_continuous_upgrade_cycle5_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 95 delivery board
+## Cycle 4 delivery board
 
-- [ ] Day 95 evidence brief committed
-- [ ] Day 95 continuous upgrade plan committed
-- [ ] Day 95 upgrade template upgrade ledger exported
-- [ ] Day 95 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Day 95 outcomes
+- [ ] Cycle 4 evidence brief committed
+- [ ] Cycle 4 continuous upgrade plan committed
+- [ ] Cycle 4 upgrade template upgrade ledger exported
+- [ ] Cycle 4 storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Cycle 4 outcomes
 
 ## Scoring model
 
-Day 95 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Cycle 4 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
 """
 
 
@@ -196,7 +194,7 @@ def _validate_plan_contract(
     return missing_keys, trajectory_issues, owner_issues, hygiene_issues
 
 
-def build_day95_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[str, Any]:
+def build_continuous_upgrade_cycle4_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
@@ -216,7 +214,7 @@ def build_day95_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[s
 
     board_text = _read_text(day90_board)
     board_count = _checklist_count(board_text)
-    board_has_day90 = "Day 94" in board_text
+    board_has_day90 = "cycle 3" in board_text.lower() or "day 93" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -231,25 +229,28 @@ def build_day95_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[s
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day95_command",
+            "check_id": "readme_cycle4_command",
             "weight": 5,
-            "passed": ("day95-continuous-upgrade-cycle5-closeout" in readme_text),
-            "evidence": "README day95 command lane",
+            "passed": ("continuous-upgrade-cycle4-closeout" in readme_text),
+            "evidence": "README cycle4 command lane",
         },
         {
-            "check_id": "docs_index_day95_links",
+            "check_id": "docs_index_cycle4_links",
             "weight": 8,
             "passed": (
-                "impact-95-big-upgrade-report.md" in docs_index_text
-                and "integrations-continuous-upgrade-cycle5-closeout.md" in docs_index_text
+                "integrations-continuous-upgrade-cycle4-closeout.md" in docs_index_text
+                and "continuous-upgrade-cycle4-closeout-summary.json" in docs_index_text
             ),
-            "evidence": "impact-95-big-upgrade-report.md + integrations-continuous-upgrade-cycle5-closeout.md",
+            "evidence": "integrations-continuous-upgrade-cycle4-closeout.md + continuous-upgrade-cycle4-closeout-summary.json",
         },
         {
-            "check_id": "top10_day95_align",
+            "check_id": "top10_cycle4_align",
             "weight": 5,
-            "passed": ("Day 94" in top10_text and "Day 95" in top10_text),
-            "evidence": "Day 94 + Day 95 strategy chain",
+            "passed": (
+                ("cycle 3" in top10_text.lower() or "day 93" in top10_text.lower())
+                and ("cycle 4" in top10_text.lower() or "day 94" in top10_text.lower())
+            ),
+            "evidence": "Cycle 3 + Cycle 4 strategy chain",
         },
         {
             "check_id": "day90_summary_present",
@@ -351,67 +352,67 @@ def build_day95_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[s
     handoff_actions: list[str] = []
 
     if day90_score >= 85 and day90_strict:
-        wins.append(f"Day 95 continuity baseline is stable with activation score={day90_score}.")
+        wins.append(f"Cycle 3 continuity baseline is stable with activation score={day90_score}.")
     else:
-        misses.append("Day 95 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append("Cycle 3 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
-            "Re-run Day 94 closeout command and raise baseline quality above 85 with strict pass before Day 95 lock."
+            "Re-run Cycle 3 closeout command and raise baseline quality above 85 with strict pass before Cycle 4 lock."
         )
 
     if board_count >= 5 and board_has_day90:
         wins.append(
-            f"Day 94 delivery board integrity validated with {board_count} checklist items."
+            f"Cycle 3 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 94 delivery board integrity is incomplete (needs >=5 items and Day 94 anchors)."
+            "Cycle 3 delivery board integrity is incomplete (needs >=5 items and Cycle 3 anchors)."
         )
-        handoff_actions.append("Repair Day 94 delivery board entries to include Day 94 anchors.")
+        handoff_actions.append("Repair Cycle 3 delivery board entries to include Cycle 3 anchors.")
 
     if not missing_plan_keys:
-        wins.append("Day 95 continuous upgrade dataset is available for governance execution.")
+        wins.append("Cycle 4 continuous upgrade dataset is available for governance execution.")
     else:
-        misses.append("Day 95 continuous upgrade dataset is missing required keys.")
+        misses.append("Cycle 4 continuous upgrade dataset is missing required keys.")
         handoff_actions.append(
-            "Update docs/roadmap/plans/continuous-upgrade-cycle5-plan.json to restore required keys."
+            "Update docs/roadmap/plans/continuous-upgrade-cycle4-plan.json to restore required keys."
         )
 
     if not plan_trajectory_issues:
-        wins.append("Day 95 target metrics are non-regressive against baseline metrics.")
+        wins.append("Cycle 4 target metrics are non-regressive against baseline metrics.")
     else:
-        misses.append("Day 95 target metrics regress against baseline metrics.")
+        misses.append("Cycle 4 target metrics regress against baseline metrics.")
         handoff_actions.append(
-            "Adjust docs/roadmap/plans/continuous-upgrade-cycle5-plan.json target metrics so each numeric target is >= baseline."
+            "Adjust docs/roadmap/plans/continuous-upgrade-cycle4-plan.json target metrics so each numeric target is >= baseline."
         )
 
     if not plan_owner_issues:
-        wins.append("Day 95 owner coverage includes both execution and rollback ownership.")
+        wins.append("Cycle 4 owner coverage includes both execution and rollback ownership.")
     else:
-        misses.append("Day 95 owner coverage is missing execution and/or rollback ownership.")
+        misses.append("Cycle 4 owner coverage is missing execution and/or rollback ownership.")
         handoff_actions.append(
-            "Assign both owner and rollback_owner in docs/roadmap/plans/continuous-upgrade-cycle5-plan.json."
+            "Assign both owner and rollback_owner in docs/roadmap/plans/continuous-upgrade-cycle4-plan.json."
         )
 
     if not plan_hygiene_issues:
         wins.append(
-            "Day 95 plan hygiene checks passed for contributors/channels/confidence/cadence."
+            "Cycle 4 plan hygiene checks passed for contributors/channels/confidence/cadence."
         )
     else:
         misses.append(
-            "Day 95 plan hygiene checks failed for contributors/channels/confidence/cadence."
+            "Cycle 4 plan hygiene checks failed for contributors/channels/confidence/cadence."
         )
         handoff_actions.append(
-            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/continuous-upgrade-cycle5-plan.json."
+            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/continuous-upgrade-cycle4-plan.json."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 95 continuous upgrade closeout lane is fully complete and ready for continuous-upgrade backlog execution."
+            "Cycle 4 continuous upgrade closeout lane is fully complete and ready for continuous-upgrade backlog execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "day95-continuous-upgrade-cycle5-closeout",
+        "name": "continuous-upgrade-cycle4-closeout",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -446,7 +447,7 @@ def build_day95_continuous_upgrade_cycle5_closeout_summary(root: Path) -> dict[s
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 95 continuous upgrade closeout summary",
+        "Cycle 4 continuous upgrade closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -463,31 +464,35 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day95-continuous-upgrade-cycle5-closeout-summary.json",
+        target / "continuous-upgrade-cycle4-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
+    _write(target / "continuous-upgrade-cycle4-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day95-continuous-upgrade-cycle5-closeout-summary.md", _render_text(payload) + "\n"
+        target / "continuous-upgrade-cycle4-evidence-brief.md",
+        "# Cycle 4 continuous upgrade brief\n",
     )
-    _write(target / "day95-evidence-brief.md", "# Day 95 continuous upgrade brief\n")
-    _write(target / "day95-continuous-upgrade-plan.md", "# Day 95 continuous upgrade plan\n")
+    _write(target / "continuous-upgrade-cycle4-plan.md", "# Cycle 4 continuous upgrade plan\n")
     _write(
-        target / "day95-upgrade-template-upgrade-ledger.json",
+        target / "continuous-upgrade-cycle4-template-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
-        target / "day95-storyline-outcomes-ledger.json",
+        target / "continuous-upgrade-cycle4-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "day95-upgrade-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day95-execution-log.md", "# Day 95 execution log\n")
     _write(
-        target / "day95-delivery-board.md",
-        "\n".join(["# Day 95 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        target / "continuous-upgrade-cycle4-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
+    _write(target / "continuous-upgrade-cycle4-execution-log.md", "# Cycle 4 execution log\n")
+    _write(
+        target / "continuous-upgrade-cycle4-delivery-board.md",
+        "\n".join(["# Cycle 4 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day95-validation-commands.md",
-        "# Day 95 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        target / "continuous-upgrade-cycle4-validation-commands.md",
+        "# Cycle 4 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -516,14 +521,14 @@ def _execute_commands(root: Path, evidence_dir: Path) -> dict[str, Any]:
         "commands": events,
     }
     _write(
-        out_dir / "day95-execution-summary.json",
+        out_dir / "continuous-upgrade-cycle4-execution-summary.json",
         json.dumps(summary, indent=2) + "\n",
     )
     return summary
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 95 continuous upgrade closeout checks")
+    parser = argparse.ArgumentParser(description="Cycle 4 continuous upgrade closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -535,9 +540,9 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY95_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _CYCLE4_DEFAULT_PAGE)
 
-    payload = build_day95_continuous_upgrade_cycle5_closeout_summary(root)
+    payload = build_continuous_upgrade_cycle4_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
@@ -545,7 +550,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/evidence")
+            else Path("docs/artifacts/continuous-upgrade-cycle4-closeout-pack/evidence")
         )
         execution_summary = _execute_commands(root, evidence_dir)
         payload["execution"] = execution_summary

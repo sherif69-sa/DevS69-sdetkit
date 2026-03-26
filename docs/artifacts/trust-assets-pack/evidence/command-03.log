@@ -14,4 +14,3 @@ trust-assets-contract check failed:
  - docs/cli.md: missing '--readme'
  - docs/cli.md: missing '--docs-index'
  - docs/cli.md: missing '--min-trust-score'
-

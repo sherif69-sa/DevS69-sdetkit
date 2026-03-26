@@ -1,35 +1,37 @@
-# Continuous Upgrade Cycle 7 Closeout — Continuous upgrade closeout lane
+# Cycle 7 — Continuous upgrade closeout lane
 
-Continuous Upgrade Cycle 7 continues the next-impact motion by converting prior impact publication outcomes into a deterministic continuous-upgrade lane.
+> Legacy mapping: `day97-continuous-upgrade-cycle7-closeout` remains a compatibility alias. Use `python -m sdetkit continuous-upgrade-cycle7-closeout` as the stable command.
 
-## Why Continuous Upgrade Cycle 7 matters
 
-- Converts Day 95 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
+Cycle 7 closes with a major upgrade that converts Cycle 6 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+
+## Why Cycle 7 matters
+
+- Converts Cycle 6 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 97 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Cycle 7 closeout into the continuous-upgrade backlog.
 
-## Required inputs (Day 95)
+## Required inputs (Cycle 6)
 
-- `docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/day95-continuous-upgrade-cycle5-closeout-summary.json`
-- `docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/day95-delivery-board.md`
+- `docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json`
+- `docs/artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle7-plan.json`
 
-## Command lane
+## Cycle 7 command lane
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict  # legacy alias
-python -m sdetkit continuous-upgrade-cycle7-closeout --emit-pack-dir docs/artifacts/day97-continuous-upgrade-cycle7-closeout-pack --format json --strict
-python -m sdetkit continuous-upgrade-cycle7-closeout --execute --evidence-dir docs/artifacts/day97-continuous-upgrade-cycle7-closeout-pack/evidence --format json --strict
-python scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py
+python -m sdetkit continuous-upgrade-cycle7-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle7-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle7-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle7-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle7_closeout_contract.py
 ```
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy).
-- The Day 97 lane references Day 95 outcomes, controls, and trust continuity signals.
-- Every Day 97 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 97 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for Cycle 7 continuous upgrade execution and signoff.
+- The Cycle 7 lane references Cycle 6 outcomes, controls, and trust continuity signals.
+- Every Cycle 7 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 7 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -39,14 +41,14 @@ python scripts/check_day97_continuous_upgrade_cycle7_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 97 delivery board
+## Cycle 7 delivery board
 
-- [ ] Day 97 evidence brief committed
-- [ ] Day 97 continuous upgrade plan committed
-- [ ] Day 97 upgrade template upgrade ledger exported
-- [ ] Day 97 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Day 97 outcomes
+- [ ] Cycle 7 evidence brief committed
+- [ ] Cycle 7 continuous upgrade plan committed
+- [ ] Cycle 7 upgrade template upgrade ledger exported
+- [ ] Cycle 7 storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Cycle 7 outcomes
 
 ## Scoring model
 
-Day 97 weights continuity + execution contract + upgrade artifact readiness for a 100-point activation score.
+Cycle 7 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

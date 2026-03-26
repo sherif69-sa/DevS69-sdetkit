@@ -331,7 +331,9 @@ def _emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Trust assets validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(
+            ["# Trust assets validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]
+        ),
         encoding="utf-8",
     )
     return [
@@ -436,10 +438,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Create default trust-assets page if missing.",
     )
     p.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated trust-assets files."
+        "--emit-pack-dir",
+        default="",
+        help="Optional output directory for generated trust-assets files.",
     )
     p.add_argument(
-        "--execute", action="store_true", help="Run trust-assets command chain and emit evidence logs."
+        "--execute",
+        action="store_true",
+        help="Run trust-assets command chain and emit evidence logs.",
     )
     p.add_argument(
         "--evidence-dir",

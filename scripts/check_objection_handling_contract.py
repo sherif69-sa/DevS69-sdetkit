@@ -11,11 +11,19 @@ DAY23_PAGE = Path("docs/objection-handling.md")
 DAY23_REPORT = Path("docs/objection-handling-report.md")
 DAY23_ARTIFACT = Path("docs/objection-handling.md")
 DAY23_PACK_SUMMARY = Path("docs/artifacts/objection-handling-pack/objection-handling-summary.json")
-DAY23_PACK_SCORECARD = Path("docs/artifacts/objection-handling-pack/objection-handling-scorecard.md")
-DAY23_PACK_MATRIX = Path("docs/artifacts/objection-handling-pack/objection-handling-response-matrix.md")
+DAY23_PACK_SCORECARD = Path(
+    "docs/artifacts/objection-handling-pack/objection-handling-scorecard.md"
+)
+DAY23_PACK_MATRIX = Path(
+    "docs/artifacts/objection-handling-pack/objection-handling-response-matrix.md"
+)
 DAY23_PACK_PLAYBOOK = Path("docs/artifacts/objection-handling-pack/objection-handling-playbook.md")
-DAY23_PACK_VALIDATION = Path("docs/artifacts/objection-handling-pack/objection-handling-validation-commands.md")
-DAY23_EVIDENCE = Path("docs/artifacts/objection-handling-pack/evidence/objection-handling-execution-summary.json")
+DAY23_PACK_VALIDATION = Path(
+    "docs/artifacts/objection-handling-pack/objection-handling-validation-commands.md"
+)
+DAY23_EVIDENCE = Path(
+    "docs/artifacts/objection-handling-pack/evidence/objection-handling-execution-summary.json"
+)
 MODULE = Path("src/sdetkit/faq_objections.py")
 
 README_EXPECTED = [

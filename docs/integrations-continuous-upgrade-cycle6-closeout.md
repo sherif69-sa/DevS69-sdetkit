@@ -1,35 +1,37 @@
-# Continuous Upgrade Cycle 6 Closeout — Continuous upgrade closeout lane
+# Cycle 6 — Continuous upgrade closeout lane
 
-Continuous Upgrade Cycle 6 continues the next-impact motion by converting prior impact publication outcomes into a deterministic continuous-upgrade lane.
+> Legacy mapping: `day96-continuous-upgrade-cycle6-closeout` remains a compatibility alias. Use `python -m sdetkit continuous-upgrade-cycle6-closeout` as the stable command.
 
-## Why Continuous Upgrade Cycle 6 matters
 
-- Converts Day 95 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
+Cycle 6 closes with a major upgrade that converts cycle 5 governance scale outcomes into a deterministic publication operating lane.
+
+## Why cycle 6 matters
+
+- Converts cycle 5 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 96 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from cycle 6 closeout into the continuous-upgrade backlog.
 
-## Required inputs (Day 95)
+## Required inputs (Cycle 5)
 
-- `docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/day95-continuous-upgrade-cycle5-closeout-summary.json`
-- `docs/artifacts/day95-continuous-upgrade-cycle5-closeout-pack/day95-delivery-board.md`
+- `docs/artifacts/continuous-upgrade-cycle5-closeout-pack/continuous-upgrade-cycle5-closeout-summary.json`
+- `docs/artifacts/continuous-upgrade-cycle5-closeout-pack/continuous-upgrade-cycle5-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle6-plan.json`
 
-## Command lane
+## Cycle 6 command lane
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle6-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle6-closeout --format json --strict  # legacy alias
-python -m sdetkit continuous-upgrade-cycle6-closeout --emit-pack-dir docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack --format json --strict
-python -m sdetkit continuous-upgrade-cycle6-closeout --execute --evidence-dir docs/artifacts/day96-continuous-upgrade-cycle6-closeout-pack/evidence --format json --strict
-python scripts/check_day96_continuous_upgrade_cycle6_closeout_contract.py
+python -m sdetkit continuous-upgrade-cycle6-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle6-closeout-pack --format json --strict
+python -m sdetkit continuous-upgrade-cycle6-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle6-closeout-pack/evidence --format json --strict
+python scripts/check_continuous_upgrade_cycle6_closeout_contract.py
 ```
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for continuous-upgrade execution and signoff (legacy).
-- The Day 96 lane references Day 95 outcomes, controls, and trust continuity signals.
-- Every Day 96 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 96 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for cycle 6 continuous upgrade execution and signoff.
+- The cycle 6 lane references Cycle 5 outcomes, controls, and trust continuity signals.
+- Every cycle 6 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 6 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -39,14 +41,14 @@ python scripts/check_day96_continuous_upgrade_cycle6_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Day 96 delivery board
+## Cycle 6 delivery board
 
-- [ ] Day 96 evidence brief committed
-- [ ] Day 96 continuous upgrade plan committed
-- [ ] Day 96 upgrade template upgrade ledger exported
-- [ ] Day 96 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Day 96 outcomes
+- [ ] Cycle 6 evidence brief committed
+- [ ] Cycle 6 continuous upgrade plan committed
+- [ ] Cycle 6 template ledger exported
+- [ ] Cycle 6 storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from cycle 6 outcomes
 
 ## Scoring model
 
-Day 96 weights continuity + execution contract + upgrade artifact readiness for a 100-point activation score.
+Cycle 6 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

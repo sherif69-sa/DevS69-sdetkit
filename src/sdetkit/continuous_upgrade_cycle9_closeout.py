@@ -248,10 +248,8 @@ def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "top10_cycle9_align",
             "weight": 5,
-            "passed": (
-                ("Cycle 8" in top10_text or "Day 97" in top10_text) and "Cycle 9" in top10_text
-            ),
-            "evidence": "Cycle 8/Day 97 + Cycle 9 strategy chain",
+            "passed": ("cycle 8" in top10_text.lower() and "cycle 9" in top10_text.lower()),
+            "evidence": "Cycle 8 + Cycle 9 strategy chain",
         },
         {
             "check_id": "cycle8_summary_present",

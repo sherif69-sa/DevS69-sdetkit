@@ -7,17 +7,23 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY19_PAGE = Path("docs/release-readiness.md")
-DAY19_REPORT = Path("docs/release-readiness-report.md")
-DAY19_ARTIFACT = Path("docs/release-readiness.md")
-DAY19_PACK_SUMMARY = Path("docs/artifacts/release-readiness-pack/release-readiness-summary.json")
-DAY19_PACK_SCORECARD = Path("docs/artifacts/release-readiness-pack/release-readiness-scorecard.md")
-DAY19_PACK_CHECKLIST = Path("docs/artifacts/release-readiness-pack/release-readiness-checklist.md")
-DAY19_PACK_VALIDATION = Path(
+RELEASE_READINESS_PAGE = Path("docs/release-readiness.md")
+RELEASE_READINESS_REPORT = Path("docs/release-readiness-report.md")
+RELEASE_READINESS_ARTIFACT = Path("docs/release-readiness.md")
+RELEASE_READINESS_PACK_SUMMARY = Path(
+    "docs/artifacts/release-readiness-pack/release-readiness-summary.json"
+)
+RELEASE_READINESS_PACK_SCORECARD = Path(
+    "docs/artifacts/release-readiness-pack/release-readiness-scorecard.md"
+)
+RELEASE_READINESS_PACK_CHECKLIST = Path(
+    "docs/artifacts/release-readiness-pack/release-readiness-checklist.md"
+)
+RELEASE_READINESS_PACK_VALIDATION = Path(
     "docs/artifacts/release-readiness-pack/release-readiness-validation-commands.md"
 )
-DAY19_PACK_DECISION = Path("docs/artifacts/release-readiness-pack/release-decision.md")
-DAY19_EVIDENCE = Path(
+RELEASE_READINESS_PACK_DECISION = Path("docs/artifacts/release-readiness-pack/release-decision.md")
+RELEASE_READINESS_EVIDENCE = Path(
     "docs/artifacts/release-readiness-pack/evidence/release-readiness-execution-summary.json"
 )
 MODULE = Path("src/sdetkit/release_readiness_board.py")
@@ -40,7 +46,7 @@ INDEX_EXPECTED = [
 CLI_EXPECTED = [
     "## release-readiness",
     "--reliability-summary",
-    "--day14-summary",
+    "--weekly-review-summary",
     "--min-release-score",
     "--write-defaults",
     "--execute",
@@ -84,18 +90,18 @@ def main(argv: list[str] | None = None) -> int:
         README,
         DOCS_INDEX,
         DOCS_CLI,
-        DAY19_PAGE,
-        DAY19_REPORT,
-        DAY19_ARTIFACT,
-        DAY19_PACK_SUMMARY,
-        DAY19_PACK_SCORECARD,
-        DAY19_PACK_CHECKLIST,
-        DAY19_PACK_VALIDATION,
-        DAY19_PACK_DECISION,
+        RELEASE_READINESS_PAGE,
+        RELEASE_READINESS_REPORT,
+        RELEASE_READINESS_ARTIFACT,
+        RELEASE_READINESS_PACK_SUMMARY,
+        RELEASE_READINESS_PACK_SCORECARD,
+        RELEASE_READINESS_PACK_CHECKLIST,
+        RELEASE_READINESS_PACK_VALIDATION,
+        RELEASE_READINESS_PACK_DECISION,
         MODULE,
     ]
     if not ns.skip_evidence:
-        required.append(DAY19_EVIDENCE)
+        required.append(RELEASE_READINESS_EVIDENCE)
 
     errors: list[str] = []
     for path in required:
@@ -106,18 +112,22 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{README}: missing '{m}'" for m in _missing(README, README_EXPECTED))
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
-        errors.extend(f"{DAY19_PAGE}: missing '{m}'" for m in _missing(DAY19_PAGE, PAGE_EXPECTED))
         errors.extend(
-            f"{DAY19_REPORT}: missing '{m}'" for m in _missing(DAY19_REPORT, REPORT_EXPECTED)
+            f"{RELEASE_READINESS_PAGE}: missing '{m}'"
+            for m in _missing(RELEASE_READINESS_PAGE, PAGE_EXPECTED)
         )
         errors.extend(
-            f"{DAY19_PACK_SUMMARY}: missing '{m}'"
-            for m in _missing(DAY19_PACK_SUMMARY, SUMMARY_EXPECTED)
+            f"{RELEASE_READINESS_REPORT}: missing '{m}'"
+            for m in _missing(RELEASE_READINESS_REPORT, REPORT_EXPECTED)
+        )
+        errors.extend(
+            f"{RELEASE_READINESS_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(RELEASE_READINESS_PACK_SUMMARY, SUMMARY_EXPECTED)
         )
         if not ns.skip_evidence:
             errors.extend(
-                f"{DAY19_EVIDENCE}: missing '{m}'"
-                for m in _missing(DAY19_EVIDENCE, EVIDENCE_EXPECTED)
+                f"{RELEASE_READINESS_EVIDENCE}: missing '{m}'"
+                for m in _missing(RELEASE_READINESS_EVIDENCE, EVIDENCE_EXPECTED)
             )
 
     if errors:

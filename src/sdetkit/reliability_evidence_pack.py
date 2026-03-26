@@ -155,9 +155,7 @@ def build_reliability_pack(
             "Recover quality stability by re-running quality deltas and closing artifact gaps."
         )
     if reliability_score >= 95 and strict_all_green:
-        recommendations.append(
-            "Reliability posture is strong; keep current CI and review cadence."
-        )
+        recommendations.append("Reliability posture is strong; keep current CI and review cadence.")
 
     return {
         "name": "reliability-evidence-pack",
@@ -246,7 +244,16 @@ def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
 
     validation_path = out_dir / "reliability-evidence-validation-commands.md"
     validation_path.write_text(
-        "\n".join(["# Reliability evidence validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]),
+        "\n".join(
+            [
+                "# Reliability evidence validation commands",
+                "",
+                "```bash",
+                *_REQUIRED_COMMANDS,
+                "```",
+                "",
+            ]
+        ),
         encoding="utf-8",
     )
 

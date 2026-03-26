@@ -6,4 +6,3 @@ ok: False
 --- stderr ---
 release-communications-contract check failed:
  - missing required file: docs/impact-20-ultra-upgrade-report.md
-
