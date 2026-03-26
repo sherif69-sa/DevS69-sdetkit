@@ -1,7 +1,7 @@
 # Frozen CI/tested dependency baseline used to keep `pip install -e .[...]`
 # reproducible across workflows while preserving flexible ranges in pyproject.toml.
 httpx==0.28.1
-build==1.4.1
+build==1.4.2
 check-wheel-contents==0.6.3
 hypothesis==6.151.9
 mkdocs==1.6.1
