@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+        / "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md"
+        root / "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -116,7 +116,7 @@ def test_day51_strict_fails_when_day50_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+        / "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
     ).unlink()
     rc = d51.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

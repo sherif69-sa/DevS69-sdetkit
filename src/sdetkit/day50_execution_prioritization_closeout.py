@@ -25,15 +25,15 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day50-execution-prioritization-closeout --format json --strict",
-    "python -m sdetkit day50-execution-prioritization-closeout --emit-pack-dir docs/artifacts/day50-execution-prioritization-closeout-pack --format json --strict",
-    "python -m sdetkit day50-execution-prioritization-closeout --execute --evidence-dir docs/artifacts/day50-execution-prioritization-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day50_execution_prioritization_closeout_contract.py",
+    "python -m sdetkit execution-prioritization-closeout --format json --strict",
+    "python -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict",
+    "python -m sdetkit execution-prioritization-closeout --execute --evidence-dir docs/artifacts/execution-prioritization-closeout-pack/evidence --format json --strict",
+    "python scripts/check_execution_prioritization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day50-execution-prioritization-closeout --format json --strict",
-    "python -m sdetkit day50-execution-prioritization-closeout --emit-pack-dir docs/artifacts/day50-execution-prioritization-closeout-pack --format json --strict",
-    "python scripts/check_day50_execution_prioritization_closeout_contract.py --skip-evidence",
+    "python -m sdetkit execution-prioritization-closeout --format json --strict",
+    "python -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict",
+    "python scripts/check_execution_prioritization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 50 execution prioritization execution and KPI follow-up.",
@@ -74,10 +74,10 @@ Day 50 closes with a major execution-prioritization upgrade that converts Day 49
 ## Day 50 command lane
 
 ```bash
-python -m sdetkit day50-execution-prioritization-closeout --format json --strict
-python -m sdetkit day50-execution-prioritization-closeout --emit-pack-dir docs/artifacts/day50-execution-prioritization-closeout-pack --format json --strict
-python -m sdetkit day50-execution-prioritization-closeout --execute --evidence-dir docs/artifacts/day50-execution-prioritization-closeout-pack/evidence --format json --strict
-python scripts/check_day50_execution_prioritization_closeout_contract.py
+python -m sdetkit execution-prioritization-closeout --format json --strict
+python -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict
+python -m sdetkit execution-prioritization-closeout --execute --evidence-dir docs/artifacts/execution-prioritization-closeout-pack/evidence --format json --strict
+python scripts/check_execution_prioritization_closeout_contract.py
 ```
 
 ## Execution prioritization closeout contract
@@ -205,10 +205,10 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
             "evidence": "docs/integrations-execution-prioritization-closeout.md",
         },
         {
-            "check_id": "readme_day50_command",
+            "check_id": "readme_execution_prioritization_command",
             "weight": 4,
-            "passed": "day50-execution-prioritization-closeout" in readme_text,
-            "evidence": "day50-execution-prioritization-closeout",
+            "passed": "execution-prioritization-closeout" in readme_text,
+            "evidence": "execution-prioritization-closeout",
         },
         {
             "check_id": "docs_index_day50_links",
@@ -327,7 +327,7 @@ def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[st
         )
 
     return {
-        "name": "day50-execution-prioritization-closeout",
+        "name": "execution-prioritization-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -388,23 +388,23 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
     _write(
-        target / "day50-execution-prioritization-closeout-summary.json",
+        target / "execution-prioritization-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
     _write(
-        target / "day50-execution-prioritization-closeout-summary.md", _render_text(payload) + "\n"
+        target / "execution-prioritization-closeout-summary.md", _render_text(payload) + "\n"
     )
     _write(
-        target / "day50-execution-prioritization-brief.md",
+        target / "execution-prioritization-brief.md",
         "# Day 50 Execution Prioritization Brief\n\n- Objective: close Day 50 with measurable execution-board discipline and prioritized release storytelling gains.\n",
     )
     _write(
-        target / "day50-risk-register.csv",
+        target / "execution-prioritization-risk-register.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "execution-prioritization-floor,qa-lead,docs-owner,2026-03-18T10:00:00Z,docs/integrations-execution-prioritization-closeout.md,python -m sdetkit day50-execution-prioritization-closeout --format json --strict,failed-checks:0,priority-drift\n",
+        "execution-prioritization-floor,qa-lead,docs-owner,2026-03-18T10:00:00Z,docs/integrations-execution-prioritization-closeout.md,python -m sdetkit execution-prioritization-closeout --format json --strict,failed-checks:0,priority-drift\n",
     )
     _write(
-        target / "day50-execution-prioritization-kpi-scorecard.json",
+        target / "execution-prioritization-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -422,15 +422,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day50-execution-log.md",
+        target / "execution-prioritization-execution-log.md",
         "# Day 50 Execution Log\n\n- [ ] 2026-03-18: Record misses, wins, and Day 51 release priorities.\n",
     )
     _write(
-        target / "day50-delivery-board.md",
+        target / "execution-prioritization-delivery-board.md",
         "# Day 50 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day50-validation-commands.md",
+        target / "execution-prioritization-validation-commands.md",
         "# Day 50 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -453,13 +453,13 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day50-execution-summary.json",
+        evidence_path / "execution-prioritization-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 50 execution prioritization closeout checks")
+    parser = argparse.ArgumentParser(description="Execution prioritization closeout checks (legacy alias: day50-execution-prioritization-closeout)")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -487,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day50-execution-prioritization-closeout-pack/evidence")
+            else Path("docs/artifacts/execution-prioritization-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

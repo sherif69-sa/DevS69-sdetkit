@@ -10,8 +10,16 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-snippet-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY50_SUMMARY_PATH = "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+_DAY50_SUMMARY_PATH = (
+    "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
+)
 _DAY50_BOARD_PATH = (
+    "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
+)
+_DAY50_LEGACY_SUMMARY_PATH = (
+    "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json"
+)
+_DAY50_LEGACY_BOARD_PATH = (
     "docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md"
 )
 _SECTION_HEADER = "# Day 51 \u2014 Case snippet closeout lane"
@@ -68,8 +76,8 @@ Day 51 closes with a major case-snippet upgrade that converts Day 50 execution-p
 
 ## Required inputs (Day 50)
 
-- `docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json`
-- `docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md`
+- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`
+- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`
 
 ## Day 51 command lane
 
@@ -142,6 +150,18 @@ def _load_day50(path: Path) -> tuple[float, bool, int]:
     return score, strict, check_count
 
 
+def _resolve_day50_inputs(root: Path) -> tuple[Path, Path]:
+    summary = root / _DAY50_SUMMARY_PATH
+    board = root / _DAY50_BOARD_PATH
+    if summary.exists() and board.exists():
+        return summary, board
+    legacy_summary = root / _DAY50_LEGACY_SUMMARY_PATH
+    legacy_board = root / _DAY50_LEGACY_BOARD_PATH
+    if legacy_summary.exists() and legacy_board.exists():
+        return legacy_summary, legacy_board
+    return summary, board
+
+
 def _contains_all_lines(text: str, required_lines: list[str]) -> list[str]:
     return [line for line in required_lines if line not in text]
 
@@ -174,8 +194,7 @@ def build_day51_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day50_summary = root / _DAY50_SUMMARY_PATH
-    day50_board = root / _DAY50_BOARD_PATH
+    day50_summary, day50_board = _resolve_day50_inputs(root)
     day50_score, day50_strict, day50_check_count = _load_day50(day50_summary)
     board_count, board_has_day50, board_has_day51 = _board_stats(day50_board)
 
