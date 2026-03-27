@@ -13,6 +13,10 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY89_SUMMARY_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
 _DAY89_BOARD_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/phase3-wrap-publication-plan.json"
+_CANONICAL_PACK_DIR = "docs/artifacts/phase3-wrap-publication-closeout-pack"
+_CANONICAL_SUMMARY_NAME = "phase3-wrap-publication-closeout-summary.json"
+_CANONICAL_BOARD_NAME = "phase3-wrap-publication-delivery-board.md"
+_CANONICAL_EVIDENCE_SUMMARY_NAME = "phase3-wrap-publication-execution-summary.json"
 _SECTION_HEADER = "# Day 90 \u2014 Phase-3 wrap publication closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Wrap Publication Closeout matters",
@@ -25,13 +29,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
-    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict",
-    "python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict",
     "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
-    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict",
+    "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict",
     "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -83,8 +87,8 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 
 ```bash
 python -m sdetkit phase3-wrap-publication-closeout --format json --strict
-python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack --format json --strict
-python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence --format json --strict
+python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict
+python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict
 python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
 ```
 
@@ -170,8 +174,8 @@ def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str
         {
             "check_id": "readme_day90_command",
             "weight": 7,
-            "passed": ("day90-phase3-wrap-publication-closeout" in readme_text),
-            "evidence": "README day90 command lane",
+            "passed": ("phase3-wrap-publication-closeout" in readme_text),
+            "evidence": "README phase3-wrap-publication-closeout command lane",
         },
         {
             "check_id": "docs_index_day90_links",
@@ -356,32 +360,32 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day90-phase3-wrap-publication-closeout-summary.json",
+        target / _CANONICAL_SUMMARY_NAME,
         json.dumps(payload, indent=2) + "\n",
     )
     _write(
-        target / "day90-phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n"
+        target / "phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n"
     )
-    _write(target / "day90-evidence-brief.md", "# Day 90 phase-3 wrap publication brief\n")
+    _write(target / "phase3-wrap-publication-evidence-brief.md", "# Day 90 phase-3 wrap publication brief\n")
     _write(
-        target / "day90-phase3-wrap-publication-plan.md", "# Day 90 phase-3 wrap publication plan\n"
+        target / "phase3-wrap-publication-plan.md", "# Day 90 phase-3 wrap publication plan\n"
     )
     _write(
-        target / "day90-narrative-template-upgrade-ledger.json",
+        target / "phase3-wrap-publication-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
-        target / "day90-storyline-outcomes-ledger.json",
+        target / "phase3-wrap-publication-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "day90-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day90-execution-log.md", "# Day 90 execution log\n")
+    _write(target / "phase3-wrap-publication-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "phase3-wrap-publication-execution-log.md", "# Day 90 execution log\n")
     _write(
-        target / "day90-delivery-board.md",
+        target / _CANONICAL_BOARD_NAME,
         "\n".join(["# Day 90 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day90-validation-commands.md",
+        target / "phase3-wrap-publication-validation-commands.md",
         "# Day 90 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -404,7 +408,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day90-execution-summary.json",
+        out_dir / _CANONICAL_EVIDENCE_SUMMARY_NAME,
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -432,7 +436,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence")
+            else Path("docs/artifacts/phase3-wrap-publication-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

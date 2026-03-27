@@ -45,7 +45,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
+        / "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -59,7 +59,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md"
+        root / "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -194,11 +194,11 @@ def test_cycle1_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert execution_data["strict_pass"] is False
 
 
-def test_cycle1_strict_fails_without_day90(tmp_path: Path) -> None:
+def test_cycle1_strict_fails_without_phase3_pack(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
+        / "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
     ).unlink()
     assert c1.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

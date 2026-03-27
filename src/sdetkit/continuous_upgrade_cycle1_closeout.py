@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-continuous-upgrade-cycle1-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY90_SUMMARY_PATH = "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
-_DAY90_BOARD_PATH = (
+_DAY90_SUMMARY_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
+_DAY90_BOARD_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
+_DAY90_LEGACY_SUMMARY_PATH = "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
+_DAY90_LEGACY_BOARD_PATH = (
     "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle1-plan.json"
@@ -77,8 +79,8 @@ Cycle 1 closes with a major upgrade that converts Day 90 governance scale outcom
 
 ## Required inputs (Day 90)
 
-- `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json`
-- `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md`
+- `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json`
+- `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle1-plan.json`
 
 ## Command lane
@@ -210,14 +212,27 @@ def _page_header_ok(page_lines: list[str], expected_cycle: int) -> bool:
     )
 
 
+def _resolve_day90_inputs(root: Path) -> tuple[Path, Path]:
+    summary = root / _DAY90_SUMMARY_PATH
+    board = root / _DAY90_BOARD_PATH
+    if summary.exists() and board.exists():
+        return summary, board
+
+    legacy_summary = root / _DAY90_LEGACY_SUMMARY_PATH
+    legacy_board = root / _DAY90_LEGACY_BOARD_PATH
+    if legacy_summary.exists() and legacy_board.exists():
+        return legacy_summary, legacy_board
+
+    return summary, board
+
+
 def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     page_lines = page_text.splitlines()
     top10_text = _read_text(root / _TOP10_PATH)
-    day90_summary = root / _DAY90_SUMMARY_PATH
-    day90_board = root / _DAY90_BOARD_PATH
+    day90_summary, day90_board = _resolve_day90_inputs(root)
 
     day90_data = _load_json(day90_summary)
     day90_summary_data = (
