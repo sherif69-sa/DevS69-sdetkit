@@ -1,4 +1,4 @@
-# GitHub Actions quickstart (Day 15)
+# GitHub Actions quickstart
 
 A production-ready integration recipe to run `sdetkit` quality checks in GitHub Actions with quickstart, strict, and nightly variants.
 
@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
-      - run: python -m sdetkit github-actions-quickstart --format json --strict
+      - run: python -m sdetkit github-actions-onboarding --format json --strict
       - run: python -m pytest -q tests/test_cli_sdetkit.py tests/test_github_actions_quickstart.py
 ```
 
@@ -53,8 +53,8 @@ jobs:
           python-version: '3.11'
       - run: python -m pip install -r requirements-test.txt -e .
       - run: python -m pytest -q tests/test_cli_sdetkit.py tests/test_github_actions_quickstart.py tests/test_cli_help_lists_subcommands.py
-      - run: python -m sdetkit github-actions-quickstart --format json --strict
-      - run: python scripts/check_day15_github_actions_quickstart_contract.py
+      - run: python -m sdetkit github-actions-onboarding --format json --strict
+      - run: python scripts/check_github_actions_onboarding_contract.py
 ```
 
 ## Nightly reliability variant
@@ -77,7 +77,7 @@ jobs:
       - run: python -m pip install -r requirements-test.txt -e .
       - run: python -m sdetkit doctor --format text
       - run: python -m sdetkit repo audit --format json
-      - run: python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict
+      - run: python -m sdetkit github-actions-onboarding --execute --evidence-dir docs/artifacts/github-actions-onboarding-pack/evidence --format json --strict
 ```
 
 ## Fast verification commands
@@ -88,15 +88,15 @@ Run these locally before opening PRs:
 python -m sdetkit doctor --format text
 python -m sdetkit repo audit --format json
 python -m pytest -q tests/test_github_actions_quickstart.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_day15_github_actions_quickstart_contract.py
-python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/day15-github-pack/evidence --format json --strict
+python scripts/check_github_actions_onboarding_contract.py
+python -m sdetkit github-actions-onboarding --execute --evidence-dir docs/artifacts/github-actions-onboarding-pack/evidence --format json --strict
 ```
 
 ## Multi-channel distribution loop
 
 1. Post merged workflow update in engineering chat with before/after CI timing.
 2. Publish docs update in `docs/index.md` weekly rollout section.
-3. Share one artifact (`day15-execution-summary.json`) in team retro for adoption tracking.
+3. Share one artifact (`github-actions-onboarding-execution-summary.json`) in team retro for adoption tracking.
 
 ## Failure recovery playbook
 
@@ -108,6 +108,6 @@ python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifa
 
 - [ ] Workflow is enabled on `pull_request` and `workflow_dispatch`.
 - [ ] CI installs from `requirements-test.txt` and editable package source.
-- [ ] Day 15 contract check is part of docs validation.
+- [ ] GitHub Actions onboarding contract check is part of docs validation.
 - [ ] Execution evidence bundle is generated weekly.
 - [ ] Team channel has a pinned link to this quickstart page.

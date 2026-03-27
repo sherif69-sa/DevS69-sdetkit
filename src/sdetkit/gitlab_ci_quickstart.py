@@ -10,7 +10,7 @@ from typing import Any, cast
 
 _PAGE_PATH = "docs/integrations-gitlab-ci-quickstart.md"
 
-_SECTION_HEADER = "# GitLab CI quickstart (Day 16)"
+_SECTION_HEADER = "# GitLab CI quickstart"
 _REQUIRED_SECTIONS = [
     "## Who this recipe is for",
     "## 5-minute setup",
@@ -27,9 +27,9 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit doctor --format text",
     "python -m sdetkit repo audit --format json",
     "python -m pytest -q tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py",
-    "python scripts/check_day16_gitlab_ci_quickstart_contract.py",
-    "python -m sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
-    "python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict",
+    "python scripts/check_gitlab_ci_onboarding_contract.py",
+    "python -m sdetkit gitlab-ci-onboarding --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
+    "python -m sdetkit gitlab-ci-onboarding --execute --evidence-dir docs/artifacts/gitlab-ci-onboarding-pack/evidence --format json --strict",
 ]
 
 
@@ -47,8 +47,8 @@ strict-gate:
   script:
     - python -m pip install -r requirements-test.txt -e .
     - python -m pytest -q tests/test_cli_sdetkit.py tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py
-    - python -m sdetkit gitlab-ci-quickstart --format json --strict
-    - python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    - python -m sdetkit gitlab-ci-onboarding --format json --strict
+    - python scripts/check_gitlab_ci_onboarding_contract.py
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "web"
@@ -68,7 +68,7 @@ nightly-audit:
     - python -m pip install -r requirements-test.txt -e .
     - python -m sdetkit doctor --format text
     - python -m sdetkit repo audit --format json
-    - python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict
+    - python -m sdetkit gitlab-ci-onboarding --execute --evidence-dir docs/artifacts/gitlab-ci-onboarding-pack/evidence --format json --strict
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
@@ -85,7 +85,7 @@ quickstart-gate:
   image: python:3.11
   script:
     - python -m pip install -r requirements-test.txt -e .
-    - python -m sdetkit gitlab-ci-quickstart --format json --strict
+    - python -m sdetkit gitlab-ci-onboarding --format json --strict
     - python -m pytest -q tests/test_cli_sdetkit.py tests/test_gitlab_ci_quickstart.py
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -93,7 +93,7 @@ quickstart-gate:
 """
 
 
-_DAY16_DEFAULT_PAGE = f"""# GitLab CI quickstart (Day 16)
+_DEFAULT_PAGE = f"""# GitLab CI quickstart
 
 A production-ready integration recipe to run `sdetkit` quality checks in GitLab CI with quickstart, strict, and nightly variants.
 
@@ -135,16 +135,16 @@ Run these locally before opening merge requests:
 python -m sdetkit doctor --format text
 python -m sdetkit repo audit --format json
 python -m pytest -q tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_day16_gitlab_ci_quickstart_contract.py
-python -m sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict
-python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict
+python scripts/check_gitlab_ci_onboarding_contract.py
+python -m sdetkit gitlab-ci-onboarding --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict
+python -m sdetkit gitlab-ci-onboarding --execute --evidence-dir docs/artifacts/gitlab-ci-onboarding-pack/evidence --format json --strict
 ```
 
 ## Multi-channel distribution loop
 
 1. Share merged `.gitlab-ci.yml` updates in engineering chat with before/after timing.
 2. Publish docs updates in `docs/index.md` weekly rollout section.
-3. Attach one artifact (`day16-execution-summary.json`) in retro for adoption tracking.
+3. Attach one artifact (`gitlab-ci-onboarding-execution-summary.json`) in retro for adoption tracking.
 
 ## Failure recovery playbook
 
@@ -156,7 +156,7 @@ python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/d
 
 - [ ] Pipeline runs for merge requests and manual dispatches.
 - [ ] CI installs from `requirements-test.txt` and editable package source.
-- [ ] Day 16 contract check is part of docs validation.
+- [ ] GitLab CI onboarding contract check is part of docs validation.
 - [ ] Execution evidence bundle is generated weekly.
 - [ ] Team channel has a pinned link to this quickstart page.
 """
@@ -164,7 +164,7 @@ python -m sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/d
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit gitlab-ci-quickstart",
+        prog="sdetkit gitlab-ci-onboarding",
         description="Render and validate a GitLab CI quickstart report.",
     )
     parser.add_argument(
@@ -252,7 +252,7 @@ def _write_defaults(base: Path) -> list[str]:
         return []
 
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(_DAY16_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(_DEFAULT_PAGE, encoding="utf-8")
     return [_PAGE_PATH]
 
 
@@ -260,11 +260,11 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    checklist = root / "day16-gitlab-checklist.md"
+    checklist = root / "gitlab-ci-onboarding-checklist.md"
     checklist.write_text(
         "\n".join(
             [
-                "# Day 16 GitLab CI rollout checklist",
+                "# GitLab CI onboarding rollout checklist",
                 "",
                 "- [ ] Validate quickstart page in strict mode.",
                 "- [ ] Commit `.gitlab-ci.yml` updates with staged variants.",
@@ -277,25 +277,25 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
         encoding="utf-8",
     )
 
-    minimal_pipeline = root / "day16-sdetkit-quickstart.yml"
+    minimal_pipeline = root / "gitlab-ci-sdetkit-quickstart.yml"
     minimal_pipeline.write_text(_pipeline_content("minimal"), encoding="utf-8")
 
-    strict_pipeline = root / "day16-sdetkit-strict.yml"
+    strict_pipeline = root / "gitlab-ci-sdetkit-strict.yml"
     strict_pipeline.write_text(_pipeline_content("strict"), encoding="utf-8")
 
-    nightly_pipeline = root / "day16-sdetkit-nightly.yml"
+    nightly_pipeline = root / "gitlab-ci-sdetkit-nightly.yml"
     nightly_pipeline.write_text(_pipeline_content("nightly"), encoding="utf-8")
 
-    distribution_plan = root / "day16-distribution-plan.md"
+    distribution_plan = root / "gitlab-ci-distribution-plan.md"
     distribution_plan.write_text(
         "\n".join(
             [
-                "# Day 16 distribution plan",
+                "# GitLab CI distribution plan",
                 "",
                 "| Channel | Artifact | Owner | Cadence |",
                 "| --- | --- | --- | --- |",
                 "| Engineering Slack | `.gitlab-ci.yml` quickstart + evidence summary | QE lead | weekly |",
-                "| Docs portal | Day 16 integration page | Docs owner | weekly |",
+                "| Docs portal | GitLab CI onboarding page | Docs owner | weekly |",
                 "| Sprint retro | evidence logs and failure themes | Team lead | bi-weekly |",
             ]
         )
@@ -303,9 +303,9 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
         encoding="utf-8",
     )
 
-    validation = root / "day16-validation-commands.md"
+    validation = root / "gitlab-ci-validation-commands.md"
     validation.write_text(
-        "\n".join(["# Day 16 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""])
+        "\n".join(["# GitLab CI validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""])
         + "\n",
         encoding="utf-8",
     )
@@ -367,9 +367,9 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
     root = base / out_dir
     root.mkdir(parents=True, exist_ok=True)
 
-    summary = root / "day16-execution-summary.json"
+    summary = root / "gitlab-ci-onboarding-execution-summary.json"
     payload = {
-        "name": "day16-gitlab-ci-execution",
+        "name": "gitlab-ci-onboarding-execution",
         "total_commands": len(results),
         "passed_commands": len([r for r in results if r.get("ok")]),
         "failed_commands": len([r for r in results if not r.get("ok")]),
@@ -421,7 +421,7 @@ def main(argv: list[str] | None = None) -> int:
     score = round((passed / total) * 100, 1)
 
     payload: dict[str, Any] = {
-        "name": "day16-gitlab-ci-quickstart",
+        "name": "gitlab-ci-onboarding",
         "page": _PAGE_PATH,
         "variant": args.variant,
         "selected_pipeline": _pipeline_content(args.variant),
@@ -434,13 +434,13 @@ def main(argv: list[str] | None = None) -> int:
         "touched_files": touched,
         "actions": {
             "open_page": _PAGE_PATH,
-            "validate": "sdetkit gitlab-ci-quickstart --format json --strict",
-            "validate_strict_variant": "sdetkit gitlab-ci-quickstart --format json --variant strict --strict",
-            "write_defaults": "sdetkit gitlab-ci-quickstart --write-defaults --format json --strict",
-            "artifact": "sdetkit gitlab-ci-quickstart --format markdown --variant strict --output docs/artifacts/day16-gitlab-ci-quickstart-sample.md",
-            "emit_pack": "sdetkit gitlab-ci-quickstart --emit-pack-dir docs/artifacts/day16-gitlab-pack --format json --strict",
-            "bootstrap_pipeline": "sdetkit gitlab-ci-quickstart --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
-            "execute": "sdetkit gitlab-ci-quickstart --execute --evidence-dir docs/artifacts/day16-gitlab-pack/evidence --format json --strict",
+            "validate": "sdetkit gitlab-ci-onboarding --format json --strict",
+            "validate_strict_variant": "sdetkit gitlab-ci-onboarding --format json --variant strict --strict",
+            "write_defaults": "sdetkit gitlab-ci-onboarding --write-defaults --format json --strict",
+            "artifact": "sdetkit gitlab-ci-onboarding --format markdown --variant strict --output docs/artifacts/gitlab-ci-onboarding-sample.md",
+            "emit_pack": "sdetkit gitlab-ci-onboarding --emit-pack-dir docs/artifacts/gitlab-ci-onboarding-pack --format json --strict",
+            "bootstrap_pipeline": "sdetkit gitlab-ci-onboarding --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
+            "execute": "sdetkit gitlab-ci-onboarding --execute --evidence-dir docs/artifacts/gitlab-ci-onboarding-pack/evidence --format json --strict",
         },
     }
 
@@ -465,7 +465,7 @@ def main(argv: list[str] | None = None) -> int:
             "python -m sdetkit doctor --format text",
             "python -m sdetkit repo audit --format json",
             "python -m pytest -q tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py",
-            "python -m sdetkit gitlab-ci-quickstart --format json --strict",
+            "python -m sdetkit gitlab-ci-onboarding --format json --strict",
         ]
         results = _execute_commands(commands, timeout_sec=args.timeout_sec)
         execution = {
@@ -477,7 +477,7 @@ def main(argv: list[str] | None = None) -> int:
         payload["execution"] = execution
         execution_failed = int(cast(Any, execution["failed_commands"])) > 0
 
-        evidence_dir = args.evidence_dir or "docs/artifacts/day16-gitlab-pack/evidence"
+        evidence_dir = args.evidence_dir or "docs/artifacts/gitlab-ci-onboarding-pack/evidence"
         payload["evidence_files"] = _write_execution_evidence(base, evidence_dir, results)
 
     if args.format == "json":

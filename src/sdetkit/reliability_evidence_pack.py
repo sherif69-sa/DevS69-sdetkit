@@ -359,11 +359,11 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--day15-summary",
-        default="docs/artifacts/day15-github-pack/evidence/day15-execution-summary.json",
+        default="docs/artifacts/github-actions-onboarding-pack/evidence/github-actions-onboarding-execution-summary.json",
     )
     parser.add_argument(
         "--day16-summary",
-        default="docs/artifacts/day16-gitlab-pack/evidence/day16-execution-summary.json",
+        default="docs/artifacts/gitlab-ci-onboarding-pack/evidence/gitlab-ci-onboarding-execution-summary.json",
     )
     parser.add_argument(
         "--day17-summary",

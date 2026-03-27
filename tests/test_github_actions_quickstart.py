@@ -44,7 +44,7 @@ def test_quickstart_json_and_strict_success(capsys):
     rc = github_actions_quickstart.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day15-github-actions-quickstart"
+    assert data["name"] == "github-actions-onboarding"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 18
 
@@ -81,14 +81,14 @@ def test_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys):
 def test_quickstart_emit_pack(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-github-actions-quickstart.md").write_text(
-        github_actions_quickstart._DAY15_DEFAULT_PAGE, encoding="utf-8"
+        github_actions_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
     rc = github_actions_quickstart.main(
         [
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "docs/artifacts/day15-github-pack",
+            "docs/artifacts/github-actions-onboarding-pack",
             "--format",
             "json",
             "--strict",
@@ -97,13 +97,13 @@ def test_quickstart_emit_pack(tmp_path, capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert len(data["pack_files"]) == 6
-    assert "docs/artifacts/day15-github-pack/day15-sdetkit-strict.yml" in data["pack_files"]
+    assert "docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-strict.yml" in data["pack_files"]
 
 
 def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-github-actions-quickstart.md").write_text(
-        github_actions_quickstart._DAY15_DEFAULT_PAGE, encoding="utf-8"
+        github_actions_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
 
     class _Proc:
@@ -129,13 +129,13 @@ def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["execution"]["failed_commands"] == 0
-    assert (tmp_path / "docs/evidence/day15-execution-summary.json").exists()
+    assert (tmp_path / "docs/evidence/github-actions-onboarding-execution-summary.json").exists()
 
 
 def test_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-github-actions-quickstart.md").write_text(
-        github_actions_quickstart._DAY15_DEFAULT_PAGE, encoding="utf-8"
+        github_actions_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
 
     class _Proc:
@@ -154,7 +154,7 @@ def test_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path,
     assert data["execution"]["failed_commands"] == 4
 
 
-def test_main_cli_dispatches_day15_quickstart(capsys):
+def test_main_cli_dispatches_github_actions_quickstart_alias(capsys):
     rc = cli.main(["github-actions-quickstart", "--format", "text"])
     assert rc == 0
     assert "GitHub Actions quickstart report" in capsys.readouterr().out
