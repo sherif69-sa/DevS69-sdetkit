@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import faq_objections as fqo
+from sdetkit import objection_handling as fqo
 
 
 def _write_fixture(root: Path) -> None:

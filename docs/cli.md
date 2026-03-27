@@ -90,3 +90,38 @@ Options:
 --evidence-dir
 --timeout-sec
 --emit-pack-dir
+
+## startup-readiness
+
+sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md
+sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict
+--write-defaults
+
+## enterprise-readiness
+
+sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md
+sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict
+sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
+--write-defaults
+--evidence-dir
+
+## release-communications
+
+--release-summary
+--changelog
+--min-release-score
+--execute
+--evidence-dir
+--timeout-sec
+--emit-pack-dir
+
+## trust-assets
+
+--readme
+--docs-index
+--min-trust-score
+--execute
+--evidence-dir
+--timeout-sec
+--emit-pack-dir
+

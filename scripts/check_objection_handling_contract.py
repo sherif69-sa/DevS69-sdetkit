@@ -24,7 +24,7 @@ DAY23_PACK_VALIDATION = Path(
 DAY23_EVIDENCE = Path(
     "docs/artifacts/objection-handling-pack/evidence/objection-handling-execution-summary.json"
 )
-MODULE = Path("src/sdetkit/faq_objections.py")
+MODULE = Path("src/sdetkit/objection_handling.py")
 
 README_EXPECTED = [
     "## Objection handling",

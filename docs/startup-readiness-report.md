@@ -12,7 +12,7 @@ Startups and small teams need a focused workflow page that converts repository c
 
 ### Product code
 
-- `src/sdetkit/startup_use_case.py`
+- `src/sdetkit/startup_readiness.py`
   - Added stricter startup-readiness validation for expanded workflow sections, CI fast-lane snippet, and runnable command sequence.
   - Added `--emit-pack-dir` to generate a startup operating pack:
     - `startup-readiness-checklist.md`
@@ -35,14 +35,14 @@ Startups and small teams need a focused workflow page that converts repository c
 
 ### Tests and checks
 
-- `tests/test_startup_use_case.py`
+- `tests/test_startup_readiness.py`
   - Added coverage for pack emission and updated strict check count assertions.
 - `scripts/check_startup_readiness_contract.py`
   - Hardened startup-readiness contract checks for pack generation, CI snippet coverage, and docs wiring.
 
 ## Validation checklist
 
-- `python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py`
+- `python -m pytest -q tests/test_startup_readiness.py tests/test_cli_help_lists_subcommands.py`
 - `python -m sdetkit startup-readiness --format json --strict`
 - `python -m sdetkit startup-readiness --write-defaults --format json --strict`
 - `python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict`
@@ -58,7 +58,7 @@ Startups and small teams need a focused workflow page that converts repository c
 
 ## Rollback plan
 
-1. Revert `src/sdetkit/startup_use_case.py` enhancements if startup-readiness pack output is no longer required.
+1. Revert `src/sdetkit/startup_readiness.py` enhancements if startup-readiness pack output is no longer required.
 2. Revert startup-readiness docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-startup-small-team.md`.
 3. Remove startup-readiness pack artifacts and contract checks if rolling back this feature.
 

@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import external_contribution_push as ecp
+from sdetkit import external_contribution as ecp
 
 
 def main() -> int:
@@ -14,7 +14,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = ecp.build_external_contribution_push_summary(root)
+    payload = ecp.build_external_contribution_summary(root)
 
     strict_failures: list[str] = []
     page = root / ecp._PAGE_PATH

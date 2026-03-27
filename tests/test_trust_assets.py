@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import trust_signal_upgrade as tsu
+from sdetkit import trust_assets as tsu
 
 
 def _write_trust_assets_page(root: Path) -> None:

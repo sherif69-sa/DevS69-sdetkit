@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import release_readiness_board as rrb
+from sdetkit import release_readiness as rrb
 
 
 def _write_inputs(tmp_path: Path) -> tuple[Path, Path]:

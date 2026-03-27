@@ -129,7 +129,7 @@ def _extract_changelog_bullets(path: Path, limit: int = 6) -> list[str]:
     return ["CHANGELOG currently has no bullet highlights; add outcome-focused release notes."]
 
 
-def build_release_narrative(
+def build_release_communications(
     release_summary: Path,
     changelog: Path,
     *,
@@ -442,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
     ]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
 
-    payload = build_release_narrative(
+    payload = build_release_communications(
         root / ns.release_summary,
         root / ns.changelog,
         release_summary_label=ns.release_summary,

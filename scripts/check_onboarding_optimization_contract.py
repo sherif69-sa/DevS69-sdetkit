@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import onboarding_time_upgrade as otu
+from sdetkit import onboarding_optimization as otu
 
 
 def main() -> int:

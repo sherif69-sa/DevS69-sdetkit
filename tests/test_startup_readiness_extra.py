@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sdetkit import startup_use_case as suc
+from sdetkit import startup_readiness as suc
 
 
 def test_write_defaults_noop_when_page_valid(tmp_path: Path) -> None:

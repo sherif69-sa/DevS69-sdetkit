@@ -84,15 +84,15 @@ _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
 
 _PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {
     "evidence-assets": "proof",
-    "onboarding-optimization": "onboarding_time_upgrade",
-    "external-contribution": "external_contribution_push",
-    "objection-handling": "faq_objections",
-    "startup-readiness": "startup_use_case",
-    "enterprise-readiness": "enterprise_use_case",
+    "onboarding-optimization": "onboarding_optimization",
+    "external-contribution": "external_contribution",
+    "objection-handling": "objection_handling",
+    "startup-readiness": "startup_readiness",
+    "enterprise-readiness": "enterprise_readiness",
     "github-actions-onboarding": "github_actions_quickstart",
     "gitlab-ci-onboarding": "gitlab_ci_quickstart",
     "contribution-quality-report": "quality_contribution_delta",
-    "release-communications": "release_narrative",
+    "release-communications": "release_communications",
 }
 
 _PLAYBOOK_ALIAS_TO_CANONICAL: dict[str, str] = {

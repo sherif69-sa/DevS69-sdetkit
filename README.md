@@ -409,3 +409,33 @@ python scripts/check_continuous_upgrade_cycle7_closeout_contract.py
 - `python -m sdetkit continuous-upgrade-cycle8-closeout --format json --strict`
 - `python -m sdetkit continuous-upgrade-cycle8-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle8-closeout-pack --format json --strict`
 - `python -m sdetkit continuous-upgrade-cycle8-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle8-closeout-pack/evidence --format json --strict`
+
+## Startup readiness
+
+python -m sdetkit startup-readiness --format text --strict
+python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict
+python scripts/check_startup_readiness_contract.py
+
+docs/startup-readiness-report.md
+
+## Enterprise readiness
+
+python -m sdetkit enterprise-readiness --format text --strict
+python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict
+python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
+python scripts/check_enterprise_readiness_contract.py
+
+docs/enterprise-readiness-report.md
+
+## Trust assets
+
+python -m sdetkit trust-assets --format json --strict
+python -m sdetkit trust-assets --execute --evidence-dir docs/artifacts/trust-assets-pack/evidence --format json --strict
+python scripts/check_trust_assets_contract.py
+
+## Release communications
+
+python -m sdetkit release-communications --format json --strict
+python -m sdetkit release-communications --execute --evidence-dir docs/artifacts/release-communications-pack/evidence --format json --strict
+python scripts/check_release_communications_contract.py
+

@@ -27,7 +27,7 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit repo audit . --profile enterprise --format json",
     "python -m sdetkit security report --format text",
     "python -m sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json",
-    "python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py",
+    "python -m pytest -q tests/test_enterprise_readiness.py tests/test_cli_help_lists_subcommands.py",
     "python scripts/check_enterprise_readiness_contract.py",
 ]
 
@@ -68,7 +68,7 @@ Use this sequence to establish an enterprise guardrail baseline:
 python -m sdetkit repo audit . --profile enterprise --format json
 python -m sdetkit security report --format text
 python -m sdetkit policy snapshot --output .sdetkit/enterprise-readiness-policy-snapshot.json
-python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py
+python -m pytest -q tests/test_enterprise_readiness.py tests/test_cli_help_lists_subcommands.py
 python scripts/check_enterprise_readiness_contract.py
 ```
 
@@ -322,7 +322,7 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
     return [str(path.relative_to(base)) for path in emitted]
 
 
-def build_enterprise_use_case_status(root: str = ".") -> dict[str, Any]:
+def build_enterprise_readiness_status(root: str = ".") -> dict[str, Any]:
     base = Path(root)
     page = base / _PAGE_PATH
     page_text = _read(page)
@@ -455,7 +455,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.write_defaults:
         touched = _write_defaults(Path(args.root))
 
-    payload = build_enterprise_use_case_status(args.root)
+    payload = build_enterprise_readiness_status(args.root)
     payload["touched_files"] = touched
 
     if args.emit_pack_dir:

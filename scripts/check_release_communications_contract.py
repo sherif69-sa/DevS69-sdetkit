@@ -8,7 +8,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY20_PAGE = Path("docs/release-communications.md")
-DAY20_REPORT = Path("docs/impact-20-ultra-upgrade-report.md")
+DAY20_REPORT = Path("docs/release-communications-report.md")
 DAY20_ARTIFACT = Path("docs/artifacts/release-communications-sample.md")
 DAY20_PACK_SUMMARY = Path(
     "docs/artifacts/release-communications-pack/release-communications-summary.json"
@@ -26,7 +26,7 @@ DAY20_PACK_VALIDATION = Path(
 DAY20_EVIDENCE = Path(
     "docs/artifacts/release-communications-pack/evidence/release-communications-execution-summary.json"
 )
-MODULE = Path("src/sdetkit/release_narrative.py")
+MODULE = Path("src/sdetkit/release_communications.py")
 
 README_EXPECTED = [
     "## Release communications",
