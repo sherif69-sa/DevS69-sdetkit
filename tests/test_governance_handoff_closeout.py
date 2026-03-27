@@ -105,10 +105,10 @@ def test_day87_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day87-pack",
+            "artifacts/governance-handoff-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day87-pack/evidence",
+            "artifacts/governance-handoff-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -116,18 +116,18 @@ def test_day87_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day87-pack/day87-governance-handoff-closeout-summary.json"
+        tmp_path / "artifacts/governance-handoff-pack/governance-handoff-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-governance-handoff-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-governance-handoff-plan.md").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day87-pack/day87-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day87-pack/evidence/day87-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-plan.md").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-narrative-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-storyline-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-execution-log.md").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/governance-handoff-pack/evidence/governance-handoff-execution-summary.json").exists()
 
 
 def test_day87_strict_fails_without_day86(tmp_path: Path) -> None:

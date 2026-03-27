@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-governance-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY87_SUMMARY_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
-_DAY87_BOARD_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md"
+_DAY87_SUMMARY_PATH = "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json"
+_DAY87_BOARD_PATH = "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
+_DAY87_LEGACY_SUMMARY_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+_DAY87_LEGACY_BOARD_PATH = "docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/governance-priorities-plan.json"
 _SECTION_HEADER = "# Day 88 \u2014 Governance priorities closeout lane"
 _REQUIRED_SECTIONS = [
@@ -25,14 +27,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit governance-priorities-closeout --format json --strict",
-    "python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict",
-    "python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day88_governance_priorities_closeout_contract.py",
+    "python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict",
+    "python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/governance-priorities-closeout-pack/evidence --format json --strict",
+    "python scripts/check_governance_priorities_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit governance-priorities-closeout --format json --strict",
-    "python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict",
-    "python scripts/check_day88_governance_priorities_closeout_contract.py --skip-evidence",
+    "python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict",
+    "python scripts/check_governance_priorities_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 88 governance priorities execution and signoff.",
@@ -75,17 +77,17 @@ Day 88 closes with a major upgrade that converts Day 87 governance handoff outco
 
 ## Required inputs (Day 87)
 
-- `docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json`
-- `docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md`
+- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json`
+- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md`
 - `docs/roadmap/plans/governance-priorities-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit governance-priorities-closeout --format json --strict
-python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/day88-governance-priorities-closeout-pack --format json --strict
-python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/day88-governance-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_day88_governance_priorities_closeout_contract.py
+python -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict
+python -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/governance-priorities-closeout-pack/evidence --format json --strict
+python scripts/check_governance_priorities_closeout_contract.py
 ```
 
 ## Governance priorities contract
@@ -135,13 +137,18 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
+def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    return canonical_path if canonical_path.exists() else root / legacy
+
+
 def build_day88_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day87_summary = root / _DAY87_SUMMARY_PATH
-    day87_board = root / _DAY87_BOARD_PATH
+    day87_summary = _resolve_with_legacy(root, _DAY87_SUMMARY_PATH, _DAY87_LEGACY_SUMMARY_PATH)
+    day87_board = _resolve_with_legacy(root, _DAY87_BOARD_PATH, _DAY87_LEGACY_BOARD_PATH)
 
     day87_data = _load_json(day87_summary)
     day87_summary_data = (
@@ -170,7 +177,7 @@ def build_day88_governance_priorities_closeout_summary(root: Path) -> dict[str, 
         {
             "check_id": "readme_day88_command",
             "weight": 7,
-            "passed": ("day88-governance-priorities-closeout" in readme_text),
+            "passed": ("governance-priorities-closeout" in readme_text),
             "evidence": "README day88 command lane",
         },
         {
@@ -354,28 +361,28 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day88-governance-priorities-closeout-summary.json",
+        target / "governance-priorities-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day88-governance-priorities-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day88-evidence-brief.md", "# Day 88 governance priorities brief\n")
-    _write(target / "day88-governance-priorities-plan.md", "# Day 88 governance priorities plan\n")
+    _write(target / "governance-priorities-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "governance-priorities-evidence-brief.md", "# Day 88 governance priorities brief\n")
+    _write(target / "governance-priorities-plan.md", "# Day 88 governance priorities plan\n")
     _write(
-        target / "day88-narrative-template-upgrade-ledger.json",
+        target / "governance-priorities-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
-        target / "day88-storyline-outcomes-ledger.json",
+        target / "governance-priorities-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "day88-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day88-execution-log.md", "# Day 88 execution log\n")
+    _write(target / "governance-priorities-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "governance-priorities-execution-log.md", "# Day 88 execution log\n")
     _write(
-        target / "day88-delivery-board.md",
+        target / "governance-priorities-delivery-board.md",
         "\n".join(["# Day 88 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day88-validation-commands.md",
+        target / "governance-priorities-validation-commands.md",
         "# Day 88 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -398,7 +405,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day88-execution-summary.json",
+        out_dir / "governance-priorities-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -426,7 +433,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day88-governance-priorities-closeout-pack/evidence")
+            else Path("docs/artifacts/governance-priorities-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

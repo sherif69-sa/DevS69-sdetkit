@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase3-wrap-publication-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY89_SUMMARY_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
-_DAY89_BOARD_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md"
+_DAY89_SUMMARY_PATH = "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
+_DAY89_BOARD_PATH = "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
+_DAY89_LEGACY_SUMMARY_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
+_DAY89_LEGACY_BOARD_PATH = "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/phase3-wrap-publication-plan.json"
 _CANONICAL_PACK_DIR = "docs/artifacts/phase3-wrap-publication-closeout-pack"
 _CANONICAL_SUMMARY_NAME = "phase3-wrap-publication-closeout-summary.json"
@@ -79,8 +81,8 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 
 ## Required inputs (Day 89)
 
-- `docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json`
-- `docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md`
+- `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`
+- `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`
 - `docs/roadmap/plans/phase3-wrap-publication-plan.json`
 
 ## Command lane
@@ -139,13 +141,18 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
+def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    return canonical_path if canonical_path.exists() else root / legacy
+
+
 def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day89_summary = root / _DAY89_SUMMARY_PATH
-    day89_board = root / _DAY89_BOARD_PATH
+    day89_summary = _resolve_with_legacy(root, _DAY89_SUMMARY_PATH, _DAY89_LEGACY_SUMMARY_PATH)
+    day89_board = _resolve_with_legacy(root, _DAY89_BOARD_PATH, _DAY89_LEGACY_BOARD_PATH)
 
     day89_data = _load_json(day89_summary)
     day89_summary_data = (

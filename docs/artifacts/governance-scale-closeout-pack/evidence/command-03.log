@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_governance_scale_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "governance-scale-closeout contract check failed:\n- summary.strict_pass is false\n- activation_score below 95\n"
+}

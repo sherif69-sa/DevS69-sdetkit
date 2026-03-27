@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json"
+        / "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md"
+        root / "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -107,34 +107,34 @@ def test_day89_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day89-pack",
+            "artifacts/governance-scale-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day89-pack/evidence",
+            "artifacts/governance-scale-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day89-pack/day89-governance-scale-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-governance-scale-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-governance-scale-plan.md").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day89-pack/day89-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day89-pack/evidence/day89-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-plan.md").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-narrative-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-storyline-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-execution-log.md").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/governance-scale-pack/evidence/governance-scale-execution-summary.json").exists()
 
 
 def test_day89_strict_fails_without_day88(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json"
+        / "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json"
     ).unlink()
     assert d89.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
