@@ -72,10 +72,10 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "day38-distribution-batch" not in out
     assert "day39-playbook-post" not in out
     assert "day40-scale-lane" not in out
-    assert "day41-expansion-automation" not in out
-    assert "day42-optimization-closeout" not in out
-    assert "day43-acceleration-closeout" not in out
-    assert "day44-scale-closeout" not in out
+    assert "expansion-automation" not in out
+    assert "optimization-closeout-foundation" not in out
+    assert "acceleration-closeout" not in out
+    assert "scale-closeout" not in out
     r3 = subprocess.run(
         [sys.executable, "-m", "sdetkit", "playbooks", "list", "--format", "json"],
         text=True,

@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
+        / "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md"
+    board = root / "docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -140,7 +140,7 @@ def test_day66_strict_fails_without_day65(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
+        / "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
     ).unlink()
     assert d66.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

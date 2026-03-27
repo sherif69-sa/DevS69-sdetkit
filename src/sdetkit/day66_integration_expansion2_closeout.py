@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-integration-expansion2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY65_SUMMARY_PATH = (
-    "docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json"
+    "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
 )
-_DAY65_BOARD_PATH = "docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md"
+_DAY65_BOARD_PATH = "docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md"
 _GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -77,8 +77,8 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 
 ## Required inputs (Day 65)
 
-- `docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json`
-- `docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md`
+- `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json`
+- `docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md`
 - `templates/ci/gitlab/day66-advanced-reference.yml`
 
 ## Integration Expansion 2 Closeout command lane (Legacy Day 66)

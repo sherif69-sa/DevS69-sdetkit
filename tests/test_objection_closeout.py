@@ -16,7 +16,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-objection-closeout.md\nday48-objection-closeout\n",
+        "docs/integrations-objection-closeout.md\nobjection-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -73,7 +73,7 @@ def test_day48_objection_closeout_json(tmp_path: Path, capsys) -> None:
     rc = d48.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day48-objection-closeout"
+    assert out["name"] == "objection-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -94,8 +94,8 @@ def test_day48_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day48-pack/day48-objection-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-objection-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day48-pack/objection-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day48-pack/objection-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day48-pack/day48-objection-plan.md").exists()
     assert (tmp_path / "artifacts/day48-pack/day48-faq-objection-map.csv").exists()
     assert (tmp_path / "artifacts/day48-pack/day48-objection-kpi-scorecard.json").exists()

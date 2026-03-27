@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY44_SUMMARY_PATH = "docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json"
-_DAY44_BOARD_PATH = "docs/artifacts/day44-scale-closeout-pack/day44-delivery-board.md"
+_DAY44_SUMMARY_PATH = "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
+_DAY44_BOARD_PATH = "docs/artifacts/scale-closeout-pack/day44-delivery-board.md"
 _SECTION_HEADER = "# Day 45 \u2014 Expansion closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 45 matters",
@@ -23,14 +23,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day45-expansion-closeout --format json --strict",
-    "python -m sdetkit day45-expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict",
-    "python -m sdetkit day45-expansion-closeout --execute --evidence-dir docs/artifacts/day45-expansion-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit expansion-closeout --format json --strict",
+    "python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict",
+    "python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict",
     "python scripts/check_day45_expansion_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day45-expansion-closeout --format json --strict",
-    "python -m sdetkit day45-expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict",
+    "python -m sdetkit expansion-closeout --format json --strict",
+    "python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict",
     "python scripts/check_day45_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -66,15 +66,15 @@ Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence
 
 ## Required inputs (Day 44)
 
-- `docs/artifacts/day44-scale-closeout-pack/day44-scale-closeout-summary.json`
-- `docs/artifacts/day44-scale-closeout-pack/day44-delivery-board.md`
+- `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`
+- `docs/artifacts/scale-closeout-pack/day44-delivery-board.md`
 
 ## Day 45 command lane
 
 ```bash
-python -m sdetkit day45-expansion-closeout --format json --strict
-python -m sdetkit day45-expansion-closeout --emit-pack-dir docs/artifacts/day45-expansion-closeout-pack --format json --strict
-python -m sdetkit day45-expansion-closeout --execute --evidence-dir docs/artifacts/day45-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit expansion-closeout --format json --strict
+python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict
+python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict
 python scripts/check_day45_expansion_closeout_contract.py
 ```
 
@@ -202,8 +202,8 @@ def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day45_command",
             "weight": 4,
-            "passed": "day45-expansion-closeout" in readme_text,
-            "evidence": "day45-expansion-closeout",
+            "passed": "expansion-closeout" in readme_text,
+            "evidence": "expansion-closeout",
         },
         {
             "check_id": "docs_index_day45_links",
@@ -322,7 +322,7 @@ def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     return {
-        "name": "day45-expansion-closeout",
+        "name": "expansion-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -382,8 +382,8 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day45-expansion-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day45-expansion-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "expansion-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "expansion-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "day45-expansion-plan.md",
         "# Day 45 Expansion Plan\n\n- Objective: close Day 45 with measurable quality and throughput gains.\n",
@@ -391,7 +391,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day45-growth-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "expansion-floor,qa-lead,platform-owner,2026-03-13T10:00:00Z,docs/integrations-expansion-closeout.md,python -m sdetkit day45-expansion-closeout --format json --strict,failed-checks:0,handoff-drift\n",
+        "expansion-floor,qa-lead,platform-owner,2026-03-13T10:00:00Z,docs/integrations-expansion-closeout.md,python -m sdetkit expansion-closeout --format json --strict,failed-checks:0,handoff-drift\n",
     )
     _write(
         target / "day45-expansion-kpi-scorecard.json",
@@ -477,7 +477,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day45-expansion-closeout-pack/evidence")
+            else Path("docs/artifacts/expansion-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-optimization-closeout.md\nday46-optimization-closeout\n",
+        "docs/integrations-optimization-closeout.md\noptimization-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -42,7 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root / "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"
+        root / "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -55,7 +55,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day45-expansion-closeout-pack/day45-delivery-board.md"
+    board = root / "docs/artifacts/expansion-closeout-pack/day45-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -77,7 +77,7 @@ def test_day46_optimization_closeout_json(tmp_path: Path, capsys) -> None:
     rc = d46.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day46-optimization-closeout"
+    assert out["name"] == "optimization-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -98,8 +98,8 @@ def test_day46_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day46-pack/day46-optimization-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-optimization-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day46-pack/day46-optimization-plan.md").exists()
     assert (tmp_path / "artifacts/day46-pack/day46-bottleneck-map.csv").exists()
     assert (tmp_path / "artifacts/day46-pack/day46-optimization-kpi-scorecard.json").exists()
@@ -113,7 +113,7 @@ def test_day46_strict_fails_when_day45_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"
+        / "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
     ).unlink()
     rc = d46.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

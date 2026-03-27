@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root / "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json"
+        root / "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -50,7 +50,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day48-objection-closeout-pack/day48-delivery-board.md"
+    board = root / "docs/artifacts/objection-closeout-pack/day48-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -110,7 +110,7 @@ def test_day49_strict_fails_when_day48_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json"
+        / "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
     ).unlink()
     rc = d49.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

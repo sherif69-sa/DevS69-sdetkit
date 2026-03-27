@@ -1,19 +1,19 @@
 {
-  "name": "day46-optimization-closeout",
+  "name": "optimization-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day46-optimization-closeout.md",
+    "docs_page": "docs/integrations-optimization-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day45_summary": "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json",
-    "day45_delivery_board": "docs/artifacts/day45-expansion-closeout-pack/day45-delivery-board.md"
+    "day45_summary": "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json",
+    "day45_delivery_board": "docs/artifacts/expansion-closeout-pack/day45-delivery-board.md"
   },
   "checks": [
     {
       "check_id": "docs_page_exists",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day46-optimization-closeout.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-optimization-closeout.md"
     },
     {
       "check_id": "required_sections_present",
@@ -35,19 +35,19 @@
       "check_id": "readme_day46_link",
       "weight": 8,
       "passed": true,
-      "evidence": "docs/integrations-day46-optimization-closeout.md"
+      "evidence": "docs/integrations-optimization-closeout.md"
     },
     {
       "check_id": "readme_day46_command",
       "weight": 4,
       "passed": true,
-      "evidence": "day46-optimization-closeout"
+      "evidence": "optimization-closeout"
     },
     {
       "check_id": "docs_index_day46_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-46-big-upgrade-report.md + integrations-day46-optimization-closeout.md"
+      "evidence": "impact-46-big-upgrade-report.md + integrations-optimization-closeout.md"
     },
     {
       "check_id": "top10_day46_alignment",
@@ -59,13 +59,13 @@
       "check_id": "day45_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
     },
     {
       "check_id": "day45_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day45-expansion-closeout-pack/day45-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-closeout-pack/day45-delivery-board.md"
     },
     {
       "check_id": "day45_quality_floor",

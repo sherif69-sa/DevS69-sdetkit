@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY41_SUMMARY_PATH = (
-    "docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json"
+    "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
 )
-_DAY41_BOARD_PATH = "docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md"
+_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Optimization Closeout Foundation matters",
@@ -68,8 +68,8 @@ Optimization Closeout Foundation closes with a major optimization upgrade that c
 
 ## Required inputs (Day 41)
 
-- `docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json`
-- `docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md`
+- `docs/artifacts/expansion-automation-pack/expansion-automation-summary.json`
+- `docs/artifacts/expansion-automation-pack/day41-delivery-board.md`
 
 ## Optimization Closeout Foundation command lane
 

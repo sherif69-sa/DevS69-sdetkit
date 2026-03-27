@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-optimization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY45_SUMMARY_PATH = (
-    "docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json"
+    "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
 )
-_DAY45_BOARD_PATH = "docs/artifacts/day45-expansion-closeout-pack/day45-delivery-board.md"
+_DAY45_BOARD_PATH = "docs/artifacts/expansion-closeout-pack/day45-delivery-board.md"
 _SECTION_HEADER = "# Day 46 \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 46 matters",
@@ -25,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day46-optimization-closeout --format json --strict",
-    "python -m sdetkit day46-optimization-closeout --emit-pack-dir docs/artifacts/day46-optimization-closeout-pack --format json --strict",
-    "python -m sdetkit day46-optimization-closeout --execute --evidence-dir docs/artifacts/day46-optimization-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit optimization-closeout --format json --strict",
+    "python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict",
+    "python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict",
     "python scripts/check_day46_optimization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day46-optimization-closeout --format json --strict",
-    "python -m sdetkit day46-optimization-closeout --emit-pack-dir docs/artifacts/day46-optimization-closeout-pack --format json --strict",
+    "python -m sdetkit optimization-closeout --format json --strict",
+    "python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict",
     "python scripts/check_day46_optimization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +68,15 @@ Day 46 closes with a major optimization upgrade that converts Day 45 expansion e
 
 ## Required inputs (Day 45)
 
-- `docs/artifacts/day45-expansion-closeout-pack/day45-expansion-closeout-summary.json`
-- `docs/artifacts/day45-expansion-closeout-pack/day45-delivery-board.md`
+- `docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json`
+- `docs/artifacts/expansion-closeout-pack/day45-delivery-board.md`
 
 ## Day 46 command lane
 
 ```bash
-python -m sdetkit day46-optimization-closeout --format json --strict
-python -m sdetkit day46-optimization-closeout --emit-pack-dir docs/artifacts/day46-optimization-closeout-pack --format json --strict
-python -m sdetkit day46-optimization-closeout --execute --evidence-dir docs/artifacts/day46-optimization-closeout-pack/evidence --format json --strict
+python -m sdetkit optimization-closeout --format json --strict
+python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict
+python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict
 python scripts/check_day46_optimization_closeout_contract.py
 ```
 
@@ -203,8 +203,8 @@ def build_day46_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day46_command",
             "weight": 4,
-            "passed": "day46-optimization-closeout" in readme_text,
-            "evidence": "day46-optimization-closeout",
+            "passed": "optimization-closeout" in readme_text,
+            "evidence": "optimization-closeout",
         },
         {
             "check_id": "docs_index_day46_links",
@@ -323,7 +323,7 @@ def build_day46_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     return {
-        "name": "day46-optimization-closeout",
+        "name": "optimization-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -384,9 +384,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
     _write(
-        target / "day46-optimization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+        target / "optimization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
     )
-    _write(target / "day46-optimization-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "optimization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "day46-optimization-plan.md",
         "# Day 46 Optimization Plan\n\n- Objective: close Day 46 with measurable efficiency and quality gains.\n",
@@ -394,7 +394,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day46-bottleneck-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "optimization-floor,qa-lead,platform-owner,2026-03-14T10:00:00Z,docs/integrations-optimization-closeout.md,python -m sdetkit day46-optimization-closeout --format json --strict,failed-checks:0,reliability-drift\n",
+        "optimization-floor,qa-lead,platform-owner,2026-03-14T10:00:00Z,docs/integrations-optimization-closeout.md,python -m sdetkit optimization-closeout --format json --strict,failed-checks:0,reliability-drift\n",
     )
     _write(
         target / "day46-optimization-kpi-scorecard.json",
@@ -480,7 +480,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day46-optimization-closeout-pack/evidence")
+            else Path("docs/artifacts/optimization-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 
