@@ -10,8 +10,8 @@ Cycle 1 starts the next impact by converting Day 90 publication outcomes into a 
 
 ## Required inputs (Day 90)
 
-- `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json`
-- `docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md`
+- `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json`
+- `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md`
 - `docs/roadmap/plans/continuous-upgrade-cycle1-plan.json`
 
 ## Command lane
