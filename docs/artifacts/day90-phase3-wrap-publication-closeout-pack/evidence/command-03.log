@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "day90-phase3-wrap-publication-closeout contract check passed\n",
-  "stderr": ""
-}

@@ -18,9 +18,9 @@ Day 87 closes with a major upgrade that converts Day 86 launch readiness outcome
 
 ```bash
 python -m sdetkit governance-handoff-closeout --format json --strict
-python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/day87-governance-handoff-closeout-pack --format json --strict
-python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/day87-governance-handoff-closeout-pack/evidence --format json --strict
-python scripts/check_day87_governance_handoff_closeout_contract.py
+python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/governance-handoff-closeout-pack --format json --strict
+python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/governance-handoff-closeout-pack/evidence --format json --strict
+python scripts/check_governance_handoff_closeout_contract.py
 ```
 
 ## Governance handoff contract

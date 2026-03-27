@@ -10,17 +10,17 @@ Day 89 closes with a major upgrade that converts Day 88 governance handoff outco
 
 ## Required inputs (Day 88)
 
-- `docs/artifacts/day88-governance-priorities-closeout-pack/day88-governance-priorities-closeout-summary.json`
-- `docs/artifacts/day88-governance-priorities-closeout-pack/day88-delivery-board.md`
+- `docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json`
+- `docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md`
 - `docs/roadmap/plans/governance-scale-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit governance-scale-closeout --format json --strict
-python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/day89-governance-scale-closeout-pack --format json --strict
-python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifacts/day89-governance-scale-closeout-pack/evidence --format json --strict
-python scripts/check_day89_governance_scale_closeout_contract.py
+python -m sdetkit governance-scale-closeout --emit-pack-dir docs/artifacts/governance-scale-closeout-pack --format json --strict
+python -m sdetkit governance-scale-closeout --execute --evidence-dir docs/artifacts/governance-scale-closeout-pack/evidence --format json --strict
+python scripts/check_governance_scale_closeout_contract.py
 ```
 
 ## Governance scale contract

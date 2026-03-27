@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+        / "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-delivery-board.md"
+    board = root / "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -105,10 +105,10 @@ def test_day88_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day88-pack",
+            "artifacts/governance-priorities-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day88-pack/evidence",
+            "artifacts/governance-priorities-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -116,27 +116,27 @@ def test_day88_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day88-pack/day88-governance-priorities-closeout-summary.json"
+        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day88-pack/day88-governance-priorities-closeout-summary.md"
+        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-governance-priorities-plan.md").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day88-pack/day88-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day88-pack/evidence/day88-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-plan.md").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-narrative-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-storyline-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-execution-log.md").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/governance-priorities-pack/evidence/governance-priorities-execution-summary.json").exists()
 
 
 def test_day88_strict_fails_without_day87(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+        / "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json"
     ).unlink()
     assert d88.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

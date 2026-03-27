@@ -6,35 +6,26 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day90_phase3_wrap_publication_closeout as d90
+from sdetkit import day88_governance_priorities_closeout as d88
 
-
-_CANONICAL_EVIDENCE = (
-    "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/phase3-wrap-publication-execution-summary.json"
-)
-_LEGACY_EVIDENCE = (
-    "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence/day90-execution-summary.json"
-)
+_CANONICAL_EVIDENCE = "docs/artifacts/governance-priorities-closeout-pack/evidence/governance-priorities-execution-summary.json"
+_LEGACY_EVIDENCE = "docs/artifacts/day88-governance-priorities-closeout-pack/evidence/day88-execution-summary.json"
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate Day 90 phase-3 wrap publication closeout contract"
-    )
+    parser = argparse.ArgumentParser(description="Validate governance priorities closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d90.build_day90_phase3_wrap_publication_closeout_summary(root)
+    payload = d88.build_day88_governance_priorities_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):
         errors.append("summary.strict_pass is false")
-
     if payload.get("summary", {}).get("activation_score", 0) < 95:
         errors.append("activation_score below 95")
-
     if payload.get("summary", {}).get("critical_failures"):
         errors.append("critical_failures is not empty")
 
@@ -50,12 +41,12 @@ def main() -> int:
                 errors.append("evidence total_commands below 3")
 
     if errors:
-        print("day90-phase3-wrap-publication-closeout contract check failed:", file=sys.stderr)
+        print("governance-priorities-closeout contract check failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("day90-phase3-wrap-publication-closeout contract check passed")
+    print("governance-priorities-closeout contract check passed")
     return 0
 
 

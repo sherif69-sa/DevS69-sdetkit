@@ -1,0 +1,127 @@
+{
+  "name": "governance-scale-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-governance-scale-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day88_summary": "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json",
+    "day88_delivery_board": "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md",
+    "governance_scale_plan": "docs/roadmap/plans/governance-scale-plan.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day89_command",
+      "weight": 7,
+      "passed": false,
+      "evidence": "README day89 command lane"
+    },
+    {
+      "check_id": "docs_index_day89_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-89-big-upgrade-report.md + integrations-governance-scale-closeout.md"
+    },
+    {
+      "check_id": "top10_day89_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 88 + Day 89 strategy chain"
+    },
+    {
+      "check_id": "day88_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json"
+    },
+    {
+      "check_id": "day88_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md"
+    },
+    {
+      "check_id": "day88_quality_floor",
+      "weight": 13,
+      "passed": false,
+      "evidence": {
+        "day88_score": 60,
+        "strict_pass": false,
+        "day88_checks": 14
+      }
+    },
+    {
+      "check_id": "day88_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day88": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": false,
+      "evidence": "# Day 89 \u2014 Governance scale closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "evidence_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/roadmap/plans/governance-scale-plan.json"
+    }
+  ],
+  "rollup": {
+    "day88_activation_score": 60,
+    "day88_checks": 14,
+    "day88_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 60,
+    "passed_checks": 9,
+    "failed_checks": 5,
+    "critical_failures": [],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 88 delivery board integrity validated with 5 checklist items.",
+    "Day 89 governance scale dataset is available for governance execution."
+  ],
+  "misses": [
+    "Day 88 continuity baseline is below the floor (<85) or not strict-pass."
+  ],
+  "handoff_actions": [
+    "Re-run Day 88 closeout command and raise baseline quality above 85 with strict pass before Day 89 lock."
+  ]
+}

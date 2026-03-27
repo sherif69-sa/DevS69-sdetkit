@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase3-wrap-publication-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day89_summary": "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json",
-    "day89_delivery_board": "docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md",
+    "day89_summary": "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json",
+    "day89_delivery_board": "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md",
     "phase3_wrap_publication_plan": "docs/roadmap/plans/phase3-wrap-publication-plan.json"
   },
   "checks": [
@@ -32,21 +32,21 @@
       "check_id": "day89_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
     },
     {
       "check_id": "day89_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day89-governance-scale-closeout-pack/day89-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
     },
     {
       "check_id": "day89_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day89_score": 100,
-        "strict_pass": true,
+        "day89_score": 60,
+        "strict_pass": false,
         "day89_checks": 14
       }
     },
@@ -103,22 +103,25 @@
     }
   ],
   "rollup": {
-    "day89_activation_score": 100,
+    "day89_activation_score": 60,
     "day89_checks": 14,
     "day89_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 73,
-    "passed_checks": 10,
-    "failed_checks": 4,
+    "activation_score": 60,
+    "passed_checks": 9,
+    "failed_checks": 5,
     "critical_failures": [],
     "strict_pass": false
   },
   "wins": [
-    "Day 89 continuity baseline is stable with activation score=100.",
     "Day 89 delivery board integrity validated with 5 checklist items.",
     "Day 90 phase-3 wrap publication dataset is available for governance execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 89 continuity baseline is below the floor (<85) or not strict-pass."
+  ],
+  "handoff_actions": [
+    "Re-run Day 89 closeout command and raise baseline quality above 85 with strict pass before Day 90 lock."
+  ]
 }
