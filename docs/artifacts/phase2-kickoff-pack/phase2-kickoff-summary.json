@@ -62,8 +62,7 @@
       "passed": true,
       "evidence": {
         "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
-        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
-        "compatibility": "/workspace/DevS69-sdetkit/docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json"
       }
     },
     {
@@ -72,8 +71,7 @@
       "passed": true,
       "evidence": {
         "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md",
-        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md",
-        "compatibility": "/workspace/DevS69-sdetkit/docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
       }
     },
     {

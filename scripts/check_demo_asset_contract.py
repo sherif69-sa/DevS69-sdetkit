@@ -4,31 +4,36 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import day29_phase1_hardening as d29
-
-
-def _evidence_path(root: Path) -> Path:
-    return root / "docs/artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
+from sdetkit import day33_demo_asset as d33
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate phase1-hardening contract.")
+    parser = argparse.ArgumentParser(description="Validate Day 33 demo asset contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d29.build_day29_phase1_hardening_summary(root)
+    payload = d33.build_day33_demo_asset_summary(root)
 
     strict_failures: list[str] = []
-    page = root / d29._PAGE_PATH
+    page = root / d33._PAGE_PATH
     page_text = page.read_text(encoding="utf-8") if page.exists() else ""
-    for section in [d29._SECTION_HEADER, *d29._REQUIRED_SECTIONS]:
+    for section in [d33._SECTION_HEADER, *d33._REQUIRED_SECTIONS]:
         if section not in page_text:
             strict_failures.append(section)
-    for command in d29._REQUIRED_COMMANDS:
+    for command in d33._REQUIRED_COMMANDS:
         if command not in page_text:
             strict_failures.append(command)
+    for contract_line in d33._REQUIRED_CONTRACT_LINES:
+        if f"- {contract_line}" not in page_text:
+            strict_failures.append(contract_line)
+    for quality_item in d33._REQUIRED_QUALITY_LINES:
+        if quality_item not in page_text:
+            strict_failures.append(quality_item)
+    for board_item in d33._REQUIRED_DELIVERY_BOARD_LINES:
+        if board_item not in page_text:
+            strict_failures.append(board_item)
 
     errors: list[str] = []
     if strict_failures:
@@ -37,12 +42,14 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        evidence = _evidence_path(root)
+        evidence = (
+            root / "docs/artifacts/demo-asset-pack/evidence/demo-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:
             data = json.loads(evidence.read_text(encoding="utf-8"))
-            if data.get("total_commands", 0) < 2:
+            if data.get("total_commands", 0) < 3:
                 errors.append("execution evidence has insufficient commands")
 
     print(json.dumps({"errors": errors, "score": payload["summary"]["activation_score"]}, indent=2))

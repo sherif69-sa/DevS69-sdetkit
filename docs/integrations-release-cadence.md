@@ -11,17 +11,15 @@ Day 32 converts Day 31 baseline goals into a repeatable release operating cadenc
 ## Required inputs (Day 31)
 
 - `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json` (primary)
-- `docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json` (compatibility)
 - `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md` (primary)
-- `docs/artifacts/day31-phase2-pack/day31-delivery-board.md` (compatibility)
 
 ## Day 32 command lane
 
 ```bash
 python -m sdetkit release-cadence --format json --strict
-python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict
-python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict
-python scripts/check_day32_release_cadence_contract.py
+python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/release-cadence-pack --format json --strict
+python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/release-cadence-pack/evidence --format json --strict
+python scripts/check_release_cadence_contract.py
 ```
 
 ## Weekly cadence contract

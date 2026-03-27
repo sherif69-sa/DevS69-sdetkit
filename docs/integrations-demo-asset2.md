@@ -10,16 +10,16 @@ Day 34 closes the second distribution-ready demo asset by translating repository
 
 ## Required inputs (Day 33)
 
-- `docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json`
-- `docs/artifacts/day33-demo-asset-pack/day33-delivery-board.md`
+- `docs/artifacts/demo-asset-pack/demo-asset-summary.json`
+- `docs/artifacts/demo-asset-pack/demo-delivery-board.md`
 
 ## Day 34 command lane
 
 ```bash
 python -m sdetkit demo-asset2 --format json --strict
-python -m sdetkit demo-asset2 --emit-pack-dir docs/artifacts/day34-demo-asset2-pack --format json --strict
-python -m sdetkit demo-asset2 --execute --evidence-dir docs/artifacts/day34-demo-asset2-pack/evidence --format json --strict
-python scripts/check_day34_demo_asset2_contract.py
+python -m sdetkit demo-asset2 --emit-pack-dir docs/artifacts/demo-asset2-pack --format json --strict
+python -m sdetkit demo-asset2 --execute --evidence-dir docs/artifacts/demo-asset2-pack/evidence --format json --strict
+python scripts/check_demo_asset2_contract.py
 ```
 
 ## Repo-audit production contract

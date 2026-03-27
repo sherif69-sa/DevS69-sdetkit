@@ -78,7 +78,6 @@ def test_day30_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (tmp_path / "artifacts/day30-pack/phase1-wrap-summary.json").exists()
-    assert (tmp_path / "artifacts/day30-pack/day30-phase1-wrap-summary.json").exists()
     assert (tmp_path / "artifacts/day30-pack/phase1-wrap-summary.md").exists()
     assert (tmp_path / "artifacts/day30-pack/phase1-wrap-phase2-backlog.md").exists()
     assert (tmp_path / "artifacts/day30-pack/phase1-wrap-handoff-actions.md").exists()

@@ -1,0 +1,18 @@
+{
+  "impact": 33,
+  "asset": {
+    "id": "demo-asset-1",
+    "theme": "doctor workflow",
+    "primary_formats": [
+      "mp4",
+      "gif"
+    ]
+  },
+  "constraints": {
+    "duration_seconds": {
+      "min": 45,
+      "max": 90
+    },
+    "quality_floor": 95
+  }
+}

@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-release-cadence.md\nday32-release-cadence\n",
+        "docs/integrations-release-cadence.md\nrelease-cadence\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def test_day32_release_cadence_json(tmp_path: Path, capsys) -> None:
     rc = d32.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day32-release-cadence"
+    assert out["name"] == "release-cadence"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -86,23 +86,23 @@ def test_day32_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day32-pack",
+            "artifacts/release-cadence-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day32-pack/evidence",
+            "artifacts/release-cadence-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day32-pack/day32-release-cadence-summary.json").exists()
-    assert (tmp_path / "artifacts/day32-pack/day32-release-cadence-summary.md").exists()
-    assert (tmp_path / "artifacts/day32-pack/day32-cadence-calendar.json").exists()
-    assert (tmp_path / "artifacts/day32-pack/day32-changelog-template.md").exists()
-    assert (tmp_path / "artifacts/day32-pack/day32-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day32-pack/day32-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day32-pack/evidence/day32-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/release-cadence-summary.json").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/release-cadence-summary.md").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/release-cadence-calendar.json").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/release-changelog-template.md").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/release-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/release-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/release-cadence-pack/evidence/release-cadence-execution-summary.json").exists()
 
 
 def test_day32_strict_fails_when_day31_inputs_missing(tmp_path: Path) -> None:

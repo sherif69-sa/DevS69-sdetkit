@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-demo-asset.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY32_SUMMARY_PATH = "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
-_DAY32_BOARD_PATH = "docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md"
+_DAY32_SUMMARY_PATH = "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
+_DAY32_SUMMARY_FALLBACK_PATH = "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
+_DAY32_BOARD_PATH = "docs/artifacts/release-cadence-pack/release-delivery-board.md"
+_DAY32_BOARD_FALLBACK_PATH = "docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md"
 _SECTION_HEADER = "# Day 33 \u2014 Demo asset #1 production"
 _REQUIRED_SECTIONS = [
     "## Why Day 33 matters",
@@ -23,15 +25,15 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day33-demo-asset --format json --strict",
-    "python -m sdetkit day33-demo-asset --emit-pack-dir docs/artifacts/day33-demo-asset-pack --format json --strict",
-    "python -m sdetkit day33-demo-asset --execute --evidence-dir docs/artifacts/day33-demo-asset-pack/evidence --format json --strict",
-    "python scripts/check_day33_demo_asset_contract.py",
+    "python -m sdetkit demo-asset --format json --strict",
+    "python -m sdetkit demo-asset --emit-pack-dir docs/artifacts/demo-asset-pack --format json --strict",
+    "python -m sdetkit demo-asset --execute --evidence-dir docs/artifacts/demo-asset-pack/evidence --format json --strict",
+    "python scripts/check_demo_asset_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day33-demo-asset --format json --strict",
-    "python -m sdetkit day33-demo-asset --emit-pack-dir docs/artifacts/day33-demo-asset-pack --format json --strict",
-    "python scripts/check_day33_demo_asset_contract.py --skip-evidence",
+    "python -m sdetkit demo-asset --format json --strict",
+    "python -m sdetkit demo-asset --emit-pack-dir docs/artifacts/demo-asset-pack --format json --strict",
+    "python scripts/check_demo_asset_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Demo owner: one accountable editor and one backup reviewer are assigned.",
@@ -66,16 +68,16 @@ Day 33 closes the first demo-asset production lane so strategy turns into distri
 
 ## Required inputs (Day 32)
 
-- `docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json`
-- `docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md`
+- `docs/artifacts/release-cadence-pack/release-cadence-summary.json`
+- `docs/artifacts/release-cadence-pack/release-delivery-board.md`
 
 ## Day 33 command lane
 
 ```bash
-python -m sdetkit day33-demo-asset --format json --strict
-python -m sdetkit day33-demo-asset --emit-pack-dir docs/artifacts/day33-demo-asset-pack --format json --strict
-python -m sdetkit day33-demo-asset --execute --evidence-dir docs/artifacts/day33-demo-asset-pack/evidence --format json --strict
-python scripts/check_day33_demo_asset_contract.py
+python -m sdetkit demo-asset --format json --strict
+python -m sdetkit demo-asset --emit-pack-dir docs/artifacts/demo-asset-pack --format json --strict
+python -m sdetkit demo-asset --execute --evidence-dir docs/artifacts/demo-asset-pack/evidence --format json --strict
+python scripts/check_demo_asset_contract.py
 ```
 
 ## Demo production contract
@@ -178,8 +180,14 @@ def build_day33_demo_asset_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day32_summary = root / _DAY32_SUMMARY_PATH
-    day32_board = root / _DAY32_BOARD_PATH
+    day32_summary_primary = root / _DAY32_SUMMARY_PATH
+    day32_summary_fallback = root / _DAY32_SUMMARY_FALLBACK_PATH
+    day32_board_primary = root / _DAY32_BOARD_PATH
+    day32_board_fallback = root / _DAY32_BOARD_FALLBACK_PATH
+    day32_summary = (
+        day32_summary_primary if day32_summary_primary.exists() else day32_summary_fallback
+    )
+    day32_board = day32_board_primary if day32_board_primary.exists() else day32_board_fallback
     day32_score, day32_strict, day32_check_count = _load_day32(day32_summary)
     board_count, board_has_day33, board_has_day34 = _board_stats(day32_board)
 
@@ -211,8 +219,8 @@ def build_day33_demo_asset_summary(
         {
             "check_id": "readme_day33_command",
             "weight": 4,
-            "passed": "day33-demo-asset" in readme_text,
-            "evidence": "day33-demo-asset",
+            "passed": "demo-asset" in readme_text,
+            "evidence": "demo-asset",
         },
         {
             "check_id": "docs_index_day33_links",
@@ -236,13 +244,13 @@ def build_day33_demo_asset_summary(
             "check_id": "day32_summary_present",
             "weight": 10,
             "passed": day32_summary.exists(),
-            "evidence": str(day32_summary),
+            "evidence": {"resolved": str(day32_summary), "primary": str(day32_summary_primary)},
         },
         {
             "check_id": "day32_delivery_board_present",
             "weight": 8,
             "passed": day32_board.exists(),
-            "evidence": str(day32_board),
+            "evidence": {"resolved": str(day32_board), "primary": str(day32_board_primary)},
         },
         {
             "check_id": "day32_quality_floor",
@@ -330,7 +338,7 @@ def build_day33_demo_asset_summary(
         )
 
     return {
-        "name": "day33-demo-asset",
+        "name": "demo-asset",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -409,10 +417,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day33-demo-asset-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day33-demo-asset-summary.md", _to_markdown(payload))
+    _write(target / "demo-asset-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "demo-asset-summary.md", _to_markdown(payload))
     _write(
-        target / "day33-demo-asset-plan.json",
+        target / "demo-asset-plan.json",
         json.dumps(
             {
                 "impact": 33,
@@ -428,18 +436,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day33-demo-script.md",
+        target / "demo-script.md",
         "# Day 33 demo script\n\n"
         "## Hook (0-10s)\n- Pain point + why this matters now\n\n"
         "## Command lane (10-45s)\n- Run: `python -m sdetkit doctor --json`\n- Highlight key output fields\n\n"
         "## Value proof + CTA (45-90s)\n- Trust signal + docs link + next step\n",
     )
     _write(
-        target / "day33-delivery-board.md",
+        target / "demo-delivery-board.md",
         "# Day 33 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day33-validation-commands.md",
+        target / "demo-validation-commands.md",
         "# Day 33 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -462,12 +470,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day33-demo-asset-execution",
+        "name": "demo-asset-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day33-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "demo-execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -501,7 +509,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day33-demo-asset-pack/evidence")
+            else Path("docs/artifacts/demo-asset-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

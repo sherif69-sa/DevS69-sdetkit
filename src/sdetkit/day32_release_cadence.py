@@ -26,14 +26,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit release-cadence --format json --strict",
-    "python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict",
-    "python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict",
-    "python scripts/check_day32_release_cadence_contract.py",
+    "python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/release-cadence-pack --format json --strict",
+    "python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/release-cadence-pack/evidence --format json --strict",
+    "python scripts/check_release_cadence_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit release-cadence --format json --strict",
-    "python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict",
-    "python scripts/check_day32_release_cadence_contract.py --skip-evidence",
+    "python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/release-cadence-pack --format json --strict",
+    "python scripts/check_release_cadence_contract.py --skip-evidence",
 ]
 _REQUIRED_CADENCE_LINES = [
     "Cadence owner: release captain rotates weekly and is published in advance.",
@@ -69,17 +69,15 @@ Day 32 converts Day 31 baseline goals into a repeatable release operating cadenc
 ## Required inputs (Day 31)
 
 - `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json` (primary)
-- `docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json` (compatibility)
 - `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md` (primary)
-- `docs/artifacts/day31-phase2-pack/day31-delivery-board.md` (compatibility)
 
 ## Day 32 command lane
 
 ```bash
 python -m sdetkit release-cadence --format json --strict
-python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict
-python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict
-python scripts/check_day32_release_cadence_contract.py
+python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/release-cadence-pack --format json --strict
+python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/release-cadence-pack/evidence --format json --strict
+python scripts/check_release_cadence_contract.py
 ```
 
 ## Weekly cadence contract
@@ -219,8 +217,8 @@ def build_day32_release_cadence_summary(
         {
             "check_id": "readme_day32_command",
             "weight": 4,
-            "passed": "day32-release-cadence" in readme_text,
-            "evidence": "day32-release-cadence",
+            "passed": "release-cadence" in readme_text,
+            "evidence": "release-cadence",
         },
         {
             "check_id": "docs_index_day32_links",
@@ -247,7 +245,6 @@ def build_day32_release_cadence_summary(
             "evidence": {
                 "resolved": str(day31_summary),
                 "primary": str(day31_summary_primary),
-                "compatibility": str(day31_summary_fallback),
             },
         },
         {
@@ -257,7 +254,6 @@ def build_day32_release_cadence_summary(
             "evidence": {
                 "resolved": str(day31_board),
                 "primary": str(day31_board_primary),
-                "compatibility": str(day31_board_fallback),
             },
         },
         {
@@ -348,7 +344,7 @@ def build_day32_release_cadence_summary(
         )
 
     return {
-        "name": "day32-release-cadence",
+        "name": "release-cadence",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -358,12 +354,10 @@ def build_day32_release_cadence_summary(
             if day31_summary.exists()
             else str(day31_summary),
             "day31_summary_primary": str(day31_summary_primary.relative_to(root)),
-            "day31_summary_compatibility": str(day31_summary_fallback.relative_to(root)),
             "day31_delivery_board": str(day31_board.relative_to(root))
             if day31_board.exists()
             else str(day31_board),
             "day31_delivery_board_primary": str(day31_board_primary.relative_to(root)),
-            "day31_delivery_board_compatibility": str(day31_board_fallback.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
@@ -431,10 +425,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day32-release-cadence-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day32-release-cadence-summary.md", _to_markdown(payload))
+    _write(target / "release-cadence-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "release-cadence-summary.md", _to_markdown(payload))
     _write(
-        target / "day32-cadence-calendar.json",
+        target / "release-cadence-calendar.json",
         json.dumps(
             {
                 "impact": 32,
@@ -454,7 +448,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day32-changelog-template.md",
+        target / "release-changelog-template.md",
         "# Day 32 changelog template\n\n"
         "## Outcomes\n- What changed for users this week?\n\n"
         "## Evidence links\n- Commands/docs/proof artifacts\n\n"
@@ -463,11 +457,11 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "## Follow-up backlog\n- [ ] Item + owner + ETA\n",
     )
     _write(
-        target / "day32-delivery-board.md",
+        target / "release-delivery-board.md",
         "# Day 32 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day32-validation-commands.md",
+        target / "release-validation-commands.md",
         "# Day 32 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -490,12 +484,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day32-release-cadence-execution",
+        "name": "release-cadence-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day32-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "release-cadence-execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -529,7 +523,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day32-release-cadence-pack/evidence")
+            else Path("docs/artifacts/release-cadence-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

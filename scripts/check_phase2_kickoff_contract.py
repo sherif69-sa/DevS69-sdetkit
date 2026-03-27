@@ -7,11 +7,8 @@ from pathlib import Path
 from sdetkit import day31_phase2_kickoff as d31
 
 
-def _evidence_candidates(root: Path) -> tuple[Path, Path]:
-    return (
-        root / "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json",
-        root / "docs/artifacts/day31-phase2-pack/evidence/day31-execution-summary.json",
-    )
+def _evidence_path(root: Path) -> Path:
+    return root / "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
 
 
 def main() -> int:
@@ -46,10 +43,9 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        primary, fallback = _evidence_candidates(root)
-        evidence = primary if primary.exists() else fallback
+        evidence = _evidence_path(root)
         if not evidence.exists():
-            errors.append(f"missing evidence file: {primary} (compatibility: {fallback})")
+            errors.append(f"missing evidence file: {evidence}")
         else:
             data = json.loads(evidence.read_text(encoding="utf-8"))
             if data.get("total_commands", 0) < 3:

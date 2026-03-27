@@ -1,0 +1,147 @@
+{
+  "name": "release-cadence",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-release-cadence.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day31_summary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+    "day31_summary_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+    "day31_delivery_board": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+    "day31_delivery_board_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-release-cadence.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day32_link",
+      "weight": 8,
+      "passed": false,
+      "evidence": "docs/integrations-release-cadence.md"
+    },
+    {
+      "check_id": "readme_day32_command",
+      "weight": 4,
+      "passed": false,
+      "evidence": "release-cadence"
+    },
+    {
+      "check_id": "docs_index_day32_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-32-ultra-upgrade-report.md + integrations-release-cadence.md"
+    },
+    {
+      "check_id": "top10_day32_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 32 + Day 33 strategy chain"
+    },
+    {
+      "check_id": "day31_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
+      }
+    },
+    {
+      "check_id": "day31_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
+      }
+    },
+    {
+      "check_id": "day31_quality_floor",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "day31_score": 65.0,
+        "strict_pass": false,
+        "day31_checks": 13
+      }
+    },
+    {
+      "check_id": "day31_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day32": true,
+        "contains_day33": true
+      }
+    },
+    {
+      "check_id": "cadence_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_cadence_lines": []
+      }
+    },
+    {
+      "check_id": "changelog_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_changelog_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day31_activation_score": 65.0,
+    "day31_checks": 13,
+    "day31_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 65,
+    "passed_checks": 9,
+    "failed_checks": 5,
+    "critical_failures": [
+      "day31_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 31 delivery board integrity validated with 5 checklist items.",
+    "Release cadence + changelog contract is fully locked for weekly execution."
+  ],
+  "misses": [
+    "Day 31 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 31 kickoff command and restore strict pass baseline before release cadence lock."
+  ]
+}

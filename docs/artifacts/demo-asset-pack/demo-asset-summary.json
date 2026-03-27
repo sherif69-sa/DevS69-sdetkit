@@ -1,0 +1,145 @@
+{
+  "name": "demo-asset",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-demo-asset.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day32_summary": "docs/artifacts/release-cadence-pack/release-cadence-summary.json",
+    "day32_delivery_board": "docs/artifacts/release-cadence-pack/release-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-demo-asset.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day33_link",
+      "weight": 8,
+      "passed": false,
+      "evidence": "docs/integrations-demo-asset.md"
+    },
+    {
+      "check_id": "readme_day33_command",
+      "weight": 4,
+      "passed": false,
+      "evidence": "demo-asset"
+    },
+    {
+      "check_id": "docs_index_day33_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-33-ultra-upgrade-report.md + integrations-demo-asset.md"
+    },
+    {
+      "check_id": "top10_day33_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 33 + Day 34 strategy chain"
+    },
+    {
+      "check_id": "day32_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/release-cadence-pack/release-cadence-summary.json",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/release-cadence-pack/release-cadence-summary.json"
+      }
+    },
+    {
+      "check_id": "day32_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/release-cadence-pack/release-delivery-board.md",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/release-cadence-pack/release-delivery-board.md"
+      }
+    },
+    {
+      "check_id": "day32_quality_floor",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "day32_score": 65.0,
+        "strict_pass": false,
+        "day32_checks": 14
+      }
+    },
+    {
+      "check_id": "day32_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day33": true,
+        "contains_day34": true
+      }
+    },
+    {
+      "check_id": "demo_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_contract_lines": []
+      }
+    },
+    {
+      "check_id": "demo_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day32_activation_score": 65.0,
+    "day32_checks": 14,
+    "day32_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 65,
+    "passed_checks": 9,
+    "failed_checks": 5,
+    "critical_failures": [
+      "day32_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 32 delivery board integrity validated with 5 checklist items.",
+    "Demo production contract + quality checklist is fully locked for execution."
+  ],
+  "misses": [
+    "Day 32 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 32 cadence command and restore strict pass baseline before demo lock."
+  ]
+}
