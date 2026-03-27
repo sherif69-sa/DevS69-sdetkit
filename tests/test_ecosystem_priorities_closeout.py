@@ -18,7 +18,10 @@ def _seed_repo(root: Path) -> None:
         "impact-78-big-upgrade-report.md\nintegrations-ecosystem-priorities-closeout.md\n",
         encoding="utf-8",
     )
-    (root / "docs/top-10-github-strategy.md").write_text("Day 77\nDay 78\n", encoding="utf-8")
+    (root / "docs/top-10-github-strategy.md").write_text(
+        "Community touchpoint + ecosystem priorities strategy chain\n",
+        encoding="utf-8",
+    )
     (root / "docs/integrations-ecosystem-priorities-closeout.md").write_text(
         d78._DAY78_DEFAULT_PAGE, encoding="utf-8"
     )
@@ -95,6 +98,14 @@ def test_day78_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-delivery-board.md"
     ).exists()
+    assert (
+        tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-workstream-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-kpi-scorecard.json"
+    ).exists()
+    assert not (tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-workstream-ledger.json").exists()
+    assert not (tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-kpi-scorecard.json").exists()
     assert (
         tmp_path
         / "artifacts/ecosystem-priorities-pack/evidence/ecosystem-priorities-execution-summary.json"

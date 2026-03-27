@@ -20,7 +20,7 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 python -m sdetkit ecosystem-priorities-closeout --format json --strict
 python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict
 python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_day78_ecosystem_priorities_closeout_contract.py
+python scripts/check_ecosystem_priorities_closeout_contract.py
 ```
 
 ## Ecosystem priorities contract
