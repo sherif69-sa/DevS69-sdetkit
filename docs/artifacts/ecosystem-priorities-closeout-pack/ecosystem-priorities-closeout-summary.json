@@ -32,13 +32,13 @@
       "check_id": "community_touchpoint_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json"
     },
     {
       "check_id": "community_touchpoint_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md"
     },
     {
       "check_id": "community_touchpoint_quality_floor",

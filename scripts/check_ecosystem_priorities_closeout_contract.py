@@ -11,7 +11,7 @@ from sdetkit import day78_ecosystem_priorities_closeout as d78
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 78 ecosystem priorities closeout contract"
+        description="Validate ecosystem priorities closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -33,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day78-ecosystem-priorities-closeout-pack/evidence/day78-execution-summary.json"
+            / "docs/artifacts/ecosystem-priorities-closeout-pack/evidence/ecosystem-priorities-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day78-ecosystem-priorities-closeout contract check failed:", file=sys.stderr)
+        print("ecosystem-priorities-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day78-ecosystem-priorities-closeout contract check passed")
+    print("ecosystem-priorities-closeout contract check passed")
     return 0
 
 

@@ -31,12 +31,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
     "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict",
     "python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day78_ecosystem_priorities_closeout_contract.py",
+    "python scripts/check_ecosystem_priorities_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit ecosystem-priorities-closeout --format json --strict",
     "python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict",
-    "python scripts/check_day78_ecosystem_priorities_closeout_contract.py --skip-evidence",
+    "python scripts/check_ecosystem_priorities_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 78 ecosystem priorities execution and signoff.",
@@ -89,7 +89,7 @@ Day 78 closes with a major upgrade that converts Day 77 community-touchpoint out
 python -m sdetkit ecosystem-priorities-closeout --format json --strict
 python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict
 python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_day78_ecosystem_priorities_closeout_contract.py
+python scripts/check_ecosystem_priorities_closeout_contract.py
 ```
 
 ## Ecosystem priorities contract
@@ -371,10 +371,13 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     )
     _write(target / "ecosystem-priorities-plan.md", "# Ecosystem priorities plan\n")
     _write(
-        target / "day78-ecosystem-workstream-ledger.json",
+        target / "ecosystem-priorities-workstream-ledger.json",
         json.dumps({"workstreams": []}, indent=2) + "\n",
     )
-    _write(target / "day78-ecosystem-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "ecosystem-priorities-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(
         target / "ecosystem-priorities-execution-log.md", "# Ecosystem priorities execution log\n"
     )

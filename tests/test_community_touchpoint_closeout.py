@@ -30,8 +30,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 76 — Contributor recognition board:** publish contributor spotlight and release credits model.\n"
-        "- **Day 77 — Community touchpoint #1:** run first office-hours session and summarize outcomes.\n",
+        "Contributor recognition + community touchpoint strategy chain\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-community-touchpoint-closeout.md").write_text(
