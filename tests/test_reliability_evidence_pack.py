@@ -51,11 +51,11 @@ def test_pack_builds_json(tmp_path: Path, capsys) -> None:
         [
             "--root",
             str(tmp_path),
-            "--day15-summary",
+            "--github-actions-summary",
             str(day15.relative_to(tmp_path)),
-            "--day16-summary",
+            "--gitlab-ci-summary",
             str(day16.relative_to(tmp_path)),
-            "--day17-summary",
+            "--contribution-quality-summary",
             str(day17.relative_to(tmp_path)),
             "--format",
             "json",
@@ -78,11 +78,11 @@ def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
         [
             "--root",
             str(tmp_path),
-            "--day15-summary",
+            "--github-actions-summary",
             str(day15.relative_to(tmp_path)),
-            "--day16-summary",
+            "--gitlab-ci-summary",
             str(day16.relative_to(tmp_path)),
-            "--day17-summary",
+            "--contribution-quality-summary",
             str(day17.relative_to(tmp_path)),
             "--emit-pack-dir",
             "artifacts/reliability-evidence-pack",
@@ -119,11 +119,11 @@ def test_write_defaults(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--write-defaults",
-            "--day15-summary",
+            "--github-actions-summary",
             str(day15.relative_to(tmp_path)),
-            "--day16-summary",
+            "--gitlab-ci-summary",
             str(day16.relative_to(tmp_path)),
-            "--day17-summary",
+            "--contribution-quality-summary",
             str(day17.relative_to(tmp_path)),
             "--format",
             "json",
@@ -142,11 +142,11 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
             "reliability-evidence-pack",
             "--root",
             str(tmp_path),
-            "--day15-summary",
+            "--github-actions-summary",
             str(day15.relative_to(tmp_path)),
-            "--day16-summary",
+            "--gitlab-ci-summary",
             str(day16.relative_to(tmp_path)),
-            "--day17-summary",
+            "--contribution-quality-summary",
             str(day17.relative_to(tmp_path)),
             "--format",
             "text",
@@ -155,6 +155,40 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert rc == 0
     out = capsys.readouterr().out
     assert "Reliability evidence pack" in out
+
+
+def test_reliability_pack_help_prefers_canonical_summary_flags() -> None:
+    help_text = rep._build_parser().format_help()
+    assert "--github-actions-summary" in help_text
+    assert "--gitlab-ci-summary" in help_text
+    assert "--contribution-quality-summary" in help_text
+    assert "--day15-summary" not in help_text
+    assert "--day16-summary" not in help_text
+    assert "--day17-summary" not in help_text
+
+
+def test_reliability_pack_accepts_legacy_day_aliases(tmp_path: Path, capsys) -> None:
+    day15, day16, day17 = _write_inputs(tmp_path)
+    _write_page(tmp_path)
+
+    rc = rep.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--day15-summary",
+            str(day15.relative_to(tmp_path)),
+            "--day16-summary",
+            str(day16.relative_to(tmp_path)),
+            "--day17-summary",
+            str(day17.relative_to(tmp_path)),
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["summary"]["strict_all_green"] is True
 
 
 def test_reliability_pack_load_json_requires_object(tmp_path: Path) -> None:
@@ -199,16 +233,16 @@ def test_reliability_pack_execute_commands_timeout_records_error(monkeypatch) ->
 
 
 def test_reliability_pack_main_returns_2_on_missing_inputs(tmp_path: Path, capsys) -> None:
-    # Missing day15/day16/day17 files should be caught and return rc=2.
+    # Missing summary files should be caught and return rc=2.
     rc = rep.main(
         [
             "--root",
             str(tmp_path),
-            "--day15-summary",
+            "--github-actions-summary",
             "missing15.json",
-            "--day16-summary",
+            "--gitlab-ci-summary",
             "missing16.json",
-            "--day17-summary",
+            "--contribution-quality-summary",
             "missing17.json",
             "--format",
             "text",
@@ -228,11 +262,11 @@ def test_reliability_pack_main_markdown_writes_output_file(tmp_path: Path) -> No
         [
             "--root",
             str(tmp_path),
-            "--day15-summary",
+            "--github-actions-summary",
             str(day15.relative_to(tmp_path)),
-            "--day16-summary",
+            "--gitlab-ci-summary",
             str(day16.relative_to(tmp_path)),
-            "--day17-summary",
+            "--contribution-quality-summary",
             str(day17.relative_to(tmp_path)),
             "--format",
             "markdown",
@@ -270,11 +304,11 @@ def test_reliability_pack_strict_fails_when_page_missing_and_score_low(
         [
             "--root",
             str(tmp_path),
-            "--day15-summary",
+            "--github-actions-summary",
             str(day15.relative_to(tmp_path)),
-            "--day16-summary",
+            "--gitlab-ci-summary",
             str(day16.relative_to(tmp_path)),
-            "--day17-summary",
+            "--contribution-quality-summary",
             str(day17.relative_to(tmp_path)),
             "--format",
             "json",

@@ -26,7 +26,7 @@ _REQUIRED_COMMANDS = [
     "python scripts/check_reliability_evidence_pack_contract.py",
 ]
 
-_REQUIRED_DAY17_KEYS = ("name", "quality", "contributions")
+_REQUIRED_CONTRIBUTION_QUALITY_KEYS = ("name", "quality", "contributions")
 
 _DAY18_DEFAULT_PAGE = """# Reliability evidence pack
 
@@ -113,44 +113,55 @@ def _normalize_execution_summary(summary: dict[str, Any], label: str) -> dict[st
 
 
 def build_reliability_pack(
-    day15_summary: dict[str, Any],
-    day16_summary: dict[str, Any],
-    day17_summary: dict[str, Any],
+    github_actions_summary: dict[str, Any],
+    gitlab_ci_summary: dict[str, Any],
+    contribution_quality_summary: dict[str, Any],
 ) -> dict[str, Any]:
-    day15 = _normalize_execution_summary(day15_summary, "day15")
-    day16 = _normalize_execution_summary(day16_summary, "day16")
-    _require_keys(day17_summary, _REQUIRED_DAY17_KEYS, "day17 summary")
+    github_actions = _normalize_execution_summary(
+        github_actions_summary, "github-actions onboarding"
+    )
+    gitlab_ci = _normalize_execution_summary(gitlab_ci_summary, "gitlab-ci onboarding")
+    _require_keys(
+        contribution_quality_summary,
+        _REQUIRED_CONTRIBUTION_QUALITY_KEYS,
+        "contribution-quality summary",
+    )
 
-    day15_pass_rate = round((float(day15["checks_passed"]) / float(day15["checks_total"])) * 100, 2)
-    day16_pass_rate = round((float(day16["checks_passed"]) / float(day16["checks_total"])) * 100, 2)
-    day17_velocity = float(day17_summary["contributions"]["velocity_score"])
-    day17_stability = float(day17_summary["quality"]["stability_score"])
+    github_actions_pass_rate = round(
+        (float(github_actions["checks_passed"]) / float(github_actions["checks_total"])) * 100,
+        2,
+    )
+    gitlab_ci_pass_rate = round(
+        (float(gitlab_ci["checks_passed"]) / float(gitlab_ci["checks_total"])) * 100, 2
+    )
+    contribution_velocity = float(contribution_quality_summary["contributions"]["velocity_score"])
+    contribution_stability = float(contribution_quality_summary["quality"]["stability_score"])
 
     reliability_score = round(
-        (float(day15["score"]) * 0.25)
-        + (float(day16["score"]) * 0.25)
-        + (day17_velocity * 0.20)
-        + (day17_stability * 0.20)
-        + (day15_pass_rate * 0.05)
-        + (day16_pass_rate * 0.05),
+        (float(github_actions["score"]) * 0.25)
+        + (float(gitlab_ci["score"]) * 0.25)
+        + (contribution_velocity * 0.20)
+        + (contribution_stability * 0.20)
+        + (github_actions_pass_rate * 0.05)
+        + (gitlab_ci_pass_rate * 0.05),
         2,
     )
 
     strict_all_green = (
-        bool(day15["strict"])
-        and bool(day16["strict"])
-        and not bool(day17_summary.get("strict_failures"))
+        bool(github_actions["strict"])
+        and bool(gitlab_ci["strict"])
+        and not bool(contribution_quality_summary.get("strict_failures"))
     )
     recommendations: list[str] = []
     if not strict_all_green:
         recommendations.append(
             "Resolve strict-gate failures before publishing the weekly reliability update."
         )
-    if day17_velocity < 70:
+    if contribution_velocity < 70:
         recommendations.append(
             "Raise contribution velocity with targeted docs and release distribution this week."
         )
-    if day17_stability < 95:
+    if contribution_stability < 95:
         recommendations.append(
             "Recover quality stability by re-running quality deltas and closing artifact gaps."
         )
@@ -160,20 +171,20 @@ def build_reliability_pack(
     return {
         "name": "reliability-evidence-pack",
         "inputs": {
-            "day15": {
-                "score": float(day15["score"]),
-                "strict": bool(day15["strict"]),
-                "pass_rate": day15_pass_rate,
+            "github_actions_onboarding": {
+                "score": float(github_actions["score"]),
+                "strict": bool(github_actions["strict"]),
+                "pass_rate": github_actions_pass_rate,
             },
-            "day16": {
-                "score": float(day16["score"]),
-                "strict": bool(day16["strict"]),
-                "pass_rate": day16_pass_rate,
+            "gitlab_ci_onboarding": {
+                "score": float(gitlab_ci["score"]),
+                "strict": bool(gitlab_ci["strict"]),
+                "pass_rate": gitlab_ci_pass_rate,
             },
-            "day17": {
-                "velocity_score": day17_velocity,
-                "stability_score": day17_stability,
-                "strict_failures": list(day17_summary.get("strict_failures", [])),
+            "contribution_quality_report": {
+                "velocity_score": contribution_velocity,
+                "stability_score": contribution_stability,
+                "strict_failures": list(contribution_quality_summary.get("strict_failures", [])),
             },
         },
         "summary": {
@@ -231,8 +242,8 @@ def _emit_pack(path: str, payload: dict[str, Any], base: Path) -> list[str]:
             [
                 "# Reliability evidence checklist",
                 "",
-                "- [ ] Day 15 GitHub Actions quickstart strict gate still green.",
-                "- [ ] Day 16 GitLab CI quickstart strict gate still green.",
+                "- [ ] GitHub Actions onboarding strict gate still green.",
+                "- [ ] GitLab CI onboarding strict gate still green.",
                 "- [ ] Contribution-quality-report strict gates are green.",
                 "- [ ] Reliability score is reviewed in weekly review.",
                 "- [ ] Recommendations are tracked in planning backlog.",
@@ -358,16 +369,31 @@ def _build_parser() -> argparse.ArgumentParser:
         "--root", default=".", help="Repository root where docs and artifacts live."
     )
     parser.add_argument(
-        "--day15-summary",
+        "--github-actions-summary",
         default="docs/artifacts/github-actions-onboarding-pack/evidence/github-actions-onboarding-execution-summary.json",
     )
     parser.add_argument(
-        "--day16-summary",
+        "--gitlab-ci-summary",
         default="docs/artifacts/gitlab-ci-onboarding-pack/evidence/gitlab-ci-onboarding-execution-summary.json",
     )
     parser.add_argument(
-        "--day17-summary",
+        "--contribution-quality-summary",
         default="docs/artifacts/contribution-quality-report-pack/contribution-quality-report-summary.json",
+    )
+    parser.add_argument(
+        "--day15-summary",
+        dest="github_actions_summary",
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--day16-summary",
+        dest="gitlab_ci_summary",
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--day17-summary",
+        dest="contribution_quality_summary",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument("--min-reliability-score", type=float, default=90.0)
     parser.add_argument("--strict", action="store_true")
@@ -407,10 +433,14 @@ def main(argv: list[str] | None = None) -> int:
     missing.extend(cmd for cmd in _REQUIRED_COMMANDS if cmd not in page_text)
 
     try:
-        day15_summary = _load_json(str(base / ns.day15_summary))
-        day16_summary = _load_json(str(base / ns.day16_summary))
-        day17_summary = _load_json(str(base / ns.day17_summary))
-        payload = build_reliability_pack(day15_summary, day16_summary, day17_summary)
+        github_actions_summary = _load_json(str(base / ns.github_actions_summary))
+        gitlab_ci_summary = _load_json(str(base / ns.gitlab_ci_summary))
+        contribution_quality_summary = _load_json(str(base / ns.contribution_quality_summary))
+        payload = build_reliability_pack(
+            github_actions_summary,
+            gitlab_ci_summary,
+            contribution_quality_summary,
+        )
     except (OSError, ValueError, json.JSONDecodeError, KeyError, TypeError) as exc:
         print(str(exc))
         return 2
@@ -431,7 +461,9 @@ def main(argv: list[str] | None = None) -> int:
     if missing:
         strict_failures.append(f"reliability page missing {len(missing)} required items")
     if not payload["summary"]["strict_all_green"]:
-        strict_failures.append("strict status is not green across day15/day16/day17 inputs")
+        strict_failures.append(
+            "strict status is not green across github-actions/gitlab-ci/contribution-quality inputs"
+        )
     if float(payload["summary"]["reliability_score"]) < float(ns.min_reliability_score):
         strict_failures.append(
             f"reliability_score {payload['summary']['reliability_score']} is below minimum {ns.min_reliability_score}"
