@@ -113,10 +113,10 @@ def test_cycle8_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/cycle8-pack",
+            "artifacts/continuous-upgrade-cycle8-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/cycle8-pack/evidence",
+            "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -124,29 +124,49 @@ def test_cycle8_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-closeout-summary.json"
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.json"
     ).exists()
-    assert (
-        tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-closeout-summary.md"
-    ).exists()
-    assert (tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-plan.md").exists()
     assert (
         tmp_path
-        / "artifacts/cycle8-pack/continuous-upgrade-cycle8-upgrade-template-upgrade-ledger.json"
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.md"
     ).exists()
     assert (
-        tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-storyline-outcomes-ledger.json"
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-evidence-brief.md"
     ).exists()
     assert (
-        tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-upgrade-kpi-scorecard.json"
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-plan.md"
     ).exists()
-    assert (tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-execution-log.md").exists()
-    assert (tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/cycle8-pack/continuous-upgrade-cycle8-validation-commands.md"
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-upgrade-template-upgrade-ledger.json"
     ).exists()
-    execution_summary = tmp_path / "artifacts/cycle8-pack/evidence/cycle8-execution-summary.json"
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-upgrade-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-validation-commands.md"
+    ).exists()
+    execution_summary = (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence/cycle8-execution-summary.json"
+    )
     assert execution_summary.exists()
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
     assert execution_data["failed_commands"] == 0
@@ -162,14 +182,17 @@ def test_cycle8_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
             str(tmp_path),
             "--execute",
             "--evidence-dir",
-            "artifacts/cycle8-pack/evidence",
+            "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 1
-    execution_summary = tmp_path / "artifacts/cycle8-pack/evidence/cycle8-execution-summary.json"
+    execution_summary = (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence/cycle8-execution-summary.json"
+    )
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
     assert execution_data["failed_commands"] == 1
     assert execution_data["strict_pass"] is False
