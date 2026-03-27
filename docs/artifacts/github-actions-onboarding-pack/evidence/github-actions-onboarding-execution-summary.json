@@ -1,0 +1,40 @@
+{
+  "name": "github-actions-onboarding-execution",
+  "total_commands": 4,
+  "passed_commands": 4,
+  "failed_commands": 0,
+  "results": [
+    {
+      "index": 1,
+      "command": "python -m sdetkit doctor --format text",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "doctor score: 100%\n[OK] ascii: ASCII scan not requested\n[OK] ci_workflows: CI workflow check not requested\n[OK] clean_tree: clean tree check not requested\n[OK] deps: dependency consistency check not requested\n[OK] pre_commit: pre-commit check not requested\n[OK] release_meta: release metadata check not requested\n[OK] repo_readiness: repo readiness check not requested\n[OK] security_files: security governance file check not requested\n[OK] stdlib_shadowing: no stdlib shadowing detected\n[OK] upgrade_audit: upgrade audit check not requested\nrecommendations:\n- No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality.\n",
+      "stderr": ""
+    },
+    {
+      "index": 2,
+      "command": "python -m sdetkit repo audit --format json",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "{\n  \"checks\": [\n    {\n      \"details\": [\n        \"Repository should define contributor conduct expectations.\"\n      ],\n      \"key\": \"CORE_MISSING_CODE_OF_CONDUCT_MD\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"CODE_OF_CONDUCT.md exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should explain how to contribute.\"\n      ],\n      \"key\": \"CORE_MISSING_CONTRIBUTING_MD\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"CONTRIBUTING.md exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should define issue template defaults.\"\n      ],\n      \"key\": \"CORE_MISSING_ISSUE_TEMPLATE_CONFIG\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"Issue template config exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should provide a pull request template.\"\n      ],\n      \"key\": \"CORE_MISSING_PR_TEMPLATE\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"PR template exists\"\n    },\n    {\n      \"details\": [\n        \"Repository should publish a security reporting policy.\"\n      ],\n      \"key\": \"CORE_MISSING_SECURITY_MD\",\n      \"pack\": \"core\",\n      \"status\": \"pass\",\n      \"supports_fix\": true,\n      \"title\": \"SECURITY.md exists\"\n    }\n  ],\n  \"findings\": [],\n  \"root\": \"/workspace/DevS69-sdetkit\",\n  \"schema_version\": \"1.1.0\",\n  \"summary\": {\n    \"checks\": 5,\n    \"counts\": {\n      \"error\": 0,\n      \"info\": 0,\n      \"warn\": 0\n    },\n    \"failed\": 0,\n    \"findings\": 0,\n    \"incremental\": {\n      \"changed_files\": 0,\n      \"used\": false\n    },\n    \"ok\": true,\n    \"packs\": [\n      \"core\"\n    ],\n    \"passed\": 5,\n    \"policy\": {\n      \"actionable\": 0,\n      \"suppressed_active\": 0,\n      \"suppressed_by_baseline\": 0,\n      \"suppressed_by_policy\": 0,\n      \"suppressed_expired\": 0,\n      \"total_findings\": 0\n    }\n  },\n  \"suppressed\": [],\n  \"suppressed_expired\": []\n}\n",
+      "stderr": ""
+    },
+    {
+      "index": 3,
+      "command": "python -m pytest -q tests/test_github_actions_quickstart.py tests/test_cli_help_lists_subcommands.py",
+      "returncode": 0,
+      "ok": true,
+      "stdout": ".............                                                            [100%]\n13 passed in 4.52s\n",
+      "stderr": ""
+    },
+    {
+      "index": 4,
+      "command": "python -m sdetkit github-actions-onboarding --format json --strict",
+      "returncode": 0,
+      "ok": true,
+      "stdout": "{\n  \"name\": \"github-actions-onboarding\",\n  \"page\": \"docs/integrations-github-actions-quickstart.md\",\n  \"variant\": \"minimal\",\n  \"selected_workflow\": \"name: sdetkit-github-quickstart\\non:\\n  pull_request:\\n  workflow_dispatch:\\n\\njobs:\\n  quality-gate:\\n    runs-on: ubuntu-latest\\n    steps:\\n      - uses: actions/checkout@v4\\n      - uses: actions/setup-python@v5\\n        with:\\n          python-version: '3.11'\\n      - run: python -m pip install -r requirements-test.txt -e .\\n      - run: python -m sdetkit github-actions-onboarding --format json --strict\\n      - run: python -m pytest -q tests/test_cli_sdetkit.py tests/test_github_actions_quickstart.py\\n\",\n  \"required_sections\": [\n    \"## Who this recipe is for\",\n    \"## 5-minute setup\",\n    \"## Minimal workflow\",\n    \"## Strict workflow variant\",\n    \"## Nightly reliability variant\",\n    \"## Fast verification commands\",\n    \"## Multi-channel distribution loop\",\n    \"## Failure recovery playbook\",\n    \"## Rollout checklist\"\n  ],\n  \"required_commands\": [\n    \"python -m sdetkit doctor --format text\",\n    \"python -m sdetkit repo audit --format json\",\n    \"python -m pytest -q tests/test_github_actions_quickstart.py tests/test_cli_help_lists_subcommands.py\",\n    \"python scripts/check_github_actions_onboarding_contract.py\",\n    \"python -m sdetkit github-actions-onboarding --execute --evidence-dir docs/artifacts/github-actions-onboarding-pack/evidence --format json --strict\"\n  ],\n  \"passed_checks\": 18,\n  \"total_checks\": 18,\n  \"score\": 100.0,\n  \"missing\": [],\n  \"touched_files\": [],\n  \"actions\": {\n    \"open_page\": \"docs/integrations-github-actions-quickstart.md\",\n    \"validate\": \"sdetkit github-actions-onboarding --format json --strict\",\n    \"validate_strict_variant\": \"sdetkit github-actions-onboarding --format json --variant strict --strict\",\n    \"write_defaults\": \"sdetkit github-actions-onboarding --write-defaults --format json --strict\",\n    \"artifact\": \"sdetkit github-actions-onboarding --format markdown --variant strict --output docs/artifacts/github-actions-onboarding-sample.md\",\n    \"emit_pack\": \"sdetkit github-actions-onboarding --emit-pack-dir docs/artifacts/github-actions-onboarding-pack --format json --strict\",\n    \"execute\": \"sdetkit github-actions-onboarding --execute --evidence-dir docs/artifacts/github-actions-onboarding-pack/evidence --format json --strict\"\n  }\n}\n",
+      "stderr": ""
+    }
+  ]
+}

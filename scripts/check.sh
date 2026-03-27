@@ -35,8 +35,8 @@ case "$mode" in
     python scripts/check_onboarding_contract.py
     python scripts/check_day3_proof_contract.py
     python scripts/check_day4_skills_contract.py
-    python scripts/check_day15_github_actions_quickstart_contract.py
-    python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    python scripts/check_github_actions_onboarding_contract.py
+    python scripts/check_gitlab_ci_onboarding_contract.py
     python scripts/check_reliability_evidence_pack_contract.py
     python scripts/check_release_communications_contract.py
     ;;
@@ -50,10 +50,10 @@ case "$mode" in
     python scripts/check_day4_skills_contract.py
     ;;
   day15)
-    python scripts/check_day15_github_actions_quickstart_contract.py
+    python scripts/check_github_actions_onboarding_contract.py
     ;;
   day16)
-    python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    python scripts/check_gitlab_ci_onboarding_contract.py
     python scripts/check_reliability_evidence_pack_contract.py
     ;;
   release-readiness)
@@ -72,8 +72,8 @@ case "$mode" in
     python scripts/check_onboarding_contract.py
     python scripts/check_day3_proof_contract.py
     python scripts/check_day4_skills_contract.py
-    python scripts/check_day15_github_actions_quickstart_contract.py
-    python scripts/check_day16_gitlab_ci_quickstart_contract.py
+    python scripts/check_github_actions_onboarding_contract.py
+    python scripts/check_gitlab_ci_onboarding_contract.py
     python scripts/check_reliability_evidence_pack_contract.py
     python scripts/check_release_communications_contract.py
     ;;

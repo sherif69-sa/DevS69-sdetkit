@@ -1,0 +1,93 @@
+command: python -m sdetkit repo audit --format json
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "checks": [
+    {
+      "details": [
+        "Repository should define contributor conduct expectations."
+      ],
+      "key": "CORE_MISSING_CODE_OF_CONDUCT_MD",
+      "pack": "core",
+      "status": "pass",
+      "supports_fix": true,
+      "title": "CODE_OF_CONDUCT.md exists"
+    },
+    {
+      "details": [
+        "Repository should explain how to contribute."
+      ],
+      "key": "CORE_MISSING_CONTRIBUTING_MD",
+      "pack": "core",
+      "status": "pass",
+      "supports_fix": true,
+      "title": "CONTRIBUTING.md exists"
+    },
+    {
+      "details": [
+        "Repository should define issue template defaults."
+      ],
+      "key": "CORE_MISSING_ISSUE_TEMPLATE_CONFIG",
+      "pack": "core",
+      "status": "pass",
+      "supports_fix": true,
+      "title": "Issue template config exists"
+    },
+    {
+      "details": [
+        "Repository should provide a pull request template."
+      ],
+      "key": "CORE_MISSING_PR_TEMPLATE",
+      "pack": "core",
+      "status": "pass",
+      "supports_fix": true,
+      "title": "PR template exists"
+    },
+    {
+      "details": [
+        "Repository should publish a security reporting policy."
+      ],
+      "key": "CORE_MISSING_SECURITY_MD",
+      "pack": "core",
+      "status": "pass",
+      "supports_fix": true,
+      "title": "SECURITY.md exists"
+    }
+  ],
+  "findings": [],
+  "root": "/workspace/DevS69-sdetkit",
+  "schema_version": "1.1.0",
+  "summary": {
+    "checks": 5,
+    "counts": {
+      "error": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "failed": 0,
+    "findings": 0,
+    "incremental": {
+      "changed_files": 0,
+      "used": false
+    },
+    "ok": true,
+    "packs": [
+      "core"
+    ],
+    "passed": 5,
+    "policy": {
+      "actionable": 0,
+      "suppressed_active": 0,
+      "suppressed_by_baseline": 0,
+      "suppressed_by_policy": 0,
+      "suppressed_expired": 0,
+      "total_findings": 0
+    }
+  },
+  "suppressed": [],
+  "suppressed_expired": []
+}
+
+--- stderr ---
+

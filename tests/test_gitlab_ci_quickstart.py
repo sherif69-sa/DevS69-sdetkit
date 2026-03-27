@@ -44,7 +44,7 @@ def test_quickstart_json_and_strict_success(capsys):
     rc = gitlab_ci_quickstart.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day16-gitlab-ci-quickstart"
+    assert data["name"] == "gitlab-ci-onboarding"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 19
 
@@ -80,14 +80,14 @@ def test_quickstart_write_defaults_recovers_missing_file(tmp_path, capsys):
 def test_quickstart_emit_pack(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
-        gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
+        gitlab_ci_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
     rc = gitlab_ci_quickstart.main(
         [
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "docs/artifacts/day16-gitlab-pack",
+            "docs/artifacts/gitlab-ci-onboarding-pack",
             "--format",
             "json",
             "--strict",
@@ -96,13 +96,13 @@ def test_quickstart_emit_pack(tmp_path, capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert len(data["pack_files"]) == 6
-    assert "docs/artifacts/day16-gitlab-pack/day16-sdetkit-strict.yml" in data["pack_files"]
+    assert "docs/artifacts/gitlab-ci-onboarding-pack/gitlab-ci-sdetkit-strict.yml" in data["pack_files"]
 
 
 def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
-        gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
+        gitlab_ci_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
 
     class _Proc:
@@ -128,13 +128,13 @@ def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert data["execution"]["failed_commands"] == 0
-    assert (tmp_path / "docs/evidence/day16-execution-summary.json").exists()
+    assert (tmp_path / "docs/evidence/gitlab-ci-onboarding-execution-summary.json").exists()
 
 
 def test_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
-        gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
+        gitlab_ci_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
 
     class _Proc:
@@ -153,7 +153,7 @@ def test_quickstart_execute_strict_fails_on_command_error(monkeypatch, tmp_path,
     assert data["execution"]["failed_commands"] == 4
 
 
-def test_main_cli_dispatches_day16_quickstart(capsys):
+def test_main_cli_dispatches_gitlab_ci_quickstart_alias(capsys):
     rc = cli.main(["gitlab-ci-quickstart", "--format", "text"])
     assert rc == 0
     assert "GitLab CI quickstart report" in capsys.readouterr().out
@@ -162,7 +162,7 @@ def test_main_cli_dispatches_day16_quickstart(capsys):
 def test_quickstart_bootstrap_pipeline_writes_selected_variant(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/integrations-gitlab-ci-quickstart.md").write_text(
-        gitlab_ci_quickstart._DAY16_DEFAULT_PAGE, encoding="utf-8"
+        gitlab_ci_quickstart._DEFAULT_PAGE, encoding="utf-8"
     )
 
     rc = gitlab_ci_quickstart.main(

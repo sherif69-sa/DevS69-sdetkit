@@ -1,0 +1,47 @@
+command: python -m sdetkit gitlab-ci-onboarding --format json --strict
+returncode: 0
+ok: True
+--- stdout ---
+{
+  "name": "gitlab-ci-onboarding",
+  "page": "docs/integrations-gitlab-ci-quickstart.md",
+  "variant": "minimal",
+  "selected_pipeline": "stages:\n  - quality\n\nvariables:\n  PIP_DISABLE_PIP_VERSION_CHECK: \"1\"\n\nquickstart-gate:\n  stage: quality\n  image: python:3.11\n  script:\n    - python -m pip install -r requirements-test.txt -e .\n    - python -m sdetkit gitlab-ci-onboarding --format json --strict\n    - python -m pytest -q tests/test_cli_sdetkit.py tests/test_gitlab_ci_quickstart.py\n  rules:\n    - if: $CI_PIPELINE_SOURCE == \"merge_request_event\"\n    - if: $CI_PIPELINE_SOURCE == \"web\"\n",
+  "required_sections": [
+    "## Who this recipe is for",
+    "## 5-minute setup",
+    "## Minimal pipeline",
+    "## Strict pipeline variant",
+    "## Nightly reliability variant",
+    "## Fast verification commands",
+    "## Multi-channel distribution loop",
+    "## Failure recovery playbook",
+    "## Rollout checklist"
+  ],
+  "required_commands": [
+    "python -m sdetkit doctor --format text",
+    "python -m sdetkit repo audit --format json",
+    "python -m pytest -q tests/test_gitlab_ci_quickstart.py tests/test_cli_help_lists_subcommands.py",
+    "python scripts/check_gitlab_ci_onboarding_contract.py",
+    "python -m sdetkit gitlab-ci-onboarding --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
+    "python -m sdetkit gitlab-ci-onboarding --execute --evidence-dir docs/artifacts/gitlab-ci-onboarding-pack/evidence --format json --strict"
+  ],
+  "passed_checks": 19,
+  "total_checks": 19,
+  "score": 100.0,
+  "missing": [],
+  "touched_files": [],
+  "actions": {
+    "open_page": "docs/integrations-gitlab-ci-quickstart.md",
+    "validate": "sdetkit gitlab-ci-onboarding --format json --strict",
+    "validate_strict_variant": "sdetkit gitlab-ci-onboarding --format json --variant strict --strict",
+    "write_defaults": "sdetkit gitlab-ci-onboarding --write-defaults --format json --strict",
+    "artifact": "sdetkit gitlab-ci-onboarding --format markdown --variant strict --output docs/artifacts/gitlab-ci-onboarding-sample.md",
+    "emit_pack": "sdetkit gitlab-ci-onboarding --emit-pack-dir docs/artifacts/gitlab-ci-onboarding-pack --format json --strict",
+    "bootstrap_pipeline": "sdetkit gitlab-ci-onboarding --variant strict --bootstrap-pipeline --pipeline-path .gitlab-ci.yml --format json --strict",
+    "execute": "sdetkit gitlab-ci-onboarding --execute --evidence-dir docs/artifacts/gitlab-ci-onboarding-pack/evidence --format json --strict"
+  }
+}
+
+--- stderr ---
+
