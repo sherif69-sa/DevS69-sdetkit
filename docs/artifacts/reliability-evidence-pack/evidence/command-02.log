@@ -1,7 +1,11 @@
 command: python scripts/check_reliability_evidence_pack_contract.py --skip-evidence
-returncode: 0
-ok: True
+returncode: 1
+ok: False
 --- stdout ---
-reliability-evidence-pack-contract check passed
 
 --- stderr ---
+reliability-evidence-pack-contract check failed:
+ - docs/index.md: missing 'Reliability evidence pack'
+ - docs/index.md: missing 'sdetkit reliability-evidence-pack --format json --strict'
+ - docs/index.md: missing 'artifacts/reliability-evidence-pack/reliability-evidence-summary.json'
+

@@ -56,9 +56,9 @@ Public kit commands are contract-oriented:
 
 ## reliability-evidence-pack
 
---day15-summary
---day16-summary
---day17-summary
+--github-actions-summary
+--gitlab-ci-summary
+--contribution-quality-summary
 --min-reliability-score
 --write-defaults
 --execute
@@ -124,4 +124,3 @@ sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-
 --evidence-dir
 --timeout-sec
 --emit-pack-dir
-

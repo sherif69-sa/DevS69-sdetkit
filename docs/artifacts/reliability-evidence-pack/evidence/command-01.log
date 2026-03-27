@@ -5,20 +5,20 @@ ok: True
 {
   "emitted_files": [],
   "inputs": {
-    "day15": {
-      "pass_rate": 100.0,
-      "score": 100.0,
-      "strict": true
-    },
-    "day16": {
-      "pass_rate": 100.0,
-      "score": 100.0,
-      "strict": true
-    },
-    "day17": {
+    "contribution_quality_report": {
       "stability_score": 100.0,
       "strict_failures": [],
       "velocity_score": 75.44
+    },
+    "github_actions_onboarding": {
+      "pass_rate": 100.0,
+      "score": 100.0,
+      "strict": true
+    },
+    "gitlab_ci_onboarding": {
+      "pass_rate": 100.0,
+      "score": 100.0,
+      "strict": true
     }
   },
   "missing": [],
@@ -38,3 +38,4 @@ ok: True
 }
 
 --- stderr ---
+

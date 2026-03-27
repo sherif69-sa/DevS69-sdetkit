@@ -3,6 +3,7 @@ returncode: 0
 ok: True
 --- stdout ---
 ..                                                                       [100%]
-2 passed in 1.39s
+2 passed in 3.98s
 
 --- stderr ---
+
