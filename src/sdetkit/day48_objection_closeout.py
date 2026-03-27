@@ -25,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day48-objection-closeout --format json --strict",
-    "python -m sdetkit day48-objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict",
-    "python -m sdetkit day48-objection-closeout --execute --evidence-dir docs/artifacts/day48-objection-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit objection-closeout --format json --strict",
+    "python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict",
+    "python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict",
     "python scripts/check_day48_objection_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day48-objection-closeout --format json --strict",
-    "python -m sdetkit day48-objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict",
+    "python -m sdetkit objection-closeout --format json --strict",
+    "python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict",
     "python scripts/check_day48_objection_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -74,9 +74,9 @@ Day 48 closes with a major objection-handling upgrade that converts Day 47 relia
 ## Day 48 command lane
 
 ```bash
-python -m sdetkit day48-objection-closeout --format json --strict
-python -m sdetkit day48-objection-closeout --emit-pack-dir docs/artifacts/day48-objection-closeout-pack --format json --strict
-python -m sdetkit day48-objection-closeout --execute --evidence-dir docs/artifacts/day48-objection-closeout-pack/evidence --format json --strict
+python -m sdetkit objection-closeout --format json --strict
+python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict
+python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict
 python scripts/check_day48_objection_closeout_contract.py
 ```
 
@@ -203,8 +203,8 @@ def build_day48_objection_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day48_command",
             "weight": 4,
-            "passed": "day48-objection-closeout" in readme_text,
-            "evidence": "day48-objection-closeout",
+            "passed": "objection-closeout" in readme_text,
+            "evidence": "objection-closeout",
         },
         {
             "check_id": "docs_index_day48_links",
@@ -323,7 +323,7 @@ def build_day48_objection_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     return {
-        "name": "day48-objection-closeout",
+        "name": "objection-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -383,8 +383,8 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day48-objection-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day48-objection-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "objection-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "objection-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "day48-objection-plan.md",
         "# Day 48 Objection Plan\n\n- Objective: close Day 48 with measurable objection-resolution and adoption gains.\n",
@@ -392,7 +392,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day48-faq-objection-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "objection-floor,qa-lead,docs-owner,2026-03-16T10:00:00Z,docs/integrations-objection-closeout.md,python -m sdetkit day48-objection-closeout --format json --strict,failed-checks:0,faq-drift\n",
+        "objection-floor,qa-lead,docs-owner,2026-03-16T10:00:00Z,docs/integrations-objection-closeout.md,python -m sdetkit objection-closeout --format json --strict,failed-checks:0,faq-drift\n",
     )
     _write(
         target / "day48-objection-kpi-scorecard.json",
@@ -478,7 +478,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day48-objection-closeout-pack/evidence")
+            else Path("docs/artifacts/objection-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

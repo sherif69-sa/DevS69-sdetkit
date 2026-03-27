@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-expansion-automation.md\nday41-expansion-automation\n",
+        "docs/integrations-expansion-automation.md\nexpansion-automation\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def test_day41_expansion_automation_json(tmp_path: Path, capsys) -> None:
     rc = d41.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day41-expansion-automation"
+    assert out["name"] == "expansion-automation"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -96,8 +96,8 @@ def test_day41_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day41-pack/day41-expansion-automation-summary.json").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-expansion-automation-summary.md").exists()
+    assert (tmp_path / "artifacts/day41-pack/expansion-automation-summary.json").exists()
+    assert (tmp_path / "artifacts/day41-pack/expansion-automation-summary.md").exists()
     assert (tmp_path / "artifacts/day41-pack/day41-expansion-plan.md").exists()
     assert (tmp_path / "artifacts/day41-pack/day41-automation-matrix.csv").exists()
     assert (tmp_path / "artifacts/day41-pack/day41-expansion-kpi-scorecard.json").exists()

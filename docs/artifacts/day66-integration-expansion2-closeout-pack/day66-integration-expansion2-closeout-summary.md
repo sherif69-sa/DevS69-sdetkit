@@ -1,5 +1,5 @@
-Day 66 integration expansion #2 closeout summary
-- Activation score: 100
-- Passed checks: 14
-- Failed checks: 0
-- Critical failures: []
+Integration Expansion 2 Closeout summary
+- Activation score: 30
+- Passed checks: 5
+- Failed checks: 9
+- Critical failures: ['day65_handoff_inputs', 'day65_strict_baseline']

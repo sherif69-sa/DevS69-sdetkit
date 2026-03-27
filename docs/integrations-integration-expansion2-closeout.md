@@ -10,8 +10,8 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 
 ## Required inputs (Day 65)
 
-- `docs/artifacts/day65-weekly-review-closeout-pack/day65-weekly-review-closeout-summary.json`
-- `docs/artifacts/day65-weekly-review-closeout-pack/day65-delivery-board.md`
+- `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json`
+- `docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md`
 - `templates/ci/gitlab/day66-advanced-reference.yml`
 
 ## Integration Expansion 2 Closeout command lane (legacy)

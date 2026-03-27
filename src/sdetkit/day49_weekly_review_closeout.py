@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-weekly-review-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY48_SUMMARY_PATH = (
-    "docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json"
+    "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
 )
-_DAY48_BOARD_PATH = "docs/artifacts/day48-objection-closeout-pack/day48-delivery-board.md"
+_DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack/day48-delivery-board.md"
 _SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 49 matters",
@@ -68,8 +68,8 @@ Day 49 closes with a major weekly-review upgrade that converts Day 48 objection 
 
 ## Required inputs (Day 48)
 
-- `docs/artifacts/day48-objection-closeout-pack/day48-objection-closeout-summary.json`
-- `docs/artifacts/day48-objection-closeout-pack/day48-delivery-board.md`
+- `docs/artifacts/objection-closeout-pack/objection-closeout-summary.json`
+- `docs/artifacts/objection-closeout-pack/day48-delivery-board.md`
 
 ## Day 49 command lane
 

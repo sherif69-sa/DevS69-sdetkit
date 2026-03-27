@@ -1,19 +1,19 @@
 {
-  "name": "day42-optimization-closeout",
+  "name": "optimization-closeout-foundation",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day42-optimization-closeout.md",
+    "docs_page": "docs/integrations-optimization-closeout-foundation.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day41_summary": "docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json",
-    "day41_delivery_board": "docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md"
+    "day41_summary": "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json",
+    "day41_delivery_board": "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
   },
   "checks": [
     {
       "check_id": "docs_page_exists",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day42-optimization-closeout.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-optimization-closeout-foundation.md"
     },
     {
       "check_id": "required_sections_present",
@@ -35,19 +35,19 @@
       "check_id": "readme_day42_link",
       "weight": 8,
       "passed": true,
-      "evidence": "docs/integrations-day42-optimization-closeout.md"
+      "evidence": "docs/integrations-optimization-closeout-foundation.md"
     },
     {
       "check_id": "readme_day42_command",
       "weight": 4,
       "passed": true,
-      "evidence": "day42-optimization-closeout"
+      "evidence": "optimization-closeout-foundation"
     },
     {
       "check_id": "docs_index_day42_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-42-big-upgrade-report.md + integrations-day42-optimization-closeout.md"
+      "evidence": "impact-42-big-upgrade-report.md + integrations-optimization-closeout-foundation.md"
     },
     {
       "check_id": "top10_day42_alignment",
@@ -59,13 +59,13 @@
       "check_id": "day41_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day41-expansion-automation-pack/day41-expansion-automation-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
     },
     {
       "check_id": "day41_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day41-expansion-automation-pack/day41-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
     },
     {
       "check_id": "day41_quality_floor",

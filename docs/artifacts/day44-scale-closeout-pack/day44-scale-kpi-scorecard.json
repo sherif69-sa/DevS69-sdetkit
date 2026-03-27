@@ -3,8 +3,8 @@
     {
       "id": "strict_pass",
       "baseline": 1,
-      "current": 1,
-      "delta": 0,
+      "current": 0,
+      "delta": -1,
       "confidence": "high"
     }
   ]

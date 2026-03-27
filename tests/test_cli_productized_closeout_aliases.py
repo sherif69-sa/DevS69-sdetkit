@@ -8,19 +8,19 @@ from sdetkit import cli
 @pytest.mark.parametrize(
     ("canonical", "legacy", "module_attr"),
     [
-        ("expansion-automation", "day41-expansion-automation", "day41_expansion_automation"),
+        ("expansion-automation", "expansion-automation", "day41_expansion_automation"),
         (
             "optimization-closeout-foundation",
-            "day42-optimization-closeout",
+            "optimization-closeout-foundation",
             "day42_optimization_closeout",
         ),
-        ("acceleration-closeout", "day43-acceleration-closeout", "day43_acceleration_closeout"),
-        ("scale-closeout", "day44-scale-closeout", "day44_scale_closeout"),
-        ("expansion-closeout", "day45-expansion-closeout", "day45_expansion_closeout"),
-        ("optimization-closeout", "day46-optimization-closeout", "day46_optimization_closeout"),
+        ("acceleration-closeout", "acceleration-closeout", "day43_acceleration_closeout"),
+        ("scale-closeout", "scale-closeout", "day44_scale_closeout"),
+        ("expansion-closeout", "expansion-closeout", "day45_expansion_closeout"),
+        ("optimization-closeout", "optimization-closeout", "day46_optimization_closeout"),
         ("reliability-closeout", "day47-reliability-closeout", "day47_reliability_closeout"),
-        ("objection-closeout", "day48-objection-closeout", "day48_objection_closeout"),
-        ("weekly-review-closeout", "day49-weekly-review-closeout", "day49_weekly_review_closeout"),
+        ("objection-closeout", "objection-closeout", "day48_objection_closeout"),
+        ("weekly-review-closeout", "weekly-review-closeout", "day49_weekly_review_closeout"),
         (
             "execution-prioritization-closeout",
             "day50-execution-prioritization-closeout",

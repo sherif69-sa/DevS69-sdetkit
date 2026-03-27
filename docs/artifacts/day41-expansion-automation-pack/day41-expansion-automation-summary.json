@@ -1,9 +1,9 @@
 {
-  "name": "day41-expansion-automation",
+  "name": "expansion-automation",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day41-expansion-automation.md",
+    "docs_page": "docs/integrations-expansion-automation.md",
     "top10": "docs/top-10-github-strategy.md",
     "day40_summary": "docs/artifacts/day40-scale-lane-pack/day40-scale-lane-summary.json",
     "day40_delivery_board": "docs/artifacts/day40-scale-lane-pack/day40-delivery-board.md"
@@ -13,7 +13,7 @@
       "check_id": "docs_page_exists",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day41-expansion-automation.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-expansion-automation.md"
     },
     {
       "check_id": "required_sections_present",
@@ -35,19 +35,19 @@
       "check_id": "readme_day41_link",
       "weight": 8,
       "passed": true,
-      "evidence": "docs/integrations-day41-expansion-automation.md"
+      "evidence": "docs/integrations-expansion-automation.md"
     },
     {
       "check_id": "readme_day41_command",
       "weight": 4,
       "passed": true,
-      "evidence": "day41-expansion-automation"
+      "evidence": "expansion-automation"
     },
     {
       "check_id": "docs_index_day41_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-41-big-upgrade-report.md + integrations-day41-expansion-automation.md"
+      "evidence": "impact-41-big-upgrade-report.md + integrations-expansion-automation.md"
     },
     {
       "check_id": "top10_day41_alignment",

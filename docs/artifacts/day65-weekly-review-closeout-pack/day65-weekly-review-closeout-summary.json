@@ -1,9 +1,9 @@
 {
-  "name": "day65-weekly-review-closeout",
+  "name": "weekly-review-closeout-cycle2",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day65-weekly-review-closeout.md",
+    "docs_page": "docs/integrations-weekly-review-closeout-cycle2.md",
     "top10": "docs/top-10-github-strategy.md",
     "day64_summary": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json",
     "day64_delivery_board": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md",
@@ -20,7 +20,7 @@
       "check_id": "docs_index_day65_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-65-big-upgrade-report.md + integrations-day65-weekly-review-closeout.md"
+      "evidence": "impact-65-big-upgrade-report.md + integrations-weekly-review-closeout-cycle2.md"
     },
     {
       "check_id": "top10_day65_alignment",

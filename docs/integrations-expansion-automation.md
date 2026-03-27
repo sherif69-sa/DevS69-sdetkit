@@ -17,8 +17,8 @@ Day 41 closes the lane with a major upgrade that converts Day 40 scale outcomes 
 
 ```bash
 python -m sdetkit expansion-automation --format json --strict
-python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict
-python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict
+python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict
+python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict
 python scripts/check_day41_expansion_automation_contract.py
 ```
 

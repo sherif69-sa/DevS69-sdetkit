@@ -31,7 +31,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day65-weekly-review-closeout-pack/evidence/day65-execution-summary.json"
+            / "docs/artifacts/weekly-review-closeout-cycle2-pack/evidence/day65-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -44,12 +44,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day65-weekly-review-closeout contract check failed:", file=sys.stderr)
+        print("weekly-review-closeout-cycle2 contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day65-weekly-review-closeout contract check passed")
+    print("weekly-review-closeout-cycle2 contract check passed")
     return 0
 
 

@@ -10,15 +10,15 @@ Day 44 closes with a big scale upgrade that converts Day 43 acceleration evidenc
 
 ## Required inputs (Day 43)
 
-- `docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json`
-- `docs/artifacts/day43-acceleration-closeout-pack/day43-delivery-board.md`
+- `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
+- `docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md`
 
 ## Day 44 command lane
 
 ```bash
 python -m sdetkit scale-closeout --format json --strict
-python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/day44-scale-closeout-pack --format json --strict
-python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/day44-scale-closeout-pack/evidence --format json --strict
+python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict
+python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict
 python scripts/check_day44_scale_closeout_contract.py
 ```
 

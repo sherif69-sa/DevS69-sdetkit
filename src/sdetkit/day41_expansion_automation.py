@@ -23,14 +23,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day41-expansion-automation --format json --strict",
-    "python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict",
-    "python -m sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict",
+    "python -m sdetkit expansion-automation --format json --strict",
+    "python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict",
+    "python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict",
     "python scripts/check_day41_expansion_automation_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day41-expansion-automation --format json --strict",
-    "python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict",
+    "python -m sdetkit expansion-automation --format json --strict",
+    "python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict",
     "python scripts/check_day41_expansion_automation_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -72,9 +72,9 @@ Day 41 closes with a major expansion automation upgrade that converts Day 40 sca
 ## Day 41 command lane
 
 ```bash
-python -m sdetkit day41-expansion-automation --format json --strict
-python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict
-python -m sdetkit day41-expansion-automation --execute --evidence-dir docs/artifacts/day41-expansion-automation-pack/evidence --format json --strict
+python -m sdetkit expansion-automation --format json --strict
+python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict
+python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict
 python scripts/check_day41_expansion_automation_contract.py
 ```
 
@@ -202,8 +202,8 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day41_command",
             "weight": 4,
-            "passed": "day41-expansion-automation" in readme_text,
-            "evidence": "day41-expansion-automation",
+            "passed": "expansion-automation" in readme_text,
+            "evidence": "expansion-automation",
         },
         {
             "check_id": "docs_index_day41_links",
@@ -322,7 +322,7 @@ def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
         )
 
     return {
-        "name": "day41-expansion-automation",
+        "name": "expansion-automation",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -401,8 +401,8 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day41-expansion-automation-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day41-expansion-automation-summary.md", _to_markdown(payload))
+    _write(target / "expansion-automation-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "expansion-automation-summary.md", _to_markdown(payload))
     _write(
         target / "day41-expansion-plan.md",
         "# Day 41 expansion automation lane\n\n"
@@ -417,15 +417,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day41-automation-matrix.csv",
         "workflow,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target,risk_guardrail\n"
-        "expansion-summary,pm-owner,backup-pm,2026-03-09T09:00:00Z,docs/integrations-expansion-automation.md,python -m sdetkit day41-expansion-automation --format json --strict,completion:+6%,rollback-doc-ready\n"
+        "expansion-summary,pm-owner,backup-pm,2026-03-09T09:00:00Z,docs/integrations-expansion-automation.md,python -m sdetkit expansion-automation --format json --strict,completion:+6%,rollback-doc-ready\n"
         "matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/impact-41-big-upgrade-report.md,python scripts/check_day41_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout\n"
-        "kpi-review,growth-owner,backup-growth,2026-03-10T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day41-expansion-automation --emit-pack-dir docs/artifacts/day41-expansion-automation-pack --format json --strict,ctr:+3%,trigger-alert-on-regression\n",
+        "kpi-review,growth-owner,backup-growth,2026-03-10T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict,ctr:+3%,trigger-alert-on-regression\n",
     )
     _write(
         target / "day41-expansion-kpi-scorecard.json",
         json.dumps(
             {
-                "generated_for": "day41-expansion-automation",
+                "generated_for": "expansion-automation",
                 "metrics": [
                     {
                         "name": "automation_completion_rate",
@@ -489,7 +489,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day41-expansion-automation-execution",
+        "name": "expansion-automation-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
@@ -528,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day41-expansion-automation-pack/evidence")
+            else Path("docs/artifacts/expansion-automation-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

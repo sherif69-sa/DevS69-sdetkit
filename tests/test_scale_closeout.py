@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-scale-closeout.md\nday44-scale-closeout\n",
+        "docs/integrations-scale-closeout.md\nscale-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json"
+        / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day43-acceleration-closeout-pack/day43-delivery-board.md"
+    board = root / "docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -78,7 +78,7 @@ def test_day44_scale_closeout_json(tmp_path: Path, capsys) -> None:
     rc = d44.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day44-scale-closeout"
+    assert out["name"] == "scale-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -99,8 +99,8 @@ def test_day44_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day44-pack/day44-scale-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-scale-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day44-pack/day44-scale-plan.md").exists()
     assert (tmp_path / "artifacts/day44-pack/day44-growth-matrix.csv").exists()
     assert (tmp_path / "artifacts/day44-pack/day44-scale-kpi-scorecard.json").exists()
@@ -114,7 +114,7 @@ def test_day44_strict_fails_when_day43_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day43-acceleration-closeout-pack/day43-acceleration-closeout-summary.json"
+        / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
     ).unlink()
     rc = d44.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

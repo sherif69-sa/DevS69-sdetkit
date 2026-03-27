@@ -1,9 +1,9 @@
 {
-  "name": "day48-objection-closeout",
+  "name": "objection-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day48-objection-closeout.md",
+    "docs_page": "docs/integrations-objection-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "day47_summary": "docs/artifacts/day47-reliability-closeout-pack/day47-reliability-closeout-summary.json",
     "day47_delivery_board": "docs/artifacts/day47-reliability-closeout-pack/day47-delivery-board.md"
@@ -13,7 +13,7 @@
       "check_id": "docs_page_exists",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-day48-objection-closeout.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-objection-closeout.md"
     },
     {
       "check_id": "required_sections_present",
@@ -35,19 +35,19 @@
       "check_id": "readme_day48_link",
       "weight": 8,
       "passed": true,
-      "evidence": "docs/integrations-day48-objection-closeout.md"
+      "evidence": "docs/integrations-objection-closeout.md"
     },
     {
       "check_id": "readme_day48_command",
       "weight": 4,
       "passed": true,
-      "evidence": "day48-objection-closeout"
+      "evidence": "objection-closeout"
     },
     {
       "check_id": "docs_index_day48_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-48-big-upgrade-report.md + integrations-day48-objection-closeout.md"
+      "evidence": "impact-48-big-upgrade-report.md + integrations-objection-closeout.md"
     },
     {
       "check_id": "top10_day48_alignment",
