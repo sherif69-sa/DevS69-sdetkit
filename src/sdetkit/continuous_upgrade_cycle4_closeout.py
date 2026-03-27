@@ -474,7 +474,7 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     )
     _write(target / "continuous-upgrade-cycle4-plan.md", "# Cycle 4 continuous upgrade plan\n")
     _write(
-        target / "continuous-upgrade-cycle4-template-ledger.json",
+        target / "continuous-upgrade-cycle4-upgrade-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
@@ -482,7 +482,7 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
     _write(
-        target / "continuous-upgrade-cycle4-kpi-scorecard.json",
+        target / "continuous-upgrade-cycle4-upgrade-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
     _write(target / "continuous-upgrade-cycle4-execution-log.md", "# Cycle 4 execution log\n")
@@ -521,7 +521,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> dict[str, Any]:
         "commands": events,
     }
     _write(
-        out_dir / "continuous-upgrade-cycle4-execution-summary.json",
+        out_dir / "cycle4-execution-summary.json",
         json.dumps(summary, indent=2) + "\n",
     )
     return summary

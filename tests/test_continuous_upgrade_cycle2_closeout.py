@@ -81,7 +81,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day92-continuous-upgrade-001",
+                "plan_id": "continuous-upgrade-cycle2-001",
                 "contributors": ["maintainers", "release-ops"],
                 "upgrade_channels": ["readme", "docs-index", "cli-lanes"],
                 "baseline": {"strict_pass_rate": 0.9, "doc_link_coverage": 0.88},
@@ -198,7 +198,7 @@ def test_cycle2_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert execution_data["strict_pass"] is False
 
 
-def test_cycle2_strict_fails_without_day91(tmp_path: Path) -> None:
+def test_cycle2_strict_fails_without_cycle1(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

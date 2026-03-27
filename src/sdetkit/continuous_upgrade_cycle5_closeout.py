@@ -50,7 +50,7 @@ _REQUIRED_QUALITY_LINES = [
 _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 5 evidence brief committed",
     "- [ ] Cycle 5 continuous upgrade plan committed",
-    "- [ ] Cycle 5 template ledger exported",
+    "- [ ] Cycle 5 upgrade template upgrade ledger exported",
     "- [ ] Cycle 5 storyline outcomes ledger exported",
     "- [ ] Next-impact roadmap draft captured from cycle 5 outcomes",
 ]
@@ -110,7 +110,7 @@ python scripts/check_continuous_upgrade_cycle5_closeout_contract.py
 
 - [ ] Cycle 5 evidence brief committed
 - [ ] Cycle 5 continuous upgrade plan committed
-- [ ] Cycle 5 template ledger exported
+- [ ] Cycle 5 upgrade template upgrade ledger exported
 - [ ] Cycle 5 storyline outcomes ledger exported
 - [ ] Next-impact roadmap draft captured from cycle 5 outcomes
 
@@ -471,7 +471,7 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     )
     _write(target / "continuous-upgrade-cycle5-plan.md", "# Cycle 5 continuous upgrade plan\n")
     _write(
-        target / "continuous-upgrade-cycle5-template-ledger.json",
+        target / "continuous-upgrade-cycle5-upgrade-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
@@ -479,7 +479,7 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
     _write(
-        target / "continuous-upgrade-cycle5-kpi-scorecard.json",
+        target / "continuous-upgrade-cycle5-upgrade-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
     _write(target / "continuous-upgrade-cycle5-execution-log.md", "# Cycle 5 execution log\n")
@@ -518,7 +518,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> dict[str, Any]:
         "commands": events,
     }
     _write(
-        out_dir / "continuous-upgrade-cycle5-execution-summary.json",
+        out_dir / "cycle5-execution-summary.json",
         json.dumps(summary, indent=2) + "\n",
     )
     return summary

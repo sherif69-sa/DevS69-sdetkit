@@ -66,7 +66,7 @@ def _seed_repo(root: Path) -> None:
                 "# Cycle 3 delivery board",
                 "- [ ] Cycle 3 evidence brief committed",
                 "- [ ] Cycle 3 continuous upgrade plan committed",
-                "- [ ] Cycle 3 template ledger exported",
+                "- [ ] Cycle 3 upgrade template upgrade ledger exported",
                 "- [ ] Cycle 3 storyline outcomes ledger exported",
                 "- [ ] Next-impact roadmap draft captured from cycle 3 outcomes",
             ]
@@ -111,10 +111,10 @@ def test_cycle4_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/continuous-upgrade-cycle4-pack",
+            "artifacts/continuous-upgrade-cycle4-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/continuous-upgrade-cycle4-pack/evidence",
+            "artifacts/continuous-upgrade-cycle4-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -123,46 +123,47 @@ def test_cycle4_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-closeout-summary.json"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-closeout-summary.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-closeout-summary.md"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-closeout-summary.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-evidence-brief.md"
-    ).exists()
-    assert (
-        tmp_path / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-plan.md"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-evidence-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-template-ledger.json"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-plan.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-storyline-outcomes-ledger.json"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-upgrade-template-upgrade-ledger.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-kpi-scorecard.json"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-storyline-outcomes-ledger.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-execution-log.md"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-upgrade-kpi-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-delivery-board.md"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/continuous-upgrade-cycle4-validation-commands.md"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-validation-commands.md"
     ).exists()
     execution_summary = (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/evidence/continuous-upgrade-cycle4-execution-summary.json"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/evidence/cycle4-execution-summary.json"
     )
     assert execution_summary.exists()
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
@@ -179,7 +180,7 @@ def test_cycle4_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
             str(tmp_path),
             "--execute",
             "--evidence-dir",
-            "artifacts/continuous-upgrade-cycle4-pack/evidence",
+            "artifacts/continuous-upgrade-cycle4-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -188,7 +189,7 @@ def test_cycle4_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert rc == 1
     execution_summary = (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle4-pack/evidence/continuous-upgrade-cycle4-execution-summary.json"
+        / "artifacts/continuous-upgrade-cycle4-closeout-pack/evidence/cycle4-execution-summary.json"
     )
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
     assert execution_data["failed_commands"] == 1
