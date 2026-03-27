@@ -1,19 +1,23 @@
 {
-  "name": "name32-release-cadence",
+  "name": "day32-release-cadence",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-name32-release-cadence.md",
+    "docs_page": "docs/integrations-release-cadence.md",
     "top10": "docs/top-10-github-strategy.md",
-    "name31_summary": "docs/artifacts/name31-phase2-pack/name31-phase2-kickoff-summary.json",
-    "name31_delivery_board": "docs/artifacts/name31-phase2-pack/name31-delivery-board.md"
+    "day31_summary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+    "day31_summary_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+    "day31_summary_compatibility": "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json",
+    "day31_delivery_board": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+    "day31_delivery_board_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+    "day31_delivery_board_compatibility": "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
   },
   "checks": [
     {
       "check_id": "docs_page_exists",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-name32-release-cadence.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-release-cadence.md"
     },
     {
       "check_id": "required_sections_present",
@@ -32,59 +36,67 @@
       }
     },
     {
-      "check_id": "readme_name32_link",
+      "check_id": "readme_day32_link",
       "weight": 8,
-      "passed": true,
-      "evidence": "docs/integrations-name32-release-cadence.md"
+      "passed": false,
+      "evidence": "docs/integrations-release-cadence.md"
     },
     {
-      "check_id": "readme_name32_command",
+      "check_id": "readme_day32_command",
       "weight": 4,
-      "passed": true,
-      "evidence": "name32-release-cadence"
+      "passed": false,
+      "evidence": "day32-release-cadence"
     },
     {
-      "check_id": "docs_index_name32_links",
+      "check_id": "docs_index_day32_links",
       "weight": 8,
-      "passed": true,
-      "evidence": "name-32-ultra-upgrade-report.md + integrations-name32-release-cadence.md"
+      "passed": false,
+      "evidence": "impact-32-ultra-upgrade-report.md + integrations-release-cadence.md"
     },
     {
-      "check_id": "top10_name32_alignment",
+      "check_id": "top10_day32_alignment",
       "weight": 5,
-      "passed": true,
-      "evidence": "Name 32 + Name 33 strategy chain"
+      "passed": false,
+      "evidence": "Day 32 + Day 33 strategy chain"
     },
     {
-      "check_id": "name31_summary_present",
-      "weight": 10,
-      "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/name31-phase2-pack/name31-phase2-kickoff-summary.json"
-    },
-    {
-      "check_id": "name31_delivery_board_present",
-      "weight": 8,
-      "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/name31-phase2-pack/name31-delivery-board.md"
-    },
-    {
-      "check_id": "name31_quality_floor",
+      "check_id": "day31_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "name31_score": 100.0,
-        "strict_pass": true,
-        "name31_checks": 13
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+        "compatibility": "/workspace/DevS69-sdetkit/docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
       }
     },
     {
-      "check_id": "name31_board_integrity",
+      "check_id": "day31_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+        "compatibility": "/workspace/DevS69-sdetkit/docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
+      }
+    },
+    {
+      "check_id": "day31_quality_floor",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "day31_score": 65.0,
+        "strict_pass": false,
+        "day31_checks": 13
+      }
+    },
+    {
+      "check_id": "day31_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_name32": true,
-        "contains_name33": true
+        "contains_day32": true,
+        "contains_day33": true
       }
     },
     {
@@ -113,23 +125,27 @@
     }
   ],
   "rollup": {
-    "name31_activation_score": 100.0,
-    "name31_checks": 13,
-    "name31_delivery_board_items": 5
+    "day31_activation_score": 65.0,
+    "day31_checks": 13,
+    "day31_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 65,
+    "passed_checks": 9,
+    "failed_checks": 5,
+    "critical_failures": [
+      "day31_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Name 31 continuity is strict-pass with activation score=100.0.",
-    "Name 31 delivery board integrity validated with 5 checklist items.",
-    "Release cadence + changelog contract is fully locked for weekly execution.",
-    "Name 32 release cadence setup is fully closed and ready for Name 33 demo asset execution."
+    "Day 31 delivery board integrity validated with 5 checklist items.",
+    "Release cadence + changelog contract is fully locked for weekly execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 31 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 31 kickoff command and restore strict pass baseline before release cadence lock."
+  ]
 }

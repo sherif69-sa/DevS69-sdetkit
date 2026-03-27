@@ -12,15 +12,16 @@ Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 e
 
 - `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
 - `docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json`
-- `docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json`
+- `docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json` (primary)
+- `docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json` (compatibility)
 
 ## Day 30 command lane
 
 ```bash
 python -m sdetkit phase1-wrap --format json --strict
-python -m sdetkit phase1-wrap --emit-pack-dir docs/artifacts/day30-wrap-pack --format json --strict
-python -m sdetkit phase1-wrap --execute --evidence-dir docs/artifacts/day30-wrap-pack/evidence --format json --strict
-python scripts/check_day30_phase1_wrap_contract.py
+python -m sdetkit phase1-wrap --emit-pack-dir docs/artifacts/phase1-wrap-pack --format json --strict
+python -m sdetkit phase1-wrap --execute --evidence-dir docs/artifacts/phase1-wrap-pack/evidence --format json --strict
+python scripts/check_phase1_wrap_contract.py
 ```
 
 ## Scoring model

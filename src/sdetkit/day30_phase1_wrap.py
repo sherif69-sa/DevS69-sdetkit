@@ -10,6 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase1-wrap.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
+_CANONICAL_LANE_NAME = "phase1-wrap"
+_LEGACY_LANE_NAME = "day30-phase1-wrap"
+_DAY29_CANONICAL_SUMMARY_PATH = "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
+_DAY29_LEGACY_SUMMARY_PATH = "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+_CANONICAL_EXECUTION_SUMMARY = "phase1-wrap-execution-summary.json"
+_LEGACY_EXECUTION_SUMMARY = "day30-execution-summary.json"
 _SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
 _REQUIRED_SECTIONS = [
     "## Why Day 30 matters",
@@ -19,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Locked Phase-2 backlog",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day30-phase1-wrap --format json --strict",
-    "python -m sdetkit day30-phase1-wrap --emit-pack-dir docs/artifacts/day30-wrap-pack --format json --strict",
-    "python -m sdetkit day30-phase1-wrap --execute --evidence-dir docs/artifacts/day30-wrap-pack/evidence --format json --strict",
-    "python scripts/check_day30_phase1_wrap_contract.py",
+    "python -m sdetkit phase1-wrap --format json --strict",
+    "python -m sdetkit phase1-wrap --emit-pack-dir docs/artifacts/phase1-wrap-pack --format json --strict",
+    "python -m sdetkit phase1-wrap --execute --evidence-dir docs/artifacts/phase1-wrap-pack/evidence --format json --strict",
+    "python scripts/check_phase1_wrap_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day30-phase1-wrap --format json --strict",
-    "python scripts/check_day30_phase1_wrap_contract.py --skip-evidence",
+    "python -m sdetkit phase1-wrap --format json --strict",
+    "python scripts/check_phase1_wrap_contract.py --skip-evidence",
 ]
 
 _DAY30_DEFAULT_PAGE = """# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff
@@ -43,15 +49,16 @@ Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 e
 
 - `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
 - `docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json`
-- `docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json`
+- `docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json` (primary)
+- `docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json` (compatibility)
 
 ## Day 30 command lane
 
 ```bash
-python -m sdetkit day30-phase1-wrap --format json --strict
-python -m sdetkit day30-phase1-wrap --emit-pack-dir docs/artifacts/day30-wrap-pack --format json --strict
-python -m sdetkit day30-phase1-wrap --execute --evidence-dir docs/artifacts/day30-wrap-pack/evidence --format json --strict
-python scripts/check_day30_phase1_wrap_contract.py
+python -m sdetkit phase1-wrap --format json --strict
+python -m sdetkit phase1-wrap --emit-pack-dir docs/artifacts/phase1-wrap-pack --format json --strict
+python -m sdetkit phase1-wrap --execute --evidence-dir docs/artifacts/phase1-wrap-pack/evidence --format json --strict
+python scripts/check_phase1_wrap_contract.py
 ```
 
 ## Scoring model
@@ -113,7 +120,9 @@ def build_day30_phase1_wrap_summary(
 
     day27_path = root / "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
     day28_path = root / "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json"
-    day29_path = root / "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+    day29_primary_path = root / _DAY29_CANONICAL_SUMMARY_PATH
+    day29_legacy_path = root / _DAY29_LEGACY_SUMMARY_PATH
+    day29_path = day29_primary_path if day29_primary_path.exists() else day29_legacy_path
 
     day27_score, day27_ok = _load_score(day27_path)
     day28_score, day28_ok = _load_score(day28_path)
@@ -154,8 +163,8 @@ def build_day30_phase1_wrap_summary(
         {
             "check_id": "readme_day30_command",
             "weight": 5,
-            "passed": "day30-phase1-wrap" in readme_text,
-            "evidence": "day30-phase1-wrap",
+            "passed": ("phase1-wrap" in readme_text) or ("day30-phase1-wrap" in readme_text),
+            "evidence": "phase1-wrap (legacy: day30-phase1-wrap)",
         },
         {
             "check_id": "docs_index_day30_links",
@@ -191,7 +200,11 @@ def build_day30_phase1_wrap_summary(
             "check_id": "day29_input_present",
             "weight": 8,
             "passed": day29_ok,
-            "evidence": str(day29_path),
+            "evidence": {
+                "resolved": str(day29_path),
+                "primary": str(day29_primary_path),
+                "compatibility": str(day29_legacy_path),
+            },
         },
         {
             "check_id": "phase2_backlog_locked",
@@ -240,7 +253,8 @@ def build_day30_phase1_wrap_summary(
         )
 
     return {
-        "name": "day30-phase1-wrap",
+        "name": _CANONICAL_LANE_NAME,
+        "legacy_name": _LEGACY_LANE_NAME,
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -249,6 +263,8 @@ def build_day30_phase1_wrap_summary(
             "day27_summary": str(day27_path.relative_to(root)),
             "day28_summary": str(day28_path.relative_to(root)),
             "day29_summary": str(day29_path.relative_to(root)),
+            "day29_summary_primary": str(day29_primary_path.relative_to(root)),
+            "day29_summary_compatibility": str(day29_legacy_path.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
@@ -318,10 +334,13 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day30-phase1-wrap-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day30-phase1-wrap-summary.md", _to_markdown(payload))
-    _write(
-        target / "day30-phase2-backlog.md",
+    summary_json = json.dumps(payload, indent=2) + "\n"
+    _write(target / "phase1-wrap-summary.json", summary_json)
+    _write(target / "day30-phase1-wrap-summary.json", summary_json)
+    summary_md = _to_markdown(payload)
+    _write(target / "phase1-wrap-summary.md", summary_md)
+    _write(target / "day30-phase1-wrap-summary.md", summary_md)
+    backlog_md = (
         "# Locked Phase-2 backlog\n\n"
         + "\n".join(
             [
@@ -338,20 +357,22 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
                 ]
             ]
         )
-        + "\n",
+        + "\n"
     )
-    _write(
-        target / "day30-handoff-actions.md",
+    _write(target / "phase1-wrap-phase2-backlog.md", backlog_md)
+    _write(target / "day30-phase2-backlog.md", backlog_md)
+    handoff_md = (
         "# Day 30 handoff actions\n\n"
         + "\n".join(
             [f"- [ ] {x}" for x in payload["handoff_actions"] or ["No handoff actions required."]]
         )
-        + "\n",
+        + "\n"
     )
-    _write(
-        target / "day30-validation-commands.md",
-        "# Day 30 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
-    )
+    _write(target / "phase1-wrap-handoff-actions.md", handoff_md)
+    _write(target / "day30-handoff-actions.md", handoff_md)
+    validation_md = "# Day 30 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    _write(target / "phase1-wrap-validation-commands.md", validation_md)
+    _write(target / "day30-validation-commands.md", validation_md)
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -372,12 +393,15 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day30-phase1-wrap-execution",
+        "name": "phase1-wrap-execution",
+        "legacy_name": "day30-phase1-wrap-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day30-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    execution_json = json.dumps(summary, indent=2) + "\n"
+    _write(target / _CANONICAL_EXECUTION_SUMMARY, execution_json)
+    _write(target / _LEGACY_EXECUTION_SUMMARY, execution_json)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -411,7 +435,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day30-wrap-pack/evidence")
+            else Path("docs/artifacts/phase1-wrap-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

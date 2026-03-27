@@ -10,8 +10,10 @@ Day 32 converts Day 31 baseline goals into a repeatable release operating cadenc
 
 ## Required inputs (Day 31)
 
-- `docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json`
-- `docs/artifacts/day31-phase2-pack/day31-delivery-board.md`
+- `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json` (primary)
+- `docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json` (compatibility)
+- `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md` (primary)
+- `docs/artifacts/day31-phase2-pack/day31-delivery-board.md` (compatibility)
 
 ## Day 32 command lane
 

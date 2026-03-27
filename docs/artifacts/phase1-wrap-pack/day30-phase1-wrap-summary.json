@@ -1,0 +1,114 @@
+{
+  "name": "phase1-wrap",
+  "legacy_name": "day30-phase1-wrap",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-phase1-wrap.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day27_summary": "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",
+    "day28_summary": "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json",
+    "day29_summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
+    "day29_summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
+    "day29_summary_compatibility": "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-phase1-wrap.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day30_link",
+      "weight": 10,
+      "passed": false,
+      "evidence": "docs/integrations-phase1-wrap.md"
+    },
+    {
+      "check_id": "readme_day30_command",
+      "weight": 5,
+      "passed": false,
+      "evidence": "phase1-wrap (legacy: day30-phase1-wrap)"
+    },
+    {
+      "check_id": "docs_index_day30_links",
+      "weight": 10,
+      "passed": false,
+      "evidence": "impact-30-ultra-upgrade-report.md + integrations-phase1-wrap.md"
+    },
+    {
+      "check_id": "top10_day30_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 30 + Day 31 strategy chain"
+    },
+    {
+      "check_id": "day27_input_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
+    },
+    {
+      "check_id": "day28_input_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json"
+    },
+    {
+      "check_id": "day29_input_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
+        "compatibility": "/workspace/DevS69-sdetkit/docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+      }
+    },
+    {
+      "check_id": "phase2_backlog_locked",
+      "weight": 20,
+      "passed": true,
+      "evidence": {
+        "backlog_items": 8
+      }
+    }
+  ],
+  "rollup": {
+    "day27_activation_score": 100.0,
+    "day28_activation_score": 100.0,
+    "day29_activation_score": 55.0,
+    "average_activation_score": 85.0
+  },
+  "summary": {
+    "activation_score": 69,
+    "passed_checks": 7,
+    "failed_checks": 4,
+    "critical_failures": [],
+    "strict_pass": false
+  },
+  "wins": [
+    "Cycles 27-29 closeout artifacts loaded successfully (avg=85.0).",
+    "Phase-2 backlog locked with 8 actionable checklist items."
+  ],
+  "misses": [],
+  "handoff_actions": [
+    "Fix Day 30 docs/discoverability contract gaps and rerun strict validation."
+  ]
+}

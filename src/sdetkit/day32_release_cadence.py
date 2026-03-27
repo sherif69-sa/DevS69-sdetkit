@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-release-cadence.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY31_SUMMARY_PATH = "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
-_DAY31_BOARD_PATH = "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
+_DAY31_SUMMARY_PATH = "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
+_DAY31_SUMMARY_FALLBACK_PATH = "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
+_DAY31_BOARD_PATH = "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
+_DAY31_BOARD_FALLBACK_PATH = "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
 _SECTION_HEADER = "# Day 32 \u2014 Release cadence setup"
 _REQUIRED_SECTIONS = [
     "## Why Day 32 matters",
@@ -23,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day32-release-cadence --format json --strict",
-    "python -m sdetkit day32-release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict",
-    "python -m sdetkit day32-release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict",
+    "python -m sdetkit release-cadence --format json --strict",
+    "python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict",
+    "python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict",
     "python scripts/check_day32_release_cadence_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day32-release-cadence --format json --strict",
-    "python -m sdetkit day32-release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict",
+    "python -m sdetkit release-cadence --format json --strict",
+    "python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict",
     "python scripts/check_day32_release_cadence_contract.py --skip-evidence",
 ]
 _REQUIRED_CADENCE_LINES = [
@@ -66,15 +68,17 @@ Day 32 converts Day 31 baseline goals into a repeatable release operating cadenc
 
 ## Required inputs (Day 31)
 
-- `docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json`
-- `docs/artifacts/day31-phase2-pack/day31-delivery-board.md`
+- `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json` (primary)
+- `docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json` (compatibility)
+- `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md` (primary)
+- `docs/artifacts/day31-phase2-pack/day31-delivery-board.md` (compatibility)
 
 ## Day 32 command lane
 
 ```bash
-python -m sdetkit day32-release-cadence --format json --strict
-python -m sdetkit day32-release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict
-python -m sdetkit day32-release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict
+python -m sdetkit release-cadence --format json --strict
+python -m sdetkit release-cadence --emit-pack-dir docs/artifacts/day32-release-cadence-pack --format json --strict
+python -m sdetkit release-cadence --execute --evidence-dir docs/artifacts/day32-release-cadence-pack/evidence --format json --strict
 python scripts/check_day32_release_cadence_contract.py
 ```
 
@@ -178,8 +182,12 @@ def build_day32_release_cadence_summary(
     missing_changelog_lines = _contains_all_lines(page_text, _REQUIRED_CHANGELOG_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day31_summary = root / _DAY31_SUMMARY_PATH
-    day31_board = root / _DAY31_BOARD_PATH
+    day31_summary_primary = root / _DAY31_SUMMARY_PATH
+    day31_summary_fallback = root / _DAY31_SUMMARY_FALLBACK_PATH
+    day31_board_primary = root / _DAY31_BOARD_PATH
+    day31_board_fallback = root / _DAY31_BOARD_FALLBACK_PATH
+    day31_summary = day31_summary_primary if day31_summary_primary.exists() else day31_summary_fallback
+    day31_board = day31_board_primary if day31_board_primary.exists() else day31_board_fallback
     day31_score, day31_strict, day31_check_count = _load_day31(day31_summary)
     board_count, board_has_day32, board_has_day33 = _board_stats(day31_board)
 
@@ -236,13 +244,21 @@ def build_day32_release_cadence_summary(
             "check_id": "day31_summary_present",
             "weight": 10,
             "passed": day31_summary.exists(),
-            "evidence": str(day31_summary),
+            "evidence": {
+                "resolved": str(day31_summary),
+                "primary": str(day31_summary_primary),
+                "compatibility": str(day31_summary_fallback),
+            },
         },
         {
             "check_id": "day31_delivery_board_present",
             "weight": 8,
             "passed": day31_board.exists(),
-            "evidence": str(day31_board),
+            "evidence": {
+                "resolved": str(day31_board),
+                "primary": str(day31_board_primary),
+                "compatibility": str(day31_board_fallback),
+            },
         },
         {
             "check_id": "day31_quality_floor",
@@ -341,9 +357,13 @@ def build_day32_release_cadence_summary(
             "day31_summary": str(day31_summary.relative_to(root))
             if day31_summary.exists()
             else str(day31_summary),
+            "day31_summary_primary": str(day31_summary_primary.relative_to(root)),
+            "day31_summary_compatibility": str(day31_summary_fallback.relative_to(root)),
             "day31_delivery_board": str(day31_board.relative_to(root))
             if day31_board.exists()
             else str(day31_board),
+            "day31_delivery_board_primary": str(day31_board_primary.relative_to(root)),
+            "day31_delivery_board_compatibility": str(day31_board_fallback.relative_to(root)),
         },
         "checks": checks,
         "rollup": {

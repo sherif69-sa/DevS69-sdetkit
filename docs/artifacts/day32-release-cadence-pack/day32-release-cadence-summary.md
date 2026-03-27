@@ -1,24 +1,22 @@
-# Name 32 release cadence summary
+# Day 32 release cadence summary
 
-- Activation score: **100**
-- Passed checks: **14**
-- Failed checks: **0**
-- Critical failures: **none**
+- Activation score: **65**
+- Passed checks: **9**
+- Failed checks: **5**
+- Critical failures: **day31_strict_baseline**
 
-## Name 31 continuity
+## Day 31 continuity
 
-- Name 31 activation score: `100.0`
-- Name 31 checks evaluated: `13`
-- Name 31 delivery board checklist items: `5`
+- Day 31 activation score: `65.0`
+- Day 31 checks evaluated: `13`
+- Day 31 delivery board checklist items: `5`
 
 ## Wins
-- Name 31 continuity is strict-pass with activation score=100.0.
-- Name 31 delivery board integrity validated with 5 checklist items.
+- Day 31 delivery board integrity validated with 5 checklist items.
 - Release cadence + changelog contract is fully locked for weekly execution.
-- Name 32 release cadence setup is fully closed and ready for Name 33 demo asset execution.
 
 ## Misses
-- No misses recorded.
+- Day 31 strict continuity signal is missing.
 
 ## Handoff actions
-- [ ] No handoff actions required.
+- [ ] Re-run Day 31 kickoff command and restore strict pass baseline before release cadence lock.

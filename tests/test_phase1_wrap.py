@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase1-wrap.md\nday30-phase1-wrap\n",
+        "docs/integrations-phase1-wrap.md\nphase1-wrap\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -44,7 +44,7 @@ def _seed_repo(root: Path) -> None:
     for rel in [
         "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",
         "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json",
-        "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json",
+        "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
     ]:
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
@@ -56,7 +56,7 @@ def test_day30_wrap_json(tmp_path: Path, capsys) -> None:
     rc = d30.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day30-phase1-wrap"
+    assert out["name"] == "phase1-wrap"
     assert out["summary"]["activation_score"] >= 90
 
 
@@ -77,17 +77,18 @@ def test_day30_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
+    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-summary.json").exists()
     assert (tmp_path / "artifacts/day30-pack/day30-phase1-wrap-summary.json").exists()
-    assert (tmp_path / "artifacts/day30-pack/day30-phase1-wrap-summary.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/day30-phase2-backlog.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/day30-handoff-actions.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/day30-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/evidence/day30-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-summary.md").exists()
+    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-phase2-backlog.md").exists()
+    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-handoff-actions.md").exists()
+    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day30-pack/evidence/phase1-wrap-execution-summary.json").exists()
 
 
 def test_day30_strict_fails_when_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json").unlink()
+    (tmp_path / "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json").unlink()
     rc = d30.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

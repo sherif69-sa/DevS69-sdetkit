@@ -19,9 +19,9 @@ Day 29 closes Phase-1 by hardening top entry pages, removing stale guidance, and
 
 ```bash
 python -m sdetkit phase1-hardening --format json --strict
-python -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/day29-hardening-pack --format json --strict
-python -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/day29-hardening-pack/evidence --format json --strict
-python scripts/check_day29_phase1_hardening_contract.py
+python -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict
+python -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict
+python scripts/check_phase1_hardening_contract.py
 ```
 
 ## Scoring model
