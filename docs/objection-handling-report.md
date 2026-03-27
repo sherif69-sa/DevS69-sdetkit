@@ -32,7 +32,7 @@ Without deterministic answers, onboarding confidence drops and launch momentum s
 ## Validation commands
 
 ```bash
-python -m pytest tests/test_faq_objections.py tests/test_cli_help_lists_subcommands.py
+python -m pytest tests/test_objection_handling.py tests/test_cli_help_lists_subcommands.py
 python -m sdetkit objection-handling --format json --strict
 python -m sdetkit objection-handling --emit-pack-dir docs/artifacts/objection-handling-pack --format json --strict
 python -m sdetkit objection-handling --execute --evidence-dir docs/artifacts/objection-handling-pack/evidence --format json --strict
@@ -52,6 +52,6 @@ python scripts/check_objection_handling_contract.py
 ## Rollback plan
 
 1. Remove the legacy objection-handling compatibility alias from CLI dispatch.
-2. Remove `src/sdetkit/faq_objections.py` and objection-handling docs pages.
+2. Remove `src/sdetkit/objection_handling.py` and objection-handling docs pages.
 3. Remove objection-handling contract checks from validation scripts.
 4. Re-run baseline tests to confirm stable fallback.

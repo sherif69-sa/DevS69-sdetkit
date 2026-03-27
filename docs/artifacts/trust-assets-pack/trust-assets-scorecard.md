@@ -2,10 +2,10 @@
 
 ## Trust posture
 
-- Trust score: **70.0**
+- Trust score: **68.0**
 - Trust label: **review**
-- Weighted points: **70/100**
-- Failed checks: **3**
+- Weighted points: **68/100**
+- Failed checks: **4**
 - Critical failures: **security_doc_exists**
 
 ## Check matrix
@@ -21,8 +21,9 @@
 - **governance::ci_workflow** (6 pts): pass
 - **governance::security_workflow** (8 pts): pass
 - **governance::pages_workflow** (4 pts): pass
-- **governance::docs_index_trust_assets** (2 pts): pass
+- **governance::docs_index_trust_assets** (2 pts): missing
 
 ## Recommendations
 
 - Ensure policy documents exist and are linked from README governance references.
+- Keep CI/security/pages workflows and docs index trust references present for reviewers.

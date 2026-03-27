@@ -67,7 +67,7 @@ PRINT_ALLOWED_MODULE_SUFFIXES = (
     "/demo.py",
     "/docs_navigation.py",
     "/docs_qa.py",
-    "/enterprise_use_case.py",
+    "/enterprise_readiness.py",
     "/first_contribution.py",
     "/github_actions_quickstart.py",
     "/gitlab_ci_quickstart.py",

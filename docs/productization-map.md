@@ -75,7 +75,7 @@ Classification is based on current repository contents and naming patterns.
 - Named playbook modules:
   - `onboarding`, `weekly_review`, `demo`, `evidence-assets`, `first_contribution`, `contributor_funnel`, `triage_templates`, `startup_readiness`, `enterprise_readiness`.
 - Rollout-oriented narrative modules:
-  - `release_narrative`, `release_readiness_board`, `reliability_evidence_pack`, `quality_contribution_delta`, `faq_objections`, `community_activation`, `external_contribution_push`, `kpi_audit`.
+  - `release_communications`, `release_readiness`, `reliability_evidence_pack`, `quality_contribution_delta`, `objection_handling`, `community_activation`, `external_contribution`, `kpi_audit`.
 - Playbook discovery/routing:
   - `playbooks_cli.py`, `sdetkit playbooks`.
 

@@ -4,7 +4,7 @@ import json
 import subprocess
 from pathlib import Path
 
-from sdetkit import enterprise_use_case as euc
+from sdetkit import enterprise_readiness as euc
 
 
 def test_write_defaults_noop_when_page_is_already_valid(tmp_path: Path) -> None:

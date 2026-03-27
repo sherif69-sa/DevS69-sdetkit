@@ -14,7 +14,7 @@ Trust assets provides a deterministic **trust visibility lane** so maintainers c
 ## Validation commands
 
 ```bash
-python -m pytest -q tests/test_trust_signal_upgrade.py tests/test_cli_help_lists_subcommands.py
+python -m pytest -q tests/test_trust_assets.py tests/test_cli_help_lists_subcommands.py
 python -m sdetkit trust-assets --format json --strict
 python -m sdetkit trust-assets --format markdown --output docs/artifacts/trust-assets-sample.md
 python -m sdetkit trust-assets --emit-pack-dir docs/artifacts/trust-assets-pack --format json --strict

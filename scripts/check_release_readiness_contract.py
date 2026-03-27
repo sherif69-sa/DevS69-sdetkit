@@ -26,7 +26,7 @@ RELEASE_READINESS_PACK_DECISION = Path("docs/artifacts/release-readiness-pack/re
 RELEASE_READINESS_EVIDENCE = Path(
     "docs/artifacts/release-readiness-pack/evidence/release-readiness-execution-summary.json"
 )
-MODULE = Path("src/sdetkit/release_readiness_board.py")
+MODULE = Path("src/sdetkit/release_readiness.py")
 
 README_EXPECTED = [
     "## Release readiness",

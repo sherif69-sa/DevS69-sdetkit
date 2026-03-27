@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import onboarding_time_upgrade as otu
+from sdetkit import onboarding_optimization as otu
 
 
 def _write_fixture(root: Path) -> None:

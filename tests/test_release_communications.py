@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import release_narrative as rn
+from sdetkit import release_communications as rn
 
 
 def _write_release_summary(path: Path, gate_status: str = "pass", score: float = 96.4) -> Path:
@@ -30,7 +30,7 @@ def _write_release_communications_page(root: Path) -> None:
     path.write_text(rn._DAY20_DEFAULT_PAGE, encoding="utf-8")
 
 
-def test_release_narrative_json(tmp_path: Path, capsys) -> None:
+def test_release_communications_json(tmp_path: Path, capsys) -> None:
     summary = _write_release_summary(tmp_path)
     _write_release_communications_page(tmp_path)
 
@@ -51,7 +51,7 @@ def test_release_narrative_json(tmp_path: Path, capsys) -> None:
     assert out["score"] == 100.0
 
 
-def test_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_release_communications_emit_pack_and_execute(tmp_path: Path) -> None:
     summary = _write_release_summary(tmp_path)
     _write_release_communications_page(tmp_path)
 
@@ -91,7 +91,7 @@ def test_release_narrative_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> None:
+def test_release_communications_strict_gate_fails_when_not_ready(tmp_path: Path) -> None:
     summary = _write_release_summary(tmp_path, gate_status="warn", score=83)
     _write_release_communications_page(tmp_path)
 
@@ -109,7 +109,7 @@ def test_release_narrative_strict_gate_fails_when_not_ready(tmp_path: Path) -> N
     assert rc == 1
 
 
-def test_release_narrative_strict_gate_fails_when_docs_contract_missing(
+def test_release_communications_strict_gate_fails_when_docs_contract_missing(
     tmp_path: Path,
 ) -> None:
     summary = _write_release_summary(tmp_path)

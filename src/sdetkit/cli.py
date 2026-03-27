@@ -87,10 +87,10 @@ from . import (
     demo,
     docs_navigation,
     docs_qa,
-    enterprise_use_case,
+    enterprise_readiness,
     evidence,
-    external_contribution_push,
-    faq_objections,
+    external_contribution,
+    objection_handling,
     first_contribution,
     forensics,
     github_actions_quickstart,
@@ -102,7 +102,7 @@ from . import (
     kvcli,
     notify,
     onboarding,
-    onboarding_time_upgrade,
+    onboarding_optimization,
     ops,
     patch,
     phase_boost,
@@ -110,16 +110,16 @@ from . import (
     production_readiness,
     proof,
     quality_contribution_delta,
-    release_narrative,
-    release_readiness_board,
+    release_communications,
+    release_readiness,
     reliability_evidence_pack,
     repo,
     report,
     roadmap,
     sdet_package,
-    startup_use_case,
+    startup_readiness,
     triage_templates,
-    trust_signal_upgrade,
+    trust_assets,
     weekly_review,
 )
 from . import gate as gate_cmd
@@ -932,7 +932,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return onboarding.main(list(argv[1:]))
 
     if argv and argv[0] in {"onboarding-optimization", "onboarding-time-upgrade"}:
-        return onboarding_time_upgrade.main(list(argv[1:]))
+        return onboarding_optimization.main(list(argv[1:]))
 
     if argv and argv[0] == "phase-boost":
         return phase_boost.main(list(argv[1:]))
@@ -944,7 +944,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return community_activation.main(list(argv[1:]))
 
     if argv and argv[0] in {"external-contribution", "external-contribution-push"}:
-        return external_contribution_push.main(list(argv[1:]))
+        return external_contribution.main(list(argv[1:]))
 
     if argv and argv[0] == "kpi-audit":
         return kpi_audit.main(list(argv[1:]))
@@ -1219,7 +1219,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return continuous_upgrade_cycle11_closeout.main(list(argv[1:]))
 
     if argv and argv[0] in {"objection-handling", "faq-objections"}:
-        return faq_objections.main(list(argv[1:]))
+        return objection_handling.main(list(argv[1:]))
 
     if argv and argv[0] == "first-contribution":
         return first_contribution.main(list(argv[1:]))
@@ -1248,13 +1248,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return roadmap.main(list(argv[1:]))
 
     if argv and argv[0] in {"startup-readiness", "startup-use-case"}:
-        return startup_use_case.main(list(argv[1:]))
+        return startup_readiness.main(list(argv[1:]))
 
     if argv and argv[0] == "sdet-package":
         return sdet_package.main(list(argv[1:]))
 
     if argv and argv[0] in {"enterprise-readiness", "enterprise-use-case"}:
-        return enterprise_use_case.main(list(argv[1:]))
+        return enterprise_readiness.main(list(argv[1:]))
 
     if argv and argv[0] in {"github-actions-onboarding", "github-actions-quickstart"}:
         return github_actions_quickstart.main(list(argv[1:]))
@@ -1269,13 +1269,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return reliability_evidence_pack.main(list(argv[1:]))
 
     if argv and argv[0] in {"release-readiness", "release-readiness-board"}:
-        return release_readiness_board.main(list(argv[1:]))
+        return release_readiness.main(list(argv[1:]))
 
     if argv and argv[0] in {"release-communications", "release-narrative"}:
-        return release_narrative.main(list(argv[1:]))
+        return release_communications.main(list(argv[1:]))
 
     if argv and argv[0] in {"trust-assets", "trust-signal-upgrade"}:
-        return trust_signal_upgrade.main(list(argv[1:]))
+        return trust_assets.main(list(argv[1:]))
 
     p, sub = _build_root_parser()
 
@@ -1449,13 +1449,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return onboarding.main(ns.args)
 
     if ns.cmd == "onboarding-optimization":
-        return onboarding_time_upgrade.main(ns.args)
+        return onboarding_optimization.main(ns.args)
 
     if ns.cmd == "community-activation":
         return community_activation.main(ns.args)
 
     if ns.cmd == "external-contribution":
-        return external_contribution_push.main(ns.args)
+        return external_contribution.main(ns.args)
 
     if ns.cmd == "kpi-audit":
         return kpi_audit.main(ns.args)
@@ -1638,7 +1638,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return continuous_upgrade_cycle11_closeout.main(ns.args)
 
     if ns.cmd == "objection-handling":
-        return faq_objections.main(ns.args)
+        return objection_handling.main(ns.args)
 
     if ns.cmd == "demo":
         return demo.main(ns.args)
@@ -1667,13 +1667,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return roadmap.main(ns.args)
 
     if ns.cmd == "startup-readiness":
-        return startup_use_case.main(ns.args)
+        return startup_readiness.main(ns.args)
 
     if ns.cmd == "sdet-package":
         return sdet_package.main(ns.args)
 
     if ns.cmd == "enterprise-readiness":
-        return enterprise_use_case.main(ns.args)
+        return enterprise_readiness.main(ns.args)
 
     if ns.cmd == "github-actions-onboarding":
         return github_actions_quickstart.main(ns.args)
@@ -1688,13 +1688,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return reliability_evidence_pack.main(ns.args)
 
     if ns.cmd == "release-readiness":
-        return release_readiness_board.main(ns.args)
+        return release_readiness.main(ns.args)
 
     if ns.cmd == "release-communications":
-        return release_narrative.main(ns.args)
+        return release_communications.main(ns.args)
 
     if ns.cmd == "trust-assets":
-        return trust_signal_upgrade.main(ns.args)
+        return trust_assets.main(ns.args)
 
     if ns.cmd == "apiget":
         raw_args = list(argv)

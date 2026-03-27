@@ -7,7 +7,7 @@
 ## What changed
 
 - Added `sdetkit enterprise-readiness` command and status pipeline:
-  - `src/sdetkit/enterprise_use_case.py`
+  - `src/sdetkit/enterprise_readiness.py`
   - Supports `--strict`, `--write-defaults`, `--format`, `--output`, `--emit-pack-dir`, `--execute`, and `--evidence-dir`.
   - Emits enterprise operating pack files:
     - `enterprise-readiness-checklist.md`
@@ -24,7 +24,7 @@
   - `scripts/check_enterprise_readiness_contract.py`
 
 - Added tests for enterprise command behavior and CLI wiring:
-  - `tests/test_enterprise_use_case.py`
+  - `tests/test_enterprise_readiness.py`
   - `tests/test_cli_help_lists_subcommands.py`
 
 - Updated docs and command references to include enterprise-readiness flows:
@@ -34,7 +34,7 @@
 
 ## Validation commands
 
-- `python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py`
+- `python -m pytest -q tests/test_enterprise_readiness.py tests/test_cli_help_lists_subcommands.py`
 - `python -m sdetkit enterprise-readiness --format json --strict`
 - `python -m sdetkit enterprise-readiness --write-defaults --format json --strict`
 - `python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict`
@@ -52,7 +52,7 @@
 
 ## Rollback plan
 
-1. Revert `src/sdetkit/enterprise_use_case.py` and `src/sdetkit/cli.py` enterprise-readiness command wiring.
+1. Revert `src/sdetkit/enterprise_readiness.py` and `src/sdetkit/cli.py` enterprise-readiness command wiring.
 2. Revert enterprise-readiness docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-enterprise-regulated.md`.
 3. Remove the enterprise-readiness contract checker and generated artifacts.
 

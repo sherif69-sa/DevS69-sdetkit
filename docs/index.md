@@ -5,6 +5,36 @@ integrations-partner-outreach-closeout.md
 integrations-ecosystem-priorities-closeout.md
 impact-80-big-upgrade-report.md
 
+## Startup readiness
+
+- startup + small-team workflow: `docs/use-cases-startup-small-team.md`
+- Command: `sdetkit startup-readiness --format text --strict`
+- Pack command: `sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict`
+- Summary artifact: `artifacts/startup-readiness-sample.md`
+
+## Enterprise readiness
+
+- enterprise + regulated workflow: `docs/use-cases-enterprise-regulated.md`
+- Command: `sdetkit enterprise-readiness --format text --strict`
+- Pack command: `sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict`
+- Execute command: `sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict`
+- Summary artifact: `artifacts/enterprise-readiness-sample.md`
+
+## Objection handling
+
+- Command: `sdetkit objection-handling --format json --strict`
+- Summary artifact: `artifacts/objection-handling-pack/objection-handling-summary.json`
+
+## Trust assets
+
+- Command: `sdetkit trust-assets --format json --strict`
+- Summary artifact: `artifacts/trust-assets-pack/trust-assets-summary.json`
+
+## Release communications
+
+- Command: `sdetkit release-communications --format json --strict`
+- Channel artifact: `artifacts/release-communications-pack/release-communications-channel-posts.md`
+
 ## Release readiness
 
 - Command: `sdetkit release-readiness --format json --strict`

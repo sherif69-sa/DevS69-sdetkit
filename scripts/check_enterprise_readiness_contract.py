@@ -7,7 +7,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-enterprise-regulated.md")
-DAY13_REPORT = Path("docs/impact-13-ultra-upgrade-report.md")
+DAY13_REPORT = Path("docs/enterprise-readiness-report.md")
 DAY13_ARTIFACT = Path("docs/artifacts/enterprise-readiness-sample.md")
 ENTERPRISE_PACK_CI = Path("docs/artifacts/enterprise-readiness-pack/enterprise-readiness-ci.yml")
 ENTERPRISE_EVIDENCE = Path(
@@ -20,7 +20,7 @@ README_EXPECTED = [
     "python -m sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict",
     "python -m sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict",
     "python scripts/check_enterprise_readiness_contract.py",
-    "docs/impact-13-ultra-upgrade-report.md",
+    "docs/enterprise-readiness-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [
@@ -45,7 +45,7 @@ USE_CASE_EXPECTED = [
     "# Enterprise + regulated workflow",
     "## 15-minute enterprise baseline",
     "python -m sdetkit repo audit . --profile enterprise --format json",
-    "python -m pytest -q tests/test_enterprise_use_case.py tests/test_cli_help_lists_subcommands.py",
+    "python -m pytest -q tests/test_enterprise_readiness.py tests/test_cli_help_lists_subcommands.py",
     "## Automated evidence bundle",
     "name: enterprise-compliance-lane",
     "## Rollout model across business units",

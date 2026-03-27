@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import external_contribution_push as ecp
+from sdetkit import external_contribution as ecp
 
 
 def _seed(root: Path) -> None:
@@ -24,7 +24,7 @@ def _seed(root: Path) -> None:
     (root / "docs/external-contribution.md").write_text(ecp._DAY26_DEFAULT_PAGE, encoding="utf-8")
 
 
-def test_external_contribution_push_json(tmp_path: Path, capsys) -> None:
+def test_external_contribution_json(tmp_path: Path, capsys) -> None:
     _seed(tmp_path)
 
     rc = ecp.main(["--root", str(tmp_path), "--format", "json"])

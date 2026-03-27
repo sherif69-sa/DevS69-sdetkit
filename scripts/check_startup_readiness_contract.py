@@ -7,7 +7,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-startup-small-team.md")
-DAY12_REPORT = Path("docs/impact-12-ultra-upgrade-report.md")
+DAY12_REPORT = Path("docs/startup-readiness-report.md")
 DAY12_ARTIFACT = Path("docs/artifacts/startup-readiness-sample.md")
 STARTUP_PACK_CI = Path("docs/artifacts/startup-readiness-pack/startup-readiness-ci.yml")
 
@@ -16,7 +16,7 @@ README_EXPECTED = [
     "python -m sdetkit startup-readiness --format text --strict",
     "python -m sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict",
     "python scripts/check_startup_readiness_contract.py",
-    "docs/impact-12-ultra-upgrade-report.md",
+    "docs/startup-readiness-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [
@@ -38,7 +38,7 @@ USE_CASE_EXPECTED = [
     "# Startup + small-team workflow",
     "## 10-minute startup path",
     "python -m sdetkit doctor --format text",
-    "python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py",
+    "python -m pytest -q tests/test_startup_readiness.py tests/test_cli_help_lists_subcommands.py",
     "## CI fast-lane recipe",
     "name: startup-quality-fast-lane",
     "## Exit criteria to graduate to enterprise workflow",

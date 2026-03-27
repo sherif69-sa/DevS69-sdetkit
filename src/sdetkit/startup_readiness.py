@@ -23,7 +23,7 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit doctor --format text",
     "python -m sdetkit repo audit --json",
     "python -m sdetkit security --strict",
-    "python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py",
+    "python -m pytest -q tests/test_startup_readiness.py tests/test_cli_help_lists_subcommands.py",
     "python -m sdetkit report --out reports/startup-weekly.json",
 ]
 
@@ -63,7 +63,7 @@ Use this sequence to move from clone to reliable checks quickly:
 python -m sdetkit doctor --format text
 python -m sdetkit repo audit --json
 python -m sdetkit security --strict
-python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py
+python -m pytest -q tests/test_startup_readiness.py tests/test_cli_help_lists_subcommands.py
 python -m sdetkit report --out reports/startup-weekly.json
 ```
 
@@ -212,7 +212,7 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
     return [str(path.relative_to(base)) for path in [checklist, ci_recipe, risk_register]]
 
 
-def build_startup_use_case_status(root: str = ".") -> dict[str, Any]:
+def build_startup_readiness_status(root: str = ".") -> dict[str, Any]:
     base = Path(root)
     page = base / _PAGE_PATH
     page_text = _read(page)
@@ -323,7 +323,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.write_defaults:
         touched = _write_defaults(Path(args.root))
 
-    payload = build_startup_use_case_status(args.root)
+    payload = build_startup_readiness_status(args.root)
     payload["touched_files"] = touched
 
     if args.emit_pack_dir:

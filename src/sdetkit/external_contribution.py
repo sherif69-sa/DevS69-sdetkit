@@ -203,7 +203,7 @@ def _evaluate_signals(
     return rows
 
 
-def build_external_contribution_push_summary(
+def build_external_contribution_summary(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -427,7 +427,7 @@ def main(argv: list[str] | None = None) -> int:
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text(_DAY26_DEFAULT_PAGE, encoding="utf-8")
 
-    payload = build_external_contribution_push_summary(
+    payload = build_external_contribution_summary(
         root,
         readme_path=ns.readme,
         docs_index_path=ns.docs_index,

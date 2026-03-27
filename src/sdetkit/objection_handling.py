@@ -141,7 +141,7 @@ _SIGNALS = [
         "source": "docs_index",
     },
     {
-        "check_id": "release_narrative_alignment",
+        "check_id": "release_communications_alignment",
         "category": "operational",
         "weight": 5,
         "marker": "release-communications",
@@ -209,7 +209,7 @@ def _evaluate_signals(
     return rows
 
 
-def build_faq_objections_summary(
+def build_objection_handling_summary(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -492,7 +492,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         _write_default_page(docs_page)
 
-    payload = build_faq_objections_summary(
+    payload = build_objection_handling_summary(
         root,
         readme_path=ns.readme,
         docs_index_path=ns.docs_index,

@@ -16,7 +16,7 @@ Use this sequence to move from clone to reliable checks quickly:
 python -m sdetkit doctor --format text
 python -m sdetkit repo audit --json
 python -m sdetkit security --strict
-python -m pytest -q tests/test_startup_use_case.py tests/test_cli_help_lists_subcommands.py
+python -m pytest -q tests/test_startup_readiness.py tests/test_cli_help_lists_subcommands.py
 python -m sdetkit report --out reports/startup-weekly.json
 ```
 

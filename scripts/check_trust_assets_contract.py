@@ -18,7 +18,7 @@ DAY22_PACK_ACTION_PLAN = Path("docs/artifacts/trust-assets-pack/trust-assets-act
 DAY22_EVIDENCE = Path(
     "docs/artifacts/trust-assets-pack/evidence/trust-assets-execution-summary.json"
 )
-MODULE = Path("src/sdetkit/trust_signal_upgrade.py")
+MODULE = Path("src/sdetkit/trust_assets.py")
 
 README_EXPECTED = [
     "## Trust assets",
