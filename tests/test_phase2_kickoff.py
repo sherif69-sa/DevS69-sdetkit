@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase2-kickoff.md\nday31-phase2-kickoff\n",
+        "docs/integrations-phase2-kickoff.md\nphase2-kickoff\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -41,7 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 31 report\n", encoding="utf-8"
     )
 
-    summary = root / "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
+    summary = root / "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    backlog = root / "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
+    backlog = root / "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
     backlog.write_text(
         "\n".join(
             [
@@ -78,7 +78,7 @@ def test_day31_kickoff_json(tmp_path: Path, capsys) -> None:
     rc = d31.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day31-phase2-kickoff"
+    assert out["name"] == "phase2-kickoff"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -99,24 +99,25 @@ def test_day31_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
+    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-summary.json").exists()
     assert (tmp_path / "artifacts/day31-pack/day31-phase2-kickoff-summary.json").exists()
-    assert (tmp_path / "artifacts/day31-pack/day31-phase2-kickoff-summary.md").exists()
-    assert (tmp_path / "artifacts/day31-pack/day31-baseline-snapshot.json").exists()
-    assert (tmp_path / "artifacts/day31-pack/day31-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day31-pack/day31-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day31-pack/evidence/day31-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-summary.md").exists()
+    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-baseline-snapshot.json").exists()
+    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day31-pack/evidence/phase2-kickoff-execution-summary.json").exists()
 
 
 def test_day31_strict_fails_when_day30_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json").unlink()
+    (tmp_path / "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json").unlink()
     rc = d31.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_day31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md").write_text(
+    (tmp_path / "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md").write_text(
         "- [ ] Day 31 baseline\n", encoding="utf-8"
     )
     rc = d31.main(["--root", str(tmp_path), "--strict", "--format", "json"])

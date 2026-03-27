@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase2-kickoff.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY30_SUMMARY_PATH = "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
-_DAY30_BACKLOG_PATH = "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
+_CANONICAL_LANE_NAME = "phase2-kickoff"
+_LEGACY_LANE_NAME = "day31-phase2-kickoff"
+_DAY30_SUMMARY_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json"
+_DAY30_SUMMARY_FALLBACK_PATH = "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
+_DAY30_BACKLOG_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
+_DAY30_BACKLOG_FALLBACK_PATH = "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
 _SECTION_HEADER = "# Day 31 \u2014 Phase-2 kickoff baseline"
 _REQUIRED_SECTIONS = [
     "## Why Day 31 matters",
@@ -22,15 +26,15 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day31-phase2-kickoff --format json --strict",
-    "python -m sdetkit day31-phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict",
-    "python -m sdetkit day31-phase2-kickoff --execute --evidence-dir docs/artifacts/day31-phase2-pack/evidence --format json --strict",
-    "python scripts/check_day31_phase2_kickoff_contract.py",
+    "python -m sdetkit phase2-kickoff --format json --strict",
+    "python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict",
+    "python -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/phase2-kickoff-pack/evidence --format json --strict",
+    "python scripts/check_phase2_kickoff_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day31-phase2-kickoff --format json --strict",
-    "python -m sdetkit day31-phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict",
-    "python scripts/check_day31_phase2_kickoff_contract.py --skip-evidence",
+    "python -m sdetkit phase2-kickoff --format json --strict",
+    "python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict",
+    "python scripts/check_phase2_kickoff_contract.py --skip-evidence",
 ]
 _REQUIRED_WEEKLY_TARGET_LINES = [
     "Week-1 Phase-2 target: maintain activation score >= 95 and preserve strict pass.",
@@ -58,16 +62,18 @@ Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a 
 
 ## Required inputs (Day 30)
 
-- `docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json`
-- `docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md`
+- `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)
+- `docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json` (compatibility)
+- `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)
+- `docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md` (compatibility)
 
 ## Day 31 command lane
 
 ```bash
-python -m sdetkit day31-phase2-kickoff --format json --strict
-python -m sdetkit day31-phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict
-python -m sdetkit day31-phase2-kickoff --execute --evidence-dir docs/artifacts/day31-phase2-pack/evidence --format json --strict
-python scripts/check_day31_phase2_kickoff_contract.py
+python -m sdetkit phase2-kickoff --format json --strict
+python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict
+python -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/phase2-kickoff-pack/evidence --format json --strict
+python scripts/check_phase2_kickoff_contract.py
 ```
 
 ## Baseline + weekly targets
@@ -163,8 +169,12 @@ def build_day31_phase2_kickoff_summary(
     )
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day30_summary = root / _DAY30_SUMMARY_PATH
-    day30_backlog = root / _DAY30_BACKLOG_PATH
+    day30_summary_primary = root / _DAY30_SUMMARY_PATH
+    day30_summary_fallback = root / _DAY30_SUMMARY_FALLBACK_PATH
+    day30_backlog_primary = root / _DAY30_BACKLOG_PATH
+    day30_backlog_fallback = root / _DAY30_BACKLOG_FALLBACK_PATH
+    day30_summary = day30_summary_primary if day30_summary_primary.exists() else day30_summary_fallback
+    day30_backlog = day30_backlog_primary if day30_backlog_primary.exists() else day30_backlog_fallback
     day30_score, day30_strict, day30_avg = _load_day30(day30_summary)
     backlog_count, backlog_has_day31, backlog_has_day32 = _backlog_stats(day30_backlog)
 
@@ -196,8 +206,8 @@ def build_day31_phase2_kickoff_summary(
         {
             "check_id": "readme_day31_command",
             "weight": 4,
-            "passed": "day31-phase2-kickoff" in readme_text,
-            "evidence": "day31-phase2-kickoff",
+            "passed": ("phase2-kickoff" in readme_text) or ("day31-phase2-kickoff" in readme_text),
+            "evidence": "phase2-kickoff (legacy: day31-phase2-kickoff)",
         },
         {
             "check_id": "docs_index_day31_links",
@@ -221,13 +231,21 @@ def build_day31_phase2_kickoff_summary(
             "check_id": "day30_summary_present",
             "weight": 10,
             "passed": day30_summary.exists(),
-            "evidence": str(day30_summary),
+            "evidence": {
+                "resolved": str(day30_summary),
+                "primary": str(day30_summary_primary),
+                "compatibility": str(day30_summary_fallback),
+            },
         },
         {
             "check_id": "day30_backlog_present",
             "weight": 8,
             "passed": day30_backlog.exists(),
-            "evidence": str(day30_backlog),
+            "evidence": {
+                "resolved": str(day30_backlog),
+                "primary": str(day30_backlog_primary),
+                "compatibility": str(day30_backlog_fallback),
+            },
         },
         {
             "check_id": "day30_quality_floor",
@@ -309,7 +327,8 @@ def build_day31_phase2_kickoff_summary(
         )
 
     return {
-        "name": "day31-phase2-kickoff",
+        "name": _CANONICAL_LANE_NAME,
+        "legacy_name": _LEGACY_LANE_NAME,
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -388,38 +407,47 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day31-phase2-kickoff-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day31-phase2-kickoff-summary.md", _to_markdown(payload))
-    _write(
-        target / "day31-baseline-snapshot.json",
-        json.dumps(
-            {
-                "impact": 31,
-                "baseline": {
-                    "day30_activation_score": payload["rollup"]["day30_activation_score"],
-                    "day30_average_activation_score": payload["rollup"][
-                        "day30_average_activation_score"
-                    ],
-                    "day30_backlog_items": payload["rollup"]["day30_backlog_items"],
-                },
-                "week1_targets": {
-                    "activation_score_floor": 95,
-                    "external_assets": 3,
-                    "kpi_checkpoints": 1,
-                },
+    summary_json = json.dumps(payload, indent=2) + "\n"
+    _write(target / "phase2-kickoff-summary.json", summary_json)
+    _write(target / "day31-phase2-kickoff-summary.json", summary_json)
+    summary_md = _to_markdown(payload)
+    _write(target / "phase2-kickoff-summary.md", summary_md)
+    _write(target / "day31-phase2-kickoff-summary.md", summary_md)
+    baseline_json = json.dumps(
+        {
+            "impact": 31,
+            "baseline": {
+                "day30_activation_score": payload["rollup"]["day30_activation_score"],
+                "day30_average_activation_score": payload["rollup"][
+                    "day30_average_activation_score"
+                ],
+                "day30_backlog_items": payload["rollup"]["day30_backlog_items"],
             },
-            indent=2,
-        )
-        + "\n",
-    )
+            "week1_targets": {
+                "activation_score_floor": 95,
+                "external_assets": 3,
+                "kpi_checkpoints": 1,
+            },
+        },
+        indent=2,
+    ) + "\n"
     _write(
-        target / "day31-delivery-board.md",
-        "# Day 31 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        target / "phase2-kickoff-baseline-snapshot.json",
+        baseline_json,
     )
+    _write(target / "day31-baseline-snapshot.json", baseline_json)
+    board_md = "# Day 31 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n"
     _write(
-        target / "day31-validation-commands.md",
-        "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        target / "phase2-kickoff-delivery-board.md",
+        board_md,
     )
+    _write(target / "day31-delivery-board.md", board_md)
+    validation_md = "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    _write(
+        target / "phase2-kickoff-validation-commands.md",
+        validation_md,
+    )
+    _write(target / "day31-validation-commands.md", validation_md)
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -440,12 +468,15 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day31-phase2-kickoff-execution",
+        "name": "phase2-kickoff-execution",
+        "legacy_name": "day31-phase2-kickoff-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day31-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    execution_json = json.dumps(summary, indent=2) + "\n"
+    _write(target / "phase2-kickoff-execution-summary.json", execution_json)
+    _write(target / "day31-execution-summary.json", execution_json)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -479,7 +510,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day31-phase2-pack/evidence")
+            else Path("docs/artifacts/phase2-kickoff-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

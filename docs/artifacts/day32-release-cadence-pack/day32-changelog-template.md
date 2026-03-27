@@ -1,4 +1,4 @@
-# Name 32 changelog template
+# Day 32 changelog template
 
 ## Outcomes
 - What changed for users this week?

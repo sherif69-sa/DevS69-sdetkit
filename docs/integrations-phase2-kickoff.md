@@ -10,16 +10,18 @@ Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a 
 
 ## Required inputs (Day 30)
 
-- `docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json`
-- `docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md`
+- `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)
+- `docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json` (compatibility)
+- `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)
+- `docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md` (compatibility)
 
 ## Day 31 command lane
 
 ```bash
 python -m sdetkit phase2-kickoff --format json --strict
-python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/day31-phase2-pack --format json --strict
-python -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/day31-phase2-pack/evidence --format json --strict
-python scripts/check_day31_phase2_kickoff_contract.py
+python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict
+python -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/phase2-kickoff-pack/evidence --format json --strict
+python scripts/check_phase2_kickoff_contract.py
 ```
 
 ## Baseline + weekly targets

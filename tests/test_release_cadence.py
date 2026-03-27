@@ -41,7 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 32 report\n", encoding="utf-8"
     )
 
-    summary = root / "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
+    summary = root / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
+    board = root / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -107,14 +107,14 @@ def test_day32_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day32_strict_fails_when_day31_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json").unlink()
+    (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json").unlink()
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_day32_strict_fails_when_day31_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day31-phase2-pack/day31-delivery-board.md").write_text(
+    (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").write_text(
         "- [ ] Day 32 release cadence checklist drafted\n", encoding="utf-8"
     )
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])

@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase1-hardening.md\nday29-phase1-hardening\n",
+        "docs/integrations-phase1-hardening.md\nphase1-hardening\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -49,7 +49,7 @@ def test_day29_hardening_json(tmp_path: Path, capsys) -> None:
     rc = d29.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day29-phase1-hardening"
+    assert out["name"] == "phase1-hardening"
     assert out["summary"]["activation_score"] >= 90
 
 
@@ -70,11 +70,12 @@ def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
+    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.json").exists()
     assert (tmp_path / "artifacts/day29-pack/day29-phase1-hardening-summary.json").exists()
-    assert (tmp_path / "artifacts/day29-pack/day29-phase1-hardening-summary.md").exists()
-    assert (tmp_path / "artifacts/day29-pack/day29-stale-gaps.json").exists()
-    assert (tmp_path / "artifacts/day29-pack/day29-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day29-pack/evidence/day29-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.md").exists()
+    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-stale-gaps.json").exists()
+    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day29-pack/evidence/phase1-hardening-execution-summary.json").exists()
 
 
 def test_day29_strict_fails_when_sections_missing(tmp_path: Path) -> None:

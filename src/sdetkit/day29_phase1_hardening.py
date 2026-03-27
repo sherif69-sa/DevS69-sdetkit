@@ -10,6 +10,20 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase1-hardening.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
+_CANONICAL_LANE_NAME = "phase1-hardening"
+_LEGACY_LANE_NAME = "day29-phase1-hardening"
+_CANONICAL_PACK_DIR = "docs/artifacts/phase1-hardening-pack"
+_LEGACY_PACK_DIR = "docs/artifacts/day29-hardening-pack"
+_CANONICAL_SUMMARY_JSON = "phase1-hardening-summary.json"
+_LEGACY_SUMMARY_JSON = "day29-phase1-hardening-summary.json"
+_CANONICAL_SUMMARY_MD = "phase1-hardening-summary.md"
+_LEGACY_SUMMARY_MD = "day29-phase1-hardening-summary.md"
+_CANONICAL_STALE_GAPS = "phase1-hardening-stale-gaps.json"
+_LEGACY_STALE_GAPS = "day29-stale-gaps.json"
+_CANONICAL_VALIDATION_COMMANDS = "phase1-hardening-validation-commands.md"
+_LEGACY_VALIDATION_COMMANDS = "day29-validation-commands.md"
+_CANONICAL_EXECUTION_SUMMARY = "phase1-hardening-execution-summary.json"
+_LEGACY_EXECUTION_SUMMARY = "day29-execution-summary.json"
 _SECTION_HEADER = "# Day 29 \u2014 Phase-1 hardening"
 _REQUIRED_SECTIONS = [
     "## Why Day 29 exists",
@@ -19,14 +33,14 @@ _REQUIRED_SECTIONS = [
     "## Entry page polish checklist",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day29-phase1-hardening --format json --strict",
-    "python -m sdetkit day29-phase1-hardening --emit-pack-dir docs/artifacts/day29-hardening-pack --format json --strict",
-    "python -m sdetkit day29-phase1-hardening --execute --evidence-dir docs/artifacts/day29-hardening-pack/evidence --format json --strict",
-    "python scripts/check_day29_phase1_hardening_contract.py",
+    "python -m sdetkit phase1-hardening --format json --strict",
+    "python -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict",
+    "python -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict",
+    "python scripts/check_phase1_hardening_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day29-phase1-hardening --format json --strict",
-    "python scripts/check_day29_phase1_hardening_contract.py --skip-evidence",
+    "python -m sdetkit phase1-hardening --format json --strict",
+    "python scripts/check_phase1_hardening_contract.py --skip-evidence",
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
@@ -50,10 +64,10 @@ Day 29 closes Phase-1 by hardening top entry pages, removing stale guidance, and
 ## Day 29 command lane
 
 ```bash
-python -m sdetkit day29-phase1-hardening --format json --strict
-python -m sdetkit day29-phase1-hardening --emit-pack-dir docs/artifacts/day29-hardening-pack --format json --strict
-python -m sdetkit day29-phase1-hardening --execute --evidence-dir docs/artifacts/day29-hardening-pack/evidence --format json --strict
-python scripts/check_day29_phase1_hardening_contract.py
+python -m sdetkit phase1-hardening --format json --strict
+python -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict
+python -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict
+python scripts/check_phase1_hardening_contract.py
 ```
 
 ## Scoring model
@@ -186,7 +200,8 @@ def build_day29_phase1_hardening_summary(
         gaps.append("Stale marker tokens detected across top entry pages.")
 
     return {
-        "name": "day29-phase1-hardening",
+        "name": _CANONICAL_LANE_NAME,
+        "legacy_name": _LEGACY_LANE_NAME,
         "paths": {
             "root": str(root),
             "docs_page": str(page.relative_to(root)) if page.exists() else docs_page_path,
@@ -250,13 +265,18 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day29-phase1-hardening-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day29-phase1-hardening-summary.md", _to_markdown(payload))
-    _write(target / "day29-stale-gaps.json", json.dumps(payload["stale_hits"], indent=2) + "\n")
-    _write(
-        target / "day29-validation-commands.md",
-        "# Day 29 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
-    )
+    summary_json = json.dumps(payload, indent=2) + "\n"
+    _write(target / _CANONICAL_SUMMARY_JSON, summary_json)
+    _write(target / _LEGACY_SUMMARY_JSON, summary_json)
+    summary_md = _to_markdown(payload)
+    _write(target / _CANONICAL_SUMMARY_MD, summary_md)
+    _write(target / _LEGACY_SUMMARY_MD, summary_md)
+    stale_json = json.dumps(payload["stale_hits"], indent=2) + "\n"
+    _write(target / _CANONICAL_STALE_GAPS, stale_json)
+    _write(target / _LEGACY_STALE_GAPS, stale_json)
+    validation_md = "# Day 29 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    _write(target / _CANONICAL_VALIDATION_COMMANDS, validation_md)
+    _write(target / _LEGACY_VALIDATION_COMMANDS, validation_md)
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -277,12 +297,15 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day29-phase1-hardening-execution",
+        "name": "phase1-hardening-execution",
+        "legacy_name": "day29-phase1-hardening-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day29-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    execution_json = json.dumps(summary, indent=2) + "\n"
+    _write(target / _CANONICAL_EXECUTION_SUMMARY, execution_json)
+    _write(target / _LEGACY_EXECUTION_SUMMARY, execution_json)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -316,7 +339,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day29-hardening-pack/evidence")
+            else Path("docs/artifacts/phase1-hardening-pack/evidence")
         )
         _run_execution(root, ev_dir)
 
