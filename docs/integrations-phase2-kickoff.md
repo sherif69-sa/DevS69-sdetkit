@@ -11,9 +11,7 @@ Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a 
 ## Required inputs (Day 30)
 
 - `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)
-- `docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json` (compatibility)
 - `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)
-- `docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md` (compatibility)
 
 ## Day 31 command lane
 

@@ -9,8 +9,7 @@
     "day27_summary": "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",
     "day28_summary": "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json",
     "day29_summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-    "day29_summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-    "day29_summary_compatibility": "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+    "day29_summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
   },
   "checks": [
     {
@@ -77,8 +76,7 @@
       "passed": true,
       "evidence": {
         "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-        "compatibility": "/workspace/DevS69-sdetkit/docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
       }
     },
     {

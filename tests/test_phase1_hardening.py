@@ -71,7 +71,6 @@ def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.json").exists()
-    assert (tmp_path / "artifacts/day29-pack/day29-phase1-hardening-summary.json").exists()
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.md").exists()
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-stale-gaps.json").exists()
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-validation-commands.md").exists()

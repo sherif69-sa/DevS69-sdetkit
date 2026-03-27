@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-demo-asset2.md\nday34-demo-asset2\n",
+        "docs/integrations-demo-asset2.md\ndemo-asset2\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -41,7 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 34 report\n", encoding="utf-8"
     )
 
-    summary = root / "docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json"
+    summary = root / "docs/artifacts/demo-asset-pack/demo-asset-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day33-demo-asset-pack/day33-delivery-board.md"
+    board = root / "docs/artifacts/demo-asset-pack/demo-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -75,7 +75,7 @@ def test_day34_demo_asset2_json(tmp_path: Path, capsys) -> None:
     rc = d34.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day34-demo-asset2"
+    assert out["name"] == "demo-asset2"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -86,35 +86,35 @@ def test_day34_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day34-pack",
+            "artifacts/demo-asset2-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day34-pack/evidence",
+            "artifacts/demo-asset2-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day34-pack/day34-demo-asset2-summary.json").exists()
-    assert (tmp_path / "artifacts/day34-pack/day34-demo-asset2-summary.md").exists()
-    assert (tmp_path / "artifacts/day34-pack/day34-demo-asset2-plan.json").exists()
-    assert (tmp_path / "artifacts/day34-pack/day34-demo-script.md").exists()
-    assert (tmp_path / "artifacts/day34-pack/day34-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day34-pack/day34-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day34-pack/evidence/day34-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-summary.json").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-summary.md").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-plan.json").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-script.md").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/demo-asset2-pack/evidence/demo-asset2-execution-summary.json").exists()
 
 
 def test_day34_strict_fails_when_day33_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json").unlink()
+    (tmp_path / "docs/artifacts/demo-asset-pack/demo-asset-summary.json").unlink()
     rc = d34.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
 def test_day34_strict_fails_when_day33_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day33-demo-asset-pack/day33-delivery-board.md").write_text(
+    (tmp_path / "docs/artifacts/demo-asset-pack/demo-delivery-board.md").write_text(
         "- [ ] Day 34 demo asset #2 backlog pre-scoped\n", encoding="utf-8"
     )
     rc = d34.main(["--root", str(tmp_path), "--strict", "--format", "json"])

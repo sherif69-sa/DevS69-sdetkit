@@ -4,31 +4,36 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import day29_phase1_hardening as d29
-
-
-def _evidence_path(root: Path) -> Path:
-    return root / "docs/artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
+from sdetkit import day32_release_cadence as d32
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate phase1-hardening contract.")
+    parser = argparse.ArgumentParser(description="Validate Day 32 release cadence contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d29.build_day29_phase1_hardening_summary(root)
+    payload = d32.build_day32_release_cadence_summary(root)
 
     strict_failures: list[str] = []
-    page = root / d29._PAGE_PATH
+    page = root / d32._PAGE_PATH
     page_text = page.read_text(encoding="utf-8") if page.exists() else ""
-    for section in [d29._SECTION_HEADER, *d29._REQUIRED_SECTIONS]:
+    for section in [d32._SECTION_HEADER, *d32._REQUIRED_SECTIONS]:
         if section not in page_text:
             strict_failures.append(section)
-    for command in d29._REQUIRED_COMMANDS:
+    for command in d32._REQUIRED_COMMANDS:
         if command not in page_text:
             strict_failures.append(command)
+    for cadence_line in d32._REQUIRED_CADENCE_LINES:
+        if f"- {cadence_line}" not in page_text:
+            strict_failures.append(cadence_line)
+    for changelog_item in d32._REQUIRED_CHANGELOG_LINES:
+        if changelog_item not in page_text:
+            strict_failures.append(changelog_item)
+    for board_item in d32._REQUIRED_DELIVERY_BOARD_LINES:
+        if board_item not in page_text:
+            strict_failures.append(board_item)
 
     errors: list[str] = []
     if strict_failures:
@@ -37,12 +42,14 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        evidence = _evidence_path(root)
+        evidence = (
+            root / "docs/artifacts/release-cadence-pack/evidence/release-cadence-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:
             data = json.loads(evidence.read_text(encoding="utf-8"))
-            if data.get("total_commands", 0) < 2:
+            if data.get("total_commands", 0) < 3:
                 errors.append("execution evidence has insufficient commands")
 
     print(json.dumps({"errors": errors, "score": payload["summary"]["activation_score"]}, indent=2))

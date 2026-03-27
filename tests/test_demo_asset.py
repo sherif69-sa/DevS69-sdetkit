@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-demo-asset.md\nday33-demo-asset\n",
+        "docs/integrations-demo-asset.md\ndemo-asset\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -39,7 +39,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 33 report\n", encoding="utf-8"
     )
 
-    summary = root / "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
+    summary = root / "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -51,7 +51,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md"
+    board = root / "docs/artifacts/release-cadence-pack/release-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -73,7 +73,7 @@ def test_day33_demo_asset_json(tmp_path: Path, capsys) -> None:
     rc = d33.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day33-demo-asset"
+    assert out["name"] == "demo-asset"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -84,29 +84,29 @@ def test_day33_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day33-pack",
+            "artifacts/demo-asset-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day33-pack/evidence",
+            "artifacts/demo-asset-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day33-pack/day33-demo-asset-summary.json").exists()
-    assert (tmp_path / "artifacts/day33-pack/day33-demo-asset-summary.md").exists()
-    assert (tmp_path / "artifacts/day33-pack/day33-demo-asset-plan.json").exists()
-    assert (tmp_path / "artifacts/day33-pack/day33-demo-script.md").exists()
-    assert (tmp_path / "artifacts/day33-pack/day33-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day33-pack/day33-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day33-pack/evidence/day33-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/demo-asset-summary.json").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/demo-asset-summary.md").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/demo-asset-plan.json").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/demo-script.md").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/demo-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/demo-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/demo-asset-pack/evidence/demo-execution-summary.json").exists()
 
 
 def test_day33_strict_fails_when_day32_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path / "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
+        tmp_path / "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
     ).unlink()
     rc = d33.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -114,7 +114,7 @@ def test_day33_strict_fails_when_day32_inputs_missing(tmp_path: Path) -> None:
 
 def test_day33_strict_fails_when_day32_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md").write_text(
+    (tmp_path / "docs/artifacts/release-cadence-pack/release-delivery-board.md").write_text(
         "- [ ] Day 33 demo asset #1 scope frozen\n", encoding="utf-8"
     )
     rc = d33.main(["--root", str(tmp_path), "--strict", "--format", "json"])

@@ -15,15 +15,10 @@ _LEGACY_LANE_NAME = "day29-phase1-hardening"
 _CANONICAL_PACK_DIR = "docs/artifacts/phase1-hardening-pack"
 _LEGACY_PACK_DIR = "docs/artifacts/day29-hardening-pack"
 _CANONICAL_SUMMARY_JSON = "phase1-hardening-summary.json"
-_LEGACY_SUMMARY_JSON = "day29-phase1-hardening-summary.json"
 _CANONICAL_SUMMARY_MD = "phase1-hardening-summary.md"
-_LEGACY_SUMMARY_MD = "day29-phase1-hardening-summary.md"
 _CANONICAL_STALE_GAPS = "phase1-hardening-stale-gaps.json"
-_LEGACY_STALE_GAPS = "day29-stale-gaps.json"
 _CANONICAL_VALIDATION_COMMANDS = "phase1-hardening-validation-commands.md"
-_LEGACY_VALIDATION_COMMANDS = "day29-validation-commands.md"
 _CANONICAL_EXECUTION_SUMMARY = "phase1-hardening-execution-summary.json"
-_LEGACY_EXECUTION_SUMMARY = "day29-execution-summary.json"
 _SECTION_HEADER = "# Day 29 \u2014 Phase-1 hardening"
 _REQUIRED_SECTIONS = [
     "## Why Day 29 exists",
@@ -267,16 +262,12 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     summary_json = json.dumps(payload, indent=2) + "\n"
     _write(target / _CANONICAL_SUMMARY_JSON, summary_json)
-    _write(target / _LEGACY_SUMMARY_JSON, summary_json)
     summary_md = _to_markdown(payload)
     _write(target / _CANONICAL_SUMMARY_MD, summary_md)
-    _write(target / _LEGACY_SUMMARY_MD, summary_md)
     stale_json = json.dumps(payload["stale_hits"], indent=2) + "\n"
     _write(target / _CANONICAL_STALE_GAPS, stale_json)
-    _write(target / _LEGACY_STALE_GAPS, stale_json)
     validation_md = "# Day 29 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
     _write(target / _CANONICAL_VALIDATION_COMMANDS, validation_md)
-    _write(target / _LEGACY_VALIDATION_COMMANDS, validation_md)
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -305,7 +296,6 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     }
     execution_json = json.dumps(summary, indent=2) + "\n"
     _write(target / _CANONICAL_EXECUTION_SUMMARY, execution_json)
-    _write(target / _LEGACY_EXECUTION_SUMMARY, execution_json)
 
 
 def _build_parser() -> argparse.ArgumentParser:

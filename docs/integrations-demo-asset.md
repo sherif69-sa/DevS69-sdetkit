@@ -10,16 +10,16 @@ Day 33 closes the first distribution-ready demo asset, turning Day 32 release re
 
 ## Required inputs (Day 32)
 
-- `docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json`
-- `docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md`
+- `docs/artifacts/release-cadence-pack/release-cadence-summary.json`
+- `docs/artifacts/release-cadence-pack/release-delivery-board.md`
 
 ## Day 33 command lane
 
 ```bash
 python -m sdetkit demo-asset --format json --strict
-python -m sdetkit demo-asset --emit-pack-dir docs/artifacts/day33-demo-asset-pack --format json --strict
-python -m sdetkit demo-asset --execute --evidence-dir docs/artifacts/day33-demo-asset-pack/evidence --format json --strict
-python scripts/check_day33_demo_asset_contract.py
+python -m sdetkit demo-asset --emit-pack-dir docs/artifacts/demo-asset-pack --format json --strict
+python -m sdetkit demo-asset --execute --evidence-dir docs/artifacts/demo-asset-pack/evidence --format json --strict
+python scripts/check_demo_asset_contract.py
 ```
 
 ## Demo production contract

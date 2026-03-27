@@ -63,9 +63,7 @@ Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a 
 ## Required inputs (Day 30)
 
 - `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)
-- `docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json` (compatibility)
 - `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)
-- `docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md` (compatibility)
 
 ## Day 31 command lane
 
@@ -234,7 +232,6 @@ def build_day31_phase2_kickoff_summary(
             "evidence": {
                 "resolved": str(day30_summary),
                 "primary": str(day30_summary_primary),
-                "compatibility": str(day30_summary_fallback),
             },
         },
         {
@@ -244,7 +241,6 @@ def build_day31_phase2_kickoff_summary(
             "evidence": {
                 "resolved": str(day30_backlog),
                 "primary": str(day30_backlog_primary),
-                "compatibility": str(day30_backlog_fallback),
             },
         },
         {
@@ -409,10 +405,8 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     summary_json = json.dumps(payload, indent=2) + "\n"
     _write(target / "phase2-kickoff-summary.json", summary_json)
-    _write(target / "day31-phase2-kickoff-summary.json", summary_json)
     summary_md = _to_markdown(payload)
     _write(target / "phase2-kickoff-summary.md", summary_md)
-    _write(target / "day31-phase2-kickoff-summary.md", summary_md)
     baseline_json = json.dumps(
         {
             "impact": 31,
@@ -435,19 +429,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "phase2-kickoff-baseline-snapshot.json",
         baseline_json,
     )
-    _write(target / "day31-baseline-snapshot.json", baseline_json)
     board_md = "# Day 31 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n"
     _write(
         target / "phase2-kickoff-delivery-board.md",
         board_md,
     )
-    _write(target / "day31-delivery-board.md", board_md)
     validation_md = "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
     _write(
         target / "phase2-kickoff-validation-commands.md",
         validation_md,
     )
-    _write(target / "day31-validation-commands.md", validation_md)
 
 
 def _run_execution(root: Path, evidence_dir: Path) -> None:
@@ -476,7 +467,6 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
     }
     execution_json = json.dumps(summary, indent=2) + "\n"
     _write(target / "phase2-kickoff-execution-summary.json", execution_json)
-    _write(target / "day31-execution-summary.json", execution_json)
 
 
 def _build_parser() -> argparse.ArgumentParser:

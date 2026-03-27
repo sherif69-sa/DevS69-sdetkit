@@ -10,8 +10,8 @@ Day 35 closes the week with a hardened KPI operating loop that ties growth narra
 
 ## Required inputs (Day 34)
 
-- `docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json`
-- `docs/artifacts/day34-demo-asset2-pack/day34-delivery-board.md`
+- `docs/artifacts/demo-asset2-pack/demo-asset2-summary.json`
+- `docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md`
 
 ## Day 35 command lane
 

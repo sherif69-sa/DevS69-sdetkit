@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-kpi-instrumentation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY34_SUMMARY_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json"
-_DAY34_BOARD_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-delivery-board.md"
+_DAY34_SUMMARY_PATH = "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json"
+_DAY34_SUMMARY_FALLBACK_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json"
+_DAY34_BOARD_PATH = "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md"
+_DAY34_BOARD_FALLBACK_PATH = "docs/artifacts/day34-demo-asset2-pack/day34-delivery-board.md"
 _SECTION_HEADER = "# Day 35 \u2014 KPI instrumentation closeout"
 _REQUIRED_SECTIONS = [
     "## Why Day 35 matters",
@@ -66,8 +68,8 @@ Day 35 closes the instrumentation lane by converting demo activity into measurab
 
 ## Required inputs (Day 34)
 
-- `docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json`
-- `docs/artifacts/day34-demo-asset2-pack/day34-delivery-board.md`
+- `docs/artifacts/demo-asset2-pack/demo-asset2-summary.json`
+- `docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md`
 
 ## Day 35 command lane
 
@@ -178,8 +180,14 @@ def build_day35_kpi_instrumentation_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day34_summary = root / _DAY34_SUMMARY_PATH
-    day34_board = root / _DAY34_BOARD_PATH
+    day34_summary_primary = root / _DAY34_SUMMARY_PATH
+    day34_summary_fallback = root / _DAY34_SUMMARY_FALLBACK_PATH
+    day34_board_primary = root / _DAY34_BOARD_PATH
+    day34_board_fallback = root / _DAY34_BOARD_FALLBACK_PATH
+    day34_summary = (
+        day34_summary_primary if day34_summary_primary.exists() else day34_summary_fallback
+    )
+    day34_board = day34_board_primary if day34_board_primary.exists() else day34_board_fallback
     day34_score, day34_strict, day34_check_count = _load_day34(day34_summary)
     board_count, board_has_day35, board_has_day36 = _board_stats(day34_board)
 
@@ -233,13 +241,13 @@ def build_day35_kpi_instrumentation_summary(
             "check_id": "day34_summary_present",
             "weight": 10,
             "passed": day34_summary.exists(),
-            "evidence": str(day34_summary),
+            "evidence": {"resolved": str(day34_summary), "primary": str(day34_summary_primary)},
         },
         {
             "check_id": "day34_delivery_board_present",
             "weight": 8,
             "passed": day34_board.exists(),
-            "evidence": str(day34_board),
+            "evidence": {"resolved": str(day34_board), "primary": str(day34_board_primary)},
         },
         {
             "check_id": "day34_quality_floor",
