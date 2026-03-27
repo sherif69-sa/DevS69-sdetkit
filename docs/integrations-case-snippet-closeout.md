@@ -10,8 +10,8 @@ Day 51 closes with a major case-snippet upgrade that converts Day 50 execution-p
 
 ## Required inputs (Day 50)
 
-- `docs/artifacts/day50-execution-prioritization-closeout-pack/day50-execution-prioritization-closeout-summary.json`
-- `docs/artifacts/day50-execution-prioritization-closeout-pack/day50-delivery-board.md`
+- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`
+- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`
 
 ## Case Snippet Closeout command lane
 
