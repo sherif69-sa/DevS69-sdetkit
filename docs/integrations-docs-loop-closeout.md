@@ -1,14 +1,14 @@
-# Docs Loop Closeout lane (Legacy: Day 53)
+# Docs Loop Closeout lane (Legacy: Cycle 53)
 
-Day 53 closes with a major docs loop optimization upgrade that converts Day 52 narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
+Cycle 53 closes with a major docs loop optimization upgrade that converts Cycle 52 narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
 
-## Why Day 53 matters
+## Why Cycle 53 matters
 
-- Converts Day 52 narrative proof into a durable docs-loop optimization discipline.
+- Converts Cycle 52 narrative proof into a durable docs-loop optimization discipline.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Day 53 docs-loop upgrades into Day 54 re-engagement execution.
+- Produces a deterministic handoff from Cycle 53 docs-loop upgrades into Cycle 54 re-engagement execution.
 
-## Required inputs (Day 52)
+## Required inputs (Cycle 52)
 
 - `docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json`
 - `docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_docs_loop_closeout_contract.py
 
 ## Docs loop optimization contract
 
-- Single owner + backup reviewer are assigned for Day 53 docs-loop execution and KPI follow-up.
-- The Day 53 docs-loop lane references Day 52 narrative winners and misses with deterministic cross-link remediation loops.
-- Every Day 53 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 53 closeout records docs-loop learnings and Day 54 re-engagement priorities.
+- Single owner + backup reviewer are assigned for Cycle 53 docs-loop execution and KPI follow-up.
+- The Cycle 53 docs-loop lane references Cycle 52 narrative winners and misses with deterministic cross-link remediation loops.
+- Every Cycle 53 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Cycle 53 closeout records docs-loop learnings and Cycle 54 re-engagement priorities.
 
 ## Docs loop quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_docs_loop_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes docs-loop brief, cross-link map, KPI scorecard, and execution log
 
-## Day 53 delivery board
+## Cycle 53 delivery board
 
-- [ ] Day 53 docs-loop brief committed
-- [ ] Day 53 docs-loop plan reviewed with owner + backup
-- [ ] Day 53 cross-link map exported
-- [ ] Day 53 KPI scorecard snapshot exported
-- [ ] Day 54 re-engagement priorities drafted from Day 53 learnings
+- [ ] Cycle 53 docs-loop brief committed
+- [ ] Cycle 53 docs-loop plan reviewed with owner + backup
+- [ ] Cycle 53 cross-link map exported
+- [ ] Cycle 53 KPI scorecard snapshot exported
+- [ ] Cycle 54 re-engagement priorities drafted from Cycle 53 learnings
 
 ## Scoring model
 
-Day 53 weighted score (0-100):
+Cycle 53 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 52 continuity and strict baseline carryover: 35 points.
+- Cycle 52 continuity and strict baseline carryover: 35 points.
 - Docs-loop contract lock + delivery board readiness: 15 points.

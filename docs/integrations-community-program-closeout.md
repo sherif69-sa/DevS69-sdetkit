@@ -1,14 +1,14 @@
 # Community Program Closeout (legacy) — Community program setup closeout lane
 
-Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
+Cycle 62 ships a major community-program upgrade that converts Cycle 61 kickoff evidence into a strict baseline for office-hours, participation, and moderation execution.
 
 ## Why Community Program Closeout matters
 
-- Converts Day 61 closeout evidence into repeatable community operations loops.
+- Converts Cycle 61 closeout evidence into repeatable community operations loops.
 - Protects trust outcomes with ownership, command proof, and moderation rollback guardrails.
-- Produces a deterministic handoff from Day 62 community setup into Day 63 onboarding activation.
+- Produces a deterministic handoff from Cycle 62 community setup into Cycle 63 onboarding activation.
 
-## Required inputs (Day 61)
+## Required inputs (Cycle 61)
 
 - `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`
 - `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_community_program_closeout_contract.py
 
 ## Community program execution contract
 
-- Single owner + backup reviewer are assigned for Day 62 community office-hours execution and moderation safety.
-- The Day 62 lane references Day 61 Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
-- Every Day 62 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 62 closeout records office-hours cadence, participation rules, moderation SOPs, and Day 63 onboarding priorities.
+- Single owner + backup reviewer are assigned for Cycle 62 community office-hours execution and moderation safety.
+- The Cycle 62 lane references Cycle 61 Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
+- Every Cycle 62 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 62 closeout records office-hours cadence, participation rules, moderation SOPs, and Cycle 63 onboarding priorities.
 
 ## Community program quality checklist
 
@@ -39,17 +39,17 @@ python scripts/check_community_program_closeout_contract.py
 
 ## Community Program Closeout delivery board (legacy)
 
-- [ ] Day 62 community launch brief committed
-- [ ] Day 62 office-hours cadence published
-- [ ] Day 62 participation policy + moderation SOP exported
-- [ ] Day 62 KPI scorecard snapshot exported
-- [ ] Day 63 onboarding priorities drafted from Day 62 learnings
+- [ ] Cycle 62 community launch brief committed
+- [ ] Cycle 62 office-hours cadence published
+- [ ] Cycle 62 participation policy + moderation SOP exported
+- [ ] Cycle 62 KPI scorecard snapshot exported
+- [ ] Cycle 63 onboarding priorities drafted from Cycle 62 learnings
 
 ## Scoring model
 
-Day 62 weighted score (0-100):
+Cycle 62 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 61 continuity and strict baseline carryover: 35 points.
+- Cycle 61 continuity and strict baseline carryover: 35 points.
 - Community program contract lock + delivery board readiness: 15 points.

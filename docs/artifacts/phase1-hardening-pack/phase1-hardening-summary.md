@@ -1,4 +1,4 @@
-# Day 29 phase-1 hardening summary
+# Cycle 29 phase-1 hardening summary
 
 - Activation score: **55**
 - Passed checks: **4**

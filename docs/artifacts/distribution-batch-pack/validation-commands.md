@@ -1,4 +1,4 @@
-# Day 38 validation commands
+# Cycle 38 validation commands
 
 ```bash
 python -m sdetkit distribution-batch --format json --strict

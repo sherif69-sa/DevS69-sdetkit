@@ -1,4 +1,4 @@
-# Day 32 changelog template
+# Cycle 32 changelog template
 
 ## Outcomes
 - What changed for users this week?

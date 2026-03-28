@@ -1,14 +1,14 @@
-# Case Snippet Closeout lane (Legacy: Day 51)
+# Case Snippet Closeout lane (Legacy: Cycle 51)
 
-Day 51 closes with a major case-snippet upgrade that converts Day 50 execution-prioritization evidence into a deterministic release-storytelling lane.
+Cycle 51 closes with a major case-snippet upgrade that converts Cycle 50 execution-prioritization evidence into a deterministic release-storytelling lane.
 
-## Why Day 51 matters
+## Why Cycle 51 matters
 
-- Converts Day 50 execution-prioritization proof into release-storytelling discipline.
+- Converts Cycle 50 execution-prioritization proof into release-storytelling discipline.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Day 51 case snippets into Day 52 narrative execution.
+- Produces a deterministic handoff from Cycle 51 case snippets into Cycle 52 narrative execution.
 
-## Required inputs (Day 50)
+## Required inputs (Cycle 50)
 
 - `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`
 - `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`
@@ -17,17 +17,17 @@ Day 51 closes with a major case-snippet upgrade that converts Day 50 execution-p
 
 ```bash
 python -m sdetkit case-snippet-closeout --format json --strict
-python -m sdetkit case-snippet-closeout --emit-pack-dir docs/artifacts/day51-case-snippet-closeout-pack --format json --strict
-python -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/day51-case-snippet-closeout-pack/evidence --format json --strict
+python -m sdetkit case-snippet-closeout --emit-pack-dir docs/artifacts/cycle51-case-snippet-closeout-pack --format json --strict
+python -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/cycle51-case-snippet-closeout-pack/evidence --format json --strict
 python scripts/check_day51_case_snippet_closeout_contract.py
 ```
 
 ## Case snippet closeout contract
 
-- Single owner + backup reviewer are assigned for Day 51 case snippet execution and KPI follow-up.
-- The Day 51 case snippet lane references Day 50 execution-prioritization winners and misses with deterministic release-storytelling loops.
-- Every Day 51 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 51 closeout records case-snippet learnings and Day 52 narrative priorities.
+- Single owner + backup reviewer are assigned for Cycle 51 case snippet execution and KPI follow-up.
+- The Cycle 51 case snippet lane references Cycle 50 execution-prioritization winners and misses with deterministic release-storytelling loops.
+- Every Cycle 51 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Cycle 51 closeout records case-snippet learnings and Cycle 52 narrative priorities.
 
 ## Case snippet quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_day51_case_snippet_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes case brief, proof map, KPI scorecard, and execution log
 
-## Day 51 delivery board
+## Cycle 51 delivery board
 
-- [ ] Day 51 case snippet brief committed
-- [ ] Day 51 snippet reviewed with owner + backup
-- [ ] Day 51 proof map exported
-- [ ] Day 51 KPI scorecard snapshot exported
-- [ ] Day 52 narrative priorities drafted from Day 51 learnings
+- [ ] Cycle 51 case snippet brief committed
+- [ ] Cycle 51 snippet reviewed with owner + backup
+- [ ] Cycle 51 proof map exported
+- [ ] Cycle 51 KPI scorecard snapshot exported
+- [ ] Cycle 52 narrative priorities drafted from Cycle 51 learnings
 
 ## Scoring model
 
-Day 51 weighted score (0-100):
+Cycle 51 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 50 continuity and strict baseline carryover: 35 points.
+- Cycle 50 continuity and strict baseline carryover: 35 points.
 - Case snippet contract lock + delivery board readiness: 15 points.

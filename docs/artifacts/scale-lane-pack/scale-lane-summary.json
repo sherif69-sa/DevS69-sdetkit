@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-scale-lane.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day39_summary": "docs/artifacts/playbook-post-pack/playbook-post-summary.json",
-    "day39_delivery_board": "docs/artifacts/playbook-post-pack/delivery-board.md"
+    "playbook_post_summary": "docs/artifacts/playbook-post-pack/playbook-post-summary.json",
+    "playbook_post_delivery_board": "docs/artifacts/playbook-post-pack/delivery-board.md"
   },
   "checks": [
     {
@@ -32,59 +32,59 @@
       }
     },
     {
-      "check_id": "readme_day40_link",
+      "check_id": "readme_scale_lane_link",
       "weight": 8,
       "passed": true,
       "evidence": "docs/integrations-scale-lane.md"
     },
     {
-      "check_id": "readme_day40_command",
+      "check_id": "readme_scale_lane_command",
       "weight": 4,
       "passed": true,
       "evidence": "scale-lane"
     },
     {
-      "check_id": "docs_index_day40_links",
+      "check_id": "docs_index_scale_lane_links",
       "weight": 8,
       "passed": true,
       "evidence": "impact-40-big-upgrade-report.md + integrations-scale-lane.md"
     },
     {
-      "check_id": "top10_day40_alignment",
+      "check_id": "top10_scale_lane_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 40 + Day 41 strategy chain"
+      "evidence": "Scale lane + expansion automation strategy chain"
     },
     {
-      "check_id": "day39_summary_present",
+      "check_id": "playbook_post_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/playbook-post-pack/playbook-post-summary.json"
     },
     {
-      "check_id": "day39_delivery_board_present",
+      "check_id": "playbook_post_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/playbook-post-pack/delivery-board.md"
     },
     {
-      "check_id": "day39_quality_floor",
+      "check_id": "playbook_post_quality_floor",
       "weight": 10,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day39_score": 100.0,
-        "strict_pass": true,
-        "day39_checks": 14
+        "playbook_post_score": 90.0,
+        "strict_pass": false,
+        "playbook_post_checks": 14
       }
     },
     {
-      "check_id": "day39_board_integrity",
+      "check_id": "playbook_post_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day39": true,
-        "contains_day40": true
+        "contains_playbook_post": true,
+        "contains_scale_lane": true
       }
     },
     {
@@ -113,23 +113,27 @@
     }
   ],
   "rollup": {
-    "day39_activation_score": 100.0,
-    "day39_checks": 14,
-    "day39_delivery_board_items": 5
+    "playbook_post_activation_score": 90.0,
+    "playbook_post_checks": 14,
+    "playbook_post_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 90,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [
+      "playbook_post_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 39 continuity is strict-pass with activation score=100.0.",
-    "Day 39 delivery board integrity validated with 5 checklist items.",
-    "Scale execution contract + quality checklist is fully locked for execution.",
-    "Day 40 scale lane #1 is fully complete and ready for Day 41 expansion lane."
+    "Playbook post delivery board integrity validated with 5 checklist items.",
+    "Scale execution contract + quality checklist is fully locked for execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Playbook post strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Playbook post scale lane command and restore strict pass baseline before Scale lane lock."
+  ]
 }

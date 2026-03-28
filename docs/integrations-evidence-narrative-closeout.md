@@ -1,14 +1,14 @@
 # Evidence Narrative Closeout — Evidence narrative closeout lane
 
-Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into a deterministic evidence narrative operating lane.
+Cycle 84 closes with a major upgrade that converts Cycle 83 trust FAQ outcomes into a deterministic evidence narrative operating lane.
 
 ## Why Evidence Narrative Closeout matters
 
-- Converts Day 83 trust FAQ outcomes into reusable evidence narratives across docs, release notes, and escalation playbooks.
+- Converts Cycle 83 trust FAQ outcomes into reusable evidence narratives across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 84 closeout into Day 85 release priorities.
+- Creates a deterministic handoff from Cycle 84 closeout into Cycle 85 release priorities.
 
-## Required inputs (Day 83)
+## Required inputs (Cycle 83)
 
 - `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json`
 - `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_evidence_narrative_closeout_contract.py
 
 ## Evidence narrative contract
 
-- Single owner + backup reviewer are assigned for Day 84 evidence narrative execution and signoff.
-- The Day 84 lane references Day 83 outcomes, controls, and trust continuity signals.
-- Every Day 84 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 84 closeout records evidence narrative pack upgrades, storyline outcomes, and Day 85 release priorities.
+- Single owner + backup reviewer are assigned for Cycle 84 evidence narrative execution and signoff.
+- The Cycle 84 lane references Cycle 83 outcomes, controls, and trust continuity signals.
+- Every Cycle 84 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 84 closeout records evidence narrative pack upgrades, storyline outcomes, and Cycle 85 release priorities.
 
 ## Evidence narrative quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_evidence_narrative_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 84 evidence brief committed
-- [ ] Day 84 evidence narrative plan committed
-- [ ] Day 84 narrative template upgrade ledger exported
-- [ ] Day 84 storyline outcomes ledger exported
-- [ ] Day 85 release priorities drafted from Day 84 outcomes
+- [ ] Cycle 84 evidence brief committed
+- [ ] Cycle 84 evidence narrative plan committed
+- [ ] Cycle 84 narrative template upgrade ledger exported
+- [ ] Cycle 84 storyline outcomes ledger exported
+- [ ] Cycle 85 release priorities drafted from Cycle 84 outcomes
 
 ## Scoring model
 
-Day 84 weights continuity + execution contract + artifact readiness for a 100-point activation score.
+Cycle 84 weights continuity + execution contract + artifact readiness for a 100-point activation score.

@@ -1,4 +1,4 @@
-Day 25 community activation summary
+Cycle 25 community activation summary
 score=55.0
 failed=readme_day25_link,readme_day25_command,docs_index_day25_link,top10_day25_alignment
 critical=top10_day25_alignment

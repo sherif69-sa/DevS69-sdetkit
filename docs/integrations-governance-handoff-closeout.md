@@ -1,14 +1,14 @@
 # Governance Handoff Closeout — Governance handoff closeout lane
 
-Day 87 closes with a major upgrade that converts Day 86 launch readiness outcomes into a deterministic governance handoff operating lane.
+Cycle 87 closes with a major upgrade that converts Cycle 86 launch readiness outcomes into a deterministic governance handoff operating lane.
 
 ## Why Governance Handoff Closeout matters
 
-- Converts Day 86 launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
+- Converts Cycle 86 launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 87 closeout into Day 88 governance priorities.
+- Creates a deterministic handoff from Cycle 87 closeout into Cycle 88 governance priorities.
 
-## Required inputs (Day 86)
+## Required inputs (Cycle 86)
 
 - `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json`
 - `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_governance_handoff_closeout_contract.py
 
 ## Governance handoff contract
 
-- Single owner + backup reviewer are assigned for Day 87 governance handoff execution and signoff.
-- The Day 87 lane references Day 86 outcomes, controls, and trust continuity signals.
-- Every Day 87 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 87 closeout records governance handoff pack upgrades, storyline outcomes, and Day 88 governance priorities.
+- Single owner + backup reviewer are assigned for Cycle 87 governance handoff execution and signoff.
+- The Cycle 87 lane references Cycle 86 outcomes, controls, and trust continuity signals.
+- Every Cycle 87 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 87 closeout records governance handoff pack upgrades, storyline outcomes, and Cycle 88 governance priorities.
 
 ## Governance handoff quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_governance_handoff_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 87 evidence brief committed
-- [ ] Day 87 governance handoff plan committed
-- [ ] Day 87 narrative template upgrade ledger exported
-- [ ] Day 87 storyline outcomes ledger exported
-- [ ] Day 88 governance priorities drafted from Day 87 outcomes
+- [ ] Cycle 87 evidence brief committed
+- [ ] Cycle 87 governance handoff plan committed
+- [ ] Cycle 87 narrative template upgrade ledger exported
+- [ ] Cycle 87 storyline outcomes ledger exported
+- [ ] Cycle 88 governance priorities drafted from Cycle 87 outcomes
 
 ## Scoring model
 
-Day 87 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Cycle 87 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

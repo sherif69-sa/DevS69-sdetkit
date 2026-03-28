@@ -1,10 +1,10 @@
-# Day 87 big upgrade report
+# Cycle 87 big upgrade report
 
 ## What shipped
 
-- Added `governance-handoff-closeout` command to score Day 87 readiness from Day 86 launch readiness handoff artifacts.
+- Added `governance-handoff-closeout` command to score Cycle 87 readiness from Cycle 86 launch readiness handoff artifacts.
 - Added deterministic pack emission and execution evidence generation for governance handoff closeout proof.
-- Added strict contract validation script and tests that enforce Day 87 closeout quality gates and handoff integrity.
+- Added strict contract validation script and tests that enforce Cycle 87 closeout quality gates and handoff integrity.
 
 ## Command lane
 

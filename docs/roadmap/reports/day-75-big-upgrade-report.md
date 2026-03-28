@@ -1,14 +1,14 @@
-# Day 75 big upgrade report
+# Cycle 75 big upgrade report
 
-## Day 75 big upgrade
+## Cycle 75 big upgrade
 
-Close Day 75 with a high-signal trust-assets refresh lane that upgrades Day 74 distribution outcomes into a deterministic governance-proof execution pack and a strict Day 76 contributor-recognition handoff.
+Close Cycle 75 with a high-signal trust-assets refresh lane that upgrades Cycle 74 distribution outcomes into a deterministic governance-proof execution pack and a strict Cycle 76 contributor-recognition handoff.
 
 ### What shipped
 
-- New `trust-assets-refresh-closeout` CLI lane with strict scoring and Day 74 continuity validation.
-- New Day 75 integration guide with command lane, contract lock, quality checklist, and delivery board.
-- New Day 75 contract checker script for CI and local execution gating.
+- New `trust-assets-refresh-closeout` CLI lane with strict scoring and Cycle 74 continuity validation.
+- New Cycle 75 integration guide with command lane, contract lock, quality checklist, and delivery board.
+- New Cycle 75 contract checker script for CI and local execution gating.
 - New `docs/roadmap/plans/trust-assets-refresh-plan.json` baseline dataset scaffold for trust refresh execution planning.
 
 ### Command lane
@@ -22,4 +22,4 @@ python scripts/check_trust_assets_refresh_closeout_contract.py
 
 ### Outcome
 
-Day 75 is now an evidence-backed trust refresh closeout lane with strict continuity to Day 74 and deterministic handoff into Day 76 contributor recognition.
+Cycle 75 is now an evidence-backed trust refresh closeout lane with strict continuity to Cycle 74 and deterministic handoff into Cycle 76 contributor recognition.

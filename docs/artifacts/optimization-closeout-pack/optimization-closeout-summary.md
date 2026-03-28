@@ -1,13 +1,13 @@
-Day 46 optimization closeout summary
+Cycle 46 optimization closeout summary
 - Activation score: 65
 - Passed checks: 9
 - Failed checks: 5
 - Critical failures: ['day45_strict_baseline']
-- Day 45 activation score: `65.0`
-- Day 45 checks evaluated: `14`
-- Day 45 delivery board checklist items: `5`
+- Cycle 45 activation score: `65.0`
+- Cycle 45 checks evaluated: `14`
+- Cycle 45 delivery board checklist items: `5`
 - Wins:
-  - Day 45 delivery board integrity validated with 5 checklist items.
+  - Cycle 45 delivery board integrity validated with 5 checklist items.
   - Optimization execution contract + quality checklist is fully locked for execution.
 - Misses:
-  - Day 45 strict continuity signal is missing.
+  - Cycle 45 strict continuity signal is missing.

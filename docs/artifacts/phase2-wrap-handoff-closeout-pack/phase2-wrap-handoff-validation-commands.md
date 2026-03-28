@@ -1,4 +1,4 @@
-# Day 60 validation commands
+# Cycle 60 validation commands
 
 ```bash
 python -m sdetkit phase2-wrap-handoff-closeout --format json --strict

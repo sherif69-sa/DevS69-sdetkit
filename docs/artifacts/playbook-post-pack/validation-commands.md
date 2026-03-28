@@ -1,4 +1,4 @@
-# Day 39 validation commands
+# Cycle 39 validation commands
 
 ```bash
 python -m sdetkit playbook-post --format json --strict

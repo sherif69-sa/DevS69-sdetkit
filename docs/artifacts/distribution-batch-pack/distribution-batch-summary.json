@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-distribution-batch.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day37_summary": "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json",
-    "day37_delivery_board": "docs/artifacts/experiment-lane-pack/delivery-board.md"
+    "experiment_lane_summary": "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json",
+    "experiment_lane_delivery_board": "docs/artifacts/experiment-lane-pack/delivery-board.md"
   },
   "checks": [
     {
@@ -32,59 +32,59 @@
       }
     },
     {
-      "check_id": "readme_day38_link",
+      "check_id": "readme_distribution_batch_link",
       "weight": 8,
       "passed": true,
       "evidence": "docs/integrations-distribution-batch.md"
     },
     {
-      "check_id": "readme_day38_command",
+      "check_id": "readme_distribution_batch_command",
       "weight": 4,
       "passed": true,
       "evidence": "distribution-batch"
     },
     {
-      "check_id": "docs_index_day38_links",
+      "check_id": "docs_index_distribution_batch_links",
       "weight": 8,
       "passed": true,
       "evidence": "impact-38-big-upgrade-report.md + integrations-distribution-batch.md"
     },
     {
-      "check_id": "top10_day38_alignment",
+      "check_id": "top10_distribution_batch_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 38 + Day 39 strategy chain"
+      "evidence": "Distribution batch + Playbook post strategy chain"
     },
     {
-      "check_id": "day37_summary_present",
+      "check_id": "experiment_lane_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"
     },
     {
-      "check_id": "day37_delivery_board_present",
+      "check_id": "experiment_lane_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/experiment-lane-pack/delivery-board.md"
     },
     {
-      "check_id": "day37_quality_floor",
+      "check_id": "experiment_lane_quality_floor",
       "weight": 10,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day37_score": 100.0,
-        "strict_pass": true,
-        "day37_checks": 14
+        "experiment_lane_score": 90.0,
+        "strict_pass": false,
+        "experiment_lane_checks": 14
       }
     },
     {
-      "check_id": "day37_board_integrity",
+      "check_id": "experiment_lane_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day37": true,
-        "contains_day38": true
+        "contains_experiment_lane": true,
+        "contains_distribution_batch": true
       }
     },
     {
@@ -113,23 +113,27 @@
     }
   ],
   "rollup": {
-    "day37_activation_score": 100.0,
-    "day37_checks": 14,
-    "day37_delivery_board_items": 5
+    "experiment_lane_activation_score": 90.0,
+    "experiment_lane_checks": 14,
+    "experiment_lane_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 90,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [
+      "experiment_lane_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 37 continuity is strict-pass with activation score=100.0.",
-    "Day 37 delivery board integrity validated with 5 checklist items.",
-    "Distribution contract + quality checklist is fully locked for execution.",
-    "Day 38 distribution batch #1 is fully complete and ready for Day 39 playbook post #1."
+    "Experiment lane delivery board integrity validated with 5 checklist items.",
+    "Distribution contract + quality checklist is fully locked for execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Experiment lane strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Experiment lane experiment lane command and restore strict pass baseline before Distribution batch lock."
+  ]
 }

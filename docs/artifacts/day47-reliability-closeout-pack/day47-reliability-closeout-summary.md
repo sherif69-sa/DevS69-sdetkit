@@ -1,13 +1,13 @@
-Day 47 reliability closeout summary
+Cycle 47 reliability closeout summary
 - Activation score: 65
 - Passed checks: 9
 - Failed checks: 5
 - Critical failures: ['day46_strict_baseline']
-- Day 46 activation score: `65.0`
-- Day 46 checks evaluated: `14`
-- Day 46 delivery board checklist items: `5`
+- Cycle 46 activation score: `65.0`
+- Cycle 46 checks evaluated: `14`
+- Cycle 46 delivery board checklist items: `5`
 - Wins:
-  - Day 46 delivery board integrity validated with 5 checklist items.
+  - Cycle 46 delivery board integrity validated with 5 checklist items.
   - Reliability execution contract + quality checklist is fully locked for execution.
 - Misses:
-  - Day 46 strict continuity signal is missing.
+  - Cycle 46 strict continuity signal is missing.

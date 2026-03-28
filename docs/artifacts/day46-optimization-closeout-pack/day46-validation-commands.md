@@ -1,4 +1,4 @@
-# Day 46 Validation Commands
+# Cycle 46 Validation Commands
 
 ```bash
 python -m sdetkit optimization-closeout --format json --strict

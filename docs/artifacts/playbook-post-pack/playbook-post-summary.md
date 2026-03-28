@@ -1,24 +1,22 @@
-# Day 39 playbook post summary
+# Playbook post summary
 
-- Activation score: **100**
-- Passed checks: **14**
-- Failed checks: **0**
-- Critical failures: **none**
+- Activation score: **90**
+- Passed checks: **13**
+- Failed checks: **1**
+- Critical failures: **distribution_batch_strict_baseline**
 
-## Day 38 continuity
+## Distribution batch continuity
 
-- Day 38 activation score: `100.0`
-- Day 38 checks evaluated: `14`
-- Day 38 delivery board checklist items: `5`
+- Distribution batch activation score: `90.0`
+- Distribution batch checks evaluated: `14`
+- Distribution batch delivery board checklist items: `5`
 
 ## Wins
-- Day 38 continuity is strict-pass with activation score=100.0.
-- Day 38 delivery board integrity validated with 5 checklist items.
+- Distribution batch delivery board integrity validated with 5 checklist items.
 - Playbook publication contract + quality checklist is fully locked for execution.
-- Day 39 playbook post #1 is fully complete and ready for Day 40 scale lane.
 
 ## Misses
-- No misses recorded.
+- Distribution batch strict continuity signal is missing.
 
 ## Handoff actions
-- [ ] No handoff actions required.
+- [ ] Re-run distribution batch command and restore strict pass baseline before playbook post lock.

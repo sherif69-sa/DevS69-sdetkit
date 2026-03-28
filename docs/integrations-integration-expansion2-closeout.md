@@ -1,14 +1,14 @@
 # Integration Expansion 2 Closeout (legacy) — Integration expansion #2 closeout lane
 
-Day 66 closes with a major integration upgrade that converts Day 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
+Cycle 66 closes with a major integration upgrade that converts Cycle 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
 
 ## Why Integration Expansion 2 Closeout matters
 
-- Converts Day 65 governance outputs into reusable GitLab CI implementation patterns.
+- Converts Cycle 65 governance outputs into reusable GitLab CI implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Day 66 integration expansion to Day 67 integration expansion #3.
+- Creates a deterministic handoff from Cycle 66 integration expansion to Cycle 67 integration expansion #3.
 
-## Required inputs (Day 65)
+## Required inputs (Cycle 65)
 
 - `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json`
 - `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_integration_expansion2_closeout_contract.py
 
 ## Integration expansion contract
 
-- Single owner + backup reviewer are assigned for Day 66 advanced GitLab CI rollout and signoff.
-- The Day 66 lane references Day 65 weekly review outputs, governance decisions, and KPI continuity signals.
-- Every Day 66 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 66 closeout records GitLab pipeline stages, parallel matrix controls, cache strategy, and Day 67 integration priorities.
+- Single owner + backup reviewer are assigned for Cycle 66 advanced GitLab CI rollout and signoff.
+- The Cycle 66 lane references Cycle 65 weekly review outputs, governance decisions, and KPI continuity signals.
+- Every Cycle 66 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 66 closeout records GitLab pipeline stages, parallel matrix controls, cache strategy, and Cycle 67 integration priorities.
 
 ## Integration quality checklist
 
@@ -40,17 +40,17 @@ python scripts/check_integration_expansion2_closeout_contract.py
 
 ## Integration Expansion 2 Closeout delivery board (legacy)
 
-- [ ] Day 66 integration brief committed
-- [ ] Day 66 advanced GitLab pipeline blueprint published
-- [ ] Day 66 matrix and cache strategy exported
-- [ ] Day 66 KPI scorecard snapshot exported
-- [ ] Day 67 integration expansion priorities drafted from Day 66 learnings
+- [ ] Cycle 66 integration brief committed
+- [ ] Cycle 66 advanced GitLab pipeline blueprint published
+- [ ] Cycle 66 matrix and cache strategy exported
+- [ ] Cycle 66 KPI scorecard snapshot exported
+- [ ] Cycle 67 integration expansion priorities drafted from Cycle 66 learnings
 
 ## Scoring model
 
-Day 66 weighted score (0-100):
+Cycle 66 weighted score (0-100):
 
 - Contract + command lane completeness: 25 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 65 continuity and strict baseline carryover: 30 points.
+- Cycle 65 continuity and strict baseline carryover: 30 points.
 - GitLab reference quality + guardrails: 25 points.

@@ -1,4 +1,4 @@
-# Day 31 validation commands
+# Cycle 31 validation commands
 
 ```bash
 python -m sdetkit phase2-kickoff --format json --strict

@@ -1,4 +1,4 @@
-# Day 37 validation commands
+# Cycle 37 validation commands
 
 ```bash
 python -m sdetkit experiment-lane --format json --strict

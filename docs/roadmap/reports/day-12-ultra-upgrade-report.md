@@ -1,8 +1,8 @@
-# Day 12 Ultra Upgrade Report — Startup/Small-Team Use-Case Page
+# Cycle 12 Ultra Upgrade Report — Startup/Small-Team Use-Case Page
 
 ## Snapshot
 
-**Day 12 big upgrade: upgraded the startup/small-team landing page with CI fast-lane and operating-pack generation (checklist + CI recipe + risk register) plus strict validation + recovery commands.**
+**Cycle 12 big upgrade: upgraded the startup/small-team landing page with CI fast-lane and operating-pack generation (checklist + CI recipe + risk register) plus strict validation + recovery commands.**
 
 ## Problem statement
 
@@ -13,7 +13,7 @@ Startups and small teams need a focused workflow page that converts repository c
 ### Product code
 
 - `src/sdetkit/startup_use_case.py`
-  - Added stricter Day 12 validation for expanded workflow sections, CI fast-lane snippet, and runnable command sequence.
+  - Added stricter Cycle 12 validation for expanded workflow sections, CI fast-lane snippet, and runnable command sequence.
   - Added `--emit-pack-dir` to generate a startup operating pack:
     - `startup-readiness-checklist.md`
     - `startup-readiness-ci.yml`
@@ -25,20 +25,20 @@ Startups and small teams need a focused workflow page that converts repository c
 ### Docs surface
 
 - `docs/use-cases-startup-small-team.md`
-  - Expanded startup path with Day 12 fast-lane test command and CI fast-lane recipe section.
+  - Expanded startup path with Cycle 12 fast-lane test command and CI fast-lane recipe section.
 - `docs/index.md`
-  - Added Day 12 operating-pack command in the docs-home Day 12 section.
+  - Added Cycle 12 operating-pack command in the docs-home Cycle 12 section.
 - `docs/cli.md`
   - Added `--emit-pack-dir` usage + examples.
 - `README.md`
-  - Added Day 12 operating-pack command in the execution block.
+  - Added Cycle 12 operating-pack command in the execution block.
 
 ### Tests and checks
 
 - `tests/test_startup_use_case.py`
   - Added coverage for pack emission and updated strict check count assertions.
 - `scripts/check_startup_readiness_contract.py`
-  - Hardened Day 12 contract checks for pack generation, CI snippet coverage, and docs wiring.
+  - Hardened Cycle 12 contract checks for pack generation, CI snippet coverage, and docs wiring.
 
 ## Validation checklist
 
@@ -58,8 +58,8 @@ Startups and small teams need a focused workflow page that converts repository c
 
 ## Rollback plan
 
-1. Revert `src/sdetkit/startup_use_case.py` enhancements if Day 12 operating-pack output is no longer required.
-2. Revert Day 12 docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-startup-small-team.md`.
-3. Remove Day 12 pack artifacts + contract checks if rolling back this feature.
+1. Revert `src/sdetkit/startup_use_case.py` enhancements if Cycle 12 operating-pack output is no longer required.
+2. Revert Cycle 12 docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-startup-small-team.md`.
+3. Remove Cycle 12 pack artifacts + contract checks if rolling back this feature.
 
-This document is the Day 12 closeout report for startup/small-team workflow hardening.
+This document is the Cycle 12 closeout report for startup/small-team workflow hardening.

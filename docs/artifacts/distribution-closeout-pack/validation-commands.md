@@ -1,4 +1,4 @@
-# Day 36 validation commands
+# Cycle 36 validation commands
 
 ```bash
 python -m sdetkit distribution-closeout --format json --strict

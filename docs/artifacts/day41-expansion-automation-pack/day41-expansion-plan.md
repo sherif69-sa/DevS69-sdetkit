@@ -1,7 +1,7 @@
-# Day 41 expansion automation lane
+# Cycle 41 expansion automation lane
 
 ## Automation summary
-- Day 40 scale winners were converted into reusable automation blocks.
+- Cycle 40 scale winners were converted into reusable automation blocks.
 - Misses are paired with rollback-ready remediation loops.
 
 ## Tactical checklist

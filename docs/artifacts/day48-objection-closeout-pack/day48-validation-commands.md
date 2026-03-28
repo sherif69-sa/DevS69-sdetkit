@@ -1,4 +1,4 @@
-# Day 48 Validation Commands
+# Cycle 48 Validation Commands
 
 ```bash
 python -m sdetkit objection-closeout --format json --strict

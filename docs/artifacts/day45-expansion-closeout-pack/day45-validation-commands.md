@@ -1,4 +1,4 @@
-# Day 45 Validation Commands
+# Cycle 45 Validation Commands
 
 ```bash
 python -m sdetkit expansion-closeout --format json --strict

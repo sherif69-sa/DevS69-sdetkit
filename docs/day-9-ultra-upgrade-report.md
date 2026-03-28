@@ -1,8 +1,8 @@
-# Day 9 Ultra Upgrade Report — Contribution Template Triage
+# Cycle 9 Ultra Upgrade Report — Contribution Template Triage
 
 ## Snapshot
 
-**Day 9 big upgrade: hardened issue/PR/config templates plus runnable triage-template validation and auto-recovery command**
+**Cycle 9 big upgrade: hardened issue/PR/config templates plus runnable triage-template validation and auto-recovery command**
 
 ## Problem statement
 
@@ -13,7 +13,7 @@ The repository had baseline issue and PR templates, but template quality checks 
 ### Product code
 
 - `src/sdetkit/triage_templates.py`
-  - Expanded Day 9 engine to validate structured requirements across bug, feature, PR, and issue-template config files.
+  - Expanded Cycle 9 engine to validate structured requirements across bug, feature, PR, and issue-template config files.
   - Added repository root targeting (`--root`) for local/CI checks across arbitrary paths.
   - Added auto-recovery path (`--write-defaults`) that writes hardened baseline templates, then re-validates.
   - Added richer reporting payload with missing checks, actions, and touched-files output.
@@ -40,18 +40,18 @@ The repository had baseline issue and PR templates, but template quality checks 
 - `tests/test_cli_help_lists_subcommands.py`
   - Keeps CLI help contract coverage for `triage-templates`.
 - `scripts/check_day9_contribution_templates_contract.py`
-  - Enforces Day 9 docs/report/contract references.
+  - Enforces Cycle 9 docs/report/contract references.
 
 ### Docs and artifacts
 
 - `README.md`
-  - Expanded Day 9 section with strict validation + write-defaults recovery command.
+  - Expanded Cycle 9 section with strict validation + write-defaults recovery command.
 - `docs/index.md`
-  - Expanded Day 9 quick action list with auto-recovery command.
+  - Expanded Cycle 9 quick action list with auto-recovery command.
 - `docs/cli.md`
   - Expanded `triage-templates` reference with `--root` and `--write-defaults` semantics.
-- `docs/artifacts/day9-triage-templates-sample.md`
-  - Refreshed generated Day 9 template-health artifact sample.
+- `docs/artifacts/cycle9-triage-templates-sample.md`
+  - Refreshed generated Cycle 9 template-health artifact sample.
 
 ## Validation checklist
 
@@ -62,12 +62,12 @@ The repository had baseline issue and PR templates, but template quality checks 
 
 ## Artifacts
 
-- `docs/artifacts/day9-triage-templates-sample.md`
+- `docs/artifacts/cycle9-triage-templates-sample.md`
 
 ## Rollback plan
 
 1. Revert `src/sdetkit/triage_templates.py` to the previous token-checking implementation.
 2. Revert `.github` template/config files to pre-Day-9 state.
-3. Revert Day 9 docs/report updates and remove Day 9 contract checker if desired.
+3. Revert Cycle 9 docs/report updates and remove Cycle 9 contract checker if desired.
 
-This document is the Day 9 artifact report for contribution-template triage hardening and recovery automation.
+This document is the Cycle 9 artifact report for contribution-template triage hardening and recovery automation.

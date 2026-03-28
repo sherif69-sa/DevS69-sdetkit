@@ -13,15 +13,15 @@ In short: this repo helps teams convert testing, QA, and repo operations into re
 
 ## Current strengths to amplify
 
-## Day 36-41 canonical lane bridge
+## Cycle 36-41 canonical lane bridge
 
-- Day 36 — distribution closeout
-- Day 37 — experiment lane
-- Day 38 — distribution batch
-- Day 39 — playbook post
-- Day 40 — scale lane
-- Day 41 — expansion automation
-- Day 42 — optimization closeout foundation
+- Cycle 36 — distribution closeout
+- Cycle 37 — experiment lane
+- Cycle 38 — distribution batch
+- Cycle 39 — playbook post
+- Cycle 40 — scale lane
+- Cycle 41 — expansion automation
+- Cycle 42 — optimization closeout foundation
 
 
 1. **Breadth of capability**: health diagnostics, policy, security gates, repo auditing, agent workflows.
@@ -366,7 +366,7 @@ Ecosystem priorities + scale upgrade strategy chain
 
 Scale upgrade + partner outreach strategy chain
 
-- Day 90 + Cycle 1 strategy chain
+- Cycle 90 + Cycle 1 strategy chain
 - Cycle 1 + Cycle 2 strategy chain
 
 - Cycle 7 + Cycle 8 strategy chain

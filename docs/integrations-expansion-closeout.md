@@ -1,19 +1,19 @@
-# Day 45 — Expansion closeout lane
+# Cycle 45 — Expansion closeout lane
 
-Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence into deterministic improvement loops.
+Cycle 45 closes with a major expansion upgrade that converts Cycle 44 scale evidence into deterministic improvement loops.
 
-## Why Day 45 matters
+## Why Cycle 45 matters
 
-- Converts Day 44 scale proof into growth-first operating motion.
+- Converts Cycle 44 scale proof into growth-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from expansion outcomes into Day 46 optimization priorities.
+- Produces a deterministic handoff from expansion outcomes into Cycle 46 optimization priorities.
 
-## Required inputs (Day 44)
+## Required inputs (Cycle 44)
 
 - `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`
 - `docs/artifacts/scale-closeout-pack/scale-delivery-board.md`
 
-## Day 45 command lane
+## Cycle 45 command lane
 
 ```bash
 python -m sdetkit expansion-closeout --format json --strict
@@ -24,10 +24,10 @@ python scripts/check_expansion_closeout_contract.py
 
 ## Expansion closeout contract
 
-- Single owner + backup reviewer are assigned for Day 45 expansion lane execution and KPI follow-up.
-- The Day 45 expansion lane references Day 44 scale winners and misses with deterministic growth loops.
-- Every Day 45 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 45 closeout records expansion learnings and Day 46 optimization priorities.
+- Single owner + backup reviewer are assigned for Cycle 45 expansion lane execution and KPI follow-up.
+- The Cycle 45 expansion lane references Cycle 44 scale winners and misses with deterministic growth loops.
+- Every Cycle 45 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Cycle 45 closeout records expansion learnings and Cycle 46 optimization priorities.
 
 ## Expansion quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_expansion_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes expansion plan, growth matrix, KPI scorecard, and execution log
 
-## Day 45 delivery board
+## Cycle 45 delivery board
 
-- [ ] Day 45 expansion plan draft committed
-- [ ] Day 45 review notes captured with owner + backup
-- [ ] Day 45 growth matrix exported
-- [ ] Day 45 KPI scorecard snapshot exported
-- [ ] Day 46 optimization priorities drafted from Day 45 learnings
+- [ ] Cycle 45 expansion plan draft committed
+- [ ] Cycle 45 review notes captured with owner + backup
+- [ ] Cycle 45 growth matrix exported
+- [ ] Cycle 45 KPI scorecard snapshot exported
+- [ ] Cycle 46 optimization priorities drafted from Cycle 45 learnings
 
 ## Scoring model
 
-Day 45 weighted score (0-100):
+Cycle 45 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 44 continuity and strict baseline carryover: 35 points.
+- Cycle 44 continuity and strict baseline carryover: 35 points.
 - Expansion contract lock + delivery board readiness: 15 points.

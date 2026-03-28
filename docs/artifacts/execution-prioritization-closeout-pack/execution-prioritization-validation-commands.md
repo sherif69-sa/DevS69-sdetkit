@@ -1,4 +1,4 @@
-# Day 50 Validation Commands
+# Cycle 50 Validation Commands
 
 ```bash
 python -m sdetkit execution-prioritization-closeout --format json --strict

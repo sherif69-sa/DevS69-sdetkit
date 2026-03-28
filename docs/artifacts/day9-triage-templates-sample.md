@@ -1,4 +1,4 @@
-# Day 9 contribution templates health
+# Cycle 9 contribution templates health
 
 - Score: **100.0** (21/21)
 

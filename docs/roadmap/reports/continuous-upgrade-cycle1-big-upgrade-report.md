@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added `continuous-upgrade-cycle1-closeout` command to score Cycle 1 readiness from Day 90 publication artifacts.
+- Added `continuous-upgrade-cycle1-closeout` command to score Cycle 1 readiness from Cycle 90 publication artifacts.
 - Added deterministic pack emission and execution evidence generation for continuous upgrade proof.
 - Added strict contract validation script and tests that enforce Cycle 1 closeout quality gates.
 

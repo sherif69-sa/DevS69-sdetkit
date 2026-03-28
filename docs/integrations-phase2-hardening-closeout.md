@@ -1,14 +1,14 @@
-# Phase 2 Hardening Closeout lane (Legacy: Day 58)
+# Phase 2 Hardening Closeout lane (Legacy: Cycle 58)
 
-Day 58 closes with a major Phase-2 hardening upgrade that turns Day 57 KPI deep-audit outcomes into deterministic execution hardening governance.
+Cycle 58 closes with a major Phase-2 hardening upgrade that turns Cycle 57 KPI deep-audit outcomes into deterministic execution hardening governance.
 
-## Why Day 58 matters
+## Why Cycle 58 matters
 
-- Converts Day 57 KPI deep-audit evidence into repeatable hardening execution loops.
+- Converts Cycle 57 KPI deep-audit evidence into repeatable hardening execution loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 58 closeout into Day 59 pre-plan execution planning.
+- Produces a deterministic handoff from Cycle 58 closeout into Cycle 59 pre-plan execution planning.
 
-## Required inputs (Day 57)
+## Required inputs (Cycle 57)
 
 - `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`
 - `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_phase2_hardening_closeout_contract.py
 
 ## Phase-2 hardening contract
 
-- Single owner + backup reviewer are assigned for Day 58 Phase-2 hardening execution and signal triage.
-- The Day 58 lane references Day 57 KPI deep-audit outcomes and unresolved risks.
-- Every Day 58 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 58 closeout records hardening outcomes and Day 59 pre-plan priorities.
+- Single owner + backup reviewer are assigned for Cycle 58 Phase-2 hardening execution and signal triage.
+- The Cycle 58 lane references Cycle 57 KPI deep-audit outcomes and unresolved risks.
+- Every Cycle 58 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 58 closeout records hardening outcomes and Cycle 59 pre-plan priorities.
 
 ## Phase-2 hardening quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_phase2_hardening_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
 - [ ] Artifact pack includes hardening brief, risk ledger, KPI scorecard, and execution log
 
-## Day 58 delivery board
+## Cycle 58 delivery board
 
-- [ ] Day 58 Phase-2 hardening brief committed
-- [ ] Day 58 hardening plan reviewed with owner + backup
-- [ ] Day 58 risk ledger exported
-- [ ] Day 58 KPI scorecard snapshot exported
-- [ ] Day 59 pre-plan priorities drafted from Day 58 learnings
+- [ ] Cycle 58 Phase-2 hardening brief committed
+- [ ] Cycle 58 hardening plan reviewed with owner + backup
+- [ ] Cycle 58 risk ledger exported
+- [ ] Cycle 58 KPI scorecard snapshot exported
+- [ ] Cycle 59 pre-plan priorities drafted from Cycle 58 learnings
 
 ## Scoring model
 
-Day 58 weighted score (0-100):
+Cycle 58 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 57 continuity and strict baseline carryover: 35 points.
+- Cycle 57 continuity and strict baseline carryover: 35 points.
 - Phase-2 hardening contract lock + delivery board readiness: 15 points.

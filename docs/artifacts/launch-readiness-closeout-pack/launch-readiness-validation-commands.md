@@ -1,4 +1,4 @@
-# Day 86 validation commands
+# Cycle 86 validation commands
 
 ```bash
 python -m sdetkit launch-readiness-closeout --format json --strict

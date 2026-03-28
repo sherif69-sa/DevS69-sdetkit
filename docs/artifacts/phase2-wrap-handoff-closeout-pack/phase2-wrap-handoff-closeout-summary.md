@@ -1,4 +1,4 @@
-Phase 2 Wrap Handoff Closeout summary (legacy: Day 60)
+Phase 2 Wrap Handoff Closeout summary (legacy: Cycle 60)
 - Activation score: 43
 - Passed checks: 7
 - Failed checks: 6

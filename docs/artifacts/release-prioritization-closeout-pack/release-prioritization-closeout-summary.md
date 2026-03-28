@@ -1,4 +1,4 @@
-Day 85 release prioritization closeout summary
+Cycle 85 release prioritization closeout summary
 - Activation score: 65
 - Passed checks: 10
 - Failed checks: 4

@@ -1,4 +1,4 @@
-# Day 27 KPI delta table
+# Cycle 27 KPI delta table
 
 | KPI | Baseline | Current | Delta | Delta % | Trend |
 | --- | --- | --- | --- | --- | --- |

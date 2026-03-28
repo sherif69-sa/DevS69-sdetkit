@@ -1,10 +1,10 @@
-# Day 38 Big Upgrade Report
+# Cycle 38 Big Upgrade Report
 
 ## What shipped
 
-- Added Day 38 closeout command: `python -m sdetkit distribution-batch`.
-- Added strict continuity checks that require Day 37 strict-pass and board integrity.
-- Added Day 38 artifact outputs for channel plan, post copy pack, KPI scorecard, execution log, and validation commands.
+- Added Cycle 38 closeout command: `python -m sdetkit distribution-batch`.
+- Added strict continuity checks that require Cycle 37 strict-pass and board integrity.
+- Added Cycle 38 artifact outputs for channel plan, post copy pack, KPI scorecard, execution log, and validation commands.
 
 ## Validation
 
@@ -14,6 +14,6 @@ python scripts/check_distribution_batch_contract.py --skip-evidence
 python -m sdetkit distribution-batch --format json --strict
 ```
 
-## Day 39 handoff
+## Cycle 39 handoff
 
-Day 38 is closed with coordinated distribution evidence and KPI deltas that directly seed Day 39 playbook post priorities.
+Cycle 38 is closed with coordinated distribution evidence and KPI deltas that directly seed Cycle 39 playbook post priorities.

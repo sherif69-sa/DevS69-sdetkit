@@ -1,20 +1,20 @@
-# Day 70 — Case-study prep #2 closeout lane
+# Cycle 70 — Case-study prep #2 closeout lane
 
-Day 70 closes with a major upgrade that turns Day 69 integration outputs into a measurable triage-speed case-study prep pack.
+Cycle 70 closes with a major upgrade that turns Cycle 69 integration outputs into a measurable triage-speed case-study prep pack.
 
 ## Why Case Study Prep 2 Closeout matters
 
-- Converts Day 69 implementation signals into before/after triage-speed evidence.
+- Converts Cycle 69 implementation signals into before/after triage-speed evidence.
 - Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Day 70 case-study prep #2 to Day 71 case-study prep #3.
+- Creates a deterministic handoff from Cycle 70 case-study prep #2 to Cycle 71 case-study prep #3.
 
-## Required inputs (Day 69)
+## Required inputs (Cycle 69)
 
 - `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json`
 - `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md`
 - `docs/roadmap/plans/triage-speed-case-study.json`
 
-## Case Study Prep 2 Closeout command lane (Legacy Day 70)
+## Case Study Prep 2 Closeout command lane (Legacy Cycle 70)
 
 ```bash
 python -m sdetkit case-study-prep2-closeout --format json --strict
@@ -25,10 +25,10 @@ python scripts/check_case_study_prep2_closeout_contract.py
 
 ## Case-study prep contract
 
-- Single owner + backup reviewer are assigned for Day 70 triage-speed case-study prep and signoff.
-- The Day 70 lane references Day 69 case-study prep outputs, governance decisions, and KPI continuity signals.
-- Every Day 70 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 70 closeout records before/after triage-speed deltas, evidence confidence notes, and Day 71 prep priorities.
+- Single owner + backup reviewer are assigned for Cycle 70 triage-speed case-study prep and signoff.
+- The Cycle 70 lane references Cycle 69 case-study prep outputs, governance decisions, and KPI continuity signals.
+- Every Cycle 70 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 70 closeout records before/after triage-speed deltas, evidence confidence notes, and Cycle 71 prep priorities.
 
 ## Case-study quality checklist
 
@@ -38,20 +38,20 @@ python scripts/check_case_study_prep2_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Case Study Prep 2 Closeout delivery board (Legacy Day 70)
+## Case Study Prep 2 Closeout delivery board (Legacy Cycle 70)
 
-- [ ] Day 70 integration brief committed
-- [ ] Day 70 triage-speed case-study narrative published
-- [ ] Day 70 controls and assumptions log exported
-- [ ] Day 70 KPI scorecard snapshot exported
-- [ ] Day 71 case-study prep priorities drafted from Day 70 learnings
+- [ ] Cycle 70 integration brief committed
+- [ ] Cycle 70 triage-speed case-study narrative published
+- [ ] Cycle 70 controls and assumptions log exported
+- [ ] Cycle 70 KPI scorecard snapshot exported
+- [ ] Cycle 71 case-study prep priorities drafted from Cycle 70 learnings
 
 ## Scoring model
 
-Day 70 weighted score (0-100):
+Cycle 70 weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Day 69 continuity baseline quality (35)
+- Cycle 69 continuity baseline quality (35)
 - Triage-speed evidence data + delivery board completeness (30)
 
 Strict pass requires score >= 95 and zero critical failures.

@@ -1,7 +1,7 @@
-# Day 36 distribution message kit
+# Cycle 36 distribution message kit
 
 ## GitHub discussion post
-- Hook: Day 35 KPI loop is closed and measurable.
+- Hook: Cycle 35 KPI loop is closed and measurable.
 - CTA: Try `python -m sdetkit distribution-closeout --format json --strict` and share score deltas.
 - KPI target: `readme_to_command_ctr +2%`.
 

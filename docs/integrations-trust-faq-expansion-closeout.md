@@ -1,14 +1,14 @@
 # Trust FAQ Expansion Closeout — Trust FAQ expansion loop closeout lane
 
-Day 83 closes with a major upgrade that folds Day 82 integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
+Cycle 83 closes with a major upgrade that folds Cycle 82 integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
 
 ## Why Trust FAQ Expansion Closeout matters
 
-- Turns Day 82 integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
+- Turns Cycle 82 integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 83 closeout into Day 84 evidence narrative priorities.
+- Creates a deterministic handoff from Cycle 83 closeout into Cycle 84 evidence narrative priorities.
 
-## Required inputs (Day 82)
+## Required inputs (Cycle 82)
 
 - `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`
 - `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 
 ## Trust FAQ expansion contract
 
-- Single owner + backup reviewer are assigned for Day 83 trust FAQ expansion execution and signoff.
-- The Day 83 lane references Day 82 outcomes, controls, and campaign continuity signals.
-- Every Day 83 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 83 closeout records trust FAQ content upgrades, escalation outcomes, and Day 84 evidence narrative priorities.
+- Single owner + backup reviewer are assigned for Cycle 83 trust FAQ expansion execution and signoff.
+- The Cycle 83 lane references Cycle 82 outcomes, controls, and campaign continuity signals.
+- Every Cycle 83 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 83 closeout records trust FAQ content upgrades, escalation outcomes, and Cycle 84 evidence narrative priorities.
 
 ## Trust FAQ expansion quality checklist
 
@@ -40,16 +40,16 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 83 trust FAQ brief committed
-- [ ] Day 83 trust FAQ expansion plan committed
-- [ ] Day 83 trust template upgrade ledger exported
-- [ ] Day 83 escalation outcomes ledger exported
-- [ ] Day 84 evidence narrative priorities drafted from Day 83 outcomes
+- [ ] Cycle 83 trust FAQ brief committed
+- [ ] Cycle 83 trust FAQ expansion plan committed
+- [ ] Cycle 83 trust template upgrade ledger exported
+- [ ] Cycle 83 escalation outcomes ledger exported
+- [ ] Cycle 84 evidence narrative priorities drafted from Cycle 83 outcomes
 
 ## Scoring model
 
 Trust FAQ Expansion Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Day 82 continuity baseline quality (35)
+- Cycle 82 continuity baseline quality (35)
 - Feedback evidence data + delivery board completeness (30)

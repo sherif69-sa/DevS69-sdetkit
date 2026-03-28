@@ -1,4 +1,4 @@
-# Day 87 validation commands
+# Cycle 87 validation commands
 
 ```bash
 python -m sdetkit governance-handoff-closeout --format json --strict

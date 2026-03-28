@@ -1,3 +1,3 @@
-# Day 44 Execution Log
+# Cycle 44 Execution Log
 
-- [ ] 2026-03-12: Record misses, wins, and Day 45 expansion priorities.
+- [ ] 2026-03-12: Record misses, wins, and Cycle 45 expansion priorities.

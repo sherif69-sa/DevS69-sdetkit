@@ -1,4 +1,4 @@
-# Day 35 alert policy
+# Cycle 35 alert policy
 
 - `readme_to_command_ctr < 10%` for two consecutive cycles -> owner opens remediation issue within 24h.
 - `ci_flake_rate > 3%` on daily sweep -> block release tagging until flaky tests triaged.

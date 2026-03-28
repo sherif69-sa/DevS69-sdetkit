@@ -1,12 +1,12 @@
-# Day 8 Ultra Upgrade Report — Contributor Funnel Start
+# Cycle 8 Ultra Upgrade Report — Contributor Funnel Start
 
 ## Upgrade title
 
-**Day 8 big upgrade: runnable contributor-funnel command with 10 curated good-first-issue tasks and acceptance criteria**
+**Cycle 8 big upgrade: runnable contributor-funnel command with 10 curated good-first-issue tasks and acceptance criteria**
 
 ## Problem statement
 
-The repository had a Day 8 plan callout in strategy and weekly review guidance, but no deterministic command output that teams could publish as a ready-to-triage good-first-issue backlog.
+The repository had a Cycle 8 plan callout in strategy and weekly review guidance, but no deterministic command output that teams could publish as a ready-to-triage good-first-issue backlog.
 
 Without a generated backlog, first-time contributors face higher discovery friction and maintainers lose consistency in issue quality.
 
@@ -15,9 +15,9 @@ Without a generated backlog, first-time contributors face higher discovery frict
 ### Files changed
 
 - `src/sdetkit/contributor_funnel.py`
-  - Added a Day 8 backlog engine that renders 10 curated good-first-issue tasks.
+  - Added a Cycle 8 backlog engine that renders 10 curated good-first-issue tasks.
   - Includes explicit acceptance criteria and output formats (`text`, `markdown`, `json`).
-  - Added Day 8 validation (`--strict`), area filtering (`--area`), and issue-pack export (`--issue-pack-dir`).
+  - Added Cycle 8 validation (`--strict`), area filtering (`--area`), and issue-pack export (`--issue-pack-dir`).
   - Supports writing shareable artifacts with `--output`.
 - `src/sdetkit/cli.py`
   - Added top-level command wiring: `python -m sdetkit contributor-funnel ...`.
@@ -26,32 +26,32 @@ Without a generated backlog, first-time contributors face higher discovery frict
 - `tests/test_cli_help_lists_subcommands.py`
   - Extended CLI help contract to include `contributor-funnel`.
 - `README.md`
-  - Added Day 8 section with execution and artifact export commands.
+  - Added Cycle 8 section with execution and artifact export commands.
 - `docs/index.md`
-  - Added Day 8 report link and usage bullets.
+  - Added Cycle 8 report link and usage bullets.
 - `docs/cli.md`
   - Added `contributor-funnel` command reference.
 - `scripts/check_day8_contributor_funnel_contract.py`
-  - Added Day 8 contract checker for README/docs/report/script wiring and artifact/module presence.
-- `docs/artifacts/day8-good-first-issues-sample.md`
-  - Added generated Day 8 backlog artifact sample.
+  - Added Cycle 8 contract checker for README/docs/report/script wiring and artifact/module presence.
+- `docs/artifacts/cycle8-good-first-issues-sample.md`
+  - Added generated Cycle 8 backlog artifact sample.
 
 ## Validation checklist
 
 - `python -m sdetkit contributor-funnel --format text --strict`
-- `python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md`
-- `python -m sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/day8-issue-pack`
+- `python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/cycle8-good-first-issues-sample.md`
+- `python -m sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/cycle8-issue-pack`
 - `python -m pytest -q tests/test_contributor_funnel.py tests/test_cli_help_lists_subcommands.py`
 - `python scripts/check_day8_contributor_funnel_contract.py`
 
 ## Artifact
 
-This document is the Day 8 artifact report for contributor-funnel backlog bootstrapping.
+This document is the Cycle 8 artifact report for contributor-funnel backlog bootstrapping.
 
 ## Rollback plan
 
 1. Remove `contributor-funnel` command wiring from `src/sdetkit/cli.py`.
 2. Remove `src/sdetkit/contributor_funnel.py` and related tests.
-3. Revert Day 8 docs/report updates and remove Day 8 artifact/checker script.
+3. Revert Cycle 8 docs/report updates and remove Cycle 8 artifact/checker script.
 
 Rollback risk is low because this is an additive planning/reporting command and does not alter existing runtime flows.

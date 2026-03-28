@@ -1,4 +1,4 @@
-# Day 41 validation commands
+# Cycle 41 validation commands
 
 ```bash
 python -m sdetkit expansion-automation --format json --strict

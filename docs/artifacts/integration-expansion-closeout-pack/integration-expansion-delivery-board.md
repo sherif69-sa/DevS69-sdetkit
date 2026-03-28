@@ -1,6 +1,6 @@
-# Day 64 delivery board
-- [ ] Day 64 integration brief committed
-- [ ] Day 64 advanced workflow blueprint published
-- [ ] Day 64 matrix and concurrency plan exported
-- [ ] Day 64 KPI scorecard snapshot exported
-- [ ] Day 65 weekly review priorities drafted from Day 64 learnings
+# Cycle 64 delivery board
+- [ ] Cycle 64 integration brief committed
+- [ ] Cycle 64 advanced workflow blueprint published
+- [ ] Cycle 64 matrix and concurrency plan exported
+- [ ] Cycle 64 KPI scorecard snapshot exported
+- [ ] Cycle 65 weekly review priorities drafted from Cycle 64 learnings

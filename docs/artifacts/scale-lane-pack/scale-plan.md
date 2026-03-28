@@ -1,7 +1,7 @@
-# Day 40 scale lane #1
+# Cycle 40 scale lane #1
 
 ## Executive summary
-- Day 39 winners were converted into a repeatable publishing pattern.
+- Cycle 39 winners were converted into a repeatable publishing pattern.
 - Misses were mapped to actionable guardrails for next wave execution.
 
 ## Tactical checklist

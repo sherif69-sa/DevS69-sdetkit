@@ -1,3 +1,3 @@
-# Day 48 Objection Plan
+# Cycle 48 Objection Plan
 
-- Objective: close Day 48 with measurable objection-resolution and adoption gains.
+- Objective: close Cycle 48 with measurable objection-resolution and adoption gains.
