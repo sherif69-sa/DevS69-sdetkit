@@ -26,13 +26,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit narrative-closeout --format json --strict",
-    "python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict",
-    "python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict",
+    "python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict",
     "python scripts/check_narrative_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit narrative-closeout --format json --strict",
-    "python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict",
+    "python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict",
     "python scripts/check_narrative_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -75,8 +75,8 @@ Day 52 closes with a major narrative upgrade that converts Day 51 case-snippet e
 
 ```bash
 python -m sdetkit narrative-closeout --format json --strict
-python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict
-python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict
+python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict
+python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict
 python scripts/check_narrative_closeout_contract.py
 ```
 
@@ -487,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day52-narrative-closeout-pack/evidence")
+            else Path("docs/artifacts/narrative-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

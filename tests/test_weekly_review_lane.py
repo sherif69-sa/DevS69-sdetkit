@@ -34,9 +34,9 @@ def _seed_repo(root: Path) -> None:
         d28._DAY28_DEFAULT_PAGE, encoding="utf-8"
     )
 
-    d25 = root / "docs/artifacts/day25-community-pack"
+    d25 = root / "docs/artifacts/community-activation-pack"
     d26 = root / "docs/artifacts/external-contribution-pack"
-    d27 = root / "docs/artifacts/day27-kpi-pack"
+    d27 = root / "docs/artifacts/kpi-audit-pack"
     d25.mkdir(parents=True, exist_ok=True)
     d26.mkdir(parents=True, exist_ok=True)
     d27.mkdir(parents=True, exist_ok=True)

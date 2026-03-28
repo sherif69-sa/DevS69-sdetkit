@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-day53-docs-loop-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day52_summary": "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json",
-    "day52_delivery_board": "docs/artifacts/day52-narrative-closeout-pack/day52-delivery-board.md"
+    "day52_summary": "docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json",
+    "day52_delivery_board": "docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
   },
   "checks": [
     {
@@ -59,13 +59,13 @@
       "check_id": "day52_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json"
     },
     {
       "check_id": "day52_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day52-narrative-closeout-pack/day52-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
     },
     {
       "check_id": "day52_quality_floor",

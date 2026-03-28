@@ -19,16 +19,16 @@ A Day 27 pass requires side-by-side baseline and current snapshots for:
 
 ## Metric baseline and current snapshot
 
-- Baseline path: `docs/artifacts/day27-kpi-pack/day27-kpi-baseline.json`
-- Current path: `docs/artifacts/day27-kpi-pack/day27-kpi-current.json`
+- Baseline path: `docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json`
+- Current path: `docs/artifacts/kpi-audit-pack/day27-kpi-current.json`
 - Every metric must be numeric and non-negative.
 
 ## Launch checklist
 
 ```bash
 python -m sdetkit kpi-audit --format json --strict
-python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/day27-kpi-pack --format json --strict
-python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/day27-kpi-pack/evidence --format json --strict
+python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/kpi-audit-pack --format json --strict
+python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/kpi-audit-pack/evidence --format json --strict
 python scripts/check_kpi_audit_contract.py
 ```
 

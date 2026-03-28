@@ -24,13 +24,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit day35-kpi-instrumentation --format json --strict",
-    "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict",
-    "python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/day35-kpi-instrumentation-pack/evidence --format json --strict",
+    "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
+    "python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict",
     "python scripts/check_kpi_instrumentation_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit day35-kpi-instrumentation --format json --strict",
-    "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict",
+    "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
     "python scripts/check_kpi_instrumentation_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -73,8 +73,8 @@ Day 35 closes the instrumentation lane by converting demo activity into measurab
 
 ```bash
 python -m sdetkit day35-kpi-instrumentation --format json --strict
-python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict
-python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/day35-kpi-instrumentation-pack/evidence --format json --strict
+python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict
+python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict
 python scripts/check_kpi_instrumentation_contract.py
 ```
 
@@ -498,7 +498,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day35-kpi-instrumentation-pack/evidence")
+            else Path("docs/artifacts/kpi-instrumentation-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

@@ -10,16 +10,16 @@ Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wi
 
 ## Inputs from Cycles 25-27
 
-- Day 25: `docs/artifacts/day25-community-pack/day25-community-summary.json`
+- Day 25: `docs/artifacts/community-activation-pack/day25-community-summary.json`
 - External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
-- Day 27: `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
+- Day 27: `docs/artifacts/kpi-audit-pack/day27-kpi-summary.json`
 
 ## Closeout checklist
 
 ```bash
 python -m sdetkit weekly-review --format json --strict
-python -m sdetkit weekly-review --emit-pack-dir docs/artifacts/day28-weekly-pack --format json --strict
-python -m sdetkit weekly-review --execute --evidence-dir docs/artifacts/day28-weekly-pack/evidence --format json --strict
+python -m sdetkit weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict
+python -m sdetkit weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict
 python scripts/check_weekly_review_contract.py
 ```
 

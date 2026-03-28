@@ -1,0 +1,120 @@
+{
+  "name": "day28-weekly-review",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-weekly-review.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day25_summary": "docs/artifacts/community-activation-pack/day25-community-summary.json",
+    "external_contribution_summary": "docs/artifacts/external-contribution-pack/external-contribution-summary.json",
+    "day27_summary": "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "category": "contract",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-weekly-review.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "category": "contract",
+      "weight": 20,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "category": "contract",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "missing_commands": [
+          "python -m sdetkit day28-weekly-review --format json --strict",
+          "python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict",
+          "python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict"
+        ]
+      }
+    },
+    {
+      "check_id": "readme_day28_link",
+      "category": "discoverability",
+      "weight": 10,
+      "passed": false,
+      "evidence": "docs/integrations-weekly-review.md"
+    },
+    {
+      "check_id": "docs_index_day28_link",
+      "category": "discoverability",
+      "weight": 10,
+      "passed": false,
+      "evidence": "impact-28-ultra-upgrade-report.md"
+    },
+    {
+      "check_id": "top10_day28_alignment",
+      "category": "strategy",
+      "weight": 8,
+      "passed": false,
+      "evidence": "Day 28 \u2014 Weekly review #4"
+    },
+    {
+      "check_id": "docs_mentions_wins_misses_actions",
+      "category": "strategy",
+      "weight": 7,
+      "passed": true,
+      "evidence": "wins/misses/corrective"
+    },
+    {
+      "check_id": "day25_input_present",
+      "category": "data",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-activation-pack/day25-community-summary.json"
+    },
+    {
+      "check_id": "external_contribution_input_present",
+      "category": "data",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/external-contribution-pack/external-contribution-summary.json"
+    },
+    {
+      "check_id": "day27_input_present",
+      "category": "data",
+      "weight": 9,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+    }
+  ],
+  "rollup": {
+    "day25_activation_score": 55.0,
+    "external_contribution_activation_score": 100.0,
+    "day27_activation_score": 72.0,
+    "average_activation_score": 75.67
+  },
+  "summary": {
+    "activation_score": 62.0,
+    "passed_checks": 6,
+    "failed_checks": 4,
+    "critical_failures": [
+      "required_commands_present",
+      "top10_day28_alignment"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "External contribution stayed healthy (100.0)."
+  ],
+  "misses": [
+    "Day 25 summary missing or below closeout target.",
+    "Day 27 KPI summary missing or below closeout target."
+  ],
+  "corrective_actions": [
+    "Re-run Day 25 pack generation and restore summary JSON for traceability.",
+    "Refresh KPI baseline/current snapshots and regenerate Day 27 artifacts.",
+    "Address Day 28 documentation and discoverability gaps before phase closeout."
+  ]
+}

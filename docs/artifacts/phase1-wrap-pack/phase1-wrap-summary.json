@@ -6,8 +6,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase1-wrap.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day27_summary": "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json",
-    "day28_summary": "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json",
+    "day27_summary": "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json",
+    "day28_summary": "docs/artifacts/weekly-review-pack/day28-weekly-review-summary.json",
     "day29_summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
     "day29_summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
   },
@@ -62,13 +62,13 @@
       "check_id": "day27_input_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
     },
     {
       "check_id": "day28_input_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-pack/day28-weekly-review-summary.json"
     },
     {
       "check_id": "day29_input_present",

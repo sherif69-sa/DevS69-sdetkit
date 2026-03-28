@@ -10,8 +10,8 @@ Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 e
 
 ## Required inputs (Cycles 27-29)
 
-- `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
-- `docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json`
+- `docs/artifacts/kpi-audit-pack/day27-kpi-summary.json`
+- `docs/artifacts/weekly-review-pack/day28-weekly-review-summary.json`
 - `docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json` (primary)
 
 ## Day 30 command lane

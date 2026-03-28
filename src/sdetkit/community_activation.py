@@ -21,8 +21,8 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit community-activation --format json --strict",
-    "python -m sdetkit community-activation --emit-pack-dir docs/artifacts/day25-community-pack --format json --strict",
-    "python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/day25-community-pack/evidence --format json --strict",
+    "python -m sdetkit community-activation --emit-pack-dir docs/artifacts/community-activation-pack --format json --strict",
+    "python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/community-activation-pack/evidence --format json --strict",
     "python scripts/check_community_activation_contract.py",
 ]
 _EXECUTION_COMMANDS = [
@@ -48,8 +48,8 @@ Day 25 is complete when a public roadmap-voting thread is opened, tagged, and li
 
 ```bash
 python -m sdetkit community-activation --format json --strict
-python -m sdetkit community-activation --emit-pack-dir docs/artifacts/day25-community-pack --format json --strict
-python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/day25-community-pack/evidence --format json --strict
+python -m sdetkit community-activation --emit-pack-dir docs/artifacts/community-activation-pack --format json --strict
+python -m sdetkit community-activation --execute --evidence-dir docs/artifacts/community-activation-pack/evidence --format json --strict
 python scripts/check_community_activation_contract.py
 ```
 
@@ -392,7 +392,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day25-community-pack/evidence",
+        default="docs/artifacts/community-activation-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
     parser.add_argument(
