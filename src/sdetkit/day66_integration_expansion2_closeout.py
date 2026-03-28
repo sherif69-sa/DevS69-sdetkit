@@ -14,7 +14,8 @@ _DAY65_SUMMARY_PATH = (
     "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
 )
 _DAY65_BOARD_PATH = "docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md"
-_GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
+_GITLAB_PATH = "templates/ci/gitlab/gitlab-advanced-reference.yml"
+_LEGACY_GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion 2 Closeout matters",
@@ -79,7 +80,8 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 
 - `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json`
 - `docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md`
-- `templates/ci/gitlab/day66-advanced-reference.yml`
+- `templates/ci/gitlab/gitlab-advanced-reference.yml`
+  - legacy compatibility alias: `templates/ci/gitlab/day66-advanced-reference.yml`
 
 ## Integration Expansion 2 Closeout command lane (Legacy Day 66)
 
@@ -128,6 +130,16 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    if legacy_path.exists():
+        return legacy_path
+    return canonical_path
+
+
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -163,7 +175,8 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
-    gitlab_text = _read(root / _GITLAB_PATH)
+    gitlab_path = _resolve_input_path(root, _GITLAB_PATH, _LEGACY_GITLAB_PATH)
+    gitlab_text = _read(gitlab_path)
 
     day65_summary = root / _DAY65_SUMMARY_PATH
     day65_board = root / _DAY65_BOARD_PATH
@@ -267,7 +280,7 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "gitlab_reference_present",
             "weight": 10,
             "passed": not missing_gitlab_lines,
-            "evidence": missing_gitlab_lines or _GITLAB_PATH,
+            "evidence": missing_gitlab_lines or str(gitlab_path.relative_to(root)),
         },
     ]
 
@@ -307,7 +320,7 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 66 GitLab reference pipeline is missing required controls.")
         handoff_actions.append(
-            "Update templates/ci/gitlab/day66-advanced-reference.yml to restore required controls."
+            "Update templates/ci/gitlab/gitlab-advanced-reference.yml to restore required controls."
         )
 
     if not failed and not critical_failures:
@@ -329,7 +342,9 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
             "day65_delivery_board": str(day65_board.relative_to(root))
             if day65_board.exists()
             else str(day65_board),
-            "gitlab_reference": _GITLAB_PATH,
+            "gitlab_reference": str(gitlab_path.relative_to(root))
+            if gitlab_path.exists()
+            else _GITLAB_PATH,
         },
         "checks": checks,
         "rollup": {

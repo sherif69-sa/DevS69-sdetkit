@@ -74,7 +74,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    jenkins = root / "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
+    jenkins = root / "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
     jenkins.write_text(
         "pipeline {\n"
         "  agent any\n"

@@ -12,7 +12,7 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json`
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md`
-- `templates/ci/tekton/day68-self-hosted-reference.yaml`
+- `templates/ci/tekton/tekton-self-hosted-reference.yaml`
 
 ## Integration Expansion4 Closeout command lane (legacy)
 

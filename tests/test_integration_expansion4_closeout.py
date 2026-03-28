@@ -27,7 +27,7 @@ def _seed_repo(root: Path) -> None:
         d68._DAY68_DEFAULT_PAGE,
         encoding="utf-8",
     )
-    (root / "templates/ci/tekton/day68-self-hosted-reference.yaml").write_text(
+    (root / "templates/ci/tekton/tekton-self-hosted-reference.yaml").write_text(
         "\n".join(d68._REQUIRED_REFERENCE_LINES) + "\n",
         encoding="utf-8",
     )

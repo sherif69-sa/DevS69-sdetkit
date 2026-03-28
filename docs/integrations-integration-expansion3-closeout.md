@@ -12,7 +12,7 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
-- `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
+- `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`
 
 ## Integration Expansion3 Closeout command lane (legacy)
 

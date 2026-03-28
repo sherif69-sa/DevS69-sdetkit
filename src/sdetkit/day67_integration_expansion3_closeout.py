@@ -14,7 +14,8 @@ _DAY66_SUMMARY_PATH = "docs/artifacts/integration-expansion2-closeout-pack/integ
 _DAY66_BOARD_PATH = (
     "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
 )
-_JENKINS_PATH = "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
+_JENKINS_PATH = "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
+_LEGACY_JENKINS_PATH = "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
 _SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion3 Closeout matters",
@@ -79,7 +80,8 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
-- `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
+- `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`
+  - legacy compatibility alias: `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
 ## Integration Expansion3 Closeout command lane (Legacy Day 67)
 
@@ -128,6 +130,16 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    if legacy_path.exists():
+        return legacy_path
+    return canonical_path
+
+
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -163,7 +175,8 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
-    jenkins_text = _read(root / _JENKINS_PATH)
+    jenkins_path = _resolve_input_path(root, _JENKINS_PATH, _LEGACY_JENKINS_PATH)
+    jenkins_text = _read(jenkins_path)
 
     day66_summary = root / _DAY66_SUMMARY_PATH
     day66_board = root / _DAY66_BOARD_PATH
@@ -267,7 +280,7 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "jenkins_reference_present",
             "weight": 10,
             "passed": not missing_jenkins_lines,
-            "evidence": missing_jenkins_lines or _JENKINS_PATH,
+            "evidence": missing_jenkins_lines or str(jenkins_path.relative_to(root)),
         },
     ]
 
@@ -307,7 +320,7 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 67 Jenkins reference pipeline is missing required controls.")
         handoff_actions.append(
-            "Update templates/ci/jenkins/day67-advanced-reference.Jenkinsfile to restore required controls."
+            "Update templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile to restore required controls."
         )
 
     if not failed and not critical_failures:
@@ -329,7 +342,9 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
             "day66_delivery_board": str(day66_board.relative_to(root))
             if day66_board.exists()
             else str(day66_board),
-            "jenkins_reference": _JENKINS_PATH,
+            "jenkins_reference": str(jenkins_path.relative_to(root))
+            if jenkins_path.exists()
+            else _JENKINS_PATH,
         },
         "checks": checks,
         "rollup": {

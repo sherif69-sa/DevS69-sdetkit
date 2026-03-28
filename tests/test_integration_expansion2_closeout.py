@@ -72,7 +72,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    gitlab = root / "templates/ci/gitlab/day66-advanced-reference.yml"
+    gitlab = root / "templates/ci/gitlab/gitlab-advanced-reference.yml"
     gitlab.write_text(
         "stages:\n"
         "  - lint\n"
