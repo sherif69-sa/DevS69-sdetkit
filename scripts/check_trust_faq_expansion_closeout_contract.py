@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+from sdetkit import day83_trust_faq_expansion_closeout as lane
+
+_CANONICAL_EVIDENCE = "docs/artifacts/trust-faq-expansion-closeout-pack/evidence/trust-faq-expansion-execution-summary.json"
+_LEGACY_EVIDENCE = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence/day83-execution-summary.json"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate trust-faq-expansion-closeout contract")
+    parser.add_argument("--root", default=".")
+    parser.add_argument("--skip-evidence", action="store_true")
+    ns = parser.parse_args()
+
+    root = Path(ns.root).resolve()
+    payload = lane.build_day83_trust_faq_expansion_closeout_summary(root)
+    errors: list[str] = []
+
+    if not payload.get("summary", {}).get("strict_pass", False):
+        errors.append("summary.strict_pass is false")
+    if payload.get("summary", {}).get("activation_score", 0) < 95:
+        errors.append("activation_score below 95")
+    if payload.get("summary", {}).get("critical_failures"):
+        errors.append("critical_failures is not empty")
+
+    if not ns.skip_evidence:
+        evidence = root / _CANONICAL_EVIDENCE
+        if not evidence.exists():
+            evidence = root / _LEGACY_EVIDENCE
+        if not evidence.exists():
+            errors.append(f"missing evidence summary: {root / _CANONICAL_EVIDENCE}")
+        else:
+            data = json.loads(evidence.read_text(encoding="utf-8"))
+            if int(data.get("total_commands", 0)) < 3:
+                errors.append("evidence total_commands below 3")
+
+    if errors:
+        print("trust-faq-expansion-closeout contract check failed:", file=sys.stderr)
+        for error in errors:
+            print(f"- {error}", file=sys.stderr)
+        return 1
+
+    print("trust-faq-expansion-closeout contract check passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

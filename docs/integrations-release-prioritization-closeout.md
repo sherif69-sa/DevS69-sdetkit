@@ -10,17 +10,17 @@ Day 85 closes with a major upgrade that converts Day 84 evidence narrative outco
 
 ## Required inputs (Day 84)
 
-- `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json`
-- `docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md`
+- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`
+- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`
 - `docs/roadmap/plans/release-prioritization-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit release-prioritization-closeout --format json --strict
-python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/day85-release-prioritization-closeout-pack --format json --strict
-python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/day85-release-prioritization-closeout-pack/evidence --format json --strict
-python scripts/check_day85_release_prioritization_closeout_contract.py
+python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/release-prioritization-closeout-pack --format json --strict
+python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/release-prioritization-closeout-pack/evidence --format json --strict
+python scripts/check_release_prioritization_closeout_contract.py
 ```
 
 ## Release prioritization contract

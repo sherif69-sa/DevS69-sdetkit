@@ -10,17 +10,17 @@ Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into 
 
 ## Required inputs (Day 83)
 
-- `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json`
-- `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md`
+- `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json`
+- `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md`
 - `docs/roadmap/plans/evidence-narrative-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit evidence-narrative-closeout --format json --strict
-python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict
-python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/day84-evidence-narrative-closeout-pack/evidence --format json --strict
-python scripts/check_day84_evidence_narrative_closeout_contract.py
+python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/evidence-narrative-closeout-pack --format json --strict
+python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/evidence-narrative-closeout-pack/evidence --format json --strict
+python scripts/check_evidence_narrative_closeout_contract.py
 ```
 
 ## Evidence narrative contract

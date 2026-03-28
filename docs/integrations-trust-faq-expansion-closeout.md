@@ -10,17 +10,17 @@ Day 83 closes with a major upgrade that folds Day 82 integration feedback outcom
 
 ## Required inputs (Day 82)
 
-- `docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json`
-- `docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md`
+- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`
+- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`
 - `docs/roadmap/plans/trust-faq-expansion-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit trust-faq-expansion-closeout --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_day83_trust_faq_expansion_closeout_contract.py
+python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict
+python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/trust-faq-expansion-closeout-pack/evidence --format json --strict
+python scripts/check_trust_faq_expansion_closeout_contract.py
 ```
 
 ## Trust FAQ expansion contract

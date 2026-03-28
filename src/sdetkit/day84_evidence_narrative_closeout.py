@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-evidence-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY83_SUMMARY_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json"
-_DAY83_BOARD_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md"
+_DAY83_SUMMARY_PATH = "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json"
+_DAY83_BOARD_PATH = "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md"
+_DAY83_LEGACY_SUMMARY_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json"
+_DAY83_LEGACY_BOARD_PATH = "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/evidence-narrative-plan.json"
 _SECTION_HEADER = "# Day 84 \u2014 Evidence narrative closeout lane"
 _REQUIRED_SECTIONS = [
@@ -25,14 +27,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit evidence-narrative-closeout --format json --strict",
-    "python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict",
-    "python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/day84-evidence-narrative-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day84_evidence_narrative_closeout_contract.py",
+    "python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/evidence-narrative-closeout-pack --format json --strict",
+    "python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/evidence-narrative-closeout-pack/evidence --format json --strict",
+    "python scripts/check_evidence_narrative_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit evidence-narrative-closeout --format json --strict",
-    "python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict",
-    "python scripts/check_day84_evidence_narrative_closeout_contract.py --skip-evidence",
+    "python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/evidence-narrative-closeout-pack --format json --strict",
+    "python scripts/check_evidence_narrative_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 84 evidence narrative execution and signoff.",
@@ -75,17 +77,17 @@ Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into 
 
 ## Required inputs (Day 83)
 
-- `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json`
-- `docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md`
+- `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json`
+- `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md`
 - `docs/roadmap/plans/evidence-narrative-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit evidence-narrative-closeout --format json --strict
-python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict
-python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/day84-evidence-narrative-closeout-pack/evidence --format json --strict
-python scripts/check_day84_evidence_narrative_closeout_contract.py
+python -m sdetkit evidence-narrative-closeout --emit-pack-dir docs/artifacts/evidence-narrative-closeout-pack --format json --strict
+python -m sdetkit evidence-narrative-closeout --execute --evidence-dir docs/artifacts/evidence-narrative-closeout-pack/evidence --format json --strict
+python scripts/check_evidence_narrative_closeout_contract.py
 ```
 
 ## Evidence narrative contract
@@ -135,13 +137,18 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
+def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    return canonical_path if canonical_path.exists() else (root / legacy)
+
+
 def build_day84_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day83_summary = root / _DAY83_SUMMARY_PATH
-    day83_board = root / _DAY83_BOARD_PATH
+    day83_summary = _resolve_with_legacy(root, _DAY83_SUMMARY_PATH, _DAY83_LEGACY_SUMMARY_PATH)
+    day83_board = _resolve_with_legacy(root, _DAY83_BOARD_PATH, _DAY83_LEGACY_BOARD_PATH)
 
     day83_data = _load_json(day83_summary)
     day83_summary_data = (
@@ -170,7 +177,7 @@ def build_day84_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any
         {
             "check_id": "readme_day84_command",
             "weight": 7,
-            "passed": ("day84-evidence-narrative-closeout" in readme_text),
+            "passed": ("evidence-narrative-closeout" in readme_text),
             "evidence": "README day84 command lane",
         },
         {
@@ -354,28 +361,28 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day84-evidence-narrative-closeout-summary.json",
+        target / "evidence-narrative-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day84-evidence-narrative-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day84-evidence-brief.md", "# Day 84 evidence narrative brief\n")
-    _write(target / "day84-evidence-narrative-plan.md", "# Day 84 evidence narrative plan\n")
+    _write(target / "evidence-narrative-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "evidence-narrative-evidence-brief.md", "# Day 84 evidence narrative brief\n")
+    _write(target / "evidence-narrative-plan.md", "# Day 84 evidence narrative plan\n")
     _write(
-        target / "day84-narrative-template-upgrade-ledger.json",
+        target / "evidence-narrative-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
-        target / "day84-storyline-outcomes-ledger.json",
+        target / "evidence-narrative-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "day84-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day84-execution-log.md", "# Day 84 execution log\n")
+    _write(target / "evidence-narrative-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "evidence-narrative-execution-log.md", "# Day 84 execution log\n")
     _write(
-        target / "day84-delivery-board.md",
+        target / "evidence-narrative-delivery-board.md",
         "\n".join(["# Day 84 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day84-validation-commands.md",
+        target / "evidence-narrative-validation-commands.md",
         "# Day 84 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -398,7 +405,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day84-execution-summary.json",
+        out_dir / "evidence-narrative-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -426,7 +433,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day84-evidence-narrative-closeout-pack/evidence")
+            else Path("docs/artifacts/evidence-narrative-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

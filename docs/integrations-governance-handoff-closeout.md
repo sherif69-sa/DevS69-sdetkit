@@ -10,8 +10,8 @@ Day 87 closes with a major upgrade that converts Day 86 launch readiness outcome
 
 ## Required inputs (Day 86)
 
-- `docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json`
-- `docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md`
+- `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json`
+- `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md`
 - `docs/roadmap/plans/governance-handoff-plan.json`
 
 ## Command lane

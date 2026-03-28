@@ -27,14 +27,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit partner-outreach-closeout --format json --strict",
-    "python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict",
-    "python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day80_partner_outreach_closeout_contract.py",
+    "python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/partner-outreach-closeout-pack --format json --strict",
+    "python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/partner-outreach-closeout-pack/evidence --format json --strict",
+    "python scripts/check_partner_outreach_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit partner-outreach-closeout --format json --strict",
-    "python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict",
-    "python scripts/check_day80_partner_outreach_closeout_contract.py --skip-evidence",
+    "python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/partner-outreach-closeout-pack --format json --strict",
+    "python scripts/check_partner_outreach_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 80 partner outreach execution and signoff.",
@@ -85,9 +85,9 @@ Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a pa
 
 ```bash
 python -m sdetkit partner-outreach-closeout --format json --strict
-python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/day80-partner-outreach-closeout-pack --format json --strict
-python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/day80-partner-outreach-closeout-pack/evidence --format json --strict
-python scripts/check_day80_partner_outreach_closeout_contract.py
+python -m sdetkit partner-outreach-closeout --emit-pack-dir docs/artifacts/partner-outreach-closeout-pack --format json --strict
+python -m sdetkit partner-outreach-closeout --execute --evidence-dir docs/artifacts/partner-outreach-closeout-pack/evidence --format json --strict
+python scripts/check_partner_outreach_closeout_contract.py
 ```
 
 ## Partner outreach contract
@@ -361,24 +361,24 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day80-partner-outreach-closeout-summary.json",
+        target / "partner-outreach-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day80-partner-outreach-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day80-integration-brief.md", "# Day 80 integration brief\n")
-    _write(target / "day80-partner-outreach-plan.md", "# Day 80 partner outreach plan\n")
+    _write(target / "partner-outreach-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "partner-outreach-integration-brief.md", "# Day 80 integration brief\n")
+    _write(target / "partner-outreach-plan.md", "# Day 80 partner outreach plan\n")
     _write(
-        target / "day80-partner-execution-ledger.json",
+        target / "partner-outreach-partner-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
     )
-    _write(target / "day80-partner-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day80-execution-log.md", "# Day 80 execution log\n")
+    _write(target / "partner-outreach-partner-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "partner-outreach-execution-log.md", "# Day 80 execution log\n")
     _write(
-        target / "day80-delivery-board.md",
+        target / "partner-outreach-delivery-board.md",
         "\n".join(["# Day 80 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day80-validation-commands.md",
+        target / "partner-outreach-validation-commands.md",
         "# Day 80 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -401,7 +401,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day80-execution-summary.json",
+        out_dir / "partner-outreach-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -429,7 +429,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day80-partner-outreach-closeout-pack/evidence")
+            else Path("docs/artifacts/partner-outreach-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

@@ -73,7 +73,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day80-partner-outreach-001",
+                "plan_id": "partner-outreach-001",
                 "contributors": ["maintainers", "partner-success"],
                 "partner_tracks": ["partner-onboarding", "joint-go-to-market"],
                 "baseline": {"activated_partners": 4, "sla_days": 9},
@@ -102,26 +102,26 @@ def test_day80_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day80-pack",
+            "artifacts/partner-outreach-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day80-pack/evidence",
+            "artifacts/partner-outreach-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day80-pack/day80-partner-outreach-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-partner-outreach-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-partner-outreach-plan.md").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-partner-execution-ledger.json").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-partner-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day80-pack/day80-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day80-pack/evidence/day80-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-plan.md").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-partner-execution-ledger.json").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-partner-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-execution-log.md").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/partner-outreach-pack/evidence/partner-outreach-execution-summary.json").exists()
 
 
 def test_day80_strict_fails_without_day79(tmp_path: Path) -> None:

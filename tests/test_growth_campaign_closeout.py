@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-growth-campaign-closeout.md\nday81-growth-campaign-closeout\n",
+        "docs/integrations-growth-campaign-closeout.md\ngrowth-campaign-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
+        / "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md"
+    board = root / "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day81-growth-campaign-001",
+                "plan_id": "growth-campaign-001",
                 "contributors": ["maintainers", "growth-ops"],
                 "campaign_tracks": ["activation", "retention"],
                 "baseline": {"leads": 90, "activation_rate": 0.22},
@@ -105,33 +105,33 @@ def test_day81_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day81-pack",
+            "artifacts/growth-campaign-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day81-pack/evidence",
+            "artifacts/growth-campaign-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day81-pack/day81-growth-campaign-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-growth-campaign-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-growth-campaign-plan.md").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-campaign-execution-ledger.json").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-campaign-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day81-pack/day81-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day81-pack/evidence/day81-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-plan.md").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-campaign-execution-ledger.json").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-campaign-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-execution-log.md").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/growth-campaign-pack/evidence/growth-campaign-execution-summary.json").exists()
 
 
 def test_day81_strict_fails_without_day80(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
+        / "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json"
     ).unlink()
     assert d81.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

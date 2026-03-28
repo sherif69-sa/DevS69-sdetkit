@@ -10,17 +10,17 @@ Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes in
 
 ## Required inputs (Day 81)
 
-- `docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json`
-- `docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md`
+- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json`
+- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md`
 - `docs/roadmap/plans/integration-feedback-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit integration-feedback-closeout --format json --strict
-python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/day82-integration-feedback-closeout-pack --format json --strict
-python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/day82-integration-feedback-closeout-pack/evidence --format json --strict
-python scripts/check_day82_integration_feedback_closeout_contract.py
+python -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/integration-feedback-closeout-pack --format json --strict
+python -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/integration-feedback-closeout-pack/evidence --format json --strict
+python scripts/check_integration_feedback_closeout_contract.py
 ```
 
 ## Integration feedback contract

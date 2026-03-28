@@ -10,17 +10,17 @@ Day 81 closes with a major upgrade that converts Day 80 partner outreach outcome
 
 ## Required inputs (Day 80)
 
-- `docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json`
-- `docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md`
+- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json`
+- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md`
 - `docs/roadmap/plans/growth-campaign-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit growth-campaign-closeout --format json --strict
-python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict
-python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict
-python scripts/check_day81_growth_campaign_closeout_contract.py
+python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict
+python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/growth-campaign-closeout-pack/evidence --format json --strict
+python scripts/check_growth_campaign_closeout_contract.py
 ```
 
 ## Growth campaign contract

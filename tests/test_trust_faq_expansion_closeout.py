@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-trust-faq-expansion-closeout.md\nday83-trust-faq-expansion-closeout\n",
+        "docs/integrations-trust-faq-expansion-closeout.md\ntrust-faq-expansion-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+        / "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md"
+    board = root / "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day83-trust-faq-expansion-001",
+                "plan_id": "trust-faq-expansion-001",
                 "contributors": ["maintainers", "docs-ops"],
                 "objection_channels": ["office-hours", "issues", "faq-form"],
                 "baseline": {"faq_coverage": 0.61, "deflection_rate": 0.43},
@@ -105,10 +105,10 @@ def test_day83_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day83-pack",
+            "artifacts/trust-faq-expansion-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day83-pack/evidence",
+            "artifacts/trust-faq-expansion-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -116,27 +116,27 @@ def test_day83_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-closeout-summary.json"
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-closeout-summary.md"
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-trust-faq-brief.md").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-trust-faq-expansion-plan.md").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-trust-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-escalation-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-trust-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day83-pack/day83-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day83-pack/evidence/day83-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-faq-brief.md").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-plan.md").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-escalation-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-execution-log.md").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/trust-faq-expansion-pack/evidence/trust-faq-expansion-execution-summary.json").exists()
 
 
 def test_day83_strict_fails_without_day82(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+        / "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json"
     ).unlink()
     assert d83.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

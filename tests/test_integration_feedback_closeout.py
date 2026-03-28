@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-integration-feedback-closeout.md\nday82-integration-feedback-closeout\n",
+        "docs/integrations-integration-feedback-closeout.md\nintegration-feedback-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
+        / "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md"
+    board = root / "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day82-integration-feedback-001",
+                "plan_id": "integration-feedback-001",
                 "contributors": ["maintainers", "docs-ops"],
                 "feedback_channels": ["office-hours", "issues"],
                 "baseline": {"feedback_items": 24, "docs_resolution_rate": 0.58},
@@ -105,10 +105,10 @@ def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day82-pack",
+            "artifacts/integration-feedback-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day82-pack/evidence",
+            "artifacts/integration-feedback-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -116,27 +116,27 @@ def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day82-pack/day82-integration-feedback-closeout-summary.json"
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day82-pack/day82-integration-feedback-closeout-summary.md"
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-integration-feedback-plan.md").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-office-hours-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day82-pack/day82-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day82-pack/evidence/day82-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-plan.md").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-office-hours-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-execution-log.md").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/integration-feedback-pack/evidence/integration-feedback-execution-summary.json").exists()
 
 
 def test_day82_strict_fails_without_day81(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
+        / "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json"
     ).unlink()
     assert d82.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

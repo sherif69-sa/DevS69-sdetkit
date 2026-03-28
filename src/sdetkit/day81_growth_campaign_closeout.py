@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-growth-campaign-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY80_SUMMARY_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
-_DAY80_BOARD_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md"
+_DAY80_SUMMARY_PATH = "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json"
+_DAY80_BOARD_PATH = "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md"
+_DAY80_LEGACY_SUMMARY_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
+_DAY80_LEGACY_BOARD_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/growth-campaign-plan.json"
 _SECTION_HEADER = "# Day 81 \u2014 Growth campaign closeout lane"
 _REQUIRED_SECTIONS = [
@@ -25,14 +27,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit growth-campaign-closeout --format json --strict",
-    "python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict",
-    "python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day81_growth_campaign_closeout_contract.py",
+    "python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict",
+    "python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/growth-campaign-closeout-pack/evidence --format json --strict",
+    "python scripts/check_growth_campaign_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit growth-campaign-closeout --format json --strict",
-    "python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict",
-    "python scripts/check_day81_growth_campaign_closeout_contract.py --skip-evidence",
+    "python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict",
+    "python scripts/check_growth_campaign_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 81 growth campaign execution and signoff.",
@@ -75,17 +77,17 @@ Day 81 closes with a major upgrade that converts Day 80 partner outreach outcome
 
 ## Required inputs (Day 80)
 
-- `docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json`
-- `docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md`
+- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json`
+- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md`
 - `docs/roadmap/plans/growth-campaign-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit growth-campaign-closeout --format json --strict
-python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/day81-growth-campaign-closeout-pack --format json --strict
-python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/day81-growth-campaign-closeout-pack/evidence --format json --strict
-python scripts/check_day81_growth_campaign_closeout_contract.py
+python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict
+python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/growth-campaign-closeout-pack/evidence --format json --strict
+python scripts/check_growth_campaign_closeout_contract.py
 ```
 
 ## Growth campaign contract
@@ -141,14 +143,19 @@ def _checklist_count(text: str) -> int:
     return sum(1 for line in text.splitlines() if line.strip().startswith("- ["))
 
 
+def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    return canonical_path if canonical_path.exists() else (root / legacy)
+
+
 def build_day81_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day80_summary = root / _DAY80_SUMMARY_PATH
-    day80_board = root / _DAY80_BOARD_PATH
+    day80_summary = _resolve_with_legacy(root, _DAY80_SUMMARY_PATH, _DAY80_LEGACY_SUMMARY_PATH)
+    day80_board = _resolve_with_legacy(root, _DAY80_BOARD_PATH, _DAY80_LEGACY_BOARD_PATH)
     day80_payload = _load_json(day80_summary)
     day80_score = int(day80_payload.get("summary", {}).get("activation_score", 0) or 0)
     day80_strict = bool(day80_payload.get("summary", {}).get("strict_pass", False))
@@ -171,7 +178,7 @@ def build_day81_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day81_command",
             "weight": 7,
-            "passed": ("day81-growth-campaign-closeout" in readme_text),
+            "passed": ("growth-campaign-closeout" in readme_text),
             "evidence": "README day81 command lane",
         },
         {
@@ -355,23 +362,23 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day81-growth-campaign-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+        target / "growth-campaign-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
     )
-    _write(target / "day81-growth-campaign-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day81-integration-brief.md", "# Day 81 integration brief\n")
-    _write(target / "day81-growth-campaign-plan.md", "# Day 81 growth campaign plan\n")
+    _write(target / "growth-campaign-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "growth-campaign-integration-brief.md", "# Day 81 integration brief\n")
+    _write(target / "growth-campaign-plan.md", "# Day 81 growth campaign plan\n")
     _write(
-        target / "day81-campaign-execution-ledger.json",
+        target / "growth-campaign-campaign-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
     )
-    _write(target / "day81-campaign-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day81-execution-log.md", "# Day 81 execution log\n")
+    _write(target / "growth-campaign-campaign-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "growth-campaign-execution-log.md", "# Day 81 execution log\n")
     _write(
-        target / "day81-delivery-board.md",
+        target / "growth-campaign-delivery-board.md",
         "\n".join(["# Day 81 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day81-validation-commands.md",
+        target / "growth-campaign-validation-commands.md",
         "# Day 81 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -394,7 +401,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day81-execution-summary.json",
+        out_dir / "growth-campaign-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -422,7 +429,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day81-growth-campaign-closeout-pack/evidence")
+            else Path("docs/artifacts/growth-campaign-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 
