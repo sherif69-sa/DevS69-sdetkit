@@ -5,5 +5,5 @@ Legacy alias: scripts/check_contributor_recognition_closeout_contract_76.py
 
 from check_contributor_recognition_closeout_contract_76 import main
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())

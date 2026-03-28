@@ -63,11 +63,14 @@ RESERVED_NAMES: set[str] = (
 )
 
 _SERIES_PREFIX = re.compile(r"^(?:impact|day)\d+_")
-_SERIES_CLOSEOUT = re.compile(r"^(?:impact|day)\d+_(.+_closeout)$")
+_SERIES_CLOSEOUT = re.compile(r"^(.+_closeout)(?:_\d+)?$")
 
 # Stable product lanes promoted from legacy numeric-series naming.
 _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
     "weekly_review_28": "weekly-review-lane",
+    "phase1_hardening_29": "phase1-hardening",
+    "phase1_wrap_30": "phase1-wrap",
+    "phase2_kickoff_31": "phase2-kickoff",
     "expansion_automation_41": "expansion-automation",
     # Two legacy modules would collide on optimization-closeout.
     "optimization_closeout_42": "optimization-closeout-foundation",
@@ -134,6 +137,8 @@ def _is_legacy_module(mod: str) -> bool:
         return True
     if re.search(r"_closeout_\d+$", mod):
         return True
+    if re.search(r"_\d+$", mod):
+        return True
     return False
 
 
@@ -197,6 +202,7 @@ def _build_registry(pkg_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
     for mod in _discover_legacy_modules(pkg_dir):
         legacy_canonical = (
             _PRODUCT_CANONICAL_BY_LEGACY_MODULE.get(mod)
+            or _alias_for_series_closeout(mod)
             or _alias_for_series_module(mod)
             or _mod_to_cmd(mod)
         )

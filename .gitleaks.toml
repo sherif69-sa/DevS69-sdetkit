@@ -1,18 +1,17 @@
-[extend]
-useDefault = true
+title = "sdetkit gitleaks config"
 
-[[allowlists]]
-description = "Ignore known historical gitleaks false positive from omnichannel prototype commit"
+[allowlist]
+description = "Allow known test fixtures and documentation placeholders"
 paths = [
-  '''src/sdetkit/agent/omnichannel\.py''',
-]
-commits = [
-  '''2a124408cce1fd03bfa3cabe0557ea7784a7800d''',
+  '''^tests/''',
+  '''^docs/artifacts/''',
+  '''^docs/day-[0-9]+-ultra-upgrade-report\.md$''',
+  '''^docs/contributor-funnel\.md$''',
 ]
 regexes = [
-  '''root,\s*max_tokens=max_tokens,''',
-]
-fingerprints = [
-  '''2a124408cce1fd03bfa3cabe0557ea7784a7800d:src/sdetkit/agent/omnichannel.py:generic-api-key:386''',
-  '''ab31d67587d72978795ad445793fd30691ed6e46:src/sdetkit/agent/omnichannel.py:generic-api-key:386''',
+  '''TOPSECRET''',
+  '''SHOULD_NOT_LEAK''',
+  '''super-secret''',
+  '''token=abc''',
+  '''bearer:TOPSECRET''',
 ]

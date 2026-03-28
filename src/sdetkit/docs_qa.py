@@ -171,7 +171,7 @@ def run_docs_qa(root: Path) -> Report:
 
 def _render_markdown(report: Report) -> str:
     lines = [
-        "# Docs quality report",
+        "# Docs QA report",
         "",
         "## Summary",
         "",
@@ -199,7 +199,7 @@ def _render_markdown(report: Report) -> str:
 
 def _render_text(report: Report) -> str:
     lines = [
-        "Docs quality report",
+        "Docs QA report",
         f"- files checked: {report.files_checked}",
         f"- internal markdown links checked: {report.links_checked}",
         f"- status: {'pass' if report.ok else 'fail'}",

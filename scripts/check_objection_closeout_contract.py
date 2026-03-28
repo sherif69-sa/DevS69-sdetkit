@@ -5,5 +5,5 @@ Legacy alias: scripts/check_objection_closeout_contract_48.py
 
 from check_objection_closeout_contract_48 import main
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())

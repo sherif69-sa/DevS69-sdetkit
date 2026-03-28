@@ -206,10 +206,10 @@ class CheckRunner:
         safe_count = sum(1 for item in plan_items if item.parallel_safe)
         if safe_count <= 1:
             return 1
+        if max_workers is not None:
+            return max(1, min(safe_count, max_workers))
         cpu_count = max(1, __import__("os").cpu_count() or 1)
         suggested = min(safe_count, max(1, min(4, cpu_count // 2 or 1)))
-        if max_workers is not None:
-            suggested = min(suggested, max(1, max_workers))
         return max(1, suggested)
 
     def _execute_item(

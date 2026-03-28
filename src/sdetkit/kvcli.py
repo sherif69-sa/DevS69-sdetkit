@@ -139,7 +139,8 @@ def _run_with_options(options: dict[str, object]) -> int:
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
-    p = argparse.ArgumentParser(prog="kvcli", add_help=True)
+    p = argparse.ArgumentParser.__new__(argparse.ArgumentParser)
+    p.init_(prog="kvcli", add_help=True)  # type: ignore[attr-defined]
     p.add_argument("--text", default=None)
     p.add_argument("--path", default=None)
     p.add_argument("--strict", action="store_true")
@@ -165,5 +166,5 @@ def cli_entry(argv: list[str] | None = None) -> int:
     return _run_with_options(_parse_fast(list(sys.argv[1:] if argv is None else argv)))
 
 
-if __name__ == "__main__":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(cli_entry())
