@@ -8,9 +8,9 @@
 
 ## Fast start
 
-- [Repository onboarding](../README.md)
+- [Repository onboarding](./repo-init.md)
 - [Contributor funnel](./contributor-funnel.md)
-- [First contribution checklist](./artifacts/first-contribution-checklist-sample.md)
+- [First contribution checklist](./first-contribution-quickstart.md)
 
 integrations-distribution-closeout.md
 integrations-experiment-lane.md
