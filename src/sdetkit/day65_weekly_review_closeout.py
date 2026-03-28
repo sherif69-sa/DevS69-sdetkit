@@ -29,12 +29,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit weekly-review-closeout --format json --strict",
     "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict",
     "python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-cycle2-pack/evidence --format json --strict",
-    "python scripts/check_day65_weekly_review_closeout_contract.py",
+    "python scripts/check_weekly_review_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit weekly-review-closeout --format json --strict",
     "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict",
-    "python scripts/check_day65_weekly_review_closeout_contract.py --skip-evidence",
+    "python scripts/check_weekly_review_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 65 weekly review scoring, risk triage, and handoff signoff.",
@@ -79,7 +79,7 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 python -m sdetkit weekly-review-closeout --format json --strict
 python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict
 python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-cycle2-pack/evidence --format json --strict
-python scripts/check_day65_weekly_review_closeout_contract.py
+python scripts/check_weekly_review_closeout_contract.py
 ```
 
 ## Weekly review contract

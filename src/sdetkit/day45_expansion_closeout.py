@@ -26,12 +26,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit expansion-closeout --format json --strict",
     "python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict",
     "python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day45_expansion_closeout_contract.py",
+    "python scripts/check_expansion_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit expansion-closeout --format json --strict",
     "python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict",
-    "python scripts/check_day45_expansion_closeout_contract.py --skip-evidence",
+    "python scripts/check_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 45 expansion lane execution and KPI follow-up.",
@@ -75,7 +75,7 @@ Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence
 python -m sdetkit expansion-closeout --format json --strict
 python -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict
 python -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict
-python scripts/check_day45_expansion_closeout_contract.py
+python scripts/check_expansion_closeout_contract.py
 ```
 
 ## Expansion closeout contract

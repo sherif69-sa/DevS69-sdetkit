@@ -19,7 +19,7 @@ Day 55 closes with a major contributor activation upgrade that turns Day 53 docs
 python -m sdetkit contributor-activation-closeout --format json --strict
 python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/day55-contributor-activation-closeout-pack --format json --strict
 python -m sdetkit contributor-activation-closeout --execute --evidence-dir docs/artifacts/day55-contributor-activation-closeout-pack/evidence --format json --strict
-python scripts/check_day55_contributor_activation_closeout_contract.py
+python scripts/check_contributor_activation_closeout_contract.py
 ```
 
 ## Contributor activation contract

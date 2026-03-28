@@ -17,7 +17,7 @@ Close Day 56 with a high-confidence stabilization lane that converts Day 55 cont
 python -m sdetkit day56-stabilization-closeout --format json --strict
 python -m sdetkit day56-stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict
 python -m sdetkit day56-stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict
-python scripts/check_day56_stabilization_closeout_contract.py
+python scripts/check_stabilization_closeout_contract.py
 ```
 
 ## Outcome

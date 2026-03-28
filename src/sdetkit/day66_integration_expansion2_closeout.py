@@ -29,12 +29,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit integration-expansion2-closeout --format json --strict",
     "python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict",
     "python -m sdetkit integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day66_integration_expansion2_closeout_contract.py",
+    "python scripts/check_integration_expansion2_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit integration-expansion2-closeout --format json --strict",
     "python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict",
-    "python scripts/check_day66_integration_expansion2_closeout_contract.py --skip-evidence",
+    "python scripts/check_integration_expansion2_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 66 advanced GitLab CI rollout and signoff.",
@@ -87,7 +87,7 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 python -m sdetkit integration-expansion2-closeout --format json --strict
 python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
 python -m sdetkit integration-expansion2-closeout --execute --evidence-dir docs/artifacts/day66-integration-expansion2-closeout-pack/evidence --format json --strict
-python scripts/check_day66_integration_expansion2_closeout_contract.py
+python scripts/check_integration_expansion2_closeout_contract.py
 ```
 
 ## Integration expansion contract

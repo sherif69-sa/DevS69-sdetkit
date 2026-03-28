@@ -19,7 +19,7 @@ Day 44 closes with a big scale upgrade that converts Day 43 acceleration evidenc
 python -m sdetkit scale-closeout --format json --strict
 python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict
 python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict
-python scripts/check_day44_scale_closeout_contract.py
+python scripts/check_scale_closeout_contract.py
 ```
 
 ## Scale closeout contract

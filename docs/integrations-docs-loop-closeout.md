@@ -19,7 +19,7 @@ Day 53 closes with a major docs loop optimization upgrade that converts Day 52 n
 python -m sdetkit docs-loop-closeout --format json --strict
 python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/day53-docs-loop-closeout-pack --format json --strict
 python -m sdetkit docs-loop-closeout --execute --evidence-dir docs/artifacts/day53-docs-loop-closeout-pack/evidence --format json --strict
-python scripts/check_day53_docs_loop_closeout_contract.py
+python scripts/check_docs_loop_closeout_contract.py
 ```
 
 ## Docs loop optimization contract

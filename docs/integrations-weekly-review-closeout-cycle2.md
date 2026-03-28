@@ -22,7 +22,7 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 python -m sdetkit weekly-review-closeout --format json --strict
 python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict
 python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-cycle2-pack/evidence --format json --strict
-python scripts/check_day65_weekly_review_closeout_contract.py
+python scripts/check_weekly_review_closeout_contract.py
 ```
 
 ## Weekly review contract

@@ -27,12 +27,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit case-study-launch-closeout --format json --strict",
     "python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict",
     "python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day73_case_study_launch_closeout_contract.py",
+    "python scripts/check_case_study_launch_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit case-study-launch-closeout --format json --strict",
     "python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict",
-    "python scripts/check_day73_case_study_launch_closeout_contract.py --skip-evidence",
+    "python scripts/check_case_study_launch_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 73 published case-study launch execution and signoff.",
@@ -85,7 +85,7 @@ Day 73 closes with a major upgrade that turns Day 72 publication-quality prep in
 python -m sdetkit case-study-launch-closeout --format json --strict
 python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict
 python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict
-python scripts/check_day73_case_study_launch_closeout_contract.py
+python scripts/check_case_study_launch_closeout_contract.py
 ```
 
 ## Case-study launch contract

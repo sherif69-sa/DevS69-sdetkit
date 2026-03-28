@@ -26,12 +26,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit expansion-automation --format json --strict",
     "python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict",
     "python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict",
-    "python scripts/check_day41_expansion_automation_contract.py",
+    "python scripts/check_expansion_automation_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit expansion-automation --format json --strict",
     "python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict",
-    "python scripts/check_day41_expansion_automation_contract.py --skip-evidence",
+    "python scripts/check_expansion_automation_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 41 expansion lane execution and KPI follow-up.",
@@ -75,7 +75,7 @@ Day 41 closes with a major expansion automation upgrade that converts Day 40 sca
 python -m sdetkit expansion-automation --format json --strict
 python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict
 python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict
-python scripts/check_day41_expansion_automation_contract.py
+python scripts/check_expansion_automation_contract.py
 ```
 
 ## Expansion automation contract
@@ -418,7 +418,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "day41-automation-matrix.csv",
         "workflow,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target,risk_guardrail\n"
         "expansion-summary,pm-owner,backup-pm,2026-03-09T09:00:00Z,docs/integrations-expansion-automation.md,python -m sdetkit expansion-automation --format json --strict,completion:+6%,rollback-doc-ready\n"
-        "matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/impact-41-big-upgrade-report.md,python scripts/check_day41_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout\n"
+        "matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/impact-41-big-upgrade-report.md,python scripts/check_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout\n"
         "kpi-review,growth-owner,backup-growth,2026-03-10T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict,ctr:+3%,trigger-alert-on-regression\n",
     )
     _write(

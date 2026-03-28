@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit acceleration-closeout --format json --strict",
     "python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict",
     "python -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day43_acceleration_closeout_contract.py",
+    "python scripts/check_acceleration_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit acceleration-closeout --format json --strict",
     "python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict",
-    "python scripts/check_day43_acceleration_closeout_contract.py --skip-evidence",
+    "python scripts/check_acceleration_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 43 acceleration lane execution and KPI follow-up.",
@@ -77,7 +77,7 @@ Day 43 closes with a major acceleration upgrade that converts Day 42 optimizatio
 python -m sdetkit acceleration-closeout --format json --strict
 python -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict
 python -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict
-python scripts/check_day43_acceleration_closeout_contract.py
+python scripts/check_acceleration_closeout_contract.py
 ```
 
 ## Acceleration closeout contract

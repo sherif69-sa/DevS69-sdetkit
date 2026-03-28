@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit narrative-closeout --format json --strict",
     "python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict",
     "python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day52_narrative_closeout_contract.py",
+    "python scripts/check_narrative_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit narrative-closeout --format json --strict",
     "python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict",
-    "python scripts/check_day52_narrative_closeout_contract.py --skip-evidence",
+    "python scripts/check_narrative_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 52 narrative execution and KPI follow-up.",
@@ -77,7 +77,7 @@ Day 52 closes with a major narrative upgrade that converts Day 51 case-snippet e
 python -m sdetkit narrative-closeout --format json --strict
 python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict
 python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict
-python scripts/check_day52_narrative_closeout_contract.py
+python scripts/check_narrative_closeout_contract.py
 ```
 
 ## Narrative closeout contract

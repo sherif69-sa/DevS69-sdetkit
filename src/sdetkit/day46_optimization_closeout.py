@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit optimization-closeout --format json --strict",
     "python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict",
     "python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day46_optimization_closeout_contract.py",
+    "python scripts/check_optimization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit optimization-closeout --format json --strict",
     "python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict",
-    "python scripts/check_day46_optimization_closeout_contract.py --skip-evidence",
+    "python scripts/check_optimization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 46 optimization lane execution and KPI follow-up.",
@@ -77,7 +77,7 @@ Day 46 closes with a major optimization upgrade that converts Day 45 expansion e
 python -m sdetkit optimization-closeout --format json --strict
 python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict
 python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict
-python scripts/check_day46_optimization_closeout_contract.py
+python scripts/check_optimization_closeout_contract.py
 ```
 
 ## Optimization closeout contract

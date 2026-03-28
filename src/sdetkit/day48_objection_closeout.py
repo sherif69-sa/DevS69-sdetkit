@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit objection-closeout --format json --strict",
     "python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict",
     "python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day48_objection_closeout_contract.py",
+    "python scripts/check_objection_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit objection-closeout --format json --strict",
     "python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict",
-    "python scripts/check_day48_objection_closeout_contract.py --skip-evidence",
+    "python scripts/check_objection_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 48 objection lane execution and KPI follow-up.",
@@ -77,7 +77,7 @@ Day 48 closes with a major objection-handling upgrade that converts Day 47 relia
 python -m sdetkit objection-closeout --format json --strict
 python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict
 python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict
-python scripts/check_day48_objection_closeout_contract.py
+python scripts/check_objection_closeout_contract.py
 ```
 
 ## Objection closeout contract

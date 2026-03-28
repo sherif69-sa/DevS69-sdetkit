@@ -20,7 +20,7 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 python -m sdetkit integration-expansion3-closeout --format json --strict
 python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
 python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
-python scripts/check_day67_integration_expansion3_closeout_contract.py
+python scripts/check_integration_expansion3_closeout_contract.py
 ```
 
 ## Integration expansion contract

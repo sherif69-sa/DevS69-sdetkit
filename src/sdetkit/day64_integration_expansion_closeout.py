@@ -29,12 +29,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit integration-expansion-closeout --format json --strict",
     "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
     "python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day64_integration_expansion_closeout_contract.py",
+    "python scripts/check_integration_expansion_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit integration-expansion-closeout --format json --strict",
     "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
-    "python scripts/check_day64_integration_expansion_closeout_contract.py --skip-evidence",
+    "python scripts/check_integration_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 64 advanced GitHub Actions workflow execution and rollout signoff.",
@@ -87,7 +87,7 @@ Day 64 closes with a major integration upgrade that turns Day 63 onboarding mome
 python -m sdetkit integration-expansion-closeout --format json --strict
 python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
 python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_day64_integration_expansion_closeout_contract.py
+python scripts/check_integration_expansion_closeout_contract.py
 ```
 
 ## Integration expansion contract

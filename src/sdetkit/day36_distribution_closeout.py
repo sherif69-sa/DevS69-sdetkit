@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit day36-distribution-closeout --format json --strict",
     "python -m sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict",
     "python -m sdetkit day36-distribution-closeout --execute --evidence-dir docs/artifacts/day36-distribution-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day36_distribution_closeout_contract.py",
+    "python scripts/check_distribution_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit day36-distribution-closeout --format json --strict",
     "python -m sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict",
-    "python scripts/check_day36_distribution_closeout_contract.py --skip-evidence",
+    "python scripts/check_distribution_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for distribution publishing.",
@@ -77,7 +77,7 @@ Day 36 closes the distribution lane by converting the Day 35 KPI story into chan
 python -m sdetkit day36-distribution-closeout --format json --strict
 python -m sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict
 python -m sdetkit day36-distribution-closeout --execute --evidence-dir docs/artifacts/day36-distribution-closeout-pack/evidence --format json --strict
-python scripts/check_day36_distribution_closeout_contract.py
+python scripts/check_distribution_closeout_contract.py
 ```
 
 ## Distribution contract

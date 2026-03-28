@@ -29,12 +29,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit contributor-recognition-closeout --format json --strict",
     "python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict",
     "python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day76_contributor_recognition_closeout_contract.py",
+    "python scripts/check_contributor_recognition_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit contributor-recognition-closeout --format json --strict",
     "python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict",
-    "python scripts/check_day76_contributor_recognition_closeout_contract.py --skip-evidence",
+    "python scripts/check_contributor_recognition_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 76 contributor recognition execution and signoff.",
@@ -87,7 +87,7 @@ Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes i
 python -m sdetkit contributor-recognition-closeout --format json --strict
 python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict
 python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict
-python scripts/check_day76_contributor_recognition_closeout_contract.py
+python scripts/check_contributor_recognition_closeout_contract.py
 ```
 
 ## Contributor recognition contract

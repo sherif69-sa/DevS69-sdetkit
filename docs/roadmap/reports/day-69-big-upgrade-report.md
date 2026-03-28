@@ -18,7 +18,7 @@ Close Day 69 with a high-signal case-study prep lane that converts Day 68 output
 python -m sdetkit day69-case-study-prep1-closeout --format json --strict
 python -m sdetkit day69-case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict
 python -m sdetkit day69-case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict
-python scripts/check_day69_case_study_prep1_closeout_contract.py
+python scripts/check_case_study_prep1_closeout_contract.py
 ```
 
 ## Outcome
