@@ -75,12 +75,12 @@ def main() -> int:
         errors.append("missing docs/artifacts/day3-proof-sample.md")
 
     if errors:
-        print("day3-proof-contract check failed:", file=sys.stderr)
+        print("proof-contract check failed:", file=sys.stderr)
         for item in errors:
             print(f"- {item}", file=sys.stderr)
         return 1
 
-    print("day3-proof-contract check passed")
+    print("proof-contract check passed")
     return 0
 
 

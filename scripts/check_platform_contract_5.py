@@ -75,12 +75,12 @@ def main() -> int:
         errors.append("missing docs/artifacts/platform-onboarding-sample-5.md")
 
     if errors:
-        print("day5-platform-contract check failed:", file=sys.stderr)
+        print("platform-contract check failed:", file=sys.stderr)
         for item in errors:
             print(f"- {item}", file=sys.stderr)
         return 1
 
-    print("day5-platform-contract check passed")
+    print("platform-contract check passed")
     return 0
 
 

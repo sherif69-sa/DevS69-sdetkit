@@ -89,12 +89,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day14-weekly-review-contract check failed:", file=sys.stderr)
+        print("weekly-review-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day14-weekly-review-contract check passed")
+    print("weekly-review-contract check passed")
     return 0
 
 

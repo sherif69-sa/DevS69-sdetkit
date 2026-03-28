@@ -86,12 +86,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day17-quality-contribution-delta-contract check failed:", file=sys.stderr)
+        print("quality-contribution-delta-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day17-quality-contribution-delta-contract check passed")
+    print("quality-contribution-delta-contract check passed")
     return 0
 
 

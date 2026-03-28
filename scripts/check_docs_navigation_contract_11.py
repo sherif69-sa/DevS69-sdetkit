@@ -73,12 +73,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day11-docs-navigation-contract check failed:", file=sys.stderr)
+        print("docs-navigation-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day11-docs-navigation-contract check passed")
+    print("docs-navigation-contract check passed")
     return 0
 
 
