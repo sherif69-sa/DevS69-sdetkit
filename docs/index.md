@@ -1,5 +1,17 @@
 # Docs index
 
+<div class="quick-jump" markdown>
+
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+
+</div>
+
+## Fast start
+
+- [Repository onboarding](../README.md)
+- [Contributor funnel](./contributor-funnel.md)
+- [First contribution checklist](./artifacts/first-contribution-checklist-sample.md)
+
 integrations-distribution-closeout.md
 integrations-experiment-lane.md
 integrations-distribution-batch.md
@@ -58,6 +70,14 @@ impact-80-big-upgrade-report.md
 
 - `integrations-continuous-upgrade-closeout-6.md`
 - `artifacts/continuous-upgrade-closeout-6-pack/continuous-upgrade-closeout-6-summary.json`
+
+## Legacy reports
+
+### Top journeys
+
+- Run first command in under 60 seconds
+- Validate docs links and anchors before publishing
+- Ship a first contribution with deterministic quality gates
 
 ## Continuous upgrade Lane closeout
 

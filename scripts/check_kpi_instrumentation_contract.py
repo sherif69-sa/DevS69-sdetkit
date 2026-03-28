@@ -5,5 +5,5 @@ Legacy alias: scripts/check_kpi_instrumentation_contract_35.py
 
 from check_kpi_instrumentation_contract_35 import main
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())

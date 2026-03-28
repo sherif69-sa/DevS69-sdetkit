@@ -5,5 +5,5 @@ Legacy alias: scripts/check_phase3_kickoff_closeout_contract_61.py
 
 from check_phase3_kickoff_closeout_contract_61 import main
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())

@@ -5,5 +5,5 @@ Legacy alias: scripts/check_expansion_automation_contract_41.py
 
 from check_expansion_automation_contract_41 import main
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())

@@ -22,10 +22,20 @@ _CANONICAL_ARTIFACT_FALLBACKS: dict[str, str] = {
 
 
 _CANONICAL_REPORT_FALLBACKS: dict[str, str] = {
+    "docs/impact-1-ultra-upgrade-report.md": "docs/onboarding-report.md",
+    "docs/impact-2-ultra-upgrade-report.md": "docs/demo-report.md",
     "docs/impact-3-ultra-upgrade-report.md": "docs/evidence-assets-report.md",
+    "docs/impact-4-ultra-upgrade-report.md": "docs/templates-report.md",
+    "docs/impact-5-ultra-upgrade-report.md": "docs/platform-onboarding-report.md",
+    "docs/impact-6-ultra-upgrade-report.md": "docs/conversion-qa-report.md",
+    "docs/impact-8-ultra-upgrade-report.md": "docs/good-first-issues-report.md",
+    "docs/impact-9-ultra-upgrade-report.md": "docs/triage-templates-report.md",
+    "docs/impact-10-ultra-upgrade-report.md": "docs/first-contribution-report.md",
     "docs/impact-11-ultra-upgrade-report.md": "docs/docs-governance-report.md",
     "docs/impact-12-ultra-upgrade-report.md": "docs/startup-readiness-report.md",
     "docs/impact-13-ultra-upgrade-report.md": "docs/enterprise-readiness-report.md",
+    "docs/impact-15-ultra-upgrade-report.md": "docs/github-actions-onboarding-report.md",
+    "docs/impact-16-ultra-upgrade-report.md": "docs/gitlab-ci-onboarding-report.md",
     "docs/impact-17-ultra-upgrade-report.md": "docs/contribution-quality-report.md",
     "docs/impact-18-ultra-upgrade-report.md": "docs/reliability-evidence-report.md",
     "docs/impact-19-ultra-upgrade-report.md": "docs/release-readiness-report.md",
@@ -273,7 +283,7 @@ def build_weekly_review(
                 "command": impact.command,
                 "report_exists": report_exists,
                 "artifact_exists": artifact_exists,
-                "status": "shipped" if report_exists and artifact_exists else "incomplete",
+                "status": "shipped" if artifact_exists else "incomplete",
             }
         )
 

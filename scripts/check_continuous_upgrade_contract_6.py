@@ -16,5 +16,5 @@ def main() -> int:
     return run_cycle_contract_check(CYCLE, root=ns.root, skip_evidence=bool(ns.skip_evidence))
 
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())

@@ -47,5 +47,5 @@ def main() -> int:
     return 1 if errors else 0
 
 
-if __name__ == "main_":
+if __name__ in {"__main__", "main_"}:
     raise SystemExit(main())
