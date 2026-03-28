@@ -19,8 +19,8 @@ A Day 27 pass requires side-by-side baseline and current snapshots for:
 
 ## Metric baseline and current snapshot
 
-- Baseline path: `docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json`
-- Current path: `docs/artifacts/kpi-audit-pack/day27-kpi-current.json`
+- Baseline path: `docs/artifacts/kpi-audit-pack/kpi-baseline.json`
+- Current path: `docs/artifacts/kpi-audit-pack/kpi-current.json`
 - Every metric must be numeric and non-negative.
 
 ## Launch checklist

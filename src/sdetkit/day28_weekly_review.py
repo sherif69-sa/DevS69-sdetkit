@@ -41,9 +41,9 @@ Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wi
 
 ## Inputs from Cycles 25-27
 
-- Day 25: `docs/artifacts/community-activation-pack/day25-community-summary.json`
+- Day 25: `docs/artifacts/community-activation-pack/community-activation-summary.json`
 - External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
-- Day 27: `docs/artifacts/kpi-audit-pack/day27-kpi-summary.json`
+- Day 27: `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
 
 ## Closeout checklist
 
@@ -71,6 +71,10 @@ Day 28 weighted score (0-100):
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _resolve_existing_path(primary: Path, fallback: Path) -> Path:
+    return primary if primary.exists() else fallback
 
 
 def _load_score(path: Path) -> tuple[float, bool]:
@@ -104,11 +108,15 @@ def build_day28_weekly_review_summary(
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
-    day25_path = root / "docs/artifacts/community-activation-pack/day25-community-summary.json"
+    day25_primary = root / "docs/artifacts/community-activation-pack/community-activation-summary.json"
+    day25_fallback = root / "docs/artifacts/community-activation-pack/day25-community-summary.json"
+    day25_path = _resolve_existing_path(day25_primary, day25_fallback)
     external_contribution_path = (
         root / "docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     )
-    day27_path = root / "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+    day27_primary = root / "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
+    day27_fallback = root / "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+    day27_path = _resolve_existing_path(day27_primary, day27_fallback)
 
     day25_score, day25_ok = _load_score(day25_path)
     external_contribution_score, external_contribution_ok = _load_score(external_contribution_path)
@@ -317,10 +325,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day28-weekly-review-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day28-kpi-rollup.md", _to_markdown(payload))
+    _write(target / "weekly-review-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "weekly-review-kpi-rollup.md", _to_markdown(payload))
     _write(
-        target / "day28-wins-misses-actions.md",
+        target / "weekly-review-wins-misses-actions.md",
         "# Day 28 wins, misses, and corrective actions\n\n"
         + "\n".join(
             [
@@ -340,7 +348,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day28-validation-commands.md",
+        target / "weekly-review-validation-commands.md",
         "# Day 28 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -368,7 +376,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day28-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "weekly-review-execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:

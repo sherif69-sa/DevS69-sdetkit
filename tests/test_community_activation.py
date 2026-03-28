@@ -41,22 +41,22 @@ def test_community_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day25-pack",
+            "artifacts/community-activation-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day25-pack/evidence",
+            "artifacts/community-activation-pack/evidence",
             "--format",
             "json",
         ]
     )
 
     assert rc == 0
-    assert (tmp_path / "artifacts/day25-pack/day25-community-summary.json").exists()
-    assert (tmp_path / "artifacts/day25-pack/day25-community-scorecard.md").exists()
-    assert (tmp_path / "artifacts/day25-pack/day25-roadmap-vote-discussion-template.md").exists()
-    assert (tmp_path / "artifacts/day25-pack/day25-feedback-triage-board.md").exists()
-    assert (tmp_path / "artifacts/day25-pack/day25-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day25-pack/evidence/day25-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/community-activation-pack/community-activation-summary.json").exists()
+    assert (tmp_path / "artifacts/community-activation-pack/community-activation-scorecard.md").exists()
+    assert (tmp_path / "artifacts/community-activation-pack/roadmap-vote-discussion-template.md").exists()
+    assert (tmp_path / "artifacts/community-activation-pack/feedback-triage-board.md").exists()
+    assert (tmp_path / "artifacts/community-activation-pack/community-activation-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/community-activation-pack/evidence/community-activation-execution-summary.json").exists()
 
 
 def test_community_strict_fails_when_sections_missing(tmp_path: Path) -> None:

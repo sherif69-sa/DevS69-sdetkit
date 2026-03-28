@@ -390,8 +390,6 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "narrative-closeout-summary.json", summary_json)
     _write(target / "narrative-closeout-summary.md", summary_md)
     # Legacy compatibility aliases
-    _write(target / "day52-narrative-closeout-summary.json", summary_json)
-    _write(target / "day52-narrative-closeout-summary.md", summary_md)
     _write(
         target / "narrative-brief.md",
         "# Day 52 Narrative Brief\n\n- Objective: close Day 52 with measurable release-storytelling discipline and proof-backed narrative gains.\n",
@@ -433,18 +431,6 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
 
     # Legacy compatibility aliases
-    _write(target / "day52-narrative-brief.md", _read(target / "narrative-brief.md"))
-    _write(target / "day52-proof-map.csv", _read(target / "narrative-proof-map.csv"))
-    _write(
-        target / "day52-narrative-kpi-scorecard.json",
-        _read(target / "narrative-kpi-scorecard.json"),
-    )
-    _write(target / "day52-execution-log.md", _read(target / "narrative-execution-log.md"))
-    _write(target / "day52-delivery-board.md", _read(target / "narrative-delivery-board.md"))
-    _write(
-        target / "day52-validation-commands.md",
-        _read(target / "narrative-validation-commands.md"),
-    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -466,7 +452,6 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     summary = json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n"
     _write(evidence_path / "narrative-execution-summary.json", summary)
-    _write(evidence_path / "day52-execution-summary.json", summary)
 
 
 def build_parser() -> argparse.ArgumentParser:

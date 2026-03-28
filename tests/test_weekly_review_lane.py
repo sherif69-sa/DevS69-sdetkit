@@ -40,13 +40,13 @@ def _seed_repo(root: Path) -> None:
     d25.mkdir(parents=True, exist_ok=True)
     d26.mkdir(parents=True, exist_ok=True)
     d27.mkdir(parents=True, exist_ok=True)
-    (d25 / "day25-community-summary.json").write_text(
+    (d25 / "community-activation-summary.json").write_text(
         '{"summary": {"activation_score": 95}}\n', encoding="utf-8"
     )
     (d26 / "external-contribution-summary.json").write_text(
         '{"summary": {"activation_score": 93}}\n', encoding="utf-8"
     )
-    (d27 / "day27-kpi-summary.json").write_text(
+    (d27 / "kpi-audit-summary.json").write_text(
         '{"summary": {"activation_score": 97}}\n', encoding="utf-8"
     )
 
@@ -67,21 +67,21 @@ def test_day28_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day28-pack",
+            "artifacts/weekly-review-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day28-pack/evidence",
+            "artifacts/weekly-review-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day28-pack/day28-weekly-review-summary.json").exists()
-    assert (tmp_path / "artifacts/day28-pack/day28-kpi-rollup.md").exists()
-    assert (tmp_path / "artifacts/day28-pack/day28-wins-misses-actions.md").exists()
-    assert (tmp_path / "artifacts/day28-pack/day28-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day28-pack/evidence/day28-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-summary.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-kpi-rollup.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-wins-misses-actions.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack/evidence/weekly-review-execution-summary.json").exists()
 
 
 def test_day28_strict_fails_when_sections_missing(tmp_path: Path) -> None:

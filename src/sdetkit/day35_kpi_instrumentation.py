@@ -410,10 +410,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day35-kpi-instrumentation-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day35-kpi-instrumentation-summary.md", _to_markdown(payload))
+    _write(target / "kpi-instrumentation-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "kpi-instrumentation-summary.md", _to_markdown(payload))
     _write(
-        target / "day35-kpi-dictionary.csv",
+        target / "kpi-dictionary.csv",
         "metric,segment,source_command,cadence,owner,threshold,notes\n"
         "docs_unique_visitors,acquisition,python -m sdetkit report --input docs/traffic.json --format json,daily,growth-owner,>=1500,Docs traffic stability\n"
         "readme_to_command_ctr,activation,python -m sdetkit evidence-assets --format json,daily,growth-owner,>=12%,README conversion\n"
@@ -425,18 +425,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "external_pr_conversion,retention,python -m sdetkit contributor-funnel --format json,weekly,community-owner,>=8%,PR funnel health\n",
     )
     _write(
-        target / "day35-alert-policy.md",
+        target / "alert-policy.md",
         "# Day 35 alert policy\n\n"
         "- `readme_to_command_ctr < 10%` for two consecutive cycles -> owner opens remediation issue within 24h.\n"
         "- `ci_flake_rate > 3%` on daily sweep -> block release tagging until flaky tests triaged.\n"
         "- `discussion_reply_time_hours > 24` for 3+ threads -> trigger backup reviewer support shift.\n",
     )
     _write(
-        target / "day35-delivery-board.md",
+        target / "delivery-board.md",
         "# Day 35 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day35-validation-commands.md",
+        target / "kpi-instrumentation-validation-commands.md",
         "# Day 35 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -464,7 +464,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day35-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "kpi-instrumentation-execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:

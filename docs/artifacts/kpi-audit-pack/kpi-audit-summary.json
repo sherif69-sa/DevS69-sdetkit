@@ -63,21 +63,21 @@
     {
       "category": "data",
       "check_id": "baseline_metrics_valid",
-      "evidence": "docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
+      "evidence": "docs/artifacts/kpi-audit-pack/kpi-baseline.json",
       "passed": true,
       "weight": 10
     },
     {
       "category": "data",
       "check_id": "current_metrics_valid",
-      "evidence": "docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
+      "evidence": "docs/artifacts/kpi-audit-pack/kpi-current.json",
       "passed": true,
       "weight": 10
     }
   ],
   "inputs": {
-    "baseline": "docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
-    "current": "docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
+    "baseline": "docs/artifacts/kpi-audit-pack/kpi-baseline.json",
+    "current": "docs/artifacts/kpi-audit-pack/kpi-current.json",
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-kpi-audit.md",
     "readme": "README.md",

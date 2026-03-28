@@ -45,8 +45,8 @@ Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 e
 
 ## Required inputs (Cycles 27-29)
 
-- `docs/artifacts/kpi-audit-pack/day27-kpi-summary.json`
-- `docs/artifacts/weekly-review-pack/day28-weekly-review-summary.json`
+- `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
+- `docs/artifacts/weekly-review-pack/weekly-review-summary.json`
 - `docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json` (primary)
 
 ## Day 30 command lane
@@ -115,8 +115,8 @@ def build_day30_phase1_wrap_summary(
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
-    day27_path = root / "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
-    day28_path = root / "docs/artifacts/weekly-review-pack/day28-weekly-review-summary.json"
+    day27_path = root / "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
+    day28_path = root / "docs/artifacts/weekly-review-pack/weekly-review-summary.json"
     day29_primary_path = root / _DAY29_CANONICAL_SUMMARY_PATH
     day29_path = day29_primary_path
 

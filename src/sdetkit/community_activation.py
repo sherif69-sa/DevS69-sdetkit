@@ -280,11 +280,11 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day25-community-summary.json"
-    scorecard = out_dir / "day25-community-scorecard.md"
-    discussion = out_dir / "day25-roadmap-vote-discussion-template.md"
-    triage = out_dir / "day25-feedback-triage-board.md"
-    validation = out_dir / "day25-validation-commands.md"
+    summary = out_dir / "community-activation-summary.json"
+    scorecard = out_dir / "community-activation-scorecard.md"
+    discussion = out_dir / "roadmap-vote-discussion-template.md"
+    triage = out_dir / "feedback-triage-board.md"
+    validation = out_dir / "community-activation-validation-commands.md"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_text(payload) + "\n", encoding="utf-8")
@@ -362,7 +362,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
-    (evidence_dir / "day25-execution-summary.json").write_text(
+    (evidence_dir / "community-activation-execution-summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return payload
