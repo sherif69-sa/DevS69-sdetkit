@@ -26,13 +26,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit contributor-activation-closeout --format json --strict",
-    "python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/day55-contributor-activation-closeout-pack --format json --strict",
-    "python -m sdetkit contributor-activation-closeout --execute --evidence-dir docs/artifacts/day55-contributor-activation-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/contributor-activation-closeout-pack --format json --strict",
+    "python -m sdetkit contributor-activation-closeout --execute --evidence-dir docs/artifacts/contributor-activation-closeout-pack/evidence --format json --strict",
     "python scripts/check_contributor_activation_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit contributor-activation-closeout --format json --strict",
-    "python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/day55-contributor-activation-closeout-pack --format json --strict",
+    "python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/contributor-activation-closeout-pack --format json --strict",
     "python scripts/check_contributor_activation_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -75,8 +75,8 @@ Day 55 closes with a major contributor activation upgrade that turns Day 53 docs
 
 ```bash
 python -m sdetkit contributor-activation-closeout --format json --strict
-python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/day55-contributor-activation-closeout-pack --format json --strict
-python -m sdetkit contributor-activation-closeout --execute --evidence-dir docs/artifacts/day55-contributor-activation-closeout-pack/evidence --format json --strict
+python -m sdetkit contributor-activation-closeout --emit-pack-dir docs/artifacts/contributor-activation-closeout-pack --format json --strict
+python -m sdetkit contributor-activation-closeout --execute --evidence-dir docs/artifacts/contributor-activation-closeout-pack/evidence --format json --strict
 python scripts/check_contributor_activation_closeout_contract.py
 ```
 
@@ -366,27 +366,27 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day55-contributor-activation-closeout-summary.json",
+        target / "contributor-activation-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
     _write(
-        target / "day55-contributor-activation-closeout-summary.md", _render_text(payload) + "\n"
+        target / "contributor-activation-closeout-summary.md", _render_text(payload) + "\n"
     )
     _write(
-        target / "day55-contributor-activation-brief.md", "# Day 55 contributor activation brief\n"
+        target / "contributor-activation-brief.md", "# Day 55 contributor activation brief\n"
     )
-    _write(target / "day55-contributor-ladder.csv", "stage,owner,kpi\n")
+    _write(target / "contributor-ladder.csv", "stage,owner,kpi\n")
     _write(
-        target / "day55-contributor-activation-kpi-scorecard.json",
+        target / "contributor-activation-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "day55-execution-log.md", "# Day 55 execution log\n")
+    _write(target / "contributor-activation-execution-log.md", "# Day 55 execution log\n")
     _write(
-        target / "day55-delivery-board.md",
+        target / "contributor-activation-delivery-board.md",
         "\n".join(["# Day 55 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day55-validation-commands.md",
+        target / "contributor-activation-validation-commands.md",
         "# Day 55 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -409,7 +409,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day55-execution-summary.json",
+        out_dir / "contributor-activation-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -444,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day55-contributor-activation-closeout-pack/evidence")
+            else Path("docs/artifacts/contributor-activation-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

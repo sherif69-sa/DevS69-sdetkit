@@ -10,8 +10,8 @@ Day 59 closes with a major Phase-3 pre-plan upgrade that turns Day 58 hardening 
 
 ## Required inputs (Day 58)
 
-- `docs/artifacts/day58-phase2-hardening-closeout-pack/day58-phase2-hardening-closeout-summary.json`
-- `docs/artifacts/day58-phase2-hardening-closeout-pack/day58-delivery-board.md`
+- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json`
+- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md`
 
 ## Phase3 Preplan Closeout command lane
 

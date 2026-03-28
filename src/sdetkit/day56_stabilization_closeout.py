@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-stabilization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY55_SUMMARY_PATH = "docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json"
+_DAY55_SUMMARY_PATH = "docs/artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json"
 _DAY55_BOARD_PATH = (
-    "docs/artifacts/day55-contributor-activation-closeout-pack/day55-delivery-board.md"
+    "docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md"
 )
 _SECTION_HEADER = "# Day 56 \u2014 Stabilization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -26,13 +26,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit stabilization-closeout --format json --strict",
-    "python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict",
-    "python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/stabilization-closeout-pack --format json --strict",
+    "python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/stabilization-closeout-pack/evidence --format json --strict",
     "python scripts/check_stabilization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit stabilization-closeout --format json --strict",
-    "python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict",
+    "python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/stabilization-closeout-pack --format json --strict",
     "python scripts/check_stabilization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +68,15 @@ Day 56 closes with a major stabilization upgrade that turns Day 55 contributor-a
 
 ## Required inputs (Day 55)
 
-- `docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json`
-- `docs/artifacts/day55-contributor-activation-closeout-pack/day55-delivery-board.md`
+- `docs/artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json`
+- `docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md`
 
 ## Day 56 command lane
 
 ```bash
 python -m sdetkit stabilization-closeout --format json --strict
-python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict
-python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict
+python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/stabilization-closeout-pack --format json --strict
+python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/stabilization-closeout-pack/evidence --format json --strict
 python scripts/check_stabilization_closeout_contract.py
 ```
 
@@ -366,21 +366,21 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day56-stabilization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+        target / "stabilization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
     )
-    _write(target / "day56-stabilization-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day56-stabilization-brief.md", "# Day 56 stabilization brief\n")
-    _write(target / "day56-risk-ledger.csv", "risk,owner,mitigation,status\n")
+    _write(target / "stabilization-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "stabilization-brief.md", "# Day 56 stabilization brief\n")
+    _write(target / "stabilization-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(
-        target / "day56-stabilization-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+        target / "stabilization-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "day56-execution-log.md", "# Day 56 execution log\n")
+    _write(target / "stabilization-execution-log.md", "# Day 56 execution log\n")
     _write(
-        target / "day56-delivery-board.md",
+        target / "stabilization-delivery-board.md",
         "\n".join(["# Day 56 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day56-validation-commands.md",
+        target / "stabilization-validation-commands.md",
         "# Day 56 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -403,7 +403,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day56-execution-summary.json",
+        out_dir / "stabilization-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -438,7 +438,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day56-stabilization-closeout-pack/evidence")
+            else Path("docs/artifacts/stabilization-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

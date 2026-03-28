@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day56-stabilization-closeout-pack/day56-stabilization-closeout-summary.json"
+        / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day56-stabilization-closeout-pack/day56-delivery-board.md"
+    board = root / "docs/artifacts/stabilization-closeout-pack/stabilization-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -99,22 +99,22 @@ def test_day57_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day57-pack/day57-kpi-deep-audit-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-kpi-deep-audit-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-kpi-deep-audit-brief.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/day57-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/evidence/day57-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-brief.md").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day57-pack/evidence/kpi-deep-audit-execution-summary.json").exists()
 
 
 def test_day57_strict_fails_without_day56(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day56-stabilization-closeout-pack/day56-stabilization-closeout-summary.json"
+        / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
     ).unlink()
     assert d57.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase3-preplan-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY58_SUMMARY_PATH = "docs/artifacts/day58-phase2-hardening-closeout-pack/day58-phase2-hardening-closeout-summary.json"
-_DAY58_BOARD_PATH = "docs/artifacts/day58-phase2-hardening-closeout-pack/day58-delivery-board.md"
+_DAY58_SUMMARY_PATH = "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
+_DAY58_BOARD_PATH = "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
 _SECTION_HEADER = "# Day 59 \u2014 Phase-3 pre-plan closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 59 matters",
@@ -66,8 +66,8 @@ Day 59 closes with a major Phase-3 pre-plan upgrade that turns Day 58 hardening 
 
 ## Required inputs (Day 58)
 
-- `docs/artifacts/day58-phase2-hardening-closeout-pack/day58-phase2-hardening-closeout-summary.json`
-- `docs/artifacts/day58-phase2-hardening-closeout-pack/day58-delivery-board.md`
+- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json`
+- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md`
 
 ## Day 59 command lane
 
