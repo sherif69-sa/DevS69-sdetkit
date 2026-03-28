@@ -41,9 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 55 report\n", encoding="utf-8"
     )
 
-    summary = (
-        root / "docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
-    )
+    summary = root / "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -55,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md"
+    board = root / "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -98,29 +96,24 @@ def test_day55_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (
-        tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.json"
-    ).exists()
-    assert (
-        tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.md"
-    ).exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day55-pack/contributor-activation-brief.md").exists()
     assert (tmp_path / "artifacts/day55-pack/contributor-ladder.csv").exists()
-    assert (
-        tmp_path / "artifacts/day55-pack/contributor-activation-kpi-scorecard.json"
-    ).exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day55-pack/contributor-activation-execution-log.md").exists()
     assert (tmp_path / "artifacts/day55-pack/contributor-activation-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/evidence/contributor-activation-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day55-pack/contributor-activation-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day55-pack/evidence/contributor-activation-execution-summary.json"
+    ).exists()
 
 
 def test_day55_strict_fails_without_day53(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (
-        tmp_path
-        / "docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
-    ).unlink()
+    (tmp_path / "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json").unlink()
     assert d55.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 

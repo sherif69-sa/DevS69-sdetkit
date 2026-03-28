@@ -1,0 +1,149 @@
+{
+  "name": "contributor-activation-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-contributor-activation-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day53_summary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
+    "day53_summary_primary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
+    "day53_delivery_board": "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md",
+    "day53_delivery_board_primary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-contributor-activation-closeout.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "missing_sections": [
+          "# Day 55 \u2014 Contributor activation closeout lane",
+          "## Day 55 command lane"
+        ]
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day55_link",
+      "weight": 8,
+      "passed": false,
+      "evidence": "docs/integrations-contributor-activation-closeout.md"
+    },
+    {
+      "check_id": "readme_day55_command",
+      "weight": 4,
+      "passed": false,
+      "evidence": "day55-contributor-activation-closeout"
+    },
+    {
+      "check_id": "docs_index_day55_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-55-big-upgrade-report.md + integrations-contributor-activation-closeout.md"
+    },
+    {
+      "check_id": "top10_day55_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 55 + Day 56 strategy chain"
+    },
+    {
+      "check_id": "day53_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
+      }
+    },
+    {
+      "check_id": "day53_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": {
+        "resolved": "/workspace/DevS69-sdetkit/docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md",
+        "primary": "/workspace/DevS69-sdetkit/docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
+      }
+    },
+    {
+      "check_id": "day53_quality_floor",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "day53_score": 55.0,
+        "strict_pass": false,
+        "day53_checks": 14
+      }
+    },
+    {
+      "check_id": "day53_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day53": true
+      }
+    },
+    {
+      "check_id": "activation_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_contract_lines": []
+      }
+    },
+    {
+      "check_id": "activation_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day53_activation_score": 55.0,
+    "day53_checks": 14,
+    "day53_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 55,
+    "passed_checks": 8,
+    "failed_checks": 6,
+    "critical_failures": [
+      "day53_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 53 delivery board integrity validated with 5 checklist items.",
+    "Contributor activation contract + quality checklist is fully locked for execution."
+  ],
+  "misses": [
+    "Day 53 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 53 docs-loop closeout command and restore strict baseline before Day 55 lock."
+  ]
+}

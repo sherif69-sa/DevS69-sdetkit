@@ -10,8 +10,8 @@ Day 53 closes with a major docs loop optimization upgrade that converts Day 52 n
 
 ## Required inputs (Day 52)
 
-- `docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json`
-- `docs/artifacts/narrative-closeout-pack/day52-delivery-board.md`
+- `docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json`
+- `docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md`
 
 ## Docs Loop Closeout command lane
 

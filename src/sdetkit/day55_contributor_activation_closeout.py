@@ -10,10 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-contributor-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY53_SUMMARY_PATH = (
+_DAY53_SUMMARY_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
+_DAY53_SUMMARY_FALLBACK_PATH = (
     "docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
 )
-_DAY53_BOARD_PATH = "docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md"
+_DAY53_BOARD_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
+_DAY53_BOARD_FALLBACK_PATH = "docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md"
 _SECTION_HEADER = "# Day 55 \u2014 Contributor activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 55 matters",
@@ -68,8 +70,9 @@ Day 55 closes with a major contributor activation upgrade that turns Day 53 docs
 
 ## Required inputs (Day 53)
 
-- `docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json`
-- `docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md`
+- `docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json`
+- `docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md`
+- Compatibility fallback: day53-named files remain accepted.
 
 ## Day 55 command lane
 
@@ -168,8 +171,14 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day53_summary = root / _DAY53_SUMMARY_PATH
-    day53_board = root / _DAY53_BOARD_PATH
+    day53_summary_primary = root / _DAY53_SUMMARY_PATH
+    day53_summary_fallback = root / _DAY53_SUMMARY_FALLBACK_PATH
+    day53_summary = (
+        day53_summary_primary if day53_summary_primary.exists() else day53_summary_fallback
+    )
+    day53_board_primary = root / _DAY53_BOARD_PATH
+    day53_board_fallback = root / _DAY53_BOARD_FALLBACK_PATH
+    day53_board = day53_board_primary if day53_board_primary.exists() else day53_board_fallback
     day53_score, day53_strict, day53_check_count = _load_day53(day53_summary)
     board_count, board_has_day53 = _board_stats(day53_board)
 
@@ -223,13 +232,13 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "day53_summary_present",
             "weight": 10,
             "passed": day53_summary.exists(),
-            "evidence": str(day53_summary),
+            "evidence": {"resolved": str(day53_summary), "primary": str(day53_summary_primary)},
         },
         {
             "check_id": "day53_delivery_board_present",
             "weight": 8,
             "passed": day53_board.exists(),
-            "evidence": str(day53_board),
+            "evidence": {"resolved": str(day53_board), "primary": str(day53_board_primary)},
         },
         {
             "check_id": "day53_quality_floor",
@@ -324,9 +333,11 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "day53_summary": str(day53_summary.relative_to(root))
             if day53_summary.exists()
             else str(day53_summary),
+            "day53_summary_primary": str(day53_summary_primary.relative_to(root)),
             "day53_delivery_board": str(day53_board.relative_to(root))
             if day53_board.exists()
             else str(day53_board),
+            "day53_delivery_board_primary": str(day53_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
@@ -369,12 +380,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "contributor-activation-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(
-        target / "contributor-activation-closeout-summary.md", _render_text(payload) + "\n"
-    )
-    _write(
-        target / "contributor-activation-brief.md", "# Day 55 contributor activation brief\n"
-    )
+    _write(target / "contributor-activation-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "contributor-activation-brief.md", "# Day 55 contributor activation brief\n")
     _write(target / "contributor-ladder.csv", "stage,owner,kpi\n")
     _write(
         target / "contributor-activation-kpi-scorecard.json",
@@ -414,10 +421,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day55_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_contributor_activation_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
