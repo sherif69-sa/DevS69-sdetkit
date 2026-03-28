@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-distribution-batch.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY37_SUMMARY_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
-_DAY37_BOARD_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
+_DAY37_SUMMARY_PATH = "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"
+_DAY37_BOARD_PATH = "docs/artifacts/experiment-lane-pack/delivery-board.md"
+_LEGACY_DAY37_SUMMARY_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
+_LEGACY_DAY37_BOARD_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
 _SECTION_HEADER = "# Day 38 \u2014 Distribution batch #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 38 matters",
@@ -23,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day38-distribution-batch --format json --strict",
-    "python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict",
-    "python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict",
+    "python -m sdetkit distribution-batch --format json --strict",
+    "python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict",
+    "python -m sdetkit distribution-batch --execute --evidence-dir docs/artifacts/distribution-batch-pack/evidence --format json --strict",
     "python scripts/check_distribution_batch_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day38-distribution-batch --format json --strict",
-    "python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict",
+    "python -m sdetkit distribution-batch --format json --strict",
+    "python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict",
     "python scripts/check_distribution_batch_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -66,15 +68,15 @@ Day 38 publishes a coordinated distribution batch that operationalizes Day 37 ex
 
 ## Required inputs (Day 37)
 
-- `docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json`
-- `docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md`
+- `docs/artifacts/experiment-lane-pack/experiment-lane-summary.json`
+- `docs/artifacts/experiment-lane-pack/delivery-board.md`
 
 ## Day 38 command lane
 
 ```bash
-python -m sdetkit day38-distribution-batch --format json --strict
-python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict
-python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict
+python -m sdetkit distribution-batch --format json --strict
+python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict
+python -m sdetkit distribution-batch --execute --evidence-dir docs/artifacts/distribution-batch-pack/evidence --format json --strict
 python scripts/check_distribution_batch_contract.py
 ```
 
@@ -156,6 +158,14 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    return legacy_path if legacy_path.exists() else canonical_path
+
+
 def build_day38_distribution_batch_summary(
     root: Path,
     *,
@@ -178,8 +188,8 @@ def build_day38_distribution_batch_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day37_summary = root / _DAY37_SUMMARY_PATH
-    day37_board = root / _DAY37_BOARD_PATH
+    day37_summary = _resolve_input_path(root, _DAY37_SUMMARY_PATH, _LEGACY_DAY37_SUMMARY_PATH)
+    day37_board = _resolve_input_path(root, _DAY37_BOARD_PATH, _LEGACY_DAY37_BOARD_PATH)
     day37_score, day37_strict, day37_check_count = _load_day37(day37_summary)
     board_count, board_has_day37, board_has_day38 = _board_stats(day37_board)
 
@@ -211,8 +221,8 @@ def build_day38_distribution_batch_summary(
         {
             "check_id": "readme_day38_command",
             "weight": 4,
-            "passed": "day38-distribution-batch" in readme_text,
-            "evidence": "day38-distribution-batch",
+            "passed": "distribution-batch" in readme_text,
+            "evidence": "distribution-batch",
         },
         {
             "check_id": "docs_index_day38_links",
@@ -329,7 +339,7 @@ def build_day38_distribution_batch_summary(
         )
 
     return {
-        "name": "day38-distribution-batch",
+        "name": "distribution-batch",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -408,36 +418,36 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day38-distribution-batch-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day38-distribution-batch-summary.md", _to_markdown(payload))
+    _write(target / "distribution-batch-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "distribution-batch-summary.md", _to_markdown(payload))
     _write(
-        target / "day38-channel-plan.csv",
+        target / "channel-plan.csv",
         "channel,post_id,experiment_winner,docs_cta,command_cta,owner,window_utc,kpi_target\n"
-        "github,gh-01,exp-01,README:docs/integrations-experiment-lane.md,python -m sdetkit day37-experiment-lane --format json,community-owner,2026-03-03T15:00:00Z,ctr:+2%\n"
-        "linkedin,li-01,exp-02,docs/index.md#impact-37-big-upgrades,python -m sdetkit day36-distribution-closeout --format json,growth-owner,2026-03-03T12:00:00Z,visitors:+8%\n"
-        "newsletter,nl-01,exp-03,docs/integrations-experiment-lane.md,python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json,pm-owner,2026-03-04T09:00:00Z,replies:+1.5%\n",
+        "github,gh-01,exp-01,README:docs/integrations-experiment-lane.md,python -m sdetkit experiment-lane --format json,community-owner,2026-03-03T15:00:00Z,ctr:+2%\n"
+        "linkedin,li-01,exp-02,docs/index.md#impact-37-big-upgrades,python -m sdetkit distribution-closeout --format json,growth-owner,2026-03-03T12:00:00Z,visitors:+8%\n"
+        "newsletter,nl-01,exp-03,docs/integrations-experiment-lane.md,python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json,pm-owner,2026-03-04T09:00:00Z,replies:+1.5%\n",
     )
     _write(
-        target / "day38-post-copy.md",
+        target / "post-copy.md",
         "# Day 38 post copy pack\n\n"
         "## GitHub post\n"
         "- Hook: Day 37 experiment winners are now live as a repeatable distribution flow.\n"
         "- CTA docs: `docs/integrations-experiment-lane.md`\n"
-        "- CTA command: `python -m sdetkit day37-experiment-lane --format json --strict`\n\n"
+        "- CTA command: `python -m sdetkit experiment-lane --format json --strict`\n\n"
         "## LinkedIn post\n"
         "- Hook: We translated controlled growth learnings into a deterministic posting batch.\n"
         "- CTA docs: `docs/index.md` (Day 37 + Day 38 sections)\n"
-        "- CTA command: `python -m sdetkit day38-distribution-batch --format json --strict`\n\n"
+        "- CTA command: `python -m sdetkit distribution-batch --format json --strict`\n\n"
         "## Newsletter blurb\n"
         "- Hook: Day 38 moves from experiments to coordinated execution with quality guardrails.\n"
         "- CTA docs: `docs/integrations-distribution-batch.md`\n"
-        "- CTA command: `python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict`\n",
+        "- CTA command: `python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict`\n",
     )
     _write(
-        target / "day38-kpi-scorecard.json",
+        target / "kpi-scorecard.json",
         json.dumps(
             {
-                "generated_for": "day38-distribution-batch",
+                "generated_for": "distribution-batch",
                 "channels": [
                     {
                         "channel": "github",
@@ -467,18 +477,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day38-execution-log.md",
+        target / "execution-log.md",
         "# Day 38 execution log\n\n"
         "- [ ] 2026-03-03: Publish GitHub + LinkedIn posts with docs + command CTAs.\n"
         "- [ ] 2026-03-04: Publish newsletter segment and capture first 24h KPI pulse.\n"
         "- [ ] 2026-03-05: Record winners/misses and map Day 39 playbook priorities.\n",
     )
     _write(
-        target / "day38-delivery-board.md",
+        target / "delivery-board.md",
         "# Day 38 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day38-validation-commands.md",
+        target / "validation-commands.md",
         "# Day 38 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -501,12 +511,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day38-distribution-batch-execution",
+        "name": "distribution-batch-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day38-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -540,7 +550,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day38-distribution-batch-pack/evidence")
+            else Path("docs/artifacts/distribution-batch-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

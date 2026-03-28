@@ -42,9 +42,11 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        evidence = (
-            root / "docs/artifacts/day40-scale-lane-pack/evidence/day40-execution-summary.json"
-        )
+        evidence_candidates = [
+            root / "docs/artifacts/scale-lane-pack/evidence/execution-summary.json",
+            root / "docs/artifacts/day40-scale-lane-pack/evidence/day40-execution-summary.json",
+        ]
+        evidence = next((path for path in evidence_candidates if path.exists()), evidence_candidates[0])
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:

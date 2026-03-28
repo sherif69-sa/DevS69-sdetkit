@@ -1,4 +1,0 @@
-channel,post_id,experiment_winner,docs_cta,command_cta,owner,window_utc,kpi_target
-github,gh-01,exp-01,README:docs/integrations-name37-experiment-lane.md,python -m sdetkit name37-experiment-lane --format json,community-owner,2026-03-03T15:00:00Z,ctr:+2%
-linkedin,li-01,exp-02,docs/index.md#name-37-big-upgrades,python -m sdetkit name36-distribution-closeout --format json,growth-owner,2026-03-03T12:00:00Z,visitors:+8%
-newsletter,nl-01,exp-03,docs/integrations-name37-experiment-lane.md,python -m sdetkit name37-experiment-lane --emit-pack-dir docs/artifacts/name37-experiment-lane-pack --format json,pm-owner,2026-03-04T09:00:00Z,replies:+1.5%

@@ -1,0 +1,135 @@
+{
+  "name": "experiment-lane",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-experiment-lane.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day36_summary": "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json",
+    "day36_delivery_board": "docs/artifacts/distribution-closeout-pack/delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-experiment-lane.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day37_link",
+      "weight": 8,
+      "passed": true,
+      "evidence": "docs/integrations-experiment-lane.md"
+    },
+    {
+      "check_id": "readme_day37_command",
+      "weight": 4,
+      "passed": true,
+      "evidence": "experiment-lane"
+    },
+    {
+      "check_id": "docs_index_day37_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "impact-37-big-upgrade-report.md + integrations-experiment-lane.md"
+    },
+    {
+      "check_id": "top10_day37_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 37 + Day 38 strategy chain"
+    },
+    {
+      "check_id": "day36_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
+    },
+    {
+      "check_id": "day36_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/distribution-closeout-pack/delivery-board.md"
+    },
+    {
+      "check_id": "day36_quality_floor",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "day36_score": 100.0,
+        "strict_pass": true,
+        "day36_checks": 14
+      }
+    },
+    {
+      "check_id": "day36_board_integrity",
+      "weight": 7,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day36": true,
+        "contains_day37": true
+      }
+    },
+    {
+      "check_id": "experiment_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_contract_lines": []
+      }
+    },
+    {
+      "check_id": "experiment_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day36_activation_score": 100.0,
+    "day36_checks": 14,
+    "day36_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 36 continuity is strict-pass with activation score=100.0.",
+    "Day 36 delivery board integrity validated with 5 checklist items.",
+    "Experiment contract + quality checklist is fully locked for execution.",
+    "Day 37 experiment lane activation is fully complete and ready for Day 38 distribution batch #1."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

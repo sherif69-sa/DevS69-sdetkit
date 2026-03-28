@@ -1,6 +1,17 @@
 # Docs index
 
 integrations-distribution-closeout.md
+integrations-experiment-lane.md
+integrations-distribution-batch.md
+integrations-playbook-post.md
+integrations-scale-lane.md
+integrations-expansion-automation.md
+impact-36-big-upgrade-report.md
+impact-37-big-upgrade-report.md
+impact-38-big-upgrade-report.md
+impact-39-big-upgrade-report.md
+impact-40-big-upgrade-report.md
+impact-41-big-upgrade-report.md
 integrations-partner-outreach-closeout.md
 integrations-community-touchpoint-closeout.md
 integrations-ecosystem-priorities-closeout.md

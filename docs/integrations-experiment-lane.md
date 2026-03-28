@@ -10,15 +10,15 @@ Day 37 turns Day 36 distribution misses into controlled experiments with strict 
 
 ## Required inputs (Day 36)
 
-- `docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json`
-- `docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md`
+- `docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json`
+- `docs/artifacts/distribution-closeout-pack/delivery-board.md`
 
 ## Day 37 command lane
 
 ```bash
 python -m sdetkit experiment-lane --format json --strict
-python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict
-python -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict
+python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json --strict
+python -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/experiment-lane-pack/evidence --format json --strict
 python scripts/check_experiment_lane_contract.py
 ```
 

@@ -113,6 +113,15 @@ The launchpad checks that contributor trust assets are present, highlights concr
 
 If you are evaluating the project as a potential contributor, this makes the repo feel maintained, navigable, and ready for real work rather than just feature demos.
 
+## Phase-2 closeout lanes (current canonical commands)
+
+- Day 36: `docs/integrations-distribution-closeout.md` → `python -m sdetkit distribution-closeout --format json --strict`
+- Day 37: `docs/integrations-experiment-lane.md` → `python -m sdetkit experiment-lane --format json --strict`
+- Day 38: `docs/integrations-distribution-batch.md` → `python -m sdetkit distribution-batch --format json --strict`
+- Day 39: `docs/integrations-playbook-post.md` → `python -m sdetkit playbook-post --format json --strict`
+- Day 40: `docs/integrations-scale-lane.md` → `python -m sdetkit scale-lane --format json --strict`
+- Day 41: `docs/integrations-expansion-automation.md` → `python -m sdetkit expansion-automation --format json --strict`
+
 ## Hero commands
 
 ```bash
