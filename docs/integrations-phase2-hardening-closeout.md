@@ -10,15 +10,15 @@ Day 58 closes with a major Phase-2 hardening upgrade that turns Day 57 KPI deep-
 
 ## Required inputs (Day 57)
 
-- `docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-kpi-deep-audit-closeout-summary.json`
-- `docs/artifacts/day57-kpi-deep-audit-closeout-pack/day57-delivery-board.md`
+- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`
+- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`
 
 ## Phase 2 Hardening Closeout command lane
 
 ```bash
 python -m sdetkit phase2-hardening-closeout --format json --strict
-python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/day58-phase2-hardening-closeout-pack --format json --strict
-python -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/day58-phase2-hardening-closeout-pack/evidence --format json --strict
+python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict
+python -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/phase2-hardening-closeout-pack/evidence --format json --strict
 python scripts/check_phase2_hardening_closeout_contract.py
 ```
 

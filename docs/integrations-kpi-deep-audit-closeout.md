@@ -10,15 +10,15 @@ Day 57 closes with a major KPI deep-audit upgrade that turns Day 56 stabilizatio
 
 ## Required inputs (Day 56)
 
-- `docs/artifacts/day56-stabilization-closeout-pack/day56-stabilization-closeout-summary.json`
-- `docs/artifacts/day56-stabilization-closeout-pack/day56-delivery-board.md`
+- `docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json`
+- `docs/artifacts/stabilization-closeout-pack/stabilization-delivery-board.md`
 
 ## KPI Deep Audit Closeout command lane
 
 ```bash
 python -m sdetkit kpi-deep-audit-closeout --format json --strict
-python -m sdetkit kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack --format json --strict
-python -m sdetkit kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence --format json --strict
+python -m sdetkit kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/kpi-deep-audit-closeout-pack --format json --strict
+python -m sdetkit kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/kpi-deep-audit-closeout-pack/evidence --format json --strict
 python scripts/check_kpi_deep_audit_closeout_contract.py
 ```
 

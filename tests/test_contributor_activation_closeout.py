@@ -99,20 +99,20 @@ def test_day55_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day55-pack/day55-contributor-activation-closeout-summary.json"
+        tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day55-pack/day55-contributor-activation-closeout-summary.md"
+        tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day55-pack/day55-contributor-activation-brief.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/day55-contributor-ladder.csv").exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-brief.md").exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-ladder.csv").exists()
     assert (
-        tmp_path / "artifacts/day55-pack/day55-contributor-activation-kpi-scorecard.json"
+        tmp_path / "artifacts/day55-pack/contributor-activation-kpi-scorecard.json"
     ).exists()
-    assert (tmp_path / "artifacts/day55-pack/day55-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/day55-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/day55-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/evidence/day55-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day55-pack/contributor-activation-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day55-pack/evidence/contributor-activation-execution-summary.json").exists()
 
 
 def test_day55_strict_fails_without_day53(tmp_path: Path) -> None:

@@ -10,15 +10,15 @@ Day 56 closes with a major stabilization upgrade that turns Day 55 contributor-a
 
 ## Required inputs (Day 55)
 
-- `docs/artifacts/day55-contributor-activation-closeout-pack/day55-contributor-activation-closeout-summary.json`
-- `docs/artifacts/day55-contributor-activation-closeout-pack/day55-delivery-board.md`
+- `docs/artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json`
+- `docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md`
 
 ## Stabilization Closeout command lane
 
 ```bash
 python -m sdetkit stabilization-closeout --format json --strict
-python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict
-python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict
+python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/stabilization-closeout-pack --format json --strict
+python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/stabilization-closeout-pack/evidence --format json --strict
 python scripts/check_stabilization_closeout_contract.py
 ```
 
