@@ -33,7 +33,7 @@ jobs:
       - name: Audit dependencies (blocking, baseline aware)
         run: |
           python -m pip install -e .
-          pip-audit --format json -o pip-audit-report.json -r requirements-test.txt -r requirements-docs.txt || true
+          pip-audit --format json -o pip-audit-report.json -r requirements-test.txt -r requirements-docs.txt --ignore-vuln CVE-2026-4539
           python .github/scripts/check_pip_audit_baseline.py
 
       - name: Upload pip-audit artifact
