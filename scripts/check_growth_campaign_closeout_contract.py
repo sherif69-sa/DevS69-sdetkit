@@ -8,7 +8,9 @@ from pathlib import Path
 
 from sdetkit import growth_campaign_closeout_81 as lane
 
-_CANONICAL_EVIDENCE = "docs/artifacts/growth-campaign-closeout-pack/evidence/growth-campaign-execution-summary.json"
+_CANONICAL_EVIDENCE = (
+    "docs/artifacts/growth-campaign-closeout-pack/evidence/growth-campaign-execution-summary.json"
+)
 
 
 def main() -> int:

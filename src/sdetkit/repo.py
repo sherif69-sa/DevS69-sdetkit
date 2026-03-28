@@ -408,7 +408,7 @@ def _inventory_for_root(repo_root: Path) -> list[FileInfo]:
 
 
 class _FileInventoryCache:
-    def init_(self, root: Path, *, strict_max_files: int | None = None) -> None:
+    def __init__(self, root: Path, *, strict_max_files: int | None = None) -> None:
         self.root = root
         self.strict_max_files = strict_max_files
         self._stats: dict[str, int] = {"hits": 0, "misses": 0, "writes": 0, "invalidations": 0}
@@ -647,7 +647,7 @@ class _FileInventoryCache:
 
 
 class RepoRuleExecutionContext:
-    def init_(
+    def __init__(
         self, root: Path, inventory: _FileInventoryCache, changed: set[str] | None = None
     ) -> None:
         self._root = root

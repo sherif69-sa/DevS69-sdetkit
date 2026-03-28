@@ -387,13 +387,20 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "integration-expansion4-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(
-        target / "integration-expansion4-closeout-summary.md", _render_text(payload) + "\n"
-    )
+    _write(target / "integration-expansion4-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "integration-expansion4-integration-brief.md", "# Day 68 integration brief\n")
-    _write(target / "integration-expansion4-self-hosted-blueprint.md", "# Day 68 self-hosted blueprint\n")
-    _write(target / "integration-expansion4-policy-plan.json", json.dumps({"policy_controls": []}, indent=2) + "\n")
-    _write(target / "integration-expansion4-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "integration-expansion4-self-hosted-blueprint.md",
+        "# Day 68 self-hosted blueprint\n",
+    )
+    _write(
+        target / "integration-expansion4-policy-plan.json",
+        json.dumps({"policy_controls": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "integration-expansion4-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "integration-expansion4-execution-log.md", "# Day 68 execution log\n")
     _write(
         target / "integration-expansion4-delivery-board.md",
@@ -428,10 +435,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day68_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_integration_expansion4_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 68 integration expansion #4 closeout checks")
@@ -464,5 +471,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

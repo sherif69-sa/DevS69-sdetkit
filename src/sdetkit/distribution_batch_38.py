@@ -12,7 +12,9 @@ _PAGE_PATH = "docs/integrations-distribution-batch.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY37_SUMMARY_PATH = "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"
 _DAY37_BOARD_PATH = "docs/artifacts/experiment-lane-pack/delivery-board.md"
-_LEGACY_DAY37_SUMMARY_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
+_LEGACY_DAY37_SUMMARY_PATH = (
+    "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
+)
 _LEGACY_DAY37_BOARD_PATH = "docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md"
 _SECTION_HEADER = "# Day 38 \u2014 Distribution batch #1"
 _REQUIRED_SECTIONS = [
@@ -576,5 +578,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

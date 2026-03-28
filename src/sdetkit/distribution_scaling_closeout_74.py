@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-distribution-scaling-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY73_SUMMARY_PATH = "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json"
-_DAY73_BOARD_PATH = "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
+_DAY73_SUMMARY_PATH = (
+    "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json"
+)
+_DAY73_BOARD_PATH = (
+    "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
+)
 _SCALING_PLAN_PATH = "docs/roadmap/plans/distribution-scaling-plan.json"
 _SECTION_HEADER = "# Day 74 \u2014 Distribution scaling closeout lane"
 _REQUIRED_SECTIONS = [
@@ -370,9 +374,13 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "distribution-scaling-integration-brief.md", "# Day 74 integration brief\n")
     _write(target / "distribution-scaling-plan.md", "# Day 74 distribution scaling plan\n")
     _write(
-        target / "distribution-scaling-channel-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
+        target / "distribution-scaling-channel-controls-log.json",
+        json.dumps({"controls": []}, indent=2) + "\n",
     )
-    _write(target / "distribution-scaling-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "distribution-scaling-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "distribution-scaling-execution-log.md", "# Day 74 execution log\n")
     _write(
         target / "distribution-scaling-delivery-board.md",
@@ -407,10 +415,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day74_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_distribution_scaling_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Distribution Scaling Closeout checks")
@@ -443,5 +451,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

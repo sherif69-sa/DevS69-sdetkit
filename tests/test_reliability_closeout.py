@@ -110,8 +110,7 @@ def test_day47_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_day47_strict_fails_when_day46_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path
-        / "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
+        tmp_path / "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
     ).unlink()
     rc = d47.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

@@ -56,7 +56,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -116,20 +119,45 @@ def test_day85_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-closeout-summary.json"
+        tmp_path
+        / "artifacts/release-prioritization-pack/release-prioritization-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-closeout-summary.md"
+        tmp_path
+        / "artifacts/release-prioritization-pack/release-prioritization-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-plan.md").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-execution-log.md").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/release-prioritization-pack/evidence/release-prioritization-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-evidence-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-plan.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-prioritization-pack/release-prioritization-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-prioritization-pack/release-prioritization-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-prioritization-pack/release-prioritization-narrative-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-prioritization-pack/release-prioritization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/release-prioritization-pack/evidence/release-prioritization-execution-summary.json"
+    ).exists()
 
 
 def test_day85_strict_fails_without_day84(tmp_path: Path) -> None:

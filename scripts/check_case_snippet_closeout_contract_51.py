@@ -31,8 +31,7 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = (
-            root
-            / "docs/artifacts/case-snippet-closeout-pack/evidence/execution-summary.json"
+            root / "docs/artifacts/case-snippet-closeout-pack/evidence/execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")

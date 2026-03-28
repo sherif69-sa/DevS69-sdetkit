@@ -46,7 +46,7 @@ class _Key:
 
 
 class Cassette:
-    def init_(self, interactions: list[dict[str, Any]] | None = None) -> None:
+    def __init__(self, interactions: list[dict[str, Any]] | None = None) -> None:
         self.interactions: list[dict[str, Any]] = interactions or []
 
     def to_json(self) -> dict[str, Any]:
@@ -100,7 +100,7 @@ class Cassette:
 
 
 class CassetteReplayTransport(httpx.BaseTransport):
-    def init_(self, cassette: Cassette) -> None:
+    def __init__(self, cassette: Cassette) -> None:
         self._cassette = cassette
         self._i = 0
 
@@ -155,7 +155,7 @@ class CassetteReplayTransport(httpx.BaseTransport):
 
 
 class CassetteRecordTransport(httpx.BaseTransport):
-    def init_(
+    def __init__(
         self,
         cassette: Cassette,
         inner: httpx.BaseTransport,
@@ -183,7 +183,7 @@ class CassetteRecordTransport(httpx.BaseTransport):
 
 
 class AsyncCassetteReplayTransport(httpx.AsyncBaseTransport):
-    def init_(self, cassette: Cassette) -> None:
+    def __init__(self, cassette: Cassette) -> None:
         self._cassette = cassette
         self._i = 0
 
@@ -238,7 +238,7 @@ class AsyncCassetteReplayTransport(httpx.AsyncBaseTransport):
 
 
 class AsyncCassetteRecordTransport(httpx.AsyncBaseTransport):
-    def init_(
+    def __init__(
         self,
         cassette: Cassette,
         inner: httpx.AsyncBaseTransport,

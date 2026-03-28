@@ -42,8 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root
-        / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
+        root / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -107,7 +106,9 @@ def test_day58_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day58-pack/phase2-hardening-execution-log.md").exists()
     assert (tmp_path / "artifacts/day58-pack/phase2-hardening-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day58-pack/phase2-hardening-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day58-pack/evidence/phase2-hardening-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day58-pack/evidence/phase2-hardening-execution-summary.json"
+    ).exists()
 
 
 def test_day58_strict_fails_without_day57(tmp_path: Path) -> None:

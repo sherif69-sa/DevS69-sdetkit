@@ -305,7 +305,9 @@ def _emit_pack(base: Path, out_dir: str) -> list[str]:
 
     validation = root / "gitlab-ci-validation-commands.md"
     validation.write_text(
-        "\n".join(["# GitLab CI validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""])
+        "\n".join(
+            ["# GitLab CI validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```", ""]
+        )
         + "\n",
         encoding="utf-8",
     )
@@ -597,5 +599,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-governance-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY87_SUMMARY_PATH = "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json"
-_DAY87_BOARD_PATH = "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
+_DAY87_SUMMARY_PATH = (
+    "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json"
+)
+_DAY87_BOARD_PATH = (
+    "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/governance-priorities-plan.json"
 _SECTION_HEADER = "# Day 88 \u2014 Governance priorities closeout lane"
 _REQUIRED_SECTIONS = [
@@ -359,7 +363,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "governance-priorities-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "governance-priorities-evidence-brief.md", "# Day 88 governance priorities brief\n")
+    _write(
+        target / "governance-priorities-evidence-brief.md", "# Day 88 governance priorities brief\n"
+    )
     _write(target / "governance-priorities-plan.md", "# Day 88 governance priorities plan\n")
     _write(
         target / "governance-priorities-narrative-template-upgrade-ledger.json",
@@ -369,7 +375,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "governance-priorities-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "governance-priorities-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "governance-priorities-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "governance-priorities-execution-log.md", "# Day 88 execution log\n")
     _write(
         target / "governance-priorities-delivery-board.md",
@@ -404,11 +413,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
-
 def build_day88_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_governance_priorities_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 88 governance priorities closeout checks")
@@ -441,5 +449,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

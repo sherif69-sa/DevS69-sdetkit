@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-launch-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY72_SUMMARY_PATH = "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
-_DAY72_BOARD_PATH = "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
+_DAY72_SUMMARY_PATH = (
+    "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
+)
+_DAY72_BOARD_PATH = (
+    "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
+)
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/published-case-study.json"
 _SECTION_HEADER = "# Day 73 \u2014 Case-study launch closeout lane"
 _REQUIRED_SECTIONS = [
@@ -369,8 +373,13 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "case-study-launch-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "case-study-launch-integration-brief.md", "# Day 73 integration brief\n")
     _write(target / "case-study-launch-case-study-narrative.md", "# Day 73 case-study narrative\n")
-    _write(target / "case-study-launch-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "case-study-launch-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "case-study-launch-controls-log.json",
+        json.dumps({"controls": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "case-study-launch-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "case-study-launch-execution-log.md", "# Day 73 execution log\n")
     _write(
         target / "case-study-launch-delivery-board.md",
@@ -405,10 +414,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day73_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_case_study_launch_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Case Study Launch Closeout checks")
@@ -441,5 +450,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

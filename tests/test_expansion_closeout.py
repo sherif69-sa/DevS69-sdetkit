@@ -109,9 +109,7 @@ def test_day45_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day45_strict_fails_when_day44_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (
-        tmp_path / "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
-    ).unlink()
+    (tmp_path / "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json").unlink()
     rc = d45.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

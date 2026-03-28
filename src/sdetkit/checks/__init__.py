@@ -48,3 +48,13 @@ __all__ = [
     "CheckRunReport",
     "CheckRunner",
 ]
+
+
+from importlib import import_module
+from typing import Any
+
+
+def __getattr__(name: str) -> Any:
+    if name == "main_":
+        return import_module(".main", __name__)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -56,7 +56,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
+        root
+        / "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
     )
     board.write_text(
         "\n".join(

@@ -105,9 +105,7 @@ def test_day33_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day33_strict_fails_when_day32_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (
-        tmp_path / "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
-    ).unlink()
+    (tmp_path / "docs/artifacts/release-cadence-pack/release-cadence-summary.json").unlink()
     rc = d33.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

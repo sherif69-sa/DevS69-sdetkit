@@ -371,7 +371,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "launch-readiness-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "launch-readiness-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "launch-readiness-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "launch-readiness-execution-log.md", "# Day 86 execution log\n")
     _write(
         target / "launch-readiness-delivery-board.md",
@@ -406,10 +409,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_launch_readiness_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 86 launch readiness closeout checks")
@@ -442,5 +445,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

@@ -10,10 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-integration-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY63_SUMMARY_PATH = "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
-_DAY63_BOARD_PATH = (
-    "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
+_DAY63_SUMMARY_PATH = (
+    "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
 )
+_DAY63_BOARD_PATH = "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
 _WORKFLOW_PATH = ".github/workflows/advanced-github-actions-reference-64.yml"
 _SECTION_HEADER = "# Cycle 64 \u2014 Integration expansion #1 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -298,7 +298,9 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         misses.append(
             "Cycle 63 delivery board integrity is incomplete (needs >=5 items and Cycle 63 anchors)."
         )
-        handoff_actions.append("Repair Cycle 63 delivery board entries to include Cycle 63 anchors.")
+        handoff_actions.append(
+            "Repair Cycle 63 delivery board entries to include Cycle 63 anchors."
+        )
 
     if not missing_workflow_lines:
         wins.append("Advanced GitHub Actions workflow reference is fully locked for execution.")
@@ -372,9 +374,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     )
     _write(target / "integration-expansion-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "integration-expansion-integration-brief.md", "# Cycle 64 integration brief\n")
-    _write(target / "integration-expansion-workflow-blueprint.md", "# Cycle 64 workflow blueprint\n")
+    _write(
+        target / "integration-expansion-workflow-blueprint.md", "# Cycle 64 workflow blueprint\n"
+    )
     _write(target / "integration-expansion-matrix-plan.csv", "os,python-version,owner\n")
-    _write(target / "integration-expansion-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "integration-expansion-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "integration-expansion-execution-log.md", "# Cycle 64 execution log\n")
     _write(
         target / "integration-expansion-delivery-board.md",
@@ -409,10 +416,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_cycle64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_integration_expansion_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Cycle 64 integration expansion closeout checks")
@@ -445,5 +452,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

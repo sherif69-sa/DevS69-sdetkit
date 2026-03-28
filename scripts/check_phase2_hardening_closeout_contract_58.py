@@ -10,9 +10,7 @@ from sdetkit import phase2_hardening_closeout_58 as d58
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate Phase-2 hardening closeout contract"
-    )
+    parser = argparse.ArgumentParser(description="Validate Phase-2 hardening closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

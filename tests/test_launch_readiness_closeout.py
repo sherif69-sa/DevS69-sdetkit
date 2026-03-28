@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md"
+        root
+        / "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -117,17 +118,37 @@ def test_day86_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-evidence-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-evidence-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-plan.md").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-narrative-kpi-scorecard.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/launch-readiness-pack/launch-readiness-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-narrative-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-execution-log.md").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/launch-readiness-pack/evidence/launch-readiness-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/launch-readiness-pack/launch-readiness-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/launch-readiness-pack/evidence/launch-readiness-execution-summary.json"
+    ).exists()
 
 
 def test_day86_strict_fails_without_day85(tmp_path: Path) -> None:

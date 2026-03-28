@@ -954,5 +954,5 @@ def main(argv: list[str] | None = None) -> int:
     return rc
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

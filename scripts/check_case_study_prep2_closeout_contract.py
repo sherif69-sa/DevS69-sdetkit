@@ -5,6 +5,5 @@ Legacy alias: scripts/check_case_study_prep2_closeout_contract_70.py
 
 from check_case_study_prep2_closeout_contract_70 import main
 
-
 if __name__ == "main_":
     raise SystemExit(main())

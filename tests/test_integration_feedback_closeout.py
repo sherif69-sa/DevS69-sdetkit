@@ -42,8 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root
-        / "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json"
+        root / "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -121,15 +120,34 @@ def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/integration-feedback-pack/integration-feedback-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-integration-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-integration-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-plan.md").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-office-hours-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-execution-log.md").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/integration-feedback-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/integration-feedback-pack/evidence/integration-feedback-execution-summary.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-feedback-pack/integration-feedback-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-feedback-pack/integration-feedback-office-hours-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/integration-feedback-pack/integration-feedback-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-feedback-pack/evidence/integration-feedback-execution-summary.json"
+    ).exists()
 
 
 def test_day82_strict_fails_without_day81(tmp_path: Path) -> None:

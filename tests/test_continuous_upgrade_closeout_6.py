@@ -36,10 +36,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "scripts").mkdir(parents=True, exist_ok=True)
     (root / "scripts/check_continuous_upgrade_contract_6.py").write_text(
-        "from __future__ import annotations\n"
-        "\n"
-        "if __name__ == 'main_':\n"
-        "    raise SystemExit(0)\n",
+        "from __future__ import annotations\n\nif __name__ == 'main_':\n    raise SystemExit(0)\n",
         encoding="utf-8",
     )
 
@@ -208,8 +205,6 @@ def test_cycle6_strict_fails_without_day95(tmp_path: Path) -> None:
 
 def test_cycle6_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["continuous-upgrade-closeout-6", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["continuous-upgrade-closeout-6", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Continuous upgrade cycle 6 closeout summary" in capsys.readouterr().out

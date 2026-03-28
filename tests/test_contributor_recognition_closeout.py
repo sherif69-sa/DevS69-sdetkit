@@ -38,7 +38,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
+    )
     board.write_text(
         "\n".join(["# Day 75 delivery board", *["- [ ] Day 75 item" for _ in range(5)]]) + "\n",
         encoding="utf-8",
@@ -90,7 +93,9 @@ def test_day76_emit_pack_and_execute(tmp_path: Path) -> None:
         tmp_path / "artifacts/day76-pack/contributor-recognition-closeout-summary.json"
     ).exists()
     assert (tmp_path / "artifacts/day76-pack/contributor-recognition-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day76-pack/evidence/contributor-recognition-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day76-pack/evidence/contributor-recognition-execution-summary.json"
+    ).exists()
 
 
 def test_day76_strict_fails_without_day75_summary(tmp_path: Path) -> None:

@@ -10,9 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-distribution-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY35_SUMMARY_PATH = (
-    "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
-)
+_DAY35_SUMMARY_PATH = "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
 _DAY35_BOARD_PATH = "docs/artifacts/kpi-instrumentation-pack/delivery-board.md"
 _DAY35_SUMMARY_FALLBACK_PATH = (
     "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
@@ -192,7 +190,9 @@ def build_day36_distribution_closeout_summary(
         root / _DAY35_SUMMARY_PATH,
         root / _DAY35_SUMMARY_FALLBACK_PATH,
     )
-    day35_board = _resolve_existing_path(root / _DAY35_BOARD_PATH, root / _DAY35_BOARD_FALLBACK_PATH)
+    day35_board = _resolve_existing_path(
+        root / _DAY35_BOARD_PATH, root / _DAY35_BOARD_FALLBACK_PATH
+    )
     day35_score, day35_strict, day35_check_count = _load_day35(day35_summary)
     board_count, board_has_day36, board_has_day37 = _board_stats(day35_board)
 
@@ -421,9 +421,7 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(
-        target / "distribution-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
+    _write(target / "distribution-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "distribution-closeout-summary.md", _to_markdown(payload))
     _write(
         target / "distribution-message-kit.md",
@@ -548,5 +546,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

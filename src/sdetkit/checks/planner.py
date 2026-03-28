@@ -102,7 +102,7 @@ def classify_changed_files(changed_paths: tuple[str, ...]) -> tuple[str, ...]:
 
 
 class CheckPlanner:
-    def init_(self, snapshot: RegistrySnapshot) -> None:
+    def __init__(self, snapshot: RegistrySnapshot) -> None:
         self._snapshot = snapshot
 
     def plan(

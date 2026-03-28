@@ -5,6 +5,5 @@ Legacy alias: scripts/check_trust_assets_refresh_closeout_contract_75.py
 
 from check_trust_assets_refresh_closeout_contract_75 import main
 
-
 if __name__ == "main_":
     raise SystemExit(main())

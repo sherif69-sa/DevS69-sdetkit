@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md"
+    board = (
+        root / "docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -102,18 +104,18 @@ def test_day50_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/day50-pack/execution-prioritization-closeout-summary.json"
     ).exists()
-    assert (
-        tmp_path / "artifacts/day50-pack/execution-prioritization-closeout-summary.md"
-    ).exists()
+    assert (tmp_path / "artifacts/day50-pack/execution-prioritization-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day50-pack/execution-prioritization-brief.md").exists()
     assert (tmp_path / "artifacts/day50-pack/execution-prioritization-risk-register.csv").exists()
-    assert (
-        tmp_path / "artifacts/day50-pack/execution-prioritization-kpi-scorecard.json"
-    ).exists()
+    assert (tmp_path / "artifacts/day50-pack/execution-prioritization-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day50-pack/execution-prioritization-execution-log.md").exists()
     assert (tmp_path / "artifacts/day50-pack/execution-prioritization-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day50-pack/execution-prioritization-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day50-pack/evidence/execution-prioritization-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day50-pack/execution-prioritization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day50-pack/evidence/execution-prioritization-execution-summary.json"
+    ).exists()
 
 
 def test_day50_strict_fails_when_day49_inputs_missing(tmp_path: Path) -> None:

@@ -41,10 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 44 report\n", encoding="utf-8"
     )
 
-    summary = (
-        root
-        / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
-    )
+    summary = root / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -113,8 +110,7 @@ def test_day44_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_day44_strict_fails_when_day43_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path
-        / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
+        tmp_path / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
     ).unlink()
     rc = d44.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
+    board = (
+        root / "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -116,20 +118,47 @@ def test_day90_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-closeout-summary.json"
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-closeout-summary.md"
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-plan.md").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-execution-log.md").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/phase3-wrap-publication-pack/evidence/phase3-wrap-publication-execution-summary.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-evidence-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-plan.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-narrative-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/phase3-wrap-publication-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-wrap-publication-pack/evidence/phase3-wrap-publication-execution-summary.json"
+    ).exists()
 
 
 def test_day90_strict_fails_without_day89(tmp_path: Path) -> None:

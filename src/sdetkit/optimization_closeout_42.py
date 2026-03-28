@@ -10,10 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY41_SUMMARY_PATH = (
-    "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
+_DAY41_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
+_DAY41_BOARD_PATH = (
+    "docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md"
 )
-_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md"
 _DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -485,10 +485,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_optimization_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
@@ -519,5 +519,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

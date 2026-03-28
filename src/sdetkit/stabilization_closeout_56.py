@@ -365,15 +365,11 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(
-        target / "stabilization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
+    _write(target / "stabilization-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "stabilization-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "stabilization-brief.md", "# Day 56 stabilization brief\n")
     _write(target / "stabilization-risk-ledger.csv", "risk,owner,mitigation,status\n")
-    _write(
-        target / "stabilization-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
-    )
+    _write(target / "stabilization-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(target / "stabilization-execution-log.md", "# Day 56 execution log\n")
     _write(
         target / "stabilization-delivery-board.md",
@@ -408,10 +404,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day56_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_stabilization_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -446,5 +442,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

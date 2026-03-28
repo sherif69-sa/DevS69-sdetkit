@@ -42,8 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root
-        / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
+        root / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -107,14 +106,15 @@ def test_day57_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-execution-log.md").exists()
     assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/evidence/kpi-deep-audit-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day57-pack/evidence/kpi-deep-audit-execution-summary.json"
+    ).exists()
 
 
 def test_day57_strict_fails_without_day56(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path
-        / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
+        tmp_path / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
     ).unlink()
     assert d57.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

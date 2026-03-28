@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase3-wrap-publication-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY89_SUMMARY_PATH = "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
-_DAY89_BOARD_PATH = "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
+_DAY89_SUMMARY_PATH = (
+    "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
+)
+_DAY89_BOARD_PATH = (
+    "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/phase3-wrap-publication-plan.json"
 _CANONICAL_PACK_DIR = "docs/artifacts/phase3-wrap-publication-closeout-pack"
 _CANONICAL_SUMMARY_NAME = "phase3-wrap-publication-closeout-summary.json"
@@ -364,13 +368,12 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / _CANONICAL_SUMMARY_NAME,
         json.dumps(payload, indent=2) + "\n",
     )
+    _write(target / "phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n"
+        target / "phase3-wrap-publication-evidence-brief.md",
+        "# Day 90 phase-3 wrap publication brief\n",
     )
-    _write(target / "phase3-wrap-publication-evidence-brief.md", "# Day 90 phase-3 wrap publication brief\n")
-    _write(
-        target / "phase3-wrap-publication-plan.md", "# Day 90 phase-3 wrap publication plan\n"
-    )
+    _write(target / "phase3-wrap-publication-plan.md", "# Day 90 phase-3 wrap publication plan\n")
     _write(
         target / "phase3-wrap-publication-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -379,7 +382,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "phase3-wrap-publication-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "phase3-wrap-publication-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "phase3-wrap-publication-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "phase3-wrap-publication-execution-log.md", "# Day 90 execution log\n")
     _write(
         target / _CANONICAL_BOARD_NAME,
@@ -414,10 +420,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day90_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_phase3_wrap_publication_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 90 phase-3 wrap publication closeout checks")
@@ -450,5 +456,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

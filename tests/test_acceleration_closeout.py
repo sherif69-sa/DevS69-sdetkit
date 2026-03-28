@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import acceleration_closeout_43 as d42
+from sdetkit import cli
 
 
 def _seed_repo(root: Path) -> None:
@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md"
+    board = (
+        root / "docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [

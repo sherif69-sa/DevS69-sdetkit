@@ -69,7 +69,7 @@ DEFAULT_PROFILES: tuple[CheckProfile, ...] = (
 
 
 class CheckRegistry:
-    def init_(
+    def __init__(
         self,
         checks=DEFAULT_CHECKS,
         profiles: tuple[CheckProfile, ...] = DEFAULT_PROFILES,

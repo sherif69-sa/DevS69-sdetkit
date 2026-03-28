@@ -122,7 +122,9 @@ def test_day79_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-enterprise-execution-ledger.json"
     ).exists()
-    assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-enterprise-kpi-scorecard.json").exists()
+    assert (
+        tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-enterprise-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-execution-log.md").exists()
     assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-delivery-board.md").exists()
     assert (tmp_path / "artifacts/scale-upgrade-pack/scale-upgrade-validation-commands.md").exists()

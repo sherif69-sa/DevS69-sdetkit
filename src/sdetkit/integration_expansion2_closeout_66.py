@@ -394,13 +394,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "integration-expansion2-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(
-        target / "integration-expansion2-closeout-summary.md", _render_text(payload) + "\n"
-    )
+    _write(target / "integration-expansion2-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "integration-expansion2-integration-brief.md", "# Day 66 integration brief\n")
     _write(target / "integration-expansion2-pipeline-blueprint.md", "# Day 66 pipeline blueprint\n")
-    _write(target / "integration-expansion2-matrix-plan.json", json.dumps({"matrix": []}, indent=2) + "\n")
-    _write(target / "integration-expansion2-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "integration-expansion2-matrix-plan.json",
+        json.dumps({"matrix": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "integration-expansion2-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "integration-expansion2-execution-log.md", "# Day 66 execution log\n")
     _write(
         target / "integration-expansion2-delivery-board.md",
@@ -435,10 +439,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day66_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_integration_expansion2_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 66 integration expansion #2 closeout checks")
@@ -471,5 +475,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

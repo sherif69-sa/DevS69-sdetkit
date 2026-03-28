@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
+        root
+        / "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -119,8 +120,7 @@ def test_day65_emit_pack_and_execute(tmp_path: Path) -> None:
         tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-validation-commands.md"
     ).exists()
     assert (
-        tmp_path
-        / "artifacts/day65-pack/evidence/weekly-review-closeout-2-execution-summary.json"
+        tmp_path / "artifacts/day65-pack/evidence/weekly-review-closeout-2-execution-summary.json"
     ).exists()
 
 
@@ -137,8 +137,6 @@ def test_day65_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(
-        ["weekly-review-closeout-2", "--root", str(tmp_path), "--format", "text"]
-    )
+    alias_rc = cli.main(["weekly-review-closeout-2", "--root", str(tmp_path), "--format", "text"])
     assert alias_rc == 0
     assert "Weekly Review Closeout summary" in capsys.readouterr().out

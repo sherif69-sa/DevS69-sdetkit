@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-continuous-upgrade-closeout-9.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_PREV_CYCLE_SUMMARY_PATH = "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-closeout-summary-8.json"
-_PREV_CYCLE_BOARD_PATH = "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-delivery-board-8.md"
+_PREV_CYCLE_SUMMARY_PATH = (
+    "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-closeout-summary-8.json"
+)
+_PREV_CYCLE_BOARD_PATH = (
+    "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-delivery-board-8.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-plan-9.json"
 _SECTION_HEADER = "# Cycle 9 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -564,5 +568,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and strict_failed else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

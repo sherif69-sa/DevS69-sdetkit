@@ -10,15 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-snippet-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY50_SUMMARY_PATH = (
-    "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
-)
-_DAY50_BOARD_PATH = (
-    "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
-)
-_DAY50_LEGACY_SUMMARY_PATH = (
-    "docs/artifacts/execution-prioritization-closeout-pack-50/execution-prioritization-closeout-summary-50.json"
-)
+_DAY50_SUMMARY_PATH = "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
+_DAY50_BOARD_PATH = "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
+_DAY50_LEGACY_SUMMARY_PATH = "docs/artifacts/execution-prioritization-closeout-pack-50/execution-prioritization-closeout-summary-50.json"
 _DAY50_LEGACY_BOARD_PATH = (
     "docs/artifacts/execution-prioritization-closeout-pack-50/delivery-board-50.md"
 )
@@ -404,9 +398,7 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(
-        target / "case-snippet-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
+    _write(target / "case-snippet-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "case-snippet-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "case-snippet-brief.md",
@@ -486,10 +478,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_cycle51_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_case_snippet_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
@@ -520,5 +512,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

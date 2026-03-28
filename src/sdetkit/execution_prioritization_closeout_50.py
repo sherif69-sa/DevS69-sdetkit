@@ -401,9 +401,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "execution-prioritization-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(
-        target / "execution-prioritization-closeout-summary.md", _render_text(payload) + "\n"
-    )
+    _write(target / "execution-prioritization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "execution-prioritization-brief.md",
         "# Day 50 Execution Prioritization Brief\n\n- Objective: close Day 50 with measurable execution-board discipline and prioritized release storytelling gains.\n",
@@ -469,7 +467,9 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Execution prioritization closeout checks (legacy alias: day50-execution-prioritization-closeout)")
+    parser = argparse.ArgumentParser(
+        description="Execution prioritization closeout checks (legacy alias: day50-execution-prioritization-closeout)"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -480,10 +480,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_execution_prioritization_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
@@ -514,5 +514,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

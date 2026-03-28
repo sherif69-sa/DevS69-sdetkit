@@ -112,16 +112,33 @@ def test_day80_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-integration-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-integration-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-plan.md").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-partner-execution-ledger.json").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-partner-kpi-scorecard.json").exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-partner-execution-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-partner-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-execution-log.md").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/partner-outreach-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/partner-outreach-pack/evidence/partner-outreach-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/partner-outreach-pack/partner-outreach-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/partner-outreach-pack/evidence/partner-outreach-execution-summary.json"
+    ).exists()
 
 
 def test_day80_strict_fails_without_day79(tmp_path: Path) -> None:

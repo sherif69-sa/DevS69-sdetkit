@@ -97,7 +97,10 @@ def test_quickstart_emit_pack(tmp_path, capsys):
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
     assert len(data["pack_files"]) == 6
-    assert "docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-strict.yml" in data["pack_files"]
+    assert (
+        "docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-strict.yml"
+        in data["pack_files"]
+    )
 
 
 def test_quickstart_execute_writes_evidence(monkeypatch, tmp_path, capsys):

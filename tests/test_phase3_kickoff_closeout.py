@@ -56,7 +56,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -107,7 +110,9 @@ def test_day61_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-execution-log.md").exists()
     assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/evidence/phase3-kickoff-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day61-pack/evidence/phase3-kickoff-execution-summary.json"
+    ).exists()
 
 
 def test_day61_strict_fails_without_day60(tmp_path: Path) -> None:

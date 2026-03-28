@@ -10,9 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-experiment-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY36_SUMMARY_PATH = (
-    "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
-)
+_DAY36_SUMMARY_PATH = "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
 _DAY36_BOARD_PATH = "docs/artifacts/distribution-closeout-pack/delivery-board.md"
 _LEGACY_DAY36_SUMMARY_PATH = (
     "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
@@ -578,5 +576,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

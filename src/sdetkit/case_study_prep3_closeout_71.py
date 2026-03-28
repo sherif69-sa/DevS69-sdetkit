@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-prep3-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY70_SUMMARY_PATH = "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json"
-_DAY70_BOARD_PATH = "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md"
+_DAY70_SUMMARY_PATH = (
+    "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json"
+)
+_DAY70_BOARD_PATH = (
+    "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md"
+)
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/escalation-quality-case-study.json"
 _SECTION_HEADER = "# Day 71 — Case-study prep #3 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -412,10 +416,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day71_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_case_study_prep3_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Case Study Prep3 Closeout checks")
@@ -448,5 +452,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

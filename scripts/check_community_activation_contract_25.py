@@ -34,7 +34,8 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = (
-            root / "docs/artifacts/community-activation-pack/evidence/community-activation-execution-summary.json"
+            root
+            / "docs/artifacts/community-activation-pack/evidence/community-activation-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")

@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
+    board = (
+        root / "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -118,16 +120,38 @@ def test_day87_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/governance-handoff-pack/governance-handoff-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-evidence-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/governance-handoff-pack/governance-handoff-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-handoff-pack/governance-handoff-evidence-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-plan.md").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-execution-log.md").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/governance-handoff-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/governance-handoff-pack/evidence/governance-handoff-execution-summary.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-handoff-pack/governance-handoff-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-handoff-pack/governance-handoff-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-handoff-pack/governance-handoff-narrative-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-handoff-pack/governance-handoff-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-handoff-pack/governance-handoff-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-handoff-pack/governance-handoff-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-handoff-pack/evidence/governance-handoff-execution-summary.json"
+    ).exists()
 
 
 def test_day87_strict_fails_without_day86(tmp_path: Path) -> None:

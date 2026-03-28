@@ -360,7 +360,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n"
     )
     _write(target / "phase1-wrap-handoff-actions.md", handoff_md)
-    validation_md = "# Day 30 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    validation_md = (
+        "# Day 30 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    )
     _write(target / "phase1-wrap-validation-commands.md", validation_md)
 
 
@@ -449,5 +451,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

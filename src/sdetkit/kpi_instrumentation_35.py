@@ -464,7 +464,9 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "kpi-instrumentation-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(
+        target / "kpi-instrumentation-execution-summary.json", json.dumps(summary, indent=2) + "\n"
+    )
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -524,5 +526,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

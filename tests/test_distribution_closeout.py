@@ -41,10 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 36 report\n", encoding="utf-8"
     )
 
-    summary = (
-        root
-        / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
-    )
+    summary = root / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -99,22 +96,25 @@ def test_day36_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/distribution-closeout-pack/distribution-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/distribution-closeout-pack/distribution-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/distribution-closeout-pack/distribution-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/distribution-closeout-pack/distribution-message-kit.md").exists()
     assert (tmp_path / "artifacts/distribution-closeout-pack/launch-plan.csv").exists()
     assert (tmp_path / "artifacts/distribution-closeout-pack/experiment-backlog.md").exists()
     assert (tmp_path / "artifacts/distribution-closeout-pack/delivery-board.md").exists()
     assert (tmp_path / "artifacts/distribution-closeout-pack/validation-commands.md").exists()
-    assert (tmp_path / "artifacts/distribution-closeout-pack/evidence/execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/distribution-closeout-pack/evidence/execution-summary.json"
+    ).exists()
 
 
 def test_day36_strict_fails_when_day35_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (
-        tmp_path
-        / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
-    ).unlink()
+    (tmp_path / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json").unlink()
     rc = d36.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

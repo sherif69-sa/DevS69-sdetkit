@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+    board = (
+        root / "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -107,7 +109,9 @@ def test_day59_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day59-pack/phase3-preplan-execution-log.md").exists()
     assert (tmp_path / "artifacts/day59-pack/phase3-preplan-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day59-pack/phase3-preplan-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/evidence/phase3-preplan-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day59-pack/evidence/phase3-preplan-execution-summary.json"
+    ).exists()
 
 
 def test_day59_strict_fails_without_day58(tmp_path: Path) -> None:

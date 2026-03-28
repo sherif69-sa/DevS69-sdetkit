@@ -10,9 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY51_SUMMARY_PATH = (
-    "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
-)
+_DAY51_SUMMARY_PATH = "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
 _DAY51_BOARD_PATH = "docs/artifacts/case-snippet-closeout-pack/delivery-board.md"
 _SECTION_HEADER = "# Cycle 52 \u2014 Narrative closeout lane"
 _REQUIRED_SECTIONS = [
@@ -502,5 +500,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

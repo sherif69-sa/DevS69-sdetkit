@@ -11,7 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-continuous-upgrade-closeout-1.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _PHASE3_WRAP_PUBLICATION_SUMMARY_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
-_PHASE3_WRAP_PUBLICATION_BOARD_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
+_PHASE3_WRAP_PUBLICATION_BOARD_PATH = (
+    "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-plan-1.json"
 _SECTION_HEADER = "# Cycle 1 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -220,7 +222,9 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
     page_text = _read_text(root / _PAGE_PATH)
     page_lines = page_text.splitlines()
     top10_text = _read_text(root / _TOP10_PATH)
-    phase3_wrap_publication_summary, phase3_wrap_publication_board = _resolve_phase3_wrap_publication_inputs(root)
+    phase3_wrap_publication_summary, phase3_wrap_publication_board = (
+        _resolve_phase3_wrap_publication_inputs(root)
+    )
 
     phase3_wrap_publication_data = _load_json(phase3_wrap_publication_summary)
     phase3_wrap_publication_summary_data = (
@@ -274,7 +278,9 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "top10_cycle1_align",
             "weight": 5,
-            "passed": ("phase-3 wrap publication" in top10_text.lower() and "cycle 1" in top10_text.lower()),
+            "passed": (
+                "phase-3 wrap publication" in top10_text.lower() and "cycle 1" in top10_text.lower()
+            ),
             "evidence": "Phase-3 wrap publication + Cycle 1 strategy chain",
         },
         {
@@ -303,7 +309,10 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
             "check_id": "phase3_wrap_publication_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_phase3_wrap_publication,
-            "evidence": {"board_items": board_count, "contains_phase3_wrap_publication": board_has_phase3_wrap_publication},
+            "evidence": {
+                "board_items": board_count,
+                "contains_phase3_wrap_publication": board_has_phase3_wrap_publication,
+            },
         },
         {
             "check_id": "page_header",
@@ -377,9 +386,13 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
     handoff_actions: list[str] = []
 
     if phase3_wrap_publication_score >= 85 and phase3_wrap_publication_strict:
-        wins.append(f"Phase-3 wrap publication continuity baseline is stable with activation score={phase3_wrap_publication_score}.")
+        wins.append(
+            f"Phase-3 wrap publication continuity baseline is stable with activation score={phase3_wrap_publication_score}."
+        )
     else:
-        misses.append("Phase-3 wrap publication continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append(
+            "Phase-3 wrap publication continuity baseline is below the floor (<85) or not strict-pass."
+        )
         handoff_actions.append(
             "Re-run phase3-wrap-publication-closeout command and raise baseline quality above 85 with strict pass before Cycle 1 lock."
         )
@@ -392,7 +405,9 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
         misses.append(
             "Phase-3 wrap publication delivery board integrity is incomplete (needs >=5 items and phase-3 wrap publication anchors)."
         )
-        handoff_actions.append("Repair phase-3 wrap publication delivery board entries to include phase-3 wrap publication anchors.")
+        handoff_actions.append(
+            "Repair phase-3 wrap publication delivery board entries to include phase-3 wrap publication anchors."
+        )
 
     if not missing_plan_keys:
         wins.append("Cycle 1 continuous upgrade dataset is available for governance execution.")
@@ -593,5 +608,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and strict_failed else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

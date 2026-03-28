@@ -8,7 +8,9 @@ from pathlib import Path
 
 from sdetkit import launch_readiness_closeout_86 as lane
 
-_CANONICAL_EVIDENCE = "docs/artifacts/launch-readiness-closeout-pack/evidence/launch-readiness-execution-summary.json"
+_CANONICAL_EVIDENCE = (
+    "docs/artifacts/launch-readiness-closeout-pack/evidence/launch-readiness-execution-summary.json"
+)
 
 
 def main() -> int:

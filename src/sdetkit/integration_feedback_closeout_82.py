@@ -372,13 +372,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "integration-feedback-integration-brief.md", "# Day 82 integration brief\n")
     _write(target / "integration-feedback-plan.md", "# Day 82 integration feedback plan\n")
     _write(
-        target / "integration-feedback-template-upgrade-ledger.json", json.dumps({"upgrades": []}, indent=2) + "\n"
+        target / "integration-feedback-template-upgrade-ledger.json",
+        json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
         target / "integration-feedback-office-hours-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "integration-feedback-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "integration-feedback-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "integration-feedback-execution-log.md", "# Day 82 execution log\n")
     _write(
         target / "integration-feedback-delivery-board.md",
@@ -413,10 +417,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day82_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_integration_feedback_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 82 integration feedback closeout checks")
@@ -449,5 +453,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-governance-handoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY86_SUMMARY_PATH = "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json"
-_DAY86_BOARD_PATH = "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
+_DAY86_SUMMARY_PATH = (
+    "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json"
+)
+_DAY86_BOARD_PATH = (
+    "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/governance-handoff-plan.json"
 _SECTION_HEADER = "# Day 87 \u2014 Governance handoff closeout lane"
 _REQUIRED_SECTIONS = [
@@ -369,7 +373,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "governance-handoff-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "governance-handoff-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "governance-handoff-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "governance-handoff-execution-log.md", "# Day 87 execution log\n")
     _write(
         target / "governance-handoff-delivery-board.md",
@@ -404,11 +411,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
-
 def build_day87_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_governance_handoff_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 87 governance handoff closeout checks")
@@ -441,5 +447,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

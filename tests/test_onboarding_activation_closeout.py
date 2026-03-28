@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
+    board = (
+        root / "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -100,20 +102,34 @@ def test_cycle63_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
+        tmp_path
+        / "artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.md"
+        tmp_path
+        / "artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-launch-brief.md").exists()
-    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/orientation-script.md").exists()
-    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/ownership-matrix.csv").exists()
-    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/roadmap-voting-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-launch-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/orientation-script.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/ownership-matrix.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/roadmap-voting-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/execution-log.md").exists()
     assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/delivery-board.md").exists()
-    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/validation-commands.md").exists()
-    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/evidence/execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/evidence/execution-summary.json"
+    ).exists()
 
 
 def test_cycle63_strict_fails_without_day62(tmp_path: Path) -> None:
@@ -127,8 +143,6 @@ def test_cycle63_strict_fails_without_day62(tmp_path: Path) -> None:
 
 def test_cycle63_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["onboarding-activation-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["onboarding-activation-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Onboarding Activation Closeout summary" in capsys.readouterr().out

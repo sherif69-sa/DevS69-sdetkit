@@ -54,8 +54,8 @@ class CircuitOpenError(RuntimeError):
 
 
 class HttpStatusError(RuntimeError):
-    def init_(self, message: str, *, response: httpx.Response, body: bytes | None = None):
-        super().init_(message)
+    def __init__(self, message: str, *, response: httpx.Response, body: bytes | None = None):
+        super().__init__(message)
         self.response = response
         self.status_code = response.status_code
         try:
@@ -180,7 +180,7 @@ async def _emit_async(hook: Hook | AsyncHook | None, ev: ClientEvent) -> None:
 
 
 class SdetHttpClient:
-    def init_(
+    def __init__(
         self,
         client: httpx.Client,
         *,
@@ -736,7 +736,7 @@ class SdetHttpClient:
 
 
 class SdetAsyncHttpClient:
-    def init_(
+    def __init__(
         self,
         client: httpx.AsyncClient,
         *,

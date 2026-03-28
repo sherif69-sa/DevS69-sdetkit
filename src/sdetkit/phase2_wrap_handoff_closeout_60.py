@@ -358,7 +358,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "phase2-wrap-handoff-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "phase2-wrap-handoff-brief.md", "# Day 60 Phase-2 wrap + handoff brief\n")
     _write(target / "phase2-wrap-handoff-risk-ledger.csv", "risk,owner,mitigation,status\n")
-    _write(target / "phase2-wrap-handoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "phase2-wrap-handoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "phase2-wrap-handoff-execution-log.md", "# Day 60 execution log\n")
     _write(
         target / "phase2-wrap-handoff-delivery-board.md",
@@ -393,10 +395,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day60_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_phase2_wrap_handoff_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -431,5 +433,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

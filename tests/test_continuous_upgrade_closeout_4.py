@@ -34,10 +34,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/cycle-4-big-upgrade-report.md").write_text("# Cycle 4 report\n", encoding="utf-8")
     (root / "scripts").mkdir(parents=True, exist_ok=True)
     (root / "scripts/check_continuous_upgrade_contract_4.py").write_text(
-        "from __future__ import annotations\n"
-        "\n"
-        "if __name__ == 'main_':\n"
-        "    raise SystemExit(0)\n",
+        "from __future__ import annotations\n\nif __name__ == 'main_':\n    raise SystemExit(0)\n",
         encoding="utf-8",
     )
 
@@ -134,8 +131,7 @@ def test_cycle4_emit_pack_and_execute(tmp_path: Path) -> None:
         / "artifacts/continuous-upgrade-closeout-4-pack/continuous-upgrade-cycle4-evidence-brief.md"
     ).exists()
     assert (
-        tmp_path
-        / "artifacts/continuous-upgrade-closeout-4-pack/continuous-upgrade-cycle4-plan.md"
+        tmp_path / "artifacts/continuous-upgrade-closeout-4-pack/continuous-upgrade-cycle4-plan.md"
     ).exists()
     assert (
         tmp_path
@@ -207,8 +203,6 @@ def test_cycle4_strict_fails_without_cycle3(tmp_path: Path) -> None:
 
 def test_cycle4_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["continuous-upgrade-closeout-4", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["continuous-upgrade-closeout-4", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Cycle 4 continuous upgrade closeout summary" in capsys.readouterr().out

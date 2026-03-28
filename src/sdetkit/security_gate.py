@@ -222,7 +222,7 @@ class SecurityScanError(ValueError):
 
 
 class _RuleVisitor(ast.NodeVisitor):
-    def init_(self, rel_path: str, lines: list[str]) -> None:
+    def __init__(self, rel_path: str, lines: list[str]) -> None:
         self.rel_path = rel_path
         self.lines = lines
         self.findings: list[Finding] = []
@@ -1452,5 +1452,5 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

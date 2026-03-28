@@ -10,7 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-trust-assets-refresh-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY74_SUMMARY_PATH = "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json"
+_DAY74_SUMMARY_PATH = (
+    "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json"
+)
 _DAY74_BOARD_PATH = (
     "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md"
 )
@@ -368,8 +370,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "trust-assets-refresh-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "trust-assets-refresh-integration-brief.md", "# Day 75 integration brief\n")
     _write(target / "trust-assets-refresh-plan.md", "# Day 75 trust assets refresh plan\n")
-    _write(target / "trust-assets-refresh-trust-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "trust-assets-refresh-trust-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "trust-assets-refresh-trust-controls-log.json",
+        json.dumps({"controls": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "trust-assets-refresh-trust-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "trust-assets-refresh-execution-log.md", "# Day 75 execution log\n")
     _write(
         target / "trust-assets-refresh-delivery-board.md",
@@ -404,10 +412,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day75_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_trust_assets_refresh_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Trust Assets Refresh Closeout checks")
@@ -440,5 +448,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

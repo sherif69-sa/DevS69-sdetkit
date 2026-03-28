@@ -365,7 +365,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps({"executions": []}, indent=2) + "\n",
     )
     _write(
-        target / "scale-upgrade-enterprise-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+        target / "scale-upgrade-enterprise-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
     )
     _write(target / "scale-upgrade-execution-log.md", "# Scale upgrade execution log\n")
     _write(
@@ -403,10 +404,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day79_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_scale_upgrade_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Scale Upgrade Closeout checks")
@@ -439,5 +440,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

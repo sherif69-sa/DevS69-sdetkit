@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-evidence-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY83_SUMMARY_PATH = "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json"
-_DAY83_BOARD_PATH = "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md"
+_DAY83_SUMMARY_PATH = (
+    "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json"
+)
+_DAY83_BOARD_PATH = (
+    "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/evidence-narrative-plan.json"
 _SECTION_HEADER = "# Day 84 \u2014 Evidence narrative closeout lane"
 _REQUIRED_SECTIONS = [
@@ -369,7 +373,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "evidence-narrative-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "evidence-narrative-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "evidence-narrative-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "evidence-narrative-execution-log.md", "# Day 84 execution log\n")
     _write(
         target / "evidence-narrative-delivery-board.md",
@@ -404,10 +411,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day84_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_evidence_narrative_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 84 evidence narrative closeout checks")
@@ -440,5 +447,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

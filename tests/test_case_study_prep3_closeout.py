@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import case_study_prep3_closeout_71 as d71
+from sdetkit import cli
 
 
 def _seed_repo(root: Path) -> None:
@@ -54,7 +54,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md"
+    board = (
+        root / "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [

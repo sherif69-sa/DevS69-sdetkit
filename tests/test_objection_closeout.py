@@ -37,8 +37,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root
-        / "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
+        root / "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(

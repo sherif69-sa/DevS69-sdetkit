@@ -108,7 +108,9 @@ def build_day28_weekly_review_summary(
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
-    day25_primary = root / "docs/artifacts/community-activation-pack/community-activation-summary.json"
+    day25_primary = (
+        root / "docs/artifacts/community-activation-pack/community-activation-summary.json"
+    )
     day25_fallback = root / "docs/artifacts/community-activation-pack/day25-community-summary.json"
     day25_path = _resolve_existing_path(day25_primary, day25_fallback)
     external_contribution_path = (
@@ -436,5 +438,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

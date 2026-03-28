@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-prep2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY69_SUMMARY_PATH = "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json"
-_DAY69_BOARD_PATH = "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
+_DAY69_SUMMARY_PATH = (
+    "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json"
+)
+_DAY69_BOARD_PATH = (
+    "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
+)
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/triage-speed-case-study.json"
 _SECTION_HEADER = "# Day 70 \u2014 Case-study prep #2 closeout lane"
 _REQUIRED_SECTIONS = [
@@ -368,8 +372,12 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "case-study-prep2-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "case-study-prep2-integration-brief.md", "# Day 70 integration brief\n")
     _write(target / "case-study-prep2-case-study-narrative.md", "# Day 70 case-study narrative\n")
-    _write(target / "case-study-prep2-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "case-study-prep2-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "case-study-prep2-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
+    )
+    _write(
+        target / "case-study-prep2-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "case-study-prep2-execution-log.md", "# Day 70 execution log\n")
     _write(
         target / "case-study-prep2-delivery-board.md",
@@ -404,10 +412,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_case_study_prep2_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 70 case-study prep #2 closeout checks")
@@ -440,5 +448,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

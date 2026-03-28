@@ -5,8 +5,12 @@ from pathlib import Path
 
 PAGE = Path("docs/integrations-github-actions-quickstart.md")
 ARTIFACT = Path("docs/artifacts/github-actions-onboarding-sample.md")
-PACK_STRICT = Path("docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-strict.yml")
-PACK_NIGHTLY = Path("docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-nightly.yml")
+PACK_STRICT = Path(
+    "docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-strict.yml"
+)
+PACK_NIGHTLY = Path(
+    "docs/artifacts/github-actions-onboarding-pack/github-actions-sdetkit-nightly.yml"
+)
 EVIDENCE = Path(
     "docs/artifacts/github-actions-onboarding-pack/evidence/github-actions-onboarding-execution-summary.json"
 )

@@ -164,10 +164,7 @@ def test_cli_alias_resolver_fallback_and_hit(monkeypatch: pytest.MonkeyPatch) ->
         ),
     )
     monkeypatch.setattr(playbooks_cli, "_pkg_dir", lambda: Path("."))
-    assert (
-        cli._resolve_non_day_playbook_alias("weekly-review-closeout")
-        == "weekly-review-closeout"
-    )
+    assert cli._resolve_non_day_playbook_alias("weekly-review-closeout") == "weekly-review-closeout"
 
     def _boom(*_args, **_kwargs):
         raise RuntimeError("boom")

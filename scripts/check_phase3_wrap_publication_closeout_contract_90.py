@@ -8,10 +8,7 @@ from pathlib import Path
 
 from sdetkit import phase3_wrap_publication_closeout_90 as d90
 
-
-_CANONICAL_EVIDENCE = (
-    "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/phase3-wrap-publication-execution-summary.json"
-)
+_CANONICAL_EVIDENCE = "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/phase3-wrap-publication-execution-summary.json"
 
 
 def main() -> int:

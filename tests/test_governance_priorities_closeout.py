@@ -56,7 +56,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -116,20 +119,44 @@ def test_day88_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-closeout-summary.json"
+        tmp_path
+        / "artifacts/governance-priorities-pack/governance-priorities-closeout-summary.json"
     ).exists()
     assert (
         tmp_path / "artifacts/governance-priorities-pack/governance-priorities-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-plan.md").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-execution-log.md").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/governance-priorities-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/governance-priorities-pack/evidence/governance-priorities-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-evidence-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-plan.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-priorities-pack/governance-priorities-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-priorities-pack/governance-priorities-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-priorities-pack/governance-priorities-narrative-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-priorities-pack/governance-priorities-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-priorities-pack/governance-priorities-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-priorities-pack/evidence/governance-priorities-execution-summary.json"
+    ).exists()
 
 
 def test_day88_strict_fails_without_day87(tmp_path: Path) -> None:
