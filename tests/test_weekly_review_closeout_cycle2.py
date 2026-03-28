@@ -107,14 +107,21 @@ def test_day65_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-summary.json").exists()
     assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-summary.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-weekly-brief.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-kpi-dashboard.json").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-governance-decision-register.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/day65-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/evidence/day65-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-weekly-brief.md").exists()
+    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-kpi-dashboard.json").exists()
+    assert (
+        tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-governance-decision-register.md"
+    ).exists()
+    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-delivery-board.md").exists()
+    assert (
+        tmp_path / "artifacts/day65-pack/weekly-review-closeout-cycle2-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/day65-pack/evidence/weekly-review-closeout-cycle2-execution-summary.json"
+    ).exists()
 
 
 def test_day65_strict_fails_without_day64(tmp_path: Path) -> None:
