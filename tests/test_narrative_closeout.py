@@ -99,15 +99,15 @@ def test_day52_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day52-pack/day52-narrative-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-narrative-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-narrative-brief.md").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-proof-map.csv").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day52-pack/day52-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day52-pack/evidence/day52-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-brief.md").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-proof-map.csv").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day52-pack/narrative-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day52-pack/evidence/narrative-execution-summary.json").exists()
 
 
 def test_day52_strict_fails_when_day51_inputs_missing(tmp_path: Path) -> None:

@@ -385,19 +385,24 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day52-narrative-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day52-narrative-closeout-summary.md", _render_text(payload) + "\n")
+    summary_json = json.dumps(payload, indent=2) + "\n"
+    summary_md = _render_text(payload) + "\n"
+    _write(target / "narrative-closeout-summary.json", summary_json)
+    _write(target / "narrative-closeout-summary.md", summary_md)
+    # Legacy compatibility aliases
+    _write(target / "day52-narrative-closeout-summary.json", summary_json)
+    _write(target / "day52-narrative-closeout-summary.md", summary_md)
     _write(
-        target / "day52-narrative-brief.md",
+        target / "narrative-brief.md",
         "# Day 52 Narrative Brief\n\n- Objective: close Day 52 with measurable release-storytelling discipline and proof-backed narrative gains.\n",
     )
     _write(
-        target / "day52-proof-map.csv",
+        target / "narrative-proof-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "narrative-floor,qa-lead,docs-owner,2026-03-19T10:00:00Z,docs/integrations-narrative-closeout.md,python -m sdetkit narrative-closeout --format json --strict,failed-checks:0,narrative-drift\n",
     )
     _write(
-        target / "day52-narrative-kpi-scorecard.json",
+        target / "narrative-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -415,16 +420,30 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day52-execution-log.md",
+        target / "narrative-execution-log.md",
         "# Day 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and Day 53 expansion priorities.\n",
     )
     _write(
-        target / "day52-delivery-board.md",
+        target / "narrative-delivery-board.md",
         "# Day 52 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day52-validation-commands.md",
+        target / "narrative-validation-commands.md",
         "# Day 52 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
+
+    # Legacy compatibility aliases
+    _write(target / "day52-narrative-brief.md", _read(target / "narrative-brief.md"))
+    _write(target / "day52-proof-map.csv", _read(target / "narrative-proof-map.csv"))
+    _write(
+        target / "day52-narrative-kpi-scorecard.json",
+        _read(target / "narrative-kpi-scorecard.json"),
+    )
+    _write(target / "day52-execution-log.md", _read(target / "narrative-execution-log.md"))
+    _write(target / "day52-delivery-board.md", _read(target / "narrative-delivery-board.md"))
+    _write(
+        target / "day52-validation-commands.md",
+        _read(target / "narrative-validation-commands.md"),
     )
 
 
@@ -445,10 +464,9 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         }
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(
-        evidence_path / "day52-execution-summary.json",
-        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
-    )
+    summary = json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n"
+    _write(evidence_path / "narrative-execution-summary.json", summary)
+    _write(evidence_path / "day52-execution-summary.json", summary)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -465,10 +483,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_narrative_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)

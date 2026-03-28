@@ -10,10 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-docs-loop-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY52_SUMMARY_PATH = (
+_DAY52_SUMMARY_PATH = "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json"
+_DAY52_SUMMARY_FALLBACK_PATH = (
     "docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json"
 )
-_DAY52_BOARD_PATH = "docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
+_DAY52_BOARD_PATH = "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md"
+_DAY52_BOARD_FALLBACK_PATH = "docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
 _SECTION_HEADER = "# Day 53 \u2014 Docs loop optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 53 matters",
@@ -68,8 +70,9 @@ Day 53 closes with a major docs loop optimization upgrade that converts Day 52 n
 
 ## Required inputs (Day 52)
 
-- `docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json`
-- `docs/artifacts/narrative-closeout-pack/day52-delivery-board.md`
+- `docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json`
+- `docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md`
+- Compatibility fallback: day52-named files remain accepted.
 
 ## Day 53 command lane
 
@@ -174,8 +177,14 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day52_summary = root / _DAY52_SUMMARY_PATH
-    day52_board = root / _DAY52_BOARD_PATH
+    day52_summary_primary = root / _DAY52_SUMMARY_PATH
+    day52_summary_fallback = root / _DAY52_SUMMARY_FALLBACK_PATH
+    day52_summary = (
+        day52_summary_primary if day52_summary_primary.exists() else day52_summary_fallback
+    )
+    day52_board_primary = root / _DAY52_BOARD_PATH
+    day52_board_fallback = root / _DAY52_BOARD_FALLBACK_PATH
+    day52_board = day52_board_primary if day52_board_primary.exists() else day52_board_fallback
     day52_score, day52_strict, day52_check_count = _load_day52(day52_summary)
     board_count, board_has_day52, board_has_day53 = _board_stats(day52_board)
 
@@ -229,13 +238,13 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "day52_summary_present",
             "weight": 10,
             "passed": day52_summary.exists(),
-            "evidence": str(day52_summary),
+            "evidence": {"resolved": str(day52_summary), "primary": str(day52_summary_primary)},
         },
         {
             "check_id": "day52_delivery_board_present",
             "weight": 8,
             "passed": day52_board.exists(),
-            "evidence": str(day52_board),
+            "evidence": {"resolved": str(day52_board), "primary": str(day52_board_primary)},
         },
         {
             "check_id": "day52_quality_floor",
@@ -334,9 +343,11 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "day52_summary": str(day52_summary.relative_to(root))
             if day52_summary.exists()
             else str(day52_summary),
+            "day52_summary_primary": str(day52_summary_primary.relative_to(root)),
             "day52_delivery_board": str(day52_board.relative_to(root))
             if day52_board.exists()
             else str(day52_board),
+            "day52_delivery_board_primary": str(day52_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
@@ -385,19 +396,24 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day53-docs-loop-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day53-docs-loop-closeout-summary.md", _render_text(payload) + "\n")
+    summary_json = json.dumps(payload, indent=2) + "\n"
+    summary_md = _render_text(payload) + "\n"
+    _write(target / "docs-loop-closeout-summary.json", summary_json)
+    _write(target / "docs-loop-closeout-summary.md", summary_md)
+    # Legacy compatibility aliases
+    _write(target / "day53-docs-loop-closeout-summary.json", summary_json)
+    _write(target / "day53-docs-loop-closeout-summary.md", summary_md)
     _write(
-        target / "day53-docs-loop-brief.md",
+        target / "docs-loop-brief.md",
         "# Day 53 Docs-loop Brief\n\n- Objective: close Day 53 with measurable docs-loop optimization gains and proof-backed cross-link quality.\n",
     )
     _write(
-        target / "day53-cross-link-map.csv",
+        target / "docs-loop-cross-link-map.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "docs-loop-floor,qa-lead,docs-owner,2026-03-20T10:00:00Z,docs/integrations-docs-loop-closeout.md,python -m sdetkit docs-loop-closeout --format json --strict,failed-checks:0,link-drift\n",
     )
     _write(
-        target / "day53-docs-loop-kpi-scorecard.json",
+        target / "docs-loop-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -415,16 +431,30 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day53-execution-log.md",
+        target / "docs-loop-execution-log.md",
         "# Day 53 Execution Log\n\n- [ ] 2026-03-20: Record misses, wins, and Day 54 re-engagement priorities.\n",
     )
     _write(
-        target / "day53-delivery-board.md",
+        target / "docs-loop-delivery-board.md",
         "# Day 53 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day53-validation-commands.md",
+        target / "docs-loop-validation-commands.md",
         "# Day 53 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+    )
+
+    # Legacy compatibility aliases
+    _write(target / "day53-docs-loop-brief.md", _read(target / "docs-loop-brief.md"))
+    _write(target / "day53-cross-link-map.csv", _read(target / "docs-loop-cross-link-map.csv"))
+    _write(
+        target / "day53-docs-loop-kpi-scorecard.json",
+        _read(target / "docs-loop-kpi-scorecard.json"),
+    )
+    _write(target / "day53-execution-log.md", _read(target / "docs-loop-execution-log.md"))
+    _write(target / "day53-delivery-board.md", _read(target / "docs-loop-delivery-board.md"))
+    _write(
+        target / "day53-validation-commands.md",
+        _read(target / "docs-loop-validation-commands.md"),
     )
 
 
@@ -445,10 +475,9 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         }
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
-    _write(
-        evidence_path / "day53-execution-summary.json",
-        json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
-    )
+    summary = json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n"
+    _write(evidence_path / "docs-loop-execution-summary.json", summary)
+    _write(evidence_path / "day53-execution-summary.json", summary)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -465,10 +494,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_docs_loop_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)

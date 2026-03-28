@@ -41,9 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 53 report\n", encoding="utf-8"
     )
 
-    summary = (
-        root / "docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json"
-    )
+    summary = root / "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -55,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
+    board = root / "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -98,23 +96,20 @@ def test_day53_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day53-pack/day53-docs-loop-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-docs-loop-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-docs-loop-brief.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-cross-link-map.csv").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-docs-loop-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/day53-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/evidence/day53-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-brief.md").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-cross-link-map.csv").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day53-pack/docs-loop-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day53-pack/evidence/docs-loop-execution-summary.json").exists()
 
 
 def test_day53_strict_fails_when_day52_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (
-        tmp_path
-        / "docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json"
-    ).unlink()
+    (tmp_path / "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json").unlink()
     rc = d53.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
