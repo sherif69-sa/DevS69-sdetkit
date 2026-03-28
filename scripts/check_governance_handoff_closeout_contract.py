@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day87_governance_handoff_closeout as d87
+from sdetkit import governance_handoff_closeout_87 as d87
 
 _CANONICAL_EVIDENCE = (
     "docs/artifacts/governance-handoff-closeout-pack/evidence/governance-handoff-execution-summary.json"
@@ -51,5 +51,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

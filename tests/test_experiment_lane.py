@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day37_experiment_lane as d37
+from sdetkit import experiment_lane_37 as d37
 
 
 def _seed_repo(root: Path) -> None:

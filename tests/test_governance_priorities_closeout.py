@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day88_governance_priorities_closeout as d88
+from sdetkit import governance_priorities_closeout_88 as d88
 
 
 def _seed_repo(root: Path) -> None:

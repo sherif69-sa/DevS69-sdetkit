@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_execution_prioritization_closeout_contract_50.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "{\n  \"errors\": [],\n  \"score\": 100\n}\n",
+  "stderr": ""
+}

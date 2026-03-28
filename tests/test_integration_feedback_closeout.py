@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day82_integration_feedback_closeout as d82
+from sdetkit import integration_feedback_closeout_82 as d82
 
 
 def _seed_repo(root: Path) -> None:

@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day77_community_touchpoint_closeout as d77
+from sdetkit import community_touchpoint_closeout_77 as d77
 
 
 def main() -> int:
@@ -55,5 +55,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

@@ -28,13 +28,13 @@ def test_main_help_has_prog_kvcli_and_exits_zero(capsys):
 
 def test_main_argument_parser_passes_prog_and_add_help_explicit(monkeypatch):
     calls = []
-    orig = argparse.ArgumentParser.__init__
+    orig = argparse.ArgumentParser.init_
 
     def wrapped(self, *args, **kwargs):
         calls.append(kwargs.copy())
         return orig(self, *args, **kwargs)
 
-    monkeypatch.setattr(argparse.ArgumentParser, "__init__", wrapped)
+    monkeypatch.setattr(argparse.ArgumentParser, "init_", wrapped)
 
     rc = kvcli.main(["--text", "a=1"])
     assert rc == 0

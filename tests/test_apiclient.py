@@ -109,7 +109,7 @@ def test_fetch_json_dict_status_code_edges_mutmut():
     from sdetkit.apiclient import fetch_json_dict
 
     class Resp:
-        def __init__(self, status_code, payload):
+        def init_(self, status_code, payload):
             self.status_code = status_code
             self._payload = payload
             self.json_calls = 0
@@ -119,7 +119,7 @@ def test_fetch_json_dict_status_code_edges_mutmut():
             return self._payload
 
     class Client:
-        def __init__(self, resp):
+        def init_(self, resp):
             self.resp = resp
             self.calls = 0
 
@@ -149,7 +149,7 @@ def test_fetch_json_dict_retries_stop_after_success_mutmut():
     from sdetkit.apiclient import fetch_json_dict
 
     class Resp:
-        def __init__(self, status_code, payload):
+        def init_(self, status_code, payload):
             self.status_code = status_code
             self._payload = payload
 
@@ -157,7 +157,7 @@ def test_fetch_json_dict_retries_stop_after_success_mutmut():
             return self._payload
 
     class Client:
-        def __init__(self, actions):
+        def init_(self, actions):
             self.actions = list(actions)
             self.calls = 0
 
@@ -182,7 +182,7 @@ def test_fetch_json_dict_retries_exhausted_call_count_mutmut():
     from sdetkit.apiclient import fetch_json_dict
 
     class Client:
-        def __init__(self, exc):
+        def init_(self, exc):
             self.exc = exc
             self.calls = 0
 
@@ -205,7 +205,7 @@ def test_fetch_json_dict_timeout_is_timeout_error_mutmut():
     from sdetkit.apiclient import fetch_json_dict
 
     class Client:
-        def __init__(self, exc):
+        def init_(self, exc):
             self.exc = exc
             self.calls = 0
 

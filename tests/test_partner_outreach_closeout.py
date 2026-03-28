@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day80_partner_outreach_closeout as d80
+from sdetkit import partner_outreach_closeout_80 as d80
 
 
 def _seed_repo(root: Path) -> None:

@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day89_governance_scale_closeout as d89
+from sdetkit import governance_scale_closeout_89 as d89
 
 _CANONICAL_EVIDENCE = "docs/artifacts/governance-scale-closeout-pack/evidence/governance-scale-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

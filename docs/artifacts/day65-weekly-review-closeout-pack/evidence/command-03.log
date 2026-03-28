@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_day65_weekly_review_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "weekly-review-closeout-cycle2 contract check passed\n",
-  "stderr": ""
-}

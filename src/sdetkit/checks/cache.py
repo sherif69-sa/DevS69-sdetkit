@@ -20,7 +20,7 @@ _IGNORED_PARTS = {
 
 
 class CheckCache:
-    def __init__(self, base_dir: Path, *, enabled: bool = True) -> None:
+    def init_(self, base_dir: Path, *, enabled: bool = True) -> None:
         self._base_dir = base_dir
         self.enabled = enabled
         self._fingerprint_cache: dict[tuple[str, ...], str] = {}

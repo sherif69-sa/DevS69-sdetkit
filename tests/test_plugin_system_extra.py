@@ -6,7 +6,7 @@ from sdetkit import plugin_system as ps
 
 
 class _EP:
-    def __init__(self, name, value, boom=False):
+    def init_(self, name, value, boom=False):
         self.name = name
         self._value = value
         self._boom = boom

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day39_playbook_post as d39
+from sdetkit import playbook_post_39 as d39
 
 
 def _seed_repo(root: Path) -> None:

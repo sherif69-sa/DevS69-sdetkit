@@ -162,7 +162,7 @@ def test_apiget_allow_scheme_insecure_and_query_errors(monkeypatch, capsys):
 
 def test_apiget_exception_handlers_timeout_circuit_and_value(monkeypatch, capsys):
     class _FakeClient:
-        def __init__(self, *_a, **_k):
+        def init_(self, *_a, **_k):
             pass
 
         def __enter__(self):
@@ -172,21 +172,21 @@ def test_apiget_exception_handlers_timeout_circuit_and_value(monkeypatch, capsys
             return False
 
     class _RaisesTimeout:
-        def __init__(self, *_a, **_k):
+        def init_(self, *_a, **_k):
             pass
 
         def get_json_any(self, *_a, **_k):
             raise TimeoutError("x")
 
     class _RaisesCircuit:
-        def __init__(self, *_a, **_k):
+        def init_(self, *_a, **_k):
             pass
 
         def get_json_any(self, *_a, **_k):
             raise apiget.CircuitOpenError("open")
 
     class _RaisesValue:
-        def __init__(self, *_a, **_k):
+        def init_(self, *_a, **_k):
             pass
 
         def get_json_any(self, *_a, **_k):

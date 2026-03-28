@@ -19,7 +19,7 @@ Cycle 51 closes with a major case-snippet upgrade that converts Cycle 50 executi
 python -m sdetkit case-snippet-closeout --format json --strict
 python -m sdetkit case-snippet-closeout --emit-pack-dir docs/artifacts/cycle51-case-snippet-closeout-pack --format json --strict
 python -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/cycle51-case-snippet-closeout-pack/evidence --format json --strict
-python scripts/check_day51_case_snippet_closeout_contract.py
+python scripts/check_case_snippet_closeout_contract_51.py
 ```
 
 ## Case snippet closeout contract

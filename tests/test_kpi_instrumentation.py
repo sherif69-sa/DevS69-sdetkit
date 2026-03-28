@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day35_kpi_instrumentation as d35
+from sdetkit import kpi_instrumentation_35 as d35
 
 
 def _seed_repo(root: Path) -> None:

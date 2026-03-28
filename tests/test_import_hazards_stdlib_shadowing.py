@@ -36,7 +36,7 @@ def test_find_stdlib_shadowing_flags_top_level_package_dir(tmp_path: Path) -> No
 
     pkg = tmp_path / "src" / name
     pkg.mkdir(parents=True)
-    (pkg / "__init__.py").write_text("x = 1\n", encoding="utf-8")
+    (pkg / "init_.py").write_text("x = 1\n", encoding="utf-8")
 
     got = find_stdlib_shadowing(tmp_path)
     assert got == [f"src/{name}"]

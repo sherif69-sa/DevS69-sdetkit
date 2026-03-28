@@ -28,7 +28,7 @@ def _seed_repo(root: Path) -> None:
     (root / "README.md").write_text("hello\n", encoding="utf-8")
     src = root / "src" / "demo_repo"
     src.mkdir(parents=True, exist_ok=True)
-    (src / "__init__.py").write_text("", encoding="utf-8")
+    (src / "init_.py").write_text("", encoding="utf-8")
 
 
 def _run_audit(root: Path, fmt: str) -> tuple[int, str]:

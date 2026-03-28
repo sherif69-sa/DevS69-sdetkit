@@ -70,14 +70,14 @@ DAY1_TO_6: tuple[DayShipped, ...] = (
         1,
         "Core positioning + role onboarding",
         "docs/impact-1-ultra-upgrade-report.md",
-        "docs/artifacts/day1-onboarding-sample.md",
+        "docs/artifacts/onboarding-sample-1.md",
         "python -m sdetkit onboarding --format text",
     ),
     DayShipped(
         2,
         "60-second demo workflow",
         "docs/impact-2-ultra-upgrade-report.md",
-        "docs/artifacts/day2-demo-sample.md",
+        "docs/artifacts/demo-sample-2.md",
         "python -m sdetkit demo --execute --format text",
     ),
     DayShipped(
@@ -91,21 +91,21 @@ DAY1_TO_6: tuple[DayShipped, ...] = (
         4,
         "Template/skill expansion run-all",
         "docs/impact-4-ultra-upgrade-report.md",
-        "docs/artifacts/day4-skills-sample.md",
+        "docs/artifacts/skills-sample-4.md",
         "python -m sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs",
     ),
     DayShipped(
         5,
         "Cross-platform onboarding snippets",
         "docs/impact-5-ultra-upgrade-report.md",
-        "docs/artifacts/day5-platform-onboarding-sample.md",
+        "docs/artifacts/platform-onboarding-sample-5.md",
         "python -m sdetkit onboarding --format text --platform all",
     ),
     DayShipped(
         6,
         "Docs conversion QA gate",
         "docs/impact-6-ultra-upgrade-report.md",
-        "docs/artifacts/day6-conversion-qa-sample.md",
+        "docs/artifacts/conversion-qa-sample-6.md",
         "python -m sdetkit docs-quality --format text",
     ),
 )
@@ -115,15 +115,15 @@ DAY8_TO_13: tuple[DayShipped, ...] = (
         8,
         "Good-first-issue accelerator pack",
         "docs/impact-8-ultra-upgrade-report.md",
-        "docs/artifacts/day8-good-first-issues-sample.md",
-        "python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/day8-good-first-issues-sample.md --strict",
+        "docs/artifacts/good-first-issues-sample-8.md",
+        "python -m sdetkit contributor-funnel --format markdown --output docs/artifacts/good-first-issues-sample-8.md --strict",
     ),
     DayShipped(
         9,
         "Triage-ready issue + PR templates",
         "docs/impact-9-ultra-upgrade-report.md",
-        "docs/artifacts/day9-triage-templates-sample.md",
-        "python -m sdetkit triage-templates --format markdown --output docs/artifacts/day9-triage-templates-sample.md --strict",
+        "docs/artifacts/triage-templates-sample-9.md",
+        "python -m sdetkit triage-templates --format markdown --output docs/artifacts/triage-templates-sample-9.md --strict",
     ),
     DayShipped(
         10,
@@ -670,5 +670,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

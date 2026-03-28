@@ -8,14 +8,14 @@ from sdetkit import playbooks_cli as pc
 
 
 def test_alias_helpers_and_discovery(tmp_path: Path) -> None:
-    (tmp_path / "day77_community_touchpoint_closeout.py").write_text("x", encoding="utf-8")
+    (tmp_path / "community_touchpoint_closeout_77.py").write_text("x", encoding="utf-8")
     (tmp_path / "day99_custom.py").write_text("x", encoding="utf-8")
     (tmp_path / "not_legacy.py").write_text("x", encoding="utf-8")
 
     mods = pc._discover_legacy_modules(tmp_path)
-    assert "day77_community_touchpoint_closeout" in mods
+    assert "community_touchpoint_closeout_77" in mods
     assert (
-        pc._alias_for_series_closeout("day77_community_touchpoint_closeout")
+        pc._alias_for_series_closeout("community_touchpoint_closeout_77")
         == "community-touchpoint-closeout"
     )
     assert pc._alias_for_series_module("day99_custom") == "custom"

@@ -127,7 +127,7 @@ async def test_async_replay_exhaustion_and_invalid_shapes(
 
 
 class _AsyncInner(httpx.AsyncBaseTransport):
-    def __init__(self) -> None:
+    def init_(self) -> None:
         self.calls: list[str] = []
         self.closed = False
 

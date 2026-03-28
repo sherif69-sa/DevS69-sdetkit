@@ -1,0 +1,216 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from sdetkit import cli
+from sdetkit import continuous_upgrade_closeout_8 as d98
+
+
+def _seed_repo(root: Path) -> None:
+    (root / "templates/ci/gitlab").mkdir(parents=True, exist_ok=True)
+    (root / "templates/ci/jenkins").mkdir(parents=True, exist_ok=True)
+    (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
+    (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
+    (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
+    (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
+    (root / "README.md").write_text(
+        "docs/integrations-continuous-upgrade-closeout-8.md\ncontinuous-upgrade-cycle8-closeout\n",
+        encoding="utf-8",
+    )
+    (root / "docs").mkdir(parents=True, exist_ok=True)
+    (root / "docs/index.md").write_text(
+        "continuous-upgrade-cycle8-big-upgrade-report.md\nintegrations-continuous-upgrade-cycle8-closeout.md\n",
+        encoding="utf-8",
+    )
+    (root / "docs/top-10-github-strategy.md").write_text(
+        "- **Cycle 7 — Continuous upgrade closeout lane:** close Cycle 7 continuous-upgrade quality loop.\n"
+        "- **Cycle 8 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
+        encoding="utf-8",
+    )
+    (root / "docs/integrations-continuous-upgrade-closeout-8.md").write_text(
+        d98._CYCLE8_DEFAULT_PAGE, encoding="utf-8"
+    )
+    (root / "docs/continuous-upgrade-big-upgrade-report-8.md").write_text(
+        "# Cycle 8 report\n", encoding="utf-8"
+    )
+    (root / "scripts").mkdir(parents=True, exist_ok=True)
+    (root / "scripts/check_continuous_upgrade_contract_8.py").write_text(
+        "from __future__ import annotations\n"
+        "\n"
+        "if __name__ == 'main_':\n"
+        "    raise SystemExit(0)\n",
+        encoding="utf-8",
+    )
+
+    summary = (
+        root
+        / "docs/artifacts/continuous-upgrade-closeout-pack-7/continuous-upgrade-closeout-summary-7.json"
+    )
+    summary.parent.mkdir(parents=True, exist_ok=True)
+    summary.write_text(
+        json.dumps(
+            {
+                "summary": {"activation_score": 100, "strict_pass": True},
+                "checks": [{"passed": True}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    board = (
+        root
+        / "docs/artifacts/continuous-upgrade-closeout-pack-7/continuous-upgrade-delivery-board-7.md"
+    )
+    board.write_text(
+        "\n".join(
+            [
+                "# Cycle 7 delivery board",
+                "- [ ] Cycle 7 evidence brief committed",
+                "- [ ] Cycle 7 continuous upgrade plan committed",
+                "- [ ] Cycle 7 upgrade template upgrade ledger exported",
+                "- [ ] Cycle 7 storyline outcomes ledger exported",
+                "- [ ] Next-impact roadmap draft captured from Cycle 7 outcomes",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    plan = root / "docs/roadmap/plans/continuous-upgrade-plan-8.json"
+    plan.write_text(
+        json.dumps(
+            {
+                "plan_id": "cycle8-continuous-upgrade-001",
+                "contributors": ["maintainers", "release-ops"],
+                "upgrade_channels": ["readme", "docs-index", "cli-lanes"],
+                "baseline": {"strict_pass_rate": 0.9, "doc_link_coverage": 0.88},
+                "target": {"strict_pass_rate": 1.0, "doc_link_coverage": 0.97},
+                "owner": "release-ops",
+                "rollback_owner": "incident-ops",
+                "confidence_floor": 0.9,
+                "cadence_days": 7,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_cycle8_json(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    rc = d98.main(["--root", str(tmp_path), "--format", "json", "--strict"])
+    assert rc == 0
+    out = json.loads(capsys.readouterr().out)
+    assert out["name"] == "continuous-upgrade-cycle8-closeout"
+    assert out["summary"]["activation_score"] >= 95
+
+
+def test_cycle8_emit_pack_and_execute(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    rc = d98.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--emit-pack-dir",
+            "artifacts/continuous-upgrade-cycle8-closeout-pack",
+            "--execute",
+            "--evidence-dir",
+            "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 0
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-evidence-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-plan.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-upgrade-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-upgrade-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/continuous-upgrade-cycle8-validation-commands.md"
+    ).exists()
+    execution_summary = (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence/cycle8-execution-summary.json"
+    )
+    assert execution_summary.exists()
+    execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
+    assert execution_data["failed_commands"] == 0
+    assert execution_data["strict_pass"] is True
+
+
+def test_cycle8_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
+    _seed_repo(tmp_path)
+    monkeypatch.setattr(d98, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
+    rc = d98.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--execute",
+            "--evidence-dir",
+            "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence",
+            "--format",
+            "json",
+            "--strict",
+        ]
+    )
+    assert rc == 1
+    execution_summary = (
+        tmp_path
+        / "artifacts/continuous-upgrade-cycle8-closeout-pack/evidence/cycle8-execution-summary.json"
+    )
+    execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
+    assert execution_data["failed_commands"] == 1
+    assert execution_data["strict_pass"] is False
+
+
+def test_cycle8_strict_fails_without_cycle7(tmp_path: Path) -> None:
+    _seed_repo(tmp_path)
+    (
+        tmp_path
+        / "docs/artifacts/continuous-upgrade-closeout-pack-7/continuous-upgrade-closeout-summary-7.json"
+    ).unlink()
+    assert d98.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
+
+
+def test_cycle8_cli_dispatch(tmp_path: Path, capsys) -> None:
+    _seed_repo(tmp_path)
+    rc = cli.main(
+        ["continuous-upgrade-cycle8-closeout", "--root", str(tmp_path), "--format", "text"]
+    )
+    assert rc == 0
+    assert "Cycle 8 continuous upgrade closeout summary" in capsys.readouterr().out

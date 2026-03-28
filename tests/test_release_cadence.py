@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day32_release_cadence as d32
+from sdetkit import release_cadence_32 as d32
 
 
 def _seed_repo(root: Path) -> None:

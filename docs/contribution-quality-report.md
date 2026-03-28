@@ -8,7 +8,7 @@ Contribution-quality reporting provides a unified **quality + contribution delta
 
 - New CLI command: `sdetkit quality-contribution-delta` with velocity score, stability score, recommendation engine, and strict delta gates.
 - New contribution-quality sample artifact and expanded emitted pack under `docs/artifacts/contribution-quality-report-pack` (summary, scorecard, action plan, remediation checklist).
-- New contract checker: `scripts/check_day17_quality_contribution_delta_contract.py`.
+- New contract checker: `scripts/check_quality_contribution_delta_contract_17.py`.
 - CLI dispatcher and help coverage updated to include `quality-contribution-delta`.
 
 ## Validation commands
@@ -16,7 +16,7 @@ Contribution-quality reporting provides a unified **quality + contribution delta
 ```bash
 python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/contribution-quality-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json --format json --strict
 python -m sdetkit contribution-quality-report --current-signals-file docs/artifacts/contribution-quality-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-baseline.json --emit-pack-dir docs/artifacts/contribution-quality-report-pack --format json --strict
-python scripts/check_day17_quality_contribution_delta_contract.py
+python scripts/check_quality_contribution_delta_contract_17.py
 ```
 
 ## Closeout

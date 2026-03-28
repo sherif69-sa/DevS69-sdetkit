@@ -4,7 +4,7 @@
       "fingerprint": "6b6a043fa9ea4c03494cebe9",
       "line": 245,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/continuous_upgrade_cycle2_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_closeout_2.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -12,7 +12,7 @@
       "fingerprint": "33131d9c2ef60322eff7f7ad",
       "line": 245,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/continuous_upgrade_cycle3_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_closeout_3.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -20,7 +20,7 @@
       "fingerprint": "a20f336350504c6d539ef1b5",
       "line": 249,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/continuous_upgrade_cycle4_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_closeout_4.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -28,7 +28,7 @@
       "fingerprint": "9be88be70baceb3e627c835d",
       "line": 249,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/continuous_upgrade_cycle5_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_closeout_5.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -36,7 +36,7 @@
       "fingerprint": "15969addd1290d038e3a540d",
       "line": 249,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/continuous_upgrade_cycle6_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_closeout_6.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     },
@@ -44,7 +44,7 @@
       "fingerprint": "913e5745a18338a53ac4dae6",
       "line": 249,
       "message": "high-entropy string literal detected.",
-      "path": "src/sdetkit/continuous_upgrade_cycle7_closeout.py",
+      "path": "src/sdetkit/continuous_upgrade_closeout_7.py",
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
       "severity": "warn"
     }

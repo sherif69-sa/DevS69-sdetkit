@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day38_distribution_batch as d38
+from sdetkit import distribution_batch_38 as d38
 
 
 def _seed_repo(root: Path) -> None:

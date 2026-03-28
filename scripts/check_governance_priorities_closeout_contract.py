@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day88_governance_priorities_closeout as d88
+from sdetkit import governance_priorities_closeout_88 as d88
 
 _CANONICAL_EVIDENCE = "docs/artifacts/governance-priorities-closeout-pack/evidence/governance-priorities-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

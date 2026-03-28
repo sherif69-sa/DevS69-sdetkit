@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_weekly_review_closeout_cycle2_contract.py --skip-evidence",
-  "returncode": 1,
-  "stdout": "",
-  "stderr": "weekly-review-closeout-cycle2 contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['readme_day65_command', 'docs_index_day65_links', 'top10_day65_alignment', 'page_header', 'required_sections', 'day64_workflow_reference_present']\n"
-}

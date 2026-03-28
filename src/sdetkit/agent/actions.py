@@ -42,7 +42,7 @@ def _value_list(value: object) -> list[Any]:
 
 
 class ActionRegistry:
-    def __init__(
+    def init_(
         self,
         *,
         root: Path,

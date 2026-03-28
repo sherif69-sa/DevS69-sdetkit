@@ -20,7 +20,7 @@ def _run_cli(argv: list[str]) -> None:
 
 
 def _run_entrypoint(fn_name: str, argv0: str, argv: list[str]) -> None:
-    mod = importlib.import_module("sdetkit._entrypoints")
+    mod = importlib.import_module("sdetkit.entrypoints")
     fn = getattr(mod, fn_name)
     old_argv = sys.argv[:]
     try:
@@ -53,7 +53,7 @@ def test_cli_module_main_guard_smoke() -> None:
         sys.modules.pop("sdetkit.cli", None)
         sys.argv = ["sdetkit", "--help"]
         try:
-            runpy.run_module("sdetkit.cli", run_name="__main__")
+            runpy.run_module("sdetkit.cli", run_name="main_")
         except SystemExit:
             pass
     finally:

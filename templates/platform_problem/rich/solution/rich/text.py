@@ -17,9 +17,9 @@ from typing import (
 )
 
 from ._loop import loop_last
-from ._text_fragments import FragmentSequence, make_fragment
-from ._text_spans import SpanDistributor
-from ._text_markup import serialize_text_markup
+from .text_fragments import FragmentSequence, make_fragment
+from .text_spans import SpanDistributor
+from .text_markup import serialize_text_markup
 from ._pick import pick_bool
 from ._wrap import divide_line
 from .align import AlignMethod
@@ -144,7 +144,7 @@ class Text(JupyterMixin):
         "_length",
     ]
 
-    def __init__(
+    def init_(
         self,
         text: str = "",
         style: Union[str, Style] = "",
@@ -1284,7 +1284,7 @@ class Text(JupyterMixin):
         return new_text
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "main_":  # pragma: no cover
     from rich.console import Console
 
     text = Text(

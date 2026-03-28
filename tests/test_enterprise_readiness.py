@@ -100,7 +100,7 @@ def test_enterprise_readiness_execute_writes_evidence(monkeypatch, tmp_path, cap
     )
 
     class _Proc:
-        def __init__(self):
+        def init_(self):
             self.returncode = 0
             self.stdout = "ok"
             self.stderr = ""
@@ -132,7 +132,7 @@ def test_enterprise_readiness_execute_strict_fails_on_command_error(monkeypatch,
     )
 
     class _Proc:
-        def __init__(self):
+        def init_(self):
             self.returncode = 1
             self.stdout = ""
             self.stderr = "boom"

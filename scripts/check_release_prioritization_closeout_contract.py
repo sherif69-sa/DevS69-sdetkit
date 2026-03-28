@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day85_release_prioritization_closeout as lane
+from sdetkit import release_prioritization_closeout_85 as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/release-prioritization-closeout-pack/evidence/release-prioritization-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

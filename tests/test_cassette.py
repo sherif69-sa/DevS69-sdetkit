@@ -89,7 +89,7 @@ def test_cassette_replay_ignores_dynamic_trace_header(
 
 
 class _AsyncInner(httpx.AsyncBaseTransport):
-    def __init__(self) -> None:
+    def init_(self) -> None:
         self.calls: list[str] = []
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:

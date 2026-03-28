@@ -10,80 +10,80 @@ from . import (
     apiget,
     author_problem,
     community_activation,
-    continuous_upgrade_cycle1_closeout,
-    continuous_upgrade_cycle2_closeout,
-    continuous_upgrade_cycle3_closeout,
-    continuous_upgrade_cycle4_closeout,
-    continuous_upgrade_cycle5_closeout,
-    continuous_upgrade_cycle6_closeout,
-    continuous_upgrade_cycle7_closeout,
-    continuous_upgrade_cycle8_closeout,
-    continuous_upgrade_cycle9_closeout,
-    continuous_upgrade_cycle10_closeout,
-    continuous_upgrade_cycle11_closeout,
+    continuous_upgrade_closeout_1,
+    continuous_upgrade_closeout_2,
+    continuous_upgrade_closeout_3,
+    continuous_upgrade_closeout_4,
+    continuous_upgrade_closeout_5,
+    continuous_upgrade_closeout_6,
+    continuous_upgrade_closeout_7,
+    continuous_upgrade_closeout_8,
+    continuous_upgrade_closeout_9,
+    continuous_upgrade_closeout_10,
+    continuous_upgrade_closeout_11,
     contributor_funnel,
-    day28_weekly_review,
-    day29_phase1_hardening,
-    day30_phase1_wrap,
-    day31_phase2_kickoff,
-    day32_release_cadence,
-    day33_demo_asset,
-    day34_demo_asset2,
-    day35_kpi_instrumentation,
-    day36_distribution_closeout,
-    day37_experiment_lane,
-    day38_distribution_batch,
-    day39_playbook_post,
-    day40_scale_lane,
-    day41_expansion_automation,
-    day42_optimization_closeout,
-    day43_acceleration_closeout,
-    day44_scale_closeout,
-    day45_expansion_closeout,
-    day46_optimization_closeout,
-    day47_reliability_closeout,
-    day48_objection_closeout,
-    day49_weekly_review_closeout,
-    day50_execution_prioritization_closeout,
-    day51_case_snippet_closeout,
-    day52_narrative_closeout,
-    day53_docs_loop_closeout,
-    day55_contributor_activation_closeout,
-    day56_stabilization_closeout,
-    day57_kpi_deep_audit_closeout,
-    day58_phase2_hardening_closeout,
-    day59_phase3_preplan_closeout,
-    day60_phase2_wrap_handoff_closeout,
-    day61_phase3_kickoff_closeout,
-    day62_community_program_closeout,
-    day63_onboarding_activation_closeout,
-    day64_integration_expansion_closeout,
-    day65_weekly_review_closeout,
-    day66_integration_expansion2_closeout,
-    day67_integration_expansion3_closeout,
-    day68_integration_expansion4_closeout,
-    day69_case_study_prep1_closeout,
-    day70_case_study_prep2_closeout,
-    day71_case_study_prep3_closeout,
-    day72_case_study_prep4_closeout,
-    day73_case_study_launch_closeout,
-    day74_distribution_scaling_closeout,
-    day75_trust_assets_refresh_closeout,
-    day76_contributor_recognition_closeout,
-    day77_community_touchpoint_closeout,
-    day78_ecosystem_priorities_closeout,
-    day79_scale_upgrade_closeout,
-    day80_partner_outreach_closeout,
-    day81_growth_campaign_closeout,
-    day82_integration_feedback_closeout,
-    day83_trust_faq_expansion_closeout,
-    day84_evidence_narrative_closeout,
-    day85_release_prioritization_closeout,
-    day86_launch_readiness_closeout,
-    day87_governance_handoff_closeout,
-    day88_governance_priorities_closeout,
-    day89_governance_scale_closeout,
-    day90_phase3_wrap_publication_closeout,
+    weekly_review_28,
+    phase1_hardening_29,
+    phase1_wrap_30,
+    phase2_kickoff_31,
+    release_cadence_32,
+    demo_asset_33,
+    demo_asset2_34,
+    kpi_instrumentation_35,
+    distribution_closeout_36,
+    experiment_lane_37,
+    distribution_batch_38,
+    playbook_post_39,
+    scale_lane_40,
+    expansion_automation_41,
+    optimization_closeout_42,
+    acceleration_closeout_43,
+    scale_closeout_44,
+    expansion_closeout_45,
+    optimization_closeout_46,
+    reliability_closeout_47,
+    objection_closeout_48,
+    weekly_review_closeout_49,
+    execution_prioritization_closeout_50,
+    case_snippet_closeout_51,
+    narrative_closeout_52,
+    docs_loop_closeout_53,
+    contributor_activation_closeout_55,
+    stabilization_closeout_56,
+    kpi_deep_audit_closeout_57,
+    phase2_hardening_closeout_58,
+    phase3_preplan_closeout_59,
+    phase2_wrap_handoff_closeout_60,
+    phase3_kickoff_closeout_61,
+    community_program_closeout_62,
+    onboarding_activation_closeout_63,
+    integration_expansion_closeout_64,
+    weekly_review_closeout_65,
+    integration_expansion2_closeout_66,
+    integration_expansion3_closeout_67,
+    integration_expansion4_closeout_68,
+    case_study_prep1_closeout_69,
+    case_study_prep2_closeout_70,
+    case_study_prep3_closeout_71,
+    case_study_prep4_closeout_72,
+    case_study_launch_closeout_73,
+    distribution_scaling_closeout_74,
+    trust_assets_refresh_closeout_75,
+    contributor_recognition_closeout_76,
+    community_touchpoint_closeout_77,
+    ecosystem_priorities_closeout_78,
+    scale_upgrade_closeout_79,
+    partner_outreach_closeout_80,
+    growth_campaign_closeout_81,
+    integration_feedback_closeout_82,
+    trust_faq_expansion_closeout_83,
+    evidence_narrative_closeout_84,
+    release_prioritization_closeout_85,
+    launch_readiness_closeout_86,
+    governance_handoff_closeout_87,
+    governance_priorities_closeout_88,
+    governance_scale_closeout_89,
+    phase3_wrap_publication_closeout_90,
     demo,
     docs_navigation,
     docs_qa,
@@ -566,8 +566,8 @@ Start here:
     d64.set_defaults(cmd="integration-expansion-closeout")
     d64.add_argument("args", nargs=argparse.REMAINDER)
 
-    d65 = sub.add_parser("weekly-review-closeout-cycle2", aliases=["day65-weekly-review-closeout"])
-    d65.set_defaults(cmd="weekly-review-closeout-cycle2")
+    d65 = sub.add_parser("weekly-review-closeout-2", aliases=["day65-weekly-review-closeout"])
+    d65.set_defaults(cmd="weekly-review-closeout-2")
     d65.add_argument("args", nargs=argparse.REMAINDER)
 
     d66 = sub.add_parser(
@@ -862,7 +862,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _playbooks_main(list(argv[1:]))
 
     if argv and argv[0] == "cassette-get":
-        from .__main__ import _cassette_get
+        from .main_ import _cassette_get
 
         try:
             return _cassette_get(argv[1:])
@@ -940,273 +940,273 @@ def main(argv: Sequence[str] | None = None) -> int:
         return kpi_audit.main(list(argv[1:]))
 
     if argv and argv[0] in {"weekly-review-lane", "day28-weekly-review"}:
-        return day28_weekly_review.main(list(argv[1:]))
+        return weekly_review_28.main(list(argv[1:]))
 
     if argv and argv[0] == "phase1-hardening":
-        return day29_phase1_hardening.main(list(argv[1:]))
+        return phase1_hardening_29.main(list(argv[1:]))
 
     if argv and argv[0] == "phase1-wrap":
-        return day30_phase1_wrap.main(list(argv[1:]))
+        return phase1_wrap_30.main(list(argv[1:]))
 
     if argv and argv[0] == "phase2-kickoff":
-        return day31_phase2_kickoff.main(list(argv[1:]))
+        return phase2_kickoff_31.main(list(argv[1:]))
 
     if argv and argv[0] == "release-cadence":
-        return day32_release_cadence.main(list(argv[1:]))
+        return release_cadence_32.main(list(argv[1:]))
 
     if argv and argv[0] == "demo-asset":
-        return day33_demo_asset.main(list(argv[1:]))
+        return demo_asset_33.main(list(argv[1:]))
 
     if argv and argv[0] == "demo-asset2":
-        return day34_demo_asset2.main(list(argv[1:]))
+        return demo_asset2_34.main(list(argv[1:]))
 
     if argv and argv[0] == "kpi-instrumentation":
-        return day35_kpi_instrumentation.main(list(argv[1:]))
+        return kpi_instrumentation_35.main(list(argv[1:]))
 
     if argv and argv[0] in {"distribution-closeout", "day36-distribution-closeout"}:
-        return day36_distribution_closeout.main(list(argv[1:]))
+        return distribution_closeout_36.main(list(argv[1:]))
 
     if argv and argv[0] in {"experiment-lane", "day37-experiment-lane"}:
-        return day37_experiment_lane.main(list(argv[1:]))
+        return experiment_lane_37.main(list(argv[1:]))
 
     if argv and argv[0] in {"distribution-batch", "day38-distribution-batch"}:
-        return day38_distribution_batch.main(list(argv[1:]))
+        return distribution_batch_38.main(list(argv[1:]))
 
     if argv and argv[0] == "playbook-post":
-        return day39_playbook_post.main(list(argv[1:]))
+        return playbook_post_39.main(list(argv[1:]))
 
     if argv and argv[0] in {"scale-lane", "day40-scale-lane"}:
-        return day40_scale_lane.main(list(argv[1:]))
+        return scale_lane_40.main(list(argv[1:]))
 
     if argv and argv[0] == "expansion-automation":
-        return day41_expansion_automation.main(list(argv[1:]))
+        return expansion_automation_41.main(list(argv[1:]))
     if argv and argv[0] == "day41-expansion-automation":
-        return day41_expansion_automation.main(list(argv[1:]))
+        return expansion_automation_41.main(list(argv[1:]))
 
     if argv and argv[0] in {"optimization-closeout-foundation", "day42-optimization-closeout"}:
-        return day42_optimization_closeout.main(list(argv[1:]))
+        return optimization_closeout_42.main(list(argv[1:]))
 
     if argv and argv[0] == "acceleration-closeout":
-        return day43_acceleration_closeout.main(list(argv[1:]))
+        return acceleration_closeout_43.main(list(argv[1:]))
     if argv and argv[0] == "day43-acceleration-closeout":
-        return day43_acceleration_closeout.main(list(argv[1:]))
+        return acceleration_closeout_43.main(list(argv[1:]))
 
     if argv and argv[0] == "scale-closeout":
-        return day44_scale_closeout.main(list(argv[1:]))
+        return scale_closeout_44.main(list(argv[1:]))
     if argv and argv[0] == "day44-scale-closeout":
-        return day44_scale_closeout.main(list(argv[1:]))
+        return scale_closeout_44.main(list(argv[1:]))
 
     if argv and argv[0] == "expansion-closeout":
-        return day45_expansion_closeout.main(list(argv[1:]))
+        return expansion_closeout_45.main(list(argv[1:]))
     if argv and argv[0] == "day45-expansion-closeout":
-        return day45_expansion_closeout.main(list(argv[1:]))
+        return expansion_closeout_45.main(list(argv[1:]))
 
     if argv and argv[0] in {"optimization-closeout", "day46-optimization-closeout"}:
-        return day46_optimization_closeout.main(list(argv[1:]))
+        return optimization_closeout_46.main(list(argv[1:]))
 
     if argv and argv[0] == "reliability-closeout":
-        return day47_reliability_closeout.main(list(argv[1:]))
+        return reliability_closeout_47.main(list(argv[1:]))
     if argv and argv[0] == "day47-reliability-closeout":
-        return day47_reliability_closeout.main(list(argv[1:]))
+        return reliability_closeout_47.main(list(argv[1:]))
     if argv and argv[0] == "objection-closeout":
-        return day48_objection_closeout.main(list(argv[1:]))
+        return objection_closeout_48.main(list(argv[1:]))
     if argv and argv[0] == "day48-objection-closeout":
-        return day48_objection_closeout.main(list(argv[1:]))
+        return objection_closeout_48.main(list(argv[1:]))
     if argv and argv[0] in {
         "weekly-review-closeout",
         "day49-weekly-review-closeout",
         "day49-advanced-weekly-review-control-tower",
     }:
-        return day49_weekly_review_closeout.main(list(argv[1:]))
+        return weekly_review_closeout_49.main(list(argv[1:]))
     if argv and argv[0] in {
         "execution-prioritization-closeout",
         "day50-execution-prioritization-closeout",
     }:
-        return day50_execution_prioritization_closeout.main(list(argv[1:]))
+        return execution_prioritization_closeout_50.main(list(argv[1:]))
     if argv and argv[0] in {"case-snippet-closeout", "day51-case-snippet-closeout"}:
-        return day51_case_snippet_closeout.main(list(argv[1:]))
+        return case_snippet_closeout_51.main(list(argv[1:]))
     if argv and argv[0] in {"narrative-closeout", "day52-narrative-closeout"}:
-        return day52_narrative_closeout.main(list(argv[1:]))
+        return narrative_closeout_52.main(list(argv[1:]))
     if argv and argv[0] in {"docs-loop-closeout", "day53-docs-loop-closeout"}:
-        return day53_docs_loop_closeout.main(list(argv[1:]))
+        return docs_loop_closeout_53.main(list(argv[1:]))
     if argv and argv[0] in {
         "contributor-activation-closeout",
         "day55-contributor-activation-closeout",
     }:
-        return day55_contributor_activation_closeout.main(list(argv[1:]))
+        return contributor_activation_closeout_55.main(list(argv[1:]))
 
     if argv and argv[0] in {"stabilization-closeout", "day56-stabilization-closeout"}:
-        return day56_stabilization_closeout.main(list(argv[1:]))
+        return stabilization_closeout_56.main(list(argv[1:]))
 
     if argv and argv[0] in {"kpi-deep-audit-closeout", "day57-kpi-deep-audit-closeout"}:
-        return day57_kpi_deep_audit_closeout.main(list(argv[1:]))
+        return kpi_deep_audit_closeout_57.main(list(argv[1:]))
 
     if argv and argv[0] in {"phase2-hardening-closeout", "day58-phase2-hardening-closeout"}:
-        return day58_phase2_hardening_closeout.main(list(argv[1:]))
+        return phase2_hardening_closeout_58.main(list(argv[1:]))
 
     if argv and argv[0] in {"phase3-preplan-closeout", "day59-phase3-preplan-closeout"}:
-        return day59_phase3_preplan_closeout.main(list(argv[1:]))
+        return phase3_preplan_closeout_59.main(list(argv[1:]))
 
     if argv and argv[0] in {"phase2-wrap-handoff-closeout", "day60-phase2-wrap-handoff-closeout"}:
-        return day60_phase2_wrap_handoff_closeout.main(list(argv[1:]))
+        return phase2_wrap_handoff_closeout_60.main(list(argv[1:]))
 
     if argv and argv[0] in {"phase3-kickoff-closeout", "day61-phase3-kickoff-closeout"}:
-        return day61_phase3_kickoff_closeout.main(list(argv[1:]))
+        return phase3_kickoff_closeout_61.main(list(argv[1:]))
 
     if argv and argv[0] in {"community-program-closeout", "day62-community-program-closeout"}:
-        return day62_community_program_closeout.main(list(argv[1:]))
+        return community_program_closeout_62.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "onboarding-activation-closeout",
         "day63-onboarding-activation-closeout",
     }:
-        return day63_onboarding_activation_closeout.main(list(argv[1:]))
+        return onboarding_activation_closeout_63.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "integration-expansion-closeout",
         "day64-integration-expansion-closeout",
     }:
-        return day64_integration_expansion_closeout.main(list(argv[1:]))
+        return integration_expansion_closeout_64.main(list(argv[1:]))
 
-    if argv and argv[0] in {"weekly-review-closeout-cycle2", "day65-weekly-review-closeout"}:
-        return day65_weekly_review_closeout.main(list(argv[1:]))
+    if argv and argv[0] in {"weekly-review-closeout-2", "day65-weekly-review-closeout"}:
+        return weekly_review_closeout_65.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "integration-expansion2-closeout",
         "day66-integration-expansion2-closeout",
     }:
-        return day66_integration_expansion2_closeout.main(list(argv[1:]))
+        return integration_expansion2_closeout_66.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "integration-expansion3-closeout",
         "day67-integration-expansion3-closeout",
     }:
-        return day67_integration_expansion3_closeout.main(list(argv[1:]))
+        return integration_expansion3_closeout_67.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "integration-expansion4-closeout",
         "day68-integration-expansion4-closeout",
     }:
-        return day68_integration_expansion4_closeout.main(list(argv[1:]))
+        return integration_expansion4_closeout_68.main(list(argv[1:]))
 
     if argv and argv[0] in {"case-study-prep1-closeout", "day69-case-study-prep1-closeout"}:
-        return day69_case_study_prep1_closeout.main(list(argv[1:]))
+        return case_study_prep1_closeout_69.main(list(argv[1:]))
 
     if argv and argv[0] in {"case-study-prep2-closeout", "day70-case-study-prep2-closeout"}:
-        return day70_case_study_prep2_closeout.main(list(argv[1:]))
+        return case_study_prep2_closeout_70.main(list(argv[1:]))
 
     if argv and argv[0] in {"case-study-prep3-closeout", "day71-case-study-prep3-closeout"}:
-        return day71_case_study_prep3_closeout.main(list(argv[1:]))
+        return case_study_prep3_closeout_71.main(list(argv[1:]))
 
     if argv and argv[0] in {"case-study-prep4-closeout", "day72-case-study-prep4-closeout"}:
-        return day72_case_study_prep4_closeout.main(list(argv[1:]))
+        return case_study_prep4_closeout_72.main(list(argv[1:]))
 
     if argv and argv[0] in {"case-study-launch-closeout", "day73-case-study-launch-closeout"}:
-        return day73_case_study_launch_closeout.main(list(argv[1:]))
+        return case_study_launch_closeout_73.main(list(argv[1:]))
 
     if argv and argv[0] in {"distribution-scaling-closeout", "day74-distribution-scaling-closeout"}:
-        return day74_distribution_scaling_closeout.main(list(argv[1:]))
+        return distribution_scaling_closeout_74.main(list(argv[1:]))
 
     if argv and argv[0] in {"trust-assets-refresh-closeout", "day75-trust-assets-refresh-closeout"}:
-        return day75_trust_assets_refresh_closeout.main(list(argv[1:]))
+        return trust_assets_refresh_closeout_75.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "contributor-recognition-closeout",
         "day76-contributor-recognition-closeout",
     }:
-        return day76_contributor_recognition_closeout.main(list(argv[1:]))
+        return contributor_recognition_closeout_76.main(list(argv[1:]))
 
     if argv and argv[0] in {"community-touchpoint-closeout", "day77-community-touchpoint-closeout"}:
-        return day77_community_touchpoint_closeout.main(list(argv[1:]))
+        return community_touchpoint_closeout_77.main(list(argv[1:]))
 
     if argv and argv[0] in {"ecosystem-priorities-closeout", "day78-ecosystem-priorities-closeout"}:
-        return day78_ecosystem_priorities_closeout.main(list(argv[1:]))
+        return ecosystem_priorities_closeout_78.main(list(argv[1:]))
 
     if argv and argv[0] in {"scale-upgrade-closeout", "day79-scale-upgrade-closeout"}:
-        return day79_scale_upgrade_closeout.main(list(argv[1:]))
+        return scale_upgrade_closeout_79.main(list(argv[1:]))
 
     if argv and argv[0] in {"partner-outreach-closeout", "day80-partner-outreach-closeout"}:
-        return day80_partner_outreach_closeout.main(list(argv[1:]))
+        return partner_outreach_closeout_80.main(list(argv[1:]))
 
     if argv and argv[0] in {"growth-campaign-closeout", "day81-growth-campaign-closeout"}:
-        return day81_growth_campaign_closeout.main(list(argv[1:]))
+        return growth_campaign_closeout_81.main(list(argv[1:]))
 
     if argv and argv[0] in {"integration-feedback-closeout", "day82-integration-feedback-closeout"}:
-        return day82_integration_feedback_closeout.main(list(argv[1:]))
+        return integration_feedback_closeout_82.main(list(argv[1:]))
 
     if argv and argv[0] in {"trust-faq-expansion-closeout", "day83-trust-faq-expansion-closeout"}:
-        return day83_trust_faq_expansion_closeout.main(list(argv[1:]))
+        return trust_faq_expansion_closeout_83.main(list(argv[1:]))
 
     if argv and argv[0] in {"evidence-narrative-closeout", "day84-evidence-narrative-closeout"}:
-        return day84_evidence_narrative_closeout.main(list(argv[1:]))
+        return evidence_narrative_closeout_84.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "release-prioritization-closeout",
         "day85-release-prioritization-closeout",
     }:
-        return day85_release_prioritization_closeout.main(list(argv[1:]))
+        return release_prioritization_closeout_85.main(list(argv[1:]))
 
     if argv and argv[0] in {"launch-readiness-closeout", "day86-launch-readiness-closeout"}:
-        return day86_launch_readiness_closeout.main(list(argv[1:]))
+        return launch_readiness_closeout_86.main(list(argv[1:]))
 
     if argv and argv[0] in {"governance-handoff-closeout", "day87-governance-handoff-closeout"}:
-        return day87_governance_handoff_closeout.main(list(argv[1:]))
+        return governance_handoff_closeout_87.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "governance-priorities-closeout",
         "day88-governance-priorities-closeout",
     }:
-        return day88_governance_priorities_closeout.main(list(argv[1:]))
+        return governance_priorities_closeout_88.main(list(argv[1:]))
 
     if argv and argv[0] in {"governance-scale-closeout", "day89-governance-scale-closeout"}:
-        return day89_governance_scale_closeout.main(list(argv[1:]))
+        return governance_scale_closeout_89.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "phase3-wrap-publication-closeout",
         "day90-phase3-wrap-publication-closeout",
     }:
-        return day90_phase3_wrap_publication_closeout.main(list(argv[1:]))
+        return phase3_wrap_publication_closeout_90.main(list(argv[1:]))
 
     if argv and argv[0] == "continuous-upgrade-cycle1-closeout":
-        return continuous_upgrade_cycle1_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_1.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle2-closeout",
     }:
-        return continuous_upgrade_cycle2_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_2.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle3-closeout",
     }:
-        return continuous_upgrade_cycle3_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_3.main(list(argv[1:]))
 
     if argv and argv[0] in {
         "continuous-upgrade-cycle4-closeout",
     }:
-        return continuous_upgrade_cycle4_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_4.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle5-closeout",
     }:
-        return continuous_upgrade_cycle5_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_5.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle6-closeout",
     }:
-        return continuous_upgrade_cycle6_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_6.main(list(argv[1:]))
     if argv and argv[0] in {
         "continuous-upgrade-cycle7-closeout",
     }:
-        return continuous_upgrade_cycle7_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_7.main(list(argv[1:]))
     if argv and argv[0] == "continuous-upgrade-cycle8-closeout":
-        return continuous_upgrade_cycle8_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_8.main(list(argv[1:]))
 
     if argv and argv[0] == "continuous-upgrade-cycle9-closeout":
-        return continuous_upgrade_cycle9_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_9.main(list(argv[1:]))
 
     if argv and argv[0] == "continuous-upgrade-cycle10-closeout":
-        return continuous_upgrade_cycle10_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_10.main(list(argv[1:]))
 
     if argv and argv[0] == "continuous-upgrade-cycle11-closeout":
-        return continuous_upgrade_cycle11_closeout.main(list(argv[1:]))
+        return continuous_upgrade_closeout_11.main(list(argv[1:]))
 
     if argv and argv[0] in {"objection-handling", "faq-objections"}:
         return objection_handling.main(list(argv[1:]))
@@ -1451,196 +1451,196 @@ def main(argv: Sequence[str] | None = None) -> int:
         return kpi_audit.main(ns.args)
 
     if ns.cmd == "day28-weekly-review":
-        return day28_weekly_review.main(ns.args)
+        return weekly_review_28.main(ns.args)
 
     if ns.cmd in {"distribution-closeout", "day36-distribution-closeout"}:
-        return day36_distribution_closeout.main(ns.args)
+        return distribution_closeout_36.main(ns.args)
 
     if ns.cmd in {"experiment-lane", "day37-experiment-lane"}:
-        return day37_experiment_lane.main(ns.args)
+        return experiment_lane_37.main(ns.args)
 
     if ns.cmd in {"distribution-batch", "day38-distribution-batch"}:
-        return day38_distribution_batch.main(ns.args)
+        return distribution_batch_38.main(ns.args)
 
     if ns.cmd == "playbook-post":
-        return day39_playbook_post.main(ns.args)
+        return playbook_post_39.main(ns.args)
 
     if ns.cmd in {"scale-lane", "day40-scale-lane"}:
-        return day40_scale_lane.main(ns.args)
+        return scale_lane_40.main(ns.args)
 
     if ns.cmd in {"expansion-automation", "day41-expansion-automation"}:
-        return day41_expansion_automation.main(ns.args)
+        return expansion_automation_41.main(ns.args)
 
     if ns.cmd in {"optimization-closeout-foundation", "day42-optimization-closeout"}:
-        return day42_optimization_closeout.main(ns.args)
+        return optimization_closeout_42.main(ns.args)
 
     if ns.cmd in {"acceleration-closeout", "day43-acceleration-closeout"}:
-        return day43_acceleration_closeout.main(ns.args)
+        return acceleration_closeout_43.main(ns.args)
 
     if ns.cmd in {"scale-closeout", "day44-scale-closeout"}:
-        return day44_scale_closeout.main(ns.args)
+        return scale_closeout_44.main(ns.args)
 
     if ns.cmd in {"expansion-closeout", "day45-expansion-closeout"}:
-        return day45_expansion_closeout.main(ns.args)
+        return expansion_closeout_45.main(ns.args)
 
     if ns.cmd in {"optimization-closeout", "day46-optimization-closeout"}:
-        return day46_optimization_closeout.main(ns.args)
+        return optimization_closeout_46.main(ns.args)
 
     if ns.cmd in {"reliability-closeout", "day47-reliability-closeout"}:
-        return day47_reliability_closeout.main(ns.args)
+        return reliability_closeout_47.main(ns.args)
     if ns.cmd in {"objection-closeout", "day48-objection-closeout"}:
-        return day48_objection_closeout.main(ns.args)
+        return objection_closeout_48.main(ns.args)
     if ns.cmd in {
         "weekly-review-closeout",
         "day49-weekly-review-closeout",
         "day49-advanced-weekly-review-control-tower",
     }:
-        return day49_weekly_review_closeout.main(ns.args)
+        return weekly_review_closeout_49.main(ns.args)
     if ns.cmd in {"execution-prioritization-closeout", "day50-execution-prioritization-closeout"}:
-        return day50_execution_prioritization_closeout.main(ns.args)
+        return execution_prioritization_closeout_50.main(ns.args)
     if ns.cmd in {"case-snippet-closeout", "day51-case-snippet-closeout"}:
-        return day51_case_snippet_closeout.main(ns.args)
+        return case_snippet_closeout_51.main(ns.args)
     if ns.cmd in {"narrative-closeout", "day52-narrative-closeout"}:
-        return day52_narrative_closeout.main(ns.args)
+        return narrative_closeout_52.main(ns.args)
     if ns.cmd in {"docs-loop-closeout", "day53-docs-loop-closeout"}:
-        return day53_docs_loop_closeout.main(ns.args)
+        return docs_loop_closeout_53.main(ns.args)
     if ns.cmd in {"contributor-activation-closeout", "day55-contributor-activation-closeout"}:
-        return day55_contributor_activation_closeout.main(ns.args)
+        return contributor_activation_closeout_55.main(ns.args)
 
     if ns.cmd in {"stabilization-closeout", "day56-stabilization-closeout"}:
-        return day56_stabilization_closeout.main(ns.args)
+        return stabilization_closeout_56.main(ns.args)
 
     if ns.cmd in {"kpi-deep-audit-closeout", "day57-kpi-deep-audit-closeout"}:
-        return day57_kpi_deep_audit_closeout.main(ns.args)
+        return kpi_deep_audit_closeout_57.main(ns.args)
 
     if ns.cmd in {"phase2-hardening-closeout", "day58-phase2-hardening-closeout"}:
-        return day58_phase2_hardening_closeout.main(ns.args)
+        return phase2_hardening_closeout_58.main(ns.args)
 
     if ns.cmd in {"phase3-preplan-closeout", "day59-phase3-preplan-closeout"}:
-        return day59_phase3_preplan_closeout.main(ns.args)
+        return phase3_preplan_closeout_59.main(ns.args)
 
     if ns.cmd in {"phase2-wrap-handoff-closeout", "day60-phase2-wrap-handoff-closeout"}:
-        return day60_phase2_wrap_handoff_closeout.main(ns.args)
+        return phase2_wrap_handoff_closeout_60.main(ns.args)
 
     if ns.cmd in {"phase3-kickoff-closeout", "day61-phase3-kickoff-closeout"}:
-        return day61_phase3_kickoff_closeout.main(ns.args)
+        return phase3_kickoff_closeout_61.main(ns.args)
 
     if ns.cmd in {"community-program-closeout", "day62-community-program-closeout"}:
-        return day62_community_program_closeout.main(ns.args)
+        return community_program_closeout_62.main(ns.args)
 
     if ns.cmd in {"onboarding-activation-closeout", "day63-onboarding-activation-closeout"}:
-        return day63_onboarding_activation_closeout.main(ns.args)
+        return onboarding_activation_closeout_63.main(ns.args)
 
     if ns.cmd in {"integration-expansion-closeout", "day64-integration-expansion-closeout"}:
-        return day64_integration_expansion_closeout.main(ns.args)
+        return integration_expansion_closeout_64.main(ns.args)
 
-    if ns.cmd in {"weekly-review-closeout-cycle2", "day65-weekly-review-closeout"}:
-        return day65_weekly_review_closeout.main(ns.args)
+    if ns.cmd in {"weekly-review-closeout-2", "day65-weekly-review-closeout"}:
+        return weekly_review_closeout_65.main(ns.args)
 
     if ns.cmd in {"integration-expansion2-closeout", "day66-integration-expansion2-closeout"}:
-        return day66_integration_expansion2_closeout.main(ns.args)
+        return integration_expansion2_closeout_66.main(ns.args)
 
     if ns.cmd in {"integration-expansion3-closeout", "day67-integration-expansion3-closeout"}:
-        return day67_integration_expansion3_closeout.main(ns.args)
+        return integration_expansion3_closeout_67.main(ns.args)
 
     if ns.cmd in {"integration-expansion4-closeout", "day68-integration-expansion4-closeout"}:
-        return day68_integration_expansion4_closeout.main(ns.args)
+        return integration_expansion4_closeout_68.main(ns.args)
 
     if ns.cmd in {"case-study-prep1-closeout", "day69-case-study-prep1-closeout"}:
-        return day69_case_study_prep1_closeout.main(ns.args)
+        return case_study_prep1_closeout_69.main(ns.args)
 
     if ns.cmd in {"case-study-prep2-closeout", "day70-case-study-prep2-closeout"}:
-        return day70_case_study_prep2_closeout.main(ns.args)
+        return case_study_prep2_closeout_70.main(ns.args)
 
     if ns.cmd == "case-study-prep3-closeout":
-        return day71_case_study_prep3_closeout.main(ns.args)
+        return case_study_prep3_closeout_71.main(ns.args)
 
     if ns.cmd == "case-study-prep4-closeout":
-        return day72_case_study_prep4_closeout.main(ns.args)
+        return case_study_prep4_closeout_72.main(ns.args)
 
     if ns.cmd == "case-study-launch-closeout":
-        return day73_case_study_launch_closeout.main(ns.args)
+        return case_study_launch_closeout_73.main(ns.args)
 
     if ns.cmd == "distribution-scaling-closeout":
-        return day74_distribution_scaling_closeout.main(ns.args)
+        return distribution_scaling_closeout_74.main(ns.args)
 
     if ns.cmd == "trust-assets-refresh-closeout":
-        return day75_trust_assets_refresh_closeout.main(ns.args)
+        return trust_assets_refresh_closeout_75.main(ns.args)
 
     if ns.cmd == "contributor-recognition-closeout":
-        return day76_contributor_recognition_closeout.main(ns.args)
+        return contributor_recognition_closeout_76.main(ns.args)
 
     if ns.cmd == "community-touchpoint-closeout":
-        return day77_community_touchpoint_closeout.main(ns.args)
+        return community_touchpoint_closeout_77.main(ns.args)
 
     if ns.cmd == "ecosystem-priorities-closeout":
-        return day78_ecosystem_priorities_closeout.main(ns.args)
+        return ecosystem_priorities_closeout_78.main(ns.args)
 
     if ns.cmd == "scale-upgrade-closeout":
-        return day79_scale_upgrade_closeout.main(ns.args)
+        return scale_upgrade_closeout_79.main(ns.args)
 
     if ns.cmd == "partner-outreach-closeout":
-        return day80_partner_outreach_closeout.main(ns.args)
+        return partner_outreach_closeout_80.main(ns.args)
 
     if ns.cmd in {"growth-campaign-closeout", "day81-growth-campaign-closeout"}:
-        return day81_growth_campaign_closeout.main(ns.args)
+        return growth_campaign_closeout_81.main(ns.args)
 
     if ns.cmd in {"integration-feedback-closeout", "day82-integration-feedback-closeout"}:
-        return day82_integration_feedback_closeout.main(ns.args)
+        return integration_feedback_closeout_82.main(ns.args)
 
     if ns.cmd in {"trust-faq-expansion-closeout", "day83-trust-faq-expansion-closeout"}:
-        return day83_trust_faq_expansion_closeout.main(ns.args)
+        return trust_faq_expansion_closeout_83.main(ns.args)
 
     if ns.cmd in {"evidence-narrative-closeout", "day84-evidence-narrative-closeout"}:
-        return day84_evidence_narrative_closeout.main(ns.args)
+        return evidence_narrative_closeout_84.main(ns.args)
 
     if ns.cmd in {"release-prioritization-closeout", "day85-release-prioritization-closeout"}:
-        return day85_release_prioritization_closeout.main(ns.args)
+        return release_prioritization_closeout_85.main(ns.args)
 
     if ns.cmd in {"launch-readiness-closeout", "day86-launch-readiness-closeout"}:
-        return day86_launch_readiness_closeout.main(ns.args)
+        return launch_readiness_closeout_86.main(ns.args)
 
     if ns.cmd in {"governance-handoff-closeout", "day87-governance-handoff-closeout"}:
-        return day87_governance_handoff_closeout.main(ns.args)
+        return governance_handoff_closeout_87.main(ns.args)
 
     if ns.cmd in {"governance-priorities-closeout", "day88-governance-priorities-closeout"}:
-        return day88_governance_priorities_closeout.main(ns.args)
+        return governance_priorities_closeout_88.main(ns.args)
 
     if ns.cmd in {"governance-scale-closeout", "day89-governance-scale-closeout"}:
-        return day89_governance_scale_closeout.main(ns.args)
+        return governance_scale_closeout_89.main(ns.args)
 
     if ns.cmd in {"phase3-wrap-publication-closeout", "day90-phase3-wrap-publication-closeout"}:
-        return day90_phase3_wrap_publication_closeout.main(ns.args)
+        return phase3_wrap_publication_closeout_90.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle1-closeout":
-        return continuous_upgrade_cycle1_closeout.main(ns.args)
+        return continuous_upgrade_closeout_1.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle2-closeout":
-        return continuous_upgrade_cycle2_closeout.main(ns.args)
+        return continuous_upgrade_closeout_2.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle3-closeout":
-        return continuous_upgrade_cycle3_closeout.main(ns.args)
+        return continuous_upgrade_closeout_3.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle4-closeout":
-        return continuous_upgrade_cycle4_closeout.main(ns.args)
+        return continuous_upgrade_closeout_4.main(ns.args)
     if ns.cmd == "continuous-upgrade-cycle5-closeout":
-        return continuous_upgrade_cycle5_closeout.main(ns.args)
+        return continuous_upgrade_closeout_5.main(ns.args)
     if ns.cmd == "continuous-upgrade-cycle6-closeout":
-        return continuous_upgrade_cycle6_closeout.main(ns.args)
+        return continuous_upgrade_closeout_6.main(ns.args)
     if ns.cmd == "continuous-upgrade-cycle7-closeout":
-        return continuous_upgrade_cycle7_closeout.main(ns.args)
+        return continuous_upgrade_closeout_7.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle8-closeout":
-        return continuous_upgrade_cycle8_closeout.main(ns.args)
+        return continuous_upgrade_closeout_8.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle9-closeout":
-        return continuous_upgrade_cycle9_closeout.main(ns.args)
+        return continuous_upgrade_closeout_9.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle10-closeout":
-        return continuous_upgrade_cycle10_closeout.main(ns.args)
+        return continuous_upgrade_closeout_10.main(ns.args)
 
     if ns.cmd == "continuous-upgrade-cycle11-closeout":
-        return continuous_upgrade_cycle11_closeout.main(ns.args)
+        return continuous_upgrade_closeout_11.main(ns.args)
 
     if ns.cmd == "objection-handling":
         return objection_handling.main(ns.args)
@@ -1741,5 +1741,5 @@ def main(argv: Sequence[str] | None = None) -> int:
     raise SystemExit(2)
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

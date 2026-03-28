@@ -270,7 +270,7 @@ def test_repo_helpers_and_fileinfo_type_guards(
     assert info.to_dict()["ctime_ns"] == -1
 
     class _Proc:
-        def __init__(self, returncode: int, stdout: str) -> None:
+        def init_(self, returncode: int, stdout: str) -> None:
             self.returncode = returncode
             self.stdout = stdout
 

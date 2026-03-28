@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day77_community_touchpoint_closeout as d77
+from sdetkit import community_touchpoint_closeout_77 as d77
 
 
 def _seed_repo(root: Path) -> None:

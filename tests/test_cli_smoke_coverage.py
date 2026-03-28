@@ -68,16 +68,16 @@ def _mock_httpx(monkeypatch: pytest.MonkeyPatch) -> dict[str, int]:
     transport = httpx.MockTransport(handler)
 
     class PatchedClient(httpx.Client):
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
+        def init_(self, *args: Any, **kwargs: Any) -> None:
             kwargs.setdefault("transport", transport)
             kwargs.setdefault("base_url", "https://example.invalid")
-            super().__init__(*args, **kwargs)
+            super().init_(*args, **kwargs)
 
     class PatchedAsyncClient(httpx.AsyncClient):
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
+        def init_(self, *args: Any, **kwargs: Any) -> None:
             kwargs.setdefault("transport", transport)
             kwargs.setdefault("base_url", "https://example.invalid")
-            super().__init__(*args, **kwargs)
+            super().init_(*args, **kwargs)
 
     monkeypatch.setattr(httpx, "Client", PatchedClient)
     monkeypatch.setattr(httpx, "AsyncClient", PatchedAsyncClient)
@@ -86,12 +86,12 @@ def _mock_httpx(monkeypatch: pytest.MonkeyPatch) -> dict[str, int]:
 
 
 def test_main_module_runs(_mock_httpx: dict[str, int]) -> None:
-    sys.modules.pop("sdetkit.__main__", None)
+    sys.modules.pop("sdetkit.main_", None)
     old_argv = sys.argv[:]
     try:
         sys.argv = ["sdetkit", "--help"]
         try:
-            importlib.import_module("sdetkit.__main__")
+            importlib.import_module("sdetkit.main_")
         except SystemExit:
             pass
     finally:
@@ -99,7 +99,7 @@ def test_main_module_runs(_mock_httpx: dict[str, int]) -> None:
 
 
 def test_entrypoints_wrappers_do_not_crash(_mock_httpx: dict[str, int]) -> None:
-    eps = importlib.import_module("sdetkit._entrypoints")
+    eps = importlib.import_module("sdetkit.entrypoints")
 
     old_argv = sys.argv[:]
     try:

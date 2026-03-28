@@ -408,7 +408,7 @@ def _inventory_for_root(repo_root: Path) -> list[FileInfo]:
 
 
 class _FileInventoryCache:
-    def __init__(self, root: Path, *, strict_max_files: int | None = None) -> None:
+    def init_(self, root: Path, *, strict_max_files: int | None = None) -> None:
         self.root = root
         self.strict_max_files = strict_max_files
         self._stats: dict[str, int] = {"hits": 0, "misses": 0, "writes": 0, "invalidations": 0}
@@ -647,7 +647,7 @@ class _FileInventoryCache:
 
 
 class RepoRuleExecutionContext:
-    def __init__(
+    def init_(
         self, root: Path, inventory: _FileInventoryCache, changed: set[str] | None = None
     ) -> None:
         self._root = root
@@ -1446,7 +1446,7 @@ def _load_repo_preset_templates(preset: str) -> dict[str, str]:
     base = importlib_resources.files("sdetkit.templates").joinpath(preset)
     templates: dict[str, str] = {}
     for entry in _iter_template_files(base):
-        if entry.name == "__init__.py":
+        if entry.name == "init_.py":
             continue
         rel = entry.relative_to(base).as_posix()
         templates[rel] = entry.read_bytes().decode("utf-8", errors="replace")

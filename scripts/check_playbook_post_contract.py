@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import day39_playbook_post as d39
+from sdetkit import playbook_post_39 as d39
 
 
 def main() -> int:
@@ -58,5 +58,5 @@ def main() -> int:
     return 1 if errors else 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

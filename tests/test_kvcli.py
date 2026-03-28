@@ -292,7 +292,7 @@ def test_kvcli_run_as_module_hits___main__(monkeypatch, capsys):
 
     monkeypatch.setattr(_sys, "argv", ["sdetkit.kvcli", "--text", "a=1"])
     with pytest.raises(SystemExit) as ei:
-        runpy.run_module("sdetkit.kvcli", run_name="__main__")
+        runpy.run_module("sdetkit.kvcli", run_name="main_")
     assert ei.value.code == 0
     out, err = capsys.readouterr()
     assert err == ""

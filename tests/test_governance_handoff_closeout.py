@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day87_governance_handoff_closeout as d87
+from sdetkit import governance_handoff_closeout_87 as d87
 
 
 def _seed_repo(root: Path) -> None:

@@ -33,8 +33,8 @@ case "$mode" in
   docs)
     mkdocs build
     python scripts/check_onboarding_contract.py
-    python scripts/check_day3_proof_contract.py
-    python scripts/check_day4_skills_contract.py
+    python scripts/check_proof_contract_3.py
+    python scripts/check_skills_contract_4.py
     python scripts/check_github_actions_onboarding_contract.py
     python scripts/check_gitlab_ci_onboarding_contract.py
     python scripts/check_reliability_evidence_pack_contract.py
@@ -44,10 +44,10 @@ case "$mode" in
     python scripts/check_onboarding_contract.py
     ;;
   day3)
-    python scripts/check_day3_proof_contract.py
+    python scripts/check_proof_contract_3.py
     ;;
   day4)
-    python scripts/check_day4_skills_contract.py
+    python scripts/check_skills_contract_4.py
     ;;
   github-actions-onboarding)
     python scripts/check_github_actions_onboarding_contract.py
@@ -78,8 +78,8 @@ case "$mode" in
     pytest --cov=src/sdetkit --cov-report=term-missing --cov-report=xml
     mkdocs build
     python scripts/check_onboarding_contract.py
-    python scripts/check_day3_proof_contract.py
-    python scripts/check_day4_skills_contract.py
+    python scripts/check_proof_contract_3.py
+    python scripts/check_skills_contract_4.py
     python scripts/check_github_actions_onboarding_contract.py
     python scripts/check_gitlab_ci_onboarding_contract.py
     python scripts/check_reliability_evidence_pack_contract.py

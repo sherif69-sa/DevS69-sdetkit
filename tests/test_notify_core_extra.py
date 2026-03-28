@@ -15,7 +15,7 @@ class _EP:
 
 
 class _EPs:
-    def __init__(self, items: list[_EP]) -> None:
+    def init_(self, items: list[_EP]) -> None:
         self._items = items
 
     def select(self, *, group: str):
@@ -23,7 +23,7 @@ class _EPs:
 
 
 class _Record:
-    def __init__(self, factory):
+    def init_(self, factory):
         self.factory = factory
 
 

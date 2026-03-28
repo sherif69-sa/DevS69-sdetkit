@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day58_phase2_hardening_closeout as d58
+from sdetkit import phase2_hardening_closeout_58 as d58
 
 
 def _seed_repo(root: Path) -> None:

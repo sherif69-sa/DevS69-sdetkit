@@ -5,9 +5,9 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-integration-expansion-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "workflow": ".github/workflows/day64-advanced-github-actions-reference.yml",
-    "day63_summary": "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json",
-    "day63_delivery_board": "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md"
+    "workflow": ".github/workflows/advanced-github-actions-reference-64.yml",
+    "day63_summary": "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json",
+    "day63_delivery_board": "docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
   },
   "checks": [
     {
@@ -32,13 +32,13 @@
       "check_id": "day63_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
     },
     {
       "check_id": "day63_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
     },
     {
       "check_id": "day63_quality_floor",

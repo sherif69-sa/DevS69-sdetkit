@@ -138,5 +138,5 @@ def main(argv: list[str] | None = None) -> int:
     return 2
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

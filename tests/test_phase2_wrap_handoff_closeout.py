@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day60_phase2_wrap_handoff_closeout as d60
+from sdetkit import phase2_wrap_handoff_closeout_60 as d60
 
 
 def _seed_repo(root: Path) -> None:

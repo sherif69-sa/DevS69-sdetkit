@@ -19,7 +19,7 @@ def test_maintenance_main_module_executes_main(monkeypatch: pytest.MonkeyPatch) 
 
     monkeypatch.setattr(mcli, "main", lambda: 7)
     with pytest.raises(SystemExit) as exc:
-        runpy.run_module("sdetkit.maintenance.__main__", run_name="__main__")
+        runpy.run_module("sdetkit.maintenance.main", run_name="main_")
     assert exc.value.code == 7
 
 
@@ -159,7 +159,7 @@ def test_cli_alias_resolver_fallback_and_hit(monkeypatch: pytest.MonkeyPatch) ->
         playbooks_cli,
         "_build_registry",
         lambda _pkg: (
-            {"weekly-review-closeout": "day49_weekly_review_closeout"},
+            {"weekly-review-closeout": "weekly_review_closeout_49"},
             {"weekly-review-closeout": "weekly-review-closeout"},
         ),
     )

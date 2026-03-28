@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day75_trust_assets_refresh_closeout as d75
+from sdetkit import trust_assets_refresh_closeout_75 as d75
 
 
 def _seed_repo(root: Path) -> None:

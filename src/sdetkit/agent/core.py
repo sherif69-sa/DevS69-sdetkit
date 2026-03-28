@@ -88,7 +88,7 @@ class RunRecord:
 
 
 class ApprovalGate:
-    def __init__(self, *, auto_approve: bool = False) -> None:
+    def init_(self, *, auto_approve: bool = False) -> None:
         self.auto_approve = auto_approve
 
     def requires_approval(self, action: str, params: dict[str, Any]) -> bool:

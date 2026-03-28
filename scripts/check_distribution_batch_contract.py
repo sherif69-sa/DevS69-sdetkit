@@ -1,10 +1,10 @@
 """Canonical contract checker entrypoint.
 
-Legacy alias: scripts/check_day38_distribution_batch_contract.py
+Legacy alias: scripts/check_distribution_batch_contract_38.py
 """
 
-from check_day38_distribution_batch_contract import main
+from check_distribution_batch_contract_38 import main
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

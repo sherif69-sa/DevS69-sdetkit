@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_case_snippet_closeout_contract_51.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "day51-case-snippet-closeout contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['required_sections_present', 'readme_day51_link', 'readme_day51_command', 'docs_index_day51_links', 'top10_day51_alignment', 'day50_quality_floor']\n"
+}

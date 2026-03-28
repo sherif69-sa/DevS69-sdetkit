@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day40_scale_lane as d40
+from sdetkit import scale_lane_40 as d40
 
 
 def _seed_repo(root: Path) -> None:

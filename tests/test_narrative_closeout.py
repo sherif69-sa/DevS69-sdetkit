@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day52_narrative_closeout as d52
+from sdetkit import narrative_closeout_52 as d52
 
 
 def _seed_repo(root: Path) -> None:
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day51-case-snippet-closeout-pack/day51-case-snippet-closeout-summary.json"
+        / "docs/artifacts/case-snippet-closeout-pack-51/case-snippet-closeout-summary-51.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day51-case-snippet-closeout-pack/day51-delivery-board.md"
+    board = root / "docs/artifacts/case-snippet-closeout-pack-51/delivery-board-51.md"
     board.write_text(
         "\n".join(
             [
@@ -114,7 +114,7 @@ def test_day52_strict_fails_when_day51_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day51-case-snippet-closeout-pack/day51-case-snippet-closeout-summary.json"
+        / "docs/artifacts/case-snippet-closeout-pack-51/case-snippet-closeout-summary-51.json"
     ).unlink()
     rc = d52.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

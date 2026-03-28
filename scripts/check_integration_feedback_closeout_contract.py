@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day82_integration_feedback_closeout as lane
+from sdetkit import integration_feedback_closeout_82 as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/integration-feedback-closeout-pack/evidence/integration-feedback-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())
