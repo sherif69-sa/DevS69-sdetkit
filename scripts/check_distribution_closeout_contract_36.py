@@ -8,7 +8,7 @@ from sdetkit import distribution_closeout_36 as d36
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 36 distribution closeout contract.")
+    parser = argparse.ArgumentParser(description="Validate distribution closeout contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

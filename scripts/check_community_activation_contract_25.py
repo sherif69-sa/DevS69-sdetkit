@@ -8,7 +8,7 @@ from sdetkit import community_activation as ca
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 25 community-activation contract.")
+    parser = argparse.ArgumentParser(description="Validate community-activation contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

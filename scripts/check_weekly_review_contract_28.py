@@ -8,7 +8,7 @@ from sdetkit import weekly_review_28 as d28
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 28 weekly review contract.")
+    parser = argparse.ArgumentParser(description="Validate weekly review contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

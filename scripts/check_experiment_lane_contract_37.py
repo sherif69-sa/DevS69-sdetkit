@@ -8,7 +8,7 @@ from sdetkit import experiment_lane_37 as d37
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 37 experiment lane contract.")
+    parser = argparse.ArgumentParser(description="Validate experiment lane contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

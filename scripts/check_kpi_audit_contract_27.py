@@ -8,7 +8,7 @@ from sdetkit import kpi_audit as kpa
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 27 kpi-audit contract.")
+    parser = argparse.ArgumentParser(description="Validate kpi-audit contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

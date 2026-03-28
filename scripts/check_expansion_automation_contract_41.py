@@ -8,7 +8,7 @@ from sdetkit import expansion_automation_41 as d41
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 41 expansion automation contract.")
+    parser = argparse.ArgumentParser(description="Validate expansion automation contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
