@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-distribution-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day35_summary": "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json",
-    "day35_delivery_board": "docs/artifacts/day35-kpi-instrumentation-pack/day35-delivery-board.md"
+    "day35_summary": "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json",
+    "day35_delivery_board": "docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
   },
   "checks": [
     {
@@ -59,13 +59,13 @@
       "check_id": "day35_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
     },
     {
       "check_id": "day35_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day35-kpi-instrumentation-pack/day35-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
     },
     {
       "check_id": "day35_quality_floor",

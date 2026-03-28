@@ -31,7 +31,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-kpi-audit.md").write_text(kpa._DAY27_DEFAULT_PAGE, encoding="utf-8")
-    pack = root / "docs/artifacts/day27-kpi-pack"
+    pack = root / "docs/artifacts/kpi-audit-pack"
     pack.mkdir(parents=True, exist_ok=True)
     (pack / "day27-kpi-baseline.json").write_text(
         json.dumps(kpa._DEFAULT_BASELINE) + "\n", encoding="utf-8"

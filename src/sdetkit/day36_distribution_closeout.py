@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-distribution-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY35_SUMMARY_PATH = (
-    "docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+    "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
 )
-_DAY35_BOARD_PATH = "docs/artifacts/day35-kpi-instrumentation-pack/day35-delivery-board.md"
+_DAY35_BOARD_PATH = "docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
 _SECTION_HEADER = "# Day 36 \u2014 Community distribution closeout"
 _REQUIRED_SECTIONS = [
     "## Why Day 36 matters",
@@ -68,8 +68,8 @@ Day 36 closes the distribution lane by converting the Day 35 KPI story into chan
 
 ## Required inputs (Day 35)
 
-- `docs/artifacts/day35-kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json`
-- `docs/artifacts/day35-kpi-instrumentation-pack/day35-delivery-board.md`
+- `docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json`
+- `docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md`
 
 ## Day 36 command lane
 

@@ -17,8 +17,8 @@ Day 35 closes the week with a hardened KPI operating loop that ties growth narra
 
 ```bash
 python -m sdetkit kpi-instrumentation --format json --strict
-python -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict
-python -m sdetkit kpi-instrumentation --execute --evidence-dir docs/artifacts/day35-kpi-instrumentation-pack/evidence --format json --strict
+python -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict
+python -m sdetkit kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict
 python scripts/check_kpi_instrumentation_contract.py
 ```
 

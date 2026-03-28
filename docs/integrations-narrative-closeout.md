@@ -17,8 +17,8 @@ Day 52 closes with a major narrative upgrade that converts Day 51 case-snippet e
 
 ```bash
 python -m sdetkit narrative-closeout --format json --strict
-python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/day52-narrative-closeout-pack --format json --strict
-python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/day52-narrative-closeout-pack/evidence --format json --strict
+python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict
+python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict
 python scripts/check_narrative_closeout_contract.py
 ```
 

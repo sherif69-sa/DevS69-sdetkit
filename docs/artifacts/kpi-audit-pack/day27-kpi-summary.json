@@ -1,0 +1,148 @@
+{
+  "checks": [
+    {
+      "category": "contract",
+      "check_id": "docs_page_exists",
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-kpi-audit.md",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "contract",
+      "check_id": "required_sections_present",
+      "evidence": {
+        "missing_sections": []
+      },
+      "passed": true,
+      "weight": 20
+    },
+    {
+      "category": "contract",
+      "check_id": "required_commands_present",
+      "evidence": {
+        "missing_commands": []
+      },
+      "passed": true,
+      "weight": 15
+    },
+    {
+      "category": "discoverability",
+      "check_id": "readme_day27_link",
+      "evidence": "docs/integrations-kpi-audit.md",
+      "passed": false,
+      "weight": 8
+    },
+    {
+      "category": "discoverability",
+      "check_id": "readme_day27_command",
+      "evidence": "kpi-audit",
+      "passed": false,
+      "weight": 6
+    },
+    {
+      "category": "discoverability",
+      "check_id": "docs_index_day27_link",
+      "evidence": "impact-27-ultra-upgrade-report.md",
+      "passed": false,
+      "weight": 6
+    },
+    {
+      "category": "strategy",
+      "check_id": "top10_day27_alignment",
+      "evidence": "Day 27 \u2014 KPI audit",
+      "passed": false,
+      "weight": 8
+    },
+    {
+      "category": "strategy",
+      "check_id": "docs_mentions_core_kpis",
+      "evidence": "stars_per_week/readme_ctr_percent/discussions_per_week/external_prs_per_week",
+      "passed": true,
+      "weight": 7
+    },
+    {
+      "category": "data",
+      "check_id": "baseline_metrics_valid",
+      "evidence": "docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
+      "passed": true,
+      "weight": 10
+    },
+    {
+      "category": "data",
+      "check_id": "current_metrics_valid",
+      "evidence": "docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
+      "passed": true,
+      "weight": 10
+    }
+  ],
+  "inputs": {
+    "baseline": "docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
+    "current": "docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-kpi-audit.md",
+    "readme": "README.md",
+    "top10": "docs/top-10-github-strategy.md"
+  },
+  "metrics": {
+    "baseline": {
+      "discussions_per_week": 3.0,
+      "external_prs_per_week": 1.0,
+      "readme_ctr_percent": 2.8,
+      "stars_per_week": 8.0
+    },
+    "current": {
+      "discussions_per_week": 6.0,
+      "external_prs_per_week": 3.0,
+      "readme_ctr_percent": 4.6,
+      "stars_per_week": 13.0
+    },
+    "deltas": {
+      "discussions_per_week": {
+        "baseline": 3.0,
+        "current": 6.0,
+        "delta": 3.0,
+        "delta_percent": 100.0,
+        "trend": "up"
+      },
+      "external_prs_per_week": {
+        "baseline": 1.0,
+        "current": 3.0,
+        "delta": 2.0,
+        "delta_percent": 200.0,
+        "trend": "up"
+      },
+      "readme_ctr_percent": {
+        "baseline": 2.8,
+        "current": 4.6,
+        "delta": 1.8,
+        "delta_percent": 64.29,
+        "trend": "up"
+      },
+      "stars_per_week": {
+        "baseline": 8.0,
+        "current": 13.0,
+        "delta": 5.0,
+        "delta_percent": 62.5,
+        "trend": "up"
+      }
+    }
+  },
+  "name": "day27-kpi-audit",
+  "strict_failures": [],
+  "summary": {
+    "activation_score": 72.0,
+    "critical_failures": [
+      "top10_day27_alignment"
+    ],
+    "failed_checks": [
+      "readme_day27_link",
+      "readme_day27_command",
+      "docs_index_day27_link",
+      "top10_day27_alignment"
+    ],
+    "recommendations": [
+      "Add Day 27 KPI links and command examples in README/docs index for operator visibility."
+    ],
+    "total_checks": 10
+  }
+}

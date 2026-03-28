@@ -21,8 +21,8 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit kpi-audit --format json --strict",
-    "python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/day27-kpi-pack --format json --strict",
-    "python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/day27-kpi-pack/evidence --format json --strict",
+    "python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/kpi-audit-pack --format json --strict",
+    "python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/kpi-audit-pack/evidence --format json --strict",
     "python scripts/check_kpi_audit_contract.py",
 ]
 _EXECUTION_COMMANDS = [
@@ -64,16 +64,16 @@ A Day 27 pass requires side-by-side baseline and current snapshots for:
 
 ## Metric baseline and current snapshot
 
-- Baseline path: `docs/artifacts/day27-kpi-pack/day27-kpi-baseline.json`
-- Current path: `docs/artifacts/day27-kpi-pack/day27-kpi-current.json`
+- Baseline path: `docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json`
+- Current path: `docs/artifacts/kpi-audit-pack/day27-kpi-current.json`
 - Every metric must be numeric and non-negative.
 
 ## Launch checklist
 
 ```bash
 python -m sdetkit kpi-audit --format json --strict
-python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/day27-kpi-pack --format json --strict
-python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/day27-kpi-pack/evidence --format json --strict
+python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/kpi-audit-pack --format json --strict
+python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/kpi-audit-pack/evidence --format json --strict
 python scripts/check_kpi_audit_contract.py
 ```
 
@@ -139,8 +139,8 @@ def build_kpi_audit_summary(
     docs_index_path: str = "docs/index.md",
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
-    baseline_path: str = "docs/artifacts/day27-kpi-pack/day27-kpi-baseline.json",
-    current_path: str = "docs/artifacts/day27-kpi-pack/day27-kpi-current.json",
+    baseline_path: str = "docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
+    current_path: str = "docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
 ) -> dict[str, Any]:
     page_path = root / docs_page_path
     page_text = _read(page_path)
@@ -416,12 +416,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
     parser.add_argument(
         "--baseline",
-        default="docs/artifacts/day27-kpi-pack/day27-kpi-baseline.json",
+        default="docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
         help="Baseline KPI snapshot JSON.",
     )
     parser.add_argument(
         "--current",
-        default="docs/artifacts/day27-kpi-pack/day27-kpi-current.json",
+        default="docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
         help="Current KPI snapshot JSON.",
     )
     parser.add_argument(
@@ -435,7 +435,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--evidence-dir",
-        default="docs/artifacts/day27-kpi-pack/evidence",
+        default="docs/artifacts/kpi-audit-pack/evidence",
         help="Output directory for execution evidence logs.",
     )
     parser.add_argument(

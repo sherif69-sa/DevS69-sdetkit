@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-contributor-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY53_SUMMARY_PATH = (
-    "docs/artifacts/day53-docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
+    "docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
 )
-_DAY53_BOARD_PATH = "docs/artifacts/day53-docs-loop-closeout-pack/day53-delivery-board.md"
+_DAY53_BOARD_PATH = "docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md"
 _SECTION_HEADER = "# Day 55 \u2014 Contributor activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 55 matters",
@@ -68,8 +68,8 @@ Day 55 closes with a major contributor activation upgrade that turns Day 53 docs
 
 ## Required inputs (Day 53)
 
-- `docs/artifacts/day53-docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json`
-- `docs/artifacts/day53-docs-loop-closeout-pack/day53-delivery-board.md`
+- `docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json`
+- `docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md`
 
 ## Day 55 command lane
 

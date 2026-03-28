@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-docs-loop-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY52_SUMMARY_PATH = (
-    "docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json"
+    "docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json"
 )
-_DAY52_BOARD_PATH = "docs/artifacts/day52-narrative-closeout-pack/day52-delivery-board.md"
+_DAY52_BOARD_PATH = "docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
 _SECTION_HEADER = "# Day 53 \u2014 Docs loop optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 53 matters",
@@ -26,13 +26,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit docs-loop-closeout --format json --strict",
-    "python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/day53-docs-loop-closeout-pack --format json --strict",
-    "python -m sdetkit docs-loop-closeout --execute --evidence-dir docs/artifacts/day53-docs-loop-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/docs-loop-closeout-pack --format json --strict",
+    "python -m sdetkit docs-loop-closeout --execute --evidence-dir docs/artifacts/docs-loop-closeout-pack/evidence --format json --strict",
     "python scripts/check_docs_loop_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit docs-loop-closeout --format json --strict",
-    "python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/day53-docs-loop-closeout-pack --format json --strict",
+    "python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/docs-loop-closeout-pack --format json --strict",
     "python scripts/check_docs_loop_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +68,15 @@ Day 53 closes with a major docs loop optimization upgrade that converts Day 52 n
 
 ## Required inputs (Day 52)
 
-- `docs/artifacts/day52-narrative-closeout-pack/day52-narrative-closeout-summary.json`
-- `docs/artifacts/day52-narrative-closeout-pack/day52-delivery-board.md`
+- `docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json`
+- `docs/artifacts/narrative-closeout-pack/day52-delivery-board.md`
 
 ## Day 53 command lane
 
 ```bash
 python -m sdetkit docs-loop-closeout --format json --strict
-python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/day53-docs-loop-closeout-pack --format json --strict
-python -m sdetkit docs-loop-closeout --execute --evidence-dir docs/artifacts/day53-docs-loop-closeout-pack/evidence --format json --strict
+python -m sdetkit docs-loop-closeout --emit-pack-dir docs/artifacts/docs-loop-closeout-pack --format json --strict
+python -m sdetkit docs-loop-closeout --execute --evidence-dir docs/artifacts/docs-loop-closeout-pack/evidence --format json --strict
 python scripts/check_docs_loop_closeout_contract.py
 ```
 
@@ -487,7 +487,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day53-docs-loop-closeout-pack/evidence")
+            else Path("docs/artifacts/docs-loop-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

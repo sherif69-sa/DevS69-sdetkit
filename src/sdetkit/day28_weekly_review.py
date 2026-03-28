@@ -20,8 +20,8 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit day28-weekly-review --format json --strict",
-    "python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/day28-weekly-pack --format json --strict",
-    "python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/day28-weekly-pack/evidence --format json --strict",
+    "python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict",
+    "python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict",
     "python scripts/check_weekly_review_contract.py",
 ]
 _EXECUTION_COMMANDS = [
@@ -41,16 +41,16 @@ Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wi
 
 ## Inputs from Cycles 25-27
 
-- Day 25: `docs/artifacts/day25-community-pack/day25-community-summary.json`
+- Day 25: `docs/artifacts/community-activation-pack/day25-community-summary.json`
 - External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
-- Day 27: `docs/artifacts/day27-kpi-pack/day27-kpi-summary.json`
+- Day 27: `docs/artifacts/kpi-audit-pack/day27-kpi-summary.json`
 
 ## Closeout checklist
 
 ```bash
 python -m sdetkit day28-weekly-review --format json --strict
-python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/day28-weekly-pack --format json --strict
-python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/day28-weekly-pack/evidence --format json --strict
+python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict
+python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict
 python scripts/check_weekly_review_contract.py
 ```
 
@@ -104,11 +104,11 @@ def build_day28_weekly_review_summary(
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
-    day25_path = root / "docs/artifacts/day25-community-pack/day25-community-summary.json"
+    day25_path = root / "docs/artifacts/community-activation-pack/day25-community-summary.json"
     external_contribution_path = (
         root / "docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     )
-    day27_path = root / "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
+    day27_path = root / "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
 
     day25_score, day25_ok = _load_score(day25_path)
     external_contribution_score, external_contribution_ok = _load_score(external_contribution_path)
@@ -402,7 +402,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day28-weekly-pack/evidence")
+            else Path("docs/artifacts/weekly-review-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

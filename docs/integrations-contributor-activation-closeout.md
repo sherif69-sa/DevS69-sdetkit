@@ -10,8 +10,8 @@ Day 55 closes with a major contributor activation upgrade that turns Day 53 docs
 
 ## Required inputs (Day 53)
 
-- `docs/artifacts/day53-docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json`
-- `docs/artifacts/day53-docs-loop-closeout-pack/day53-delivery-board.md`
+- `docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json`
+- `docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md`
 
 ## Contributor Activation Closeout command lane
 
