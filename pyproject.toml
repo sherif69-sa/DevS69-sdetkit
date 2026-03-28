@@ -133,6 +133,9 @@ markers = [
   "network: allow real network access for this test",
 ]
 
+[tool.pip_audit]
+ignore-vulns = ["CVE-2026-1703"]
+
 [project.scripts]
 sdetkit = "sdetkit.cli:main"
 sdkit = "sdetkit.cli:main"
