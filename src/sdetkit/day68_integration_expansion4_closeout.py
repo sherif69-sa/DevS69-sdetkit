@@ -14,7 +14,8 @@ _DAY67_SUMMARY_PATH = "docs/artifacts/integration-expansion3-closeout-pack/integ
 _DAY67_BOARD_PATH = (
     "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md"
 )
-_REFERENCE_PATH = "templates/ci/tekton/day68-self-hosted-reference.yaml"
+_REFERENCE_PATH = "templates/ci/tekton/tekton-self-hosted-reference.yaml"
+_LEGACY_REFERENCE_PATH = "templates/ci/tekton/day68-self-hosted-reference.yaml"
 _SECTION_HEADER = "# Day 68 \u2014 Integration expansion #4 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion4 Closeout matters",
@@ -79,7 +80,8 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json`
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md`
-- `templates/ci/tekton/day68-self-hosted-reference.yaml`
+- `templates/ci/tekton/tekton-self-hosted-reference.yaml`
+  - legacy compatibility alias: `templates/ci/tekton/day68-self-hosted-reference.yaml`
 
 ## Integration Expansion4 Closeout command lane (Legacy Day 68)
 
@@ -128,6 +130,16 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    if legacy_path.exists():
+        return legacy_path
+    return canonical_path
+
+
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -163,7 +175,8 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
-    reference_text = _read(root / _REFERENCE_PATH)
+    reference_path = _resolve_input_path(root, _REFERENCE_PATH, _LEGACY_REFERENCE_PATH)
+    reference_text = _read(reference_path)
 
     day67_summary = root / _DAY67_SUMMARY_PATH
     day67_board = root / _DAY67_BOARD_PATH
@@ -267,7 +280,7 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "self_hosted_reference_present",
             "weight": 10,
             "passed": not missing_reference_lines,
-            "evidence": missing_reference_lines or _REFERENCE_PATH,
+            "evidence": missing_reference_lines or str(reference_path.relative_to(root)),
         },
     ]
 
@@ -307,7 +320,7 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 68 self-hosted reference pipeline is missing required controls.")
         handoff_actions.append(
-            "Update templates/ci/tekton/day68-self-hosted-reference.yaml to restore required controls."
+            "Update templates/ci/tekton/tekton-self-hosted-reference.yaml to restore required controls."
         )
 
     if not failed and not critical_failures:
@@ -329,7 +342,9 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
             "day67_delivery_board": str(day67_board.relative_to(root))
             if day67_board.exists()
             else str(day67_board),
-            "self_hosted_reference": _REFERENCE_PATH,
+            "self_hosted_reference": str(reference_path.relative_to(root))
+            if reference_path.exists()
+            else _REFERENCE_PATH,
         },
         "checks": checks,
         "rollup": {
