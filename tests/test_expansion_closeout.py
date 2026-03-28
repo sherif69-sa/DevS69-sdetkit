@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/scale-closeout-pack/day44-delivery-board.md"
+    board = root / "docs/artifacts/scale-closeout-pack/scale-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -98,13 +98,13 @@ def test_day45_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (tmp_path / "artifacts/day45-pack/expansion-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day45-pack/expansion-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/day45-expansion-plan.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/day45-growth-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day45-pack/day45-expansion-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day45-pack/day45-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/day45-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/day45-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/evidence/day45-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day45-pack/expansion-plan.md").exists()
+    assert (tmp_path / "artifacts/day45-pack/expansion-growth-matrix.csv").exists()
+    assert (tmp_path / "artifacts/day45-pack/expansion-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day45-pack/expansion-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day45-pack/expansion-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day45-pack/expansion-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day45-pack/evidence/expansion-execution-summary.json").exists()
 
 
 def test_day45_strict_fails_when_day44_inputs_missing(tmp_path: Path) -> None:

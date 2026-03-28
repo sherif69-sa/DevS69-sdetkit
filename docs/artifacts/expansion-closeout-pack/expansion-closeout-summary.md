@@ -1,0 +1,13 @@
+Day 45 expansion closeout summary
+- Activation score: 65
+- Passed checks: 9
+- Failed checks: 5
+- Critical failures: ['day44_strict_baseline']
+- Day 44 activation score: `40.0`
+- Day 44 checks evaluated: `14`
+- Day 44 delivery board checklist items: `5`
+- Wins:
+  - Day 44 delivery board integrity validated with 5 checklist items.
+  - Expansion execution contract + quality checklist is fully locked for execution.
+- Misses:
+  - Day 44 strict continuity signal is missing.

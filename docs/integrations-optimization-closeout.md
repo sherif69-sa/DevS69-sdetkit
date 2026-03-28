@@ -11,7 +11,7 @@ Day 46 closes with a major optimization upgrade that converts Day 45 expansion e
 ## Required inputs (Day 45)
 
 - `docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json`
-- `docs/artifacts/expansion-closeout-pack/day45-delivery-board.md`
+- `docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md`
 
 ## Day 46 command lane
 

@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY43_SUMMARY_PATH = (
     "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
 )
-_DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md"
+_DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md"
 _SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 44 matters",
@@ -69,7 +69,7 @@ Day 44 closes with a major scale upgrade that converts Day 43 acceleration evide
 ## Required inputs (Day 43)
 
 - `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
-- `docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md`
+- `docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md`
 
 ## Day 44 command lane
 
@@ -116,6 +116,13 @@ Day 44 weighted score (0-100):
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -172,7 +179,11 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day43_summary = root / _DAY43_SUMMARY_PATH
-    day43_board = root / _DAY43_BOARD_PATH
+    day43_board = _resolve_existing_path(
+        root,
+        _DAY43_BOARD_PATH,
+        "docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md",
+    )
     day43_score, day43_strict, day43_check_count = _load_day43(day43_summary)
     board_count, board_has_day43, board_has_day44 = _board_stats(day43_board)
 
@@ -383,16 +394,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "scale-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "scale-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day44-scale-plan.md",
+        target / "scale-plan.md",
         "# Day 44 Scale Plan\n\n- Objective: close Day 44 with measurable quality and throughput gains.\n",
     )
     _write(
-        target / "day44-growth-matrix.csv",
+        target / "scale-growth-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-scale-closeout.md,python -m sdetkit scale-closeout --format json --strict,failed-checks:0,baseline-drift\n",
     )
     _write(
-        target / "day44-scale-kpi-scorecard.json",
+        target / "scale-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -410,15 +421,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day44-execution-log.md",
+        target / "scale-execution-log.md",
         "# Day 44 Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 45 expansion priorities.\n",
     )
     _write(
-        target / "day44-delivery-board.md",
+        target / "scale-delivery-board.md",
         "# Day 44 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day44-validation-commands.md",
+        target / "scale-validation-commands.md",
         "# Day 44 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -441,7 +452,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day44-execution-summary.json",
+        evidence_path / "scale-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 

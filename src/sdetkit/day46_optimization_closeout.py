@@ -13,7 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY45_SUMMARY_PATH = (
     "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
 )
-_DAY45_BOARD_PATH = "docs/artifacts/expansion-closeout-pack/day45-delivery-board.md"
+_DAY45_BOARD_PATH = "docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md"
 _SECTION_HEADER = "# Day 46 \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 46 matters",
@@ -69,7 +69,7 @@ Day 46 closes with a major optimization upgrade that converts Day 45 expansion e
 ## Required inputs (Day 45)
 
 - `docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json`
-- `docs/artifacts/expansion-closeout-pack/day45-delivery-board.md`
+- `docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md`
 
 ## Day 46 command lane
 
@@ -116,6 +116,13 @@ Day 46 weighted score (0-100):
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -171,7 +178,11 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day45_summary = root / _DAY45_SUMMARY_PATH
-    day45_board = root / _DAY45_BOARD_PATH
+    day45_board = _resolve_existing_path(
+        root,
+        _DAY45_BOARD_PATH,
+        "docs/artifacts/expansion-closeout-pack/day45-delivery-board.md",
+    )
     day45_score, day45_strict, day45_check_count = _load_day45(day45_summary)
     board_count, board_has_day45, board_has_day46 = _board_stats(day45_board)
 
@@ -388,16 +399,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(target / "optimization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day46-optimization-plan.md",
+        target / "optimization-plan.md",
         "# Day 46 Optimization Plan\n\n- Objective: close Day 46 with measurable efficiency and quality gains.\n",
     )
     _write(
-        target / "day46-bottleneck-map.csv",
+        target / "optimization-bottleneck-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "optimization-floor,qa-lead,platform-owner,2026-03-14T10:00:00Z,docs/integrations-optimization-closeout.md,python -m sdetkit optimization-closeout --format json --strict,failed-checks:0,reliability-drift\n",
     )
     _write(
-        target / "day46-optimization-kpi-scorecard.json",
+        target / "optimization-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -415,15 +426,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day46-execution-log.md",
+        target / "optimization-execution-log.md",
         "# Day 46 Execution Log\n\n- [ ] 2026-03-13: Record misses, wins, and Day 47 reliability priorities.\n",
     )
     _write(
-        target / "day46-delivery-board.md",
+        target / "optimization-delivery-board.md",
         "# Day 46 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day46-validation-commands.md",
+        target / "optimization-validation-commands.md",
         "# Day 46 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -446,7 +457,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day46-execution-summary.json",
+        evidence_path / "optimization-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 

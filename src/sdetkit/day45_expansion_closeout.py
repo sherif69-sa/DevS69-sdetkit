@@ -11,7 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY44_SUMMARY_PATH = "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
-_DAY44_BOARD_PATH = "docs/artifacts/scale-closeout-pack/day44-delivery-board.md"
+_DAY44_BOARD_PATH = "docs/artifacts/scale-closeout-pack/scale-delivery-board.md"
 _SECTION_HEADER = "# Day 45 \u2014 Expansion closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 45 matters",
@@ -67,7 +67,7 @@ Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence
 ## Required inputs (Day 44)
 
 - `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`
-- `docs/artifacts/scale-closeout-pack/day44-delivery-board.md`
+- `docs/artifacts/scale-closeout-pack/scale-delivery-board.md`
 
 ## Day 45 command lane
 
@@ -114,6 +114,13 @@ Day 45 weighted score (0-100):
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
+
+
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
 
 
 def _load_json(path: Path) -> dict[str, Any] | None:
@@ -170,7 +177,11 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day44_summary = root / _DAY44_SUMMARY_PATH
-    day44_board = root / _DAY44_BOARD_PATH
+    day44_board = _resolve_existing_path(
+        root,
+        _DAY44_BOARD_PATH,
+        "docs/artifacts/scale-closeout-pack/day44-delivery-board.md",
+    )
     day44_score, day44_strict, day44_check_count = _load_day44(day44_summary)
     board_count, board_has_day44, board_has_day45 = _board_stats(day44_board)
 
@@ -385,16 +396,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "expansion-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "expansion-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day45-expansion-plan.md",
+        target / "expansion-plan.md",
         "# Day 45 Expansion Plan\n\n- Objective: close Day 45 with measurable quality and throughput gains.\n",
     )
     _write(
-        target / "day45-growth-matrix.csv",
+        target / "expansion-growth-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "expansion-floor,qa-lead,platform-owner,2026-03-13T10:00:00Z,docs/integrations-expansion-closeout.md,python -m sdetkit expansion-closeout --format json --strict,failed-checks:0,handoff-drift\n",
     )
     _write(
-        target / "day45-expansion-kpi-scorecard.json",
+        target / "expansion-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -412,15 +423,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day45-execution-log.md",
+        target / "expansion-execution-log.md",
         "# Day 45 Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 46 optimization priorities.\n",
     )
     _write(
-        target / "day45-delivery-board.md",
+        target / "expansion-delivery-board.md",
         "# Day 45 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day45-validation-commands.md",
+        target / "expansion-validation-commands.md",
         "# Day 45 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -443,7 +454,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day45-execution-summary.json",
+        evidence_path / "expansion-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
