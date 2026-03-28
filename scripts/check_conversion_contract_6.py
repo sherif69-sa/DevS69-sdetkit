@@ -60,12 +60,12 @@ def main() -> int:
             errors.append(f"missing required file: {p}")
 
     if errors:
-        print("day6-conversion-contract check failed:", file=sys.stderr)
+        print("conversion-contract check failed:", file=sys.stderr)
         for e in errors:
             print(f"- {e}", file=sys.stderr)
         return 1
 
-    print("day6-conversion-contract check passed")
+    print("conversion-contract check passed")
     return 0
 
 

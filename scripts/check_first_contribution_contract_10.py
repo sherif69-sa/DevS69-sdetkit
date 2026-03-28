@@ -100,12 +100,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day10-first-contribution-contract check failed:", file=sys.stderr)
+        print("first-contribution-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day10-first-contribution-contract check passed")
+    print("first-contribution-contract check passed")
     return 0
 
 

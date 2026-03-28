@@ -71,12 +71,12 @@ def main() -> int:
         )
 
     if errors:
-        print("day9-contribution-templates-contract check failed:", file=sys.stderr)
+        print("contribution-templates-contract check failed:", file=sys.stderr)
         for error in errors:
             print(f" - {error}", file=sys.stderr)
         return 1
 
-    print("day9-contribution-templates-contract check passed")
+    print("contribution-templates-contract check passed")
     return 0
 
 

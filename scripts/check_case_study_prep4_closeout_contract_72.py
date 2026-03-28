@@ -11,7 +11,7 @@ from sdetkit import case_study_prep4_closeout_72 as d72
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 72 case-study prep #4 closeout contract"
+        description="Validate case-study prep #4 closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day72-case-study-prep4-closeout contract check failed:", file=sys.stderr)
+        print("case-study-prep4-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day72-case-study-prep4-closeout contract check passed")
+    print("case-study-prep4-closeout contract check passed")
     return 0
 
 

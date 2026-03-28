@@ -10,7 +10,7 @@ from sdetkit import scale_upgrade_closeout_79 as d79
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 79 scale upgrade closeout contract")
+    parser = argparse.ArgumentParser(description="Validate scale upgrade closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -31,7 +31,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/day79-scale-upgrade-closeout-pack/evidence/day79-execution-summary.json"
+            / "docs/artifacts/scale-upgrade-closeout-pack/evidence/scale-upgrade-execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -44,12 +44,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day79-scale-upgrade-closeout contract check failed:", file=sys.stderr)
+        print("scale-upgrade-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day79-scale-upgrade-closeout contract check passed")
+    print("scale-upgrade-closeout contract check passed")
     return 0
 
 

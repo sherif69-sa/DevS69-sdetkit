@@ -10,7 +10,7 @@ from sdetkit import narrative_closeout_52 as d52
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 52 narrative closeout contract")
+    parser = argparse.ArgumentParser(description="Validate narrative closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -51,12 +51,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day52-narrative-closeout contract check failed:", file=sys.stderr)
+        print("narrative-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day52-narrative-closeout contract check passed")
+    print("narrative-closeout contract check passed")
     return 0
 
 

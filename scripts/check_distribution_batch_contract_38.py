@@ -8,7 +8,7 @@ from sdetkit import distribution_batch_38 as d38
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 38 distribution batch contract.")
+    parser = argparse.ArgumentParser(description="Validate distribution batch contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

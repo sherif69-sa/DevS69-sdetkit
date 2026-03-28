@@ -8,7 +8,7 @@ from sdetkit import acceleration_closeout_43 as d43
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 43 acceleration closeout contract.")
+    parser = argparse.ArgumentParser(description="Validate acceleration closeout contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

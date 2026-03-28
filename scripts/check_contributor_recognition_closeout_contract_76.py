@@ -11,7 +11,7 @@ from sdetkit import contributor_recognition_closeout_76 as d76
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 76 contributor recognition closeout contract"
+        description="Validate contributor recognition closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day76-contributor-recognition-closeout contract check failed:", file=sys.stderr)
+        print("contributor-recognition-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day76-contributor-recognition-closeout contract check passed")
+    print("contributor-recognition-closeout contract check passed")
     return 0
 
 

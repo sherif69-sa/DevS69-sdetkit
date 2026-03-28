@@ -8,7 +8,7 @@ from sdetkit import demo_asset_33 as d33
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 33 demo asset contract.")
+    parser = argparse.ArgumentParser(description="Validate demo asset contract.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

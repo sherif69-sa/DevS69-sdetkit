@@ -66,12 +66,12 @@ def main() -> int:
         errors.append("missing issue-pack artifacts: expected at least 5 gfi-*.md files")
 
     if errors:
-        print("day8-contributor-funnel-contract check failed:", file=sys.stderr)
+        print("contributor-funnel-contract check failed:", file=sys.stderr)
         for e in errors:
             print(f"- {e}", file=sys.stderr)
         return 1
 
-    print("day8-contributor-funnel-contract check passed")
+    print("contributor-funnel-contract check passed")
     return 0
 
 
