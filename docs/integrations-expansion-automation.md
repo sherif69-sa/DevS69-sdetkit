@@ -1,19 +1,19 @@
-# Cycle 41 — Expansion automation lane
+# Lane — Expansion automation lane
 
-Cycle 41 closes the lane with a major upgrade that converts Cycle 40 scale outcomes into repeatable expansion workflows.
+Lane closes the lane with a major upgrade that converts Lane scale outcomes into repeatable expansion workflows.
 
-## Why Cycle 41 matters
+## Why Lane matters
 
-- Turns Cycle 40 scale proof into automation-first operating motion.
+- Turns Lane scale proof into automation-first operating motion.
 - Locks quality controls while increasing repeatability and throughput.
-- Produces a deterministic handoff into Cycle 42 optimization priorities.
+- Produces a deterministic handoff into Lane optimization priorities.
 
-## Required inputs (Cycle 40)
+## Required inputs (Lane)
 
 - `docs/artifacts/scale-lane-pack/scale-lane-summary.json`
 - `docs/artifacts/scale-lane-pack/delivery-board.md`
 
-## Cycle 41 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit expansion-automation --format json --strict
@@ -24,10 +24,10 @@ python scripts/check_expansion_automation_contract.py
 
 ## Expansion automation contract
 
-- Single owner + backup reviewer are assigned for Cycle 41 expansion lane execution and KPI follow-up.
-- The Cycle 41 expansion lane references Cycle 40 scale winners and misses with deterministic remediation loops.
-- Every Cycle 41 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 41 closeout records expansion learnings and Cycle 42 optimization priorities.
+- Single owner + backup reviewer are assigned for Lane expansion lane execution and KPI follow-up.
+- The Lane expansion lane references Lane scale winners and misses with deterministic remediation loops.
+- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Lane closeout records expansion learnings and Lane optimization priorities.
 
 ## Expansion quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_expansion_automation_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes expansion plan, automation matrix, KPI scorecard, and execution log
 
-## Cycle 41 delivery board
+## Lane delivery board
 
-- [ ] Cycle 41 expansion plan draft committed
-- [ ] Cycle 41 review notes captured with owner + backup
-- [ ] Cycle 41 automation matrix exported
-- [ ] Cycle 41 KPI scorecard snapshot exported
-- [ ] Cycle 42 optimization priorities drafted from Cycle 41 learnings
+- [ ] Lane expansion plan draft committed
+- [ ] Lane review notes captured with owner + backup
+- [ ] Lane automation matrix exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane optimization priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 41 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 40 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Expansion execution contract lock + delivery board readiness: 15 points.

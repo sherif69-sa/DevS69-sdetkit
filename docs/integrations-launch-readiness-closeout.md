@@ -1,14 +1,14 @@
 # Launch Readiness Closeout — Launch readiness closeout lane
 
-Cycle 86 closes with a major upgrade that converts Cycle 85 release prioritization outcomes into a deterministic launch readiness operating lane.
+Lane closes with a major upgrade that converts Lane release prioritization outcomes into a deterministic launch readiness operating lane.
 
 ## Why Launch Readiness Closeout matters
 
-- Converts Cycle 85 release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
+- Converts Lane release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 86 closeout into Cycle 87 launch priorities.
+- Creates a deterministic handoff from Lane closeout into Lane launch priorities.
 
-## Required inputs (Cycle 85)
+## Required inputs (Lane)
 
 - `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json`
 - `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_launch_readiness_closeout_contract.py
 
 ## Launch readiness contract
 
-- Single owner + backup reviewer are assigned for Cycle 86 launch readiness execution and signoff.
-- The Cycle 86 lane references Cycle 85 outcomes, controls, and trust continuity signals.
-- Every Cycle 86 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 86 closeout records launch readiness pack upgrades, storyline outcomes, and Cycle 87 launch priorities.
+- Single owner + backup reviewer are assigned for Lane launch readiness execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records launch readiness pack upgrades, storyline outcomes, and Lane launch priorities.
 
 ## Launch readiness quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_launch_readiness_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 86 evidence brief committed
-- [ ] Cycle 86 launch readiness plan committed
-- [ ] Cycle 86 narrative template upgrade ledger exported
-- [ ] Cycle 86 storyline outcomes ledger exported
-- [ ] Cycle 87 launch priorities drafted from Cycle 86 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane launch readiness plan committed
+- [ ] Lane narrative template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Lane launch priorities drafted from Lane outcomes
 
 ## Scoring model
 
-Cycle 86 weights continuity + execution contract + launch artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + launch artifact readiness for a 100-point activation score.

@@ -1,19 +1,19 @@
-# Cycle 47 — Reliability closeout lane
+# Lane — Reliability closeout lane
 
-Cycle 47 closes with a major reliability upgrade that converts Cycle 46 optimization evidence into deterministic hardening loops.
+Lane closes with a major reliability upgrade that converts Lane optimization evidence into deterministic hardening loops.
 
-## Why Cycle 47 matters
+## Why Lane matters
 
-- Converts Cycle 46 optimization proof into reliability-first operating motion.
+- Converts Lane optimization proof into reliability-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from reliability outcomes into Cycle 48 execution priorities.
+- Produces a deterministic handoff from reliability outcomes into Lane execution priorities.
 
-## Required inputs (Cycle 46)
+## Required inputs (Lane)
 
 - `docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json`
 - `docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md`
 
-## Cycle 47 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit reliability-closeout --format json --strict
@@ -24,10 +24,10 @@ python scripts/check_reliability_closeout_contract.py
 
 ## Reliability closeout contract
 
-- Single owner + backup reviewer are assigned for Cycle 47 reliability lane execution and KPI follow-up.
-- The Cycle 47 reliability lane references Cycle 46 optimization winners and misses with deterministic reliability loops.
-- Every Cycle 47 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 47 closeout records reliability learnings and Cycle 48 execution priorities.
+- Single owner + backup reviewer are assigned for Lane reliability lane execution and KPI follow-up.
+- The Lane reliability lane references Lane optimization winners and misses with deterministic reliability loops.
+- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Lane closeout records reliability learnings and Lane execution priorities.
 
 ## Reliability quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_reliability_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes reliability plan, incident map, KPI scorecard, and execution log
 
-## Cycle 47 delivery board
+## Lane delivery board
 
-- [ ] Cycle 47 reliability plan draft committed
-- [ ] Cycle 47 review notes captured with owner + backup
-- [ ] Cycle 47 incident map exported
-- [ ] Cycle 47 KPI scorecard snapshot exported
-- [ ] Cycle 48 execution priorities drafted from Cycle 47 learnings
+- [ ] Lane reliability plan draft committed
+- [ ] Lane review notes captured with owner + backup
+- [ ] Lane incident map exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane execution priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 47 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 46 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Reliability contract lock + delivery board readiness: 15 points.

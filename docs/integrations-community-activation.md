@@ -1,8 +1,8 @@
-# Community activation (Cycle 25)
+# Community activation (Lane)
 
-Cycle 25 converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.
+Lane converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.
 
-## Who should run Cycle 25
+## Who should run Lane
 
 - Maintainers preparing priorities for the next sprint or release train.
 - DevRel/community managers collecting qualitative and quantitative roadmap feedback.
@@ -10,7 +10,7 @@ Cycle 25 converts passive roadmap readers into active contributors through a det
 
 ## Roadmap-voting discussion contract
 
-Cycle 25 is complete when a public roadmap-voting thread is opened, tagged, and linked from docs so contributors can vote and comment on priority items.
+Lane is complete when a public roadmap-voting thread is opened, tagged, and linked from docs so contributors can vote and comment on priority items.
 
 ## Launch checklist
 
@@ -29,7 +29,7 @@ python scripts/check_community_activation_contract.py
 
 ## Activation scoring model
 
-Cycle 25 computes weighted readiness score (0-100):
+Lane computes weighted readiness score (0-100):
 
 - Docs contract + command lane completeness: 45 points.
 - Discoverability links in README/docs index: 25 points.
@@ -38,4 +38,4 @@ Cycle 25 computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs deterministic Cycle 25 checks and writes logs to `--evidence-dir` for release review.
+`--execute` runs deterministic Lane checks and writes logs to `--evidence-dir` for release review.

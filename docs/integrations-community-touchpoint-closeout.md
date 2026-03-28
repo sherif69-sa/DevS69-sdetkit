@@ -1,14 +1,14 @@
 # Community touchpoint closeout lane
 
-Cycle 77 closes with a major upgrade that converts Cycle 76 contributor-recognition outcomes into a community-touchpoint execution pack.
+Lane closes with a major upgrade that converts Lane contributor-recognition outcomes into a community-touchpoint execution pack.
 
-## Why Cycle 77 matters
+## Why Lane matters
 
-- Turns Cycle 76 contributor-recognition outcomes into community-facing touchpoint proof across docs, governance, and release channels.
+- Turns Lane contributor-recognition outcomes into community-facing touchpoint proof across docs, governance, and release channels.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Cycle 77 community touchpoint into Cycle 78 ecosystem priorities.
+- Creates a deterministic handoff from Lane community touchpoint into Lane ecosystem priorities.
 
-## Required inputs (Cycle 76)
+## Required inputs (Lane)
 
 - `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json`
 - `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_community_touchpoint_closeout_contract.py
 
 ## Community touchpoint contract
 
-- Single owner + backup reviewer are assigned for Cycle 77 community touchpoint execution and signoff.
-- The Cycle 77 lane references Cycle 76 outcomes, controls, and KPI continuity signals.
-- Every Cycle 77 section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 77 closeout records touchpoint outcomes, confidence notes, and Cycle 78 ecosystem priorities.
+- Single owner + backup reviewer are assigned for Lane community touchpoint execution and signoff.
+- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- Every Lane section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records touchpoint outcomes, confidence notes, and Lane ecosystem priorities.
 
 ## Touchpoint quality checklist
 
@@ -40,18 +40,18 @@ python scripts/check_community_touchpoint_closeout_contract.py
 
 ## Community touchpoint delivery board
 
-- [ ] Cycle 77 integration brief committed
-- [ ] Cycle 77 community touchpoint plan committed
-- [ ] Cycle 77 touchpoint session ledger exported
-- [ ] Cycle 77 touchpoint KPI scorecard snapshot exported
-- [ ] Cycle 78 ecosystem priorities drafted from Cycle 77 learnings
+- [ ] Lane integration brief committed
+- [ ] Lane community touchpoint plan committed
+- [ ] Lane touchpoint session ledger exported
+- [ ] Lane touchpoint KPI scorecard snapshot exported
+- [ ] Lane ecosystem priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 77 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Cycle 76 continuity baseline quality (35)
+- Lane continuity baseline quality (35)
 - Touchpoint evidence data + delivery board completeness (30)
 
 Strict pass requires score >= 95 and zero critical failures.

@@ -1,14 +1,14 @@
 # Governance Priorities Closeout — Governance priorities closeout lane
 
-Cycle 88 closes with a major upgrade that converts Cycle 87 governance handoff outcomes into a deterministic governance priorities operating lane.
+Lane closes with a major upgrade that converts Lane governance handoff outcomes into a deterministic governance priorities operating lane.
 
 ## Why Governance Priorities Closeout matters
 
-- Converts Cycle 87 governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
+- Converts Lane governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 88 closeout into Cycle 89 governance priorities.
+- Creates a deterministic handoff from Lane closeout into Lane governance priorities.
 
-## Required inputs (Cycle 87)
+## Required inputs (Lane)
 
 - `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json`
 - `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_governance_priorities_closeout_contract.py
 
 ## Governance priorities contract
 
-- Single owner + backup reviewer are assigned for Cycle 88 governance priorities execution and signoff.
-- The Cycle 88 lane references Cycle 87 outcomes, controls, and trust continuity signals.
-- Every Cycle 88 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 88 closeout records governance priorities pack upgrades, storyline outcomes, and Cycle 89 governance priorities.
+- Single owner + backup reviewer are assigned for Lane governance priorities execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records governance priorities pack upgrades, storyline outcomes, and Lane governance priorities.
 
 ## Governance priorities quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_governance_priorities_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 88 evidence brief committed
-- [ ] Cycle 88 governance priorities plan committed
-- [ ] Cycle 88 narrative template upgrade ledger exported
-- [ ] Cycle 88 storyline outcomes ledger exported
-- [ ] Cycle 89 governance priorities drafted from Cycle 88 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane governance priorities plan committed
+- [ ] Lane narrative template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Lane governance priorities drafted from Lane outcomes
 
 ## Scoring model
 
-Cycle 88 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

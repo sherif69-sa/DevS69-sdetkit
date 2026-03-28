@@ -1,14 +1,14 @@
-# Contributor Activation Closeout lane (Legacy: Cycle 55)
+# Contributor Activation Closeout lane (Legacy)
 
-Cycle 55 closes with a major contributor activation upgrade that turns Cycle 53 docs-loop evidence into a deterministic contributor follow-through lane.
+Lane closes with a major contributor activation upgrade that turns Lane docs-loop evidence into a deterministic contributor follow-through lane.
 
-## Why Cycle 55 matters
+## Why Lane matters
 
-- Converts Cycle 53 docs-loop wins into repeatable contributor activation motions.
+- Converts Lane docs-loop wins into repeatable contributor activation motions.
 - Protects quality with ownership, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Cycle 55 closeout into Cycle 56 planning.
+- Produces a deterministic handoff from Lane closeout into Lane planning.
 
-## Required inputs (Cycle 53)
+## Required inputs (Lane)
 
 - `docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json`
 - `docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_contributor_activation_closeout_contract.py
 
 ## Contributor activation contract
 
-- Single owner + backup reviewer are assigned for Cycle 55 contributor-activation execution and KPI follow-up.
-- The Cycle 55 lane references Cycle 53 docs-loop wins and misses with deterministic contributor follow-up loops.
-- Every Cycle 55 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 55 closeout records contributor-activation learnings and Cycle 56 prioritization inputs.
+- Single owner + backup reviewer are assigned for Lane contributor-activation execution and KPI follow-up.
+- The Lane lane references Lane docs-loop wins and misses with deterministic contributor follow-up loops.
+- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Lane closeout records contributor-activation learnings and Lane prioritization inputs.
 
 ## Contributor activation quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_contributor_activation_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes contributor brief, contributor ladder, KPI scorecard, and execution log
 
-## Cycle 55 delivery board
+## Lane delivery board
 
-- [ ] Cycle 55 contributor brief committed
-- [ ] Cycle 55 activation plan reviewed with owner + backup
-- [ ] Cycle 55 contributor ladder exported
-- [ ] Cycle 55 KPI scorecard snapshot exported
-- [ ] Cycle 56 priorities drafted from Cycle 55 learnings
+- [ ] Lane contributor brief committed
+- [ ] Lane activation plan reviewed with owner + backup
+- [ ] Lane contributor ladder exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 55 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 53 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Activation contract lock + delivery board readiness: 15 points.

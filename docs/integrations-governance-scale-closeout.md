@@ -1,14 +1,14 @@
 # Governance Scale Closeout — Governance scale closeout lane
 
-Cycle 89 closes with a major upgrade that converts Cycle 88 governance handoff outcomes into a deterministic governance scale operating lane.
+Lane closes with a major upgrade that converts Lane governance handoff outcomes into a deterministic governance scale operating lane.
 
 ## Why Governance Scale Closeout matters
 
-- Converts Cycle 88 governance handoff outcomes into reusable governance scale decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
+- Converts Lane governance handoff outcomes into reusable governance scale decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 89 closeout into Cycle 90 governance planning inputs.
+- Creates a deterministic handoff from Lane closeout into Lane governance planning inputs.
 
-## Required inputs (Cycle 88)
+## Required inputs (Lane)
 
 - `docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json`
 - `docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_governance_scale_closeout_contract.py
 
 ## Governance scale contract
 
-- Single owner + backup reviewer are assigned for Cycle 89 governance scale execution and signoff.
-- The Cycle 89 lane references Cycle 88 outcomes, controls, and trust continuity signals.
-- Every Cycle 89 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 89 closeout records governance scale pack upgrades, storyline outcomes, and Cycle 90 governance planning inputs.
+- Single owner + backup reviewer are assigned for Lane governance scale execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records governance scale pack upgrades, storyline outcomes, and Lane governance planning inputs.
 
 ## Governance scale quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_governance_scale_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 89 evidence brief committed
-- [ ] Cycle 89 governance scale plan committed
-- [ ] Cycle 89 narrative template upgrade ledger exported
-- [ ] Cycle 89 storyline outcomes ledger exported
-- [ ] Cycle 90 governance planning drafted from Cycle 89 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane governance scale plan committed
+- [ ] Lane narrative template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Lane governance planning drafted from Lane outcomes
 
 ## Scoring model
 
-Cycle 89 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

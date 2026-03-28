@@ -1,14 +1,14 @@
-# Case Snippet Closeout lane (Legacy: Cycle 51)
+# Case Snippet Closeout lane (Legacy)
 
-Cycle 51 closes with a major case-snippet upgrade that converts Cycle 50 execution-prioritization evidence into a deterministic release-storytelling lane.
+Lane closes with a major case-snippet upgrade that converts Lane execution-prioritization evidence into a deterministic release-storytelling lane.
 
-## Why Cycle 51 matters
+## Why Lane matters
 
-- Converts Cycle 50 execution-prioritization proof into release-storytelling discipline.
+- Converts Lane execution-prioritization proof into release-storytelling discipline.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Cycle 51 case snippets into Cycle 52 narrative execution.
+- Produces a deterministic handoff from Lane case snippets into Lane narrative execution.
 
-## Required inputs (Cycle 50)
+## Required inputs (Lane)
 
 - `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`
 - `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_case_snippet_closeout_contract_51.py
 
 ## Case snippet closeout contract
 
-- Single owner + backup reviewer are assigned for Cycle 51 case snippet execution and KPI follow-up.
-- The Cycle 51 case snippet lane references Cycle 50 execution-prioritization winners and misses with deterministic release-storytelling loops.
-- Every Cycle 51 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 51 closeout records case-snippet learnings and Cycle 52 narrative priorities.
+- Single owner + backup reviewer are assigned for Lane case snippet execution and KPI follow-up.
+- The Lane case snippet lane references Lane execution-prioritization winners and misses with deterministic release-storytelling loops.
+- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Lane closeout records case-snippet learnings and Lane narrative priorities.
 
 ## Case snippet quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_case_snippet_closeout_contract_51.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes case brief, proof map, KPI scorecard, and execution log
 
-## Cycle 51 delivery board
+## Lane delivery board
 
-- [ ] Cycle 51 case snippet brief committed
-- [ ] Cycle 51 snippet reviewed with owner + backup
-- [ ] Cycle 51 proof map exported
-- [ ] Cycle 51 KPI scorecard snapshot exported
-- [ ] Cycle 52 narrative priorities drafted from Cycle 51 learnings
+- [ ] Lane case snippet brief committed
+- [ ] Lane snippet reviewed with owner + backup
+- [ ] Lane proof map exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane narrative priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 51 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 50 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Case snippet contract lock + delivery board readiness: 15 points.

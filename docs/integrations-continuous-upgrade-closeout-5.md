@@ -1,20 +1,20 @@
-# Cycle 5 — Continuous upgrade closeout lane
+# Lane — Continuous upgrade closeout lane
 
-Cycle 5 closes with a major upgrade that converts cycle 4 governance scale outcomes into a deterministic publication operating lane.
+Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic publication operating lane.
 
-## Why cycle 5 matters
+## Why Lane matters
 
-- Converts cycle 4 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
+- Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from cycle 5 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Lane closeout into the continuous-upgrade backlog.
 
-## Required inputs (Cycle 4)
+## Required inputs (Lane)
 
 - `docs/artifacts/continuous-upgrade-closeout-pack-4/continuous-upgrade-closeout-summary-4.json`
 - `docs/artifacts/continuous-upgrade-closeout-pack-4/continuous-upgrade-delivery-board-4.md`
 - `docs/roadmap/plans/continuous-upgrade-plan-5.json`
 
-## Cycle 5 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle5-closeout --format json --strict
@@ -25,10 +25,10 @@ python scripts/check_continuous_upgrade_cycle5_closeout_contract.py
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for cycle 5 continuous upgrade execution and signoff.
-- The cycle 5 lane references cycle 4 outcomes, controls, and trust continuity signals.
-- Every cycle 5 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 5 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for Lane continuous upgrade execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -38,14 +38,14 @@ python scripts/check_continuous_upgrade_cycle5_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Cycle 5 delivery board
+## Lane delivery board
 
-- [ ] Cycle 5 evidence brief committed
-- [ ] Cycle 5 continuous upgrade plan committed
-- [ ] Cycle 5 upgrade template upgrade ledger exported
-- [ ] Cycle 5 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from cycle 5 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane continuous upgrade plan committed
+- [ ] Lane upgrade template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Lane outcomes
 
 ## Scoring model
 
-Cycle 5 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

@@ -1,20 +1,20 @@
-# Cycle 7 — Continuous upgrade closeout lane
+# Lane — Continuous upgrade closeout lane
 
-Cycle 7 closes with a major upgrade that converts Cycle 6 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
-## Why Cycle 7 matters
+## Why Lane matters
 
-- Converts Cycle 6 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
+- Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 7 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Lane closeout into the continuous-upgrade backlog.
 
-## Required inputs (Cycle 6)
+## Required inputs (Lane)
 
 - `docs/artifacts/continuous-upgrade-closeout-pack-6/continuous-upgrade-closeout-summary-6.json`
 - `docs/artifacts/continuous-upgrade-closeout-pack-6/continuous-upgrade-delivery-board-6.md`
 - `docs/roadmap/plans/continuous-upgrade-plan-7.json`
 
-## Cycle 7 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit continuous-upgrade-cycle7-closeout --format json --strict
@@ -25,10 +25,10 @@ python scripts/check_continuous_upgrade_cycle7_closeout_contract.py
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for Cycle 7 continuous upgrade execution and signoff.
-- The Cycle 7 lane references Cycle 6 outcomes, controls, and trust continuity signals.
-- Every Cycle 7 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 7 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for Lane continuous upgrade execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -38,14 +38,14 @@ python scripts/check_continuous_upgrade_cycle7_closeout_contract.py
 - [ ] Scorecard captures continuous upgrade adoption delta, confidence, and rollback owner
 - [ ] Artifact pack includes upgrade brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
 
-## Cycle 7 delivery board
+## Lane delivery board
 
-- [ ] Cycle 7 evidence brief committed
-- [ ] Cycle 7 continuous upgrade plan committed
-- [ ] Cycle 7 upgrade template upgrade ledger exported
-- [ ] Cycle 7 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Cycle 7 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane continuous upgrade plan committed
+- [ ] Lane upgrade template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Lane outcomes
 
 ## Scoring model
 
-Cycle 7 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

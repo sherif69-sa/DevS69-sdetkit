@@ -54,27 +54,27 @@ impact-80-big-upgrade-report.md
 - Command: `sdetkit release-readiness --format json --strict`
 - Summary artifact: `artifacts/release-readiness-pack/release-readiness-summary.json`
 
-## Continuous upgrade cycle 6 closeout
+## Continuous upgrade Lane closeout
 
 - `integrations-continuous-upgrade-cycle6-closeout.md`
 - `artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json`
 
-## Continuous upgrade cycle 5 closeout
+## Continuous upgrade Lane closeout
 
 - `integrations-continuous-upgrade-cycle5-closeout.md`
 - `artifacts/continuous-upgrade-cycle5-closeout-pack/continuous-upgrade-cycle5-closeout-summary.json`
 
-Continuous upgrade cycle 4 closeout
+Continuous upgrade Lane closeout
 
 integrations-continuous-upgrade-cycle4-closeout.md
 artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-closeout-summary.json
 
-## Continuous upgrade cycle 3 closeout
+## Continuous upgrade Lane closeout
 
 integrations-continuous-upgrade-cycle3-closeout.md
 artifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-closeout-summary.json
 
-Continuous upgrade cycle 7 closeout
+Continuous upgrade Lane closeout
 
 integrations-continuous-upgrade-cycle7-closeout.md
 artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-closeout-summary.json
@@ -85,7 +85,7 @@ artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-clos
 - `docs/integrations-continuous-upgrade-closeout-2.md`
 - `docs/continuous-upgrade-big-upgrade-report-2.md`
 
-## Continuous upgrade cycle 8 references
+## Continuous upgrade Lane references
 - `docs/continuous-upgrade-big-upgrade-report-8.md`
 - `docs/integrations-continuous-upgrade-closeout-8.md`
 

@@ -1,14 +1,14 @@
 # Evidence Narrative Closeout — Evidence narrative closeout lane
 
-Cycle 84 closes with a major upgrade that converts Cycle 83 trust FAQ outcomes into a deterministic evidence narrative operating lane.
+Lane closes with a major upgrade that converts Lane trust FAQ outcomes into a deterministic evidence narrative operating lane.
 
 ## Why Evidence Narrative Closeout matters
 
-- Converts Cycle 83 trust FAQ outcomes into reusable evidence narratives across docs, release notes, and escalation playbooks.
+- Converts Lane trust FAQ outcomes into reusable evidence narratives across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 84 closeout into Cycle 85 release priorities.
+- Creates a deterministic handoff from Lane closeout into Lane release priorities.
 
-## Required inputs (Cycle 83)
+## Required inputs (Lane)
 
 - `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json`
 - `docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_evidence_narrative_closeout_contract.py
 
 ## Evidence narrative contract
 
-- Single owner + backup reviewer are assigned for Cycle 84 evidence narrative execution and signoff.
-- The Cycle 84 lane references Cycle 83 outcomes, controls, and trust continuity signals.
-- Every Cycle 84 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 84 closeout records evidence narrative pack upgrades, storyline outcomes, and Cycle 85 release priorities.
+- Single owner + backup reviewer are assigned for Lane evidence narrative execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records evidence narrative pack upgrades, storyline outcomes, and Lane release priorities.
 
 ## Evidence narrative quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_evidence_narrative_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 84 evidence brief committed
-- [ ] Cycle 84 evidence narrative plan committed
-- [ ] Cycle 84 narrative template upgrade ledger exported
-- [ ] Cycle 84 storyline outcomes ledger exported
-- [ ] Cycle 85 release priorities drafted from Cycle 84 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane evidence narrative plan committed
+- [ ] Lane narrative template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Lane release priorities drafted from Lane outcomes
 
 ## Scoring model
 
-Cycle 84 weights continuity + execution contract + artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + artifact readiness for a 100-point activation score.

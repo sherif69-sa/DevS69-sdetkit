@@ -1,19 +1,19 @@
-# Cycle 33 — Demo asset #1 production
+# Lane — Demo asset #1 production
 
-Cycle 33 closes the first distribution-ready demo asset, turning Cycle 32 release readiness into externally consumable proof.
+Lane closes the first distribution-ready demo asset, turning Lane release readiness into externally consumable proof.
 
-## Why Cycle 33 matters
+## Why Lane matters
 
 - Demonstrates real value with a concise `doctor` workflow narrative.
 - Creates a repeatable media pipeline (script → cut → publish → evidence).
 - Links each demo claim to runnable CLI commands and docs for trust.
 
-## Required inputs (Cycle 32)
+## Required inputs (Lane)
 
 - `docs/artifacts/release-cadence-pack/release-cadence-summary.json`
 - `docs/artifacts/release-cadence-pack/release-delivery-board.md`
 
-## Cycle 33 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit demo-asset --format json --strict
@@ -37,19 +37,19 @@ python scripts/check_demo_asset_contract.py
 - [ ] Includes docs link and CLI command in caption or description
 - [ ] Raw source file and final export are both stored in artifact pack
 
-## Cycle 33 delivery board
+## Lane delivery board
 
-- [ ] Cycle 33 script draft committed
-- [ ] Cycle 33 first cut rendered
-- [ ] Cycle 33 final cut + caption copy approved
-- [ ] Cycle 34 demo asset #2 backlog pre-scoped
-- [ ] Cycle 35 KPI instrumentation plan updated
+- [ ] Lane script draft committed
+- [ ] Lane first cut rendered
+- [ ] Lane final cut + caption copy approved
+- [ ] Lane demo asset #2 backlog pre-scoped
+- [ ] Lane KPI instrumentation plan updated
 
 ## Scoring model
 
-Cycle 33 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 32 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Demo contract lock + delivery board readiness: 15 points.

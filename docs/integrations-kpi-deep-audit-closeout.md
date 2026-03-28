@@ -1,14 +1,14 @@
-# KPI Deep Audit Closeout lane (Legacy: Cycle 57)
+# KPI Deep Audit Closeout lane (Legacy)
 
-Cycle 57 closes with a major KPI deep-audit upgrade that turns Cycle 56 stabilization outcomes into deterministic trendline governance.
+Lane closes with a major KPI deep-audit upgrade that turns Lane stabilization outcomes into deterministic trendline governance.
 
-## Why Cycle 57 matters
+## Why Lane matters
 
-- Converts Cycle 56 stabilization evidence into repeatable KPI anomaly triage loops.
+- Converts Lane stabilization evidence into repeatable KPI anomaly triage loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Cycle 57 closeout into Cycle 58 execution planning.
+- Produces a deterministic handoff from Lane closeout into Lane execution planning.
 
-## Required inputs (Cycle 56)
+## Required inputs (Lane)
 
 - `docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json`
 - `docs/artifacts/stabilization-closeout-pack/stabilization-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_kpi_deep_audit_closeout_contract.py
 
 ## KPI deep audit contract
 
-- Single owner + backup reviewer are assigned for Cycle 57 KPI deep-audit execution and signal triage.
-- The Cycle 57 lane references Cycle 56 stabilization outcomes and unresolved risks.
-- Every Cycle 57 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 57 closeout records deep-audit outcomes and Cycle 58 execution priorities.
+- Single owner + backup reviewer are assigned for Lane KPI deep-audit execution and signal triage.
+- The Lane lane references Lane stabilization outcomes and unresolved risks.
+- Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records deep-audit outcomes and Lane execution priorities.
 
 ## KPI deep audit quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_kpi_deep_audit_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
 - [ ] Artifact pack includes audit brief, risk ledger, KPI scorecard, and execution log
 
-## Cycle 57 delivery board
+## Lane delivery board
 
-- [ ] Cycle 57 KPI deep audit brief committed
-- [ ] Cycle 57 deep-audit plan reviewed with owner + backup
-- [ ] Cycle 57 risk ledger exported
-- [ ] Cycle 57 KPI scorecard snapshot exported
-- [ ] Cycle 58 execution priorities drafted from Cycle 57 learnings
+- [ ] Lane KPI deep audit brief committed
+- [ ] Lane deep-audit plan reviewed with owner + backup
+- [ ] Lane risk ledger exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane execution priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 57 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 56 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - KPI deep-audit contract lock + delivery board readiness: 15 points.

@@ -1,19 +1,19 @@
-# Cycle 48 — Objection closeout lane
+# Lane — Objection closeout lane
 
-Cycle 48 closes with a major objection-handling upgrade that converts Cycle 47 reliability evidence into deterministic documentation hardening loops.
+Lane closes with a major objection-handling upgrade that converts Lane reliability evidence into deterministic documentation hardening loops.
 
-## Why Cycle 48 matters
+## Why Lane matters
 
-- Converts Cycle 47 reliability proof into objection-first adoption motion.
+- Converts Lane reliability proof into objection-first adoption motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from objection outcomes into Cycle 49 weekly-review priorities.
+- Produces a deterministic handoff from objection outcomes into Lane weekly-review priorities.
 
-## Required inputs (Cycle 47)
+## Required inputs (Lane)
 
 - `docs/artifacts/cycle47-reliability-closeout-pack/cycle47-reliability-closeout-summary.json`
 - `docs/artifacts/cycle47-reliability-closeout-pack/cycle47-delivery-board.md`
 
-## Cycle 48 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit objection-closeout --format json --strict
@@ -24,10 +24,10 @@ python scripts/check_objection_closeout_contract.py
 
 ## Objection closeout contract
 
-- Single owner + backup reviewer are assigned for Cycle 48 objection lane execution and KPI follow-up.
-- The Cycle 48 objection lane references Cycle 47 reliability winners and misses with deterministic objection-handling loops.
-- Every Cycle 48 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 48 closeout records objection-handling learnings and Cycle 49 weekly-review priorities.
+- Single owner + backup reviewer are assigned for Lane objection lane execution and KPI follow-up.
+- The Lane objection lane references Lane reliability winners and misses with deterministic objection-handling loops.
+- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Lane closeout records objection-handling learnings and Lane weekly-review priorities.
 
 ## Objection quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_objection_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes objection plan, FAQ map, KPI scorecard, and execution log
 
-## Cycle 48 delivery board
+## Lane delivery board
 
-- [ ] Cycle 48 objection plan draft committed
-- [ ] Cycle 48 review notes captured with owner + backup
-- [ ] Cycle 48 FAQ objection map exported
-- [ ] Cycle 48 KPI scorecard snapshot exported
-- [ ] Cycle 49 weekly-review priorities drafted from Cycle 48 learnings
+- [ ] Lane objection plan draft committed
+- [ ] Lane review notes captured with owner + backup
+- [ ] Lane FAQ objection map exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane weekly-review priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 48 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 47 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Objection contract lock + delivery board readiness: 15 points.

@@ -1,14 +1,14 @@
-# Cycle 3 — Continuous upgrade closeout lane
+# Lane — Continuous upgrade closeout lane
 
-Cycle 3 closes with a major upgrade that converts Cycle 2 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
 ## Why Continuous Upgrade Cycle3 Closeout matters
 
-- Converts Cycle 2 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
+- Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 3 closeout into the continuous-upgrade backlog.
+- Creates a deterministic handoff from Lane closeout into the continuous-upgrade backlog.
 
-## Required inputs (Cycle 2)
+## Required inputs (Lane)
 
 - `docs/artifacts/continuous-upgrade-closeout-pack-2/continuous-upgrade-closeout-summary-2.json`
 - `docs/artifacts/continuous-upgrade-closeout-pack-2/continuous-upgrade-delivery-board-2.md`
@@ -25,10 +25,10 @@ python scripts/check_continuous_upgrade_cycle3_closeout_contract.py
 
 ## Continuous upgrade contract
 
-- Single owner + backup reviewer are assigned for Cycle 3 continuous upgrade execution and signoff.
-- The Cycle 3 lane references Cycle 2 outcomes, controls, and trust continuity signals.
-- Every Cycle 3 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 3 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
+- Single owner + backup reviewer are assigned for Lane continuous upgrade execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
 ## Continuous upgrade quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_continuous_upgrade_cycle3_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 3 evidence brief committed
-- [ ] Cycle 3 continuous upgrade plan committed
-- [ ] Cycle 3 upgrade template upgrade ledger exported
-- [ ] Cycle 3 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Cycle 3 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane continuous upgrade plan committed
+- [ ] Lane upgrade template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Lane outcomes
 
 ## Scoring model
 
-Cycle 3 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
