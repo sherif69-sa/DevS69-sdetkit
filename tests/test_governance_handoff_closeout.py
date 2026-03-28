@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-governance-handoff-closeout.md\nday87-governance-handoff-closeout\n",
+        "docs/integrations-governance-handoff-closeout.md\ngovernance-handoff-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+        / "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md"
+    board = root / "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day87-governance-handoff-001",
+                "plan_id": "governance-handoff-001",
                 "contributors": ["maintainers", "release-ops"],
                 "narrative_channels": ["launch-brief", "release-report", "faq"],
                 "baseline": {"launch_confidence": 0.64, "narrative_reuse": 0.42},
@@ -134,7 +134,7 @@ def test_day87_strict_fails_without_day86(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+        / "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json"
     ).unlink()
     assert d87.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
