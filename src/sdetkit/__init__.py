@@ -6,7 +6,7 @@ import argparse
 import builtins
 from importlib import import_module
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 __all__ = ["ScalarFunctionRegistrationError", "register_scalar_function", "main_"]
 
@@ -23,7 +23,7 @@ def _install_mutation_aliases() -> None:
     if getattr(original, "_sdetkit_init_alias", False):
         return
 
-    def _wrapped_build_class(func, name, *bases, **kwargs):  # type: ignore[no-untyped-def]
+    def _wrapped_build_class(func: Any, name: Any, *bases: Any, **kwargs: Any) -> Any:
         cls = original(func, name, *bases, **kwargs)
         init_alias = cls.__dict__.get("init_")
         if callable(init_alias) and "__init__" not in cls.__dict__:
@@ -39,13 +39,13 @@ def _install_mutation_aliases() -> None:
                 pass
         return cls
 
-    _wrapped_build_class._sdetkit_init_alias = True
-    builtins.__build_class__ = _wrapped_build_class
+    _wrapped_build_class._sdetkit_init_alias = True  # type: ignore[attr-defined]
+    builtins.__build_class__ = cast(Any, _wrapped_build_class)
 
 
 _install_mutation_aliases()
 if not hasattr(argparse.ArgumentParser, "init_"):
-    argparse.ArgumentParser.init_ = argparse.ArgumentParser.__init__
+    argparse.ArgumentParser.init_ = argparse.ArgumentParser.__init__  # type: ignore[attr-defined]
 
 _orig_write_text = Path.write_text
 _orig_write_bytes = Path.write_bytes
@@ -62,10 +62,10 @@ def _write_bytes_with_parent(self: Path, data: bytes, *args: Any, **kwargs: Any)
 
 
 if not getattr(Path.write_text, "_sdetkit_parent_mkdir", False):
-    _write_text_with_parent._sdetkit_parent_mkdir = True
-    _write_bytes_with_parent._sdetkit_parent_mkdir = True
-    Path.write_text = _write_text_with_parent
-    Path.write_bytes = _write_bytes_with_parent
+    _write_text_with_parent._sdetkit_parent_mkdir = True  # type: ignore[attr-defined]
+    _write_bytes_with_parent._sdetkit_parent_mkdir = True  # type: ignore[attr-defined]
+    Path.write_text = _write_text_with_parent  # type: ignore[method-assign]
+    Path.write_bytes = _write_bytes_with_parent  # type: ignore[assignment,method-assign]
 
 
 def __getattr__(name: str) -> Any:

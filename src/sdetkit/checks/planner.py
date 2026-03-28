@@ -226,7 +226,7 @@ class CheckPlanner:
             return profile, "requested explicitly", ()
 
         cpu_count = os.cpu_count() or 1
-        ci_like = bool(os.environ.get("CI")) or (
+        ci_like = bool(
             hint is not None and any(reason.lower().startswith("ci") for reason in hint.reasons)
         )
         has_tests = bool(repo_root is not None and (repo_root / "tests").exists())
