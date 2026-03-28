@@ -213,7 +213,7 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
     page_lines = page_text.splitlines()
     top10_text = _read_text(root / _TOP10_PATH)
     cycle1_summary = root / _CYCLE1_SUMMARY_PATH
-    day90_board = root / _CYCLE1_BOARD_PATH
+    cycle1_board = root / _CYCLE1_BOARD_PATH
 
     cycle1_data = _load_json(cycle1_summary)
     cycle1_summary_data = (
@@ -225,7 +225,7 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
         len(cycle1_data.get("checks", [])) if isinstance(cycle1_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day90_board)
+    board_text = _read_text(cycle1_board)
     board_count = _checklist_count(board_text)
     board_has_cycle1 = "Cycle 1" in board_text
 
@@ -271,8 +271,8 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "cycle1_delivery_board_present",
             "weight": 7,
-            "passed": day90_board.exists(),
-            "evidence": str(day90_board),
+            "passed": cycle1_board.exists(),
+            "evidence": str(cycle1_board),
         },
         {
             "check_id": "cycle1_quality_floor",
@@ -354,7 +354,7 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle1_summary.exists() or not day90_board.exists():
+    if not cycle1_summary.exists() or not cycle1_board.exists():
         critical_failures.append("cycle1_handoff_inputs")
 
     wins: list[str] = []
@@ -431,9 +431,9 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
             "cycle1_summary": str(cycle1_summary.relative_to(root))
             if cycle1_summary.exists()
             else str(cycle1_summary),
-            "cycle1_delivery_board": str(day90_board.relative_to(root))
-            if day90_board.exists()
-            else str(day90_board),
+            "cycle1_delivery_board": str(cycle1_board.relative_to(root))
+            if cycle1_board.exists()
+            else str(cycle1_board),
             "continuous_upgrade_plan": _PLAN_PATH,
         },
         "checks": checks,

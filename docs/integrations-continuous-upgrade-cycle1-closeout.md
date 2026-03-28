@@ -1,14 +1,14 @@
 # Cycle 1 — Continuous upgrade closeout lane
 
-Cycle 1 starts the next impact by converting Day 90 publication outcomes into a deterministic continuous-upgrade lane.
+Cycle 1 starts the next impact by converting phase-3 wrap publication outcomes into a deterministic continuous-upgrade lane.
 
 ## Why Continuous Upgrade Closeout matters
 
-- Converts Day 90 publication artifacts into a repeatable execution loop for ongoing repository upgrades.
+- Converts phase-3 wrap publication artifacts into a repeatable execution loop for ongoing repository upgrades.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
 - Creates a deterministic handoff from Cycle 1 closeout into the continuous-upgrade backlog.
 
-## Required inputs (Day 90)
+## Required inputs (Phase-3 wrap publication)
 
 - `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json`
 - `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md`
@@ -20,13 +20,13 @@ Cycle 1 starts the next impact by converting Day 90 publication outcomes into a 
 python -m sdetkit continuous-upgrade-cycle1-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle1-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle1-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack/evidence --format json --strict
-python scripts/check_continuous_upgrade_cycle1_closeout_contract.py
+python scripts/check_continuous_upgrade_cycle1_contract.py
 ```
 
 ## Continuous upgrade contract
 
 - Single owner + backup reviewer are assigned for Cycle 1 continuous upgrade execution and signoff.
-- The Cycle 1 lane references Day 90 outcomes, controls, and trust continuity signals.
+- The Cycle 1 lane references phase-3 wrap publication outcomes, controls, and trust continuity signals.
 - Every Cycle 1 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Cycle 1 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 

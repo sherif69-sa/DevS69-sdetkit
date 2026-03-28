@@ -29,7 +29,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-cycle1-closeout.md").write_text(
-        c1._DAY91_DEFAULT_PAGE, encoding="utf-8"
+        c1._CYCLE1_DEFAULT_PAGE, encoding="utf-8"
     )
     (root / "docs/continuous-upgrade-cycle1-big-upgrade-report.md").write_text(
         "# Cycle 1 report\n", encoding="utf-8"
@@ -80,7 +80,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day91-continuous-upgrade-001",
+                "plan_id": "continuous-upgrade-cycle1-001",
                 "contributors": ["maintainers", "release-ops"],
                 "upgrade_channels": ["readme", "docs-index", "cli-lanes"],
                 "baseline": {"strict_pass_rate": 0.9, "doc_link_coverage": 0.88},
