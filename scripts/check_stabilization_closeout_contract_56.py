@@ -10,7 +10,7 @@ from sdetkit import stabilization_closeout_56 as d56
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 56 stabilization closeout contract")
+    parser = argparse.ArgumentParser(description="Validate stabilization closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -44,12 +44,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day56-stabilization-closeout contract check failed:", file=sys.stderr)
+        print("stabilization-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day56-stabilization-closeout contract check passed")
+    print("stabilization-closeout contract check passed")
     return 0
 
 

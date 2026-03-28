@@ -11,7 +11,7 @@ from sdetkit import trust_assets_refresh_closeout_75 as d75
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 75 trust assets refresh closeout contract"
+        description="Validate trust assets refresh closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day75-trust-assets-refresh-closeout contract check failed:", file=sys.stderr)
+        print("trust-assets-refresh-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day75-trust-assets-refresh-closeout contract check passed")
+    print("trust-assets-refresh-closeout contract check passed")
     return 0
 
 

@@ -10,7 +10,7 @@ from sdetkit import kpi_deep_audit_closeout_57 as d57
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 57 KPI deep audit closeout contract")
+    parser = argparse.ArgumentParser(description="Validate KPI deep audit closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -44,12 +44,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day57-kpi-deep-audit-closeout contract check failed:", file=sys.stderr)
+        print("kpi-deep-audit-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day57-kpi-deep-audit-closeout contract check passed")
+    print("kpi-deep-audit-closeout contract check passed")
     return 0
 
 

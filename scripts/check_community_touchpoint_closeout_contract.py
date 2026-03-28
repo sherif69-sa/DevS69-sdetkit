@@ -11,7 +11,7 @@ from sdetkit import community_touchpoint_closeout_77 as d77
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 77 community touchpoint closeout contract"
+        description="Validate community touchpoint closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")

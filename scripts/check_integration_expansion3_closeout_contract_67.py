@@ -11,7 +11,7 @@ from sdetkit import integration_expansion3_closeout_67 as d67
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 67 integration expansion #3 closeout contract"
+        description="Validate integration expansion #3 closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day67-integration-expansion3-closeout contract check failed:", file=sys.stderr)
+        print("integration-expansion3-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day67-integration-expansion3-closeout contract check passed")
+    print("integration-expansion3-closeout contract check passed")
     return 0
 
 

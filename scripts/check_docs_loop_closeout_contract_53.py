@@ -10,7 +10,7 @@ from sdetkit import docs_loop_closeout_53 as d53
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 53 docs-loop closeout contract")
+    parser = argparse.ArgumentParser(description="Validate docs-loop closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -51,12 +51,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day53-docs-loop-closeout contract check failed:", file=sys.stderr)
+        print("docs-loop-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day53-docs-loop-closeout contract check passed")
+    print("docs-loop-closeout contract check passed")
     return 0
 
 

@@ -11,7 +11,7 @@ from sdetkit import phase2_wrap_handoff_closeout_60 as d60
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 60 Phase-2 wrap + handoff closeout contract"
+        description="Validate Phase-2 wrap + handoff closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day60-phase2-wrap-handoff-closeout contract check failed:", file=sys.stderr)
+        print("phase2-wrap-handoff-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day60-phase2-wrap-handoff-closeout contract check passed")
+    print("phase2-wrap-handoff-closeout contract check passed")
     return 0
 
 

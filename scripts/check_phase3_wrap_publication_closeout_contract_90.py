@@ -16,7 +16,7 @@ _CANONICAL_EVIDENCE = (
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 90 phase-3 wrap publication closeout contract"
+        description="Validate phase-3 wrap publication closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -45,12 +45,12 @@ def main() -> int:
                 errors.append("evidence total_commands below 3")
 
     if errors:
-        print("day90-phase3-wrap-publication-closeout contract check failed:", file=sys.stderr)
+        print("phase3-wrap-publication-closeout contract check failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("day90-phase3-wrap-publication-closeout contract check passed")
+    print("phase3-wrap-publication-closeout contract check passed")
     return 0
 
 
