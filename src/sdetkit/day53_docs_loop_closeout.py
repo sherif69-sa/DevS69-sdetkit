@@ -401,8 +401,6 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "docs-loop-closeout-summary.json", summary_json)
     _write(target / "docs-loop-closeout-summary.md", summary_md)
     # Legacy compatibility aliases
-    _write(target / "day53-docs-loop-closeout-summary.json", summary_json)
-    _write(target / "day53-docs-loop-closeout-summary.md", summary_md)
     _write(
         target / "docs-loop-brief.md",
         "# Day 53 Docs-loop Brief\n\n- Objective: close Day 53 with measurable docs-loop optimization gains and proof-backed cross-link quality.\n",
@@ -444,18 +442,6 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
 
     # Legacy compatibility aliases
-    _write(target / "day53-docs-loop-brief.md", _read(target / "docs-loop-brief.md"))
-    _write(target / "day53-cross-link-map.csv", _read(target / "docs-loop-cross-link-map.csv"))
-    _write(
-        target / "day53-docs-loop-kpi-scorecard.json",
-        _read(target / "docs-loop-kpi-scorecard.json"),
-    )
-    _write(target / "day53-execution-log.md", _read(target / "docs-loop-execution-log.md"))
-    _write(target / "day53-delivery-board.md", _read(target / "docs-loop-delivery-board.md"))
-    _write(
-        target / "day53-validation-commands.md",
-        _read(target / "docs-loop-validation-commands.md"),
-    )
 
 
 def _execute_commands(root: Path, evidence_dir: Path) -> None:
@@ -477,7 +463,6 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     summary = json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n"
     _write(evidence_path / "docs-loop-execution-summary.json", summary)
-    _write(evidence_path / "day53-execution-summary.json", summary)
 
 
 def build_parser() -> argparse.ArgumentParser:

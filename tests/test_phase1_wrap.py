@@ -42,8 +42,8 @@ def _seed_repo(root: Path) -> None:
     )
 
     for rel in [
-        "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json",
-        "docs/artifacts/weekly-review-pack/day28-weekly-review-summary.json",
+        "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json",
+        "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
         "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
     ]:
         p = root / rel

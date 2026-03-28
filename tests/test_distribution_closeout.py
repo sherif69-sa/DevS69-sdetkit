@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+        / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
+    board = root / "docs/artifacts/kpi-instrumentation-pack/delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -113,7 +113,7 @@ def test_day36_strict_fails_when_day35_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+        / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
     ).unlink()
     rc = d36.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -121,7 +121,7 @@ def test_day36_strict_fails_when_day35_inputs_missing(tmp_path: Path) -> None:
 
 def test_day36_strict_fails_when_day35_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md").write_text(
+    (tmp_path / "docs/artifacts/kpi-instrumentation-pack/delivery-board.md").write_text(
         "- [ ] Day 36 distribution message references KPI shifts\n", encoding="utf-8"
     )
     rc = d36.main(["--root", str(tmp_path), "--strict", "--format", "json"])

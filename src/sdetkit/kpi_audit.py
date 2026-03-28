@@ -64,8 +64,8 @@ A Day 27 pass requires side-by-side baseline and current snapshots for:
 
 ## Metric baseline and current snapshot
 
-- Baseline path: `docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json`
-- Current path: `docs/artifacts/kpi-audit-pack/day27-kpi-current.json`
+- Baseline path: `docs/artifacts/kpi-audit-pack/kpi-baseline.json`
+- Current path: `docs/artifacts/kpi-audit-pack/kpi-current.json`
 - Every metric must be numeric and non-negative.
 
 ## Launch checklist
@@ -139,8 +139,8 @@ def build_kpi_audit_summary(
     docs_index_path: str = "docs/index.md",
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
-    baseline_path: str = "docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
-    current_path: str = "docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
+    baseline_path: str = "docs/artifacts/kpi-audit-pack/kpi-baseline.json",
+    current_path: str = "docs/artifacts/kpi-audit-pack/kpi-current.json",
 ) -> dict[str, Any]:
     page_path = root / docs_page_path
     page_text = _read(page_path)
@@ -313,13 +313,13 @@ def _render_text(payload: dict[str, Any]) -> str:
 
 def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    summary = out_dir / "day27-kpi-summary.json"
-    scorecard = out_dir / "day27-kpi-scorecard.md"
-    delta_table = out_dir / "day27-kpi-delta-table.md"
-    action_plan = out_dir / "day27-kpi-corrective-actions.md"
-    validation = out_dir / "day27-validation-commands.md"
-    baseline = out_dir / "day27-kpi-baseline.json"
-    current = out_dir / "day27-kpi-current.json"
+    summary = out_dir / "kpi-audit-summary.json"
+    scorecard = out_dir / "kpi-audit-scorecard.md"
+    delta_table = out_dir / "kpi-delta-table.md"
+    action_plan = out_dir / "kpi-corrective-actions.md"
+    validation = out_dir / "kpi-audit-validation-commands.md"
+    baseline = out_dir / "kpi-baseline.json"
+    current = out_dir / "kpi-current.json"
 
     summary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     scorecard.write_text(_render_text(payload) + "\n", encoding="utf-8")
@@ -396,7 +396,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
-    (evidence_dir / "day27-execution-summary.json").write_text(
+    (evidence_dir / "kpi-audit-execution-summary.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return payload
@@ -416,12 +416,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
     parser.add_argument(
         "--baseline",
-        default="docs/artifacts/kpi-audit-pack/day27-kpi-baseline.json",
+        default="docs/artifacts/kpi-audit-pack/kpi-baseline.json",
         help="Baseline KPI snapshot JSON.",
     )
     parser.add_argument(
         "--current",
-        default="docs/artifacts/kpi-audit-pack/day27-kpi-current.json",
+        default="docs/artifacts/kpi-audit-pack/kpi-current.json",
         help="Current KPI snapshot JSON.",
     )
     parser.add_argument(

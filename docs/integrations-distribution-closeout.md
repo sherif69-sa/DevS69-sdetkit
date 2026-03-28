@@ -10,8 +10,8 @@ Day 36 closes the distribution lane by converting the Day 35 KPI story into chan
 
 ## Required inputs (Day 35)
 
-- `docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json`
-- `docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md`
+- `docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json`
+- `docs/artifacts/kpi-instrumentation-pack/delivery-board.md`
 
 ## Day 36 command lane
 

@@ -5,9 +5,9 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day25_summary": "docs/artifacts/community-activation-pack/day25-community-summary.json",
+    "day25_summary": "docs/artifacts/community-activation-pack/community-activation-summary.json",
     "external_contribution_summary": "docs/artifacts/external-contribution-pack/external-contribution-summary.json",
-    "day27_summary": "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+    "day27_summary": "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
   },
   "checks": [
     {
@@ -72,7 +72,7 @@
       "category": "data",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-activation-pack/day25-community-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-activation-pack/community-activation-summary.json"
     },
     {
       "check_id": "external_contribution_input_present",
@@ -86,7 +86,7 @@
       "category": "data",
       "weight": 9,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
     }
   ],
   "rollup": {
