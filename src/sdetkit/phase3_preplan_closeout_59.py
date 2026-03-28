@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase3-preplan-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY58_SUMMARY_PATH = "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
-_DAY58_BOARD_PATH = "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+_DAY58_SUMMARY_PATH = (
+    "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
+)
+_DAY58_BOARD_PATH = (
+    "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+)
 _SECTION_HEADER = "# Day 59 \u2014 Phase-3 pre-plan closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 59 matters",
@@ -347,9 +351,7 @@ def _write(path: Path, text: str) -> None:
 
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
-    _write(
-        target / "phase3-preplan-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
+    _write(target / "phase3-preplan-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "phase3-preplan-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "phase3-preplan-brief.md", "# Day 59 Phase-3 pre-plan brief\n")
     _write(target / "phase3-preplan-risk-ledger.csv", "risk,owner,mitigation,status\n")
@@ -388,10 +390,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day59_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_phase3_preplan_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
@@ -426,5 +428,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

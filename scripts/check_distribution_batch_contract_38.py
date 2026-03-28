@@ -44,9 +44,12 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence_candidates = [
             root / "docs/artifacts/distribution-batch-pack/evidence/execution-summary.json",
-            root / "docs/artifacts/day38-distribution-batch-pack/evidence/day38-execution-summary.json",
+            root
+            / "docs/artifacts/day38-distribution-batch-pack/evidence/day38-execution-summary.json",
         ]
-        evidence = next((path for path in evidence_candidates if path.exists()), evidence_candidates[0])
+        evidence = next(
+            (path for path in evidence_candidates if path.exists()), evidence_candidates[0]
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:

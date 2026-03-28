@@ -370,8 +370,12 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "case-study-prep1-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "case-study-prep1-integration-brief.md", "# Day 69 integration brief\n")
     _write(target / "case-study-prep1-case-study-narrative.md", "# Day 69 case-study narrative\n")
-    _write(target / "case-study-prep1-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "case-study-prep1-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "case-study-prep1-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
+    )
+    _write(
+        target / "case-study-prep1-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "case-study-prep1-execution-log.md", "# Day 69 execution log\n")
     _write(
         target / "case-study-prep1-delivery-board.md",
@@ -406,10 +410,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day69_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_case_study_prep1_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 69 case-study prep #1 closeout checks")
@@ -442,5 +446,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

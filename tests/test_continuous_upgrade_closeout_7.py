@@ -123,7 +123,9 @@ def _seed_repo(root: Path) -> None:
     _write(root / "docs/impact-97-big-upgrade-report.md", "# Cycle 7 report\n")
 
     (root / "scripts").mkdir(parents=True, exist_ok=True)
-    checker_body = "from __future__ import annotations\n\nif __name__ == 'main_':\n    raise SystemExit(0)\n"
+    checker_body = (
+        "from __future__ import annotations\n\nif __name__ == 'main_':\n    raise SystemExit(0)\n"
+    )
     _write(root / "scripts/check_continuous_upgrade_contract_7.py", checker_body)
     _write(root / "scripts/check_continuous_upgrade_contract_7.py", checker_body)
 
@@ -315,8 +317,6 @@ def test_cycle7_strict_fails_without_previous_cycle(tmp_path: Path) -> None:
 
 def test_cycle7_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["continuous-upgrade-closeout-7", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["continuous-upgrade-closeout-7", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "continuous upgrade closeout summary" in capsys.readouterr().out.lower()

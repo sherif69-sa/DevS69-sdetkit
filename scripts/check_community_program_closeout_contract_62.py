@@ -10,9 +10,7 @@ from sdetkit import community_program_closeout_62 as d62
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate community program closeout contract"
-    )
+    parser = argparse.ArgumentParser(description="Validate community program closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

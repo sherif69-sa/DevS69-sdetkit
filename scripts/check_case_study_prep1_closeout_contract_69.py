@@ -10,9 +10,7 @@ from sdetkit import case_study_prep1_closeout_69 as d69
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate case-study prep #1 closeout contract"
-    )
+    parser = argparse.ArgumentParser(description="Validate case-study prep #1 closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

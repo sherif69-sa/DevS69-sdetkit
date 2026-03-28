@@ -51,12 +51,23 @@ def test_community_emit_pack_and_execute(tmp_path: Path) -> None:
     )
 
     assert rc == 0
-    assert (tmp_path / "artifacts/community-activation-pack/community-activation-summary.json").exists()
-    assert (tmp_path / "artifacts/community-activation-pack/community-activation-scorecard.md").exists()
-    assert (tmp_path / "artifacts/community-activation-pack/roadmap-vote-discussion-template.md").exists()
+    assert (
+        tmp_path / "artifacts/community-activation-pack/community-activation-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/community-activation-pack/community-activation-scorecard.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/community-activation-pack/roadmap-vote-discussion-template.md"
+    ).exists()
     assert (tmp_path / "artifacts/community-activation-pack/feedback-triage-board.md").exists()
-    assert (tmp_path / "artifacts/community-activation-pack/community-activation-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/community-activation-pack/evidence/community-activation-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/community-activation-pack/community-activation-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/community-activation-pack/evidence/community-activation-execution-summary.json"
+    ).exists()
 
 
 def test_community_strict_fails_when_sections_missing(tmp_path: Path) -> None:

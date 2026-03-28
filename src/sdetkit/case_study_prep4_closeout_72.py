@@ -198,7 +198,11 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "weight": 5,
             "passed": (
                 ("case-study-prep4-closeout" in top10_text and "publication launch" in top10_text)
-                or ("Day 72" in top10_text and "Day 73" in top10_text and "Publication launch" in top10_text)
+                or (
+                    "Day 72" in top10_text
+                    and "Day 73" in top10_text
+                    and "Publication launch" in top10_text
+                )
                 or "Day 72 + Day 73 strategy chain" in top10_text
             ),
             "evidence": "Case-study prep #4 + publication launch strategy chain",
@@ -235,7 +239,11 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "page_header",
             "weight": 7,
             "passed": (
-                page_text.splitlines()[0].strip() in {"# Case-study prep #4 closeout lane", "# Day 72 — Case-study prep #4 closeout lane"}
+                page_text.splitlines()[0].strip()
+                in {
+                    "# Case-study prep #4 closeout lane",
+                    "# Day 72 — Case-study prep #4 closeout lane",
+                }
                 if page_text.strip()
                 else False
             ),
@@ -383,8 +391,12 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "case-study-prep4-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "case-study-prep4-integration-brief.md", "# Day 72 integration brief\n")
     _write(target / "case-study-prep4-case-study-narrative.md", "# Day 72 case-study narrative\n")
-    _write(target / "case-study-prep4-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "case-study-prep4-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "case-study-prep4-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
+    )
+    _write(
+        target / "case-study-prep4-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "case-study-prep4-execution-log.md", "# Day 72 execution log\n")
     _write(
         target / "case-study-prep4-delivery-board.md",
@@ -419,10 +431,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day72_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_case_study_prep4_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Case Study Prep4 Closeout checks")
@@ -455,5 +467,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

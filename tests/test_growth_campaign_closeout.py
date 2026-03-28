@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md"
+    board = (
+        root / "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -115,16 +117,30 @@ def test_day81_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-integration-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/growth-campaign-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/growth-campaign-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/growth-campaign-integration-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-plan.md").exists()
-    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-campaign-execution-ledger.json").exists()
-    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-campaign-kpi-scorecard.json").exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/growth-campaign-campaign-execution-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/growth-campaign-campaign-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-execution-log.md").exists()
     assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/growth-campaign-pack/growth-campaign-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/growth-campaign-pack/evidence/growth-campaign-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/growth-campaign-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/growth-campaign-pack/evidence/growth-campaign-execution-summary.json"
+    ).exists()
 
 
 def test_day81_strict_fails_without_day80(tmp_path: Path) -> None:

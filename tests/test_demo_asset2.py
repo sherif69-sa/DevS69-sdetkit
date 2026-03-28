@@ -102,7 +102,9 @@ def test_day34_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-script.md").exists()
     assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").exists()
     assert (tmp_path / "artifacts/demo-asset2-pack/demo-asset2-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/demo-asset2-pack/evidence/demo-asset2-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/demo-asset2-pack/evidence/demo-asset2-execution-summary.json"
+    ).exists()
 
 
 def test_day34_strict_fails_when_day33_inputs_missing(tmp_path: Path) -> None:

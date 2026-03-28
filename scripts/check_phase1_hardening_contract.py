@@ -8,7 +8,10 @@ from sdetkit import phase1_hardening_29 as d29
 
 
 def _evidence_path(root: Path) -> Path:
-    return root / "docs/artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
+    return (
+        root
+        / "docs/artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
+    )
 
 
 def main() -> int:

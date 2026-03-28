@@ -102,7 +102,9 @@ def test_day32_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/release-cadence-pack/release-changelog-template.md").exists()
     assert (tmp_path / "artifacts/release-cadence-pack/release-delivery-board.md").exists()
     assert (tmp_path / "artifacts/release-cadence-pack/release-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/release-cadence-pack/evidence/release-cadence-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/release-cadence-pack/evidence/release-cadence-execution-summary.json"
+    ).exists()
 
 
 def test_day32_strict_fails_when_day31_inputs_missing(tmp_path: Path) -> None:

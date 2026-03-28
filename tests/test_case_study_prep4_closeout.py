@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import case_study_prep4_closeout_72 as d72
+from sdetkit import cli
 
 
 def _seed_repo(root: Path) -> None:
@@ -124,7 +124,9 @@ def test_day72_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day72-pack/case-study-prep4-execution-log.md").exists()
     assert (tmp_path / "artifacts/day72-pack/case-study-prep4-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day72-pack/case-study-prep4-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/evidence/case-study-prep4-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day72-pack/evidence/case-study-prep4-execution-summary.json"
+    ).exists()
 
 
 def test_day72_strict_fails_without_day71(tmp_path: Path) -> None:

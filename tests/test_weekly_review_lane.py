@@ -81,7 +81,9 @@ def test_day28_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-kpi-rollup.md").exists()
     assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-wins-misses-actions.md").exists()
     assert (tmp_path / "artifacts/weekly-review-pack/weekly-review-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/weekly-review-pack/evidence/weekly-review-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/weekly-review-pack/evidence/weekly-review-execution-summary.json"
+    ).exists()
 
 
 def test_day28_strict_fails_when_sections_missing(tmp_path: Path) -> None:

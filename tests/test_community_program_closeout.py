@@ -42,8 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root
-        / "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
+        root / "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -99,9 +98,7 @@ def test_day62_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (
-        tmp_path / "artifacts/day62-pack/community-program-closeout-summary.json"
-    ).exists()
+    assert (tmp_path / "artifacts/day62-pack/community-program-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day62-pack/community-program-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day62-pack/community-program-community-launch-brief.md").exists()
     assert (tmp_path / "artifacts/day62-pack/community-program-office-hours-cadence.md").exists()
@@ -111,7 +108,9 @@ def test_day62_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day62-pack/community-program-execution-log.md").exists()
     assert (tmp_path / "artifacts/day62-pack/community-program-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day62-pack/community-program-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/evidence/community-program-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day62-pack/evidence/community-program-execution-summary.json"
+    ).exists()
 
 
 def test_day62_strict_fails_without_day61(tmp_path: Path) -> None:

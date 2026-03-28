@@ -10,8 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-release-prioritization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY84_SUMMARY_PATH = "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json"
-_DAY84_BOARD_PATH = "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
+_DAY84_SUMMARY_PATH = (
+    "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json"
+)
+_DAY84_BOARD_PATH = (
+    "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
+)
 _PLAN_PATH = "docs/roadmap/plans/release-prioritization-plan.json"
 _SECTION_HEADER = "# Day 85 \u2014 Release prioritization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -358,13 +362,12 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "release-prioritization-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
+    _write(target / "release-prioritization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "release-prioritization-closeout-summary.md", _render_text(payload) + "\n"
+        target / "release-prioritization-evidence-brief.md",
+        "# Day 85 release prioritization brief\n",
     )
-    _write(target / "release-prioritization-evidence-brief.md", "# Day 85 release prioritization brief\n")
-    _write(
-        target / "release-prioritization-plan.md", "# Day 85 release prioritization plan\n"
-    )
+    _write(target / "release-prioritization-plan.md", "# Day 85 release prioritization plan\n")
     _write(
         target / "release-prioritization-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -373,7 +376,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "release-prioritization-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "release-prioritization-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "release-prioritization-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "release-prioritization-execution-log.md", "# Day 85 execution log\n")
     _write(
         target / "release-prioritization-delivery-board.md",
@@ -408,10 +414,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_release_prioritization_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 85 release prioritization closeout checks")
@@ -444,5 +450,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

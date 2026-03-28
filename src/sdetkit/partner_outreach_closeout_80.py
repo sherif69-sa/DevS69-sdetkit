@@ -371,7 +371,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "partner-outreach-partner-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
     )
-    _write(target / "partner-outreach-partner-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "partner-outreach-partner-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "partner-outreach-execution-log.md", "# Day 80 execution log\n")
     _write(
         target / "partner-outreach-delivery-board.md",
@@ -406,10 +409,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day80_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_partner_outreach_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Partner Outreach Closeout checks")
@@ -442,5 +445,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

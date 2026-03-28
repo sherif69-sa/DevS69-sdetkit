@@ -104,7 +104,9 @@ def test_day31_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-baseline-snapshot.json").exists()
     assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day31-pack/evidence/phase2-kickoff-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day31-pack/evidence/phase2-kickoff-execution-summary.json"
+    ).exists()
 
 
 def test_day31_strict_fails_when_day30_inputs_missing(tmp_path: Path) -> None:

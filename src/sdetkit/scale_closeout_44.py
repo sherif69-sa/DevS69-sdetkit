@@ -10,9 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-scale-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY43_SUMMARY_PATH = (
-    "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
-)
+_DAY43_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
 _DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md"
 _SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
 _REQUIRED_SECTIONS = [
@@ -469,10 +467,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day44_scale_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_scale_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
@@ -503,5 +501,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

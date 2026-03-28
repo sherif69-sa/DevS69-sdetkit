@@ -266,7 +266,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / _CANONICAL_SUMMARY_MD, summary_md)
     stale_json = json.dumps(payload["stale_hits"], indent=2) + "\n"
     _write(target / _CANONICAL_STALE_GAPS, stale_json)
-    validation_md = "# Day 29 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    validation_md = (
+        "# Day 29 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    )
     _write(target / _CANONICAL_VALIDATION_COMMANDS, validation_md)
 
 
@@ -355,5 +357,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

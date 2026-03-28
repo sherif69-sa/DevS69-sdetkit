@@ -109,9 +109,7 @@ def test_day38_emit_pack_and_execute(tmp_path: Path) -> None:
 
 def test_day38_strict_fails_when_day37_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (
-        tmp_path / "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"
-    ).unlink()
+    (tmp_path / "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json").unlink()
     rc = d38.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

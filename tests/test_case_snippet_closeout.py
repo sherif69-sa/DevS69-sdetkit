@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import case_snippet_closeout_51 as d51
+from sdetkit import cli
 
 
 def _seed_repo(root: Path) -> None:
@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
+        root
+        / "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -101,15 +102,23 @@ def test_cycle51_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-brief.md").exists()
     assert (tmp_path / "artifacts/case-snippet-closeout-pack/proof-map.csv").exists()
-    assert (tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-kpi-scorecard.json").exists()
+    assert (
+        tmp_path / "artifacts/case-snippet-closeout-pack/case-snippet-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/case-snippet-closeout-pack/execution-log.md").exists()
     assert (tmp_path / "artifacts/case-snippet-closeout-pack/delivery-board.md").exists()
     assert (tmp_path / "artifacts/case-snippet-closeout-pack/validation-commands.md").exists()
-    assert (tmp_path / "artifacts/case-snippet-closeout-pack/evidence/execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/case-snippet-closeout-pack/evidence/execution-summary.json"
+    ).exists()
 
 
 def test_cycle51_strict_fails_when_day50_inputs_missing(tmp_path: Path) -> None:

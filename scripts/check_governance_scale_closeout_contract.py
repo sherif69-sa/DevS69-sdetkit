@@ -8,7 +8,9 @@ from pathlib import Path
 
 from sdetkit import governance_scale_closeout_89 as d89
 
-_CANONICAL_EVIDENCE = "docs/artifacts/governance-scale-closeout-pack/evidence/governance-scale-execution-summary.json"
+_CANONICAL_EVIDENCE = (
+    "docs/artifacts/governance-scale-closeout-pack/evidence/governance-scale-execution-summary.json"
+)
 
 
 def main() -> int:

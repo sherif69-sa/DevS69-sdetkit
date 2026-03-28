@@ -41,10 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Cycle 52 report\n", encoding="utf-8"
     )
 
-    summary = (
-        root
-        / "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
-    )
+    summary = root / "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -106,15 +103,18 @@ def test_cycle52_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/narrative-closeout-pack/narrative-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/narrative-closeout-pack/narrative-execution-log.md").exists()
     assert (tmp_path / "artifacts/narrative-closeout-pack/narrative-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/narrative-closeout-pack/narrative-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/narrative-closeout-pack/evidence/narrative-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/narrative-closeout-pack/narrative-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/narrative-closeout-pack/evidence/narrative-execution-summary.json"
+    ).exists()
 
 
 def test_cycle52_strict_fails_when_cycle51_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
-        tmp_path
-        / "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
+        tmp_path / "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
     ).unlink()
     rc = d52.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

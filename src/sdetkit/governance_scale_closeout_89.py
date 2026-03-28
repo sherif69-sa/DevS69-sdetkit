@@ -10,7 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-governance-scale-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY88_SUMMARY_PATH = "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json"
+_DAY88_SUMMARY_PATH = (
+    "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json"
+)
 _DAY88_BOARD_PATH = (
     "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md"
 )
@@ -371,7 +373,10 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "governance-scale-storyline-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "governance-scale-narrative-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "governance-scale-narrative-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
     _write(target / "governance-scale-execution-log.md", "# Day 89 execution log\n")
     _write(
         target / "governance-scale-delivery-board.md",
@@ -406,11 +411,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
-
 def build_day89_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_governance_scale_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 89 governance scale closeout checks")
@@ -443,5 +447,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

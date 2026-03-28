@@ -33,7 +33,9 @@ def main() -> int:
         errors.append(f"critical failures: {payload['summary']['critical_failures']}")
 
     if not ns.skip_evidence:
-        evidence = root / "docs/artifacts/weekly-review-pack/evidence/weekly-review-execution-summary.json"
+        evidence = (
+            root / "docs/artifacts/weekly-review-pack/evidence/weekly-review-execution-summary.json"
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:

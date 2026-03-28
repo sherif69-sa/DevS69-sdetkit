@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import case_study_launch_closeout_73 as d73
+from sdetkit import cli
 
 
 def _seed_repo(root: Path) -> None:
@@ -56,7 +56,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
+    board = (
+        root / "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -115,9 +117,7 @@ def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (
-        tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.json"
-    ).exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day73-pack/case-study-launch-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day73-pack/case-study-launch-case-study-narrative.md").exists()
@@ -126,7 +126,9 @@ def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day73-pack/case-study-launch-execution-log.md").exists()
     assert (tmp_path / "artifacts/day73-pack/case-study-launch-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day73-pack/case-study-launch-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/evidence/case-study-launch-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day73-pack/evidence/case-study-launch-execution-summary.json"
+    ).exists()
 
 
 def test_day73_strict_fails_without_day72(tmp_path: Path) -> None:

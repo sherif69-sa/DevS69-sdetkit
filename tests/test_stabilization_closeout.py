@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md"
+        root
+        / "docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -109,7 +110,9 @@ def test_day56_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day56-pack/stabilization-execution-log.md").exists()
     assert (tmp_path / "artifacts/day56-pack/stabilization-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day56-pack/stabilization-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day56-pack/evidence/stabilization-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day56-pack/evidence/stabilization-execution-summary.json"
+    ).exists()
 
 
 def test_day56_strict_fails_without_day55(tmp_path: Path) -> None:

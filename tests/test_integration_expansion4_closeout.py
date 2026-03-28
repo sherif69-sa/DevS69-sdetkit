@@ -48,7 +48,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md"
+        root
+        / "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -92,14 +93,16 @@ def test_day68_emit_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (
-        tmp_path / "artifacts/day68-pack/integration-expansion4-closeout-summary.json"
-    ).exists()
+    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day68-pack/integration-expansion4-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-self-hosted-blueprint.md").exists()
+    assert (
+        tmp_path / "artifacts/day68-pack/integration-expansion4-self-hosted-blueprint.md"
+    ).exists()
     assert (tmp_path / "artifacts/day68-pack/integration-expansion4-policy-plan.json").exists()
     assert (tmp_path / "artifacts/day68-pack/integration-expansion4-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day68-pack/evidence/integration-expansion4-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day68-pack/evidence/integration-expansion4-execution-summary.json"
+    ).exists()
 
 
 def test_day68_strict_fails_without_day67_summary(tmp_path: Path) -> None:

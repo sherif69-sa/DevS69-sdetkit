@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
+        root
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -126,20 +127,20 @@ def test_day67_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (
-        tmp_path / "artifacts/day67-pack/integration-expansion3-closeout-summary.json"
-    ).exists()
-    assert (
-        tmp_path / "artifacts/day67-pack/integration-expansion3-closeout-summary.md"
-    ).exists()
+    assert (tmp_path / "artifacts/day67-pack/integration-expansion3-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day67-pack/integration-expansion3-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day67-pack/integration-expansion3-integration-brief.md").exists()
     assert (tmp_path / "artifacts/day67-pack/integration-expansion3-jenkins-blueprint.md").exists()
     assert (tmp_path / "artifacts/day67-pack/integration-expansion3-matrix-plan.json").exists()
     assert (tmp_path / "artifacts/day67-pack/integration-expansion3-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day67-pack/integration-expansion3-execution-log.md").exists()
     assert (tmp_path / "artifacts/day67-pack/integration-expansion3-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day67-pack/integration-expansion3-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day67-pack/evidence/integration-expansion3-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day67-pack/integration-expansion3-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/day67-pack/evidence/integration-expansion3-execution-summary.json"
+    ).exists()
 
 
 def test_day67_strict_fails_without_day66(tmp_path: Path) -> None:

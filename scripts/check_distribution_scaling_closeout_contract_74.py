@@ -10,9 +10,7 @@ from sdetkit import distribution_scaling_closeout_74 as d74
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Validate distribution scaling closeout contract"
-    )
+    parser = argparse.ArgumentParser(description="Validate distribution scaling closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()

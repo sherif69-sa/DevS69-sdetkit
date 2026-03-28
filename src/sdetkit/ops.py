@@ -92,7 +92,7 @@ class ActionSpec:
 
 
 class ActionRegistry:
-    def init_(self) -> None:
+    def __init__(self) -> None:
         self._actions: dict[str, ActionSpec] = {}
 
     def register(self, action: ActionSpec) -> None:
@@ -973,5 +973,5 @@ def main(argv: list[str] | None = None) -> int:
     return 2
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

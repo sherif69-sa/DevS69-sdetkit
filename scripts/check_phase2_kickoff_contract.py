@@ -8,7 +8,9 @@ from sdetkit import phase2_kickoff_31 as d31
 
 
 def _evidence_path(root: Path) -> Path:
-    return root / "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
+    return (
+        root / "docs/artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
+    )
 
 
 def main() -> int:

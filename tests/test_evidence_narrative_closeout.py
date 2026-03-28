@@ -56,7 +56,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -118,16 +121,38 @@ def test_day84_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-evidence-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-evidence-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-plan.md").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-execution-log.md").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence/evidence-narrative-execution-summary.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/evidence-narrative-pack/evidence-narrative-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/evidence-narrative-pack/evidence-narrative-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/evidence-narrative-pack/evidence-narrative-narrative-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/evidence-narrative-pack/evidence/evidence-narrative-execution-summary.json"
+    ).exists()
 
 
 def test_day84_strict_fails_without_day83(tmp_path: Path) -> None:

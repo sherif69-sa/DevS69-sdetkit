@@ -74,7 +74,9 @@ def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.md").exists()
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-stale-gaps.json").exists()
     assert (tmp_path / "artifacts/day29-pack/phase1-hardening-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day29-pack/evidence/phase1-hardening-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day29-pack/evidence/phase1-hardening-execution-summary.json"
+    ).exists()
 
 
 def test_day29_strict_fails_when_sections_missing(tmp_path: Path) -> None:

@@ -263,5 +263,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0 if report.verdict.ok else 1
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

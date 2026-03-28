@@ -57,7 +57,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md"
+        root
+        / "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -117,17 +118,37 @@ def test_day89_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-evidence-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-evidence-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-plan.md").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-narrative-kpi-scorecard.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-scale-pack/governance-scale-narrative-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-storyline-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-narrative-kpi-scorecard.json"
+    ).exists()
     assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-execution-log.md").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/governance-scale-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/governance-scale-pack/evidence/governance-scale-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/governance-scale-pack/governance-scale-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/governance-scale-pack/evidence/governance-scale-execution-summary.json"
+    ).exists()
 
 
 def test_day89_strict_fails_without_day88(tmp_path: Path) -> None:

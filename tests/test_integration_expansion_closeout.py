@@ -56,9 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = (
-        root / "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
-    )
+    board = root / "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -128,19 +126,45 @@ def test_cycle64_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.md"
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-workflow-blueprint.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-matrix-plan.csv").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-execution-log.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/evidence/integration-expansion-execution-summary.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-workflow-blueprint.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-matrix-plan.csv"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/integration-expansion-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion-closeout-pack/evidence/integration-expansion-execution-summary.json"
+    ).exists()
 
 
 def test_cycle64_strict_fails_without_cycle63(tmp_path: Path) -> None:
@@ -154,8 +178,6 @@ def test_cycle64_strict_fails_without_cycle63(tmp_path: Path) -> None:
 
 def test_cycle64_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["integration-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["integration-expansion-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Integration Expansion Closeout summary" in capsys.readouterr().out

@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from sdetkit import cli
 from sdetkit import case_study_prep2_closeout_70 as d70
+from sdetkit import cli
 
 
 def _seed_repo(root: Path) -> None:
@@ -38,7 +38,9 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
+    board = (
+        root / "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
+    )
     board.write_text(
         "\n".join(["# Day 69 delivery board", *["- [ ] Day 69 item" for _ in range(5)]]) + "\n",
         encoding="utf-8",
@@ -87,7 +89,9 @@ def test_day70_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (tmp_path / "artifacts/day70-pack/case-study-prep2-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day70-pack/case-study-prep2-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day70-pack/evidence/case-study-prep2-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day70-pack/evidence/case-study-prep2-execution-summary.json"
+    ).exists()
 
 
 def test_day70_strict_fails_without_day69_summary(tmp_path: Path) -> None:
@@ -103,8 +107,6 @@ def test_day70_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["case-study-prep2-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(
-        ["case-study-prep2-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    alias_rc = cli.main(["case-study-prep2-closeout", "--root", str(tmp_path), "--format", "text"])
     assert alias_rc == 0
     assert "Case Study Prep 2 Closeout summary" in capsys.readouterr().out

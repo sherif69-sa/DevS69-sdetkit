@@ -403,24 +403,27 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "phase2-kickoff-summary.json", summary_json)
     summary_md = _to_markdown(payload)
     _write(target / "phase2-kickoff-summary.md", summary_md)
-    baseline_json = json.dumps(
-        {
-            "impact": 31,
-            "baseline": {
-                "day30_activation_score": payload["rollup"]["day30_activation_score"],
-                "day30_average_activation_score": payload["rollup"][
-                    "day30_average_activation_score"
-                ],
-                "day30_backlog_items": payload["rollup"]["day30_backlog_items"],
+    baseline_json = (
+        json.dumps(
+            {
+                "impact": 31,
+                "baseline": {
+                    "day30_activation_score": payload["rollup"]["day30_activation_score"],
+                    "day30_average_activation_score": payload["rollup"][
+                        "day30_average_activation_score"
+                    ],
+                    "day30_backlog_items": payload["rollup"]["day30_backlog_items"],
+                },
+                "week1_targets": {
+                    "activation_score_floor": 95,
+                    "external_assets": 3,
+                    "kpi_checkpoints": 1,
+                },
             },
-            "week1_targets": {
-                "activation_score_floor": 95,
-                "external_assets": 3,
-                "kpi_checkpoints": 1,
-            },
-        },
-        indent=2,
-    ) + "\n"
+            indent=2,
+        )
+        + "\n"
+    )
     _write(
         target / "phase2-kickoff-baseline-snapshot.json",
         baseline_json,
@@ -430,7 +433,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "phase2-kickoff-delivery-board.md",
         board_md,
     )
-    validation_md = "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    validation_md = (
+        "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+    )
     _write(
         target / "phase2-kickoff-validation-commands.md",
         validation_md,
@@ -522,5 +527,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

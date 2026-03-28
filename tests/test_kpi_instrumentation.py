@@ -96,13 +96,20 @@ def test_day35_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
+    ).exists()
     assert (tmp_path / "artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.md").exists()
     assert (tmp_path / "artifacts/kpi-instrumentation-pack/kpi-dictionary.csv").exists()
     assert (tmp_path / "artifacts/kpi-instrumentation-pack/alert-policy.md").exists()
     assert (tmp_path / "artifacts/kpi-instrumentation-pack/delivery-board.md").exists()
-    assert (tmp_path / "artifacts/kpi-instrumentation-pack/kpi-instrumentation-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/kpi-instrumentation-pack/evidence/kpi-instrumentation-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/kpi-instrumentation-pack/kpi-instrumentation-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/kpi-instrumentation-pack/evidence/kpi-instrumentation-execution-summary.json"
+    ).exists()
 
 
 def test_day35_strict_fails_when_day34_inputs_missing(tmp_path: Path) -> None:

@@ -7,9 +7,18 @@ from collections.abc import Sequence
 from importlib import metadata
 
 from . import (
+    acceleration_closeout_43,
     apiget,
     author_problem,
+    case_snippet_closeout_51,
+    case_study_launch_closeout_73,
+    case_study_prep1_closeout_69,
+    case_study_prep2_closeout_70,
+    case_study_prep3_closeout_71,
+    case_study_prep4_closeout_72,
     community_activation,
+    community_program_closeout_62,
+    community_touchpoint_closeout_77,
     continuous_upgrade_closeout_1,
     continuous_upgrade_closeout_2,
     continuous_upgrade_closeout_3,
@@ -21,106 +30,97 @@ from . import (
     continuous_upgrade_closeout_9,
     continuous_upgrade_closeout_10,
     continuous_upgrade_closeout_11,
-    contributor_funnel,
-    weekly_review_28,
-    phase1_hardening_29,
-    phase1_wrap_30,
-    phase2_kickoff_31,
-    release_cadence_32,
-    demo_asset_33,
-    demo_asset2_34,
-    kpi_instrumentation_35,
-    distribution_closeout_36,
-    experiment_lane_37,
-    distribution_batch_38,
-    playbook_post_39,
-    scale_lane_40,
-    expansion_automation_41,
-    optimization_closeout_42,
-    acceleration_closeout_43,
-    scale_closeout_44,
-    expansion_closeout_45,
-    optimization_closeout_46,
-    reliability_closeout_47,
-    objection_closeout_48,
-    weekly_review_closeout_49,
-    execution_prioritization_closeout_50,
-    case_snippet_closeout_51,
-    narrative_closeout_52,
-    docs_loop_closeout_53,
     contributor_activation_closeout_55,
-    stabilization_closeout_56,
-    kpi_deep_audit_closeout_57,
-    phase2_hardening_closeout_58,
-    phase3_preplan_closeout_59,
-    phase2_wrap_handoff_closeout_60,
-    phase3_kickoff_closeout_61,
-    community_program_closeout_62,
-    onboarding_activation_closeout_63,
-    integration_expansion_closeout_64,
-    weekly_review_closeout_65,
-    integration_expansion2_closeout_66,
-    integration_expansion3_closeout_67,
-    integration_expansion4_closeout_68,
-    case_study_prep1_closeout_69,
-    case_study_prep2_closeout_70,
-    case_study_prep3_closeout_71,
-    case_study_prep4_closeout_72,
-    case_study_launch_closeout_73,
-    distribution_scaling_closeout_74,
-    trust_assets_refresh_closeout_75,
+    contributor_funnel,
     contributor_recognition_closeout_76,
-    community_touchpoint_closeout_77,
-    ecosystem_priorities_closeout_78,
-    scale_upgrade_closeout_79,
-    partner_outreach_closeout_80,
-    growth_campaign_closeout_81,
-    integration_feedback_closeout_82,
-    trust_faq_expansion_closeout_83,
-    evidence_narrative_closeout_84,
-    release_prioritization_closeout_85,
-    launch_readiness_closeout_86,
-    governance_handoff_closeout_87,
-    governance_priorities_closeout_88,
-    governance_scale_closeout_89,
-    phase3_wrap_publication_closeout_90,
     demo,
+    demo_asset2_34,
+    demo_asset_33,
+    distribution_batch_38,
+    distribution_closeout_36,
+    distribution_scaling_closeout_74,
+    docs_loop_closeout_53,
     docs_navigation,
     docs_qa,
+    ecosystem_priorities_closeout_78,
     enterprise_readiness,
     evidence,
+    evidence_narrative_closeout_84,
+    execution_prioritization_closeout_50,
+    expansion_automation_41,
+    expansion_closeout_45,
+    experiment_lane_37,
     external_contribution,
-    objection_handling,
     first_contribution,
     forensics,
     github_actions_quickstart,
     gitlab_ci_quickstart,
+    governance_handoff_closeout_87,
+    governance_priorities_closeout_88,
+    governance_scale_closeout_89,
+    growth_campaign_closeout_81,
     integration,
+    integration_expansion2_closeout_66,
+    integration_expansion3_closeout_67,
+    integration_expansion4_closeout_68,
+    integration_expansion_closeout_64,
+    integration_feedback_closeout_82,
     intelligence,
     kits,
     kpi_audit,
+    kpi_deep_audit_closeout_57,
+    kpi_instrumentation_35,
     kvcli,
+    launch_readiness_closeout_86,
+    narrative_closeout_52,
     notify,
+    objection_closeout_48,
+    objection_handling,
     onboarding,
+    onboarding_activation_closeout_63,
     onboarding_optimization,
     ops,
+    optimization_closeout_42,
+    optimization_closeout_46,
+    partner_outreach_closeout_80,
     patch,
+    phase1_hardening_29,
+    phase1_wrap_30,
+    phase2_hardening_closeout_58,
+    phase2_kickoff_31,
+    phase2_wrap_handoff_closeout_60,
+    phase3_kickoff_closeout_61,
+    phase3_preplan_closeout_59,
+    phase3_wrap_publication_closeout_90,
     phase_boost,
+    playbook_post_39,
     policy,
     production_readiness,
     proof,
     quality_contribution_delta,
+    release_cadence_32,
     release_communications,
+    release_prioritization_closeout_85,
     release_readiness,
+    reliability_closeout_47,
     reliability_evidence_pack,
     repo,
     report,
     roadmap,
+    scale_closeout_44,
+    scale_lane_40,
+    scale_upgrade_closeout_79,
     sdet_package,
+    stabilization_closeout_56,
     startup_readiness,
     triage_templates,
     trust_assets,
+    trust_assets_refresh_closeout_75,
+    trust_faq_expansion_closeout_83,
     weekly_review,
+    weekly_review_28,
+    weekly_review_closeout_49,
+    weekly_review_closeout_65,
 )
 from . import gate as gate_cmd
 from .agent.cli import main as agent_main
@@ -128,11 +128,13 @@ from .maintenance import main as maintenance_main
 from .public_surface_contract import render_root_help_groups
 from .security_gate import main as security_main
 
+
 def _tool_version() -> str:
     try:
         return metadata.version("sdetkit")
     except metadata.PackageNotFoundError:
         return "0+unknown"
+
 
 def _add_apiget_args(p: argparse.ArgumentParser) -> None:
     apiget._add_apiget_args(p)
@@ -144,6 +146,7 @@ def _add_apiget_args(p: argparse.ArgumentParser) -> None:
         default=None,
         help="Cassette mode: auto, record, or replay.",
     )
+
 
 def _is_hidden_cmd(name: str) -> bool:
     if name == "playbooks":
@@ -171,6 +174,7 @@ def _is_hidden_cmd(name: str) -> bool:
         return True
     return False
 
+
 def _filter_hidden_subcommands(parser: argparse.ArgumentParser) -> None:
     for action in parser._actions:
         if not hasattr(action, "_choices_actions"):
@@ -186,6 +190,7 @@ def _filter_hidden_subcommands(parser: argparse.ArgumentParser) -> None:
             filtered.append(choice_action)
         action._choices_actions = filtered
 
+
 def _hide_help_subcommands(sub) -> None:
     actions = getattr(sub, "_choices_actions", None)
     if not isinstance(actions, list):
@@ -198,6 +203,7 @@ def _hide_help_subcommands(sub) -> None:
         filtered.append(a)
     sub._choices_actions = filtered
 
+
 def _print_playbooks(sub) -> None:
     mp = getattr(sub, "_name_parser_map", {})
     if not isinstance(mp, dict):
@@ -208,6 +214,7 @@ def _print_playbooks(sub) -> None:
         print(f"  {n}")
     print("")
     print("Tip: these commands still run directly, e.g. sdetkit <name> --help")
+
 
 def _resolve_non_day_playbook_alias(cmd: str) -> str:
     """Resolve product/legacy playbook names to a parser-backed command."""
@@ -222,6 +229,7 @@ def _resolve_non_day_playbook_alias(cmd: str) -> str:
         return alias_to_canonical[cmd]
 
     return cmd
+
 
 def _add_passthrough_subcommand(
     sub,
@@ -241,6 +249,7 @@ def _add_passthrough_subcommand(
         parser.set_defaults(cmd=default_cmd)
     parser.add_argument("args", nargs=argparse.REMAINDER)
     return parser
+
 
 def _build_root_parser() -> tuple[argparse.ArgumentParser, object]:
     help_description = """\
@@ -459,9 +468,7 @@ Start here:
     d41.set_defaults(cmd="expansion-automation")
     d41.add_argument("args", nargs=argparse.REMAINDER)
 
-    d42 = sub.add_parser(
-        "optimization-closeout-foundation"
-    )
+    d42 = sub.add_parser("optimization-closeout-foundation")
     d42.set_defaults(cmd="optimization-closeout-foundation")
     d42.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -492,9 +499,7 @@ Start here:
     )
     d49.set_defaults(cmd="weekly-review-closeout")
     d49.add_argument("args", nargs=argparse.REMAINDER)
-    d50 = sub.add_parser(
-        "execution-prioritization-closeout"
-    )
+    d50 = sub.add_parser("execution-prioritization-closeout")
     d50.set_defaults(cmd="execution-prioritization-closeout")
     d50.add_argument("args", nargs=argparse.REMAINDER)
     d51 = sub.add_parser("case-snippet-closeout")
@@ -508,9 +513,7 @@ Start here:
     d53.set_defaults(cmd="docs-loop-closeout")
     d53.add_argument("args", nargs=argparse.REMAINDER)
 
-    d55 = sub.add_parser(
-        "contributor-activation-closeout"
-    )
+    d55 = sub.add_parser("contributor-activation-closeout")
     d55.set_defaults(cmd="contributor-activation-closeout")
     d55.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -530,9 +533,7 @@ Start here:
     d59.set_defaults(cmd="phase3-preplan-closeout")
     d59.add_argument("args", nargs=argparse.REMAINDER)
 
-    d60 = sub.add_parser(
-        "phase2-wrap-handoff-closeout"
-    )
+    d60 = sub.add_parser("phase2-wrap-handoff-closeout")
     d60.set_defaults(cmd="phase2-wrap-handoff-closeout")
     d60.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -544,15 +545,11 @@ Start here:
     d62.set_defaults(cmd="community-program-closeout")
     d62.add_argument("args", nargs=argparse.REMAINDER)
 
-    d63 = sub.add_parser(
-        "onboarding-activation-closeout"
-    )
+    d63 = sub.add_parser("onboarding-activation-closeout")
     d63.set_defaults(cmd="onboarding-activation-closeout")
     d63.add_argument("args", nargs=argparse.REMAINDER)
 
-    d64 = sub.add_parser(
-        "integration-expansion-closeout"
-    )
+    d64 = sub.add_parser("integration-expansion-closeout")
     d64.set_defaults(cmd="integration-expansion-closeout")
     d64.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -560,21 +557,15 @@ Start here:
     d65.set_defaults(cmd="weekly-review-closeout-2")
     d65.add_argument("args", nargs=argparse.REMAINDER)
 
-    d66 = sub.add_parser(
-        "integration-expansion2-closeout"
-    )
+    d66 = sub.add_parser("integration-expansion2-closeout")
     d66.set_defaults(cmd="integration-expansion2-closeout")
     d66.add_argument("args", nargs=argparse.REMAINDER)
 
-    d67 = sub.add_parser(
-        "integration-expansion3-closeout"
-    )
+    d67 = sub.add_parser("integration-expansion3-closeout")
     d67.set_defaults(cmd="integration-expansion3-closeout")
     d67.add_argument("args", nargs=argparse.REMAINDER)
 
-    d68 = sub.add_parser(
-        "integration-expansion4-closeout"
-    )
+    d68 = sub.add_parser("integration-expansion4-closeout")
     d68.set_defaults(cmd="integration-expansion4-closeout")
     d68.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -594,28 +585,18 @@ Start here:
     d73 = sub.add_parser("case-study-launch-closeout")
     d73.set_defaults(cmd="case-study-launch-closeout")
     d73.add_argument("args", nargs=argparse.REMAINDER)
-    d74 = sub.add_parser(
-        "distribution-scaling-closeout"
-    )
+    d74 = sub.add_parser("distribution-scaling-closeout")
     d74.set_defaults(cmd="distribution-scaling-closeout")
     d74.add_argument("args", nargs=argparse.REMAINDER)
-    d75 = sub.add_parser(
-        "trust-assets-refresh-closeout"
-    )
+    d75 = sub.add_parser("trust-assets-refresh-closeout")
     d75.set_defaults(cmd="trust-assets-refresh-closeout")
     d75.add_argument("args", nargs=argparse.REMAINDER)
-    d76 = sub.add_parser(
-        "contributor-recognition-closeout"
-    )
+    d76 = sub.add_parser("contributor-recognition-closeout")
     d76.set_defaults(cmd="contributor-recognition-closeout")
     d76.add_argument("args", nargs=argparse.REMAINDER)
-    d77 = sub.add_parser(
-        "community-touchpoint-closeout"
-    )
+    d77 = sub.add_parser("community-touchpoint-closeout")
     d77.add_argument("args", nargs=argparse.REMAINDER)
-    d78 = sub.add_parser(
-        "ecosystem-priorities-closeout"
-    )
+    d78 = sub.add_parser("ecosystem-priorities-closeout")
     d78.add_argument("args", nargs=argparse.REMAINDER)
     d79 = sub.add_parser("scale-upgrade-closeout")
     d79.add_argument("args", nargs=argparse.REMAINDER)
@@ -624,45 +605,31 @@ Start here:
     d81 = sub.add_parser("growth-campaign-closeout")
     d81.set_defaults(cmd="growth-campaign-closeout")
     d81.add_argument("args", nargs=argparse.REMAINDER)
-    d82 = sub.add_parser(
-        "integration-feedback-closeout"
-    )
+    d82 = sub.add_parser("integration-feedback-closeout")
     d82.set_defaults(cmd="integration-feedback-closeout")
     d82.add_argument("args", nargs=argparse.REMAINDER)
-    d83 = sub.add_parser(
-        "trust-faq-expansion-closeout"
-    )
+    d83 = sub.add_parser("trust-faq-expansion-closeout")
     d83.set_defaults(cmd="trust-faq-expansion-closeout")
     d83.add_argument("args", nargs=argparse.REMAINDER)
-    d84 = sub.add_parser(
-        "evidence-narrative-closeout"
-    )
+    d84 = sub.add_parser("evidence-narrative-closeout")
     d84.set_defaults(cmd="evidence-narrative-closeout")
     d84.add_argument("args", nargs=argparse.REMAINDER)
-    d85 = sub.add_parser(
-        "release-prioritization-closeout"
-    )
+    d85 = sub.add_parser("release-prioritization-closeout")
     d85.set_defaults(cmd="release-prioritization-closeout")
     d85.add_argument("args", nargs=argparse.REMAINDER)
     d86 = sub.add_parser("launch-readiness-closeout")
     d86.set_defaults(cmd="launch-readiness-closeout")
     d86.add_argument("args", nargs=argparse.REMAINDER)
-    d87 = sub.add_parser(
-        "governance-handoff-closeout"
-    )
+    d87 = sub.add_parser("governance-handoff-closeout")
     d87.set_defaults(cmd="governance-handoff-closeout")
     d87.add_argument("args", nargs=argparse.REMAINDER)
-    d88 = sub.add_parser(
-        "governance-priorities-closeout"
-    )
+    d88 = sub.add_parser("governance-priorities-closeout")
     d88.set_defaults(cmd="governance-priorities-closeout")
     d88.add_argument("args", nargs=argparse.REMAINDER)
     d89 = sub.add_parser("governance-scale-closeout")
     d89.set_defaults(cmd="governance-scale-closeout")
     d89.add_argument("args", nargs=argparse.REMAINDER)
-    d90 = sub.add_parser(
-        "phase3-wrap-publication-closeout"
-    )
+    d90 = sub.add_parser("phase3-wrap-publication-closeout")
     d90.set_defaults(cmd="phase3-wrap-publication-closeout")
     d90.add_argument("args", nargs=argparse.REMAINDER)
     cycle1_parser = sub.add_parser(
@@ -836,6 +803,7 @@ Start here:
     _filter_hidden_subcommands(p)
     return p, sub
 
+
 def main(argv: Sequence[str] | None = None) -> int:
 
     if argv is None:
@@ -851,7 +819,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _playbooks_main(list(argv[1:]))
 
     if argv and argv[0] == "cassette-get":
-        from .main_ import _cassette_get
+        from .__main__ import _cassette_get
 
         try:
             return _cassette_get(argv[1:])
@@ -1699,5 +1667,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                 os.environ["SDETKIT_CASSETTE_MODE"] = old_mode
     raise SystemExit(2)
 
-if __name__ == "main_":
+
+if __name__ == "__main__":
     raise SystemExit(main())

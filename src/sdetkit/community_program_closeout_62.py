@@ -354,14 +354,18 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "community-program-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "community-program-community-launch-brief.md", "# Day 62 community launch brief\n")
+    _write(
+        target / "community-program-community-launch-brief.md", "# Day 62 community launch brief\n"
+    )
     _write(
         target / "community-program-office-hours-cadence.md",
         "# Day 62 office-hours cadence\n\n- Weekly office hours\n",
     )
     _write(target / "community-program-participation-policy.md", "# Day 62 participation policy\n")
     _write(target / "community-program-moderation-runbook.md", "# Day 62 moderation runbook\n")
-    _write(target / "community-program-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(
+        target / "community-program-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+    )
     _write(target / "community-program-execution-log.md", "# Day 62 execution log\n")
     _write(
         target / "community-program-delivery-board.md",
@@ -396,10 +400,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day62_community_program_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_community_program_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 62 community program closeout checks")
@@ -432,5 +436,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

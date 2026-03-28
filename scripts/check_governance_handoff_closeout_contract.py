@@ -8,9 +8,7 @@ from pathlib import Path
 
 from sdetkit import governance_handoff_closeout_87 as d87
 
-_CANONICAL_EVIDENCE = (
-    "docs/artifacts/governance-handoff-closeout-pack/evidence/governance-handoff-execution-summary.json"
-)
+_CANONICAL_EVIDENCE = "docs/artifacts/governance-handoff-closeout-pack/evidence/governance-handoff-execution-summary.json"
 
 
 def main() -> int:

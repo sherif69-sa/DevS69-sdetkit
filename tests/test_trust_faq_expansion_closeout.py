@@ -56,7 +56,10 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md"
+    board = (
+        root
+        / "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md"
+    )
     board.write_text(
         "\n".join(
             [
@@ -121,15 +124,34 @@ def test_day83_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-faq-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-faq-brief.md"
+    ).exists()
     assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-plan.md").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-escalation-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-execution-log.md").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/trust-faq-expansion-pack/evidence/trust-faq-expansion-execution-summary.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-template-upgrade-ledger.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-escalation-outcomes-ledger.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-trust-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/trust-faq-expansion-pack/trust-faq-expansion-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-faq-expansion-pack/evidence/trust-faq-expansion-execution-summary.json"
+    ).exists()
 
 
 def test_day83_strict_fails_without_day82(tmp_path: Path) -> None:

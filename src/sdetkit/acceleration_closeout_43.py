@@ -10,13 +10,13 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-acceleration-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY42_SUMMARY_PATH = (
-    "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
-)
+_DAY42_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
 _DAY42_BOARD_PATH = (
     "docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md"
 )
-_DAY42_LEGACY_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md"
+_DAY42_LEGACY_BOARD_PATH = (
+    "docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md"
+)
 _SECTION_HEADER = "# Day 43 \u2014 Acceleration closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 43 matters",
@@ -394,9 +394,7 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(
-        target / "acceleration-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
+    _write(target / "acceleration-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "acceleration-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "day43-acceleration-plan.md",
@@ -478,10 +476,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day43_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_acceleration_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
@@ -512,5 +510,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

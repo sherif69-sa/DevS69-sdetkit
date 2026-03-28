@@ -10,9 +10,7 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-optimization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY45_SUMMARY_PATH = (
-    "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
-)
+_DAY45_SUMMARY_PATH = "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
 _DAY45_BOARD_PATH = "docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md"
 _SECTION_HEADER = "# Day 46 \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -394,9 +392,7 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(
-        target / "optimization-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
-    )
+    _write(target / "optimization-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "optimization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "optimization-plan.md",
@@ -474,10 +470,10 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day46_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_optimization_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
@@ -508,5 +504,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

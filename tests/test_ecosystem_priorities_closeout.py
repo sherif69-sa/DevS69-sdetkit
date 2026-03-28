@@ -104,8 +104,12 @@ def test_day78_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-kpi-scorecard.json"
     ).exists()
-    assert not (tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-workstream-ledger.json").exists()
-    assert not (tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-kpi-scorecard.json").exists()
+    assert not (
+        tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-workstream-ledger.json"
+    ).exists()
+    assert not (
+        tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-kpi-scorecard.json"
+    ).exists()
     assert (
         tmp_path
         / "artifacts/ecosystem-priorities-pack/evidence/ecosystem-priorities-execution-summary.json"

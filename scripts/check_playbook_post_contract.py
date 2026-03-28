@@ -46,7 +46,9 @@ def main() -> int:
             root / "docs/artifacts/playbook-post-pack/evidence/execution-summary.json",
             root / "docs/artifacts/day39-playbook-post-pack/evidence/day39-execution-summary.json",
         ]
-        evidence = next((path for path in evidence_candidates if path.exists()), evidence_candidates[0])
+        evidence = next(
+            (path for path in evidence_candidates if path.exists()), evidence_candidates[0]
+        )
         if not evidence.exists():
             errors.append(f"missing evidence file: {evidence}")
         else:

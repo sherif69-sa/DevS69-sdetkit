@@ -520,10 +520,10 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-
 def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_expansion_automation_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
@@ -569,5 +569,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

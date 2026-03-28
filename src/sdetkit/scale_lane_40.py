@@ -12,7 +12,9 @@ _PAGE_PATH = "docs/integrations-scale-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY39_SUMMARY_PATH = "docs/artifacts/playbook-post-pack/playbook-post-summary.json"
 _DAY39_BOARD_PATH = "docs/artifacts/playbook-post-pack/delivery-board.md"
-_LEGACY_DAY39_SUMMARY_PATH = "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
+_LEGACY_DAY39_SUMMARY_PATH = (
+    "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
+)
 _LEGACY_DAY39_BOARD_PATH = "docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md"
 _SECTION_HEADER = "# Day 40 \u2014 Scale lane #1"
 _REQUIRED_SECTIONS = [
@@ -566,5 +568,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

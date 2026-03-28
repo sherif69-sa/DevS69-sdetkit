@@ -42,8 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root
-        / "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
+        root / "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -99,19 +98,17 @@ def test_day60_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (
-        tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-closeout-summary.json"
-    ).exists()
-    assert (
-        tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-closeout-summary.md"
-    ).exists()
+    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-brief.md").exists()
     assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-risk-ledger.csv").exists()
     assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-execution-log.md").exists()
     assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day60-pack/evidence/phase2-wrap-handoff-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/day60-pack/evidence/phase2-wrap-handoff-execution-summary.json"
+    ).exists()
 
 
 def test_day60_strict_fails_without_day59(tmp_path: Path) -> None:

@@ -48,7 +48,7 @@ class GenericAdapter(ChannelAdapter):
 
 
 class TelegramAdapter(ChannelAdapter):
-    def init_(self, *, enable_outgoing: bool = False, simulation_mode: bool = False) -> None:
+    def __init__(self, *, enable_outgoing: bool = False, simulation_mode: bool = False) -> None:
         self.enable_outgoing = enable_outgoing
         self.simulation_mode = simulation_mode
 
@@ -73,7 +73,7 @@ class TelegramAdapter(ChannelAdapter):
 
 
 class ConversationStore:
-    def init_(self, root: Path) -> None:
+    def __init__(self, root: Path) -> None:
         self.root = root
 
     def _conversation_path(self, *, channel: str, user_id: str) -> Path:
@@ -110,7 +110,7 @@ class ConversationStore:
 
 
 class DeterministicRateLimiter:
-    def init_(
+    def __init__(
         self,
         root: Path,
         *,
@@ -195,7 +195,7 @@ class ToolBridge:
 
 
 class StdioJsonRpcToolBridge(ToolBridge):
-    def init_(
+    def __init__(
         self,
         *,
         command: list[str],
@@ -241,7 +241,7 @@ class StdioJsonRpcToolBridge(ToolBridge):
 
 
 class AgentRouter:
-    def init_(
+    def __init__(
         self,
         *,
         root: Path,
@@ -366,7 +366,7 @@ class _WebhookHandler(BaseHTTPRequestHandler):
 
 
 class AgentHTTPServer(ThreadingHTTPServer):
-    def init_(
+    def __init__(
         self,
         addr: tuple[str, int],
         *,
@@ -374,14 +374,14 @@ class AgentHTTPServer(ThreadingHTTPServer):
         generic_adapter: GenericAdapter,
         telegram_adapter: TelegramAdapter,
     ) -> None:
-        super().init_(addr, _WebhookHandler)
+        super().__init__(addr, _WebhookHandler)
         self.router = router
         self.generic_adapter = generic_adapter
         self.telegram_adapter = telegram_adapter
 
 
 class AgentServeApp:
-    def init_(
+    def __init__(
         self,
         *,
         root: Path,

@@ -10,7 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-contributor-recognition-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY75_SUMMARY_PATH = "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
+_DAY75_SUMMARY_PATH = (
+    "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
+)
 _DAY75_BOARD_PATH = (
     "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
 )
@@ -365,19 +367,16 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "contributor-recognition-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(
-        target / "contributor-recognition-closeout-summary.md", _render_text(payload) + "\n"
-    )
+    _write(target / "contributor-recognition-closeout-summary.md", _render_text(payload) + "\n")
     _write(target / "contributor-recognition-integration-brief.md", "# Day 76 integration brief\n")
-    _write(
-        target / "contributor-recognition-plan.md", "# Day 76 contributor recognition plan\n"
-    )
+    _write(target / "contributor-recognition-plan.md", "# Day 76 contributor recognition plan\n")
     _write(
         target / "contributor-recognition-credits-ledger.json",
         json.dumps({"credits": []}, indent=2) + "\n",
     )
     _write(
-        target / "contributor-recognition-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+        target / "contributor-recognition-kpi-scorecard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
     )
     _write(target / "contributor-recognition-execution-log.md", "# Day 76 execution log\n")
     _write(
@@ -413,10 +412,10 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-
 def build_day76_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_contributor_recognition_closeout_summary(root)
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Contributor Recognition Closeout checks")
@@ -449,5 +448,5 @@ def main(argv: list[str] | None = None) -> int:
     return 1 if ns.strict and not payload["summary"]["strict_pass"] else 0
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(main())

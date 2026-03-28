@@ -72,7 +72,9 @@ def test_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/kpi-audit-pack/kpi-delta-table.md").exists()
     assert (tmp_path / "artifacts/kpi-audit-pack/kpi-corrective-actions.md").exists()
     assert (tmp_path / "artifacts/kpi-audit-pack/kpi-audit-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/kpi-audit-pack/evidence/kpi-audit-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/kpi-audit-pack/evidence/kpi-audit-execution-summary.json"
+    ).exists()
 
 
 def test_strict_fails_when_sections_missing(tmp_path: Path) -> None:

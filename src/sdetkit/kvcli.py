@@ -165,5 +165,5 @@ def cli_entry(argv: list[str] | None = None) -> int:
     return _run_with_options(_parse_fast(list(sys.argv[1:] if argv is None else argv)))
 
 
-if __name__ == "main_":
+if __name__ == "__main__":
     raise SystemExit(cli_entry())

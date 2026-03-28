@@ -8,7 +8,9 @@ from pathlib import Path
 
 from sdetkit import partner_outreach_closeout_80 as lane
 
-_CANONICAL_EVIDENCE = "docs/artifacts/partner-outreach-closeout-pack/evidence/partner-outreach-execution-summary.json"
+_CANONICAL_EVIDENCE = (
+    "docs/artifacts/partner-outreach-closeout-pack/evidence/partner-outreach-execution-summary.json"
+)
 
 
 def main() -> int:
