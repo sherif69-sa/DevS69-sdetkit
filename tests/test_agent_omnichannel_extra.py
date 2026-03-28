@@ -67,7 +67,7 @@ def test_adapter_errors_and_rate_limiter_load_fallback(tmp_path: Path) -> None:
 
 def test_tool_bridge_error_paths(monkeypatch) -> None:
     class _Proc:
-        def __init__(self, rc: int, out: bytes):
+        def init_(self, rc: int, out: bytes):
             self.returncode = rc
             self.stdout = out
 

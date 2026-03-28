@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day71_case_study_prep3_closeout as d71
+from sdetkit import case_study_prep3_closeout_71 as d71
 
 
 def _seed_repo(root: Path) -> None:
@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-case-study-prep3-closeout.md").write_text(
         d71._DAY71_DEFAULT_PAGE, encoding="utf-8"
     )
-    (root / "docs/day-71-big-upgrade-report.md").write_text("# Day 71 report\n", encoding="utf-8")
+    (root / "docs/big-upgrade-report-71.md").write_text("# Day 71 report\n", encoding="utf-8")
 
     summary = (
         root

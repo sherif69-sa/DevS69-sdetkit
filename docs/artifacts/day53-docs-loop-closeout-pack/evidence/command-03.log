@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_day53_docs_loop_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "day53-docs-loop-closeout contract check passed\n",
-  "stderr": ""
-}

@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day80_partner_outreach_closeout as lane
+from sdetkit import partner_outreach_closeout_80 as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/partner-outreach-closeout-pack/evidence/partner-outreach-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

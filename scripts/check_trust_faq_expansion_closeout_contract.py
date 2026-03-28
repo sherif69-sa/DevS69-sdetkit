@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day83_trust_faq_expansion_closeout as lane
+from sdetkit import trust_faq_expansion_closeout_83 as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/trust-faq-expansion-closeout-pack/evidence/trust-faq-expansion-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day57_kpi_deep_audit_closeout as d57
+from sdetkit import kpi_deep_audit_closeout_57 as d57
 
 
 def _seed_repo(root: Path) -> None:

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day79_scale_upgrade_closeout as d79
+from sdetkit import scale_upgrade_closeout_79 as d79
 
 
 def _seed_repo(root: Path) -> None:

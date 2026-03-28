@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day50_execution_prioritization_closeout as d50
+from sdetkit import execution_prioritization_closeout_50 as d50
 
 
 def _seed_repo(root: Path) -> None:
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+        / "docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -120,7 +120,7 @@ def test_day50_strict_fails_when_day49_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
+        / "docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json"
     ).unlink()
     rc = d50.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

@@ -10,7 +10,7 @@ from sdetkit import cli, repo
 
 
 class Result:
-    def __init__(self, exit_code: int, stdout: str, stderr: str) -> None:
+    def init_(self, exit_code: int, stdout: str, stderr: str) -> None:
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr

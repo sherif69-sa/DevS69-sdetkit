@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day53_docs_loop_closeout as d53
+from sdetkit import docs_loop_closeout_53 as d53
 
 
 def _seed_repo(root: Path) -> None:

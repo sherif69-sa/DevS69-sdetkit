@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day47_reliability_closeout as d47
+from sdetkit import reliability_closeout_47 as d47
 
 
 def _seed_repo(root: Path) -> None:

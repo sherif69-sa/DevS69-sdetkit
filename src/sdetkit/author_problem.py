@@ -1568,10 +1568,10 @@ def _write_rich_problem_artifacts(
     test_path.unlink(missing_ok=True)
 
     solution_files = [
-        "rich/_markup_tags.py",
-        "rich/_text_fragments.py",
-        "rich/_text_markup.py",
-        "rich/_text_spans.py",
+        "rich/markup_tags.py",
+        "rich/text_fragments.py",
+        "rich/text_markup.py",
+        "rich/text_spans.py",
         "rich/markup.py",
         "rich/style.py",
         "rich/text.py",
@@ -2195,5 +2195,5 @@ def main(argv: list[str] | None = None) -> int:
     raise SystemExit(2)
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

@@ -58,7 +58,7 @@ class CheckRunReport:
 
 
 class CheckRunner:
-    def __init__(self, snapshot: RegistrySnapshot) -> None:
+    def init_(self, snapshot: RegistrySnapshot) -> None:
         self._snapshot = snapshot
 
     def run(

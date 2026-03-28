@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day64_integration_expansion_closeout as d64
+from sdetkit import integration_expansion_closeout_64 as d64
 
 
 def _seed_repo(root: Path) -> None:
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json"
+        / "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md"
+        root / "docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
     )
     board.write_text(
         "\n".join(
@@ -74,7 +74,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
 
-    workflow = root / ".github/workflows/day64-advanced-github-actions-reference.yml"
+    workflow = root / ".github/workflows/advanced-github-actions-reference-64.yml"
     workflow.parent.mkdir(parents=True, exist_ok=True)
     workflow.write_text(
         "\n".join(
@@ -147,7 +147,7 @@ def test_day64_strict_fails_without_day63(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json"
+        / "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
     ).unlink()
     assert d64.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

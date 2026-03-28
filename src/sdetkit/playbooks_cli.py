@@ -67,19 +67,19 @@ _SERIES_CLOSEOUT = re.compile(r"^(?:impact|day)\d+_(.+_closeout)$")
 
 # Stable product lanes promoted from legacy numeric-series naming.
 _PRODUCT_CANONICAL_BY_LEGACY_MODULE: dict[str, str] = {
-    "day28_weekly_review": "weekly-review-lane",
-    "day41_expansion_automation": "expansion-automation",
+    "weekly_review_28": "weekly-review-lane",
+    "expansion_automation_41": "expansion-automation",
     # Two legacy modules would collide on optimization-closeout.
-    "day42_optimization_closeout": "optimization-closeout-foundation",
-    "day43_acceleration_closeout": "acceleration-closeout",
-    "day44_scale_closeout": "scale-closeout",
-    "day45_expansion_closeout": "expansion-closeout",
-    "day46_optimization_closeout": "optimization-closeout",
-    "day47_reliability_closeout": "reliability-closeout",
-    "day48_objection_closeout": "objection-closeout",
-    "day49_weekly_review_closeout": "weekly-review-closeout",
-    "day50_execution_prioritization_closeout": "execution-prioritization-closeout",
-    "day65_weekly_review_closeout": "weekly-review-closeout-cycle2",
+    "optimization_closeout_42": "optimization-closeout-foundation",
+    "acceleration_closeout_43": "acceleration-closeout",
+    "scale_closeout_44": "scale-closeout",
+    "expansion_closeout_45": "expansion-closeout",
+    "optimization_closeout_46": "optimization-closeout",
+    "reliability_closeout_47": "reliability-closeout",
+    "objection_closeout_48": "objection-closeout",
+    "weekly_review_closeout_49": "weekly-review-closeout",
+    "execution_prioritization_closeout_50": "execution-prioritization-closeout",
+    "weekly_review_closeout_65": "weekly-review-closeout-2",
 }
 
 _PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {

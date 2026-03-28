@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import day31_phase2_kickoff as d31
+from sdetkit import phase2_kickoff_31 as d31
 
 
 def _evidence_path(root: Path) -> Path:
@@ -55,5 +55,5 @@ def main() -> int:
     return 1 if errors else 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

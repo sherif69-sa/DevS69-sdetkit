@@ -8,7 +8,7 @@ from sdetkit.sqlite_scalar import ScalarFunctionRegistrationError, register_scal
 
 
 class FakeConnection:
-    def __init__(self) -> None:
+    def init_(self) -> None:
         self.calls: list[tuple[str, int]] = []
 
     def create_function(
@@ -64,7 +64,7 @@ def test_unwrap_partial_rejects_non_callable_after_unwrap(monkeypatch: pytest.Mo
     import sdetkit.sqlite_scalar as ss
 
     class FakePartial:
-        def __init__(self) -> None:
+        def init_(self) -> None:
             self.args = ()
             self.keywords = {}
             self.func = 123

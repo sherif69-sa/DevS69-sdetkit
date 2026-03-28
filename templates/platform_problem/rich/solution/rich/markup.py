@@ -4,7 +4,7 @@ from operator import attrgetter
 from typing import Callable, Iterable, List, Match, NamedTuple, Optional, Tuple, Union
 
 from ._emoji_replace import _emoji_replace
-from ._markup_tags import render_close_tag, render_open_tag
+from .markup_tags import render_close_tag, render_open_tag
 from .emoji import EmojiVariant
 from .errors import MarkupError
 from .style import Style
@@ -239,7 +239,7 @@ def render(
     return text
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "main_":  # pragma: no cover
     MARKUP = [
         "[red]Hello World[/red]",
         "[magenta]Hello [b]World[/b]",

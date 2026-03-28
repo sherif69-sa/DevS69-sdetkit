@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, List, Optional, Type, Union, cast
 from . import errors
 from .color import Color, ColorParseError, ColorSystem, blend_rgb
 from .repr import Result, rich_repr
-from ._markup_tags import style_markup_close_tags, style_markup_open_tags
+from .markup_tags import style_markup_close_tags, style_markup_open_tags
 from .terminal_theme import DEFAULT_TERMINAL_THEME, TerminalTheme
 
 _hash_getter = attrgetter(
@@ -24,7 +24,7 @@ class _Bit:
 
     __slots__ = ["bit"]
 
-    def __init__(self, bit_no: int) -> None:
+    def init_(self, bit_no: int) -> None:
         self.bit = 1 << bit_no
 
     def __get__(self, obj: "Style", objtype: Type["Style"]) -> Optional[bool]:
@@ -125,7 +125,7 @@ class Style:
         "o": "overline",
     }
 
-    def __init__(
+    def init_(
         self,
         *,
         color: Optional[Union[Color, str]] = None,
@@ -770,7 +770,7 @@ class StyleStack:
 
     __slots__ = ["_stack"]
 
-    def __init__(self, default_style: "Style") -> None:
+    def init_(self, default_style: "Style") -> None:
         self._stack: List[Style] = [default_style]
 
     def __repr__(self) -> str:

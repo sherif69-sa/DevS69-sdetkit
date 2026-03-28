@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_scale_closeout_contract_44.py --skip-evidence",
+  "returncode": 0,
+  "stdout": "{\n  \"errors\": [],\n  \"score\": 100\n}\n",
+  "stderr": ""
+}

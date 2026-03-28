@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import day50_execution_prioritization_closeout as d50
+from sdetkit import execution_prioritization_closeout_50 as d50
 
 
 def _resolve_evidence_path(root: Path) -> Path:
@@ -16,7 +16,7 @@ def _resolve_evidence_path(root: Path) -> Path:
         return canonical
     return (
         root
-        / "docs/artifacts/day50-execution-prioritization-closeout-pack/evidence/day50-execution-summary.json"
+        / "docs/artifacts/execution-prioritization-closeout-pack-50/evidence/execution-summary-50.json"
     )
 
 
@@ -72,5 +72,5 @@ def main() -> int:
     return 1 if errors else 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

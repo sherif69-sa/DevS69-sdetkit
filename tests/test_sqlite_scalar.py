@@ -8,7 +8,7 @@ from sdetkit.sqlite_scalar import ScalarFunctionRegistrationError, register_scal
 
 
 class FakeConnection:
-    def __init__(self) -> None:
+    def init_(self) -> None:
         self.calls: list[tuple[str, int, object, bool]] = []
 
     def create_function(
@@ -153,7 +153,7 @@ def test_default_name_for_class_uses_class_name() -> None:
     conn = FakeConnection()
 
     class Build:
-        def __init__(self, a: int, b: int = 0) -> None:
+        def init_(self, a: int, b: int = 0) -> None:
             self.value = a + b
 
     register_scalar_function(conn, Build)

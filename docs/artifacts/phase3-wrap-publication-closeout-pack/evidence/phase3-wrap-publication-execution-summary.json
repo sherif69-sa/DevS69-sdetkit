@@ -14,7 +14,7 @@
       "stderr": ""
     },
     {
-      "command": "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py --skip-evidence",
+      "command": "python scripts/check_phase3_wrap_publication_closeout_contract_90.py --skip-evidence",
       "returncode": 1,
       "stdout": "",
       "stderr": "day90-phase3-wrap-publication-closeout contract check failed:\n- summary.strict_pass is false\n- activation_score below 95\n"

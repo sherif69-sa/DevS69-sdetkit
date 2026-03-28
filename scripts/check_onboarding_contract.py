@@ -4,7 +4,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-ARTIFACT = Path("docs/artifacts/day1-onboarding-sample.md")
+ARTIFACT = Path("docs/artifacts/onboarding-sample-1.md")
 REPORT = Path("docs/impact-1-ultra-upgrade-report.md")
 
 REQUIRED_ARTIFACT_SNIPPETS = [
@@ -20,8 +20,8 @@ REQUIRED_REPORT_SNIPPETS = [
     "`src/sdetkit/onboarding.py`",
     "`tests/test_onboarding_cli.py`",
     "`scripts/check_onboarding_contract.py`",
-    "`docs/artifacts/day1-onboarding-sample.md`",
-    "`python -m sdetkit onboarding --format markdown --output docs/artifacts/day1-onboarding-sample.md`",
+    "`docs/artifacts/onboarding-sample-1.md`",
+    "`python -m sdetkit onboarding --format markdown --output docs/artifacts/onboarding-sample-1.md`",
     "`python scripts/check_onboarding_contract.py`",
 ]
 
@@ -73,5 +73,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

@@ -1,10 +1,10 @@
 """Canonical contract checker entrypoint.
 
-Legacy alias: scripts/check_day37_experiment_lane_contract.py
+Legacy alias: scripts/check_experiment_lane_contract_37.py
 """
 
-from check_day37_experiment_lane_contract import main
+from check_experiment_lane_contract_37 import main
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

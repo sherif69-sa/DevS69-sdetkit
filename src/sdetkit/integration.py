@@ -637,5 +637,5 @@ def main(argv: list[str] | None = None) -> int:
     return 0 if payload["summary"]["passed"] else 1
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

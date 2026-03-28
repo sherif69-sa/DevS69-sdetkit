@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day78_ecosystem_priorities_closeout as d78
+from sdetkit import ecosystem_priorities_closeout_78 as d78
 
 
 def main() -> int:
@@ -55,5 +55,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

@@ -2354,5 +2354,5 @@ def main(argv: list[str] | None = None) -> int:
     return EXIT_OK if gate_ok else EXIT_FAILED
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

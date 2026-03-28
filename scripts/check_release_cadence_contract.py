@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from sdetkit import day32_release_cadence as d32
+from sdetkit import release_cadence_32 as d32
 
 
 def main() -> int:
@@ -56,5 +56,5 @@ def main() -> int:
     return 1 if errors else 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

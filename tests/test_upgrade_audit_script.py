@@ -168,7 +168,7 @@ def test_load_dependencies_follows_nested_requirement_files(tmp_path: Path) -> N
 def test_collect_repo_usage_tracks_imported_packages(tmp_path: Path) -> None:
     src_dir = tmp_path / "src" / "demo"
     src_dir.mkdir(parents=True)
-    (src_dir / "__init__.py").write_text("import httpx\n", encoding="utf-8")
+    (src_dir / "init_.py").write_text("import httpx\n", encoding="utf-8")
     (src_dir / "client.py").write_text("from telegram import Bot\n", encoding="utf-8")
     tests_dir = tmp_path / "tests"
     tests_dir.mkdir()
@@ -179,7 +179,7 @@ def test_collect_repo_usage_tracks_imported_packages(tmp_path: Path) -> None:
         ["httpx", "python-telegram-bot", "pytest-asyncio", "twilio"],
     )
 
-    assert usage["httpx"] == ["src/demo/__init__.py"]
+    assert usage["httpx"] == ["src/demo/init_.py"]
     assert usage["python-telegram-bot"] == ["src/demo/client.py"]
     assert usage["pytest-asyncio"] == ["tests/test_client.py"]
     assert usage["twilio"] == []

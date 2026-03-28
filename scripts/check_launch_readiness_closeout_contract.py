@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day86_launch_readiness_closeout as lane
+from sdetkit import launch_readiness_closeout_86 as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/launch-readiness-closeout-pack/evidence/launch-readiness-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

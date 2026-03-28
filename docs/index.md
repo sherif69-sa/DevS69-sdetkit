@@ -80,19 +80,19 @@ integrations-continuous-upgrade-cycle7-closeout.md
 artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-closeout-summary.json
 
 ## Continuous upgrade closeout references
-- `docs/integrations-continuous-upgrade-cycle1-closeout.md`
-- `docs/continuous-upgrade-cycle1-big-upgrade-report.md`
-- `docs/integrations-continuous-upgrade-cycle2-closeout.md`
-- `docs/continuous-upgrade-cycle2-big-upgrade-report.md`
+- `docs/integrations-continuous-upgrade-closeout-1.md`
+- `docs/continuous-upgrade-big-upgrade-report-1.md`
+- `docs/integrations-continuous-upgrade-closeout-2.md`
+- `docs/continuous-upgrade-big-upgrade-report-2.md`
 
 ## Continuous upgrade cycle 8 references
-- `docs/continuous-upgrade-cycle8-big-upgrade-report.md`
-- `docs/integrations-continuous-upgrade-cycle8-closeout.md`
+- `docs/continuous-upgrade-big-upgrade-report-8.md`
+- `docs/integrations-continuous-upgrade-closeout-8.md`
 
 ## Continuous upgrade cycles 9-11 references
-- `docs/continuous-upgrade-cycle9-big-upgrade-report.md`
-- `docs/integrations-continuous-upgrade-cycle9-closeout.md`
-- `docs/continuous-upgrade-cycle10-big-upgrade-report.md`
-- `docs/integrations-continuous-upgrade-cycle10-closeout.md`
-- `docs/continuous-upgrade-cycle11-big-upgrade-report.md`
-- `docs/integrations-continuous-upgrade-cycle11-closeout.md`
+- `docs/continuous-upgrade-big-upgrade-report-9.md`
+- `docs/integrations-continuous-upgrade-closeout-9.md`
+- `docs/continuous-upgrade-big-upgrade-report-10.md`
+- `docs/integrations-continuous-upgrade-closeout-10.md`
+- `docs/continuous-upgrade-big-upgrade-report-11.md`
+- `docs/integrations-continuous-upgrade-closeout-11.md`

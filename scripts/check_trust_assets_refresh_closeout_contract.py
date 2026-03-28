@@ -1,10 +1,10 @@
 """Canonical contract checker entrypoint.
 
-Legacy alias: scripts/check_day75_trust_assets_refresh_closeout_contract.py
+Legacy alias: scripts/check_trust_assets_refresh_closeout_contract_75.py
 """
 
-from check_day75_trust_assets_refresh_closeout_contract import main
+from check_trust_assets_refresh_closeout_contract_75 import main
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

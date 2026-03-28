@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day86_launch_readiness_closeout as d86
+from sdetkit import launch_readiness_closeout_86 as d86
 
 
 def _seed_repo(root: Path) -> None:

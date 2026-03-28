@@ -39,7 +39,7 @@ Without a dedicated Cycle 3 command, proof gathering was manual and inconsistent
 
 - `python -m sdetkit evidence-assets --execute --strict --format markdown --output docs/artifacts/evidence-assets-sample.md`
 - `python -m pytest -q tests/test_proof_cli.py tests/test_cli_help_lists_subcommands.py`
-- `python scripts/check_day3_proof_contract.py`
+- `python scripts/check_proof_contract_3.py`
 
 ## Artifact
 

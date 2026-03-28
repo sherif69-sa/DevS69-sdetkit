@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day71_case_study_prep3_closeout as d71
+from sdetkit import case_study_prep3_closeout_71 as d71
 
 
 def main() -> int:
@@ -55,5 +55,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

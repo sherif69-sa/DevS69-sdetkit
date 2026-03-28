@@ -4,7 +4,7 @@ import json
 import zipfile
 from pathlib import Path
 
-from sdetkit.checks import __main__ as checks_main
+from sdetkit.checks import main_ as checks_main
 from sdetkit.checks.artifacts import render_record_artifacts
 from sdetkit.checks.results import CheckRecord
 

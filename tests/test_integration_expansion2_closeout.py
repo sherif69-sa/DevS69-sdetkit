@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day66_integration_expansion2_closeout as d66
+from sdetkit import integration_expansion2_closeout_66 as d66
 
 
 def _seed_repo(root: Path) -> None:
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
+        / "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -58,7 +58,7 @@ def _seed_repo(root: Path) -> None:
     )
     board = (
         root
-        / "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md"
+        / "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md"
     )
     board.write_text(
         "\n".join(
@@ -143,7 +143,7 @@ def test_day66_strict_fails_without_day65(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
+        / "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json"
     ).unlink()
     assert d66.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

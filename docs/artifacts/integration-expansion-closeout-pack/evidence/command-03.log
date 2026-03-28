@@ -1,5 +1,5 @@
 {
-  "command": "python scripts/check_day64_integration_expansion_closeout_contract.py --skip-evidence",
+  "command": "python scripts/check_integration_expansion_closeout_contract_64.py --skip-evidence",
   "returncode": 0,
   "stdout": "day64-integration-expansion-closeout contract check passed\n",
   "stderr": ""

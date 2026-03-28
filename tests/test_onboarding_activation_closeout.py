@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day63_onboarding_activation_closeout as d63
+from sdetkit import onboarding_activation_closeout_63 as d63
 
 
 def _seed_repo(root: Path) -> None:

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day30_phase1_wrap as d30
+from sdetkit import phase1_wrap_30 as d30
 
 
 def _seed_repo(root: Path) -> None:

@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-integration-expansion2-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day65_summary": "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json",
-    "day65_delivery_board": "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md",
+    "day65_summary": "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json",
+    "day65_delivery_board": "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md",
     "gitlab_reference": "templates/ci/gitlab/gitlab-advanced-reference.yml"
   },
   "checks": [
@@ -32,13 +32,13 @@
       "check_id": "day65_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json"
     },
     {
       "check_id": "day65_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md"
     },
     {
       "check_id": "day65_quality_floor",

@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from sdetkit import day81_growth_campaign_closeout as lane
+from sdetkit import growth_campaign_closeout_81 as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/growth-campaign-closeout-pack/evidence/growth-campaign-execution-summary.json"
 
@@ -47,5 +47,5 @@ def main() -> int:
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

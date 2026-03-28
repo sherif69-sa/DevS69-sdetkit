@@ -14,7 +14,7 @@
       "stderr": ""
     },
     {
-      "command": "python scripts/check_day60_phase2_wrap_handoff_closeout_contract.py --skip-evidence",
+      "command": "python scripts/check_phase2_wrap_handoff_closeout_contract_60.py --skip-evidence",
       "returncode": 0,
       "stdout": "day60-phase2-wrap-handoff-closeout contract check passed\n",
       "stderr": ""

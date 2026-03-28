@@ -10,8 +10,8 @@ Cycle 66 closes with a major integration upgrade that converts Cycle 65 weekly r
 
 ## Required inputs (Cycle 65)
 
-- `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json`
-- `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md`
+- `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json`
+- `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md`
 - `templates/ci/gitlab/gitlab-advanced-reference.yml`
 
 ## Integration Expansion 2 Closeout command lane (legacy)

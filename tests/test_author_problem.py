@@ -29,7 +29,7 @@ def _export_dir(root: Path) -> Path:
 
 
 class _FakeRunner(DockerCommandRunner):
-    def __init__(self) -> None:
+    def init_(self) -> None:
         self.calls: list[list[str]] = []
 
     def run(self, argv: list[str], *, cwd: Path | None = None):  # type: ignore[override]
@@ -92,7 +92,7 @@ test = ["pytest>=8"]
         + "\n",
         encoding="utf-8",
     )
-    (path / "src/demoapp/__init__.py").write_text("", encoding="utf-8")
+    (path / "src/demoapp/init_.py").write_text("", encoding="utf-8")
     (path / "src/demoapp/service.py").write_text(
         """
 def refresh_state(snapshot):
@@ -147,7 +147,7 @@ dependencies = []
         + "\n",
         encoding="utf-8",
     )
-    (path / "rich/__init__.py").write_text("", encoding="utf-8")
+    (path / "rich/init_.py").write_text("", encoding="utf-8")
     (path / "rich/text.py").write_text("class Text: ...\n", encoding="utf-8")
     (path / "tests/test_text.py").write_text(
         "def test_placeholder():\n    assert True\n", encoding="utf-8"
@@ -168,7 +168,7 @@ authors = ["Author <author@example.com>"]
         + "\n",
         encoding="utf-8",
     )
-    (path / "rich/__init__.py").write_text("", encoding="utf-8")
+    (path / "rich/init_.py").write_text("", encoding="utf-8")
     (path / "rich/text.py").write_text("class Text: ...\n", encoding="utf-8")
     (path / "tests/test_text.py").write_text(
         "def test_placeholder():\n    assert True\n", encoding="utf-8"
@@ -410,7 +410,7 @@ test = ["pytest>=8"]
         + "\n",
         encoding="utf-8",
     )
-    (source / "pkg/__init__.py").write_text("", encoding="utf-8")
+    (source / "pkg/init_.py").write_text("", encoding="utf-8")
     (source / "pkg/core.py").write_text("def value():\n    return 1\n", encoding="utf-8")
     (source / "tests/test_existing.py").write_text(
         "from pkg.core import value\n\ndef test_value():\n    assert value() == 1\n",
@@ -552,11 +552,11 @@ def test_rich_problem_generator_executes(tmp_path: Path) -> None:
     script = Path("templates/platform_problem/rich/generate_test_problem.py")
     rich_pkg = tmp_path / "rich"
     rich_pkg.mkdir()
-    (rich_pkg / "__init__.py").write_text("", encoding="utf-8")
+    (rich_pkg / "init_.py").write_text("", encoding="utf-8")
     (rich_pkg / "console.py").write_text("class Console:\n    pass\n", encoding="utf-8")
     (rich_pkg / "style.py").write_text(
         "class Style:\n"
-        "    def __init__(self, link='', meta=None):\n"
+        "    def init_(self, link='', meta=None):\n"
         "        self.link = link\n"
         "        self.meta = meta or {}\n",
         encoding="utf-8",
@@ -577,7 +577,7 @@ class _Fragment:
 
 
 class Text:
-    def __init__(self, plain, style=""):
+    def init_(self, plain, style=""):
         self.plain = plain
         self.style = style
         self.justify = ""

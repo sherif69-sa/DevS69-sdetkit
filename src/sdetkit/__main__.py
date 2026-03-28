@@ -111,5 +111,5 @@ def main() -> int:
     return int(cli_main() or 0)
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

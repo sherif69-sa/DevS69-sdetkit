@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day51_case_snippet_closeout as d51
+from sdetkit import case_snippet_closeout_51 as d51
 
 
 def _seed_repo(root: Path) -> None:

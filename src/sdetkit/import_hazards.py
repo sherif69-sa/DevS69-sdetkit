@@ -28,7 +28,7 @@ def find_stdlib_shadowing(repo_root: Path, src_dir: str = "src") -> list[str]:
                 out.append(str(p.relative_to(repo_root)))
             continue
 
-        if p.is_dir() and (p / "__init__.py").is_file():
+        if p.is_dir() and (p / "init_.py").is_file():
             name = p.name
             if name in stdlib:
                 out.append(str(p.relative_to(repo_root)))

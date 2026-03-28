@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day83_trust_faq_expansion_closeout as d83
+from sdetkit import trust_faq_expansion_closeout_83 as d83
 
 
 def _seed_repo(root: Path) -> None:

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day76_contributor_recognition_closeout as d76
+from sdetkit import contributor_recognition_closeout_76 as d76
 
 
 def _seed_repo(root: Path) -> None:

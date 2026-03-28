@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day28_weekly_review as d28
+from sdetkit import weekly_review_28 as d28
 
 
 def _seed_repo(root: Path) -> None:

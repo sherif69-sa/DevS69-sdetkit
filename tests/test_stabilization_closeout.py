@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day56_stabilization_closeout as d56
+from sdetkit import stabilization_closeout_56 as d56
 
 
 def _seed_repo(root: Path) -> None:

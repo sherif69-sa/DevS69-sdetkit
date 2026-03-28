@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day41_expansion_automation as d41
+from sdetkit import expansion_automation_41 as d41
 
 
 def _seed_repo(root: Path) -> None:

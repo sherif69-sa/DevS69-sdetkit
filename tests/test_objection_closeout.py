@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from sdetkit import cli
-from sdetkit import day48_objection_closeout as d48
+from sdetkit import objection_closeout_48 as d48
 
 
 def _seed_repo(root: Path) -> None:
@@ -38,7 +38,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day47-reliability-closeout-pack/day47-reliability-closeout-summary.json"
+        / "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -51,7 +51,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day47-reliability-closeout-pack/day47-delivery-board.md"
+    board = root / "docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md"
     board.write_text(
         "\n".join(
             [
@@ -109,7 +109,7 @@ def test_day48_strict_fails_when_day47_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day47-reliability-closeout-pack/day47-reliability-closeout-summary.json"
+        / "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
     ).unlink()
     rc = d48.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

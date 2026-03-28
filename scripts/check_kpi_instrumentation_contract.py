@@ -1,10 +1,10 @@
 """Canonical contract checker entrypoint.
 
-Legacy alias: scripts/check_day35_kpi_instrumentation_contract.py
+Legacy alias: scripts/check_kpi_instrumentation_contract_35.py
 """
 
-from check_day35_kpi_instrumentation_contract import main
+from check_kpi_instrumentation_contract_35 import main
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     raise SystemExit(main())

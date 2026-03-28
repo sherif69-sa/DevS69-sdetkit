@@ -226,7 +226,7 @@ def main(output: str) -> None:
     Path(output).write_text(render_test_module(), encoding="utf-8")
 
 
-if __name__ == "__main__":
+if __name__ == "main_":
     import sys
 
     if len(sys.argv) != 2:
