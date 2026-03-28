@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-continuous-upgrade-cycle1-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day90_summary": "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json",
-    "day90_delivery_board": "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md",
+    "phase3_wrap_publication_summary": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json",
+    "phase3_wrap_publication_delivery_board": "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md",
     "continuous_upgrade_plan": "docs/roadmap/plans/continuous-upgrade-cycle1-plan.json"
   },
   "checks": [
@@ -25,38 +25,38 @@
     {
       "check_id": "top10_cycle1_align",
       "weight": 5,
-      "passed": true,
-      "evidence": "Day 90 + Cycle 1 strategy chain"
+      "passed": false,
+      "evidence": "Phase-3 wrap publication + Cycle 1 strategy chain"
     },
     {
-      "check_id": "day90_summary_present",
+      "check_id": "phase3_wrap_publication_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
     },
     {
-      "check_id": "day90_delivery_board_present",
+      "check_id": "phase3_wrap_publication_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
     },
     {
-      "check_id": "day90_quality_floor",
+      "check_id": "phase3_wrap_publication_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day90_score": 100,
-        "strict_pass": true,
-        "day90_checks": 14
+        "phase3_wrap_publication_score": 60,
+        "strict_pass": false,
+        "phase3_wrap_publication_checks": 14
       }
     },
     {
-      "check_id": "day90_board_integrity",
+      "check_id": "phase3_wrap_publication_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day90": true
+        "contains_phase3_wrap_publication": true
       }
     },
     {
@@ -121,26 +121,28 @@
     }
   ],
   "rollup": {
-    "day90_activation_score": 100,
-    "day90_checks": 14,
-    "day90_delivery_board_items": 5
+    "phase3_wrap_publication_activation_score": 60,
+    "phase3_wrap_publication_checks": 14,
+    "phase3_wrap_publication_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 17,
-    "failed_checks": 0,
+    "activation_score": 82,
+    "passed_checks": 15,
+    "failed_checks": 2,
     "critical_failures": [],
-    "strict_pass": true
+    "strict_pass": false
   },
   "wins": [
-    "Day 90 continuity baseline is stable with activation score=100.",
-    "Day 90 delivery board integrity validated with 5 checklist items.",
+    "Phase-3 wrap publication delivery board integrity validated with 5 checklist items.",
     "Cycle 1 continuous upgrade dataset is available for governance execution.",
     "Cycle 1 target metrics are non-regressive against baseline metrics.",
     "Cycle 1 owner coverage includes both execution and rollback ownership.",
-    "Cycle 1 plan hygiene checks passed for contributors/channels/confidence/cadence.",
-    "Cycle 1 continuous upgrade closeout lane is fully complete and ready for continuous-upgrade backlog execution."
+    "Cycle 1 plan hygiene checks passed for contributors/channels/confidence/cadence."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Phase-3 wrap publication continuity baseline is below the floor (<85) or not strict-pass."
+  ],
+  "handoff_actions": [
+    "Re-run phase3-wrap-publication-closeout command and raise baseline quality above 85 with strict pass before Cycle 1 lock."
+  ]
 }

@@ -10,13 +10,13 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-continuous-upgrade-cycle1-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY90_SUMMARY_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
-_DAY90_BOARD_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
+_PHASE3_WRAP_PUBLICATION_SUMMARY_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
+_PHASE3_WRAP_PUBLICATION_BOARD_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle1-plan.json"
 _SECTION_HEADER = "# Cycle 1 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Continuous Upgrade Closeout matters",
-    "## Required inputs (Day 90)",
+    "## Required inputs (Phase-3 wrap publication)",
     "## Command lane",
     "## Continuous upgrade contract",
     "## Continuous upgrade quality checklist",
@@ -36,7 +36,7 @@ _EXECUTION_COMMANDS = [
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 1 continuous upgrade execution and signoff.",
-    "The Cycle 1 lane references Day 90 outcomes, controls, and trust continuity signals.",
+    "The Cycle 1 lane references phase-3 wrap publication outcomes, controls, and trust continuity signals.",
     "Every Cycle 1 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
     "Cycle 1 closeout records continuous upgrade outputs, report publication status, and backlog inputs.",
 ]
@@ -63,17 +63,17 @@ _REQUIRED_DATA_KEYS = [
     "owner",
 ]
 
-_DAY91_DEFAULT_PAGE = """# Cycle 1 \u2014 Continuous upgrade closeout lane
+_CYCLE1_DEFAULT_PAGE = """# Cycle 1 \u2014 Continuous upgrade closeout lane
 
-Cycle 1 closes with a major upgrade that converts Day 90 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Cycle 1 closes with a major upgrade that converts phase-3 wrap publication outcomes into a deterministic phase-3 wrap and publication operating lane.
 
 ## Why Continuous Upgrade Closeout matters
 
-- Converts Day 90 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
+- Converts phase-3 wrap publication outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
 - Creates a deterministic handoff from Cycle 1 closeout into the continuous-upgrade backlog.
 
-## Required inputs (Day 90)
+## Required inputs (Phase-3 wrap publication)
 
 - `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json`
 - `docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md`
@@ -91,7 +91,7 @@ python scripts/check_continuous_upgrade_cycle1_contract.py
 ## Continuous upgrade contract
 
 - Single owner + backup reviewer are assigned for Cycle 1 continuous upgrade execution and signoff.
-- The Cycle 1 lane references Day 90 outcomes, controls, and trust continuity signals.
+- The Cycle 1 lane references phase-3 wrap publication outcomes, controls, and trust continuity signals.
 - Every Cycle 1 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
 - Cycle 1 closeout records continuous upgrade outputs, report publication status, and backlog inputs.
 
@@ -208,9 +208,9 @@ def _page_header_ok(page_lines: list[str], expected_cycle: int) -> bool:
     )
 
 
-def _resolve_day90_inputs(root: Path) -> tuple[Path, Path]:
-    summary = root / _DAY90_SUMMARY_PATH
-    board = root / _DAY90_BOARD_PATH
+def _resolve_phase3_wrap_publication_inputs(root: Path) -> tuple[Path, Path]:
+    summary = root / _PHASE3_WRAP_PUBLICATION_SUMMARY_PATH
+    board = root / _PHASE3_WRAP_PUBLICATION_BOARD_PATH
     return summary, board
 
 
@@ -220,21 +220,29 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
     page_text = _read_text(root / _PAGE_PATH)
     page_lines = page_text.splitlines()
     top10_text = _read_text(root / _TOP10_PATH)
-    day90_summary, day90_board = _resolve_day90_inputs(root)
+    phase3_wrap_publication_summary, phase3_wrap_publication_board = _resolve_phase3_wrap_publication_inputs(root)
 
-    day90_data = _load_json(day90_summary)
-    day90_summary_data = (
-        day90_data.get("summary", {}) if isinstance(day90_data.get("summary"), dict) else {}
+    phase3_wrap_publication_data = _load_json(phase3_wrap_publication_summary)
+    phase3_wrap_publication_summary_data = (
+        phase3_wrap_publication_data.get("summary", {})
+        if isinstance(phase3_wrap_publication_data.get("summary"), dict)
+        else {}
     )
-    day90_score = int(day90_summary_data.get("activation_score", 0) or 0)
-    day90_strict = bool(day90_summary_data.get("strict_pass", False))
-    day90_check_count = (
-        len(day90_data.get("checks", [])) if isinstance(day90_data.get("checks"), list) else 0
+    phase3_wrap_publication_score = int(
+        phase3_wrap_publication_summary_data.get("activation_score", 0) or 0
+    )
+    phase3_wrap_publication_strict = bool(
+        phase3_wrap_publication_summary_data.get("strict_pass", False)
+    )
+    phase3_wrap_publication_check_count = (
+        len(phase3_wrap_publication_data.get("checks", []))
+        if isinstance(phase3_wrap_publication_data.get("checks"), list)
+        else 0
     )
 
-    board_text = _read_text(day90_board)
+    board_text = _read_text(phase3_wrap_publication_board)
     board_count = _checklist_count(board_text)
-    board_has_day90 = "Day 90" in board_text
+    board_has_phase3_wrap_publication = "phase-3 wrap publication" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -266,36 +274,36 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "top10_cycle1_align",
             "weight": 5,
-            "passed": ("Day 90" in top10_text and "Cycle 1" in top10_text),
-            "evidence": "Day 90 + Cycle 1 strategy chain",
+            "passed": ("phase-3 wrap publication" in top10_text.lower() and "cycle 1" in top10_text.lower()),
+            "evidence": "Phase-3 wrap publication + Cycle 1 strategy chain",
         },
         {
-            "check_id": "day90_summary_present",
+            "check_id": "phase3_wrap_publication_summary_present",
             "weight": 10,
-            "passed": day90_summary.exists(),
-            "evidence": str(day90_summary),
+            "passed": phase3_wrap_publication_summary.exists(),
+            "evidence": str(phase3_wrap_publication_summary),
         },
         {
-            "check_id": "day90_delivery_board_present",
+            "check_id": "phase3_wrap_publication_delivery_board_present",
             "weight": 7,
-            "passed": day90_board.exists(),
-            "evidence": str(day90_board),
+            "passed": phase3_wrap_publication_board.exists(),
+            "evidence": str(phase3_wrap_publication_board),
         },
         {
-            "check_id": "day90_quality_floor",
+            "check_id": "phase3_wrap_publication_quality_floor",
             "weight": 13,
-            "passed": day90_score >= 85 and day90_strict,
+            "passed": phase3_wrap_publication_score >= 85 and phase3_wrap_publication_strict,
             "evidence": {
-                "day90_score": day90_score,
-                "strict_pass": day90_strict,
-                "day90_checks": day90_check_count,
+                "phase3_wrap_publication_score": phase3_wrap_publication_score,
+                "strict_pass": phase3_wrap_publication_strict,
+                "phase3_wrap_publication_checks": phase3_wrap_publication_check_count,
             },
         },
         {
-            "check_id": "day90_board_integrity",
+            "check_id": "phase3_wrap_publication_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day90,
-            "evidence": {"board_items": board_count, "contains_day90": board_has_day90},
+            "passed": board_count >= 5 and board_has_phase3_wrap_publication,
+            "evidence": {"board_items": board_count, "contains_phase3_wrap_publication": board_has_phase3_wrap_publication},
         },
         {
             "check_id": "page_header",
@@ -361,30 +369,30 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day90_summary.exists() or not day90_board.exists():
-        critical_failures.append("day90_handoff_inputs")
+    if not phase3_wrap_publication_summary.exists() or not phase3_wrap_publication_board.exists():
+        critical_failures.append("phase3_wrap_publication_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day90_score >= 85 and day90_strict:
-        wins.append(f"Day 90 continuity baseline is stable with activation score={day90_score}.")
+    if phase3_wrap_publication_score >= 85 and phase3_wrap_publication_strict:
+        wins.append(f"Phase-3 wrap publication continuity baseline is stable with activation score={phase3_wrap_publication_score}.")
     else:
-        misses.append("Day 90 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append("Phase-3 wrap publication continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
-            "Re-run Day 90 closeout command and raise baseline quality above 85 with strict pass before Cycle 1 lock."
+            "Re-run phase3-wrap-publication-closeout command and raise baseline quality above 85 with strict pass before Cycle 1 lock."
         )
 
-    if board_count >= 5 and board_has_day90:
+    if board_count >= 5 and board_has_phase3_wrap_publication:
         wins.append(
-            f"Day 90 delivery board integrity validated with {board_count} checklist items."
+            f"Phase-3 wrap publication delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 90 delivery board integrity is incomplete (needs >=5 items and Day 90 anchors)."
+            "Phase-3 wrap publication delivery board integrity is incomplete (needs >=5 items and phase-3 wrap publication anchors)."
         )
-        handoff_actions.append("Repair Day 90 delivery board entries to include Day 90 anchors.")
+        handoff_actions.append("Repair phase-3 wrap publication delivery board entries to include phase-3 wrap publication anchors.")
 
     if not missing_plan_keys:
         wins.append("Cycle 1 continuous upgrade dataset is available for governance execution.")
@@ -435,19 +443,23 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day90_summary": str(day90_summary.relative_to(root))
-            if day90_summary.exists()
-            else str(day90_summary),
-            "day90_delivery_board": str(day90_board.relative_to(root))
-            if day90_board.exists()
-            else str(day90_board),
+            "phase3_wrap_publication_summary": str(
+                phase3_wrap_publication_summary.relative_to(root)
+            )
+            if phase3_wrap_publication_summary.exists()
+            else str(phase3_wrap_publication_summary),
+            "phase3_wrap_publication_delivery_board": str(
+                phase3_wrap_publication_board.relative_to(root)
+            )
+            if phase3_wrap_publication_board.exists()
+            else str(phase3_wrap_publication_board),
             "continuous_upgrade_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day90_activation_score": day90_score,
-            "day90_checks": day90_check_count,
-            "day90_delivery_board_items": board_count,
+            "phase3_wrap_publication_activation_score": phase3_wrap_publication_score,
+            "phase3_wrap_publication_checks": phase3_wrap_publication_check_count,
+            "phase3_wrap_publication_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -557,7 +569,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY91_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _CYCLE1_DEFAULT_PAGE)
 
     payload = build_continuous_upgrade_cycle1_closeout_summary(root)
 
