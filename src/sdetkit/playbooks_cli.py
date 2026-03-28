@@ -132,6 +132,8 @@ def _is_legacy_module(mod: str) -> bool:
         return True
     if mod.endswith("_closeout"):
         return True
+    if re.search(r"_closeout_\d+$", mod):
+        return True
     return False
 
 
@@ -395,7 +397,11 @@ def _selected_playbooks(
     if ns.recommended:
         return sorted([n for n in RECOMMENDED_PLAYBOOKS if n in all_names])
     if ns.legacy:
-        return [n for n in all_names if n.startswith("impact") or n.endswith("-closeout")]
+        return [
+            n
+            for n in all_names
+            if n.startswith("impact") or n.endswith("-closeout") or "-closeout-" in n
+        ]
     if ns.aliases:
         return sorted(alias_to_canonical.keys())
 

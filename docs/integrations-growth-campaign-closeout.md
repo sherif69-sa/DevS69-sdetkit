@@ -1,14 +1,14 @@
 # Growth Campaign Closeout — Growth campaign closeout lane
 
-Cycle 81 closes with a major upgrade that converts Cycle 80 partner outreach outcomes into a growth-campaign execution pack.
+Lane closes with a major upgrade that converts Lane partner outreach outcomes into a growth-campaign execution pack.
 
 ## Why Growth Campaign Closeout matters
 
-- Turns Cycle 80 partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
+- Turns Lane partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Cycle 81 growth campaign closeout into Cycle 82 execution priorities.
+- Creates a deterministic handoff from Lane growth campaign closeout into Lane execution priorities.
 
-## Required inputs (Cycle 80)
+## Required inputs (Lane)
 
 - `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json`
 - `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_growth_campaign_closeout_contract.py
 
 ## Growth campaign contract
 
-- Single owner + backup reviewer are assigned for Cycle 81 growth campaign execution and signoff.
-- The Cycle 81 lane references Cycle 80 outcomes, controls, and KPI continuity signals.
-- Every Cycle 81 section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 81 closeout records campaign outcomes, confidence notes, and Cycle 82 execution priorities.
+- Single owner + backup reviewer are assigned for Lane growth campaign execution and signoff.
+- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- Every Lane section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records campaign outcomes, confidence notes, and Lane execution priorities.
 
 ## Growth campaign quality checklist
 
@@ -40,16 +40,16 @@ python scripts/check_growth_campaign_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 81 integration brief committed
-- [ ] Cycle 81 growth campaign plan committed
-- [ ] Cycle 81 campaign execution ledger exported
-- [ ] Cycle 81 campaign KPI scorecard snapshot exported
-- [ ] Cycle 82 execution priorities drafted from Cycle 81 learnings
+- [ ] Lane integration brief committed
+- [ ] Lane growth campaign plan committed
+- [ ] Lane campaign execution ledger exported
+- [ ] Lane campaign KPI scorecard snapshot exported
+- [ ] Lane execution priorities drafted from Lane learnings
 
 ## Scoring model
 
 Growth Campaign Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Cycle 80 continuity baseline quality (35)
+- Lane continuity baseline quality (35)
 - Campaign evidence data + delivery board completeness (30)

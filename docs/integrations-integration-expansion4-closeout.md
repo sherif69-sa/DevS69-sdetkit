@@ -1,14 +1,14 @@
 # Integration Expansion4 Closeout (legacy) — Integration expansion #4 closeout lane
 
-Cycle 68 closes with a major integration upgrade that converts Cycle 67 outputs into a self-hosted enterprise Tekton reference.
+Lane closes with a major integration upgrade that converts Lane outputs into a self-hosted enterprise Tekton reference.
 
 ## Why Integration Expansion4 Closeout matters
 
-- Converts Cycle 67 governance outputs into reusable self-hosted implementation patterns.
+- Converts Lane governance outputs into reusable self-hosted implementation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Cycle 68 integration expansion to Cycle 69 case-study prep #1.
+- Creates a deterministic handoff from Lane integration expansion to Lane case-study prep #1.
 
-## Required inputs (Cycle 67)
+## Required inputs (Lane)
 
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json`
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_integration_expansion4_closeout_contract.py
 
 ## Integration expansion contract
 
-- Single owner + backup reviewer are assigned for Cycle 68 self-hosted enterprise rollout and signoff.
-- The Cycle 68 lane references Cycle 67 integration expansion outputs, governance decisions, and KPI continuity signals.
-- Every Cycle 68 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 68 closeout records self-hosted pipeline stages, identity controls, runner policy strategy, and Cycle 69 case-study prep priorities.
+- Single owner + backup reviewer are assigned for Lane self-hosted enterprise rollout and signoff.
+- The Lane lane references Lane integration expansion outputs, governance decisions, and KPI continuity signals.
+- Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records self-hosted pipeline stages, identity controls, runner policy strategy, and Lane case-study prep priorities.
 
 ## Integration quality checklist
 
@@ -40,17 +40,17 @@ python scripts/check_integration_expansion4_closeout_contract.py
 
 ## Integration Expansion4 Closeout delivery board (legacy)
 
-- [ ] Cycle 68 integration brief committed
-- [ ] Cycle 68 self-hosted enterprise pipeline blueprint published
-- [ ] Cycle 68 identity and runner policy strategy exported
-- [ ] Cycle 68 KPI scorecard snapshot exported
-- [ ] Cycle 69 case-study prep priorities drafted from Cycle 68 learnings
+- [ ] Lane integration brief committed
+- [ ] Lane self-hosted enterprise pipeline blueprint published
+- [ ] Lane identity and runner policy strategy exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane case-study prep priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 68 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Contract + command lane completeness: 25 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 67 continuity and strict baseline carryover: 30 points.
+- Lane continuity and strict baseline carryover: 30 points.
 - Self-hosted reference quality + guardrails: 25 points.

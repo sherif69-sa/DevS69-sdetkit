@@ -1,14 +1,14 @@
 # Phase3 Wrap Publication Closeout — Phase-3 wrap publication closeout lane
 
-Cycle 90 closes with a major upgrade that converts Cycle 89 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
+Lane closes with a major upgrade that converts Lane governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
 ## Why Phase3 Wrap Publication Closeout matters
 
-- Converts Cycle 89 governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
+- Converts Lane governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 90 closeout into the next-impact roadmap.
+- Creates a deterministic handoff from Lane closeout into the next-impact roadmap.
 
-## Required inputs (Cycle 89)
+## Required inputs (Lane)
 
 - `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`
 - `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_phase3_wrap_publication_closeout_contract.py
 
 ## Phase-3 wrap publication contract
 
-- Single owner + backup reviewer are assigned for Cycle 90 phase-3 wrap publication execution and signoff.
-- The Cycle 90 lane references Cycle 89 outcomes, controls, and trust continuity signals.
-- Every Cycle 90 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
+- Single owner + backup reviewer are assigned for Lane phase-3 wrap publication execution and signoff.
+- The Lane lane references Lane outcomes, controls, and trust continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.
 
 ## Phase-3 wrap publication quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_phase3_wrap_publication_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 90 evidence brief committed
-- [ ] Cycle 90 phase-3 wrap publication plan committed
-- [ ] Cycle 90 narrative template upgrade ledger exported
-- [ ] Cycle 90 storyline outcomes ledger exported
-- [ ] Next-impact roadmap draft captured from Cycle 90 outcomes
+- [ ] Lane evidence brief committed
+- [ ] Lane phase-3 wrap publication plan committed
+- [ ] Lane narrative template upgrade ledger exported
+- [ ] Lane storyline outcomes ledger exported
+- [ ] Next-impact roadmap draft captured from Lane outcomes
 
 ## Scoring model
 
-Cycle 90 weights continuity + execution contract + publication artifact readiness for a 100-point activation score.
+Lane weights continuity + execution contract + publication artifact readiness for a 100-point activation score.

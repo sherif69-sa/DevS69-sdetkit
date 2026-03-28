@@ -1,14 +1,14 @@
-# Phase 2 Wrap Handoff Closeout lane (Legacy: Cycle 60)
+# Phase 2 Wrap Handoff Closeout lane (Legacy)
 
-Cycle 60 closes with a major Phase-2 wrap + handoff upgrade that turns Cycle 59 pre-plan outcomes into deterministic Cycle 61 execution priorities.
+Lane closes with a major Phase-2 wrap + handoff upgrade that turns Lane pre-plan outcomes into deterministic Lane execution priorities.
 
-## Why Cycle 60 matters
+## Why Lane matters
 
-- Converts Cycle 59 pre-plan evidence into repeatable Phase-3 planning loops.
+- Converts Lane pre-plan evidence into repeatable Phase-3 planning loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Cycle 60 closeout into Cycle 61 execution planning.
+- Produces a deterministic handoff from Lane closeout into Lane execution planning.
 
-## Required inputs (Cycle 59)
+## Required inputs (Lane)
 
 - `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`
 - `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_phase2_wrap_handoff_closeout_contract.py
 
 ## Phase-2 wrap + handoff contract
 
-- Single owner + backup reviewer are assigned for Cycle 60 Phase-2 wrap + handoff execution and signal triage.
-- The Cycle 60 lane references Cycle 59 Phase-3 pre-plan outcomes and unresolved risks.
-- Every Cycle 60 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 60 closeout records Phase-2 wrap outcomes and Cycle 61 execution priorities.
+- Single owner + backup reviewer are assigned for Lane Phase-2 wrap + handoff execution and signal triage.
+- The Lane lane references Lane Phase-3 pre-plan outcomes and unresolved risks.
+- Every Lane section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records Phase-2 wrap outcomes and Lane execution priorities.
 
 ## Phase-2 wrap + handoff quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_phase2_wrap_handoff_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
 - [ ] Artifact pack includes wrap brief, risk ledger, KPI scorecard, and execution log
 
-## Cycle 60 delivery board
+## Lane delivery board
 
-- [ ] Cycle 60 Phase-2 wrap + handoff brief committed
-- [ ] Cycle 60 wrap reviewed with owner + backup
-- [ ] Cycle 60 risk ledger exported
-- [ ] Cycle 60 KPI scorecard snapshot exported
-- [ ] Cycle 61 execution priorities drafted from Cycle 60 learnings
+- [ ] Lane Phase-2 wrap + handoff brief committed
+- [ ] Lane wrap reviewed with owner + backup
+- [ ] Lane risk ledger exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane execution priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 60 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 59 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Phase-2 wrap + handoff contract lock + delivery board readiness: 15 points.

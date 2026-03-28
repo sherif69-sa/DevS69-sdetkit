@@ -1,5 +1,5 @@
 {
-  "name": "continuous-upgrade-cycle4-closeout",
+  "name": "continuous-upgrade-closeout-4",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
@@ -20,7 +20,7 @@
       "check_id": "docs_index_cycle4_links",
       "weight": 8,
       "passed": true,
-      "evidence": "integrations-continuous-upgrade-cycle4-closeout.md + continuous-upgrade-cycle4-closeout-summary.json"
+      "evidence": "integrations-continuous-upgrade-closeout-4.md + continuous-upgrade-closeout-4-summary.json"
     },
     {
       "check_id": "top10_cycle4_align",

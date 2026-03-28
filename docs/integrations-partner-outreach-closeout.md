@@ -1,14 +1,14 @@
 # Partner outreach closeout lane
 
-Cycle 80 closes with a major upgrade that converts Cycle 79 scale outcomes into a partner-outreach execution pack.
+Lane closes with a major upgrade that converts Lane scale outcomes into a partner-outreach execution pack.
 
 ## Why partner outreach matters
 
-- Turns Cycle 79 scale outcomes into partner onboarding proof across docs, rollout, and adoption loops.
+- Turns Lane scale outcomes into partner onboarding proof across docs, rollout, and adoption loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Cycle 80 partner outreach into Cycle 81 growth campaign priorities.
+- Creates a deterministic handoff from Lane partner outreach into Lane growth campaign priorities.
 
-## Required inputs (Cycle 79)
+## Required inputs (Lane)
 
 - `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json`
 - `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_partner_outreach_closeout_contract.py
 
 ## Partner outreach contract
 
-- Single owner + backup reviewer are assigned for Cycle 80 partner outreach execution and signoff.
-- The Cycle 80 lane references Cycle 79 outcomes, controls, and KPI continuity signals.
-- Every Cycle 80 section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 80 closeout records partner onboarding outcomes, confidence notes, and Cycle 81 growth campaign priorities.
+- Single owner + backup reviewer are assigned for Lane partner outreach execution and signoff.
+- The Lane lane references Lane outcomes, controls, and KPI continuity signals.
+- Every Lane section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records partner onboarding outcomes, confidence notes, and Lane growth campaign priorities.
 
 ## Partner outreach quality checklist
 
@@ -40,16 +40,16 @@ python scripts/check_partner_outreach_closeout_contract.py
 
 ## Partner outreach delivery board
 
-- [ ] Cycle 80 integration brief committed
-- [ ] Cycle 80 partner outreach plan committed
-- [ ] Cycle 80 partner execution ledger exported
-- [ ] Cycle 80 partner KPI scorecard snapshot exported
-- [ ] Cycle 81 growth campaign priorities drafted from Cycle 80 learnings
+- [ ] Lane integration brief committed
+- [ ] Lane partner outreach plan committed
+- [ ] Lane partner execution ledger exported
+- [ ] Lane partner KPI scorecard snapshot exported
+- [ ] Lane growth campaign priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 80 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Cycle 79 continuity baseline quality (35)
+- Lane continuity baseline quality (35)
 - Partner evidence data + delivery board completeness (30)

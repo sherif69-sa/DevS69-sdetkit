@@ -34,7 +34,7 @@ def test_playbooks_validate_legacy_selection_only_has_legacy(capsys) -> None:
         item["name"] not in {"onboarding", "weekly-review", "evidence-assets"}
         for item in payload["results"]
     )
-    assert any(item["name"] == "continuous-upgrade-cycle7-closeout" for item in payload["results"])
+    assert any(item["name"] == "continuous-upgrade-closeout-7" for item in payload["results"])
 
 
 def test_playbooks_validate_aliases_are_only_alias_names(capsys) -> None:
@@ -61,7 +61,7 @@ def test_playbooks_validate_all_includes_multiple_groups(capsys) -> None:
     assert payload["ok"] is True
     names = [item["name"] for item in payload["results"]]
     assert "onboarding" in names
-    assert "continuous-upgrade-cycle7-closeout" in names
+    assert "continuous-upgrade-closeout-7" in names
 
 
 def test_playbooks_validate_scan_handles_missing_main(monkeypatch, capsys) -> None:

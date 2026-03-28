@@ -1,14 +1,14 @@
 # Optimization Closeout Foundation — Optimization closeout lane
 
-Optimization Closeout Foundation closes the lane with a major optimization upgrade that converts Cycle 41 expansion outcomes into deterministic remediation loops.
+Optimization Closeout Foundation closes the lane with a major optimization upgrade that converts Lane expansion outcomes into deterministic remediation loops.
 
 ## Why Optimization Closeout Foundation matters
 
-- Turns Cycle 41 expansion proof into remediation-first operating motion.
+- Turns Lane expansion proof into remediation-first operating motion.
 - Locks quality controls while increasing repeatability and throughput.
-- Produces a deterministic handoff into Cycle 43 acceleration priorities.
+- Produces a deterministic handoff into Lane acceleration priorities.
 
-## Required inputs (Cycle 41)
+## Required inputs (Lane)
 
 - `docs/artifacts/expansion-automation-pack/expansion-automation-summary.json`
 - `docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md`
@@ -25,9 +25,9 @@ python scripts/check_optimization_closeout_contract.py
 ## Optimization closeout contract
 
 - Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.
-- The Optimization Closeout Foundation optimization lane references Cycle 41 expansion winners and misses with deterministic remediation loops.
+- The Optimization Closeout Foundation optimization lane references Lane expansion winners and misses with deterministic remediation loops.
 - Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Optimization Closeout Foundation closeout records optimization learnings and Cycle 43 acceleration priorities.
+- Optimization Closeout Foundation closeout records optimization learnings and Lane acceleration priorities.
 
 ## Optimization quality checklist
 
@@ -43,7 +43,7 @@ python scripts/check_optimization_closeout_contract.py
 - [ ] Optimization Closeout Foundation review notes captured with owner + backup
 - [ ] Optimization Closeout Foundation remediation matrix exported
 - [ ] Optimization Closeout Foundation KPI scorecard snapshot exported
-- [ ] Cycle 43 acceleration priorities drafted from Optimization Closeout Foundation learnings
+- [ ] Lane acceleration priorities drafted from Optimization Closeout Foundation learnings
 
 ## Scoring model
 
@@ -51,5 +51,5 @@ Optimization Closeout Foundation weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 41 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Optimization execution contract lock + delivery board readiness: 15 points.

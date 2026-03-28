@@ -1,14 +1,14 @@
 # Trust FAQ Expansion Closeout — Trust FAQ expansion loop closeout lane
 
-Cycle 83 closes with a major upgrade that folds Cycle 82 integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
+Lane closes with a major upgrade that folds Lane integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
 
 ## Why Trust FAQ Expansion Closeout matters
 
-- Turns Cycle 82 integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
+- Turns Lane integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Cycle 83 closeout into Cycle 84 evidence narrative priorities.
+- Creates a deterministic handoff from Lane closeout into Lane evidence narrative priorities.
 
-## Required inputs (Cycle 82)
+## Required inputs (Lane)
 
 - `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`
 - `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 
 ## Trust FAQ expansion contract
 
-- Single owner + backup reviewer are assigned for Cycle 83 trust FAQ expansion execution and signoff.
-- The Cycle 83 lane references Cycle 82 outcomes, controls, and campaign continuity signals.
-- Every Cycle 83 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 83 closeout records trust FAQ content upgrades, escalation outcomes, and Cycle 84 evidence narrative priorities.
+- Single owner + backup reviewer are assigned for Lane trust FAQ expansion execution and signoff.
+- The Lane lane references Lane outcomes, controls, and campaign continuity signals.
+- Every Lane section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Lane closeout records trust FAQ content upgrades, escalation outcomes, and Lane evidence narrative priorities.
 
 ## Trust FAQ expansion quality checklist
 
@@ -40,16 +40,16 @@ python scripts/check_trust_faq_expansion_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Cycle 83 trust FAQ brief committed
-- [ ] Cycle 83 trust FAQ expansion plan committed
-- [ ] Cycle 83 trust template upgrade ledger exported
-- [ ] Cycle 83 escalation outcomes ledger exported
-- [ ] Cycle 84 evidence narrative priorities drafted from Cycle 83 outcomes
+- [ ] Lane trust FAQ brief committed
+- [ ] Lane trust FAQ expansion plan committed
+- [ ] Lane trust template upgrade ledger exported
+- [ ] Lane escalation outcomes ledger exported
+- [ ] Lane evidence narrative priorities drafted from Lane outcomes
 
 ## Scoring model
 
 Trust FAQ Expansion Closeout weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Cycle 82 continuity baseline quality (35)
+- Lane continuity baseline quality (35)
 - Feedback evidence data + delivery board completeness (30)

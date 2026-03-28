@@ -1,5 +1,5 @@
 {
-  "name": "continuous-upgrade-cycle10-closeout",
+  "name": "continuous-upgrade-closeout-10",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
@@ -20,7 +20,7 @@
       "check_id": "docs_index_cycle10_links",
       "weight": 8,
       "passed": true,
-      "evidence": "continuous-upgrade-cycle10-big-upgrade-report.md + integrations-continuous-upgrade-cycle10-closeout.md"
+      "evidence": "continuous-upgrade-cycle10-big-upgrade-report.md + integrations-continuous-upgrade-closeout-10.md"
     },
     {
       "check_id": "top10_cycle10_align",

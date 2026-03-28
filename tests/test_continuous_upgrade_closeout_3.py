@@ -15,12 +15,12 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-continuous-upgrade-closeout-3.md\ncontinuous-upgrade-cycle3-closeout\n",
+        "docs/integrations-continuous-upgrade-closeout-3.md\ncontinuous-upgrade-closeout-3\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "integrations-continuous-upgrade-cycle3-closeout.md\nartifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-closeout-summary.json\n",
+        "integrations-continuous-upgrade-closeout-3.md\nartifacts/continuous-upgrade-closeout-3-pack/continuous-upgrade-closeout-3-summary.json\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -102,7 +102,7 @@ def test_cycle3_json(tmp_path: Path, capsys) -> None:
     rc = c3.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "continuous-upgrade-cycle3-closeout"
+    assert out["name"] == "continuous-upgrade-closeout-3"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -125,11 +125,11 @@ def test_cycle3_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-closeout-summary.json"
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-closeout-3-summary.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-cycle3-closeout-summary.md"
+        / "artifacts/continuous-upgrade-cycle3-pack/continuous-upgrade-closeout-3-summary.md"
     ).exists()
     assert (
         tmp_path
@@ -209,7 +209,7 @@ def test_cycle3_strict_fails_without_day92(tmp_path: Path) -> None:
 def test_cycle3_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["continuous-upgrade-cycle3-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["continuous-upgrade-closeout-3", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Cycle 3 continuous upgrade closeout summary" in capsys.readouterr().out

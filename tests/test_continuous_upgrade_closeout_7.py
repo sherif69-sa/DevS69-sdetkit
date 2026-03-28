@@ -86,8 +86,8 @@ def _seed_repo(root: Path) -> None:
         "\n".join(
             [
                 "docs/integrations-continuous-upgrade-closeout-7.md",
-                "continuous-upgrade-cycle7-closeout",
-                "continuous-upgrade-cycle7-closeout",
+                "continuous-upgrade-closeout-7",
+                "continuous-upgrade-closeout-7",
             ]
         )
         + "\n",
@@ -99,8 +99,8 @@ def _seed_repo(root: Path) -> None:
         "\n".join(
             [
                 "impact-97-big-upgrade-report.md",
-                "integrations-continuous-upgrade-cycle7-closeout.md",
-                "artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-closeout-summary.json",
+                "integrations-continuous-upgrade-closeout-7.md",
+                "artifacts/continuous-upgrade-closeout-7-pack/continuous-upgrade-closeout-7-summary.json",
             ]
         )
         + "\n",
@@ -162,7 +162,7 @@ def test_cycle7_json(tmp_path: Path, capsys) -> None:
     rc = c7.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "continuous-upgrade-cycle7-closeout"
+    assert out["name"] == "continuous-upgrade-closeout-7"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -188,14 +188,14 @@ def test_cycle7_emit_pack_and_execute(tmp_path: Path) -> None:
 
     _find_existing(
         [
-            pack / "continuous-upgrade-cycle7-closeout-summary.json",
-            pack / "continuous-upgrade-cycle7-closeout-summary.json",
+            pack / "continuous-upgrade-closeout-7-summary.json",
+            pack / "continuous-upgrade-closeout-7-summary.json",
         ]
     )
     _find_existing(
         [
-            pack / "continuous-upgrade-cycle7-closeout-summary.md",
-            pack / "continuous-upgrade-cycle7-closeout-summary.md",
+            pack / "continuous-upgrade-closeout-7-summary.md",
+            pack / "continuous-upgrade-closeout-7-summary.md",
         ]
     )
     _find_existing(
@@ -316,7 +316,7 @@ def test_cycle7_strict_fails_without_previous_cycle(tmp_path: Path) -> None:
 def test_cycle7_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["continuous-upgrade-cycle7-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["continuous-upgrade-closeout-7", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "continuous upgrade closeout summary" in capsys.readouterr().out.lower()

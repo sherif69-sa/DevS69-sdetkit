@@ -1,19 +1,19 @@
-# Cycle 43 — Acceleration closeout lane
+# Lane — Acceleration closeout lane
 
-Cycle 43 closes with a major acceleration upgrade that converts Cycle 42 optimization evidence into deterministic improvement loops.
+Lane closes with a major acceleration upgrade that converts Lane optimization evidence into deterministic improvement loops.
 
-## Why Cycle 43 matters
+## Why Lane matters
 
-- Converts Cycle 42 optimization proof into growth-first operating motion.
+- Converts Lane optimization proof into growth-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from acceleration outcomes into Cycle 44 scale priorities.
+- Produces a deterministic handoff from acceleration outcomes into Lane scale priorities.
 
-## Required inputs (Cycle 42)
+## Required inputs (Lane)
 
 - `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
 - `docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md`
 
-## Cycle 43 command lane
+## Lane command lane
 
 ```bash
 python -m sdetkit acceleration-closeout --format json --strict
@@ -24,10 +24,10 @@ python scripts/check_acceleration_closeout_contract.py
 
 ## Acceleration closeout contract
 
-- Single owner + backup reviewer are assigned for Cycle 43 acceleration lane execution and KPI follow-up.
-- The Cycle 43 acceleration lane references Cycle 42 optimization winners and misses with deterministic growth loops.
-- Every Cycle 43 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 43 closeout records acceleration learnings and Cycle 44 scale priorities.
+- Single owner + backup reviewer are assigned for Lane acceleration lane execution and KPI follow-up.
+- The Lane acceleration lane references Lane optimization winners and misses with deterministic growth loops.
+- Every Lane section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Lane closeout records acceleration learnings and Lane scale priorities.
 
 ## Acceleration quality checklist
 
@@ -37,19 +37,19 @@ python scripts/check_acceleration_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log
 
-## Cycle 43 delivery board
+## Lane delivery board
 
-- [ ] Cycle 43 acceleration plan draft committed
-- [ ] Cycle 43 review notes captured with owner + backup
-- [ ] Cycle 43 growth matrix exported
-- [ ] Cycle 43 KPI scorecard snapshot exported
-- [ ] Cycle 44 scale priorities drafted from Cycle 43 learnings
+- [ ] Lane acceleration plan draft committed
+- [ ] Lane review notes captured with owner + backup
+- [ ] Lane growth matrix exported
+- [ ] Lane KPI scorecard snapshot exported
+- [ ] Lane scale priorities drafted from Lane learnings
 
 ## Scoring model
 
-Cycle 43 weighted score (0-100):
+Lane weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 42 continuity and strict baseline carryover: 35 points.
+- Lane continuity and strict baseline carryover: 35 points.
 - Acceleration contract lock + delivery board readiness: 15 points.

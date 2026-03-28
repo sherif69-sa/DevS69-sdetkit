@@ -1,8 +1,8 @@
-# KPI audit (Cycle 27)
+# KPI audit (Lane)
 
-Cycle 27 closes the conversion sprint by comparing baseline vs current KPI performance and publishing corrective actions.
+Lane closes the conversion sprint by comparing baseline vs current KPI performance and publishing corrective actions.
 
-## Who should run Cycle 27
+## Who should run Lane
 
 - Maintainers validating weekly growth outcomes from Cycles 22-26.
 - DevRel/community operators tracking traffic-to-contribution conversion.
@@ -10,7 +10,7 @@ Cycle 27 closes the conversion sprint by comparing baseline vs current KPI perfo
 
 ## KPI contract
 
-A Cycle 27 pass requires side-by-side baseline and current snapshots for:
+A Lane pass requires side-by-side baseline and current snapshots for:
 
 - `stars_per_week`
 - `readme_ctr_percent`
@@ -34,7 +34,7 @@ python scripts/check_kpi_audit_contract.py
 
 ## KPI scoring model
 
-Cycle 27 computes weighted readiness score (0-100):
+Lane computes weighted readiness score (0-100):
 
 - Docs contract + command lane completeness: 45 points.
 - Discoverability links in README/docs index: 20 points.
@@ -43,4 +43,4 @@ Cycle 27 computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs deterministic Cycle 27 checks and writes logs to `--evidence-dir` for final closeout review.
+`--execute` runs deterministic Lane checks and writes logs to `--evidence-dir` for final closeout review.
