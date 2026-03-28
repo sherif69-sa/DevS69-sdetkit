@@ -1,14 +1,14 @@
 # Governance Priorities Closeout — Governance priorities closeout lane
 
-Day 88 closes with a major upgrade that converts Day 87 governance handoff outcomes into a deterministic governance priorities operating lane.
+Cycle 88 closes with a major upgrade that converts Cycle 87 governance handoff outcomes into a deterministic governance priorities operating lane.
 
 ## Why Governance Priorities Closeout matters
 
-- Converts Day 87 governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
+- Converts Cycle 87 governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 88 closeout into Day 89 governance priorities.
+- Creates a deterministic handoff from Cycle 88 closeout into Cycle 89 governance priorities.
 
-## Required inputs (Day 87)
+## Required inputs (Cycle 87)
 
 - `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json`
 - `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_governance_priorities_closeout_contract.py
 
 ## Governance priorities contract
 
-- Single owner + backup reviewer are assigned for Day 88 governance priorities execution and signoff.
-- The Day 88 lane references Day 87 outcomes, controls, and trust continuity signals.
-- Every Day 88 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 88 closeout records governance priorities pack upgrades, storyline outcomes, and Day 89 governance priorities.
+- Single owner + backup reviewer are assigned for Cycle 88 governance priorities execution and signoff.
+- The Cycle 88 lane references Cycle 87 outcomes, controls, and trust continuity signals.
+- Every Cycle 88 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 88 closeout records governance priorities pack upgrades, storyline outcomes, and Cycle 89 governance priorities.
 
 ## Governance priorities quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_governance_priorities_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 88 evidence brief committed
-- [ ] Day 88 governance priorities plan committed
-- [ ] Day 88 narrative template upgrade ledger exported
-- [ ] Day 88 storyline outcomes ledger exported
-- [ ] Day 89 governance priorities drafted from Day 88 outcomes
+- [ ] Cycle 88 evidence brief committed
+- [ ] Cycle 88 governance priorities plan committed
+- [ ] Cycle 88 narrative template upgrade ledger exported
+- [ ] Cycle 88 storyline outcomes ledger exported
+- [ ] Cycle 89 governance priorities drafted from Cycle 88 outcomes
 
 ## Scoring model
 
-Day 88 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
+Cycle 88 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.

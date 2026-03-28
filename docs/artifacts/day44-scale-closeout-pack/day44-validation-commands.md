@@ -1,4 +1,4 @@
-# Day 44 Validation Commands
+# Cycle 44 Validation Commands
 
 ```bash
 python -m sdetkit scale-closeout --format json --strict

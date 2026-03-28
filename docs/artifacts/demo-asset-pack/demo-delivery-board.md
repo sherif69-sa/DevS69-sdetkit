@@ -1,7 +1,7 @@
-# Day 33 delivery board
+# Cycle 33 delivery board
 
-- [ ] Day 33 script draft committed
-- [ ] Day 33 first cut rendered
-- [ ] Day 33 final cut + caption copy approved
-- [ ] Day 34 demo asset #2 backlog pre-scoped
-- [ ] Day 35 KPI instrumentation plan updated
+- [ ] Cycle 33 script draft committed
+- [ ] Cycle 33 first cut rendered
+- [ ] Cycle 33 final cut + caption copy approved
+- [ ] Cycle 34 demo asset #2 backlog pre-scoped
+- [ ] Cycle 35 KPI instrumentation plan updated

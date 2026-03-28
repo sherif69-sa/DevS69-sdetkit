@@ -1,15 +1,15 @@
-# Day 7 Weekly Review #1
+# Cycle 7 Weekly Review #1
 
-## What shipped (Day 1-6)
+## What shipped (Cycle 1-6)
 
 | Day | Upgrade | Report | Artifact | Status |
 | --- | --- | --- | --- | --- |
-| 1 | Core positioning + role onboarding | `docs/impact-1-ultra-upgrade-report.md` | `docs/artifacts/day1-onboarding-sample.md` | shipped ✅ |
-| 2 | 60-second demo workflow | `docs/impact-2-ultra-upgrade-report.md` | `docs/artifacts/day2-demo-sample.md` | shipped ✅ |
+| 1 | Core positioning + role onboarding | `docs/impact-1-ultra-upgrade-report.md` | `docs/artifacts/cycle1-onboarding-sample.md` | shipped ✅ |
+| 2 | 60-second demo workflow | `docs/impact-2-ultra-upgrade-report.md` | `docs/artifacts/cycle2-demo-sample.md` | shipped ✅ |
 | 3 | Evidence assets with runnable checks | `docs/evidence-assets-report.md` | `docs/artifacts/evidence-assets-sample.md` | shipped ✅ |
-| 4 | Template/skill expansion run-all | `docs/impact-4-ultra-upgrade-report.md` | `docs/artifacts/day4-skills-sample.md` | shipped ✅ |
-| 5 | Cross-platform onboarding snippets | `docs/impact-5-ultra-upgrade-report.md` | `docs/artifacts/day5-platform-onboarding-sample.md` | shipped ✅ |
-| 6 | Docs conversion QA gate | `docs/impact-6-ultra-upgrade-report.md` | `docs/artifacts/day6-conversion-qa-sample.md` | shipped ✅ |
+| 4 | Template/skill expansion run-all | `docs/impact-4-ultra-upgrade-report.md` | `docs/artifacts/cycle4-skills-sample.md` | shipped ✅ |
+| 5 | Cross-platform onboarding snippets | `docs/impact-5-ultra-upgrade-report.md` | `docs/artifacts/cycle5-platform-onboarding-sample.md` | shipped ✅ |
+| 6 | Docs conversion QA gate | `docs/impact-6-ultra-upgrade-report.md` | `docs/artifacts/cycle6-conversion-qa-sample.md` | shipped ✅ |
 
 ## KPI movement
 
@@ -19,6 +19,6 @@
 
 ## Next-week focus
 
-- Day 8: publish 10 curated good-first-issue tasks with clear acceptance criteria.
-- Day 9: tighten issue/PR templates to reduce triage response time.
-- Day 10: add first-contribution checklist from clone to first merged PR.
+- Cycle 8: publish 10 curated good-first-issue tasks with clear acceptance criteria.
+- Cycle 9: tighten issue/PR templates to reduce triage response time.
+- Cycle 10: add first-contribution checklist from clone to first merged PR.

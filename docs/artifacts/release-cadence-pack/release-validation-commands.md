@@ -1,4 +1,4 @@
-# Day 32 validation commands
+# Cycle 32 validation commands
 
 ```bash
 python -m sdetkit release-cadence --format json --strict

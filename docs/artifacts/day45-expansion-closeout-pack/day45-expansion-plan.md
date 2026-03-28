@@ -1,3 +1,3 @@
-# Day 45 Expansion Plan
+# Cycle 45 Expansion Plan
 
-- Objective: close Day 45 with measurable quality and throughput gains.
+- Objective: close Cycle 45 with measurable quality and throughput gains.

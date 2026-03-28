@@ -1,21 +1,21 @@
-# Day 3 Ultra Upgrade Report — Proof Pack + Evidence Boost
+# Cycle 3 Ultra Upgrade Report — Proof Pack + Evidence Boost
 
 ## Upgrade title
 
-**Day 3 big boost: executable proof pack with strict validation and artifact export**
+**Cycle 3 big boost: executable proof pack with strict validation and artifact export**
 
 ## Problem statement
 
-Day 1 and Day 2 improved conversion and demos, but teams still needed a consistent Day 3 mechanism to produce reusable proof artifacts for governance, security, and release stakeholders.
+Cycle 1 and Cycle 2 improved conversion and demos, but teams still needed a consistent Cycle 3 mechanism to produce reusable proof artifacts for governance, security, and release stakeholders.
 
-Without a dedicated Day 3 command, proof gathering was manual and inconsistent.
+Without a dedicated Cycle 3 command, proof gathering was manual and inconsistent.
 
 ## Implementation scope
 
 ### Files changed
 
 - `src/sdetkit/proof.py`
-  - Added new `sdetkit evidence-assets` command for Day 3 evidence asset workflows.
+  - Added new `sdetkit evidence-assets` command for Cycle 3 evidence asset workflows.
   - Added `--execute`, `--strict`, `--timeout-seconds`, and `--output` options.
   - Added text/markdown/json rendering for artifact-ready proof bundles.
 - `src/sdetkit/cli.py`
@@ -25,15 +25,15 @@ Without a dedicated Day 3 command, proof gathering was manual and inconsistent.
 - `tests/test_cli_help_lists_subcommands.py`
   - Updated help coverage to include `proof`.
 - `README.md`
-  - Added Day 3 ultra section with run commands and artifact generation path.
+  - Added Cycle 3 ultra section with run commands and artifact generation path.
 - `docs/index.md`
-  - Added Day 3 ultra section and report/artifact links.
+  - Added Cycle 3 ultra section and report/artifact links.
 - `docs/cli.md`
   - Added command reference for `sdetkit evidence-assets`.
 - `docs/artifacts/evidence-assets-sample.md`
-  - Added generated Day 3 evidence-assets artifact sample.
+  - Added generated Cycle 3 evidence-assets artifact sample.
 - `docs/impact-3-ultra-upgrade-report.md`
-  - Added Day 3 implementation and validation record.
+  - Added Cycle 3 implementation and validation record.
 
 ## Validation checklist
 
@@ -43,12 +43,12 @@ Without a dedicated Day 3 command, proof gathering was manual and inconsistent.
 
 ## Artifact
 
-This document is the Day 3 artifact for evidence-assets-pack traceability and operational handoff.
+This document is the Cycle 3 artifact for evidence-assets-pack traceability and operational handoff.
 
 ## Rollback plan
 
 1. Remove `src/sdetkit/proof.py` and CLI wiring.
-2. Revert docs and README Day 3 sections.
-3. Remove Day 3 artifact/report documents.
+2. Revert docs and README Cycle 3 sections.
+3. Remove Cycle 3 artifact/report documents.
 
 Rollback risk is low because this is additive command/documentation surface only.

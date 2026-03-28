@@ -1,10 +1,10 @@
-# Day 39 Big Upgrade Report
+# Cycle 39 Big Upgrade Report
 
 ## What shipped
 
-- Added Day 39 closeout command: `python -m sdetkit playbook-post`.
-- Added strict continuity checks that require Day 38 strict-pass and board integrity.
-- Added Day 39 artifact outputs for playbook draft, rollout plan, KPI scorecard, execution log, and validation commands.
+- Added Cycle 39 closeout command: `python -m sdetkit playbook-post`.
+- Added strict continuity checks that require Cycle 38 strict-pass and board integrity.
+- Added Cycle 39 artifact outputs for playbook draft, rollout plan, KPI scorecard, execution log, and validation commands.
 
 ## Validation
 
@@ -14,6 +14,6 @@ python scripts/check_playbook_post_contract.py --skip-evidence
 python -m sdetkit playbook-post --format json --strict
 ```
 
-## Day 40 handoff
+## Cycle 40 handoff
 
-Day 39 is closed with a publication-grade playbook lane that converts Day 38 outcomes into Day 40 scale priorities.
+Cycle 39 is closed with a publication-grade playbook lane that converts Cycle 38 outcomes into Cycle 40 scale priorities.

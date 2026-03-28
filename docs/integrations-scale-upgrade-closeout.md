@@ -1,14 +1,14 @@
 # Scale upgrade closeout lane
 
-Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
+Cycle 79 closes with a major upgrade that converts Cycle 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
 
 ## Why scale upgrade matters
 
-- Turns Day 78 ecosystem priorities into enterprise onboarding readiness proof across docs, rollout, and adoption loops.
+- Turns Cycle 78 ecosystem priorities into enterprise onboarding readiness proof across docs, rollout, and adoption loops.
 - Protects scale quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 79 scale upgrades into Day 80 partner outreach priorities.
+- Creates a deterministic handoff from Cycle 79 scale upgrades into Cycle 80 partner outreach priorities.
 
-## Required inputs (Day 78)
+## Required inputs (Cycle 78)
 
 - `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json`
 - `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_scale_upgrade_closeout_contract.py
 
 ## Scale upgrade contract
 
-- Single owner + backup reviewer are assigned for Day 79 scale upgrade execution and signoff.
-- The Day 79 lane references Day 78 outcomes, controls, and KPI continuity signals.
-- Every Day 79 section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 79 closeout records enterprise onboarding outcomes, confidence notes, and Day 80 partner outreach priorities.
+- Single owner + backup reviewer are assigned for Cycle 79 scale upgrade execution and signoff.
+- The Cycle 79 lane references Cycle 78 outcomes, controls, and KPI continuity signals.
+- Every Cycle 79 section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 79 closeout records enterprise onboarding outcomes, confidence notes, and Cycle 80 partner outreach priorities.
 
 ## Scale upgrade quality checklist
 
@@ -40,16 +40,16 @@ python scripts/check_scale_upgrade_closeout_contract.py
 
 ## Scale upgrade delivery board
 
-- [ ] Day 79 integration brief committed
-- [ ] Day 79 scale upgrade plan committed
-- [ ] Day 79 enterprise execution ledger exported
-- [ ] Day 79 enterprise KPI scorecard snapshot exported
-- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings
+- [ ] Cycle 79 integration brief committed
+- [ ] Cycle 79 scale upgrade plan committed
+- [ ] Cycle 79 enterprise execution ledger exported
+- [ ] Cycle 79 enterprise KPI scorecard snapshot exported
+- [ ] Cycle 80 partner outreach priorities drafted from Cycle 79 learnings
 
 ## Scoring model
 
-Day 79 weighted score (0-100):
+Cycle 79 weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Day 78 continuity baseline quality (35)
+- Cycle 78 continuity baseline quality (35)
 - Scale evidence data + delivery board completeness (30)

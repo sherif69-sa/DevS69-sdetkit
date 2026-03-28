@@ -1,14 +1,14 @@
 # Phase3 Kickoff Closeout (legacy) — Phase-3 kickoff execution closeout lane
 
-Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence into a strict baseline for ecosystem + trust execution.
+Cycle 61 ships a major Phase-3 kickoff upgrade that converts Cycle 60 wrap evidence into a strict baseline for ecosystem + trust execution.
 
 ## Why Phase3 Kickoff Closeout matters
 
-- Converts Day 60 closeout evidence into repeatable Phase-3 execution loops.
+- Converts Cycle 60 closeout evidence into repeatable Phase-3 execution loops.
 - Protects trust outcomes with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 61 kickoff into Day 62 community program setup.
+- Produces a deterministic handoff from Cycle 61 kickoff into Cycle 62 community program setup.
 
-## Required inputs (Day 60)
+## Required inputs (Cycle 60)
 
 - `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json`
 - `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md`
@@ -24,10 +24,10 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 
 ## Phase-3 kickoff execution contract
 
-- Single owner + backup reviewer are assigned for Day 61 Phase-3 kickoff execution and trust-signal triage.
-- The Day 61 lane references Day 60 Phase-2 wrap outcomes, risks, and KPI continuity evidence.
-- Every Day 61 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 61 closeout records Phase-3 baseline activation, trust KPI owners, and Day 62 community program priorities.
+- Single owner + backup reviewer are assigned for Cycle 61 Phase-3 kickoff execution and trust-signal triage.
+- The Cycle 61 lane references Cycle 60 Phase-2 wrap outcomes, risks, and KPI continuity evidence.
+- Every Cycle 61 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 61 closeout records Phase-3 baseline activation, trust KPI owners, and Cycle 62 community program priorities.
 
 ## Phase-3 kickoff quality checklist
 
@@ -39,17 +39,17 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 
 ## Phase3 Kickoff Closeout delivery board (legacy)
 
-- [ ] Day 61 Phase-3 kickoff brief committed
-- [ ] Day 61 kickoff reviewed with owner + backup
-- [ ] Day 61 trust ledger exported
-- [ ] Day 61 KPI scorecard snapshot exported
-- [ ] Day 62 community program priorities drafted from Day 61 learnings
+- [ ] Cycle 61 Phase-3 kickoff brief committed
+- [ ] Cycle 61 kickoff reviewed with owner + backup
+- [ ] Cycle 61 trust ledger exported
+- [ ] Cycle 61 KPI scorecard snapshot exported
+- [ ] Cycle 62 community program priorities drafted from Cycle 61 learnings
 
 ## Scoring model
 
-Day 61 weighted score (0-100):
+Cycle 61 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 60 continuity and strict baseline carryover: 35 points.
+- Cycle 60 continuity and strict baseline carryover: 35 points.
 - Phase-3 kickoff contract lock + delivery board readiness: 15 points.

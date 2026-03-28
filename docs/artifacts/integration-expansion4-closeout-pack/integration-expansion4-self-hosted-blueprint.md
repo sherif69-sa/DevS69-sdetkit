@@ -1,1 +1,1 @@
-# Day 68 self-hosted blueprint
+# Cycle 68 self-hosted blueprint

@@ -1,14 +1,14 @@
 # Launch Readiness Closeout — Launch readiness closeout lane
 
-Day 86 closes with a major upgrade that converts Day 85 release prioritization outcomes into a deterministic launch readiness operating lane.
+Cycle 86 closes with a major upgrade that converts Cycle 85 release prioritization outcomes into a deterministic launch readiness operating lane.
 
 ## Why Launch Readiness Closeout matters
 
-- Converts Day 85 release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
+- Converts Cycle 85 release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 86 closeout into Day 87 launch priorities.
+- Creates a deterministic handoff from Cycle 86 closeout into Cycle 87 launch priorities.
 
-## Required inputs (Day 85)
+## Required inputs (Cycle 85)
 
 - `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json`
 - `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_launch_readiness_closeout_contract.py
 
 ## Launch readiness contract
 
-- Single owner + backup reviewer are assigned for Day 86 launch readiness execution and signoff.
-- The Day 86 lane references Day 85 outcomes, controls, and trust continuity signals.
-- Every Day 86 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 86 closeout records launch readiness pack upgrades, storyline outcomes, and Day 87 launch priorities.
+- Single owner + backup reviewer are assigned for Cycle 86 launch readiness execution and signoff.
+- The Cycle 86 lane references Cycle 85 outcomes, controls, and trust continuity signals.
+- Every Cycle 86 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 86 closeout records launch readiness pack upgrades, storyline outcomes, and Cycle 87 launch priorities.
 
 ## Launch readiness quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_launch_readiness_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 86 evidence brief committed
-- [ ] Day 86 launch readiness plan committed
-- [ ] Day 86 narrative template upgrade ledger exported
-- [ ] Day 86 storyline outcomes ledger exported
-- [ ] Day 87 launch priorities drafted from Day 86 outcomes
+- [ ] Cycle 86 evidence brief committed
+- [ ] Cycle 86 launch readiness plan committed
+- [ ] Cycle 86 narrative template upgrade ledger exported
+- [ ] Cycle 86 storyline outcomes ledger exported
+- [ ] Cycle 87 launch priorities drafted from Cycle 86 outcomes
 
 ## Scoring model
 
-Day 86 weights continuity + execution contract + launch artifact readiness for a 100-point activation score.
+Cycle 86 weights continuity + execution contract + launch artifact readiness for a 100-point activation score.

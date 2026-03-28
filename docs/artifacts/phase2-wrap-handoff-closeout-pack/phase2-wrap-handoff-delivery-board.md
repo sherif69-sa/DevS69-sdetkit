@@ -1,6 +1,6 @@
-# Day 60 delivery board
-- [ ] Day 60 Phase-2 wrap + handoff brief committed
-- [ ] Day 60 wrap reviewed with owner + backup
-- [ ] Day 60 risk ledger exported
-- [ ] Day 60 KPI scorecard snapshot exported
-- [ ] Day 61 execution priorities drafted from Day 60 learnings
+# Cycle 60 delivery board
+- [ ] Cycle 60 Phase-2 wrap + handoff brief committed
+- [ ] Cycle 60 wrap reviewed with owner + backup
+- [ ] Cycle 60 risk ledger exported
+- [ ] Cycle 60 KPI scorecard snapshot exported
+- [ ] Cycle 61 execution priorities drafted from Cycle 60 learnings

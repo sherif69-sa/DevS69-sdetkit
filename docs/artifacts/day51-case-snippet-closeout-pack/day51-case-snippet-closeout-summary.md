@@ -1,13 +1,13 @@
-Case Snippet Closeout summary (legacy: Day 51)
+Case Snippet Closeout summary (legacy: Cycle 51)
 - Activation score: 55
 - Passed checks: 8
 - Failed checks: 6
 - Critical failures: ['day50_strict_baseline']
-- Day 50 activation score: `75.0`
-- Day 50 checks evaluated: `14`
-- Day 50 delivery board checklist items: `5`
+- Cycle 50 activation score: `75.0`
+- Cycle 50 checks evaluated: `14`
+- Cycle 50 delivery board checklist items: `5`
 - Wins:
-  - Day 50 delivery board integrity validated with 5 checklist items.
+  - Cycle 50 delivery board integrity validated with 5 checklist items.
   - Case snippet contract + quality checklist is fully locked for execution.
 - Misses:
-  - Day 50 strict continuity signal is missing.
+  - Cycle 50 strict continuity signal is missing.

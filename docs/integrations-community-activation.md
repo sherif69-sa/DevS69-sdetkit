@@ -1,8 +1,8 @@
-# Community activation (Day 25)
+# Community activation (Cycle 25)
 
-Day 25 converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.
+Cycle 25 converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.
 
-## Who should run Day 25
+## Who should run Cycle 25
 
 - Maintainers preparing priorities for the next sprint or release train.
 - DevRel/community managers collecting qualitative and quantitative roadmap feedback.
@@ -10,7 +10,7 @@ Day 25 converts passive roadmap readers into active contributors through a deter
 
 ## Roadmap-voting discussion contract
 
-Day 25 is complete when a public roadmap-voting thread is opened, tagged, and linked from docs so contributors can vote and comment on priority items.
+Cycle 25 is complete when a public roadmap-voting thread is opened, tagged, and linked from docs so contributors can vote and comment on priority items.
 
 ## Launch checklist
 
@@ -29,7 +29,7 @@ python scripts/check_community_activation_contract.py
 
 ## Activation scoring model
 
-Day 25 computes weighted readiness score (0-100):
+Cycle 25 computes weighted readiness score (0-100):
 
 - Docs contract + command lane completeness: 45 points.
 - Discoverability links in README/docs index: 25 points.
@@ -38,4 +38,4 @@ Day 25 computes weighted readiness score (0-100):
 
 ## Execution evidence mode
 
-`--execute` runs deterministic Day 25 checks and writes logs to `--evidence-dir` for release review.
+`--execute` runs deterministic Cycle 25 checks and writes logs to `--evidence-dir` for release review.

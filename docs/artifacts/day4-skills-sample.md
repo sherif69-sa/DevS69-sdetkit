@@ -1,4 +1,4 @@
-# Day 4 Skills Sample — Built-in Agent Templates
+# Cycle 4 Skills Sample — Built-in Agent Templates
 
 Generated from `templates/automations/*.yaml`.
 
@@ -13,7 +13,7 @@ Generated from `templates/automations/*.yaml`.
 7. `report-dashboard`
 8. `security-governance-summary`
 
-## Suggested Day 4 execution
+## Suggested Cycle 4 execution
 
 ```bash
 python -m sdetkit agent templates list

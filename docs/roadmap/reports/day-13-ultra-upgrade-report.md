@@ -1,8 +1,8 @@
-# Day 13 Ultra Upgrade Report
+# Cycle 13 Ultra Upgrade Report
 
 ## Summary
 
-**Day 13 big upgrade: shipped an enterprise/regulated workflow landing page with compliance-lane automation, controls-register generation, and strict contract validation across docs + CLI + artifacts.**
+**Cycle 13 big upgrade: shipped an enterprise/regulated workflow landing page with compliance-lane automation, controls-register generation, and strict contract validation across docs + CLI + artifacts.**
 
 ## What changed
 
@@ -17,17 +17,17 @@
 - Wired CLI dispatch and top-level parser support:
   - `src/sdetkit/cli.py`
 
-- Added Day 13 enterprise workflow landing page:
+- Added Cycle 13 enterprise workflow landing page:
   - `docs/use-cases-enterprise-regulated.md`
 
-- Added Day 13 contract checker:
+- Added Cycle 13 contract checker:
   - `scripts/check_enterprise_readiness_contract.py`
 
 - Added tests for enterprise command behavior and CLI wiring:
   - `tests/test_enterprise_use_case.py`
   - `tests/test_cli_help_lists_subcommands.py`
 
-- Updated docs and command references to include Day 13 flows:
+- Updated docs and command references to include Cycle 13 flows:
   - `README.md`
   - `docs/index.md`
   - `docs/cli.md`
@@ -48,12 +48,12 @@
 - `docs/artifacts/enterprise-readiness-pack/enterprise-readiness-checklist.md`
 - `docs/artifacts/enterprise-readiness-pack/enterprise-readiness-ci.yml`
 - `docs/artifacts/enterprise-readiness-pack/enterprise-readiness-controls-register.md`
-- `docs/artifacts/enterprise-readiness-pack/evidence/day13-execution-summary.json`
+- `docs/artifacts/enterprise-readiness-pack/evidence/cycle13-execution-summary.json`
 
 ## Rollback plan
 
-1. Revert `src/sdetkit/enterprise_use_case.py` and `src/sdetkit/cli.py` Day 13 command wiring.
-2. Revert Day 13 docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-enterprise-regulated.md`.
-3. Remove Day 13 contract checker and generated artifacts.
+1. Revert `src/sdetkit/enterprise_use_case.py` and `src/sdetkit/cli.py` Cycle 13 command wiring.
+2. Revert Cycle 13 docs updates in `README.md`, `docs/index.md`, `docs/cli.md`, and `docs/use-cases-enterprise-regulated.md`.
+3. Remove Cycle 13 contract checker and generated artifacts.
 
-This document is the Day 13 closeout report for enterprise/regulated workflow hardening.
+This document is the Cycle 13 closeout report for enterprise/regulated workflow hardening.

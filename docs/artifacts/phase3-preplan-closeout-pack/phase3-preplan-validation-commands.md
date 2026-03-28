@@ -1,4 +1,4 @@
-# Day 59 validation commands
+# Cycle 59 validation commands
 
 ```bash
 python -m sdetkit phase3-preplan-closeout --format json --strict

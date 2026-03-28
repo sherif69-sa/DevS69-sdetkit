@@ -1,3 +1,3 @@
-# Day 50 Execution Prioritization Brief
+# Cycle 50 Execution Prioritization Brief
 
-- Objective: close Day 50 with measurable execution-board discipline and prioritized release storytelling gains.
+- Objective: close Cycle 50 with measurable execution-board discipline and prioritized release storytelling gains.

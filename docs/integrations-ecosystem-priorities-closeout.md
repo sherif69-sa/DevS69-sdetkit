@@ -1,14 +1,14 @@
 # Ecosystem priorities closeout lane
 
-Day 78 closes with a major upgrade that converts Day 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
+Cycle 78 closes with a major upgrade that converts Cycle 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
 
-## Why Day 78 matters
+## Why Cycle 78 matters
 
-- Turns Day 77 community-touchpoint outcomes into ecosystem-facing expansion proof across docs, governance, and release channels.
+- Turns Cycle 77 community-touchpoint outcomes into ecosystem-facing expansion proof across docs, governance, and release channels.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 78 ecosystem priorities into Day 79 scale priorities.
+- Creates a deterministic handoff from Cycle 78 ecosystem priorities into Cycle 79 scale priorities.
 
-## Required inputs (Day 77)
+## Required inputs (Cycle 77)
 
 - `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`
 - `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_ecosystem_priorities_closeout_contract.py
 
 ## Ecosystem priorities contract
 
-- Single owner + backup reviewer are assigned for Day 78 ecosystem priorities execution and signoff.
-- The Day 78 lane references Day 77 outcomes, controls, and KPI continuity signals.
-- Every Day 78 section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 78 closeout records ecosystem outcomes, confidence notes, and Day 79 scale priorities.
+- Single owner + backup reviewer are assigned for Cycle 78 ecosystem priorities execution and signoff.
+- The Cycle 78 lane references Cycle 77 outcomes, controls, and KPI continuity signals.
+- Every Cycle 78 section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 78 closeout records ecosystem outcomes, confidence notes, and Cycle 79 scale priorities.
 
 ## Ecosystem priorities quality checklist
 
@@ -40,18 +40,18 @@ python scripts/check_ecosystem_priorities_closeout_contract.py
 
 ## Ecosystem priorities delivery board
 
-- [ ] Day 78 integration brief committed
-- [ ] Day 78 ecosystem priorities plan committed
-- [ ] Day 78 ecosystem workstream ledger exported
-- [ ] Day 78 ecosystem KPI scorecard snapshot exported
-- [ ] Day 79 scale priorities drafted from Day 78 learnings
+- [ ] Cycle 78 integration brief committed
+- [ ] Cycle 78 ecosystem priorities plan committed
+- [ ] Cycle 78 ecosystem workstream ledger exported
+- [ ] Cycle 78 ecosystem KPI scorecard snapshot exported
+- [ ] Cycle 79 scale priorities drafted from Cycle 78 learnings
 
 ## Scoring model
 
-Day 78 weighted score (0-100):
+Cycle 78 weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Day 77 continuity baseline quality (35)
+- Cycle 77 continuity baseline quality (35)
 - Ecosystem evidence data + delivery board completeness (30)
 
 Strict pass requires score >= 95 and zero critical failures.

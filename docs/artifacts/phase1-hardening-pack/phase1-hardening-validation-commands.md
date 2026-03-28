@@ -1,4 +1,4 @@
-# Day 29 validation commands
+# Cycle 29 validation commands
 
 ```bash
 python -m sdetkit phase1-hardening --format json --strict

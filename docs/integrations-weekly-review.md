@@ -1,18 +1,18 @@
-# Weekly review #4 (Day 28)
+# Weekly review #4 (Cycle 28)
 
-Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wins, misses, and corrective actions.
+Cycle 28 closes the weekly growth loop by consolidating Cycle 25-27 outcomes into wins, misses, and corrective actions.
 
-## Who should run Day 28
+## Who should run Cycle 28
 
-- Maintainers preparing Phase-1 closeout and Day 29 hardening priorities.
+- Maintainers preparing Phase-1 closeout and Cycle 29 hardening priorities.
 - DevRel/community operators validating that activation efforts converted to contributions.
 - Engineering managers requiring an auditable weekly checkpoint before handoff.
 
 ## Inputs from Cycles 25-27
 
-- Day 25: `docs/artifacts/community-activation-pack/community-activation-summary.json`
+- Cycle 25: `docs/artifacts/community-activation-pack/community-activation-summary.json`
 - External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
-- Day 27: `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
+- Cycle 27: `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
 
 ## Closeout checklist
 
@@ -25,7 +25,7 @@ python scripts/check_weekly_review_contract.py
 
 ## Scoring model
 
-Day 28 weighted score (0-100):
+Cycle 28 weighted score (0-100):
 
 - Docs contract + command lane completeness: 40 points.
 - Discoverability links in README/docs index: 20 points.

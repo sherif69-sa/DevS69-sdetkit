@@ -1,17 +1,17 @@
 # Integration Expansion Closeout (legacy) — Integration expansion #1 closeout lane
 
-Day 64 closes with a major integration upgrade that turns Day 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
+Cycle 64 closes with a major integration upgrade that turns Cycle 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
 ## Why Integration Expansion Closeout matters
 
-- Converts Day 63 contributor activation into reusable CI automation patterns.
+- Converts Cycle 63 contributor activation into reusable CI automation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Day 64 integration expansion to Day 65 weekly review.
+- Creates a deterministic handoff from Cycle 64 integration expansion to Cycle 65 weekly review.
 
-## Required inputs (Day 63)
+## Required inputs (Cycle 63)
 
-- `docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json`
-- `docs/artifacts/day63-onboarding-activation-closeout-pack/day63-delivery-board.md`
+- `docs/artifacts/cycle63-onboarding-activation-closeout-pack/cycle63-onboarding-activation-closeout-summary.json`
+- `docs/artifacts/cycle63-onboarding-activation-closeout-pack/cycle63-delivery-board.md`
 
 ## Integration Expansion Closeout command lane (legacy)
 
@@ -24,10 +24,10 @@ python scripts/check_integration_expansion_closeout_contract.py
 
 ## Integration expansion contract
 
-- Single owner + backup reviewer are assigned for Day 64 advanced GitHub Actions workflow execution and rollout signoff.
-- The Day 64 lane references Day 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
-- Every Day 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.
+- Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.
+- The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
+- Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Cycle 65 review priorities.
 
 ## Integration quality checklist
 
@@ -39,17 +39,17 @@ python scripts/check_integration_expansion_closeout_contract.py
 
 ## Integration Expansion Closeout delivery board (legacy)
 
-- [ ] Day 64 integration brief committed
-- [ ] Day 64 advanced workflow blueprint published
-- [ ] Day 64 matrix and concurrency plan exported
-- [ ] Day 64 KPI scorecard snapshot exported
-- [ ] Day 65 weekly review priorities drafted from Day 64 learnings
+- [ ] Cycle 64 integration brief committed
+- [ ] Cycle 64 advanced workflow blueprint published
+- [ ] Cycle 64 matrix and concurrency plan exported
+- [ ] Cycle 64 KPI scorecard snapshot exported
+- [ ] Cycle 65 weekly review priorities drafted from Cycle 64 learnings
 
 ## Scoring model
 
-Day 64 weighted score (0-100):
+Cycle 64 weighted score (0-100):
 
 - Contract + command lane completeness: 25 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 63 continuity and strict baseline carryover: 30 points.
+- Cycle 63 continuity and strict baseline carryover: 30 points.
 - Workflow reference quality + guardrails: 25 points.

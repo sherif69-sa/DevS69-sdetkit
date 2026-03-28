@@ -1,7 +1,7 @@
-# Day 39 playbook post #1
+# Cycle 39 playbook post #1
 
 ## Executive summary
-- Day 38 winners were converted into a repeatable publishing pattern.
+- Cycle 38 winners were converted into a repeatable publishing pattern.
 - Misses were mapped to actionable guardrails for next wave execution.
 
 ## Tactical checklist

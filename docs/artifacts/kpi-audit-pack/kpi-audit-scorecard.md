@@ -1,4 +1,4 @@
-Day 27 KPI audit summary
+Cycle 27 KPI audit summary
 score=72.0
 failed=readme_day27_link,readme_day27_command,docs_index_day27_link,top10_day27_alignment
 critical=top10_day27_alignment

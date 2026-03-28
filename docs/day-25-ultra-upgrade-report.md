@@ -1,9 +1,9 @@
-# Day 25 ultra upgrade report — community activation closeout
+# Cycle 25 ultra upgrade report — community activation closeout
 
 ## What shipped
 
 - Added `community-activation` command to enforce roadmap-voting and feedback-triage readiness.
-- Added strict docs-contract checks for Day 25 community activation guidance.
+- Added strict docs-contract checks for Cycle 25 community activation guidance.
 - Added deterministic artifact pack + execution evidence mode.
 - Added dedicated contract validation script and tests.
 
@@ -18,7 +18,7 @@ python scripts/check_community_activation_contract.py
 
 ## Closeout criteria
 
-- Day 25 score >= 90 with no critical failures.
+- Cycle 25 score >= 90 with no critical failures.
 - Integration page includes all required sections + command contract.
 - README/docs index discoverability links in place.
 - Evidence bundle generated and review-ready.

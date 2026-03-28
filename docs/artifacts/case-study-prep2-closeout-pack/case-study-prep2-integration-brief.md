@@ -1,1 +1,1 @@
-# Day 70 integration brief
+# Cycle 70 integration brief

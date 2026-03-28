@@ -1,4 +1,4 @@
-# Day 40 validation commands
+# Cycle 40 validation commands
 
 ```bash
 python -m sdetkit scale-lane --format json --strict

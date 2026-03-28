@@ -1,4 +1,4 @@
-# Day 55 validation commands
+# Cycle 55 validation commands
 
 ```bash
 python -m sdetkit contributor-activation-closeout --format json --strict

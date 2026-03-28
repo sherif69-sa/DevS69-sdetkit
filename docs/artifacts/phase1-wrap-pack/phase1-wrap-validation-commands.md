@@ -1,4 +1,4 @@
-# Day 30 validation commands
+# Cycle 30 validation commands
 
 ```bash
 python -m sdetkit phase1-wrap --format json --strict

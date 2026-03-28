@@ -1,4 +1,4 @@
-# Day 37 experiment hypothesis brief
+# Cycle 37 experiment hypothesis brief
 
 ## Experiment hypotheses
 - `exp-01`: Command-first headline improves contributor command CTR by at least 2%.

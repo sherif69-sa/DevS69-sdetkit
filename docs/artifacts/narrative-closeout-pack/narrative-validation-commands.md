@@ -1,4 +1,4 @@
-# Day 52 Validation Commands
+# Cycle 52 Validation Commands
 
 ```bash
 python -m sdetkit narrative-closeout --format json --strict

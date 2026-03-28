@@ -1,10 +1,10 @@
-# Day 88 big upgrade report
+# Cycle 88 big upgrade report
 
 ## What shipped
 
-- Added `governance-priorities-closeout` command to score Day 88 readiness from Day 87 governance handoff artifacts.
+- Added `governance-priorities-closeout` command to score Cycle 88 readiness from Cycle 87 governance handoff artifacts.
 - Added deterministic pack emission and execution evidence generation for governance priorities closeout proof.
-- Added strict contract validation script and tests that enforce Day 88 closeout quality gates and handoff integrity.
+- Added strict contract validation script and tests that enforce Cycle 88 closeout quality gates and handoff integrity.
 
 ## Command lane
 

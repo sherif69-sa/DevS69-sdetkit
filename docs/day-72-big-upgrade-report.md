@@ -1,16 +1,16 @@
-# Day 72 big upgrade report
+# Cycle 72 big upgrade report
 
 ## Objective
 
-Close Day 72 with a high-signal case-study prep #4 lane that upgrades Day 71 escalation-quality outputs into publication-quality assets and a strict Day 73 launch handoff.
+Close Cycle 72 with a high-signal case-study prep #4 lane that upgrades Cycle 71 escalation-quality outputs into publication-quality assets and a strict Cycle 73 launch handoff.
 
 ## What shipped
 
-- New `case-study-prep4-closeout` CLI lane with strict scoring and Day 71 continuity validation.
-- New Day 72 integration guide with command lane, contract lock, quality checklist, and delivery board.
-- New Day 72 contract checker script for CI and local execution gating.
+- New `case-study-prep4-closeout` CLI lane with strict scoring and Cycle 71 continuity validation.
+- New Cycle 72 integration guide with command lane, contract lock, quality checklist, and delivery board.
+- New Cycle 72 contract checker script for CI and local execution gating.
 - New publication-quality artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
-- New `docs/roadmap/plans/day72-publication-quality-case-study.json` baseline dataset scaffold for Day 72 publication-quality prep.
+- New `docs/roadmap/plans/cycle72-publication-quality-case-study.json` baseline dataset scaffold for Cycle 72 publication-quality prep.
 
 ## Validation flow
 
@@ -23,4 +23,4 @@ python scripts/check_case_study_prep4_closeout_contract.py
 
 ## Outcome
 
-Day 72 is now an evidence-backed case-study prep #4 lane with strict continuity to Day 71 and deterministic handoff into Day 73 publication launch execution.
+Cycle 72 is now an evidence-backed case-study prep #4 lane with strict continuity to Cycle 71 and deterministic handoff into Cycle 73 publication launch execution.

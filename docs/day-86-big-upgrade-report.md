@@ -1,10 +1,10 @@
-# Day 86 big upgrade report
+# Cycle 86 big upgrade report
 
 ## What shipped
 
-- Added `launch-readiness-closeout` command to score Day 86 readiness from Day 85 release prioritization handoff artifacts.
+- Added `launch-readiness-closeout` command to score Cycle 86 readiness from Cycle 85 release prioritization handoff artifacts.
 - Added deterministic pack emission and execution evidence generation for launch readiness closeout proof.
-- Added strict contract validation script and tests that enforce Day 86 closeout quality gates and handoff integrity.
+- Added strict contract validation script and tests that enforce Cycle 86 closeout quality gates and handoff integrity.
 
 ## Command lane
 

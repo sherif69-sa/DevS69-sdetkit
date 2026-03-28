@@ -1,14 +1,14 @@
 # Release Prioritization Closeout — Release prioritization closeout lane
 
-Day 85 closes with a major upgrade that converts Day 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
+Cycle 85 closes with a major upgrade that converts Cycle 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
 
 ## Why Release Prioritization Closeout matters
 
-- Converts Day 84 evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
+- Converts Cycle 84 evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
 - Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 85 closeout into Day 86 launch priorities.
+- Creates a deterministic handoff from Cycle 85 closeout into Cycle 86 launch priorities.
 
-## Required inputs (Day 84)
+## Required inputs (Cycle 84)
 
 - `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`
 - `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`
@@ -25,10 +25,10 @@ python scripts/check_release_prioritization_closeout_contract.py
 
 ## Release prioritization contract
 
-- Single owner + backup reviewer are assigned for Day 85 release prioritization execution and signoff.
-- The Day 85 lane references Day 84 outcomes, controls, and trust continuity signals.
-- Every Day 85 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 85 closeout records release prioritization pack upgrades, storyline outcomes, and Day 86 launch priorities.
+- Single owner + backup reviewer are assigned for Cycle 85 release prioritization execution and signoff.
+- The Cycle 85 lane references Cycle 84 outcomes, controls, and trust continuity signals.
+- Every Cycle 85 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 85 closeout records release prioritization pack upgrades, storyline outcomes, and Cycle 86 launch priorities.
 
 ## Release prioritization quality checklist
 
@@ -40,12 +40,12 @@ python scripts/check_release_prioritization_closeout_contract.py
 
 ## Delivery board
 
-- [ ] Day 85 evidence brief committed
-- [ ] Day 85 release prioritization plan committed
-- [ ] Day 85 narrative template upgrade ledger exported
-- [ ] Day 85 storyline outcomes ledger exported
-- [ ] Day 86 launch priorities drafted from Day 85 outcomes
+- [ ] Cycle 85 evidence brief committed
+- [ ] Cycle 85 release prioritization plan committed
+- [ ] Cycle 85 narrative template upgrade ledger exported
+- [ ] Cycle 85 storyline outcomes ledger exported
+- [ ] Cycle 86 launch priorities drafted from Cycle 85 outcomes
 
 ## Scoring model
 
-Day 85 weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.
+Cycle 85 weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.

@@ -1,4 +1,4 @@
-# Day 34 demo script
+# Cycle 34 demo script
 
 ## Hook (0-15s)
 - Repo risk + why this matters now

@@ -1,15 +1,15 @@
-# Day 74 big upgrade report
+# Cycle 74 big upgrade report
 
-## Day 74 big upgrade
+## Cycle 74 big upgrade
 
-Close Day 74 with a high-signal distribution scaling lane that upgrades Day 73 published case-study proof into a deterministic multi-channel execution pack and a strict Day 75 trust-refresh handoff.
+Close Cycle 74 with a high-signal distribution scaling lane that upgrades Cycle 73 published case-study proof into a deterministic multi-channel execution pack and a strict Cycle 75 trust-refresh handoff.
 
 ### What shipped
 
-- New `distribution-scaling-closeout` CLI lane with strict scoring and Day 73 continuity validation.
-- New Day 74 integration guide with command lane, contract lock, quality checklist, and delivery board.
-- New Day 74 contract checker script for CI and local execution gating.
-- New `docs/roadmap/plans/day74-distribution-scaling-plan.json` baseline dataset scaffold for Day 74 distribution execution planning.
+- New `distribution-scaling-closeout` CLI lane with strict scoring and Cycle 73 continuity validation.
+- New Cycle 74 integration guide with command lane, contract lock, quality checklist, and delivery board.
+- New Cycle 74 contract checker script for CI and local execution gating.
+- New `docs/roadmap/plans/cycle74-distribution-scaling-plan.json` baseline dataset scaffold for Cycle 74 distribution execution planning.
 
 ### Command lane
 
@@ -22,4 +22,4 @@ python scripts/check_distribution_scaling_closeout_contract.py
 
 ### Outcome
 
-Day 74 is now an evidence-backed distribution scaling closeout lane with strict continuity to Day 73 and deterministic handoff into Day 75 trust refresh.
+Cycle 74 is now an evidence-backed distribution scaling closeout lane with strict continuity to Cycle 73 and deterministic handoff into Cycle 75 trust refresh.

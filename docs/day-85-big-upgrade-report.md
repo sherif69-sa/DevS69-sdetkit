@@ -1,10 +1,10 @@
-# Day 85 big upgrade report
+# Cycle 85 big upgrade report
 
 ## What shipped
 
-- Added `release-prioritization-closeout` command to score Day 85 readiness from Day 84 evidence narrative handoff artifacts.
+- Added `release-prioritization-closeout` command to score Cycle 85 readiness from Cycle 84 evidence narrative handoff artifacts.
 - Added deterministic pack emission and execution evidence generation for release prioritization closeout proof.
-- Added strict contract validation script and tests that enforce Day 85 closeout quality gates and handoff integrity.
+- Added strict contract validation script and tests that enforce Cycle 85 closeout quality gates and handoff integrity.
 
 ## Command lane
 

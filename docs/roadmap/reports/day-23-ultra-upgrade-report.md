@@ -1,8 +1,8 @@
-# Day 23 ultra upgrade report
+# Cycle 23 ultra upgrade report
 
-## Day 23 big upgrade: FAQ and objections closeout lane
+## Cycle 23 big upgrade: FAQ and objections closeout lane
 
-Day 23 delivers a production-grade objection-handling lane that translates recurring adoption blockers into strict, testable, and artifact-backed outcomes.
+Cycle 23 delivers a production-grade objection-handling lane that translates recurring adoption blockers into strict, testable, and artifact-backed outcomes.
 
 ## Problem statement
 
@@ -24,10 +24,10 @@ Without deterministic answers, onboarding confidence drops and launch momentum s
 
 ## Diff target
 
-- Product code: new Day 23 module + CLI wiring.
+- Product code: new Cycle 23 module + CLI wiring.
 - Tests: command behavior + strict failure modes + CLI dispatch.
-- Docs: Day 23 integration guide, artifacts, and index/README updates.
-- CI/automation: Day 23 contract check script.
+- Docs: Cycle 23 integration guide, artifacts, and index/README updates.
+- CI/automation: Cycle 23 contract check script.
 
 ## Validation commands
 
@@ -52,6 +52,6 @@ python scripts/check_objection_handling_contract.py
 ## Rollback plan
 
 1. Remove `faq-objections` command dispatch from CLI.
-2. Remove `src/sdetkit/faq_objections.py` and Day 23 docs pages.
-3. Remove Day 23 contract checks from validation scripts.
+2. Remove `src/sdetkit/faq_objections.py` and Cycle 23 docs pages.
+3. Remove Cycle 23 contract checks from validation scripts.
 4. Re-run baseline tests to confirm stable fallback.

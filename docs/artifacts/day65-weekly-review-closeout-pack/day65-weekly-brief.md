@@ -1,1 +1,1 @@
-# Day 65 weekly brief
+# Cycle 65 weekly brief

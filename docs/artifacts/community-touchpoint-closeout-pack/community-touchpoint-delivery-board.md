@@ -1,6 +1,6 @@
 # Community touchpoint delivery board
-- [ ] Day 77 integration brief committed
-- [ ] Day 77 community touchpoint plan committed
-- [ ] Day 77 touchpoint session ledger exported
-- [ ] Day 77 touchpoint KPI scorecard snapshot exported
-- [ ] Day 78 ecosystem priorities drafted from Day 77 learnings
+- [ ] Cycle 77 integration brief committed
+- [ ] Cycle 77 community touchpoint plan committed
+- [ ] Cycle 77 touchpoint session ledger exported
+- [ ] Cycle 77 touchpoint KPI scorecard snapshot exported
+- [ ] Cycle 78 ecosystem priorities drafted from Cycle 77 learnings

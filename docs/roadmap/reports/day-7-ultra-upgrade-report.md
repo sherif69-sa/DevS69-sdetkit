@@ -1,8 +1,8 @@
-# Day 7 Ultra Upgrade Report — Weekly Review #1
+# Cycle 7 Ultra Upgrade Report — Weekly Review #1
 
 ## Upgrade title
 
-**Day 7 big upgrade: runnable weekly review command for shipped scope, KPI movement, and next-week focus**
+**Cycle 7 big upgrade: runnable weekly review command for shipped scope, KPI movement, and next-week focus**
 
 ## Problem statement
 
@@ -15,7 +15,7 @@ This made weekly reporting manual and increased drift risk between what was deli
 ### Files changed
 
 - `src/sdetkit/weekly_review.py`
-  - Added a Day 7 weekly review engine that evaluates Day 1–6 report/artifact coverage.
+  - Added a Cycle 7 weekly review engine that evaluates Cycle 1–6 report/artifact coverage.
   - Computes KPI snapshot (`days_completed`, `completion_rate_percent`, `runnable_commands`, `artifact_coverage`).
   - Emits text/json/markdown output and supports writing artifacts through `--output`.
 - `src/sdetkit/cli.py`
@@ -26,31 +26,31 @@ This made weekly reporting manual and increased drift risk between what was deli
 - `tests/test_cli_help_lists_subcommands.py`
   - Extended CLI help contract to include `weekly-review` in `sdetkit --help` output.
 - `README.md`
-  - Added Day 7 weekly review section with runnable command flow and closeout checks.
+  - Added Cycle 7 weekly review section with runnable command flow and closeout checks.
 - `docs/index.md`
-  - Added Day 7 report link and execution bullets.
+  - Added Cycle 7 report link and execution bullets.
 - `docs/cli.md`
   - Added `weekly-review` command reference and usage examples.
 - `scripts/check_day7_weekly_review_contract.py`
-  - Added Day 7 contract checker for README/docs/report/script wiring and artifact presence.
-- `docs/artifacts/day7-weekly-review-sample.md`
-  - Added generated Day 7 weekly review artifact sample.
+  - Added Cycle 7 contract checker for README/docs/report/script wiring and artifact presence.
+- `docs/artifacts/cycle7-weekly-review-sample.md`
+  - Added generated Cycle 7 weekly review artifact sample.
 
 ## Validation checklist
 
 - `python -m sdetkit weekly-review --format text`
-- `python -m sdetkit weekly-review --format markdown --output docs/artifacts/day7-weekly-review-sample.md`
+- `python -m sdetkit weekly-review --format markdown --output docs/artifacts/cycle7-weekly-review-sample.md`
 - `python -m pytest -q tests/test_weekly_review.py tests/test_cli_help_lists_subcommands.py`
 - `python scripts/check_day7_weekly_review_contract.py`
 
 ## Artifact
 
-This document is the Day 7 artifact report for Weekly review #1 closeout and KPI checkpointing.
+This document is the Cycle 7 artifact report for Weekly review #1 closeout and KPI checkpointing.
 
 ## Rollback plan
 
 1. Remove `weekly-review` command wiring from `src/sdetkit/cli.py`.
 2. Remove `src/sdetkit/weekly_review.py` and related tests.
-3. Revert Day 7 docs/report updates and remove Day 7 artifact/checker script.
+3. Revert Cycle 7 docs/report updates and remove Cycle 7 artifact/checker script.
 
 Rollback risk is low because this is an additive reporting command and does not alter existing workflows.

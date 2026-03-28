@@ -1,7 +1,7 @@
-# Day 48 Delivery Board
+# Cycle 48 Delivery Board
 
-- [ ] Day 48 objection plan draft committed
-- [ ] Day 48 review notes captured with owner + backup
-- [ ] Day 48 FAQ objection map exported
-- [ ] Day 48 KPI scorecard snapshot exported
-- [ ] Day 49 weekly-review priorities drafted from Day 48 learnings
+- [ ] Cycle 48 objection plan draft committed
+- [ ] Cycle 48 review notes captured with owner + backup
+- [ ] Cycle 48 FAQ objection map exported
+- [ ] Cycle 48 KPI scorecard snapshot exported
+- [ ] Cycle 49 weekly-review priorities drafted from Cycle 48 learnings

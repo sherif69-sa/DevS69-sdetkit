@@ -1,4 +1,4 @@
-# Day 65 validation commands
+# Cycle 65 validation commands
 
 ```bash
 python -m sdetkit weekly-review-closeout --format json --strict
