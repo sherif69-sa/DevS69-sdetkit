@@ -32,7 +32,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d50.build_day50_execution_prioritization_closeout_summary(root)
+    payload = d50.build_execution_prioritization_closeout_summary(root)
 
     strict_failures: list[str] = []
     page = root / d50._PAGE_PATH

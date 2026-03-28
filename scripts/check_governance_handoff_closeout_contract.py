@@ -20,7 +20,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d87.build_day87_governance_handoff_closeout_summary(root)
+    payload = d87.build_governance_handoff_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):

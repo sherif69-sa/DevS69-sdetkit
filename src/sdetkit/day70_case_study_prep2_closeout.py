@@ -151,7 +151,7 @@ def _count_board_items(board_path: Path, anchor: str) -> tuple[int, bool]:
     return len(items), (anchor in text)
 
 
-def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
+def build_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read(root / "README.md")
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
@@ -404,6 +404,11 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
+
+def build_day70_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy day-based builder name."""
+    return build_case_study_prep2_closeout_summary(root)
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 70 case-study prep #2 closeout checks")
     parser.add_argument("--root", default=".")
@@ -419,7 +424,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DAY70_DEFAULT_PAGE)
 
-    payload = build_day70_case_study_prep2_closeout_summary(root)
+    payload = build_case_study_prep2_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

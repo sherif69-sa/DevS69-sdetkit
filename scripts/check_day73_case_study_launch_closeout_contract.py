@@ -18,7 +18,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d73.build_day73_case_study_launch_closeout_summary(root)
+    payload = d73.build_case_study_launch_closeout_summary(root)
     errors: list[str] = []
 
     if payload["summary"]["activation_score"] < 95:

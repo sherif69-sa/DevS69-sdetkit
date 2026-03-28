@@ -150,7 +150,7 @@ def _load_board(path: Path) -> tuple[int, bool]:
     return len(items), has_day56
 
 
-def build_day57_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
+def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read(root / "README.md")
     docs_index_text = _read(root / "docs/index.md")
     page_path = root / _PAGE_PATH
@@ -399,6 +399,11 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
+
+def build_day57_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy day-based builder name."""
+    return build_kpi_deep_audit_closeout_summary(root)
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="KPI Deep Audit Closeout checks (legacy alias: day57-kpi-deep-audit-closeout)"
@@ -416,7 +421,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DAY57_DEFAULT_PAGE)
 
-    payload = build_day57_kpi_deep_audit_closeout_summary(root)
+    payload = build_kpi_deep_audit_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

@@ -18,7 +18,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d89.build_day89_governance_scale_closeout_summary(root)
+    payload = d89.build_governance_scale_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):

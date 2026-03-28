@@ -149,7 +149,7 @@ def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
     return [line for line in expected if line not in text]
 
 
-def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     readme_path = "README.md"
     docs_index_path = "docs/index.md"
     docs_page_path = _PAGE_PATH
@@ -460,6 +460,11 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+
+def build_day45_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy day-based builder name."""
+    return build_expansion_closeout_summary(root)
+
 def main(argv: list[str] | None = None) -> int:
     ns = build_parser().parse_args(argv)
     root = Path(ns.root).resolve()
@@ -469,7 +474,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY45_DEFAULT_PAGE)
 
-    payload = build_day45_expansion_closeout_summary(root)
+    payload = build_expansion_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
