@@ -6,7 +6,7 @@ Close Day 70 with a high-signal case-study prep lane that converts Day 69 output
 
 ## What shipped
 
-- New `day70-case-study-prep2-closeout` CLI lane with strict scoring and Day 69 continuity validation.
+- New `case-study-prep2-closeout` CLI lane with strict scoring and Day 69 continuity validation.
 - New Day 70 integration guide with command lane, contract lock, quality checklist, and delivery board.
 - New Day 70 contract checker script for CI and local execution gating.
 - New case-study artifact pack outputs for narrative, controls logging, KPI scoring, and execution evidence.
@@ -15,9 +15,9 @@ Close Day 70 with a high-signal case-study prep lane that converts Day 69 output
 ## Validation flow
 
 ```bash
-python -m sdetkit day70-case-study-prep2-closeout --format json --strict
-python -m sdetkit day70-case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict
-python -m sdetkit day70-case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep2-closeout --format json --strict
+python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/case-study-prep2-closeout-pack --format json --strict
+python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/case-study-prep2-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_prep2_closeout_contract.py
 ```
 

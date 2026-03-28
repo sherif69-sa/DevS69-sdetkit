@@ -42,7 +42,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json"
+        / "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
+        root / "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -151,7 +151,7 @@ def test_day77_strict_fails_without_day76(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json"
+        / "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
     ).unlink()
     assert d77.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

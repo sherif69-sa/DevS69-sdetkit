@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_case_study_launch_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "day73-case-study-launch-closeout contract check failed:\n- activation_score too low: 67\n- strict_pass is false\n- failed checks: ['readme_day73_command', 'docs_index_day73_links', 'top10_day73_alignment', 'day72_quality_floor']\n"
+}

@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_day76_contributor_recognition_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "day76-contributor-recognition-closeout contract check passed\n",
-  "stderr": ""
-}

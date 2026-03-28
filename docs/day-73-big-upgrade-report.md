@@ -16,8 +16,8 @@ Close Day 73 with a high-signal case-study launch lane that upgrades Day 72 publ
 
 ```bash
 python -m sdetkit case-study-launch-closeout --format json --strict
-python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict
-python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict
+python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_launch_closeout_contract.py
 ```
 

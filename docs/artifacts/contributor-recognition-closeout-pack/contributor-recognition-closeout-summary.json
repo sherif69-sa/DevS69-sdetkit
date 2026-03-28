@@ -1,0 +1,129 @@
+{
+  "name": "contributor-recognition-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-contributor-recognition-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day75_summary": "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json",
+    "day75_delivery_board": "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md",
+    "recognition_plan": "docs/roadmap/plans/contributor-recognition-plan.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day76_command",
+      "weight": 7,
+      "passed": false,
+      "evidence": "README day76 command lane"
+    },
+    {
+      "check_id": "docs_index_day76_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-76-big-upgrade-report.md + integrations-contributor-recognition-closeout.md"
+    },
+    {
+      "check_id": "top10_day76_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 75 + Day 76 strategy chain"
+    },
+    {
+      "check_id": "day75_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
+    },
+    {
+      "check_id": "day75_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
+    },
+    {
+      "check_id": "day75_quality_floor",
+      "weight": 13,
+      "passed": false,
+      "evidence": {
+        "day75_score": 67,
+        "strict_pass": false,
+        "day75_checks": 14
+      }
+    },
+    {
+      "check_id": "day75_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day75": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 76 \u2014 Contributor recognition closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "recognition_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/roadmap/plans/contributor-recognition-plan.json"
+    }
+  ],
+  "rollup": {
+    "day75_activation_score": 67,
+    "day75_checks": 14,
+    "day75_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 67,
+    "passed_checks": 10,
+    "failed_checks": 4,
+    "critical_failures": [
+      "day75_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 75 delivery board integrity validated with 5 checklist items.",
+    "Day 76 contributor recognition dataset is available for launch execution."
+  ],
+  "misses": [
+    "Day 75 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 75 closeout command and restore strict baseline before Day 76 lock."
+  ]
+}

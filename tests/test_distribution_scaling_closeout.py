@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json"
+        / "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day73-case-study-launch-closeout-pack/day73-delivery-board.md"
+    board = root / "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -116,26 +116,26 @@ def test_day74_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day74-pack/day74-distribution-scaling-closeout-summary.json"
+        tmp_path / "artifacts/day74-pack/distribution-scaling-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day74-pack/day74-distribution-scaling-closeout-summary.md"
+        tmp_path / "artifacts/day74-pack/distribution-scaling-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-distribution-scaling-plan.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-channel-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/day74-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/evidence/day74-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-plan.md").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-channel-controls-log.json").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day74-pack/evidence/distribution-scaling-execution-summary.json").exists()
 
 
 def test_day74_strict_fails_without_day73(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json"
+        / "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json"
     ).unlink()
     assert d74.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

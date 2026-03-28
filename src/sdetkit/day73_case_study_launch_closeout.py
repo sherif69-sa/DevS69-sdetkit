@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-launch-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY72_SUMMARY_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
-_DAY72_BOARD_PATH = "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md"
+_DAY72_SUMMARY_PATH = "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
+_DAY72_BOARD_PATH = "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/published-case-study.json"
 _SECTION_HEADER = "# Day 73 \u2014 Case-study launch closeout lane"
 _REQUIRED_SECTIONS = [
@@ -25,13 +25,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit case-study-launch-closeout --format json --strict",
-    "python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict",
-    "python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict",
     "python scripts/check_case_study_launch_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit case-study-launch-closeout --format json --strict",
-    "python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict",
     "python scripts/check_case_study_launch_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -75,16 +75,16 @@ Day 73 closes with a major upgrade that turns Day 72 publication-quality prep in
 
 ## Required inputs (Day 72)
 
-- `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json`
-- `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md`
+- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json`
+- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md`
 - `docs/roadmap/plans/published-case-study.json`
 
 ## Day 73 command lane
 
 ```bash
 python -m sdetkit case-study-launch-closeout --format json --strict
-python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict
-python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict
+python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_launch_closeout_contract.py
 ```
 
@@ -363,21 +363,21 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day73-case-study-launch-closeout-summary.json",
+        target / "case-study-launch-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day73-case-study-launch-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day73-integration-brief.md", "# Day 73 integration brief\n")
-    _write(target / "day73-case-study-narrative.md", "# Day 73 case-study narrative\n")
-    _write(target / "day73-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "day73-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day73-execution-log.md", "# Day 73 execution log\n")
+    _write(target / "case-study-launch-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "case-study-launch-integration-brief.md", "# Day 73 integration brief\n")
+    _write(target / "case-study-launch-case-study-narrative.md", "# Day 73 case-study narrative\n")
+    _write(target / "case-study-launch-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
+    _write(target / "case-study-launch-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "case-study-launch-execution-log.md", "# Day 73 execution log\n")
     _write(
-        target / "day73-delivery-board.md",
+        target / "case-study-launch-delivery-board.md",
         "\n".join(["# Day 73 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day73-validation-commands.md",
+        target / "case-study-launch-validation-commands.md",
         "# Day 73 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -400,7 +400,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day73-execution-summary.json",
+        out_dir / "case-study-launch-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -433,7 +433,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day73-case-study-launch-closeout-pack/evidence")
+            else Path("docs/artifacts/case-study-launch-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

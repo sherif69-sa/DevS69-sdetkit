@@ -115,16 +115,16 @@ def test_day72_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day72-pack/day72-case-study-prep4-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-case-study-prep4-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/day72-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/evidence/day72-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-case-study-narrative.md").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-controls-log.json").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day72-pack/evidence/case-study-prep4-execution-summary.json").exists()
 
 
 def test_day72_strict_fails_without_day71(tmp_path: Path) -> None:

@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_day75_trust_assets_refresh_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "day75-trust-assets-refresh-closeout contract check passed\n",
-  "stderr": ""
-}

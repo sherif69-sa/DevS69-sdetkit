@@ -10,10 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-prep3-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY70_SUMMARY_PATH = "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json"
-_DAY70_BOARD_PATH = "docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md"
+_DAY70_SUMMARY_PATH = "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json"
+_DAY70_BOARD_PATH = "docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md"
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/escalation-quality-case-study.json"
-_SECTION_HEADER = "# Case-study prep #3 closeout lane"
+_SECTION_HEADER = "# Day 71 — Case-study prep #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 71 matters",
     "## Required inputs (Day 70)",
@@ -75,8 +75,8 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 
 ## Required inputs (Day 70)
 
-- `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json`
-- `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md`
+- `docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json`
+- `docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md`
 - `docs/roadmap/plans/escalation-quality-case-study.json`
 
 ## Day 71 command lane
@@ -189,10 +189,7 @@ def build_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_case_study_prep3_alignment",
             "weight": 5,
-            "passed": (
-                "case-study-prep3-closeout" in top10_text
-                and "case-study-prep4-closeout" in top10_text
-            ),
+            "passed": ("Day 71" in top10_text and "Day 72" in top10_text),
             "evidence": "Case-study prep #3 + prep #4 strategy chain",
         },
         {
@@ -227,7 +224,7 @@ def build_case_study_prep3_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "page_header",
             "weight": 7,
             "passed": (
-                page_text.splitlines()[0].strip() == "# Case-study prep #3 closeout lane"
+                page_text.splitlines()[0].strip() == "# Day 71 — Case-study prep #3 closeout lane"
                 if page_text.strip()
                 else False
             ),

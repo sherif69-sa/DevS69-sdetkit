@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_distribution_scaling_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "day74-distribution-scaling-closeout contract check failed:\n- activation_score too low: 67\n- strict_pass is false\n- failed checks: ['readme_day74_command', 'docs_index_day74_links', 'top10_day74_alignment', 'day73_quality_floor']\n"
+}

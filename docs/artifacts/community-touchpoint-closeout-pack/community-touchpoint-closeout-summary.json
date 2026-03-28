@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-community-touchpoint-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day76_summary": "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json",
-    "day76_delivery_board": "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md",
+    "day76_summary": "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json",
+    "day76_delivery_board": "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md",
     "touchpoint_plan": "docs/roadmap/plans/community-touchpoint-plan.json"
   },
   "checks": [
@@ -32,21 +32,21 @@
       "check_id": "day76_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
     },
     {
       "check_id": "day76_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
     },
     {
       "check_id": "day76_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day76_score": 100,
-        "strict_pass": true,
+        "day76_score": 67,
+        "strict_pass": false,
         "day76_checks": 14
       }
     },
@@ -103,23 +103,27 @@
     }
   ],
   "rollup": {
-    "day76_activation_score": 100,
+    "day76_activation_score": 67,
     "day76_checks": 14,
     "day76_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 87,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [
+      "day76_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 76 continuity is strict-pass with activation score=100.",
     "Day 76 delivery board integrity validated with 5 checklist items.",
-    "Day 77 community touchpoint dataset is available for launch execution.",
-    "Day 77 community touchpoint closeout lane is fully complete and ready for Day 78 ecosystem priorities."
+    "Day 77 community touchpoint dataset is available for launch execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 76 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 76 closeout command and restore strict baseline before Day 77 lock."
+  ]
 }

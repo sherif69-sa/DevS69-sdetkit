@@ -16,8 +16,8 @@ Close Day 72 with a high-signal case-study prep #4 lane that upgrades Day 71 esc
 
 ```bash
 python -m sdetkit case-study-prep4-closeout --format json --strict
-python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/day72-case-study-prep4-closeout-pack --format json --strict
-python -m sdetkit case-study-prep4-closeout --execute --evidence-dir docs/artifacts/day72-case-study-prep4-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/case-study-prep4-closeout-pack --format json --strict
+python -m sdetkit case-study-prep4-closeout --execute --evidence-dir docs/artifacts/case-study-prep4-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_prep4_closeout_contract.py
 ```
 
