@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-playbook-post.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day38_summary": "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json",
-    "day38_delivery_board": "docs/artifacts/distribution-batch-pack/delivery-board.md"
+    "distribution_batch_summary": "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json",
+    "distribution_batch_delivery_board": "docs/artifacts/distribution-batch-pack/delivery-board.md"
   },
   "checks": [
     {
@@ -32,59 +32,59 @@
       }
     },
     {
-      "check_id": "readme_day39_link",
+      "check_id": "readme_playbook_post_link",
       "weight": 8,
       "passed": true,
       "evidence": "docs/integrations-playbook-post.md"
     },
     {
-      "check_id": "readme_day39_command",
+      "check_id": "readme_playbook_post_command",
       "weight": 4,
       "passed": true,
       "evidence": "playbook-post"
     },
     {
-      "check_id": "docs_index_day39_links",
+      "check_id": "docs_index_playbook_post_links",
       "weight": 8,
       "passed": true,
       "evidence": "impact-39-big-upgrade-report.md + integrations-playbook-post.md"
     },
     {
-      "check_id": "top10_day39_alignment",
+      "check_id": "top10_playbook_post_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 39 + Day 40 strategy chain"
+      "evidence": "Playbook post + Scale lane strategy chain"
     },
     {
-      "check_id": "day38_summary_present",
+      "check_id": "distribution_batch_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
     },
     {
-      "check_id": "day38_delivery_board_present",
+      "check_id": "distribution_batch_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/distribution-batch-pack/delivery-board.md"
     },
     {
-      "check_id": "day38_quality_floor",
+      "check_id": "distribution_batch_quality_floor",
       "weight": 10,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day38_score": 100.0,
-        "strict_pass": true,
-        "day38_checks": 14
+        "distribution_batch_score": 90.0,
+        "strict_pass": false,
+        "distribution_batch_checks": 14
       }
     },
     {
-      "check_id": "day38_board_integrity",
+      "check_id": "distribution_batch_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day38": true,
-        "contains_day39": true
+        "contains_distribution_batch": true,
+        "contains_playbook_post": true
       }
     },
     {
@@ -113,23 +113,27 @@
     }
   ],
   "rollup": {
-    "day38_activation_score": 100.0,
-    "day38_checks": 14,
-    "day38_delivery_board_items": 5
+    "distribution_batch_activation_score": 90.0,
+    "distribution_batch_checks": 14,
+    "distribution_batch_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 90,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [
+      "distribution_batch_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 38 continuity is strict-pass with activation score=100.0.",
-    "Day 38 delivery board integrity validated with 5 checklist items.",
-    "Playbook publication contract + quality checklist is fully locked for execution.",
-    "Day 39 playbook post #1 is fully complete and ready for Day 40 scale lane."
+    "Distribution batch delivery board integrity validated with 5 checklist items.",
+    "Playbook publication contract + quality checklist is fully locked for execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Distribution batch strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Distribution batch distribution batch command and restore strict pass baseline before Playbook post lock."
+  ]
 }

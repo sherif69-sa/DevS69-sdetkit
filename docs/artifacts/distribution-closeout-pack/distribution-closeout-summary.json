@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-distribution-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day35_summary": "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json",
-    "day35_delivery_board": "docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
+    "kpi_instrumentation_summary": "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json",
+    "kpi_instrumentation_delivery_board": "docs/artifacts/kpi-instrumentation-pack/delivery-board.md"
   },
   "checks": [
     {
@@ -32,59 +32,59 @@
       }
     },
     {
-      "check_id": "readme_day36_link",
+      "check_id": "readme_distribution_closeout_link",
       "weight": 8,
       "passed": true,
       "evidence": "docs/integrations-distribution-closeout.md"
     },
     {
-      "check_id": "readme_day36_command",
+      "check_id": "readme_distribution_closeout_command",
       "weight": 4,
       "passed": true,
       "evidence": "distribution-closeout"
     },
     {
-      "check_id": "docs_index_day36_links",
+      "check_id": "docs_index_distribution_closeout_links",
       "weight": 8,
       "passed": true,
       "evidence": "impact-36-big-upgrade-report.md + integrations-distribution-closeout.md"
     },
     {
-      "check_id": "top10_day36_alignment",
+      "check_id": "top10_distribution_closeout_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 36 + Day 37 strategy chain"
+      "evidence": "Distribution closeout + Experiment lane strategy chain"
     },
     {
-      "check_id": "day35_summary_present",
+      "check_id": "kpi_instrumentation_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
     },
     {
-      "check_id": "day35_delivery_board_present",
+      "check_id": "kpi_instrumentation_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-instrumentation-pack/delivery-board.md"
     },
     {
-      "check_id": "day35_quality_floor",
+      "check_id": "kpi_instrumentation_quality_floor",
       "weight": 10,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day35_score": 100.0,
-        "strict_pass": true,
-        "day35_checks": 14
+        "kpi_instrumentation_score": 55.0,
+        "strict_pass": false,
+        "kpi_instrumentation_checks": 14
       }
     },
     {
-      "check_id": "day35_board_integrity",
+      "check_id": "kpi_instrumentation_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day36": true,
-        "contains_day37": true
+        "contains_distribution_closeout": true,
+        "contains_experiment_lane": true
       }
     },
     {
@@ -113,23 +113,27 @@
     }
   ],
   "rollup": {
-    "day35_activation_score": 100.0,
-    "day35_checks": 14,
-    "day35_delivery_board_items": 5
+    "kpi_instrumentation_activation_score": 55.0,
+    "kpi_instrumentation_checks": 14,
+    "kpi_instrumentation_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 90,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [
+      "kpi_instrumentation_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 35 continuity is strict-pass with activation score=100.0.",
-    "Day 35 delivery board integrity validated with 5 checklist items.",
-    "Distribution contract + quality checklist is fully locked for execution.",
-    "Day 36 community distribution closeout is fully complete and ready for Day 37 experiment execution."
+    "KPI instrumentation delivery board integrity validated with 5 checklist items.",
+    "Distribution contract + quality checklist is fully locked for execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "KPI instrumentation strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run KPI instrumentation KPI instrumentation command and restore strict pass baseline before Distribution closeout lock."
+  ]
 }

@@ -1,24 +1,22 @@
-# Day 40 scale lane summary
+# Scale lane summary
 
-- Activation score: **100**
-- Passed checks: **14**
-- Failed checks: **0**
-- Critical failures: **none**
+- Activation score: **90**
+- Passed checks: **13**
+- Failed checks: **1**
+- Critical failures: **playbook_post_strict_baseline**
 
-## Day 39 continuity
+## Playbook post continuity
 
-- Day 39 activation score: `100.0`
-- Day 39 checks evaluated: `14`
-- Day 39 delivery board checklist items: `5`
+- Playbook post activation score: `90.0`
+- Playbook post checks evaluated: `14`
+- Playbook post delivery board checklist items: `5`
 
 ## Wins
-- Day 39 continuity is strict-pass with activation score=100.0.
-- Day 39 delivery board integrity validated with 5 checklist items.
+- Playbook post delivery board integrity validated with 5 checklist items.
 - Scale execution contract + quality checklist is fully locked for execution.
-- Day 40 scale lane #1 is fully complete and ready for Day 41 expansion lane.
 
 ## Misses
-- No misses recorded.
+- Playbook post strict continuity signal is missing.
 
 ## Handoff actions
-- [ ] No handoff actions required.
+- [ ] Re-run playbook post command and restore strict pass baseline before scale lane lock.

@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-experiment-lane.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day36_summary": "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json",
-    "day36_delivery_board": "docs/artifacts/distribution-closeout-pack/delivery-board.md"
+    "distribution_closeout_summary": "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json",
+    "distribution_closeout_delivery_board": "docs/artifacts/distribution-closeout-pack/delivery-board.md"
   },
   "checks": [
     {
@@ -32,59 +32,59 @@
       }
     },
     {
-      "check_id": "readme_day37_link",
+      "check_id": "readme_experiment_lane_link",
       "weight": 8,
       "passed": true,
       "evidence": "docs/integrations-experiment-lane.md"
     },
     {
-      "check_id": "readme_day37_command",
+      "check_id": "readme_experiment_lane_command",
       "weight": 4,
       "passed": true,
       "evidence": "experiment-lane"
     },
     {
-      "check_id": "docs_index_day37_links",
+      "check_id": "docs_index_experiment_lane_links",
       "weight": 8,
       "passed": true,
       "evidence": "impact-37-big-upgrade-report.md + integrations-experiment-lane.md"
     },
     {
-      "check_id": "top10_day37_alignment",
+      "check_id": "top10_experiment_lane_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 37 + Day 38 strategy chain"
+      "evidence": "Experiment lane + Distribution batch strategy chain"
     },
     {
-      "check_id": "day36_summary_present",
+      "check_id": "distribution_closeout_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
     },
     {
-      "check_id": "day36_delivery_board_present",
+      "check_id": "distribution_closeout_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/distribution-closeout-pack/delivery-board.md"
     },
     {
-      "check_id": "day36_quality_floor",
+      "check_id": "distribution_closeout_quality_floor",
       "weight": 10,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day36_score": 100.0,
-        "strict_pass": true,
-        "day36_checks": 14
+        "distribution_closeout_score": 90.0,
+        "strict_pass": false,
+        "distribution_closeout_checks": 14
       }
     },
     {
-      "check_id": "day36_board_integrity",
+      "check_id": "distribution_closeout_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day36": true,
-        "contains_day37": true
+        "contains_distribution_closeout": true,
+        "contains_experiment_lane": true
       }
     },
     {
@@ -113,23 +113,27 @@
     }
   ],
   "rollup": {
-    "day36_activation_score": 100.0,
-    "day36_checks": 14,
-    "day36_delivery_board_items": 5
+    "distribution_closeout_activation_score": 90.0,
+    "distribution_closeout_checks": 14,
+    "distribution_closeout_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 90,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [
+      "distribution_closeout_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 36 continuity is strict-pass with activation score=100.0.",
-    "Day 36 delivery board integrity validated with 5 checklist items.",
-    "Experiment contract + quality checklist is fully locked for execution.",
-    "Day 37 experiment lane activation is fully complete and ready for Day 38 distribution batch #1."
+    "Distribution closeout delivery board integrity validated with 5 checklist items.",
+    "Experiment contract + quality checklist is fully locked for execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Distribution closeout strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Distribution closeout distribution closeout command and restore strict pass baseline before Experiment lane lock."
+  ]
 }
