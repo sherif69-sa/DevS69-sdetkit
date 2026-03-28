@@ -65,7 +65,7 @@ _TRUST_ASSETS = {
     },
 }
 
-_CHECKLIST_SECTION_HEADER = "## 0) Day 10 first-contribution checklist"
+_CHECKLIST_SECTION_HEADER = "## 0) First-contribution checklist"
 
 _CHECKLIST_ITEMS = [
     "Fork the repository and clone your fork locally.",
@@ -86,7 +86,7 @@ _COMMAND_BLOCKS = [
     "mkdocs build",
 ]
 
-_DAY10_DEFAULT_BLOCK = """## 0) Day 10 first-contribution checklist
+_DAY10_DEFAULT_BLOCK = """## 0) First-contribution checklist
 
 Use this guided path from local clone to first merged PR:
 
@@ -210,7 +210,7 @@ def build_first_contribution_status(root: str = ".", profile: str = "all") -> di
     recommended_profile = next(iter(selected_profiles)) if profile != "all" else "docs-polish"
 
     return {
-        "name": "day10-first-contribution-checklist",
+        "name": "first-contribution-checklist",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,
@@ -238,7 +238,7 @@ def build_first_contribution_status(root: str = ".", profile: str = "all") -> di
             "profile_test_hardening": "sdetkit first-contribution --profile test-hardening --format markdown",
             "profile_automation_upgrade": "sdetkit first-contribution --profile automation-upgrade --format markdown",
             "write_defaults": "sdetkit first-contribution --write-defaults --strict",
-            "artifact": "sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md",
+            "artifact": "sdetkit first-contribution --format markdown --output docs/artifacts/first-contribution-checklist-sample.md",
         },
     }
 

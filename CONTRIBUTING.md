@@ -128,7 +128,7 @@ Reference: [docs/premium-quality-gate.md](docs/premium-quality-gate.md)
 - Mention affected commands/workflows.
 - Keep PRs small enough for fast review turnaround.
 
-## 0) Day 10 first-contribution checklist
+## 0) First-contribution checklist
 
 Use this guided path from local clone to first merged PR:
 

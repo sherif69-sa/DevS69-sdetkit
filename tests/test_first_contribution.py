@@ -55,7 +55,7 @@ def test_first_contribution_json_and_strict_success(capsys):
     rc = first_contribution.main(["--format", "json", "--strict"])
     assert rc == 0
     data = json.loads(capsys.readouterr().out)
-    assert data["name"] == "day10-first-contribution-checklist"
+    assert data["name"] == "first-contribution-checklist"
     assert data["passed_checks"] == data["total_checks"]
     assert "mkdocs build" in data["required_commands"]
 

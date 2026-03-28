@@ -129,8 +129,8 @@ DAY8_TO_13: tuple[DayShipped, ...] = (
         10,
         "First-contribution checklist",
         "docs/impact-10-ultra-upgrade-report.md",
-        "docs/artifacts/day10-first-contribution-checklist-sample.md",
-        "python -m sdetkit first-contribution --format markdown --output docs/artifacts/day10-first-contribution-checklist-sample.md --strict",
+        "docs/artifacts/first-contribution-checklist-sample.md",
+        "python -m sdetkit first-contribution --format markdown --output docs/artifacts/first-contribution-checklist-sample.md --strict",
     ),
     DayShipped(
         11,
