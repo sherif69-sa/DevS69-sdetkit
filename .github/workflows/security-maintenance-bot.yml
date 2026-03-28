@@ -41,6 +41,9 @@ jobs:
           set -euo pipefail
           /tmp/gitleaks-bin/gitleaks detect \
             --source . \
+            --config .gitleaks.toml \
+            --gitleaks-ignore-path .gitleaksignore \
+            --no-git \
             --report-format sarif \
             --report-path results.sarif \
             --redact \
