@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-integration-expansion3-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY66_SUMMARY_PATH = "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json"
+_DAY66_SUMMARY_PATH = "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
 _DAY66_BOARD_PATH = (
-    "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md"
+    "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
 )
 _JENKINS_PATH = "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
 _SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
@@ -27,13 +27,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit integration-expansion3-closeout --format json --strict",
-    "python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict",
-    "python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/integration-expansion3-closeout-pack/evidence --format json --strict",
     "python scripts/check_integration_expansion3_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit integration-expansion3-closeout --format json --strict",
-    "python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict",
     "python scripts/check_integration_expansion3_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -77,16 +77,16 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 
 ## Required inputs (Day 66)
 
-- `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json`
-- `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md`
+- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`
+- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
 - `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
 ## Integration Expansion3 Closeout command lane (Legacy Day 67)
 
 ```bash
 python -m sdetkit integration-expansion3-closeout --format json --strict
-python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
-python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict
+python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/integration-expansion3-closeout-pack/evidence --format json --strict
 python scripts/check_integration_expansion3_closeout_contract.py
 ```
 
@@ -408,7 +408,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day67-execution-summary.json",
+        out_dir / "integration-expansion3-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -441,7 +441,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day67-integration-expansion3-closeout-pack/evidence")
+            else Path("docs/artifacts/integration-expansion3-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

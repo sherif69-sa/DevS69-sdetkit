@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
+        / "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
+    board = root / "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -120,7 +120,7 @@ def test_day63_strict_fails_without_day62(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
+        / "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
     ).unlink()
     assert d63.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

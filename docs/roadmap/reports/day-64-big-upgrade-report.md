@@ -15,8 +15,8 @@ Close Day 64 with an advanced GitHub Actions integration lane that converts Day 
 
 ```bash
 python -m sdetkit day64-integration-expansion-closeout --format json --strict
-python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
-python -m sdetkit day64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit day64-integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict
+python -m sdetkit day64-integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict
 python scripts/check_integration_expansion_closeout_contract.py
 ```
 

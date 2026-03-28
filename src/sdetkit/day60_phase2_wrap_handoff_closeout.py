@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-phase2-wrap-handoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY58_SUMMARY_PATH = (
-    "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json"
+    "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
 )
-_DAY58_BOARD_PATH = "docs/artifacts/day59-phase3-preplan-closeout-pack/day59-delivery-board.md"
+_DAY58_BOARD_PATH = "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md"
 _SECTION_HEADER = "# Day 60 \u2014 Phase-2 wrap + handoff closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 60 matters",
@@ -26,13 +26,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit phase2-wrap-handoff-closeout --format json --strict",
-    "python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict",
-    "python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict",
+    "python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict",
     "python scripts/check_phase2_wrap_handoff_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit phase2-wrap-handoff-closeout --format json --strict",
-    "python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict",
+    "python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict",
     "python scripts/check_phase2_wrap_handoff_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +68,15 @@ Day 60 closes with a major Phase-2 wrap + handoff upgrade that turns Day 59 pre-
 
 ## Required inputs (Day 59)
 
-- `docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json`
-- `docs/artifacts/day59-phase3-preplan-closeout-pack/day59-delivery-board.md`
+- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`
+- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`
 
 ## Day 60 command lane
 
 ```bash
 python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
+python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict
 python scripts/check_phase2_wrap_handoff_closeout_contract.py
 ```
 
@@ -388,7 +388,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day60-execution-summary.json",
+        out_dir / "phase2-wrap-handoff-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -423,7 +423,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence")
+            else Path("docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

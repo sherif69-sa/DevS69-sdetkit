@@ -107,7 +107,7 @@ def test_day59_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day59-pack/day59-execution-log.md").exists()
     assert (tmp_path / "artifacts/day59-pack/day59-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day59-pack/day59-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/evidence/day59-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day59-pack/evidence/phase3-preplan-execution-summary.json").exists()
 
 
 def test_day59_strict_fails_without_day58(tmp_path: Path) -> None:

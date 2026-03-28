@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
+        / "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+        root / "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -121,7 +121,7 @@ def test_day65_strict_fails_without_day64(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
+        / "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     ).unlink()
     assert d65.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-weekly-review-closeout-cycle2.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY64_SUMMARY_PATH = "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
+_DAY64_SUMMARY_PATH = "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
 _DAY64_BOARD_PATH = (
-    "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+    "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
 )
 _DAY64_WORKFLOW_PATH = ".github/workflows/day64-advanced-github-actions-reference.yml"
 _SECTION_HEADER = "# Day 65 \u2014 Weekly review #9 closeout lane"
@@ -69,8 +69,8 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 
 ## Required inputs (Day 64)
 
-- `docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json`
-- `docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md`
+- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json`
+- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md`
 - `.github/workflows/day64-advanced-github-actions-reference.yml`
 
 ## Weekly Review Closeout command lane (Legacy Day 65)

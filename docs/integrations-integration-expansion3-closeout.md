@@ -10,16 +10,16 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 
 ## Required inputs (Day 66)
 
-- `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json`
-- `docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md`
+- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`
+- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
 - `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
 ## Integration Expansion3 Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit integration-expansion3-closeout --format json --strict
-python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
-python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/day67-integration-expansion3-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict
+python -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/integration-expansion3-closeout-pack/evidence --format json --strict
 python scripts/check_integration_expansion3_closeout_contract.py
 ```
 

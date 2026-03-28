@@ -1,0 +1,125 @@
+{
+  "name": "day67-integration-expansion3-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-day67-integration-expansion3-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day66_summary": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json",
+    "day66_delivery_board": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md",
+    "jenkins_reference": "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
+  },
+  "checks": [
+    {
+      "check_id": "readme_day67_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README day67 command lane"
+    },
+    {
+      "check_id": "docs_index_day67_links",
+      "weight": 8,
+      "passed": true,
+      "evidence": "impact-67-big-upgrade-report.md + integrations-day67-integration-expansion3-closeout.md"
+    },
+    {
+      "check_id": "top10_day67_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Day 67 + Day 68 strategy chain"
+    },
+    {
+      "check_id": "day66_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
+    },
+    {
+      "check_id": "day66_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
+    },
+    {
+      "check_id": "day66_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day66_score": 100,
+        "strict_pass": true,
+        "day66_checks": 14
+      }
+    },
+    {
+      "check_id": "day66_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day66": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Day 67 \u2014 Integration expansion #3 closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "jenkins_reference_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
+    }
+  ],
+  "rollup": {
+    "day66_activation_score": 100,
+    "day66_checks": 14,
+    "day66_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 100,
+    "passed_checks": 14,
+    "failed_checks": 0,
+    "critical_failures": [],
+    "strict_pass": true
+  },
+  "wins": [
+    "Day 66 continuity is strict-pass with activation score=100.",
+    "Day 66 delivery board integrity validated with 5 checklist items.",
+    "Day 67 Jenkins reference pipeline is available for integration expansion execution.",
+    "Day 67 integration expansion #3 closeout lane is fully complete and ready for Day 68 integration expansion #4."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

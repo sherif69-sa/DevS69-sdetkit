@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json"
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-delivery-board.md"
+        root / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -139,14 +139,14 @@ def test_day67_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day67-pack/day67-execution-log.md").exists()
     assert (tmp_path / "artifacts/day67-pack/day67-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day67-pack/day67-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day67-pack/evidence/day67-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day67-pack/evidence/integration-expansion3-execution-summary.json").exists()
 
 
 def test_day67_strict_fails_without_day66(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day66-integration-expansion2-closeout-pack/day66-integration-expansion2-closeout-summary.json"
+        / "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
     ).unlink()
     assert d67.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-day63-onboarding-activation-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day62_summary": "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json",
-    "day62_delivery_board": "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
+    "day62_summary": "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json",
+    "day62_delivery_board": "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
   },
   "checks": [
     {
@@ -31,13 +31,13 @@
       "check_id": "day62_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
     },
     {
       "check_id": "day62_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
     },
     {
       "check_id": "day62_quality_floor",
