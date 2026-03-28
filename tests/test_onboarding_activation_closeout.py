@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-onboarding-activation-closeout.md\nday63-onboarding-activation-closeout\n",
+        "docs/integrations-onboarding-activation-closeout.md\nonboarding-activation-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 63 — Contributor onboarding activation:** launch orientation flow and ownership handoff loops.\n"
-        "- **Day 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.\n",
+        "- **Cycle 63 — Contributor onboarding activation:** launch orientation flow and ownership handoff loops.\n"
+        "- **Cycle 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-onboarding-activation-closeout.md").write_text(
         d63._DAY63_DEFAULT_PAGE, encoding="utf-8"
     )
     (root / "docs/impact-63-big-upgrade-report.md").write_text(
-        "# Day 63 report\n", encoding="utf-8"
+        "# Cycle 63 report\n", encoding="utf-8"
     )
 
     summary = (
@@ -65,7 +65,7 @@ def _seed_repo(root: Path) -> None:
                 "- [ ] Day 62 office-hours cadence published",
                 "- [ ] Day 62 participation policy + moderation SOP exported",
                 "- [ ] Day 62 KPI scorecard snapshot exported",
-                "- [ ] Day 63 onboarding priorities drafted from Day 62 learnings",
+                "- [ ] Cycle 63 onboarding priorities drafted from Day 62 learnings",
             ]
         )
         + "\n",
@@ -73,7 +73,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day63_json(tmp_path: Path, capsys) -> None:
+def test_cycle63_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d63.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -82,17 +82,17 @@ def test_day63_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day63_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_cycle63_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d63.main(
         [
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day63-pack",
+            "artifacts/onboarding-activation-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day63-pack/evidence",
+            "artifacts/onboarding-activation-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -100,23 +100,23 @@ def test_day63_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day63-pack/day63-onboarding-activation-closeout-summary.json"
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day63-pack/day63-onboarding-activation-closeout-summary.md"
+        tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-onboarding-launch-brief.md").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-orientation-script.md").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-ownership-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-roadmap-voting-brief.md").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day63-pack/day63-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day63-pack/evidence/day63-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/onboarding-launch-brief.md").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/orientation-script.md").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/ownership-matrix.csv").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/roadmap-voting-brief.md").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/execution-log.md").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/onboarding-activation-closeout-pack/evidence/execution-summary.json").exists()
 
 
-def test_day63_strict_fails_without_day62(tmp_path: Path) -> None:
+def test_cycle63_strict_fails_without_day62(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -125,10 +125,10 @@ def test_day63_strict_fails_without_day62(tmp_path: Path) -> None:
     assert d63.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day63_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cycle63_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day63-onboarding-activation-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["onboarding-activation-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Onboarding Activation Closeout summary" in capsys.readouterr().out

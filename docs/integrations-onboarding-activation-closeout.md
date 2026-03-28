@@ -17,8 +17,8 @@ Cycle 63 closes with a major onboarding activation upgrade that turns Cycle 62 c
 
 ```bash
 python -m sdetkit onboarding-activation-closeout --format json --strict
-python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/cycle63-onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/cycle63-onboarding-activation-closeout-pack/evidence --format json --strict
+python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict
+python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/onboarding-activation-closeout-pack/evidence --format json --strict
 python scripts/check_onboarding_activation_closeout_contract_63.py
 ```
 

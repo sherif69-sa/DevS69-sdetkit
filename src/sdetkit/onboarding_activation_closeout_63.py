@@ -12,32 +12,32 @@ _PAGE_PATH = "docs/integrations-onboarding-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY62_SUMMARY_PATH = "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
 _DAY62_BOARD_PATH = "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
-_SECTION_HEADER = "# Day 63 \u2014 Contributor onboarding activation closeout lane"
+_SECTION_HEADER = "# Cycle 63 \u2014 Contributor onboarding activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Onboarding Activation Closeout matters",
     "## Required inputs (Day 62)",
-    "## Onboarding Activation Closeout command lane (Legacy Day 63)",
+    "## Onboarding Activation Closeout command lane (Legacy Cycle 63)",
     "## Onboarding activation contract",
     "## Onboarding quality checklist",
-    "## Onboarding Activation Closeout delivery board (Legacy Day 63)",
+    "## Onboarding Activation Closeout delivery board (Legacy Cycle 63)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit onboarding-activation-closeout --format json --strict",
-    "python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict",
-    "python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/onboarding-activation-closeout-pack/evidence --format json --strict",
     "python scripts/check_onboarding_activation_closeout_contract_63.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit onboarding-activation-closeout --format json --strict",
-    "python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict",
+    "python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict",
     "python scripts/check_onboarding_activation_closeout_contract_63.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 63 onboarding activation execution and roadmap-voting facilitation.",
-    "The Day 63 lane references Day 62 community-program outcomes, moderation guardrails, and KPI continuity evidence.",
-    "Every Day 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Day 64 pipeline priorities.",
+    "Single owner + backup reviewer are assigned for Cycle 63 onboarding activation execution and roadmap-voting facilitation.",
+    "The Cycle 63 lane references Day 62 community-program outcomes, moderation guardrails, and KPI continuity evidence.",
+    "Every Cycle 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "Cycle 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Cycle 64 pipeline priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes onboarding orientation path, mentor ownership model, and rollback trigger",
@@ -47,43 +47,43 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 63 onboarding launch brief committed",
-    "- [ ] Day 63 orientation script + ownership matrix published",
-    "- [ ] Day 63 roadmap voting brief exported",
-    "- [ ] Day 63 KPI scorecard snapshot exported",
-    "- [ ] Day 64 contributor pipeline priorities drafted from Day 63 learnings",
+    "- [ ] Cycle 63 onboarding launch brief committed",
+    "- [ ] Cycle 63 orientation script + ownership matrix published",
+    "- [ ] Cycle 63 roadmap voting brief exported",
+    "- [ ] Cycle 63 KPI scorecard snapshot exported",
+    "- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings",
 ]
 
-_DAY63_DEFAULT_PAGE = """# Day 63 \u2014 Contributor onboarding activation closeout lane
+_DAY63_DEFAULT_PAGE = """# Cycle 63 \u2014 Contributor onboarding activation closeout lane
 
-Day 63 ships a major onboarding-activation upgrade that converts Day 62 community program evidence into deterministic onboarding ownership and roadmap-voting loops.
+Cycle 63 ships a major onboarding-activation upgrade that converts Day 62 community program evidence into deterministic onboarding ownership and roadmap-voting loops.
 
 ## Why Onboarding Activation Closeout matters
 
 - Converts Day 62 community trust baseline into repeatable onboarding activation and mentor ownership loops.
 - Protects contributor onboarding outcomes with ownership, command proof, and rollback guardrails.
-- Produces a deterministic handoff from Day 63 onboarding activation into Day 64 contributor pipeline acceleration.
+- Produces a deterministic handoff from Cycle 63 onboarding activation into Cycle 64 contributor pipeline acceleration.
 
 ## Required inputs (Day 62)
 
 - `docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json`
 - `docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md`
 
-## Onboarding Activation Closeout command lane (Legacy Day 63)
+## Onboarding Activation Closeout command lane (Legacy Cycle 63)
 
 ```bash
 python -m sdetkit onboarding-activation-closeout --format json --strict
-python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/day63-onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/day63-onboarding-activation-closeout-pack/evidence --format json --strict
+python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict
+python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/onboarding-activation-closeout-pack/evidence --format json --strict
 python scripts/check_onboarding_activation_closeout_contract_63.py
 ```
 
 ## Onboarding activation contract
 
-- Single owner + backup reviewer are assigned for Day 63 onboarding activation execution and roadmap-voting facilitation.
-- The Day 63 lane references Day 62 community-program outcomes, moderation guardrails, and KPI continuity evidence.
-- Every Day 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Day 64 pipeline priorities.
+- Single owner + backup reviewer are assigned for Cycle 63 onboarding activation execution and roadmap-voting facilitation.
+- The Cycle 63 lane references Day 62 community-program outcomes, moderation guardrails, and KPI continuity evidence.
+- Every Cycle 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Cycle 64 pipeline priorities.
 
 ## Onboarding quality checklist
 
@@ -93,17 +93,17 @@ python scripts/check_onboarding_activation_closeout_contract_63.py
 - [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner
 - [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log
 
-## Onboarding Activation Closeout delivery board (Legacy Day 63)
+## Onboarding Activation Closeout delivery board (Legacy Cycle 63)
 
-- [ ] Day 63 onboarding launch brief committed
-- [ ] Day 63 orientation script + ownership matrix published
-- [ ] Day 63 roadmap voting brief exported
-- [ ] Day 63 KPI scorecard snapshot exported
-- [ ] Day 64 contributor pipeline priorities drafted from Day 63 learnings
+- [ ] Cycle 63 onboarding launch brief committed
+- [ ] Cycle 63 orientation script + ownership matrix published
+- [ ] Cycle 63 roadmap voting brief exported
+- [ ] Cycle 63 KPI scorecard snapshot exported
+- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings
 
 ## Scoring model
 
-Day 63 weighted score (0-100):
+Cycle 63 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -165,13 +165,13 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day63_command",
+            "check_id": "readme_cycle63_command",
             "weight": 7,
-            "passed": ("day63-onboarding-activation-closeout" in readme_text),
-            "evidence": "README day63 command lane",
+            "passed": ("onboarding-activation-closeout" in readme_text),
+            "evidence": "README onboarding-activation-closeout command lane",
         },
         {
-            "check_id": "docs_index_day63_links",
+            "check_id": "docs_index_cycle63_links",
             "weight": 8,
             "passed": (
                 "impact-63-big-upgrade-report.md" in docs_index_text
@@ -180,10 +180,10 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-63-big-upgrade-report.md + integrations-onboarding-activation-closeout.md",
         },
         {
-            "check_id": "top10_day63_alignment",
+            "check_id": "top10_cycle63_alignment",
             "weight": 5,
-            "passed": ("Day 63" in top10_text and "Day 64" in top10_text),
-            "evidence": "Day 63 + Day 64 strategy chain",
+            "passed": ("Cycle 63" in top10_text and "Cycle 64" in top10_text),
+            "evidence": "Cycle 63 + Cycle 64 strategy chain",
         },
         {
             "check_id": "day62_summary_present",
@@ -267,7 +267,7 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Day 62 strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 62 community-program closeout command and restore strict baseline before Day 63 lock."
+            "Re-run Day 62 community-program closeout command and restore strict baseline before Cycle 63 lock."
         )
 
     if board_count >= 5 and board_has_day62:
@@ -289,12 +289,12 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "Onboarding activation contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 63 contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all Cycle 63 contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 63 onboarding activation closeout lane is fully complete and ready for Day 64 contributor pipeline lane."
+            "Cycle 63 onboarding activation closeout lane is fully complete and ready for Cycle 64 contributor pipeline lane."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -350,23 +350,23 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day63-onboarding-activation-closeout-summary.json",
+        target / "onboarding-activation-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day63-onboarding-activation-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day63-onboarding-launch-brief.md", "# Day 63 onboarding launch brief\n")
-    _write(target / "day63-orientation-script.md", "# Day 63 orientation script\n")
-    _write(target / "day63-ownership-matrix.csv", "track,owner,backup,sla\n")
-    _write(target / "day63-roadmap-voting-brief.md", "# Day 63 roadmap voting brief\n")
-    _write(target / "day63-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day63-execution-log.md", "# Day 63 execution log\n")
+    _write(target / "onboarding-activation-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "onboarding-launch-brief.md", "# Cycle 63 onboarding launch brief\n")
+    _write(target / "orientation-script.md", "# Cycle 63 orientation script\n")
+    _write(target / "ownership-matrix.csv", "track,owner,backup,sla\n")
+    _write(target / "roadmap-voting-brief.md", "# Cycle 63 roadmap voting brief\n")
+    _write(target / "kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "execution-log.md", "# Cycle 63 execution log\n")
     _write(
-        target / "day63-delivery-board.md",
-        "\n".join(["# Day 63 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        target / "delivery-board.md",
+        "\n".join(["# Cycle 63 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day63-validation-commands.md",
-        "# Day 63 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        target / "validation-commands.md",
+        "# Cycle 63 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -388,18 +388,18 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day63-execution-summary.json",
+        out_dir / "execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
 
 
-def build_day63_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+def build_cycle63_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy cycle-based builder name."""
     return build_onboarding_activation_closeout_summary(root)
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 63 onboarding activation closeout checks")
+    parser = argparse.ArgumentParser(description="Cycle 63 onboarding activation closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -421,7 +421,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day63-onboarding-activation-closeout-pack/evidence")
+            else Path("docs/artifacts/onboarding-activation-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

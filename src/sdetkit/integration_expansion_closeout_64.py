@@ -10,19 +10,19 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-integration-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY63_SUMMARY_PATH = "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
+_DAY63_SUMMARY_PATH = "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
 _DAY63_BOARD_PATH = (
-    "docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
+    "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
 )
 _WORKFLOW_PATH = ".github/workflows/advanced-github-actions-reference-64.yml"
-_SECTION_HEADER = "# Day 64 \u2014 Integration expansion #1 closeout lane"
+_SECTION_HEADER = "# Cycle 64 \u2014 Integration expansion #1 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion Closeout matters",
-    "## Required inputs (Day 63)",
-    "## Integration Expansion Closeout command lane (Legacy Day 64)",
+    "## Required inputs (Cycle 63)",
+    "## Integration Expansion Closeout command lane (Legacy Cycle 64)",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Integration Expansion Closeout delivery board (Legacy Day 64)",
+    "## Integration Expansion Closeout delivery board (Legacy Cycle 64)",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -37,10 +37,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_integration_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 64 advanced GitHub Actions workflow execution and rollout signoff.",
-    "The Day 64 lane references Day 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.",
-    "Every Day 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.",
+    "Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.",
+    "The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.",
+    "Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes reusable workflow + workflow_call path, matrix coverage, and rollback trigger",
@@ -50,14 +50,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 64 integration brief committed",
-    "- [ ] Day 64 advanced workflow blueprint published",
-    "- [ ] Day 64 matrix and concurrency plan exported",
-    "- [ ] Day 64 KPI scorecard snapshot exported",
-    "- [ ] Day 65 weekly review priorities drafted from Day 64 learnings",
+    "- [ ] Cycle 64 integration brief committed",
+    "- [ ] Cycle 64 advanced workflow blueprint published",
+    "- [ ] Cycle 64 matrix and concurrency plan exported",
+    "- [ ] Cycle 64 KPI scorecard snapshot exported",
+    "- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings",
 ]
 _REQUIRED_WORKFLOW_LINES = [
-    "name: Day64 Advanced GitHub Actions Reference",
+    "name: Cycle64 Advanced GitHub Actions Reference",
     "workflow_dispatch:",
     "workflow_call:",
     "strategy:",
@@ -66,22 +66,22 @@ _REQUIRED_WORKFLOW_LINES = [
     "actions/cache@v4",
 ]
 
-_DAY64_DEFAULT_PAGE = """# Day 64 \u2014 Integration expansion #1 closeout lane
+_DAY64_DEFAULT_PAGE = """# Cycle 64 \u2014 Integration expansion #1 closeout lane
 
-Day 64 closes with a major integration upgrade that turns Day 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
+Cycle 64 closes with a major integration upgrade that turns Cycle 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
 ## Why Integration Expansion Closeout matters
 
-- Converts Day 63 contributor activation into reusable CI automation patterns.
+- Converts Cycle 63 contributor activation into reusable CI automation patterns.
 - Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Day 64 integration expansion to Day 65 weekly review.
+- Creates a deterministic handoff from Cycle 64 integration expansion to Day 65 weekly review.
 
-## Required inputs (Day 63)
+## Required inputs (Cycle 63)
 
-- `docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json`
-- `docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md`
+- `docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json`
+- `docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md`
 
-## Integration Expansion Closeout command lane (Legacy Day 64)
+## Integration Expansion Closeout command lane (Legacy Cycle 64)
 
 ```bash
 python -m sdetkit integration-expansion-closeout --format json --strict
@@ -92,10 +92,10 @@ python scripts/check_integration_expansion_closeout_contract.py
 
 ## Integration expansion contract
 
-- Single owner + backup reviewer are assigned for Day 64 advanced GitHub Actions workflow execution and rollout signoff.
-- The Day 64 lane references Day 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
-- Every Day 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.
+- Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.
+- The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
+- Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.
 
 ## Integration quality checklist
 
@@ -105,21 +105,21 @@ python scripts/check_integration_expansion_closeout_contract.py
 - [ ] Scorecard captures workflow pass-rate, median runtime, cache hit-rate, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion Closeout delivery board (Legacy Day 64)
+## Integration Expansion Closeout delivery board (Legacy Cycle 64)
 
-- [ ] Day 64 integration brief committed
-- [ ] Day 64 advanced workflow blueprint published
-- [ ] Day 64 matrix and concurrency plan exported
-- [ ] Day 64 KPI scorecard snapshot exported
-- [ ] Day 65 weekly review priorities drafted from Day 64 learnings
+- [ ] Cycle 64 integration brief committed
+- [ ] Cycle 64 advanced workflow blueprint published
+- [ ] Cycle 64 matrix and concurrency plan exported
+- [ ] Cycle 64 KPI scorecard snapshot exported
+- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings
 
 ## Scoring model
 
-Day 64 weighted score (0-100):
+Cycle 64 weighted score (0-100):
 
 - Contract + command lane completeness: 25 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 63 continuity and strict baseline carryover: 30 points.
+- Cycle 63 continuity and strict baseline carryover: 30 points.
 - Workflow reference quality + guardrails: 25 points.
 """
 
@@ -138,7 +138,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day63(path: Path) -> tuple[int, bool, int]:
+def _load_cycle63(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -165,10 +165,10 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     workflow_text = _read(root / _WORKFLOW_PATH)
 
-    day63_summary = root / _DAY63_SUMMARY_PATH
-    day63_board = root / _DAY63_BOARD_PATH
-    day63_score, day63_strict, day63_check_count = _load_day63(day63_summary)
-    board_count, board_has_day63 = _count_board_items(day63_board, "Day 63")
+    cycle63_summary = root / _DAY63_SUMMARY_PATH
+    cycle63_board = root / _DAY63_BOARD_PATH
+    cycle63_score, cycle63_strict, cycle63_check_count = _load_cycle63(cycle63_summary)
+    board_count, board_has_cycle63 = _count_board_items(cycle63_board, "Cycle 63")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -179,13 +179,13 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day64_command",
+            "check_id": "readme_cycle64_command",
             "weight": 7,
-            "passed": ("day64-integration-expansion-closeout" in readme_text),
-            "evidence": "README day64 command lane",
+            "passed": ("integration-expansion-closeout" in readme_text),
+            "evidence": "README cycle64 command lane",
         },
         {
-            "check_id": "docs_index_day64_links",
+            "check_id": "docs_index_cycle64_links",
             "weight": 8,
             "passed": (
                 "impact-64-big-upgrade-report.md" in docs_index_text
@@ -194,38 +194,38 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-64-big-upgrade-report.md + integrations-integration-expansion-closeout.md",
         },
         {
-            "check_id": "top10_day64_alignment",
+            "check_id": "top10_cycle64_alignment",
             "weight": 5,
-            "passed": ("Day 64" in top10_text and "Day 65" in top10_text),
-            "evidence": "Day 64 + Day 65 strategy chain",
+            "passed": ("Cycle 64" in top10_text and "Day 65" in top10_text),
+            "evidence": "Cycle 64 + Day 65 strategy chain",
         },
         {
-            "check_id": "day63_summary_present",
+            "check_id": "cycle63_summary_present",
             "weight": 10,
-            "passed": day63_summary.exists(),
-            "evidence": str(day63_summary),
+            "passed": cycle63_summary.exists(),
+            "evidence": str(cycle63_summary),
         },
         {
-            "check_id": "day63_delivery_board_present",
+            "check_id": "cycle63_delivery_board_present",
             "weight": 7,
-            "passed": day63_board.exists(),
-            "evidence": str(day63_board),
+            "passed": cycle63_board.exists(),
+            "evidence": str(cycle63_board),
         },
         {
-            "check_id": "day63_quality_floor",
+            "check_id": "cycle63_quality_floor",
             "weight": 13,
-            "passed": day63_strict and day63_score >= 95,
+            "passed": cycle63_strict and cycle63_score >= 95,
             "evidence": {
-                "day63_score": day63_score,
-                "strict_pass": day63_strict,
-                "day63_checks": day63_check_count,
+                "cycle63_score": cycle63_score,
+                "strict_pass": cycle63_strict,
+                "cycle63_checks": cycle63_check_count,
             },
         },
         {
-            "check_id": "day63_board_integrity",
+            "check_id": "cycle63_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day63,
-            "evidence": {"board_items": board_count, "contains_day63": board_has_day63},
+            "passed": board_count >= 5 and board_has_cycle63,
+            "evidence": {"board_items": board_count, "contains_cycle63": board_has_cycle63},
         },
         {
             "check_id": "page_header",
@@ -273,32 +273,32 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day63_summary.exists() or not day63_board.exists():
-        critical_failures.append("day63_handoff_inputs")
-    if not day63_strict:
-        critical_failures.append("day63_strict_baseline")
+    if not cycle63_summary.exists() or not cycle63_board.exists():
+        critical_failures.append("cycle63_handoff_inputs")
+    if not cycle63_strict:
+        critical_failures.append("cycle63_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day63_strict:
-        wins.append(f"Day 63 continuity is strict-pass with activation score={day63_score}.")
+    if cycle63_strict:
+        wins.append(f"Cycle 63 continuity is strict-pass with activation score={cycle63_score}.")
     else:
-        misses.append("Day 63 strict continuity signal is missing.")
+        misses.append("Cycle 63 strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 63 closeout command and restore strict baseline before Day 64 lock."
+            "Re-run Cycle 63 closeout command and restore strict baseline before Cycle 64 lock."
         )
 
-    if board_count >= 5 and board_has_day63:
+    if board_count >= 5 and board_has_cycle63:
         wins.append(
-            f"Day 63 delivery board integrity validated with {board_count} checklist items."
+            f"Cycle 63 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 63 delivery board integrity is incomplete (needs >=5 items and Day 63 anchors)."
+            "Cycle 63 delivery board integrity is incomplete (needs >=5 items and Cycle 63 anchors)."
         )
-        handoff_actions.append("Repair Day 63 delivery board entries to include Day 63 anchors.")
+        handoff_actions.append("Repair Cycle 63 delivery board entries to include Cycle 63 anchors.")
 
     if not missing_workflow_lines:
         wins.append("Advanced GitHub Actions workflow reference is fully locked for execution.")
@@ -310,7 +310,7 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 64 integration expansion closeout lane is fully complete and ready for Day 65 weekly review."
+            "Cycle 64 integration expansion closeout lane is fully complete and ready for Day 65 weekly review."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -322,18 +322,18 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
             "workflow": _WORKFLOW_PATH,
-            "day63_summary": str(day63_summary.relative_to(root))
-            if day63_summary.exists()
-            else str(day63_summary),
-            "day63_delivery_board": str(day63_board.relative_to(root))
-            if day63_board.exists()
-            else str(day63_board),
+            "cycle63_summary": str(cycle63_summary.relative_to(root))
+            if cycle63_summary.exists()
+            else str(cycle63_summary),
+            "cycle63_delivery_board": str(cycle63_board.relative_to(root))
+            if cycle63_board.exists()
+            else str(cycle63_board),
         },
         "checks": checks,
         "rollup": {
-            "day63_activation_score": day63_score,
-            "day63_checks": day63_check_count,
-            "day63_delivery_board_items": board_count,
+            "cycle63_activation_score": cycle63_score,
+            "cycle63_checks": cycle63_check_count,
+            "cycle63_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -371,18 +371,18 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "integration-expansion-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "integration-expansion-integration-brief.md", "# Day 64 integration brief\n")
-    _write(target / "integration-expansion-workflow-blueprint.md", "# Day 64 workflow blueprint\n")
+    _write(target / "integration-expansion-integration-brief.md", "# Cycle 64 integration brief\n")
+    _write(target / "integration-expansion-workflow-blueprint.md", "# Cycle 64 workflow blueprint\n")
     _write(target / "integration-expansion-matrix-plan.csv", "os,python-version,owner\n")
     _write(target / "integration-expansion-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "integration-expansion-execution-log.md", "# Day 64 execution log\n")
+    _write(target / "integration-expansion-execution-log.md", "# Cycle 64 execution log\n")
     _write(
         target / "integration-expansion-delivery-board.md",
-        "\n".join(["# Day 64 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# Cycle 64 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "integration-expansion-validation-commands.md",
-        "# Day 64 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Cycle 64 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -410,12 +410,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 
-def build_day64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+def build_cycle64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy cycle-based builder name."""
     return build_integration_expansion_closeout_summary(root)
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 64 integration expansion closeout checks")
+    parser = argparse.ArgumentParser(description="Cycle 64 integration expansion closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

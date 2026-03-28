@@ -11,7 +11,7 @@ from sdetkit import onboarding_activation_closeout_63 as d63
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate Day 63 onboarding activation closeout contract"
+        description="Validate Cycle 63 onboarding activation closeout contract"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
@@ -33,7 +33,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/onboarding-activation-closeout-pack-63/evidence/execution-summary-63.json"
+            / "docs/artifacts/onboarding-activation-closeout-pack/evidence/execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day63-onboarding-activation-closeout contract check failed:", file=sys.stderr)
+        print("onboarding-activation-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day63-onboarding-activation-closeout contract check passed")
+    print("onboarding-activation-closeout contract check passed")
     return 0
 
 

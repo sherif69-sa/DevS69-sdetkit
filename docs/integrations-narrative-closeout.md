@@ -10,8 +10,8 @@ Cycle 52 closes with a major narrative upgrade that converts Cycle 51 case-snipp
 
 ## Required inputs (Cycle 51)
 
-- `docs/artifacts/cycle51-case-snippet-closeout-pack/cycle51-case-snippet-closeout-summary.json`
-- `docs/artifacts/cycle51-case-snippet-closeout-pack/cycle51-delivery-board.md`
+- `docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json`
+- `docs/artifacts/case-snippet-closeout-pack/delivery-board.md`
 
 ## Narrative Closeout command lane
 
