@@ -10,7 +10,7 @@
 
 ```bash
 python -m pytest -q tests/test_distribution_closeout.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_day36_distribution_closeout_contract.py --skip-evidence
+python scripts/check_distribution_closeout_contract.py --skip-evidence
 python -m sdetkit day36-distribution-closeout --format json --strict
 ```
 

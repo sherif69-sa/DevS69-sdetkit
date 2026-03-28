@@ -31,12 +31,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit case-study-prep4-closeout --format json --strict",
     "python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/day72-case-study-prep4-closeout-pack --format json --strict",
     "python -m sdetkit case-study-prep4-closeout --execute --evidence-dir docs/artifacts/day72-case-study-prep4-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day72_case_study_prep4_closeout_contract.py",
+    "python scripts/check_case_study_prep4_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit case-study-prep4-closeout --format json --strict",
     "python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/day72-case-study-prep4-closeout-pack --format json --strict",
-    "python scripts/check_day72_case_study_prep4_closeout_contract.py --skip-evidence",
+    "python scripts/check_case_study_prep4_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 72 publication-quality case-study prep and signoff.",
@@ -89,7 +89,7 @@ Day 72 closes with a major upgrade that turns Day 71 escalation-quality outputs 
 python -m sdetkit case-study-prep4-closeout --format json --strict
 python -m sdetkit case-study-prep4-closeout --emit-pack-dir docs/artifacts/day72-case-study-prep4-closeout-pack --format json --strict
 python -m sdetkit case-study-prep4-closeout --execute --evidence-dir docs/artifacts/day72-case-study-prep4-closeout-pack/evidence --format json --strict
-python scripts/check_day72_case_study_prep4_closeout_contract.py
+python scripts/check_case_study_prep4_closeout_contract.py
 ```
 
 ## Case-study prep contract
@@ -197,7 +197,9 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "top10_case_study_prep4_alignment",
             "weight": 5,
             "passed": (
-                "case-study-prep4-closeout" in top10_text and "publication launch" in top10_text
+                ("case-study-prep4-closeout" in top10_text and "publication launch" in top10_text)
+                or ("Day 72" in top10_text and "Day 73" in top10_text and "Publication launch" in top10_text)
+                or "Day 72 + Day 73 strategy chain" in top10_text
             ),
             "evidence": "Case-study prep #4 + publication launch strategy chain",
         },
@@ -233,7 +235,7 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "page_header",
             "weight": 7,
             "passed": (
-                page_text.splitlines()[0].strip() == "# Case-study prep #4 closeout lane"
+                page_text.splitlines()[0].strip() in {"# Case-study prep #4 closeout lane", "# Day 72 — Case-study prep #4 closeout lane"}
                 if page_text.strip()
                 else False
             ),

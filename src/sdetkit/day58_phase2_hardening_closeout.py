@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit phase2-hardening-closeout --format json --strict",
     "python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/day58-phase2-hardening-closeout-pack --format json --strict",
     "python -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/day58-phase2-hardening-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day58_phase2_hardening_closeout_contract.py",
+    "python scripts/check_phase2_hardening_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit phase2-hardening-closeout --format json --strict",
     "python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/day58-phase2-hardening-closeout-pack --format json --strict",
-    "python scripts/check_day58_phase2_hardening_closeout_contract.py --skip-evidence",
+    "python scripts/check_phase2_hardening_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 58 Phase-2 hardening execution and signal triage.",
@@ -77,7 +77,7 @@ Day 58 closes with a major Phase-2 hardening upgrade that turns Day 57 KPI deep-
 python -m sdetkit phase2-hardening-closeout --format json --strict
 python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/day58-phase2-hardening-closeout-pack --format json --strict
 python -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/day58-phase2-hardening-closeout-pack/evidence --format json --strict
-python scripts/check_day58_phase2_hardening_closeout_contract.py
+python scripts/check_phase2_hardening_closeout_contract.py
 ```
 
 ## Phase-2 hardening contract

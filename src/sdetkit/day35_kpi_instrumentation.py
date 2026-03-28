@@ -26,12 +26,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit day35-kpi-instrumentation --format json --strict",
     "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict",
     "python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/day35-kpi-instrumentation-pack/evidence --format json --strict",
-    "python scripts/check_day35_kpi_instrumentation_contract.py",
+    "python scripts/check_kpi_instrumentation_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit day35-kpi-instrumentation --format json --strict",
     "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict",
-    "python scripts/check_day35_kpi_instrumentation_contract.py --skip-evidence",
+    "python scripts/check_kpi_instrumentation_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for KPI instrumentation maintenance.",
@@ -75,7 +75,7 @@ Day 35 closes the instrumentation lane by converting demo activity into measurab
 python -m sdetkit day35-kpi-instrumentation --format json --strict
 python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/day35-kpi-instrumentation-pack --format json --strict
 python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/day35-kpi-instrumentation-pack/evidence --format json --strict
-python scripts/check_day35_kpi_instrumentation_contract.py
+python scripts/check_kpi_instrumentation_contract.py
 ```
 
 ## KPI instrumentation contract

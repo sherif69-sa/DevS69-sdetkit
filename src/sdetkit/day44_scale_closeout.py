@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit scale-closeout --format json --strict",
     "python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict",
     "python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day44_scale_closeout_contract.py",
+    "python scripts/check_scale_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit scale-closeout --format json --strict",
     "python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict",
-    "python scripts/check_day44_scale_closeout_contract.py --skip-evidence",
+    "python scripts/check_scale_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 44 scale lane execution and KPI follow-up.",
@@ -77,7 +77,7 @@ Day 44 closes with a major scale upgrade that converts Day 43 acceleration evide
 python -m sdetkit scale-closeout --format json --strict
 python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict
 python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict
-python scripts/check_day44_scale_closeout_contract.py
+python scripts/check_scale_closeout_contract.py
 ```
 
 ## Scale closeout contract

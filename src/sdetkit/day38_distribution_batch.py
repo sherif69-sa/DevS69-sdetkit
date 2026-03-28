@@ -26,12 +26,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit day38-distribution-batch --format json --strict",
     "python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict",
     "python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict",
-    "python scripts/check_day38_distribution_batch_contract.py",
+    "python scripts/check_distribution_batch_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit day38-distribution-batch --format json --strict",
     "python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict",
-    "python scripts/check_day38_distribution_batch_contract.py --skip-evidence",
+    "python scripts/check_distribution_batch_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 38 posting execution and outcome logging.",
@@ -75,7 +75,7 @@ Day 38 publishes a coordinated distribution batch that operationalizes Day 37 ex
 python -m sdetkit day38-distribution-batch --format json --strict
 python -m sdetkit day38-distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict
 python -m sdetkit day38-distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict
-python scripts/check_day38_distribution_batch_contract.py
+python scripts/check_distribution_batch_contract.py
 ```
 
 ## Distribution contract

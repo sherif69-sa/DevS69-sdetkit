@@ -27,12 +27,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit case-study-prep2-closeout --format json --strict",
     "python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict",
     "python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day70_case_study_prep2_closeout_contract.py",
+    "python scripts/check_case_study_prep2_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit case-study-prep2-closeout --format json --strict",
     "python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict",
-    "python scripts/check_day70_case_study_prep2_closeout_contract.py --skip-evidence",
+    "python scripts/check_case_study_prep2_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 70 triage-speed case-study prep and signoff.",
@@ -85,7 +85,7 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 python -m sdetkit case-study-prep2-closeout --format json --strict
 python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict
 python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict
-python scripts/check_day70_case_study_prep2_closeout_contract.py
+python scripts/check_case_study_prep2_closeout_contract.py
 ```
 
 ## Case-study prep contract

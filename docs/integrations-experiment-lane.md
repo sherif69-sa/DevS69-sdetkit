@@ -19,7 +19,7 @@ Day 37 turns Day 36 distribution misses into controlled experiments with strict 
 python -m sdetkit experiment-lane --format json --strict
 python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict
 python -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict
-python scripts/check_day37_experiment_lane_contract.py
+python scripts/check_experiment_lane_contract.py
 ```
 
 ## Experiment contract

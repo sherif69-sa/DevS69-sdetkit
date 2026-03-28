@@ -31,12 +31,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
     "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict",
     "python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py",
+    "python scripts/check_phase3_wrap_publication_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit phase3-wrap-publication-closeout --format json --strict",
     "python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict",
-    "python scripts/check_day90_phase3_wrap_publication_closeout_contract.py --skip-evidence",
+    "python scripts/check_phase3_wrap_publication_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 90 phase-3 wrap publication execution and signoff.",
@@ -89,7 +89,7 @@ Day 90 closes with a major upgrade that converts Day 89 governance scale outcome
 python -m sdetkit phase3-wrap-publication-closeout --format json --strict
 python -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict
 python -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict
-python scripts/check_day90_phase3_wrap_publication_closeout_contract.py
+python scripts/check_phase3_wrap_publication_closeout_contract.py
 ```
 
 ## Phase-3 wrap publication contract

@@ -19,7 +19,7 @@ Day 60 closes with a major Phase-2 wrap + handoff upgrade that turns Day 59 pre-
 python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
 python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict
 python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence --format json --strict
-python scripts/check_day60_phase2_wrap_handoff_closeout_contract.py
+python scripts/check_phase2_wrap_handoff_closeout_contract.py
 ```
 
 ## Phase-2 wrap + handoff contract

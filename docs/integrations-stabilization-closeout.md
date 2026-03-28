@@ -19,7 +19,7 @@ Day 56 closes with a major stabilization upgrade that turns Day 55 contributor-a
 python -m sdetkit stabilization-closeout --format json --strict
 python -m sdetkit stabilization-closeout --emit-pack-dir docs/artifacts/day56-stabilization-closeout-pack --format json --strict
 python -m sdetkit stabilization-closeout --execute --evidence-dir docs/artifacts/day56-stabilization-closeout-pack/evidence --format json --strict
-python scripts/check_day56_stabilization_closeout_contract.py
+python scripts/check_stabilization_closeout_contract.py
 ```
 
 ## Stabilization contract

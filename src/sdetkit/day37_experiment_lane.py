@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit day37-experiment-lane --format json --strict",
     "python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict",
     "python -m sdetkit day37-experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict",
-    "python scripts/check_day37_experiment_lane_contract.py",
+    "python scripts/check_experiment_lane_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit day37-experiment-lane --format json --strict",
     "python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict",
-    "python scripts/check_day37_experiment_lane_contract.py --skip-evidence",
+    "python scripts/check_experiment_lane_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for experiment execution and decision logging.",
@@ -77,7 +77,7 @@ Day 37 turns Day 36 distribution misses into controlled experiments with strict 
 python -m sdetkit day37-experiment-lane --format json --strict
 python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict
 python -m sdetkit day37-experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict
-python scripts/check_day37_experiment_lane_contract.py
+python scripts/check_experiment_lane_contract.py
 ```
 
 ## Experiment contract

@@ -19,7 +19,7 @@ Day 57 closes with a major KPI deep-audit upgrade that turns Day 56 stabilizatio
 python -m sdetkit kpi-deep-audit-closeout --format json --strict
 python -m sdetkit kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack --format json --strict
 python -m sdetkit kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/day57-kpi-deep-audit-closeout-pack/evidence --format json --strict
-python scripts/check_day57_kpi_deep_audit_closeout_contract.py
+python scripts/check_kpi_deep_audit_closeout_contract.py
 ```
 
 ## KPI deep audit contract

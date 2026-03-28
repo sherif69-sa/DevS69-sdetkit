@@ -3,5 +3,5 @@
 ```bash
 python -m sdetkit day67-integration-expansion3-closeout --format json --strict
 python -m sdetkit day67-integration-expansion3-closeout --emit-pack-dir docs/artifacts/day67-integration-expansion3-closeout-pack --format json --strict
-python scripts/check_day67_integration_expansion3_closeout_contract.py --skip-evidence
+python scripts/check_integration_expansion3_closeout_contract.py --skip-evidence
 ```

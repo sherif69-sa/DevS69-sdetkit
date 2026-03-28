@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit optimization-closeout-foundation --format json --strict",
     "python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict",
     "python -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/optimization-closeout-foundation-pack/evidence --format json --strict",
-    "python scripts/check_day42_optimization_closeout_contract.py",
+    "python scripts/check_optimization_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit optimization-closeout-foundation --format json --strict",
     "python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict",
-    "python scripts/check_day42_optimization_closeout_contract.py --skip-evidence",
+    "python scripts/check_optimization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.",
@@ -77,7 +77,7 @@ Optimization Closeout Foundation closes with a major optimization upgrade that c
 python -m sdetkit optimization-closeout-foundation --format json --strict
 python -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict
 python -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/optimization-closeout-foundation-pack/evidence --format json --strict
-python scripts/check_day42_optimization_closeout_contract.py
+python scripts/check_optimization_closeout_contract.py
 ```
 
 ## Optimization closeout contract

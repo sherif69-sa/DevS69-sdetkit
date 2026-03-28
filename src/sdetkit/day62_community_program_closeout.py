@@ -28,12 +28,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit community-program-closeout --format json --strict",
     "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
     "python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day62_community_program_closeout_contract.py",
+    "python scripts/check_community_program_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit community-program-closeout --format json --strict",
     "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
-    "python scripts/check_day62_community_program_closeout_contract.py --skip-evidence",
+    "python scripts/check_community_program_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 62 community office-hours execution and moderation safety.",
@@ -77,7 +77,7 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 python -m sdetkit community-program-closeout --format json --strict
 python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
 python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
-python scripts/check_day62_community_program_closeout_contract.py
+python scripts/check_community_program_closeout_contract.py
 ```
 
 ## Community program execution contract

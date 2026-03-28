@@ -10,7 +10,7 @@
 
 ```bash
 python -m pytest -q tests/test_day41_expansion_automation.py tests/test_cli_help_lists_subcommands.py
-python scripts/check_day41_expansion_automation_contract.py --skip-evidence
+python scripts/check_expansion_automation_contract.py --skip-evidence
 python -m sdetkit day41-expansion-automation --format json --strict
 ```
 
