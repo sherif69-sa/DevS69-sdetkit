@@ -10,15 +10,15 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 
 ## Required inputs (Day 61)
 
-- `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json`
-- `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md`
+- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`
+- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`
 
 ## Community Program Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit community-program-closeout --format json --strict
-python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
-python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
+python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict
+python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/community-program-closeout-pack/evidence --format json --strict
 python scripts/check_community_program_closeout_contract.py
 ```
 

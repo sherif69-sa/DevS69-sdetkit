@@ -10,15 +10,15 @@ Day 60 closes with a major Phase-2 wrap + handoff upgrade that turns Day 59 pre-
 
 ## Required inputs (Day 59)
 
-- `docs/artifacts/day59-phase3-preplan-closeout-pack/day59-phase3-preplan-closeout-summary.json`
-- `docs/artifacts/day59-phase3-preplan-closeout-pack/day59-delivery-board.md`
+- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json`
+- `docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md`
 
 ## Phase 2 Wrap Handoff Closeout command lane
 
 ```bash
 python -m sdetkit phase2-wrap-handoff-closeout --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack --format json --strict
-python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/evidence --format json --strict
+python -m sdetkit phase2-wrap-handoff-closeout --emit-pack-dir docs/artifacts/phase2-wrap-handoff-closeout-pack --format json --strict
+python -m sdetkit phase2-wrap-handoff-closeout --execute --evidence-dir docs/artifacts/phase2-wrap-handoff-closeout-pack/evidence --format json --strict
 python scripts/check_phase2_wrap_handoff_closeout_contract.py
 ```
 

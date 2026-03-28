@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-community-program-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY61_SUMMARY_PATH = (
-    "docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json"
+    "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
 )
-_DAY61_BOARD_PATH = "docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md"
+_DAY61_BOARD_PATH = "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
 _SECTION_HEADER = "# Day 62 \u2014 Community program setup closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Community Program Closeout matters",
@@ -26,13 +26,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit community-program-closeout --format json --strict",
-    "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
-    "python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict",
+    "python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/community-program-closeout-pack/evidence --format json --strict",
     "python scripts/check_community_program_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit community-program-closeout --format json --strict",
-    "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict",
+    "python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict",
     "python scripts/check_community_program_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +68,15 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 
 ## Required inputs (Day 61)
 
-- `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-phase3-kickoff-closeout-summary.json`
-- `docs/artifacts/day61-phase3-kickoff-closeout-pack/day61-delivery-board.md`
+- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`
+- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`
 
 ## Community Program Closeout command lane (Legacy Day 62)
 
 ```bash
 python -m sdetkit community-program-closeout --format json --strict
-python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/day62-community-program-closeout-pack --format json --strict
-python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/day62-community-program-closeout-pack/evidence --format json --strict
+python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict
+python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/community-program-closeout-pack/evidence --format json --strict
 python scripts/check_community_program_closeout_contract.py
 ```
 
@@ -391,7 +391,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day62-execution-summary.json",
+        out_dir / "community-program-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -424,7 +424,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day62-community-program-closeout-pack/evidence")
+            else Path("docs/artifacts/community-program-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

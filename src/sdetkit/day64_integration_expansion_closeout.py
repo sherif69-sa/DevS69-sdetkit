@@ -27,13 +27,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit integration-expansion-closeout --format json --strict",
-    "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
-    "python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict",
     "python scripts/check_integration_expansion_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit integration-expansion-closeout --format json --strict",
-    "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict",
+    "python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict",
     "python scripts/check_integration_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -85,8 +85,8 @@ Day 64 closes with a major integration upgrade that turns Day 63 onboarding mome
 
 ```bash
 python -m sdetkit integration-expansion-closeout --format json --strict
-python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/day64-integration-expansion-closeout-pack --format json --strict
-python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/day64-integration-expansion-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict
+python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict
 python scripts/check_integration_expansion_closeout_contract.py
 ```
 
@@ -404,7 +404,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day64-execution-summary.json",
+        out_dir / "integration-expansion-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -437,7 +437,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day64-integration-expansion-closeout-pack/evidence")
+            else Path("docs/artifacts/integration-expansion-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

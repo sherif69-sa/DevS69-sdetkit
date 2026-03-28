@@ -10,8 +10,8 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 
 ## Required inputs (Day 68)
 
-- `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json`
-- `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
+- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json`
+- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md`
 - `docs/roadmap/plans/reliability-case-study.json`
 
 ## Case Study Prep1 Closeout command lane (Legacy Day 69)

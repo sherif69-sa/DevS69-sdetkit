@@ -12,8 +12,8 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 
 ## Required inputs (Day 64)
 
-- `docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json`
-- `docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md`
+- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json`
+- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md`
 - `.github/workflows/day64-advanced-github-actions-reference.yml`
 
 ## Weekly Review Closeout command lane (legacy)

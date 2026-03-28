@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review-closeout-cycle2.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day64_summary": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json",
-    "day64_delivery_board": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md",
+    "day64_summary": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json",
+    "day64_delivery_board": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md",
     "day64_workflow": ".github/workflows/day64-advanced-github-actions-reference.yml"
   },
   "checks": [
@@ -32,13 +32,13 @@
       "check_id": "day64_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     },
     {
       "check_id": "day64_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day64-integration-expansion-closeout-pack/day64-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
     },
     {
       "check_id": "day64_quality_floor",

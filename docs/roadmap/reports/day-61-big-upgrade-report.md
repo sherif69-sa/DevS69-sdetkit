@@ -16,8 +16,8 @@ Close Day 61 with a high-confidence Phase-3 kickoff execution lane that converts
 
 ```bash
 python -m sdetkit day61-phase3-kickoff-closeout --format json --strict
-python -m sdetkit day61-phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict
-python -m sdetkit day61-phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence --format json --strict
+python -m sdetkit day61-phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict
+python -m sdetkit day61-phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict
 python scripts/check_day61_phase3_kickoff_closeout_contract.py
 ```
 

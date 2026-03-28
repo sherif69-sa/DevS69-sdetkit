@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-case-study-prep1-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day68_summary": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json",
-    "day68_delivery_board": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md",
+    "day68_summary": "docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json",
+    "day68_delivery_board": "docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md",
     "case_study_data": "docs/roadmap/plans/reliability-case-study.json"
   },
   "checks": [
@@ -32,13 +32,13 @@
       "check_id": "day68_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json"
     },
     {
       "check_id": "day68_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md"
     },
     {
       "check_id": "day68_quality_floor",

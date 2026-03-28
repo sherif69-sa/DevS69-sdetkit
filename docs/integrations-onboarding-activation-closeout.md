@@ -10,8 +10,8 @@ Day 63 closes with a major onboarding activation upgrade that turns Day 62 commu
 
 ## Required inputs (Day 62)
 
-- `docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json`
-- `docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md`
+- `docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json`
+- `docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md`
 
 ## Onboarding Activation Closeout command lane (legacy)
 

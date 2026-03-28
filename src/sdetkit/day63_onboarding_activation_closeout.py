@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-onboarding-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY62_SUMMARY_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
-_DAY62_BOARD_PATH = "docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md"
+_DAY62_SUMMARY_PATH = "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
+_DAY62_BOARD_PATH = "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
 _SECTION_HEADER = "# Day 63 \u2014 Contributor onboarding activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Onboarding Activation Closeout matters",
@@ -66,8 +66,8 @@ Day 63 ships a major onboarding-activation upgrade that converts Day 62 communit
 
 ## Required inputs (Day 62)
 
-- `docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json`
-- `docs/artifacts/day62-community-program-closeout-pack/day62-delivery-board.md`
+- `docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json`
+- `docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md`
 
 ## Onboarding Activation Closeout command lane (Legacy Day 63)
 

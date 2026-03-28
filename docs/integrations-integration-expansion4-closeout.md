@@ -10,16 +10,16 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 
 ## Required inputs (Day 67)
 
-- `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-integration-expansion3-closeout-summary.json`
-- `docs/artifacts/day67-integration-expansion3-closeout-pack/day67-delivery-board.md`
+- `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json`
+- `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md`
 - `templates/ci/tekton/day68-self-hosted-reference.yaml`
 
 ## Integration Expansion4 Closeout command lane (legacy)
 
 ```bash
 python -m sdetkit integration-expansion4-closeout --format json --strict
-python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict
-python -m sdetkit integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict
+python -m sdetkit integration-expansion4-closeout --emit-pack-dir docs/artifacts/integration-expansion4-closeout-pack --format json --strict
+python -m sdetkit integration-expansion4-closeout --execute --evidence-dir docs/artifacts/integration-expansion4-closeout-pack/evidence --format json --strict
 python scripts/check_integration_expansion4_closeout_contract.py
 ```
 

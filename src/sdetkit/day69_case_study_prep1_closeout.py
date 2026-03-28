@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-case-study-prep1-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY68_SUMMARY_PATH = "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json"
+_DAY68_SUMMARY_PATH = "docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json"
 _DAY68_BOARD_PATH = (
-    "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md"
+    "docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md"
 )
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/reliability-case-study.json"
 _SECTION_HEADER = "# Day 69 \u2014 Case-study prep #1 closeout lane"
@@ -77,8 +77,8 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 
 ## Required inputs (Day 68)
 
-- `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json`
-- `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
+- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json`
+- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md`
 - `docs/roadmap/plans/reliability-case-study.json`
 
 ## Case Study Prep1 Closeout command lane (Legacy Day 69)

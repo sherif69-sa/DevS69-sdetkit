@@ -140,7 +140,7 @@ def test_day64_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day64-pack/day64-execution-log.md").exists()
     assert (tmp_path / "artifacts/day64-pack/day64-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day64-pack/day64-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/evidence/day64-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day64-pack/evidence/integration-expansion-execution-summary.json").exists()
 
 
 def test_day64_strict_fails_without_day63(tmp_path: Path) -> None:

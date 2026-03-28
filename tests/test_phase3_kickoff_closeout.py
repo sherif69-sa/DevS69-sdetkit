@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json"
+        / "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md"
+    board = root / "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -107,14 +107,14 @@ def test_day61_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day61-pack/day61-execution-log.md").exists()
     assert (tmp_path / "artifacts/day61-pack/day61-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day61-pack/day61-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/evidence/day61-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day61-pack/evidence/phase3-kickoff-execution-summary.json").exists()
 
 
 def test_day61_strict_fails_without_day60(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json"
+        / "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json"
     ).unlink()
     assert d61.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase3-kickoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY60_SUMMARY_PATH = "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json"
-_DAY60_BOARD_PATH = "docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md"
+_DAY60_SUMMARY_PATH = "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json"
+_DAY60_BOARD_PATH = "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
 _SECTION_HEADER = "# Day 61 \u2014 Phase-3 kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Kickoff Closeout matters",
@@ -24,13 +24,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit phase3-kickoff-closeout --format json --strict",
-    "python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict",
-    "python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict",
+    "python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict",
     "python scripts/check_phase3_kickoff_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit phase3-kickoff-closeout --format json --strict",
-    "python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict",
+    "python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict",
     "python scripts/check_phase3_kickoff_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -66,15 +66,15 @@ Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence 
 
 ## Required inputs (Day 60)
 
-- `docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-phase2-wrap-handoff-closeout-summary.json`
-- `docs/artifacts/day60-phase2-wrap-handoff-closeout-pack/day60-delivery-board.md`
+- `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json`
+- `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md`
 
 ## Phase3 Kickoff Closeout command lane (Legacy Day 61)
 
 ```bash
 python -m sdetkit phase3-kickoff-closeout --format json --strict
-python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/day61-phase3-kickoff-closeout-pack --format json --strict
-python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence --format json --strict
+python -m sdetkit phase3-kickoff-closeout --emit-pack-dir docs/artifacts/phase3-kickoff-closeout-pack --format json --strict
+python -m sdetkit phase3-kickoff-closeout --execute --evidence-dir docs/artifacts/phase3-kickoff-closeout-pack/evidence --format json --strict
 python scripts/check_phase3_kickoff_closeout_contract.py
 ```
 
@@ -384,7 +384,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day61-execution-summary.json",
+        out_dir / "phase3-kickoff-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -417,7 +417,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day61-phase3-kickoff-closeout-pack/evidence")
+            else Path("docs/artifacts/phase3-kickoff-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

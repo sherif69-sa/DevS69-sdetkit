@@ -133,7 +133,7 @@ def test_day66_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day66-pack/day66-execution-log.md").exists()
     assert (tmp_path / "artifacts/day66-pack/day66-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day66-pack/day66-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day66-pack/evidence/day66-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day66-pack/evidence/integration-expansion2-execution-summary.json").exists()
 
 
 def test_day66_strict_fails_without_day65(tmp_path: Path) -> None:

@@ -16,8 +16,8 @@ Close Day 68 with a high-signal self-hosted integration lane that converts Day 6
 
 ```bash
 python -m sdetkit day68-integration-expansion4-closeout --format json --strict
-python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/day68-integration-expansion4-closeout-pack --format json --strict
-python -m sdetkit day68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/day68-integration-expansion4-closeout-pack/evidence --format json --strict
+python -m sdetkit day68-integration-expansion4-closeout --emit-pack-dir docs/artifacts/integration-expansion4-closeout-pack --format json --strict
+python -m sdetkit day68-integration-expansion4-closeout --execute --evidence-dir docs/artifacts/integration-expansion4-closeout-pack/evidence --format json --strict
 python scripts/check_integration_expansion4_closeout_contract.py
 ```
 

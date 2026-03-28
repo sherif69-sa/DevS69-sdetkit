@@ -16,8 +16,8 @@ Close Day 59 with a high-confidence Phase-3 pre-plan lane that converts Day 58 h
 
 ```bash
 python -m sdetkit day59-phase3-preplan-closeout --format json --strict
-python -m sdetkit day59-phase3-preplan-closeout --emit-pack-dir docs/artifacts/day59-phase3-preplan-closeout-pack --format json --strict
-python -m sdetkit day59-phase3-preplan-closeout --execute --evidence-dir docs/artifacts/day59-phase3-preplan-closeout-pack/evidence --format json --strict
+python -m sdetkit day59-phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict
+python -m sdetkit day59-phase3-preplan-closeout --execute --evidence-dir docs/artifacts/phase3-preplan-closeout-pack/evidence --format json --strict
 python scripts/check_day59_phase3_preplan_closeout_contract.py
 ```
 
