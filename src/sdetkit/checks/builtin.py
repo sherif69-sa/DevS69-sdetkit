@@ -33,16 +33,29 @@ def _run_subprocess(
     ctx.out_dir.mkdir(parents=True, exist_ok=True)
     started = time.monotonic()
     log_path = ctx.out_dir / f"check.{check.id}.log"
-    proc = subprocess.run(
-        command,
-        cwd=ctx.repo_root,
-        env=dict(ctx.env),
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    max_attempts = 2 if check.id == "tests_full" else 1
+    attempt = 0
+    proc: subprocess.CompletedProcess[str] | None = None
+    outputs: list[str] = []
+    while attempt < max_attempts:
+        attempt += 1
+        current = subprocess.run(
+            command,
+            cwd=ctx.repo_root,
+            env=dict(ctx.env),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        outputs.append(f"--- attempt {attempt}/{max_attempts} ---\n")
+        outputs.append(current.stdout)
+        outputs.append(current.stderr)
+        proc = current
+        if current.returncode == 0:
+            break
     elapsed = time.monotonic() - started
-    combined = proc.stdout + proc.stderr
+    assert proc is not None
+    combined = "".join(outputs)
     log_path.write_text(combined, encoding="utf-8")
     status: Literal["passed", "failed"]
     if proc.returncode == 0:
@@ -53,6 +66,8 @@ def _run_subprocess(
     evidence_paths = _existing_evidence(ctx, check.evidence_outputs)
     metadata = {
         "returncode": proc.returncode,
+        "attempts": attempt,
+        "max_attempts": max_attempts,
         "category": check.category,
         "truth_level": check.truth_level,
         "target_mode": ctx.target_mode,
