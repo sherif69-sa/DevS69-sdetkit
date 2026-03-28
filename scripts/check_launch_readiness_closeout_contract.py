@@ -18,7 +18,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = lane.build_day86_launch_readiness_closeout_summary(root)
+    payload = lane.build_launch_readiness_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):

@@ -23,7 +23,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d90.build_day90_phase3_wrap_publication_closeout_summary(root)
+    payload = d90.build_phase3_wrap_publication_closeout_summary(root)
     errors: list[str] = []
 
     if not payload.get("summary", {}).get("strict_pass", False):

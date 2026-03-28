@@ -151,7 +151,7 @@ def _load_board(path: Path) -> tuple[int, bool]:
     return len(items), has_day57
 
 
-def build_day58_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
+def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read(root / "README.md")
     docs_index_text = _read(root / "docs/index.md")
     top10_text = _read(root / _TOP10_PATH)
@@ -400,6 +400,11 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
+
+def build_day58_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy day-based builder name."""
+    return build_phase2_hardening_closeout_summary(root)
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Phase 2 Hardening Closeout checks (legacy alias: day58-phase2-hardening-closeout)"
@@ -417,7 +422,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DAY58_DEFAULT_PAGE)
 
-    payload = build_day58_phase2_hardening_closeout_summary(root)
+    payload = build_phase2_hardening_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

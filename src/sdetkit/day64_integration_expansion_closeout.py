@@ -158,7 +158,7 @@ def _count_board_items(path: Path, needle: str) -> tuple[int, bool]:
     return len(checks), (needle in text)
 
 
-def build_day64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read(root / "README.md")
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
@@ -409,6 +409,11 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
+
+def build_day64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy day-based builder name."""
+    return build_integration_expansion_closeout_summary(root)
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 64 integration expansion closeout checks")
     parser.add_argument("--root", default=".")
@@ -424,7 +429,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DAY64_DEFAULT_PAGE)
 
-    payload = build_day64_integration_expansion_closeout_summary(root)
+    payload = build_integration_expansion_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

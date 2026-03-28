@@ -16,7 +16,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d53.build_day53_docs_loop_closeout_summary(root)
+    payload = d53.build_docs_loop_closeout_summary(root)
 
     errors: list[str] = []
 

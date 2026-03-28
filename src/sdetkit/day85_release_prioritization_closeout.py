@@ -135,7 +135,7 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
-def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
+def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
@@ -408,6 +408,11 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
+
+def build_day85_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy day-based builder name."""
+    return build_release_prioritization_closeout_summary(root)
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Day 85 release prioritization closeout checks")
     parser.add_argument("--root", default=".")
@@ -423,7 +428,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _DAY85_DEFAULT_PAGE)
 
-    payload = build_day85_release_prioritization_closeout_summary(root)
+    payload = build_release_prioritization_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)
