@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-governance-scale-closeout.md\nday89-governance-scale-closeout\n",
+        "docs/integrations-governance-scale-closeout.md\ngovernance-scale-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -78,7 +78,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day89-governance-scale-001",
+                "plan_id": "governance-scale-001",
                 "contributors": ["maintainers", "release-ops"],
                 "narrative_channels": ["launch-brief", "release-report", "faq"],
                 "baseline": {"launch_confidence": 0.64, "narrative_reuse": 0.42},
