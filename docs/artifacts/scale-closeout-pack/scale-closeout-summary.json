@@ -1,0 +1,141 @@
+{
+  "name": "scale-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-scale-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day43_summary": "/workspace/DevS69-sdetkit/docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json",
+    "day43_delivery_board": "/workspace/DevS69-sdetkit/docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-scale-closeout.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_sections": []
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_day44_link",
+      "weight": 8,
+      "passed": false,
+      "evidence": "docs/integrations-scale-closeout.md"
+    },
+    {
+      "check_id": "readme_day44_command",
+      "weight": 4,
+      "passed": false,
+      "evidence": "scale-closeout"
+    },
+    {
+      "check_id": "docs_index_day44_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-44-big-upgrade-report.md + integrations-scale-closeout.md"
+    },
+    {
+      "check_id": "top10_day44_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 44 + Day 45 strategy chain"
+    },
+    {
+      "check_id": "day43_summary_present",
+      "weight": 10,
+      "passed": false,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
+    },
+    {
+      "check_id": "day43_delivery_board_present",
+      "weight": 8,
+      "passed": false,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md"
+    },
+    {
+      "check_id": "day43_quality_floor",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "day43_score": 0.0,
+        "strict_pass": false,
+        "day43_checks": 0
+      }
+    },
+    {
+      "check_id": "day43_board_integrity",
+      "weight": 7,
+      "passed": false,
+      "evidence": {
+        "board_items": 0,
+        "contains_day43": false,
+        "contains_day44": false
+      }
+    },
+    {
+      "check_id": "scale_contract_locked",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "missing_contract_lines": []
+      }
+    },
+    {
+      "check_id": "scale_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": true,
+      "evidence": {
+        "missing_board_items": []
+      }
+    }
+  ],
+  "rollup": {
+    "day43_activation_score": 0.0,
+    "day43_checks": 0,
+    "day43_delivery_board_items": 0
+  },
+  "summary": {
+    "activation_score": 40,
+    "passed_checks": 6,
+    "failed_checks": 8,
+    "critical_failures": [
+      "day43_handoff_inputs",
+      "day43_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "Scale execution contract + quality checklist is fully locked for execution."
+  ],
+  "misses": [
+    "Day 43 strict continuity signal is missing.",
+    "Day 43 delivery board integrity is incomplete (needs >=5 items and Day 43/44 anchors)."
+  ],
+  "handoff_actions": [
+    "Re-run Day 43 acceleration closeout command and restore strict pass baseline before Day 44 lock.",
+    "Repair Day 43 delivery board entries to include Day 43 and Day 44 anchors."
+  ]
+}

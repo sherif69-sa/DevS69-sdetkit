@@ -101,13 +101,13 @@ def test_day44_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (tmp_path / "artifacts/day44-pack/scale-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day44-pack/scale-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-scale-plan.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-growth-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-scale-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/day44-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/evidence/day44-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-plan.md").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-growth-matrix.csv").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day44-pack/scale-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day44-pack/evidence/scale-execution-summary.json").exists()
 
 
 def test_day44_strict_fails_when_day43_inputs_missing(tmp_path: Path) -> None:

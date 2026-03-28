@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_expansion_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "{\n  \"errors\": [\n    \"critical failures: ['day44_strict_baseline']\"\n  ],\n  \"score\": 65\n}\n",
+  "stderr": ""
+}

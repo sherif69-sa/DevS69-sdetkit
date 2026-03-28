@@ -11,7 +11,7 @@ Day 45 closes with a major expansion upgrade that converts Day 44 scale evidence
 ## Required inputs (Day 44)
 
 - `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`
-- `docs/artifacts/scale-closeout-pack/day44-delivery-board.md`
+- `docs/artifacts/scale-closeout-pack/scale-delivery-board.md`
 
 ## Day 45 command lane
 

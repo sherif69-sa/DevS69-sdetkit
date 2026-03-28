@@ -55,7 +55,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/expansion-closeout-pack/day45-delivery-board.md"
+    board = root / "docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -100,13 +100,13 @@ def test_day46_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (tmp_path / "artifacts/day46-pack/optimization-closeout-summary.json").exists()
     assert (tmp_path / "artifacts/day46-pack/optimization-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-optimization-plan.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-bottleneck-map.csv").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-optimization-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/day46-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/evidence/day46-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-plan.md").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-bottleneck-map.csv").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day46-pack/optimization-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day46-pack/evidence/optimization-execution-summary.json").exists()
 
 
 def test_day46_strict_fails_when_day45_inputs_missing(tmp_path: Path) -> None:
