@@ -12,5 +12,5 @@
 python -m sdetkit day84-evidence-narrative-closeout --format json --strict
 python -m sdetkit day84-evidence-narrative-closeout --emit-pack-dir docs/artifacts/day84-evidence-narrative-closeout-pack --format json --strict
 python -m sdetkit day84-evidence-narrative-closeout --execute --evidence-dir docs/artifacts/day84-evidence-narrative-closeout-pack/evidence --format json --strict
-python scripts/check_day84_evidence_narrative_closeout_contract.py
+python scripts/check_evidence_narrative_closeout_contract.py
 ```

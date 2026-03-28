@@ -10,17 +10,17 @@ Day 86 closes with a major upgrade that converts Day 85 release prioritization o
 
 ## Required inputs (Day 85)
 
-- `docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json`
-- `docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md`
+- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json`
+- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md`
 - `docs/roadmap/plans/launch-readiness-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit launch-readiness-closeout --format json --strict
-python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/day86-launch-readiness-closeout-pack --format json --strict
-python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/day86-launch-readiness-closeout-pack/evidence --format json --strict
-python scripts/check_day86_launch_readiness_closeout_contract.py
+python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/launch-readiness-closeout-pack --format json --strict
+python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/launch-readiness-closeout-pack/evidence --format json --strict
+python scripts/check_launch_readiness_closeout_contract.py
 ```
 
 ## Launch readiness contract

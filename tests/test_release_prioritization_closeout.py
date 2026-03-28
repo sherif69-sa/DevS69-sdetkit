@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-release-prioritization-closeout.md\nday85-release-prioritization-closeout\n",
+        "docs/integrations-release-prioritization-closeout.md\nrelease-prioritization-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json"
+        / "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-delivery-board.md"
+    board = root / "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day85-release-prioritization-001",
+                "plan_id": "release-prioritization-001",
                 "contributors": ["maintainers", "docs-ops"],
                 "narrative_channels": ["release-report", "runbook", "faq"],
                 "baseline": {"evidence_coverage": 0.64, "narrative_reuse": 0.42},
@@ -105,10 +105,10 @@ def test_day85_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day85-pack",
+            "artifacts/release-prioritization-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day85-pack/evidence",
+            "artifacts/release-prioritization-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -116,27 +116,27 @@ def test_day85_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day85-pack/day85-release-prioritization-closeout-summary.json"
+        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day85-pack/day85-release-prioritization-closeout-summary.md"
+        tmp_path / "artifacts/release-prioritization-pack/release-prioritization-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-release-prioritization-plan.md").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day85-pack/day85-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day85-pack/evidence/day85-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-plan.md").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-narrative-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-storyline-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-execution-log.md").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/release-prioritization-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/release-prioritization-pack/evidence/release-prioritization-execution-summary.json").exists()
 
 
 def test_day85_strict_fails_without_day84(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day84-evidence-narrative-closeout-pack/day84-evidence-narrative-closeout-summary.json"
+        / "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json"
     ).unlink()
     assert d85.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

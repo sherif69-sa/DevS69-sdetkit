@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-launch-readiness-closeout.md\nday86-launch-readiness-closeout\n",
+        "docs/integrations-launch-readiness-closeout.md\nlaunch-readiness-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json"
+        / "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md"
+        root / "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -78,7 +78,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day86-launch-readiness-001",
+                "plan_id": "launch-readiness-001",
                 "contributors": ["maintainers", "release-ops"],
                 "narrative_channels": ["launch-brief", "release-report", "faq"],
                 "baseline": {"launch_confidence": 0.64, "narrative_reuse": 0.42},
@@ -107,34 +107,34 @@ def test_day86_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day86-pack",
+            "artifacts/launch-readiness-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day86-pack/evidence",
+            "artifacts/launch-readiness-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day86-pack/day86-launch-readiness-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-launch-readiness-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-launch-readiness-plan.md").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day86-pack/day86-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day86-pack/evidence/day86-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-plan.md").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-narrative-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-storyline-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-execution-log.md").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/launch-readiness-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/launch-readiness-pack/evidence/launch-readiness-execution-summary.json").exists()
 
 
 def test_day86_strict_fails_without_day85(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json"
+        / "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json"
     ).unlink()
     assert d86.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

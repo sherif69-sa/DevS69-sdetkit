@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-evidence-narrative-closeout.md\nday84-evidence-narrative-closeout\n",
+        "docs/integrations-evidence-narrative-closeout.md\nevidence-narrative-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json"
+        / "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-delivery-board.md"
+    board = root / "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day84-evidence-narrative-001",
+                "plan_id": "evidence-narrative-001",
                 "contributors": ["maintainers", "docs-ops"],
                 "narrative_channels": ["release-report", "runbook", "faq"],
                 "baseline": {"evidence_coverage": 0.64, "narrative_reuse": 0.42},
@@ -105,10 +105,10 @@ def test_day84_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day84-pack",
+            "artifacts/evidence-narrative-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day84-pack/evidence",
+            "artifacts/evidence-narrative-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -116,25 +116,25 @@ def test_day84_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day84-pack/day84-evidence-narrative-closeout-summary.json"
+        tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-evidence-narrative-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-evidence-brief.md").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-evidence-narrative-plan.md").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-narrative-template-upgrade-ledger.json").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-storyline-outcomes-ledger.json").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-narrative-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day84-pack/day84-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day84-pack/evidence/day84-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-evidence-brief.md").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-plan.md").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-narrative-template-upgrade-ledger.json").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-storyline-outcomes-ledger.json").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-narrative-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-execution-log.md").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence-narrative-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/evidence-narrative-pack/evidence/evidence-narrative-execution-summary.json").exists()
 
 
 def test_day84_strict_fails_without_day83(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day83-trust-faq-expansion-closeout-pack/day83-trust-faq-expansion-closeout-summary.json"
+        / "docs/artifacts/trust-faq-expansion-closeout-pack/trust-faq-expansion-closeout-summary.json"
     ).unlink()
     assert d84.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

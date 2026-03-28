@@ -14,7 +14,7 @@
       "stderr": ""
     },
     {
-      "command": "python scripts/check_day86_launch_readiness_closeout_contract.py --skip-evidence",
+      "command": "python scripts/check_launch_readiness_closeout_contract.py --skip-evidence",
       "returncode": 0,
       "stdout": "day86-launch-readiness-closeout contract check passed\n",
       "stderr": ""

@@ -10,10 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-trust-faq-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY82_SUMMARY_PATH = "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+_DAY82_SUMMARY_PATH = "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json"
 _DAY82_BOARD_PATH = (
-    "docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md"
+    "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md"
 )
+_DAY82_LEGACY_SUMMARY_PATH = "docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json"
+_DAY82_LEGACY_BOARD_PATH = "docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/trust-faq-expansion-plan.json"
 _SECTION_HEADER = "# Day 83 \u2014 Trust FAQ expansion loop closeout lane"
 _REQUIRED_SECTIONS = [
@@ -27,14 +29,14 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit trust-faq-expansion-closeout --format json --strict",
-    "python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict",
-    "python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day83_trust_faq_expansion_closeout_contract.py",
+    "python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict",
+    "python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/trust-faq-expansion-closeout-pack/evidence --format json --strict",
+    "python scripts/check_trust_faq_expansion_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit trust-faq-expansion-closeout --format json --strict",
-    "python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict",
-    "python scripts/check_day83_trust_faq_expansion_closeout_contract.py --skip-evidence",
+    "python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict",
+    "python scripts/check_trust_faq_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 83 trust FAQ expansion execution and signoff.",
@@ -77,17 +79,17 @@ Day 83 closes with a major upgrade that folds Day 82 integration feedback outcom
 
 ## Required inputs (Day 82)
 
-- `docs/artifacts/day82-integration-feedback-closeout-pack/day82-integration-feedback-closeout-summary.json`
-- `docs/artifacts/day82-integration-feedback-closeout-pack/day82-delivery-board.md`
+- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`
+- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`
 - `docs/roadmap/plans/trust-faq-expansion-plan.json`
 
 ## Command lane
 
 ```bash
 python -m sdetkit trust-faq-expansion-closeout --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_day83_trust_faq_expansion_closeout_contract.py
+python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict
+python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/trust-faq-expansion-closeout-pack/evidence --format json --strict
+python scripts/check_trust_faq_expansion_closeout_contract.py
 ```
 
 ## Trust FAQ expansion contract
@@ -145,13 +147,18 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
+def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    return canonical_path if canonical_path.exists() else (root / legacy)
+
+
 def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day82_summary = root / _DAY82_SUMMARY_PATH
-    day82_board = root / _DAY82_BOARD_PATH
+    day82_summary = _resolve_with_legacy(root, _DAY82_SUMMARY_PATH, _DAY82_LEGACY_SUMMARY_PATH)
+    day82_board = _resolve_with_legacy(root, _DAY82_BOARD_PATH, _DAY82_LEGACY_BOARD_PATH)
 
     day82_data = _load_json(day82_summary)
     day82_summary_data = (
@@ -180,7 +187,7 @@ def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "readme_day83_command",
             "weight": 7,
-            "passed": ("day83-trust-faq-expansion-closeout" in readme_text),
+            "passed": ("trust-faq-expansion-closeout" in readme_text),
             "evidence": "README day83 command lane",
         },
         {
@@ -364,28 +371,28 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day83-trust-faq-expansion-closeout-summary.json",
+        target / "trust-faq-expansion-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day83-trust-faq-expansion-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day83-trust-faq-brief.md", "# Day 83 trust FAQ brief\n")
-    _write(target / "day83-trust-faq-expansion-plan.md", "# Day 83 trust FAQ expansion plan\n")
+    _write(target / "trust-faq-expansion-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "trust-faq-expansion-trust-faq-brief.md", "# Day 83 trust FAQ brief\n")
+    _write(target / "trust-faq-expansion-plan.md", "# Day 83 trust FAQ expansion plan\n")
     _write(
-        target / "day83-trust-template-upgrade-ledger.json",
+        target / "trust-faq-expansion-trust-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
     )
     _write(
-        target / "day83-escalation-outcomes-ledger.json",
+        target / "trust-faq-expansion-escalation-outcomes-ledger.json",
         json.dumps({"outcomes": []}, indent=2) + "\n",
     )
-    _write(target / "day83-trust-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day83-execution-log.md", "# Day 83 execution log\n")
+    _write(target / "trust-faq-expansion-trust-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "trust-faq-expansion-execution-log.md", "# Day 83 execution log\n")
     _write(
-        target / "day83-delivery-board.md",
+        target / "trust-faq-expansion-delivery-board.md",
         "\n".join(["# Day 83 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day83-validation-commands.md",
+        target / "trust-faq-expansion-validation-commands.md",
         "# Day 83 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -408,7 +415,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day83-execution-summary.json",
+        out_dir / "trust-faq-expansion-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -436,7 +443,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day83-trust-faq-expansion-closeout-pack/evidence")
+            else Path("docs/artifacts/trust-faq-expansion-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 
