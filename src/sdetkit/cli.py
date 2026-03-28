@@ -444,15 +444,15 @@ Start here:
     d35.set_defaults(cmd="kpi-instrumentation")
     d35.add_argument("args", nargs=argparse.REMAINDER)
 
-    d36 = sub.add_parser("distribution-closeout")
+    d36 = sub.add_parser("distribution-closeout", aliases=["day36-distribution-closeout"])
     d36.set_defaults(cmd="distribution-closeout")
     d36.add_argument("args", nargs=argparse.REMAINDER)
 
-    d37 = sub.add_parser("experiment-lane")
+    d37 = sub.add_parser("experiment-lane", aliases=["day37-experiment-lane"])
     d37.set_defaults(cmd="experiment-lane")
     d37.add_argument("args", nargs=argparse.REMAINDER)
 
-    d38 = sub.add_parser("distribution-batch")
+    d38 = sub.add_parser("distribution-batch", aliases=["day38-distribution-batch"])
     d38.set_defaults(cmd="distribution-batch")
     d38.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -460,7 +460,7 @@ Start here:
     d39.set_defaults(cmd="playbook-post")
     d39.add_argument("args", nargs=argparse.REMAINDER)
 
-    d40 = sub.add_parser("scale-lane")
+    d40 = sub.add_parser("scale-lane", aliases=["day40-scale-lane"])
     d40.set_defaults(cmd="scale-lane")
     d40.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -963,19 +963,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "kpi-instrumentation":
         return day35_kpi_instrumentation.main(list(argv[1:]))
 
-    if argv and argv[0] == "distribution-closeout":
+    if argv and argv[0] in {"distribution-closeout", "day36-distribution-closeout"}:
         return day36_distribution_closeout.main(list(argv[1:]))
 
-    if argv and argv[0] == "experiment-lane":
+    if argv and argv[0] in {"experiment-lane", "day37-experiment-lane"}:
         return day37_experiment_lane.main(list(argv[1:]))
 
-    if argv and argv[0] == "distribution-batch":
+    if argv and argv[0] in {"distribution-batch", "day38-distribution-batch"}:
         return day38_distribution_batch.main(list(argv[1:]))
 
     if argv and argv[0] == "playbook-post":
         return day39_playbook_post.main(list(argv[1:]))
 
-    if argv and argv[0] == "scale-lane":
+    if argv and argv[0] in {"scale-lane", "day40-scale-lane"}:
         return day40_scale_lane.main(list(argv[1:]))
 
     if argv and argv[0] == "expansion-automation":
@@ -1452,6 +1452,21 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "day28-weekly-review":
         return day28_weekly_review.main(ns.args)
+
+    if ns.cmd in {"distribution-closeout", "day36-distribution-closeout"}:
+        return day36_distribution_closeout.main(ns.args)
+
+    if ns.cmd in {"experiment-lane", "day37-experiment-lane"}:
+        return day37_experiment_lane.main(ns.args)
+
+    if ns.cmd in {"distribution-batch", "day38-distribution-batch"}:
+        return day38_distribution_batch.main(ns.args)
+
+    if ns.cmd == "playbook-post":
+        return day39_playbook_post.main(ns.args)
+
+    if ns.cmd in {"scale-lane", "day40-scale-lane"}:
+        return day40_scale_lane.main(ns.args)
 
     if ns.cmd in {"expansion-automation", "day41-expansion-automation"}:
         return day41_expansion_automation.main(ns.args)

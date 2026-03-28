@@ -25,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day36-distribution-closeout --format json --strict",
-    "python -m sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict",
-    "python -m sdetkit day36-distribution-closeout --execute --evidence-dir docs/artifacts/day36-distribution-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit distribution-closeout --format json --strict",
+    "python -m sdetkit distribution-closeout --emit-pack-dir docs/artifacts/distribution-closeout-pack --format json --strict",
+    "python -m sdetkit distribution-closeout --execute --evidence-dir docs/artifacts/distribution-closeout-pack/evidence --format json --strict",
     "python scripts/check_distribution_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day36-distribution-closeout --format json --strict",
-    "python -m sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict",
+    "python -m sdetkit distribution-closeout --format json --strict",
+    "python -m sdetkit distribution-closeout --emit-pack-dir docs/artifacts/distribution-closeout-pack --format json --strict",
     "python scripts/check_distribution_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -74,9 +74,9 @@ Day 36 closes the distribution lane by converting the Day 35 KPI story into chan
 ## Day 36 command lane
 
 ```bash
-python -m sdetkit day36-distribution-closeout --format json --strict
-python -m sdetkit day36-distribution-closeout --emit-pack-dir docs/artifacts/day36-distribution-closeout-pack --format json --strict
-python -m sdetkit day36-distribution-closeout --execute --evidence-dir docs/artifacts/day36-distribution-closeout-pack/evidence --format json --strict
+python -m sdetkit distribution-closeout --format json --strict
+python -m sdetkit distribution-closeout --emit-pack-dir docs/artifacts/distribution-closeout-pack --format json --strict
+python -m sdetkit distribution-closeout --execute --evidence-dir docs/artifacts/distribution-closeout-pack/evidence --format json --strict
 python scripts/check_distribution_closeout_contract.py
 ```
 
@@ -213,8 +213,8 @@ def build_day36_distribution_closeout_summary(
         {
             "check_id": "readme_day36_command",
             "weight": 4,
-            "passed": "day36-distribution-closeout" in readme_text,
-            "evidence": "day36-distribution-closeout",
+            "passed": "distribution-closeout" in readme_text,
+            "evidence": "distribution-closeout",
         },
         {
             "check_id": "docs_index_day36_links",
@@ -331,7 +331,7 @@ def build_day36_distribution_closeout_summary(
         )
 
     return {
-        "name": "day36-distribution-closeout",
+        "name": "distribution-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -411,15 +411,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
     _write(
-        target / "day36-distribution-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
+        target / "distribution-closeout-summary.json", json.dumps(payload, indent=2) + "\n"
     )
-    _write(target / "day36-distribution-closeout-summary.md", _to_markdown(payload))
+    _write(target / "distribution-closeout-summary.md", _to_markdown(payload))
     _write(
-        target / "day36-distribution-message-kit.md",
+        target / "distribution-message-kit.md",
         "# Day 36 distribution message kit\n\n"
         "## GitHub discussion post\n"
         "- Hook: Day 35 KPI loop is closed and measurable.\n"
-        "- CTA: Try `python -m sdetkit day36-distribution-closeout --format json --strict` and share score deltas.\n"
+        "- CTA: Try `python -m sdetkit distribution-closeout --format json --strict` and share score deltas.\n"
         "- KPI target: `readme_to_command_ctr +2%`.\n\n"
         "## LinkedIn post\n"
         "- Hook: We turned SDET growth metrics into an execution lane in 24 hours.\n"
@@ -431,25 +431,25 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- KPI target: `external_pr_conversion +1.5%`.\n",
     )
     _write(
-        target / "day36-launch-plan.csv",
+        target / "launch-plan.csv",
         "channel,publish_at_utc,owner,backup,cta,kpi_target\n"
         "github_discussion,2026-02-26T15:00:00Z,community-owner,backup-reviewer,Run day36 command and share score,readme_to_command_ctr:+2%\n"
         "linkedin,2026-02-26T17:30:00Z,growth-owner,backup-reviewer,Comment your bottleneck,docs_unique_visitors:+10%\n"
         "newsletter,2026-02-27T09:00:00Z,pm-owner,backup-reviewer,Forward to one maintainer,external_pr_conversion:+1.5%\n",
     )
     _write(
-        target / "day36-experiment-backlog.md",
+        target / "experiment-backlog.md",
         "# Day 37 experiment backlog seeded on Day 36\n\n"
         "- [ ] Test CTA variant: command-first vs narrative-first headline on GitHub discussion.\n"
         "- [ ] Compare morning vs afternoon LinkedIn posting window for CTR lift.\n"
         "- [ ] Add short GIF teaser to newsletter block and track reply rate delta.\n",
     )
     _write(
-        target / "day36-delivery-board.md",
+        target / "delivery-board.md",
         "# Day 36 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day36-validation-commands.md",
+        target / "validation-commands.md",
         "# Day 36 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -472,12 +472,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day36-distribution-closeout-execution",
+        "name": "distribution-closeout-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day36-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -511,7 +511,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day36-distribution-closeout-pack/evidence")
+            else Path("docs/artifacts/distribution-closeout-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

@@ -11,9 +11,13 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-playbook-post.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY38_SUMMARY_PATH = (
+    "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
+)
+_DAY38_BOARD_PATH = "docs/artifacts/distribution-batch-pack/delivery-board.md"
+_LEGACY_DAY38_SUMMARY_PATH = (
     "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
 )
-_DAY38_BOARD_PATH = "docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md"
+_LEGACY_DAY38_BOARD_PATH = "docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md"
 _SECTION_HEADER = "# Day 39 \u2014 Playbook post #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 39 matters",
@@ -26,13 +30,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit playbook-post --format json --strict",
-    "python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict",
-    "python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict",
+    "python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict",
+    "python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/playbook-post-pack/evidence --format json --strict",
     "python scripts/check_playbook_post_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit playbook-post --format json --strict",
-    "python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict",
+    "python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict",
     "python scripts/check_playbook_post_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +72,15 @@ Day 39 publishes playbook post #1 that converts Day 38 distribution evidence int
 
 ## Required inputs (Day 38)
 
-- `docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json`
-- `docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md`
+- `docs/artifacts/distribution-batch-pack/distribution-batch-summary.json`
+- `docs/artifacts/distribution-batch-pack/delivery-board.md`
 
 ## Day 39 command lane
 
 ```bash
 python -m sdetkit playbook-post --format json --strict
-python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict
-python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict
+python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict
+python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/playbook-post-pack/evidence --format json --strict
 python scripts/check_playbook_post_contract.py
 ```
 
@@ -158,6 +162,14 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    return legacy_path if legacy_path.exists() else canonical_path
+
+
 def build_day39_playbook_post_summary(
     root: Path,
     *,
@@ -180,8 +192,8 @@ def build_day39_playbook_post_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day38_summary = root / _DAY38_SUMMARY_PATH
-    day38_board = root / _DAY38_BOARD_PATH
+    day38_summary = _resolve_input_path(root, _DAY38_SUMMARY_PATH, _LEGACY_DAY38_SUMMARY_PATH)
+    day38_board = _resolve_input_path(root, _DAY38_BOARD_PATH, _LEGACY_DAY38_BOARD_PATH)
     day38_score, day38_strict, day38_check_count = _load_day38(day38_summary)
     board_count, board_has_day38, board_has_day39 = _board_stats(day38_board)
 
@@ -410,10 +422,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day39-playbook-post-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day39-playbook-post-summary.md", _to_markdown(payload))
+    _write(target / "playbook-post-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "playbook-post-summary.md", _to_markdown(payload))
     _write(
-        target / "day39-playbook-draft.md",
+        target / "playbook-draft.md",
         "# Day 39 playbook post #1\n\n"
         "## Executive summary\n"
         "- Day 38 winners were converted into a repeatable publishing pattern.\n"
@@ -424,14 +436,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] Capture KPI pulse after 24h and 72h\n",
     )
     _write(
-        target / "day39-rollout-plan.csv",
+        target / "rollout-plan.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
         "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-playbook-post.md,python -m sdetkit playbook-post --format json --strict,completion:+5%\n"
         "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/impact-39-big-upgrade-report.md,python scripts/check_playbook_post_contract.py,adoption:+7%\n"
-        "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict,ctr:+2%\n",
+        "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict,ctr:+2%\n",
     )
     _write(
-        target / "day39-kpi-scorecard.json",
+        target / "kpi-scorecard.json",
         json.dumps(
             {
                 "generated_for": "playbook-post",
@@ -461,18 +473,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day39-execution-log.md",
+        target / "execution-log.md",
         "# Day 39 execution log\n\n"
         "- [ ] 2026-03-06: Publish playbook draft and collect internal review notes.\n"
         "- [ ] 2026-03-07: Execute rollout timeline and capture first KPI pulse.\n"
         "- [ ] 2026-03-08: Record misses, wins, and Day 40 scale priorities.\n",
     )
     _write(
-        target / "day39-delivery-board.md",
+        target / "delivery-board.md",
         "# Day 39 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day39-validation-commands.md",
+        target / "validation-commands.md",
         "# Day 39 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -495,12 +507,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day39-playbook-post-execution",
+        "name": "playbook-post-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day39-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -534,7 +546,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day39-playbook-post-pack/evidence")
+            else Path("docs/artifacts/playbook-post-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

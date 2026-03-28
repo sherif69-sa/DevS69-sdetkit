@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-scale-lane.md\nday40-scale-lane\n",
+        "docs/integrations-scale-lane.md\nscale-lane\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -39,7 +39,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 40 report\n", encoding="utf-8"
     )
 
-    summary = root / "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
+    summary = root / "docs/artifacts/playbook-post-pack/playbook-post-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -51,7 +51,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md"
+    board = root / "docs/artifacts/playbook-post-pack/delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -73,7 +73,7 @@ def test_day40_scale_lane_json(tmp_path: Path, capsys) -> None:
     rc = d40.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day40-scale-lane"
+    assert out["name"] == "scale-lane"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -84,30 +84,30 @@ def test_day40_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day40-pack",
+            "artifacts/scale-lane-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day40-pack/evidence",
+            "artifacts/scale-lane-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day40-pack/day40-scale-lane-summary.json").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-scale-lane-summary.md").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-scale-plan.md").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-channel-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-scale-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day40-pack/day40-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day40-pack/evidence/day40-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/scale-lane-summary.json").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/scale-lane-summary.md").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/scale-plan.md").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/channel-matrix.csv").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/scale-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/execution-log.md").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/scale-lane-pack/evidence/execution-summary.json").exists()
 
 
 def test_day40_strict_fails_when_day39_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
-    (tmp_path / "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json").unlink()
+    (tmp_path / "docs/artifacts/playbook-post-pack/playbook-post-summary.json").unlink()
     rc = d40.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 

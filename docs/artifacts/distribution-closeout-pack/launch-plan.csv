@@ -1,0 +1,4 @@
+channel,publish_at_utc,owner,backup,cta,kpi_target
+github_discussion,2026-02-26T15:00:00Z,community-owner,backup-reviewer,Run day36 command and share score,readme_to_command_ctr:+2%
+linkedin,2026-02-26T17:30:00Z,growth-owner,backup-reviewer,Comment your bottleneck,docs_unique_visitors:+10%
+newsletter,2026-02-27T09:00:00Z,pm-owner,backup-reviewer,Forward to one maintainer,external_pr_conversion:+1.5%

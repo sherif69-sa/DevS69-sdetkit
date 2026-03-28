@@ -11,9 +11,13 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-experiment-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY36_SUMMARY_PATH = (
+    "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
+)
+_DAY36_BOARD_PATH = "docs/artifacts/distribution-closeout-pack/delivery-board.md"
+_LEGACY_DAY36_SUMMARY_PATH = (
     "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
 )
-_DAY36_BOARD_PATH = "docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md"
+_LEGACY_DAY36_BOARD_PATH = "docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md"
 _SECTION_HEADER = "# Day 37 \u2014 Experiment lane activation"
 _REQUIRED_SECTIONS = [
     "## Why Day 37 matters",
@@ -25,14 +29,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day37-experiment-lane --format json --strict",
-    "python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict",
-    "python -m sdetkit day37-experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict",
+    "python -m sdetkit experiment-lane --format json --strict",
+    "python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json --strict",
+    "python -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/experiment-lane-pack/evidence --format json --strict",
     "python scripts/check_experiment_lane_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day37-experiment-lane --format json --strict",
-    "python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict",
+    "python -m sdetkit experiment-lane --format json --strict",
+    "python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json --strict",
     "python scripts/check_experiment_lane_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -68,15 +72,15 @@ Day 37 turns Day 36 distribution misses into controlled experiments with strict 
 
 ## Required inputs (Day 36)
 
-- `docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json`
-- `docs/artifacts/day36-distribution-closeout-pack/day36-delivery-board.md`
+- `docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json`
+- `docs/artifacts/distribution-closeout-pack/delivery-board.md`
 
 ## Day 37 command lane
 
 ```bash
-python -m sdetkit day37-experiment-lane --format json --strict
-python -m sdetkit day37-experiment-lane --emit-pack-dir docs/artifacts/day37-experiment-lane-pack --format json --strict
-python -m sdetkit day37-experiment-lane --execute --evidence-dir docs/artifacts/day37-experiment-lane-pack/evidence --format json --strict
+python -m sdetkit experiment-lane --format json --strict
+python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json --strict
+python -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/experiment-lane-pack/evidence --format json --strict
 python scripts/check_experiment_lane_contract.py
 ```
 
@@ -158,6 +162,14 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    return legacy_path if legacy_path.exists() else canonical_path
+
+
 def build_day37_experiment_lane_summary(
     root: Path,
     *,
@@ -180,8 +192,8 @@ def build_day37_experiment_lane_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day36_summary = root / _DAY36_SUMMARY_PATH
-    day36_board = root / _DAY36_BOARD_PATH
+    day36_summary = _resolve_input_path(root, _DAY36_SUMMARY_PATH, _LEGACY_DAY36_SUMMARY_PATH)
+    day36_board = _resolve_input_path(root, _DAY36_BOARD_PATH, _LEGACY_DAY36_BOARD_PATH)
     day36_score, day36_strict, day36_check_count = _load_day36(day36_summary)
     board_count, board_has_day36, board_has_day37 = _board_stats(day36_board)
 
@@ -213,8 +225,8 @@ def build_day37_experiment_lane_summary(
         {
             "check_id": "readme_day37_command",
             "weight": 4,
-            "passed": "day37-experiment-lane" in readme_text,
-            "evidence": "day37-experiment-lane",
+            "passed": "experiment-lane" in readme_text,
+            "evidence": "experiment-lane",
         },
         {
             "check_id": "docs_index_day37_links",
@@ -331,7 +343,7 @@ def build_day37_experiment_lane_summary(
         )
 
     return {
-        "name": "day37-experiment-lane",
+        "name": "experiment-lane",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -410,17 +422,17 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day37-experiment-lane-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day37-experiment-lane-summary.md", _to_markdown(payload))
+    _write(target / "experiment-lane-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "experiment-lane-summary.md", _to_markdown(payload))
     _write(
-        target / "day37-experiment-matrix.csv",
+        target / "experiment-matrix.csv",
         "experiment_id,distribution_miss,control,variant,kpi_target,stop_threshold,owner,decision_deadline\n"
         "exp-01,github_hook_ctr_low,narrative-first,command-first,readme_to_command_ctr:+2%,<0.5% uplift,community-owner,2026-03-01\n"
         "exp-02,linkedin_post_timing_miss,afternoon_slot,morning_slot,docs_unique_visitors:+8%,engagement<-5%,growth-owner,2026-03-01\n"
         "exp-03,newsletter_reply_rate_flat,text-only,teaser-gif,newsletter_reply_rate:+1.5%,unsubscribe>0.2%,pm-owner,2026-03-01\n",
     )
     _write(
-        target / "day37-hypothesis-brief.md",
+        target / "hypothesis-brief.md",
         "# Day 37 experiment hypothesis brief\n\n"
         "## Experiment hypotheses\n"
         "- `exp-01`: Command-first headline improves contributor command CTR by at least 2%.\n"
@@ -431,10 +443,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- Contribution quality: no drop in first-pass review acceptance rate beyond 3%.\n",
     )
     _write(
-        target / "day37-experiment-scorecard.json",
+        target / "experiment-scorecard.json",
         json.dumps(
             {
-                "generated_for": "day37-experiment-lane",
+                "generated_for": "experiment-lane",
                 "experiments": [
                     {
                         "experiment_id": "exp-01",
@@ -467,18 +479,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day37-decision-log.md",
+        target / "decision-log.md",
         "# Day 37 decision log\n\n"
         "- [ ] 2026-03-01: Promote winning variant(s) into Day 38 distribution batch #1.\n"
         "- [ ] 2026-03-01: Pause losing variant(s) and record fallback plan.\n"
         "- [ ] 2026-03-02: Publish day37 closeout summary with Day 38 rollout checklist.\n",
     )
     _write(
-        target / "day37-delivery-board.md",
+        target / "delivery-board.md",
         "# Day 37 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day37-validation-commands.md",
+        target / "validation-commands.md",
         "# Day 37 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -501,12 +513,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day37-experiment-lane-execution",
+        "name": "experiment-lane-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day37-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -540,7 +552,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day37-experiment-lane-pack/evidence")
+            else Path("docs/artifacts/experiment-lane-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

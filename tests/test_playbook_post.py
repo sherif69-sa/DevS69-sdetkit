@@ -42,7 +42,7 @@ def _seed_repo(root: Path) -> None:
     )
 
     summary = (
-        root / "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
+        root / "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -55,7 +55,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md"
+    board = root / "docs/artifacts/distribution-batch-pack/delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -88,32 +88,32 @@ def test_day39_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day39-pack",
+            "artifacts/playbook-post-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day39-pack/evidence",
+            "artifacts/playbook-post-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day39-pack/day39-playbook-post-summary.json").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-playbook-post-summary.md").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-playbook-draft.md").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-rollout-plan.csv").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day39-pack/day39-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day39-pack/evidence/day39-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/playbook-post-summary.json").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/playbook-post-summary.md").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/playbook-draft.md").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/rollout-plan.csv").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/execution-log.md").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/playbook-post-pack/evidence/execution-summary.json").exists()
 
 
 def test_day39_strict_fails_when_day38_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
+        / "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
     ).unlink()
     rc = d39.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

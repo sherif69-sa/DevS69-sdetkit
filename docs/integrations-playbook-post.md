@@ -10,15 +10,15 @@ Day 39 publishes playbook post #1 that converts Day 38 distribution evidence int
 
 ## Required inputs (Day 38)
 
-- `docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json`
-- `docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md`
+- `docs/artifacts/distribution-batch-pack/distribution-batch-summary.json`
+- `docs/artifacts/distribution-batch-pack/delivery-board.md`
 
 ## Day 39 command lane
 
 ```bash
 python -m sdetkit playbook-post --format json --strict
-python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/day39-playbook-post-pack --format json --strict
-python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/day39-playbook-post-pack/evidence --format json --strict
+python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict
+python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/playbook-post-pack/evidence --format json --strict
 python scripts/check_playbook_post_contract.py
 ```
 

@@ -10,15 +10,15 @@ Day 38 publishes a coordinated distribution batch that operationalizes Day 37 ex
 
 ## Required inputs (Day 37)
 
-- `docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json`
-- `docs/artifacts/day37-experiment-lane-pack/day37-delivery-board.md`
+- `docs/artifacts/experiment-lane-pack/experiment-lane-summary.json`
+- `docs/artifacts/experiment-lane-pack/delivery-board.md`
 
 ## Day 38 command lane
 
 ```bash
 python -m sdetkit distribution-batch --format json --strict
-python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/day38-distribution-batch-pack --format json --strict
-python -m sdetkit distribution-batch --execute --evidence-dir docs/artifacts/day38-distribution-batch-pack/evidence --format json --strict
+python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict
+python -m sdetkit distribution-batch --execute --evidence-dir docs/artifacts/distribution-batch-pack/evidence --format json --strict
 python scripts/check_distribution_batch_contract.py
 ```
 

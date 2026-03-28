@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-scale-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY39_SUMMARY_PATH = "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
-_DAY39_BOARD_PATH = "docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md"
+_DAY39_SUMMARY_PATH = "docs/artifacts/playbook-post-pack/playbook-post-summary.json"
+_DAY39_BOARD_PATH = "docs/artifacts/playbook-post-pack/delivery-board.md"
+_LEGACY_DAY39_SUMMARY_PATH = "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
+_LEGACY_DAY39_BOARD_PATH = "docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md"
 _SECTION_HEADER = "# Day 40 \u2014 Scale lane #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 40 matters",
@@ -23,14 +25,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day40-scale-lane --format json --strict",
-    "python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict",
-    "python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict",
+    "python -m sdetkit scale-lane --format json --strict",
+    "python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/scale-lane-pack --format json --strict",
+    "python -m sdetkit scale-lane --execute --evidence-dir docs/artifacts/scale-lane-pack/evidence --format json --strict",
     "python scripts/check_scale_lane_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day40-scale-lane --format json --strict",
-    "python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict",
+    "python -m sdetkit scale-lane --format json --strict",
+    "python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/scale-lane-pack --format json --strict",
     "python scripts/check_scale_lane_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -66,15 +68,15 @@ Day 40 publishes scale lane #1 that converts Day 39 publication evidence into a 
 
 ## Required inputs (Day 39)
 
-- `docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json`
-- `docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md`
+- `docs/artifacts/playbook-post-pack/playbook-post-summary.json`
+- `docs/artifacts/playbook-post-pack/delivery-board.md`
 
 ## Day 40 command lane
 
 ```bash
-python -m sdetkit day40-scale-lane --format json --strict
-python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict
-python -m sdetkit day40-scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict
+python -m sdetkit scale-lane --format json --strict
+python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/scale-lane-pack --format json --strict
+python -m sdetkit scale-lane --execute --evidence-dir docs/artifacts/scale-lane-pack/evidence --format json --strict
 python scripts/check_scale_lane_contract.py
 ```
 
@@ -156,6 +158,14 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
+def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
+    canonical_path = root / canonical
+    if canonical_path.exists():
+        return canonical_path
+    legacy_path = root / legacy
+    return legacy_path if legacy_path.exists() else canonical_path
+
+
 def build_day40_scale_lane_summary(
     root: Path,
     *,
@@ -178,8 +188,8 @@ def build_day40_scale_lane_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day39_summary = root / _DAY39_SUMMARY_PATH
-    day39_board = root / _DAY39_BOARD_PATH
+    day39_summary = _resolve_input_path(root, _DAY39_SUMMARY_PATH, _LEGACY_DAY39_SUMMARY_PATH)
+    day39_board = _resolve_input_path(root, _DAY39_BOARD_PATH, _LEGACY_DAY39_BOARD_PATH)
     day39_score, day39_strict, day39_check_count = _load_day39(day39_summary)
     board_count, board_has_day39, board_has_day40 = _board_stats(day39_board)
 
@@ -211,8 +221,8 @@ def build_day40_scale_lane_summary(
         {
             "check_id": "readme_day40_command",
             "weight": 4,
-            "passed": "day40-scale-lane" in readme_text,
-            "evidence": "day40-scale-lane",
+            "passed": "scale-lane" in readme_text,
+            "evidence": "scale-lane",
         },
         {
             "check_id": "docs_index_day40_links",
@@ -327,7 +337,7 @@ def build_day40_scale_lane_summary(
         wins.append("Day 40 scale lane #1 is fully complete and ready for Day 41 expansion lane.")
 
     return {
-        "name": "day40-scale-lane",
+        "name": "scale-lane",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -406,10 +416,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = (root / pack_dir).resolve() if not pack_dir.is_absolute() else pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day40-scale-lane-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day40-scale-lane-summary.md", _to_markdown(payload))
+    _write(target / "scale-lane-summary.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "scale-lane-summary.md", _to_markdown(payload))
     _write(
-        target / "day40-scale-plan.md",
+        target / "scale-plan.md",
         "# Day 40 scale lane #1\n\n"
         "## Executive summary\n"
         "- Day 39 winners were converted into a repeatable publishing pattern.\n"
@@ -420,17 +430,17 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] Capture KPI pulse after 24h and 72h\n",
     )
     _write(
-        target / "day40-channel-matrix.csv",
+        target / "channel-matrix.csv",
         "section,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target\n"
-        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-scale-lane.md,python -m sdetkit day40-scale-lane --format json --strict,completion:+5%\n"
+        "executive-summary,pm-owner,backup-pm,2026-03-06T09:00:00Z,docs/integrations-scale-lane.md,python -m sdetkit scale-lane --format json --strict,completion:+5%\n"
         "tactical-checklist,ops-owner,backup-ops,2026-03-06T12:00:00Z,docs/impact-40-big-upgrade-report.md,python scripts/check_scale_lane_contract.py,adoption:+7%\n"
-        "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit day40-scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict,ctr:+2%\n",
+        "rollout-timeline,growth-owner,backup-growth,2026-03-07T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/scale-lane-pack --format json --strict,ctr:+2%\n",
     )
     _write(
-        target / "day40-scale-kpi-scorecard.json",
+        target / "scale-kpi-scorecard.json",
         json.dumps(
             {
-                "generated_for": "day40-scale-lane",
+                "generated_for": "scale-lane",
                 "metrics": [
                     {
                         "name": "playbook_read_completion",
@@ -457,18 +467,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day40-execution-log.md",
+        target / "execution-log.md",
         "# Day 40 execution log\n\n"
         "- [ ] 2026-03-06: Publish playbook draft and collect internal review notes.\n"
         "- [ ] 2026-03-07: Execute rollout timeline and capture first KPI pulse.\n"
         "- [ ] 2026-03-08: Record misses, wins, and Day 40 scale priorities.\n",
     )
     _write(
-        target / "day40-delivery-board.md",
+        target / "delivery-board.md",
         "# Day 40 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day40-validation-commands.md",
+        target / "validation-commands.md",
         "# Day 40 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
@@ -491,12 +501,12 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day40-scale-lane-execution",
+        "name": "scale-lane-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day40-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -530,7 +540,7 @@ def main(argv: list[str] | None = None) -> int:
         ev_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day40-scale-lane-pack/evidence")
+            else Path("docs/artifacts/scale-lane-pack/evidence")
         )
         _run_execution(root, ev_dir)
 

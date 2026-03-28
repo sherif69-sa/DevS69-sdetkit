@@ -10,8 +10,8 @@ Day 41 closes the lane with a major upgrade that converts Day 40 scale outcomes 
 
 ## Required inputs (Day 40)
 
-- `docs/artifacts/day40-scale-lane-pack/day40-scale-lane-summary.json`
-- `docs/artifacts/day40-scale-lane-pack/day40-delivery-board.md`
+- `docs/artifacts/scale-lane-pack/scale-lane-summary.json`
+- `docs/artifacts/scale-lane-pack/delivery-board.md`
 
 ## Day 41 command lane
 

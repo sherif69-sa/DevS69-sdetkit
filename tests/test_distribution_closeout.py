@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-distribution-closeout.md\nday36-distribution-closeout\n",
+        "docs/integrations-distribution-closeout.md\ndistribution-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -78,7 +78,7 @@ def test_day36_distribution_json(tmp_path: Path, capsys) -> None:
     rc = d36.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day36-distribution-closeout"
+    assert out["name"] == "distribution-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -89,24 +89,24 @@ def test_day36_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day36-pack",
+            "artifacts/distribution-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day36-pack/evidence",
+            "artifacts/distribution-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day36-pack/day36-distribution-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day36-pack/day36-distribution-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day36-pack/day36-distribution-message-kit.md").exists()
-    assert (tmp_path / "artifacts/day36-pack/day36-launch-plan.csv").exists()
-    assert (tmp_path / "artifacts/day36-pack/day36-experiment-backlog.md").exists()
-    assert (tmp_path / "artifacts/day36-pack/day36-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day36-pack/day36-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day36-pack/evidence/day36-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/distribution-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/distribution-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/distribution-message-kit.md").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/launch-plan.csv").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/experiment-backlog.md").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/distribution-closeout-pack/evidence/execution-summary.json").exists()
 
 
 def test_day36_strict_fails_when_day35_inputs_missing(tmp_path: Path) -> None:

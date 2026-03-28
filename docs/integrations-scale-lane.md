@@ -10,15 +10,15 @@ Day 40 closes the lane with a scale-oriented upgrade that converts Day 39 public
 
 ## Required inputs (Day 39)
 
-- `docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json`
-- `docs/artifacts/day39-playbook-post-pack/day39-delivery-board.md`
+- `docs/artifacts/playbook-post-pack/playbook-post-summary.json`
+- `docs/artifacts/playbook-post-pack/delivery-board.md`
 
 ## Day 40 command lane
 
 ```bash
 python -m sdetkit scale-lane --format json --strict
-python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/day40-scale-lane-pack --format json --strict
-python -m sdetkit scale-lane --execute --evidence-dir docs/artifacts/day40-scale-lane-pack/evidence --format json --strict
+python -m sdetkit scale-lane --emit-pack-dir docs/artifacts/scale-lane-pack --format json --strict
+python -m sdetkit scale-lane --execute --evidence-dir docs/artifacts/scale-lane-pack/evidence --format json --strict
 python scripts/check_scale_lane_contract.py
 ```
 
