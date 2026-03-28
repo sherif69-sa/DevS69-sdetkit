@@ -33,7 +33,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/cycle-4-big-upgrade-report.md").write_text("# Cycle 4 report\n", encoding="utf-8")
     (root / "scripts").mkdir(parents=True, exist_ok=True)
-    (root / "scripts/check_continuous_upgrade_cycle4_closeout_contract.py").write_text(
+    (root / "scripts/check_continuous_upgrade_cycle4_contract.py").write_text(
         "from __future__ import annotations\n"
         "\n"
         "if __name__ == '__main__':\n"

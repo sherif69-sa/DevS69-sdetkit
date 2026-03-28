@@ -14,8 +14,6 @@ _DAY85_SUMMARY_PATH = "docs/artifacts/release-prioritization-closeout-pack/relea
 _DAY85_BOARD_PATH = (
     "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md"
 )
-_DAY85_LEGACY_SUMMARY_PATH = "docs/artifacts/day85-release-prioritization-closeout-pack/day85-release-prioritization-closeout-summary.json"
-_DAY85_LEGACY_BOARD_PATH = "docs/artifacts/day85-release-prioritization-closeout-pack/day85-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/launch-readiness-plan.json"
 _SECTION_HEADER = "# Day 86 \u2014 Launch readiness closeout lane"
 _REQUIRED_SECTIONS = [
@@ -139,18 +137,14 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
-def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    return canonical_path if canonical_path.exists() else (root / legacy)
-
-
 def build_day86_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day85_summary = _resolve_with_legacy(root, _DAY85_SUMMARY_PATH, _DAY85_LEGACY_SUMMARY_PATH)
-    day85_board = _resolve_with_legacy(root, _DAY85_BOARD_PATH, _DAY85_LEGACY_BOARD_PATH)
+
+    day85_summary = root / _DAY85_SUMMARY_PATH
+    day85_board = root / _DAY85_BOARD_PATH
 
     day85_data = _load_json(day85_summary)
     day85_summary_data = (

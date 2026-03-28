@@ -13,7 +13,6 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CANONICAL_LANE_NAME = "phase1-wrap"
 _LEGACY_LANE_NAME = "day30-phase1-wrap"
 _DAY29_CANONICAL_SUMMARY_PATH = "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
-_DAY29_LEGACY_SUMMARY_PATH = "docs/artifacts/day29-hardening-pack/day29-phase1-hardening-summary.json"
 _CANONICAL_EXECUTION_SUMMARY = "phase1-wrap-execution-summary.json"
 _SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
 _REQUIRED_SECTIONS = [
@@ -119,8 +118,7 @@ def build_day30_phase1_wrap_summary(
     day27_path = root / "docs/artifacts/day27-kpi-pack/day27-kpi-summary.json"
     day28_path = root / "docs/artifacts/day28-weekly-pack/day28-weekly-review-summary.json"
     day29_primary_path = root / _DAY29_CANONICAL_SUMMARY_PATH
-    day29_legacy_path = root / _DAY29_LEGACY_SUMMARY_PATH
-    day29_path = day29_primary_path if day29_primary_path.exists() else day29_legacy_path
+    day29_path = day29_primary_path
 
     day27_score, day27_ok = _load_score(day27_path)
     day28_score, day28_ok = _load_score(day28_path)

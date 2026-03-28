@@ -11,9 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-demo-asset2.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY33_SUMMARY_PATH = "docs/artifacts/demo-asset-pack/demo-asset-summary.json"
-_DAY33_SUMMARY_FALLBACK_PATH = "docs/artifacts/day33-demo-asset-pack/day33-demo-asset-summary.json"
 _DAY33_BOARD_PATH = "docs/artifacts/demo-asset-pack/demo-delivery-board.md"
-_DAY33_BOARD_FALLBACK_PATH = "docs/artifacts/day33-demo-asset-pack/day33-delivery-board.md"
 _SECTION_HEADER = "# Day 34 \u2014 Demo asset #2 production (repo audit)"
 _REQUIRED_SECTIONS = [
     "## Why Day 34 matters",
@@ -181,13 +179,9 @@ def build_day34_demo_asset2_summary(
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day33_summary_primary = root / _DAY33_SUMMARY_PATH
-    day33_summary_fallback = root / _DAY33_SUMMARY_FALLBACK_PATH
     day33_board_primary = root / _DAY33_BOARD_PATH
-    day33_board_fallback = root / _DAY33_BOARD_FALLBACK_PATH
-    day33_summary = (
-        day33_summary_primary if day33_summary_primary.exists() else day33_summary_fallback
-    )
-    day33_board = day33_board_primary if day33_board_primary.exists() else day33_board_fallback
+    day33_summary = day33_summary_primary
+    day33_board = day33_board_primary
     day33_score, day33_strict, day33_check_count = _load_day33(day33_summary)
     board_count, board_has_day34, board_has_day35 = _board_stats(day33_board)
 

@@ -11,9 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-release-cadence.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY31_SUMMARY_PATH = "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
-_DAY31_SUMMARY_FALLBACK_PATH = "docs/artifacts/day31-phase2-pack/day31-phase2-kickoff-summary.json"
 _DAY31_BOARD_PATH = "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
-_DAY31_BOARD_FALLBACK_PATH = "docs/artifacts/day31-phase2-pack/day31-delivery-board.md"
 _SECTION_HEADER = "# Day 32 \u2014 Release cadence setup"
 _REQUIRED_SECTIONS = [
     "## Why Day 32 matters",
@@ -181,11 +179,9 @@ def build_day32_release_cadence_summary(
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day31_summary_primary = root / _DAY31_SUMMARY_PATH
-    day31_summary_fallback = root / _DAY31_SUMMARY_FALLBACK_PATH
     day31_board_primary = root / _DAY31_BOARD_PATH
-    day31_board_fallback = root / _DAY31_BOARD_FALLBACK_PATH
-    day31_summary = day31_summary_primary if day31_summary_primary.exists() else day31_summary_fallback
-    day31_board = day31_board_primary if day31_board_primary.exists() else day31_board_fallback
+    day31_summary = day31_summary_primary
+    day31_board = day31_board_primary
     day31_score, day31_strict, day31_check_count = _load_day31(day31_summary)
     board_count, board_has_day32, board_has_day33 = _board_stats(day31_board)
 

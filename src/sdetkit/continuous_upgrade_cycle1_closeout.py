@@ -12,10 +12,6 @@ _PAGE_PATH = "docs/integrations-continuous-upgrade-cycle1-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY90_SUMMARY_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-closeout-summary.json"
 _DAY90_BOARD_PATH = "docs/artifacts/phase3-wrap-publication-closeout-pack/phase3-wrap-publication-delivery-board.md"
-_DAY90_LEGACY_SUMMARY_PATH = "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-phase3-wrap-publication-closeout-summary.json"
-_DAY90_LEGACY_BOARD_PATH = (
-    "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/day90-delivery-board.md"
-)
 _PLAN_PATH = "docs/roadmap/plans/continuous-upgrade-cycle1-plan.json"
 _SECTION_HEADER = "# Cycle 1 \u2014 Continuous upgrade closeout lane"
 _REQUIRED_SECTIONS = [
@@ -31,12 +27,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit continuous-upgrade-cycle1-closeout --format json --strict",
     "python -m sdetkit continuous-upgrade-cycle1-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack --format json --strict",
     "python -m sdetkit continuous-upgrade-cycle1-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack/evidence --format json --strict",
-    "python scripts/check_continuous_upgrade_cycle1_closeout_contract.py",
+    "python scripts/check_continuous_upgrade_cycle1_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit continuous-upgrade-cycle1-closeout --format json --strict",
     "python -m sdetkit continuous-upgrade-cycle1-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack --format json --strict",
-    "python scripts/check_continuous_upgrade_cycle1_closeout_contract.py --skip-evidence",
+    "python scripts/check_continuous_upgrade_cycle1_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 1 continuous upgrade execution and signoff.",
@@ -89,7 +85,7 @@ Cycle 1 closes with a major upgrade that converts Day 90 governance scale outcom
 python -m sdetkit continuous-upgrade-cycle1-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle1-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle1-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack/evidence --format json --strict
-python scripts/check_continuous_upgrade_cycle1_closeout_contract.py
+python scripts/check_continuous_upgrade_cycle1_contract.py
 ```
 
 ## Continuous upgrade contract
@@ -215,14 +211,6 @@ def _page_header_ok(page_lines: list[str], expected_cycle: int) -> bool:
 def _resolve_day90_inputs(root: Path) -> tuple[Path, Path]:
     summary = root / _DAY90_SUMMARY_PATH
     board = root / _DAY90_BOARD_PATH
-    if summary.exists() and board.exists():
-        return summary, board
-
-    legacy_summary = root / _DAY90_LEGACY_SUMMARY_PATH
-    legacy_board = root / _DAY90_LEGACY_BOARD_PATH
-    if legacy_summary.exists() and legacy_board.exists():
-        return legacy_summary, legacy_board
-
     return summary, board
 
 

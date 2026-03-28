@@ -9,7 +9,6 @@ from pathlib import Path
 from sdetkit import day80_partner_outreach_closeout as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/partner-outreach-closeout-pack/evidence/partner-outreach-execution-summary.json"
-_LEGACY_EVIDENCE = "docs/artifacts/day80-partner-outreach-closeout-pack/evidence/day80-execution-summary.json"
 
 
 def main() -> int:
@@ -31,8 +30,6 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = root / _CANONICAL_EVIDENCE
-        if not evidence.exists():
-            evidence = root / _LEGACY_EVIDENCE
         if not evidence.exists():
             errors.append(f"missing evidence summary: {root / _CANONICAL_EVIDENCE}")
         else:

@@ -13,9 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CANONICAL_LANE_NAME = "phase2-kickoff"
 _LEGACY_LANE_NAME = "day31-phase2-kickoff"
 _DAY30_SUMMARY_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json"
-_DAY30_SUMMARY_FALLBACK_PATH = "docs/artifacts/day30-wrap-pack/day30-phase1-wrap-summary.json"
 _DAY30_BACKLOG_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
-_DAY30_BACKLOG_FALLBACK_PATH = "docs/artifacts/day30-wrap-pack/day30-phase2-backlog.md"
 _SECTION_HEADER = "# Day 31 \u2014 Phase-2 kickoff baseline"
 _REQUIRED_SECTIONS = [
     "## Why Day 31 matters",
@@ -168,11 +166,9 @@ def build_day31_phase2_kickoff_summary(
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day30_summary_primary = root / _DAY30_SUMMARY_PATH
-    day30_summary_fallback = root / _DAY30_SUMMARY_FALLBACK_PATH
     day30_backlog_primary = root / _DAY30_BACKLOG_PATH
-    day30_backlog_fallback = root / _DAY30_BACKLOG_FALLBACK_PATH
-    day30_summary = day30_summary_primary if day30_summary_primary.exists() else day30_summary_fallback
-    day30_backlog = day30_backlog_primary if day30_backlog_primary.exists() else day30_backlog_fallback
+    day30_summary = day30_summary_primary
+    day30_backlog = day30_backlog_primary
     day30_score, day30_strict, day30_avg = _load_day30(day30_summary)
     backlog_count, backlog_has_day31, backlog_has_day32 = _backlog_stats(day30_backlog)
 

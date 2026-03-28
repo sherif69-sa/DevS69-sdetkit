@@ -12,8 +12,6 @@ _PAGE_PATH = "docs/integrations-governance-handoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY86_SUMMARY_PATH = "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json"
 _DAY86_BOARD_PATH = "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
-_DAY86_LEGACY_SUMMARY_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
-_DAY86_LEGACY_BOARD_PATH = "docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/governance-handoff-plan.json"
 _SECTION_HEADER = "# Day 87 \u2014 Governance handoff closeout lane"
 _REQUIRED_SECTIONS = [
@@ -137,18 +135,14 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
-def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    return canonical_path if canonical_path.exists() else (root / legacy)
-
-
 def build_day87_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day86_summary = _resolve_with_legacy(root, _DAY86_SUMMARY_PATH, _DAY86_LEGACY_SUMMARY_PATH)
-    day86_board = _resolve_with_legacy(root, _DAY86_BOARD_PATH, _DAY86_LEGACY_BOARD_PATH)
+
+    day86_summary = root / _DAY86_SUMMARY_PATH
+    day86_board = root / _DAY86_BOARD_PATH
 
     day86_data = _load_json(day86_summary)
     day86_summary_data = (
