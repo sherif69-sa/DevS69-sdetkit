@@ -11,7 +11,7 @@ Day 44 closes with a big scale upgrade that converts Day 43 acceleration evidenc
 ## Required inputs (Day 43)
 
 - `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
-- `docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md`
+- `docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md`
 
 ## Day 44 command lane
 
