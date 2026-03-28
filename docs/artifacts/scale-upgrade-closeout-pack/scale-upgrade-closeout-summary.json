@@ -1,0 +1,124 @@
+{
+  "name": "scale-upgrade-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-scale-upgrade-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day78_summary": "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json",
+    "day78_delivery_board": "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md",
+    "scale_upgrade_plan": "docs/roadmap/plans/scale-upgrade-plan.json"
+  },
+  "checks": [
+    {
+      "check_id": "readme_scale_upgrade_command",
+      "weight": 7,
+      "passed": true,
+      "evidence": "README scale-upgrade command lane"
+    },
+    {
+      "check_id": "docs_index_scale_upgrade_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-79-big-upgrade-report.md + integrations-scale-upgrade-closeout.md"
+    },
+    {
+      "check_id": "top10_scale_upgrade_alignment",
+      "weight": 5,
+      "passed": true,
+      "evidence": "Ecosystem priorities + scale upgrade strategy chain"
+    },
+    {
+      "check_id": "day78_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json"
+    },
+    {
+      "check_id": "day78_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md"
+    },
+    {
+      "check_id": "day78_quality_floor",
+      "weight": 13,
+      "passed": true,
+      "evidence": {
+        "day78_score": 100,
+        "strict_pass": true,
+        "day78_checks": 14
+      }
+    },
+    {
+      "check_id": "day78_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_day78": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": true,
+      "evidence": "# Scale upgrade closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all sections present"
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "delivery board locked"
+    },
+    {
+      "check_id": "scale_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/roadmap/plans/scale-upgrade-plan.json"
+    }
+  ],
+  "rollup": {
+    "day78_activation_score": 100,
+    "day78_checks": 14,
+    "day78_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 92,
+    "passed_checks": 13,
+    "failed_checks": 1,
+    "critical_failures": [],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 78 continuity baseline is stable with activation score=100.",
+    "Day 78 delivery board integrity validated with 5 checklist items.",
+    "Day 79 scale upgrade dataset is available for launch execution."
+  ],
+  "misses": [],
+  "handoff_actions": []
+}

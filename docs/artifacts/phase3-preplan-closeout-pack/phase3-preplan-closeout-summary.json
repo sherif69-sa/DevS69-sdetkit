@@ -1,13 +1,126 @@
 {
-  "name": "day59-phase3-preplan-closeout",
-  "summary": {
-    "activation_score": 100,
-    "strict_pass": true
+  "name": "phase3-preplan-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-phase3-preplan-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "day58_summary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json",
+    "day58_delivery_board": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
   },
   "checks": [
     {
-      "check_id": "seed",
-      "passed": true
+      "check_id": "readme_day59_command",
+      "weight": 7,
+      "passed": false,
+      "evidence": "README day59 command lane"
+    },
+    {
+      "check_id": "docs_index_day59_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-59-big-upgrade-report.md + integrations-phase3-preplan-closeout.md"
+    },
+    {
+      "check_id": "top10_day59_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 59 + Day 60 strategy chain"
+    },
+    {
+      "check_id": "day58_summary_present",
+      "weight": 10,
+      "passed": false,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
+    },
+    {
+      "check_id": "day58_delivery_board_present",
+      "weight": 8,
+      "passed": false,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+    },
+    {
+      "check_id": "day58_quality_floor",
+      "weight": 15,
+      "passed": false,
+      "evidence": {
+        "day58_score": 0,
+        "strict_pass": false,
+        "day58_checks": 0
+      }
+    },
+    {
+      "check_id": "day58_board_integrity",
+      "weight": 7,
+      "passed": false,
+      "evidence": {
+        "board_items": 0,
+        "contains_day58": false
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": false,
+      "evidence": "# Day 59 \u2014 Phase-3 pre-plan closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 10,
+      "passed": false,
+      "evidence": [
+        "## Day 59 command lane"
+      ]
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 8,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "contract locked"
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 3,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 2,
+      "passed": true,
+      "evidence": "delivery board locked"
     }
+  ],
+  "rollup": {
+    "day58_activation_score": 0,
+    "day58_checks": 0,
+    "day58_delivery_board_items": 0
+  },
+  "summary": {
+    "activation_score": 18,
+    "passed_checks": 4,
+    "failed_checks": 9,
+    "critical_failures": [
+      "day58_handoff_inputs",
+      "day58_strict_baseline"
+    ],
+    "strict_pass": false
+  },
+  "wins": [
+    "Phase-3 pre-plan contract + quality checklist is fully locked for execution."
+  ],
+  "misses": [
+    "Day 58 strict continuity signal is missing.",
+    "Day 58 delivery board integrity is incomplete (needs >=5 items and Day 58 anchors)."
+  ],
+  "handoff_actions": [
+    "Re-run Day 58 Phase-2 hardening closeout command and restore strict baseline before Day 59 lock.",
+    "Repair Day 58 delivery board entries to include Day 58 anchors."
   ]
 }

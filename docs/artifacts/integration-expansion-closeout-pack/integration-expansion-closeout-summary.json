@@ -1,9 +1,9 @@
 {
-  "name": "day64-integration-expansion-closeout",
+  "name": "integration-expansion-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day64-integration-expansion-closeout.md",
+    "docs_page": "docs/integrations-integration-expansion-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "workflow": ".github/workflows/day64-advanced-github-actions-reference.yml",
     "day63_summary": "docs/artifacts/day63-onboarding-activation-closeout-pack/day63-onboarding-activation-closeout-summary.json",
@@ -13,19 +13,19 @@
     {
       "check_id": "readme_day64_command",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "README day64 command lane"
     },
     {
       "check_id": "docs_index_day64_links",
       "weight": 8,
-      "passed": true,
-      "evidence": "impact-64-big-upgrade-report.md + integrations-day64-integration-expansion-closeout.md"
+      "passed": false,
+      "evidence": "impact-64-big-upgrade-report.md + integrations-integration-expansion-closeout.md"
     },
     {
       "check_id": "top10_day64_alignment",
       "weight": 5,
-      "passed": true,
+      "passed": false,
       "evidence": "Day 64 + Day 65 strategy chain"
     },
     {
@@ -62,14 +62,17 @@
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 64 \u2014 Integration expansion #1 closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Integration Expansion Closeout command lane (Legacy Day 64)",
+        "## Integration Expansion Closeout delivery board (Legacy Day 64)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -98,8 +101,11 @@
     {
       "check_id": "workflow_reference_lock",
       "weight": 10,
-      "passed": true,
-      "evidence": "workflow locked"
+      "passed": false,
+      "evidence": [
+        "name: Day64 Advanced GitHub Actions Reference",
+        "actions/cache@v4"
+      ]
     }
   ],
   "rollup": {
@@ -108,18 +114,20 @@
     "day63_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
+    "activation_score": 55,
+    "passed_checks": 8,
+    "failed_checks": 6,
     "critical_failures": [],
-    "strict_pass": true
+    "strict_pass": false
   },
   "wins": [
     "Day 63 continuity is strict-pass with activation score=95.",
-    "Day 63 delivery board integrity validated with 5 checklist items.",
-    "Advanced GitHub Actions workflow reference is fully locked for execution.",
-    "Day 64 integration expansion closeout lane is fully complete and ready for Day 65 weekly review."
+    "Day 63 delivery board integrity validated with 5 checklist items."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Advanced workflow reference is missing required controls."
+  ],
+  "handoff_actions": [
+    "Complete workflow_dispatch/workflow_call/matrix/concurrency/cache lines in workflow file."
+  ]
 }

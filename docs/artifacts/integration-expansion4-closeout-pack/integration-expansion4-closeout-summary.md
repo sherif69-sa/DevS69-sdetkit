@@ -1,5 +1,5 @@
-Day 68 integration expansion #4 closeout summary
-- Activation score: 100
-- Passed checks: 14
-- Failed checks: 0
-- Critical failures: []
+Integration Expansion4 Closeout summary
+- Activation score: 52
+- Passed checks: 8
+- Failed checks: 6
+- Critical failures: ['day67_strict_baseline']

@@ -1,31 +1,31 @@
 {
-  "name": "day67-integration-expansion3-closeout",
+  "name": "integration-expansion3-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day67-integration-expansion3-closeout.md",
+    "docs_page": "docs/integrations-integration-expansion3-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "day66_summary": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json",
     "day66_delivery_board": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md",
-    "jenkins_reference": "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
+    "jenkins_reference": "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
   },
   "checks": [
     {
       "check_id": "readme_day67_command",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "README day67 command lane"
     },
     {
       "check_id": "docs_index_day67_links",
       "weight": 8,
-      "passed": true,
-      "evidence": "impact-67-big-upgrade-report.md + integrations-day67-integration-expansion3-closeout.md"
+      "passed": false,
+      "evidence": "impact-67-big-upgrade-report.md + integrations-integration-expansion3-closeout.md"
     },
     {
       "check_id": "top10_day67_alignment",
       "weight": 5,
-      "passed": true,
+      "passed": false,
       "evidence": "Day 67 + Day 68 strategy chain"
     },
     {
@@ -43,10 +43,10 @@
     {
       "check_id": "day66_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day66_score": 100,
-        "strict_pass": true,
+        "day66_score": 52,
+        "strict_pass": false,
         "day66_checks": 14
       }
     },
@@ -62,14 +62,17 @@
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 67 \u2014 Integration expansion #3 closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Integration Expansion3 Closeout command lane (Legacy Day 67)",
+        "## Integration Expansion3 Closeout delivery board (Legacy Day 67)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -99,27 +102,31 @@
       "check_id": "jenkins_reference_present",
       "weight": 10,
       "passed": true,
-      "evidence": "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
+      "evidence": "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
     }
   ],
   "rollup": {
-    "day66_activation_score": 100,
+    "day66_activation_score": 52,
     "day66_checks": 14,
     "day66_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 52,
+    "passed_checks": 8,
+    "failed_checks": 6,
+    "critical_failures": [
+      "day66_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 66 continuity is strict-pass with activation score=100.",
     "Day 66 delivery board integrity validated with 5 checklist items.",
-    "Day 67 Jenkins reference pipeline is available for integration expansion execution.",
-    "Day 67 integration expansion #3 closeout lane is fully complete and ready for Day 68 integration expansion #4."
+    "Day 67 Jenkins reference pipeline is available for integration expansion execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 66 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 66 closeout command and restore strict baseline before Day 67 lock."
+  ]
 }

@@ -384,23 +384,23 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day67-integration-expansion3-closeout-summary.json",
+        target / "integration-expansion3-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
     _write(
-        target / "day67-integration-expansion3-closeout-summary.md", _render_text(payload) + "\n"
+        target / "integration-expansion3-closeout-summary.md", _render_text(payload) + "\n"
     )
-    _write(target / "day67-integration-brief.md", "# Day 67 integration brief\n")
-    _write(target / "day67-jenkins-blueprint.md", "# Day 67 Jenkins blueprint\n")
-    _write(target / "day67-matrix-plan.json", json.dumps({"matrix": []}, indent=2) + "\n")
-    _write(target / "day67-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day67-execution-log.md", "# Day 67 execution log\n")
+    _write(target / "integration-expansion3-integration-brief.md", "# Day 67 integration brief\n")
+    _write(target / "integration-expansion3-jenkins-blueprint.md", "# Day 67 Jenkins blueprint\n")
+    _write(target / "integration-expansion3-matrix-plan.json", json.dumps({"matrix": []}, indent=2) + "\n")
+    _write(target / "integration-expansion3-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "integration-expansion3-execution-log.md", "# Day 67 execution log\n")
     _write(
-        target / "day67-delivery-board.md",
+        target / "integration-expansion3-delivery-board.md",
         "\n".join(["# Day 67 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day67-validation-commands.md",
+        target / "integration-expansion3-validation-commands.md",
         "# Day 67 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 

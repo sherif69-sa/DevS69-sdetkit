@@ -1,5 +1,5 @@
-Day 59 Phase-3 pre-plan closeout summary
-- Activation score: 55
-- Passed checks: 9
-- Failed checks: 4
+Phase3 Preplan Closeout summary (legacy: Day 59)
+- Activation score: 18
+- Passed checks: 4
+- Failed checks: 9
 - Critical failures: ['day58_handoff_inputs', 'day58_strict_baseline']

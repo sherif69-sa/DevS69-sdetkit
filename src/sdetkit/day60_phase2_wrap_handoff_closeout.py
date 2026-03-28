@@ -352,20 +352,20 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day60-phase2-wrap-handoff-closeout-summary.json",
+        target / "phase2-wrap-handoff-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day60-phase2-wrap-handoff-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day60-phase2-wrap-handoff-brief.md", "# Day 60 Phase-2 wrap + handoff brief\n")
-    _write(target / "day60-risk-ledger.csv", "risk,owner,mitigation,status\n")
-    _write(target / "day60-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day60-execution-log.md", "# Day 60 execution log\n")
+    _write(target / "phase2-wrap-handoff-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "phase2-wrap-handoff-brief.md", "# Day 60 Phase-2 wrap + handoff brief\n")
+    _write(target / "phase2-wrap-handoff-risk-ledger.csv", "risk,owner,mitigation,status\n")
+    _write(target / "phase2-wrap-handoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "phase2-wrap-handoff-execution-log.md", "# Day 60 execution log\n")
     _write(
-        target / "day60-delivery-board.md",
+        target / "phase2-wrap-handoff-delivery-board.md",
         "\n".join(["# Day 60 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day60-validation-commands.md",
+        target / "phase2-wrap-handoff-validation-commands.md",
         "# Day 60 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 

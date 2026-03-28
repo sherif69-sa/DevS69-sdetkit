@@ -128,18 +128,18 @@ def test_day64_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day64-pack/day64-integration-expansion-closeout-summary.json"
+        tmp_path / "artifacts/day64-pack/integration-expansion-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day64-pack/day64-integration-expansion-closeout-summary.md"
+        tmp_path / "artifacts/day64-pack/integration-expansion-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-workflow-blueprint.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-matrix-plan.csv").exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/day64-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-workflow-blueprint.md").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-matrix-plan.csv").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day64-pack/integration-expansion-validation-commands.md").exists()
     assert (tmp_path / "artifacts/day64-pack/evidence/integration-expansion-execution-summary.json").exists()
 
 

@@ -99,14 +99,14 @@ def test_day59_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day59-pack/day59-phase3-preplan-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-phase3-preplan-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-phase3-preplan-brief.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/day59-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-brief.md").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-validation-commands.md").exists()
     assert (tmp_path / "artifacts/day59-pack/evidence/phase3-preplan-execution-summary.json").exists()
 
 
