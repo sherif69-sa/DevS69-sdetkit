@@ -15,12 +15,12 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/reports").mkdir(parents=True, exist_ok=True)
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-continuous-upgrade-closeout-9.md\ncontinuous-upgrade-cycle9-closeout\n",
+        "docs/integrations-continuous-upgrade-closeout-9.md\ncontinuous-upgrade-closeout-9\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        "continuous-upgrade-cycle9-big-upgrade-report.md\nintegrations-continuous-upgrade-cycle9-closeout.md\n",
+        "continuous-upgrade-cycle9-big-upgrade-report.md\nintegrations-continuous-upgrade-closeout-9.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
@@ -102,7 +102,7 @@ def test_cycle9_json(tmp_path: Path, capsys) -> None:
     rc = d99.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "continuous-upgrade-cycle9-closeout"
+    assert out["name"] == "continuous-upgrade-closeout-9"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -113,10 +113,10 @@ def test_cycle9_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/continuous-upgrade-cycle9-closeout-pack",
+            "artifacts/continuous-upgrade-closeout-9-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/continuous-upgrade-cycle9-closeout-pack/evidence",
+            "artifacts/continuous-upgrade-closeout-9-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -125,47 +125,47 @@ def test_cycle9_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-closeout-summary.json"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-closeout-9-summary.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-closeout-summary.md"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-closeout-9-summary.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-evidence-brief.md"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-evidence-brief.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-plan.md"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-plan.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-upgrade-template-upgrade-ledger.json"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-upgrade-template-upgrade-ledger.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-storyline-outcomes-ledger.json"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-storyline-outcomes-ledger.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-upgrade-kpi-scorecard.json"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-upgrade-kpi-scorecard.json"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-execution-log.md"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-execution-log.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-delivery-board.md"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-delivery-board.md"
     ).exists()
     assert (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/continuous-upgrade-cycle9-validation-commands.md"
+        / "artifacts/continuous-upgrade-closeout-9-pack/continuous-upgrade-cycle9-validation-commands.md"
     ).exists()
     execution_summary = (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/evidence/cycle9-execution-summary.json"
+        / "artifacts/continuous-upgrade-closeout-9-pack/evidence/cycle9-execution-summary.json"
     )
     assert execution_summary.exists()
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
@@ -182,7 +182,7 @@ def test_cycle9_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
             str(tmp_path),
             "--execute",
             "--evidence-dir",
-            "artifacts/continuous-upgrade-cycle9-closeout-pack/evidence",
+            "artifacts/continuous-upgrade-closeout-9-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -191,7 +191,7 @@ def test_cycle9_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert rc == 1
     execution_summary = (
         tmp_path
-        / "artifacts/continuous-upgrade-cycle9-closeout-pack/evidence/cycle9-execution-summary.json"
+        / "artifacts/continuous-upgrade-closeout-9-pack/evidence/cycle9-execution-summary.json"
     )
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
     assert execution_data["failed_commands"] == 1
@@ -210,7 +210,7 @@ def test_cycle9_strict_fails_without_cycle8(tmp_path: Path) -> None:
 def test_cycle9_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["continuous-upgrade-cycle9-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["continuous-upgrade-closeout-9", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Cycle 9 continuous upgrade closeout summary" in capsys.readouterr().out

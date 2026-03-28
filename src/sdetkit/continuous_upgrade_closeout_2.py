@@ -24,14 +24,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict",
-    "python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack --format json --strict",
-    "python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout-2 --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout-2 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-2-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout-2 --execute --evidence-dir docs/artifacts/continuous-upgrade-closeout-2-pack/evidence --format json --strict",
     "python scripts/check_continuous_upgrade_contract_2.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict",
-    "python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout-2 --format json --strict",
+    "python -m sdetkit continuous-upgrade-closeout-2 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-2-pack --format json --strict",
     "python scripts/check_continuous_upgrade_contract_2.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -85,9 +85,9 @@ Cycle 2 closes with a major upgrade that converts Cycle 1 governance scale outco
 ## Command lane
 
 ```bash
-python -m sdetkit continuous-upgrade-cycle2-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle2-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack --format json --strict
-python -m sdetkit continuous-upgrade-cycle2-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle2-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-closeout-2 --format json --strict
+python -m sdetkit continuous-upgrade-closeout-2 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-2-pack --format json --strict
+python -m sdetkit continuous-upgrade-closeout-2 --execute --evidence-dir docs/artifacts/continuous-upgrade-closeout-2-pack/evidence --format json --strict
 python scripts/check_continuous_upgrade_contract_2.py
 ```
 
@@ -244,7 +244,7 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
         {
             "check_id": "readme_cycle2_command",
             "weight": 5,
-            "passed": ("continuous-upgrade-cycle2-closeout" in readme_text),
+            "passed": ("continuous-upgrade-closeout-2" in readme_text),
             "evidence": "README cycle2 command lane",
         },
         {
@@ -252,9 +252,9 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
             "weight": 8,
             "passed": (
                 "continuous-upgrade-cycle2-big-upgrade-report.md" in docs_index_text
-                and "integrations-continuous-upgrade-cycle2-closeout.md" in docs_index_text
+                and "integrations-continuous-upgrade-closeout-2.md" in docs_index_text
             ),
-            "evidence": "continuous-upgrade-cycle2-big-upgrade-report.md + integrations-continuous-upgrade-cycle2-closeout.md",
+            "evidence": "continuous-upgrade-cycle2-big-upgrade-report.md + integrations-continuous-upgrade-closeout-2.md",
         },
         {
             "check_id": "top10_cycle2_align",
@@ -422,7 +422,7 @@ def build_continuous_upgrade_cycle2_closeout_summary(root: Path) -> dict[str, An
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     return {
-        "name": "continuous-upgrade-cycle2-closeout",
+        "name": "continuous-upgrade-closeout-2",
         "inputs": {
             "readme": "README.md",
             "docs_index": "docs/index.md",
@@ -474,10 +474,10 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "continuous-upgrade-cycle2-closeout-summary.json",
+        target / "continuous-upgrade-closeout-2-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "continuous-upgrade-cycle2-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "continuous-upgrade-closeout-2-summary.md", _render_text(payload) + "\n")
     _write(
         target / "continuous-upgrade-cycle2-evidence-brief.md",
         "# Cycle 2 continuous upgrade brief\n",
@@ -560,7 +560,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/continuous-upgrade-cycle2-closeout-pack/evidence")
+            else Path("docs/artifacts/continuous-upgrade-closeout-2-pack/evidence")
         )
         execution_summary = _execute_commands(root, evidence_dir)
         payload["execution"] = execution_summary

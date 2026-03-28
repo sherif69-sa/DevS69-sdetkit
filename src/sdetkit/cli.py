@@ -666,41 +666,41 @@ Start here:
     d90.set_defaults(cmd="phase3-wrap-publication-closeout")
     d90.add_argument("args", nargs=argparse.REMAINDER)
     cycle1_parser = sub.add_parser(
-        "continuous-upgrade-cycle1-closeout", aliases=["continuous-upgrade-cycle1-closeout"]
+        "continuous-upgrade-closeout-1", aliases=["continuous-upgrade-closeout-1"]
     )
-    cycle1_parser.set_defaults(cmd="continuous-upgrade-cycle1-closeout")
+    cycle1_parser.set_defaults(cmd="continuous-upgrade-closeout-1")
     cycle1_parser.add_argument("args", nargs=argparse.REMAINDER)
-    cycle2_parser = sub.add_parser("continuous-upgrade-cycle2-closeout")
-    cycle2_parser.set_defaults(cmd="continuous-upgrade-cycle2-closeout")
+    cycle2_parser = sub.add_parser("continuous-upgrade-closeout-2")
+    cycle2_parser.set_defaults(cmd="continuous-upgrade-closeout-2")
     cycle2_parser.add_argument("args", nargs=argparse.REMAINDER)
-    c3 = sub.add_parser("continuous-upgrade-cycle3-closeout")
-    c3.set_defaults(cmd="continuous-upgrade-cycle3-closeout")
+    c3 = sub.add_parser("continuous-upgrade-closeout-3")
+    c3.set_defaults(cmd="continuous-upgrade-closeout-3")
     c3.add_argument("args", nargs=argparse.REMAINDER)
-    d94 = sub.add_parser("continuous-upgrade-cycle4-closeout")
-    d94.set_defaults(cmd="continuous-upgrade-cycle4-closeout")
+    d94 = sub.add_parser("continuous-upgrade-closeout-4")
+    d94.set_defaults(cmd="continuous-upgrade-closeout-4")
     d94.add_argument("args", nargs=argparse.REMAINDER)
-    d95 = sub.add_parser("continuous-upgrade-cycle5-closeout")
-    d95.set_defaults(cmd="continuous-upgrade-cycle5-closeout")
+    d95 = sub.add_parser("continuous-upgrade-closeout-5")
+    d95.set_defaults(cmd="continuous-upgrade-closeout-5")
     d95.add_argument("args", nargs=argparse.REMAINDER)
-    cycle6_parser = sub.add_parser("continuous-upgrade-cycle6-closeout")
-    cycle6_parser.set_defaults(cmd="continuous-upgrade-cycle6-closeout")
+    cycle6_parser = sub.add_parser("continuous-upgrade-closeout-6")
+    cycle6_parser.set_defaults(cmd="continuous-upgrade-closeout-6")
     cycle6_parser.add_argument("args", nargs=argparse.REMAINDER)
-    d97 = sub.add_parser("continuous-upgrade-cycle7-closeout")
-    d97.set_defaults(cmd="continuous-upgrade-cycle7-closeout")
+    d97 = sub.add_parser("continuous-upgrade-closeout-7")
+    d97.set_defaults(cmd="continuous-upgrade-closeout-7")
     d97.add_argument("args", nargs=argparse.REMAINDER)
-    cycle8_parser = sub.add_parser("continuous-upgrade-cycle8-closeout")
-    cycle8_parser.set_defaults(cmd="continuous-upgrade-cycle8-closeout")
+    cycle8_parser = sub.add_parser("continuous-upgrade-closeout-8")
+    cycle8_parser.set_defaults(cmd="continuous-upgrade-closeout-8")
     cycle8_parser.add_argument("args", nargs=argparse.REMAINDER)
 
-    d99 = sub.add_parser("continuous-upgrade-cycle9-closeout")
-    d99.set_defaults(cmd="continuous-upgrade-cycle9-closeout")
+    d99 = sub.add_parser("continuous-upgrade-closeout-9")
+    d99.set_defaults(cmd="continuous-upgrade-closeout-9")
     d99.add_argument("args", nargs=argparse.REMAINDER)
 
-    d100 = sub.add_parser("continuous-upgrade-cycle10-closeout")
-    d100.set_defaults(cmd="continuous-upgrade-cycle10-closeout")
+    d100 = sub.add_parser("continuous-upgrade-closeout-10")
+    d100.set_defaults(cmd="continuous-upgrade-closeout-10")
     d100.add_argument("args", nargs=argparse.REMAINDER)
-    d101 = sub.add_parser("continuous-upgrade-cycle11-closeout")
-    d101.set_defaults(cmd="continuous-upgrade-cycle11-closeout")
+    d101 = sub.add_parser("continuous-upgrade-closeout-11")
+    d101.set_defaults(cmd="continuous-upgrade-closeout-11")
     d101.add_argument("args", nargs=argparse.REMAINDER)
 
     obj = sub.add_parser("objection-handling", help="Objection handling playbook")
@@ -1131,45 +1131,45 @@ def main(argv: Sequence[str] | None = None) -> int:
     }:
         return phase3_wrap_publication_closeout_90.main(list(argv[1:]))
 
-    if argv and argv[0] == "continuous-upgrade-cycle1-closeout":
+    if argv and argv[0] == "continuous-upgrade-closeout-1":
         return continuous_upgrade_closeout_1.main(list(argv[1:]))
 
     if argv and argv[0] in {
-        "continuous-upgrade-cycle2-closeout",
+        "continuous-upgrade-closeout-2",
     }:
         return continuous_upgrade_closeout_2.main(list(argv[1:]))
 
     if argv and argv[0] in {
-        "continuous-upgrade-cycle3-closeout",
+        "continuous-upgrade-closeout-3",
     }:
         return continuous_upgrade_closeout_3.main(list(argv[1:]))
 
     if argv and argv[0] in {
-        "continuous-upgrade-cycle4-closeout",
+        "continuous-upgrade-closeout-4",
     }:
         return continuous_upgrade_closeout_4.main(list(argv[1:]))
     if argv and argv[0] in {
-        "continuous-upgrade-cycle5-closeout",
+        "continuous-upgrade-closeout-5",
     }:
         return continuous_upgrade_closeout_5.main(list(argv[1:]))
     if argv and argv[0] in {
-        "continuous-upgrade-cycle6-closeout",
+        "continuous-upgrade-closeout-6",
     }:
         return continuous_upgrade_closeout_6.main(list(argv[1:]))
     if argv and argv[0] in {
-        "continuous-upgrade-cycle7-closeout",
+        "continuous-upgrade-closeout-7",
     }:
         return continuous_upgrade_closeout_7.main(list(argv[1:]))
-    if argv and argv[0] == "continuous-upgrade-cycle8-closeout":
+    if argv and argv[0] == "continuous-upgrade-closeout-8":
         return continuous_upgrade_closeout_8.main(list(argv[1:]))
 
-    if argv and argv[0] == "continuous-upgrade-cycle9-closeout":
+    if argv and argv[0] == "continuous-upgrade-closeout-9":
         return continuous_upgrade_closeout_9.main(list(argv[1:]))
 
-    if argv and argv[0] == "continuous-upgrade-cycle10-closeout":
+    if argv and argv[0] == "continuous-upgrade-closeout-10":
         return continuous_upgrade_closeout_10.main(list(argv[1:]))
 
-    if argv and argv[0] == "continuous-upgrade-cycle11-closeout":
+    if argv and argv[0] == "continuous-upgrade-closeout-11":
         return continuous_upgrade_closeout_11.main(list(argv[1:]))
 
     if argv and argv[0] in {"objection-handling", "faq-objections"}:
@@ -1571,34 +1571,34 @@ def main(argv: Sequence[str] | None = None) -> int:
     if ns.cmd in {"phase3-wrap-publication-closeout"}:
         return phase3_wrap_publication_closeout_90.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle1-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-1":
         return continuous_upgrade_closeout_1.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle2-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-2":
         return continuous_upgrade_closeout_2.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle3-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-3":
         return continuous_upgrade_closeout_3.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle4-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-4":
         return continuous_upgrade_closeout_4.main(ns.args)
-    if ns.cmd == "continuous-upgrade-cycle5-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-5":
         return continuous_upgrade_closeout_5.main(ns.args)
-    if ns.cmd == "continuous-upgrade-cycle6-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-6":
         return continuous_upgrade_closeout_6.main(ns.args)
-    if ns.cmd == "continuous-upgrade-cycle7-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-7":
         return continuous_upgrade_closeout_7.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle8-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-8":
         return continuous_upgrade_closeout_8.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle9-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-9":
         return continuous_upgrade_closeout_9.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle10-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-10":
         return continuous_upgrade_closeout_10.main(ns.args)
 
-    if ns.cmd == "continuous-upgrade-cycle11-closeout":
+    if ns.cmd == "continuous-upgrade-closeout-11":
         return continuous_upgrade_closeout_11.main(ns.args)
 
     if ns.cmd == "objection-handling":

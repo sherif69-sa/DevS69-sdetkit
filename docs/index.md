@@ -56,28 +56,28 @@ impact-80-big-upgrade-report.md
 
 ## Continuous upgrade Lane closeout
 
-- `integrations-continuous-upgrade-cycle6-closeout.md`
-- `artifacts/continuous-upgrade-cycle6-closeout-pack/continuous-upgrade-cycle6-closeout-summary.json`
+- `integrations-continuous-upgrade-closeout-6.md`
+- `artifacts/continuous-upgrade-closeout-6-pack/continuous-upgrade-closeout-6-summary.json`
 
 ## Continuous upgrade Lane closeout
 
-- `integrations-continuous-upgrade-cycle5-closeout.md`
-- `artifacts/continuous-upgrade-cycle5-closeout-pack/continuous-upgrade-cycle5-closeout-summary.json`
+- `integrations-continuous-upgrade-closeout-5.md`
+- `artifacts/continuous-upgrade-closeout-5-pack/continuous-upgrade-closeout-5-summary.json`
 
 Continuous upgrade Lane closeout
 
-integrations-continuous-upgrade-cycle4-closeout.md
-artifacts/continuous-upgrade-cycle4-closeout-pack/continuous-upgrade-cycle4-closeout-summary.json
+integrations-continuous-upgrade-closeout-4.md
+artifacts/continuous-upgrade-closeout-4-pack/continuous-upgrade-closeout-4-summary.json
 
 ## Continuous upgrade Lane closeout
 
-integrations-continuous-upgrade-cycle3-closeout.md
-artifacts/continuous-upgrade-cycle3-closeout-pack/continuous-upgrade-cycle3-closeout-summary.json
+integrations-continuous-upgrade-closeout-3.md
+artifacts/continuous-upgrade-closeout-3-pack/continuous-upgrade-closeout-3-summary.json
 
 Continuous upgrade Lane closeout
 
-integrations-continuous-upgrade-cycle7-closeout.md
-artifacts/continuous-upgrade-cycle7-closeout-pack/continuous-upgrade-cycle7-closeout-summary.json
+integrations-continuous-upgrade-closeout-7.md
+artifacts/continuous-upgrade-closeout-7-pack/continuous-upgrade-closeout-7-summary.json
 
 ## Continuous upgrade closeout references
 - `docs/integrations-continuous-upgrade-closeout-1.md`

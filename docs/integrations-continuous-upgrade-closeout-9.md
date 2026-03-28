@@ -17,9 +17,9 @@ Lane closes with a major upgrade that converts Lane continuous-upgrade outcomes 
 ## Lane command lane
 
 ```bash
-python -m sdetkit continuous-upgrade-cycle9-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle9-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle9-closeout-pack --format json --strict
-python -m sdetkit continuous-upgrade-cycle9-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle9-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-closeout-9 --format json --strict
+python -m sdetkit continuous-upgrade-closeout-9 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-9-pack --format json --strict
+python -m sdetkit continuous-upgrade-closeout-9 --execute --evidence-dir docs/artifacts/continuous-upgrade-closeout-9-pack/evidence --format json --strict
 python scripts/check_continuous_upgrade_cycle9_closeout_contract.py
 ```
 

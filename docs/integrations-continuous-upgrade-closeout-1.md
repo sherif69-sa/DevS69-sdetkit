@@ -17,9 +17,9 @@ Lane starts the next impact by converting phase-3 wrap publication outcomes into
 ## Command lane
 
 ```bash
-python -m sdetkit continuous-upgrade-cycle1-closeout --format json --strict
-python -m sdetkit continuous-upgrade-cycle1-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack --format json --strict
-python -m sdetkit continuous-upgrade-cycle1-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle1-closeout-pack/evidence --format json --strict
+python -m sdetkit continuous-upgrade-closeout-1 --format json --strict
+python -m sdetkit continuous-upgrade-closeout-1 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-1-pack --format json --strict
+python -m sdetkit continuous-upgrade-closeout-1 --execute --evidence-dir docs/artifacts/continuous-upgrade-closeout-1-pack/evidence --format json --strict
 python scripts/check_continuous_upgrade_contract_1.py
 ```
 
