@@ -11,7 +11,7 @@ Day 49 closes with a major weekly-review upgrade that converts Day 48 objection 
 ## Required inputs (Day 48)
 
 - `docs/artifacts/objection-closeout-pack/objection-closeout-summary.json`
-- `docs/artifacts/objection-closeout-pack/day48-delivery-board.md`
+- `docs/artifacts/objection-closeout-pack/objection-delivery-board.md`
 
 ## Day 49 command lane
 

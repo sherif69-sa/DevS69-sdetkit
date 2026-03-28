@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md"
+    board = root / "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md"
     board.write_text(
         "\n".join(
             [

@@ -13,7 +13,10 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY42_SUMMARY_PATH = (
     "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
 )
-_DAY42_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md"
+_DAY42_BOARD_PATH = (
+    "docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md"
+)
+_DAY42_LEGACY_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md"
 _SECTION_HEADER = "# Day 43 \u2014 Acceleration closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 43 matters",
@@ -69,7 +72,7 @@ Day 43 closes with a major acceleration upgrade that converts Day 42 optimizatio
 ## Required inputs (Day 42)
 
 - `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
-- `docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md`
+- `docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md`
 
 ## Day 43 command lane
 
@@ -151,6 +154,13 @@ def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
     return [line for line in expected if line not in text]
 
 
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
+
+
 def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     readme_path = "README.md"
     docs_index_path = "docs/index.md"
@@ -172,7 +182,7 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day42_summary = root / _DAY42_SUMMARY_PATH
-    day42_board = root / _DAY42_BOARD_PATH
+    day42_board = _resolve_existing_path(root, _DAY42_BOARD_PATH, _DAY42_LEGACY_BOARD_PATH)
     day42_score, day42_strict, day42_check_count = _load_day42(day42_summary)
     board_count, board_has_day42, board_has_day43 = _board_stats(day42_board)
 
@@ -418,6 +428,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day43-execution-log.md",
         "# Day 43 Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 44 scale priorities.\n",
+    )
+    _write(
+        target / "acceleration-delivery-board.md",
+        "# Day 43 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "day43-delivery-board.md",

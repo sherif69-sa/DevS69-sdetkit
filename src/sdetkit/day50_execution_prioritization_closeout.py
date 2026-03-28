@@ -13,7 +13,10 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY49_SUMMARY_PATH = (
     "docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json"
 )
-_DAY49_BOARD_PATH = "docs/artifacts/day49-weekly-review-closeout-pack/day49-delivery-board.md"
+_DAY49_BOARD_PATH = (
+    "docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md"
+)
+_DAY49_LEGACY_BOARD_PATH = "docs/artifacts/day49-weekly-review-closeout-pack/day49-delivery-board.md"
 _SECTION_HEADER = "# Day 50 \u2014 Execution prioritization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 50 matters",
@@ -69,7 +72,7 @@ Day 50 closes with a major execution-prioritization upgrade that converts Day 49
 ## Required inputs (Day 49)
 
 - `docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json`
-- `docs/artifacts/day49-weekly-review-closeout-pack/day49-delivery-board.md`
+- `docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md`
 
 ## Day 50 command lane
 
@@ -146,6 +149,13 @@ def _contains_all_lines(text: str, required_lines: list[str]) -> list[str]:
     return [line for line in required_lines if line not in text]
 
 
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
+
+
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
@@ -175,7 +185,7 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day49_summary = root / _DAY49_SUMMARY_PATH
-    day49_board = root / _DAY49_BOARD_PATH
+    day49_board = _resolve_existing_path(root, _DAY49_BOARD_PATH, _DAY49_LEGACY_BOARD_PATH)
     day49_score, day49_strict, day49_check_count = _load_day49(day49_summary)
     board_count, board_has_day49, board_has_day50 = _board_stats(day49_board)
 

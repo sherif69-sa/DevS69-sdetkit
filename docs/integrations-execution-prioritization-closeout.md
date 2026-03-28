@@ -11,7 +11,7 @@ Day 50 closes with a major execution-prioritization upgrade that converts Day 49
 ## Required inputs (Day 49)
 
 - `docs/artifacts/day49-weekly-review-closeout-pack/day49-weekly-review-closeout-summary.json`
-- `docs/artifacts/day49-weekly-review-closeout-pack/day49-delivery-board.md`
+- `docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md`
 
 ## Day 50 command lane
 

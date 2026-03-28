@@ -11,7 +11,7 @@ Day 43 closes with a major acceleration upgrade that converts Day 42 optimizatio
 ## Required inputs (Day 42)
 
 - `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
-- `docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md`
+- `docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md`
 
 ## Day 43 command lane
 

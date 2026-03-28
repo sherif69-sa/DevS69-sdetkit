@@ -417,6 +417,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "# Day 48 Execution Log\n\n- [ ] 2026-03-16: Record misses, wins, and Day 49 weekly-review priorities.\n",
     )
     _write(
+        target / "objection-delivery-board.md",
+        "# Day 48 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+    )
+    _write(
         target / "day48-delivery-board.md",
         "# Day 48 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )

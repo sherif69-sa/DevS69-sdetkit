@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
+    board = root / "docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -107,7 +107,7 @@ def test_day42_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day42-pack/day42-remediation-matrix.csv").exists()
     assert (tmp_path / "artifacts/day42-pack/day42-optimization-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day42-pack/day42-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day42-pack/day42-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day42-pack/optimization-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day42-pack/day42-validation-commands.md").exists()
     assert (tmp_path / "artifacts/day42-pack/evidence/day42-execution-summary.json").exists()
 

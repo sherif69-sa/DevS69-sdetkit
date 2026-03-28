@@ -11,7 +11,7 @@ Optimization Closeout Foundation closes the lane with a major optimization upgra
 ## Required inputs (Day 41)
 
 - `docs/artifacts/expansion-automation-pack/expansion-automation-summary.json`
-- `docs/artifacts/expansion-automation-pack/day41-delivery-board.md`
+- `docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md`
 
 ## Optimization Closeout Foundation command lane
 

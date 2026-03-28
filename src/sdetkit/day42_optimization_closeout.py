@@ -13,7 +13,8 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY41_SUMMARY_PATH = (
     "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
 )
-_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
+_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md"
+_DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Optimization Closeout Foundation matters",
@@ -69,7 +70,7 @@ Optimization Closeout Foundation closes with a major optimization upgrade that c
 ## Required inputs (Day 41)
 
 - `docs/artifacts/expansion-automation-pack/expansion-automation-summary.json`
-- `docs/artifacts/expansion-automation-pack/day41-delivery-board.md`
+- `docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md`
 
 ## Optimization Closeout Foundation command lane
 
@@ -151,6 +152,13 @@ def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
     return [line for line in expected if line not in text]
 
 
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
+
+
 def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     readme_path = "README.md"
     docs_index_path = "docs/index.md"
@@ -172,7 +180,7 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day41_summary = root / _DAY41_SUMMARY_PATH
-    day41_board = root / _DAY41_BOARD_PATH
+    day41_board = _resolve_existing_path(root, _DAY41_BOARD_PATH, _DAY41_LEGACY_BOARD_PATH)
     day41_score, day41_strict, day41_check_count = _load_day41(day41_summary)
     board_count, board_has_day41, board_has_day42 = _board_stats(day41_board)
 
@@ -419,6 +427,12 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day42-execution-log.md",
         "# Optimization Closeout Foundation Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 43 acceleration priorities.\n",
+    )
+    _write(
+        target / "optimization-delivery-board.md",
+        "# Optimization Closeout Foundation Delivery Board\n\n"
+        + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES)
+        + "\n",
     )
     _write(
         target / "day42-delivery-board.md",

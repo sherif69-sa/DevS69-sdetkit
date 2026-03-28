@@ -13,7 +13,8 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY48_SUMMARY_PATH = (
     "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
 )
-_DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack/day48-delivery-board.md"
+_DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack/objection-delivery-board.md"
+_DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/day48-delivery-board.md"
 _SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 49 matters",
@@ -69,7 +70,7 @@ Day 49 closes with a major weekly-review upgrade that converts Day 48 objection 
 ## Required inputs (Day 48)
 
 - `docs/artifacts/objection-closeout-pack/objection-closeout-summary.json`
-- `docs/artifacts/objection-closeout-pack/day48-delivery-board.md`
+- `docs/artifacts/objection-closeout-pack/objection-delivery-board.md`
 
 ## Day 49 command lane
 
@@ -150,6 +151,13 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    return root / legacy
+
+
 def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
     readme_path = "README.md"
     docs_index_path = "docs/index.md"
@@ -171,7 +179,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day48_summary = root / _DAY48_SUMMARY_PATH
-    day48_board = root / _DAY48_BOARD_PATH
+    day48_board = _resolve_existing_path(root, _DAY48_BOARD_PATH, _DAY48_LEGACY_BOARD_PATH)
     day48_score, day48_strict, day48_check_count = _load_day48(day48_summary)
     board_count, board_has_day48, board_has_day49 = _board_stats(day48_board)
 
@@ -441,6 +449,10 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day49-execution-log.md",
         "# Day 49 Execution Log\n\n- [ ] 2026-03-17: Record misses, wins, and Day 50 execution priorities.\n",
+    )
+    _write(
+        target / "weekly-review-delivery-board.md",
+        "# Day 49 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "day49-delivery-board.md",

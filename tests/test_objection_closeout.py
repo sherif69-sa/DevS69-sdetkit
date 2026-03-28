@@ -100,7 +100,7 @@ def test_day48_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/day48-pack/day48-faq-objection-map.csv").exists()
     assert (tmp_path / "artifacts/day48-pack/day48-objection-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day48-pack/day48-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day48-pack/objection-delivery-board.md").exists()
     assert (tmp_path / "artifacts/day48-pack/day48-validation-commands.md").exists()
     assert (tmp_path / "artifacts/day48-pack/evidence/day48-execution-summary.json").exists()
 
