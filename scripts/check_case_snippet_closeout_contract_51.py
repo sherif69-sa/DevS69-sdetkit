@@ -10,7 +10,7 @@ from sdetkit import case_snippet_closeout_51 as d51
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 51 case snippet closeout contract")
+    parser = argparse.ArgumentParser(description="Validate Cycle 51 case snippet closeout contract")
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -32,7 +32,7 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/case-snippet-closeout-pack-51/evidence/execution-summary-51.json"
+            / "docs/artifacts/case-snippet-closeout-pack/evidence/execution-summary.json"
         )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
@@ -46,12 +46,12 @@ def main() -> int:
                 errors.append(f"failed to parse evidence summary: {exc}")
 
     if errors:
-        print("day51-case-snippet-closeout contract check failed:", file=sys.stderr)
+        print("case-snippet-closeout contract check failed:", file=sys.stderr)
         for err in errors:
             print(f"- {err}", file=sys.stderr)
         return 1
 
-    print("day51-case-snippet-closeout contract check passed")
+    print("case-snippet-closeout contract check passed")
     return 0
 
 

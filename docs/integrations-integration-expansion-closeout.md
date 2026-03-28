@@ -10,8 +10,8 @@ Cycle 64 closes with a major integration upgrade that turns Cycle 63 onboarding 
 
 ## Required inputs (Cycle 63)
 
-- `docs/artifacts/cycle63-onboarding-activation-closeout-pack/cycle63-onboarding-activation-closeout-summary.json`
-- `docs/artifacts/cycle63-onboarding-activation-closeout-pack/cycle63-delivery-board.md`
+- `docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json`
+- `docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md`
 
 ## Integration Expansion Closeout command lane (legacy)
 

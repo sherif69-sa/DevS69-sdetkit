@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-integration-expansion-closeout.md\nday64-integration-expansion-closeout\n",
+        "docs/integrations-integration-expansion-closeout.md\nintegration-expansion-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -30,7 +30,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.\n"
+        "- **Cycle 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.\n"
         "- **Day 65 — Weekly review #9:** report baseline movement and community signal quality.\n",
         encoding="utf-8",
     )
@@ -38,12 +38,12 @@ def _seed_repo(root: Path) -> None:
         d64._DAY64_DEFAULT_PAGE, encoding="utf-8"
     )
     (root / "docs/impact-64-big-upgrade-report.md").write_text(
-        "# Day 64 report\n", encoding="utf-8"
+        "# Cycle 64 report\n", encoding="utf-8"
     )
 
     summary = (
         root
-        / "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
+        / "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -57,17 +57,17 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
+        root / "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
     )
     board.write_text(
         "\n".join(
             [
-                "# Day 63 delivery board",
-                "- [ ] Day 63 onboarding launch brief committed",
-                "- [ ] Day 63 orientation script + ownership matrix published",
-                "- [ ] Day 63 roadmap voting brief exported",
-                "- [ ] Day 63 KPI scorecard snapshot exported",
-                "- [ ] Day 64 contributor pipeline priorities drafted from Day 63 learnings",
+                "# Cycle 63 delivery board",
+                "- [ ] Cycle 63 onboarding launch brief committed",
+                "- [ ] Cycle 63 orientation script + ownership matrix published",
+                "- [ ] Cycle 63 roadmap voting brief exported",
+                "- [ ] Cycle 63 KPI scorecard snapshot exported",
+                "- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings",
             ]
         )
         + "\n",
@@ -79,7 +79,7 @@ def _seed_repo(root: Path) -> None:
     workflow.write_text(
         "\n".join(
             [
-                "name: Day64 Advanced GitHub Actions Reference",
+                "name: Cycle64 Advanced GitHub Actions Reference",
                 "on:",
                 "  workflow_dispatch:",
                 "  workflow_call:",
@@ -90,7 +90,7 @@ def _seed_repo(root: Path) -> None:
                 "      matrix:",
                 "        python-version: ['3.11']",
                 "    concurrency:",
-                "      group: day64-${{ github.ref }}",
+                "      group: integration-expansion-64-${{ github.ref }}",
                 "      cancel-in-progress: true",
                 "    steps:",
                 "      - uses: actions/cache@v4",
@@ -101,7 +101,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day64_json(tmp_path: Path, capsys) -> None:
+def test_cycle64_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d64.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -110,17 +110,17 @@ def test_day64_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day64_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_cycle64_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d64.main(
         [
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day64-pack",
+            "artifacts/integration-expansion-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day64-pack/evidence",
+            "artifacts/integration-expansion-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -128,34 +128,34 @@ def test_day64_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day64-pack/integration-expansion-closeout-summary.json"
+        tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day64-pack/integration-expansion-closeout-summary.md"
+        tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-workflow-blueprint.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-matrix-plan.csv").exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/integration-expansion-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day64-pack/evidence/integration-expansion-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-workflow-blueprint.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-matrix-plan.csv").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-execution-log.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/integration-expansion-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion-closeout-pack/evidence/integration-expansion-execution-summary.json").exists()
 
 
-def test_day64_strict_fails_without_day63(tmp_path: Path) -> None:
+def test_cycle64_strict_fails_without_cycle63(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
+        / "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
     ).unlink()
     assert d64.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day64_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cycle64_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day64-integration-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["integration-expansion-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Integration Expansion Closeout summary" in capsys.readouterr().out

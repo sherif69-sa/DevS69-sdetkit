@@ -11,17 +11,17 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY51_SUMMARY_PATH = (
-    "docs/artifacts/case-snippet-closeout-pack-51/case-snippet-closeout-summary-51.json"
+    "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
 )
-_DAY51_BOARD_PATH = "docs/artifacts/case-snippet-closeout-pack-51/delivery-board-51.md"
-_SECTION_HEADER = "# Day 52 \u2014 Narrative closeout lane"
+_DAY51_BOARD_PATH = "docs/artifacts/case-snippet-closeout-pack/delivery-board.md"
+_SECTION_HEADER = "# Cycle 52 \u2014 Narrative closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 52 matters",
-    "## Required inputs (Day 51)",
-    "## Day 52 command lane",
+    "## Why Cycle 52 matters",
+    "## Required inputs (Cycle 51)",
+    "## Cycle 52 command lane",
     "## Narrative closeout contract",
     "## Narrative quality checklist",
-    "## Day 52 delivery board",
+    "## Cycle 52 delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -36,10 +36,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_narrative_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 52 narrative execution and KPI follow-up.",
-    "The Day 52 narrative lane references Day 51 case-snippet winners and misses with deterministic release-storytelling loops.",
-    "Every Day 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 52 closeout records narrative learnings and Day 53 expansion priorities.",
+    "Single owner + backup reviewer are assigned for Cycle 52 narrative execution and KPI follow-up.",
+    "The Cycle 52 narrative lane references Cycle 51 case-snippet winners and misses with deterministic release-storytelling loops.",
+    "Every Cycle 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    "Cycle 52 closeout records narrative learnings and Day 53 expansion priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy",
@@ -49,29 +49,29 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, proof map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 52 narrative brief committed",
-    "- [ ] Day 52 narrative reviewed with owner + backup",
-    "- [ ] Day 52 proof map exported",
-    "- [ ] Day 52 KPI scorecard snapshot exported",
-    "- [ ] Day 53 expansion priorities drafted from Day 52 learnings",
+    "- [ ] Cycle 52 narrative brief committed",
+    "- [ ] Cycle 52 narrative reviewed with owner + backup",
+    "- [ ] Cycle 52 proof map exported",
+    "- [ ] Cycle 52 KPI scorecard snapshot exported",
+    "- [ ] Day 53 expansion priorities drafted from Cycle 52 learnings",
 ]
 
-_DAY52_DEFAULT_PAGE = """# Day 52 \u2014 Narrative closeout lane
+_DAY52_DEFAULT_PAGE = """# Cycle 52 \u2014 Narrative closeout lane
 
-Day 52 closes with a major narrative upgrade that converts Day 51 case-snippet evidence into a deterministic release-storytelling lane.
+Cycle 52 closes with a major narrative upgrade that converts Cycle 51 case-snippet evidence into a deterministic release-storytelling lane.
 
-## Why Day 52 matters
+## Why Cycle 52 matters
 
-- Converts Day 51 case-snippet proof into release-storytelling discipline.
+- Converts Cycle 51 case-snippet proof into release-storytelling discipline.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Day 52 narratives into Day 52 narrative execution.
+- Produces a deterministic handoff from Cycle 52 narratives into Cycle 52 narrative execution.
 
-## Required inputs (Day 51)
+## Required inputs (Cycle 51)
 
-- `docs/artifacts/case-snippet-closeout-pack-51/case-snippet-closeout-summary-51.json`
-- `docs/artifacts/case-snippet-closeout-pack-51/delivery-board-51.md`
+- `docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json`
+- `docs/artifacts/case-snippet-closeout-pack/delivery-board.md`
 
-## Day 52 command lane
+## Cycle 52 command lane
 
 ```bash
 python -m sdetkit narrative-closeout --format json --strict
@@ -82,10 +82,10 @@ python scripts/check_narrative_closeout_contract.py
 
 ## Narrative closeout contract
 
-- Single owner + backup reviewer are assigned for Day 52 narrative execution and KPI follow-up.
-- The Day 52 narrative lane references Day 51 case-snippet winners and misses with deterministic release-storytelling loops.
-- Every Day 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 52 closeout records narrative learnings and Day 53 expansion priorities.
+- Single owner + backup reviewer are assigned for Cycle 52 narrative execution and KPI follow-up.
+- The Cycle 52 narrative lane references Cycle 51 case-snippet winners and misses with deterministic release-storytelling loops.
+- Every Cycle 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- Cycle 52 closeout records narrative learnings and Day 53 expansion priorities.
 
 ## Narrative quality checklist
 
@@ -95,21 +95,21 @@ python scripts/check_narrative_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes narrative brief, proof map, KPI scorecard, and execution log
 
-## Day 52 delivery board
+## Cycle 52 delivery board
 
-- [ ] Day 52 narrative brief committed
-- [ ] Day 52 narrative reviewed with owner + backup
-- [ ] Day 52 proof map exported
-- [ ] Day 52 KPI scorecard snapshot exported
-- [ ] Day 53 expansion priorities drafted from Day 52 learnings
+- [ ] Cycle 52 narrative brief committed
+- [ ] Cycle 52 narrative reviewed with owner + backup
+- [ ] Cycle 52 proof map exported
+- [ ] Cycle 52 KPI scorecard snapshot exported
+- [ ] Day 53 expansion priorities drafted from Cycle 52 learnings
 
 ## Scoring model
 
-Day 52 weighted score (0-100):
+Cycle 52 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 51 continuity and strict baseline carryover: 35 points.
+- Cycle 51 continuity and strict baseline carryover: 35 points.
 - Narrative contract lock + delivery board readiness: 15 points.
 """
 
@@ -128,7 +128,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day51(path: Path) -> tuple[float, bool, int]:
+def _load_cycle51(path: Path) -> tuple[float, bool, int]:
     data_obj = _load_json(path)
     if not isinstance(data_obj, dict):
         return 0.0, False, 0
@@ -149,7 +149,7 @@ def _contains_all_lines(text: str, required_lines: list[str]) -> list[str]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(lines), ("Day 51" in text), ("Day 52" in text)
+    return len(lines), ("Cycle 51" in text), ("Cycle 52" in text)
 
 
 def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
@@ -174,10 +174,10 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day51_summary = root / _DAY51_SUMMARY_PATH
-    day51_board = root / _DAY51_BOARD_PATH
-    day51_score, day51_strict, day51_check_count = _load_day51(day51_summary)
-    board_count, board_has_day51, board_has_day52 = _board_stats(day51_board)
+    cycle51_summary = root / _DAY51_SUMMARY_PATH
+    cycle51_board = root / _DAY51_BOARD_PATH
+    cycle51_score, cycle51_strict, cycle51_check_count = _load_cycle51(cycle51_summary)
+    board_count, board_has_cycle51, board_has_cycle52 = _board_stats(cycle51_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -199,19 +199,19 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day52_link",
+            "check_id": "readme_cycle52_link",
             "weight": 8,
             "passed": "docs/integrations-narrative-closeout.md" in readme_text,
             "evidence": "docs/integrations-narrative-closeout.md",
         },
         {
-            "check_id": "readme_day52_command",
+            "check_id": "readme_cycle52_command",
             "weight": 4,
-            "passed": "day52-narrative-closeout" in readme_text,
-            "evidence": "day52-narrative-closeout",
+            "passed": "narrative-closeout" in readme_text,
+            "evidence": "narrative-closeout",
         },
         {
-            "check_id": "docs_index_day52_links",
+            "check_id": "docs_index_cycle52_links",
             "weight": 8,
             "passed": (
                 "impact-52-big-upgrade-report.md" in docs_index_text
@@ -220,41 +220,41 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-52-big-upgrade-report.md + integrations-narrative-closeout.md",
         },
         {
-            "check_id": "top10_day52_alignment",
+            "check_id": "top10_cycle52_alignment",
             "weight": 5,
-            "passed": ("Day 52" in top10_text and "Day 53" in top10_text),
-            "evidence": "Day 52 + Day 53 strategy chain",
+            "passed": ("Cycle 52" in top10_text and "Day 53" in top10_text),
+            "evidence": "Cycle 52 + Day 53 strategy chain",
         },
         {
-            "check_id": "day51_summary_present",
+            "check_id": "cycle51_summary_present",
             "weight": 10,
-            "passed": day51_summary.exists(),
-            "evidence": str(day51_summary),
+            "passed": cycle51_summary.exists(),
+            "evidence": str(cycle51_summary),
         },
         {
-            "check_id": "day51_delivery_board_present",
+            "check_id": "cycle51_delivery_board_present",
             "weight": 8,
-            "passed": day51_board.exists(),
-            "evidence": str(day51_board),
+            "passed": cycle51_board.exists(),
+            "evidence": str(cycle51_board),
         },
         {
-            "check_id": "day51_quality_floor",
+            "check_id": "cycle51_quality_floor",
             "weight": 10,
-            "passed": day51_strict and day51_score >= 95,
+            "passed": cycle51_strict and cycle51_score >= 95,
             "evidence": {
-                "day51_score": day51_score,
-                "strict_pass": day51_strict,
-                "day51_checks": day51_check_count,
+                "cycle51_score": cycle51_score,
+                "strict_pass": cycle51_strict,
+                "cycle51_checks": cycle51_check_count,
             },
         },
         {
-            "check_id": "day51_board_integrity",
+            "check_id": "cycle51_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day51 and board_has_day52,
+            "passed": board_count >= 5 and board_has_cycle51 and board_has_cycle52,
             "evidence": {
                 "board_items": board_count,
-                "contains_day51": board_has_day51,
-                "contains_day52": board_has_day52,
+                "contains_cycle51": board_has_cycle51,
+                "contains_cycle52": board_has_cycle52,
             },
         },
         {
@@ -280,33 +280,33 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     critical_failures: list[str] = []
-    if not day51_summary.exists() or not day51_board.exists():
-        critical_failures.append("day51_handoff_inputs")
-    if not day51_strict:
-        critical_failures.append("day51_strict_baseline")
+    if not cycle51_summary.exists() or not cycle51_board.exists():
+        critical_failures.append("cycle51_handoff_inputs")
+    if not cycle51_strict:
+        critical_failures.append("cycle51_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day51_strict:
-        wins.append(f"Day 51 continuity is strict-pass with activation score={day51_score}.")
+    if cycle51_strict:
+        wins.append(f"Cycle 51 continuity is strict-pass with activation score={cycle51_score}.")
     else:
-        misses.append("Day 51 strict continuity signal is missing.")
+        misses.append("Cycle 51 strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 51 case snippet closeout command and restore strict pass baseline before Day 52 lock."
+            "Re-run Cycle 51 case snippet closeout command and restore strict pass baseline before Cycle 52 lock."
         )
 
-    if board_count >= 5 and board_has_day51 and board_has_day52:
+    if board_count >= 5 and board_has_cycle51 and board_has_cycle52:
         wins.append(
-            f"Day 51 delivery board integrity validated with {board_count} checklist items."
+            f"Cycle 51 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 51 delivery board integrity is incomplete (needs >=5 items and Day 51/52 anchors)."
+            "Cycle 51 delivery board integrity is incomplete (needs >=5 items and Cycle 51/52 anchors)."
         )
         handoff_actions.append(
-            "Repair Day 51 delivery board entries to include Day 51 and Day 52 anchors."
+            "Repair Cycle 51 delivery board entries to include Cycle 51 and Cycle 52 anchors."
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -316,12 +316,12 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "Narrative contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 52 narrative contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all Cycle 52 narrative contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 52 narrative closeout lane is fully complete and ready for Day 53 execution lane."
+            "Cycle 52 narrative closeout lane is fully complete and ready for Day 53 execution lane."
         )
 
     return {
@@ -331,18 +331,18 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day51_summary": str(day51_summary.relative_to(root))
-            if day51_summary.exists()
-            else str(day51_summary),
-            "day51_delivery_board": str(day51_board.relative_to(root))
-            if day51_board.exists()
-            else str(day51_board),
+            "cycle51_summary": str(cycle51_summary.relative_to(root))
+            if cycle51_summary.exists()
+            else str(cycle51_summary),
+            "cycle51_delivery_board": str(cycle51_board.relative_to(root))
+            if cycle51_board.exists()
+            else str(cycle51_board),
         },
         "checks": checks,
         "rollup": {
-            "day51_activation_score": day51_score,
-            "day51_checks": day51_check_count,
-            "day51_delivery_board_items": board_count,
+            "cycle51_activation_score": cycle51_score,
+            "cycle51_checks": cycle51_check_count,
+            "cycle51_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -359,14 +359,14 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Narrative Closeout summary (legacy: Day 52)",
+        "Narrative Closeout summary (legacy: Cycle 52)",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 51 activation score: `{payload['rollup']['day51_activation_score']}`",
-        f"- Day 51 checks evaluated: `{payload['rollup']['day51_checks']}`",
-        f"- Day 51 delivery board checklist items: `{payload['rollup']['day51_delivery_board_items']}`",
+        f"- Cycle 51 activation score: `{payload['rollup']['cycle51_activation_score']}`",
+        f"- Cycle 51 checks evaluated: `{payload['rollup']['cycle51_checks']}`",
+        f"- Cycle 51 delivery board checklist items: `{payload['rollup']['cycle51_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -392,7 +392,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     # Legacy compatibility aliases
     _write(
         target / "narrative-brief.md",
-        "# Day 52 Narrative Brief\n\n- Objective: close Day 52 with measurable release-storytelling discipline and proof-backed narrative gains.\n",
+        "# Cycle 52 Narrative Brief\n\n- Objective: close Cycle 52 with measurable release-storytelling discipline and proof-backed narrative gains.\n",
     )
     _write(
         target / "narrative-proof-map.csv",
@@ -419,15 +419,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "narrative-execution-log.md",
-        "# Day 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and Day 53 expansion priorities.\n",
+        "# Cycle 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and Day 53 expansion priorities.\n",
     )
     _write(
         target / "narrative-delivery-board.md",
-        "# Day 52 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# Cycle 52 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "narrative-validation-commands.md",
-        "# Day 52 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Cycle 52 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
     # Legacy compatibility aliases
@@ -456,7 +456,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Narrative Closeout checks (legacy alias: day52-narrative-closeout)"
+        description="Narrative Closeout checks (legacy alias: narrative-closeout)"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
@@ -468,8 +468,8 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+def build_cycle52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
+    """Compatibility alias for legacy cycle-based builder name."""
     return build_narrative_closeout_summary(root)
 
 
