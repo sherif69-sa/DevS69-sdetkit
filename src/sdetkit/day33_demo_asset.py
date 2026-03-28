@@ -11,9 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-demo-asset.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY32_SUMMARY_PATH = "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
-_DAY32_SUMMARY_FALLBACK_PATH = "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
 _DAY32_BOARD_PATH = "docs/artifacts/release-cadence-pack/release-delivery-board.md"
-_DAY32_BOARD_FALLBACK_PATH = "docs/artifacts/day32-release-cadence-pack/day32-delivery-board.md"
 _SECTION_HEADER = "# Day 33 \u2014 Demo asset #1 production"
 _REQUIRED_SECTIONS = [
     "## Why Day 33 matters",
@@ -181,13 +179,9 @@ def build_day33_demo_asset_summary(
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day32_summary_primary = root / _DAY32_SUMMARY_PATH
-    day32_summary_fallback = root / _DAY32_SUMMARY_FALLBACK_PATH
     day32_board_primary = root / _DAY32_BOARD_PATH
-    day32_board_fallback = root / _DAY32_BOARD_FALLBACK_PATH
-    day32_summary = (
-        day32_summary_primary if day32_summary_primary.exists() else day32_summary_fallback
-    )
-    day32_board = day32_board_primary if day32_board_primary.exists() else day32_board_fallback
+    day32_summary = day32_summary_primary
+    day32_board = day32_board_primary
     day32_score, day32_strict, day32_check_count = _load_day32(day32_summary)
     board_count, board_has_day33, board_has_day34 = _board_stats(day32_board)
 

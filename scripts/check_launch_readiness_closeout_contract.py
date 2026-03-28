@@ -9,7 +9,6 @@ from pathlib import Path
 from sdetkit import day86_launch_readiness_closeout as lane
 
 _CANONICAL_EVIDENCE = "docs/artifacts/launch-readiness-closeout-pack/evidence/launch-readiness-execution-summary.json"
-_LEGACY_EVIDENCE = "docs/artifacts/day86-launch-readiness-closeout-pack/evidence/day86-execution-summary.json"
 
 
 def main() -> int:
@@ -31,8 +30,6 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = root / _CANONICAL_EVIDENCE
-        if not evidence.exists():
-            evidence = root / _LEGACY_EVIDENCE
         if not evidence.exists():
             errors.append(f"missing evidence summary: {root / _CANONICAL_EVIDENCE}")
         else:

@@ -12,9 +12,6 @@ from sdetkit import day90_phase3_wrap_publication_closeout as d90
 _CANONICAL_EVIDENCE = (
     "docs/artifacts/phase3-wrap-publication-closeout-pack/evidence/phase3-wrap-publication-execution-summary.json"
 )
-_LEGACY_EVIDENCE = (
-    "docs/artifacts/day90-phase3-wrap-publication-closeout-pack/evidence/day90-execution-summary.json"
-)
 
 
 def main() -> int:
@@ -40,8 +37,6 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = root / _CANONICAL_EVIDENCE
-        if not evidence.exists():
-            evidence = root / _LEGACY_EVIDENCE
         if not evidence.exists():
             errors.append(f"missing evidence summary: {root / _CANONICAL_EVIDENCE}")
         else:

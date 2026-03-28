@@ -27,12 +27,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict",
     "python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict",
     "python -m sdetkit continuous-upgrade-cycle4-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack/evidence --format json --strict",
-    "python scripts/check_continuous_upgrade_cycle4_closeout_contract.py",
+    "python scripts/check_continuous_upgrade_cycle4_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict",
     "python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict",
-    "python scripts/check_continuous_upgrade_cycle4_closeout_contract.py --skip-evidence",
+    "python scripts/check_continuous_upgrade_cycle4_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 4 continuous upgrade execution and signoff.",
@@ -88,7 +88,7 @@ Cycle 4 closes with a major upgrade that converts Cycle 3 governance scale outco
 python -m sdetkit continuous-upgrade-cycle4-closeout --format json --strict
 python -m sdetkit continuous-upgrade-cycle4-closeout --emit-pack-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack --format json --strict
 python -m sdetkit continuous-upgrade-cycle4-closeout --execute --evidence-dir docs/artifacts/continuous-upgrade-cycle4-closeout-pack/evidence --format json --strict
-python scripts/check_continuous_upgrade_cycle4_closeout_contract.py
+python scripts/check_continuous_upgrade_cycle4_contract.py
 ```
 
 ## Continuous upgrade contract

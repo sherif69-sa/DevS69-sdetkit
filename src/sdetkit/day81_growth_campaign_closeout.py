@@ -12,8 +12,6 @@ _PAGE_PATH = "docs/integrations-growth-campaign-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY80_SUMMARY_PATH = "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json"
 _DAY80_BOARD_PATH = "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md"
-_DAY80_LEGACY_SUMMARY_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-partner-outreach-closeout-summary.json"
-_DAY80_LEGACY_BOARD_PATH = "docs/artifacts/day80-partner-outreach-closeout-pack/day80-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/growth-campaign-plan.json"
 _SECTION_HEADER = "# Day 81 \u2014 Growth campaign closeout lane"
 _REQUIRED_SECTIONS = [
@@ -143,19 +141,15 @@ def _checklist_count(text: str) -> int:
     return sum(1 for line in text.splitlines() if line.strip().startswith("- ["))
 
 
-def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    return canonical_path if canonical_path.exists() else (root / legacy)
-
-
 def build_day81_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day80_summary = _resolve_with_legacy(root, _DAY80_SUMMARY_PATH, _DAY80_LEGACY_SUMMARY_PATH)
-    day80_board = _resolve_with_legacy(root, _DAY80_BOARD_PATH, _DAY80_LEGACY_BOARD_PATH)
+    day80_summary = root / _DAY80_SUMMARY_PATH
+    day80_board = root / _DAY80_BOARD_PATH
+
     day80_payload = _load_json(day80_summary)
     day80_score = int(day80_payload.get("summary", {}).get("activation_score", 0) or 0)
     day80_strict = bool(day80_payload.get("summary", {}).get("strict_pass", False))

@@ -124,8 +124,8 @@ def _seed_repo(root: Path) -> None:
 
     (root / "scripts").mkdir(parents=True, exist_ok=True)
     checker_body = "from __future__ import annotations\n\nif __name__ == '__main__':\n    raise SystemExit(0)\n"
-    _write(root / "scripts/check_continuous_upgrade_cycle7_closeout_contract.py", checker_body)
-    _write(root / "scripts/check_continuous_upgrade_cycle7_closeout_contract.py", checker_body)
+    _write(root / "scripts/check_continuous_upgrade_cycle7_contract.py", checker_body)
+    _write(root / "scripts/check_continuous_upgrade_cycle7_contract.py", checker_body)
 
     _seed_previous_cycle_artifacts(root)
 

@@ -9,7 +9,6 @@ from pathlib import Path
 from sdetkit import day89_governance_scale_closeout as d89
 
 _CANONICAL_EVIDENCE = "docs/artifacts/governance-scale-closeout-pack/evidence/governance-scale-execution-summary.json"
-_LEGACY_EVIDENCE = "docs/artifacts/day89-governance-scale-closeout-pack/evidence/day89-execution-summary.json"
 
 
 def main() -> int:
@@ -31,8 +30,6 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = root / _CANONICAL_EVIDENCE
-        if not evidence.exists():
-            evidence = root / _LEGACY_EVIDENCE
         if not evidence.exists():
             errors.append(f"missing evidence summary: {root / _CANONICAL_EVIDENCE}")
         else:

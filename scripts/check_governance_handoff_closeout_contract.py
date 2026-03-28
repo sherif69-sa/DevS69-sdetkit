@@ -11,9 +11,6 @@ from sdetkit import day87_governance_handoff_closeout as d87
 _CANONICAL_EVIDENCE = (
     "docs/artifacts/governance-handoff-closeout-pack/evidence/governance-handoff-execution-summary.json"
 )
-_LEGACY_EVIDENCE = (
-    "docs/artifacts/day87-governance-handoff-closeout-pack/evidence/day87-execution-summary.json"
-)
 
 
 def main() -> int:
@@ -37,8 +34,6 @@ def main() -> int:
 
     if not ns.skip_evidence:
         evidence = root / _CANONICAL_EVIDENCE
-        if not evidence.exists():
-            evidence = root / _LEGACY_EVIDENCE
         if not evidence.exists():
             errors.append(f"missing evidence summary: {root / _CANONICAL_EVIDENCE}")
         else:

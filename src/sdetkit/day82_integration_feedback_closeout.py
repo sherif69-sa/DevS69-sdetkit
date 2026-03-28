@@ -14,8 +14,6 @@ _DAY81_SUMMARY_PATH = (
     "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json"
 )
 _DAY81_BOARD_PATH = "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md"
-_DAY81_LEGACY_SUMMARY_PATH = "docs/artifacts/day81-growth-campaign-closeout-pack/day81-growth-campaign-closeout-summary.json"
-_DAY81_LEGACY_BOARD_PATH = "docs/artifacts/day81-growth-campaign-closeout-pack/day81-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/integration-feedback-plan.json"
 _SECTION_HEADER = "# Day 82 \u2014 Integration feedback loop closeout lane"
 _REQUIRED_SECTIONS = [
@@ -147,18 +145,14 @@ def _checklist_count(markdown: str) -> int:
     return sum(1 for line in markdown.splitlines() if line.strip().startswith("- ["))
 
 
-def _resolve_with_legacy(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    return canonical_path if canonical_path.exists() else (root / legacy)
-
-
 def build_day82_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    day81_summary = _resolve_with_legacy(root, _DAY81_SUMMARY_PATH, _DAY81_LEGACY_SUMMARY_PATH)
-    day81_board = _resolve_with_legacy(root, _DAY81_BOARD_PATH, _DAY81_LEGACY_BOARD_PATH)
+
+    day81_summary = root / _DAY81_SUMMARY_PATH
+    day81_board = root / _DAY81_BOARD_PATH
 
     day81_data = _load_json(day81_summary)
     day81_summary_data = (
