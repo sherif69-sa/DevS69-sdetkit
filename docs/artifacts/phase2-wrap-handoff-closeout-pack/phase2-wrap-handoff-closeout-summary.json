@@ -1,9 +1,9 @@
 {
-  "name": "day60-phase2-wrap-handoff-closeout",
+  "name": "phase2-wrap-handoff-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day60-phase2-wrap-handoff-closeout.md",
+    "docs_page": "docs/integrations-phase2-wrap-handoff-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "day59_summary": "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json",
     "day59_delivery_board": "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md"
@@ -12,19 +12,19 @@
     {
       "check_id": "readme_day60_command",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "README day60 command lane"
     },
     {
       "check_id": "docs_index_day60_links",
       "weight": 8,
-      "passed": true,
-      "evidence": "impact-60-big-upgrade-report.md + integrations-day60-phase2-wrap-handoff-closeout.md"
+      "passed": false,
+      "evidence": "impact-60-big-upgrade-report.md + integrations-phase2-wrap-handoff-closeout.md"
     },
     {
       "check_id": "top10_day60_alignment",
       "weight": 5,
-      "passed": true,
+      "passed": false,
       "evidence": "Day 60 + Day 61 strategy chain"
     },
     {
@@ -42,11 +42,11 @@
     {
       "check_id": "day59_quality_floor",
       "weight": 15,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day59_score": 100,
-        "strict_pass": true,
-        "day59_checks": 1
+        "day59_score": 18,
+        "strict_pass": false,
+        "day59_checks": 13
       }
     },
     {
@@ -61,14 +61,16 @@
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 60 \u2014 Phase-2 wrap + handoff closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 10,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Day 60 command lane"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -96,23 +98,27 @@
     }
   ],
   "rollup": {
-    "day59_activation_score": 100,
-    "day59_checks": 1,
+    "day59_activation_score": 18,
+    "day59_checks": 13,
     "day59_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 95,
-    "passed_checks": 13,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 43,
+    "passed_checks": 7,
+    "failed_checks": 6,
+    "critical_failures": [
+      "day59_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 59 continuity is strict-pass with activation score=100.",
     "Day 59 delivery board integrity validated with 5 checklist items.",
-    "Phase-2 wrap + handoff contract + quality checklist is fully locked for execution.",
-    "Day 60 Phase-2 wrap + handoff closeout lane is fully complete and ready for Day 61 execution lane."
+    "Phase-2 wrap + handoff contract + quality checklist is fully locked for execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 59 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 59 Phase-3 pre-plan closeout command and restore strict baseline before Day 60 lock."
+  ]
 }

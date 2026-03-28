@@ -350,25 +350,25 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day62-community-program-closeout-summary.json",
+        target / "community-program-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day62-community-program-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day62-community-launch-brief.md", "# Day 62 community launch brief\n")
+    _write(target / "community-program-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "community-program-community-launch-brief.md", "# Day 62 community launch brief\n")
     _write(
-        target / "day62-office-hours-cadence.md",
+        target / "community-program-office-hours-cadence.md",
         "# Day 62 office-hours cadence\n\n- Weekly office hours\n",
     )
-    _write(target / "day62-participation-policy.md", "# Day 62 participation policy\n")
-    _write(target / "day62-moderation-runbook.md", "# Day 62 moderation runbook\n")
-    _write(target / "day62-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day62-execution-log.md", "# Day 62 execution log\n")
+    _write(target / "community-program-participation-policy.md", "# Day 62 participation policy\n")
+    _write(target / "community-program-moderation-runbook.md", "# Day 62 moderation runbook\n")
+    _write(target / "community-program-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "community-program-execution-log.md", "# Day 62 execution log\n")
     _write(
-        target / "day62-delivery-board.md",
+        target / "community-program-delivery-board.md",
         "\n".join(["# Day 62 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day62-validation-commands.md",
+        target / "community-program-validation-commands.md",
         "# Day 62 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 

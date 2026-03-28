@@ -93,12 +93,12 @@ def test_day68_emit_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day68-pack/day68-integration-expansion4-closeout-summary.json"
+        tmp_path / "artifacts/day68-pack/integration-expansion4-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day68-pack/day68-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day68-pack/day68-self-hosted-blueprint.md").exists()
-    assert (tmp_path / "artifacts/day68-pack/day68-policy-plan.json").exists()
-    assert (tmp_path / "artifacts/day68-pack/day68-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-self-hosted-blueprint.md").exists()
+    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-policy-plan.json").exists()
+    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/day68-pack/evidence/integration-expansion4-execution-summary.json").exists()
 
 

@@ -1,31 +1,31 @@
 {
-  "name": "day68-integration-expansion4-closeout",
+  "name": "integration-expansion4-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day68-integration-expansion4-closeout.md",
+    "docs_page": "docs/integrations-integration-expansion4-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "day67_summary": "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json",
     "day67_delivery_board": "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md",
-    "self_hosted_reference": "templates/ci/tekton/day68-self-hosted-reference.yaml"
+    "self_hosted_reference": "templates/ci/tekton/tekton-self-hosted-reference.yaml"
   },
   "checks": [
     {
       "check_id": "readme_day68_command",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "README day68 command lane"
     },
     {
       "check_id": "docs_index_day68_links",
       "weight": 8,
-      "passed": true,
-      "evidence": "impact-68-big-upgrade-report.md + integrations-day68-integration-expansion4-closeout.md"
+      "passed": false,
+      "evidence": "impact-68-big-upgrade-report.md + integrations-integration-expansion4-closeout.md"
     },
     {
       "check_id": "top10_day68_alignment",
       "weight": 5,
-      "passed": true,
+      "passed": false,
       "evidence": "Day 68 + Day 69 strategy chain"
     },
     {
@@ -43,10 +43,10 @@
     {
       "check_id": "day67_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day67_score": 100,
-        "strict_pass": true,
+        "day67_score": 52,
+        "strict_pass": false,
         "day67_checks": 14
       }
     },
@@ -62,14 +62,17 @@
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 68 \u2014 Integration expansion #4 closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Integration Expansion4 Closeout command lane (Legacy Day 68)",
+        "## Integration Expansion4 Closeout delivery board (Legacy Day 68)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -99,27 +102,31 @@
       "check_id": "self_hosted_reference_present",
       "weight": 10,
       "passed": true,
-      "evidence": "templates/ci/tekton/day68-self-hosted-reference.yaml"
+      "evidence": "templates/ci/tekton/tekton-self-hosted-reference.yaml"
     }
   ],
   "rollup": {
-    "day67_activation_score": 100,
+    "day67_activation_score": 52,
     "day67_checks": 14,
     "day67_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 100,
-    "passed_checks": 14,
-    "failed_checks": 0,
-    "critical_failures": [],
-    "strict_pass": true
+    "activation_score": 52,
+    "passed_checks": 8,
+    "failed_checks": 6,
+    "critical_failures": [
+      "day67_strict_baseline"
+    ],
+    "strict_pass": false
   },
   "wins": [
-    "Day 67 continuity is strict-pass with activation score=100.",
     "Day 67 delivery board integrity validated with 5 checklist items.",
-    "Day 68 self-hosted reference pipeline is available for integration expansion execution.",
-    "Day 68 integration expansion #4 closeout lane is fully complete and ready for Day 69 case-study prep #1."
+    "Day 68 self-hosted reference pipeline is available for integration expansion execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 67 strict continuity signal is missing."
+  ],
+  "handoff_actions": [
+    "Re-run Day 67 closeout command and restore strict baseline before Day 68 lock."
+  ]
 }

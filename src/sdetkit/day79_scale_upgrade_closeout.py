@@ -361,11 +361,11 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "scale-upgrade-integration-brief.md", "# Scale upgrade integration brief\n")
     _write(target / "scale-upgrade-plan.md", "# Scale upgrade plan\n")
     _write(
-        target / "day79-enterprise-execution-ledger.json",
+        target / "scale-upgrade-enterprise-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
     )
     _write(
-        target / "day79-enterprise-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+        target / "scale-upgrade-enterprise-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
     _write(target / "scale-upgrade-execution-log.md", "# Scale upgrade execution log\n")
     _write(

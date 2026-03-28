@@ -348,20 +348,20 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day61-phase3-kickoff-closeout-summary.json",
+        target / "phase3-kickoff-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day61-phase3-kickoff-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day61-phase3-kickoff-brief.md", "# Day 61 Phase-3 kickoff brief\n")
-    _write(target / "day61-trust-ledger.csv", "risk,owner,mitigation,status\n")
-    _write(target / "day61-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day61-execution-log.md", "# Day 61 execution log\n")
+    _write(target / "phase3-kickoff-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "phase3-kickoff-brief.md", "# Day 61 Phase-3 kickoff brief\n")
+    _write(target / "phase3-kickoff-trust-ledger.csv", "risk,owner,mitigation,status\n")
+    _write(target / "phase3-kickoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "phase3-kickoff-execution-log.md", "# Day 61 execution log\n")
     _write(
-        target / "day61-delivery-board.md",
+        target / "phase3-kickoff-delivery-board.md",
         "\n".join(["# Day 61 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day61-validation-commands.md",
+        target / "phase3-kickoff-validation-commands.md",
         "# Day 61 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 

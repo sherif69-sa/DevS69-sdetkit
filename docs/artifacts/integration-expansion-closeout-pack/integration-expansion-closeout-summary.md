@@ -1,5 +1,5 @@
-Day 64 integration expansion closeout summary
-- Activation score: 100
-- Passed checks: 14
-- Failed checks: 0
+Integration Expansion Closeout summary
+- Activation score: 55
+- Passed checks: 8
+- Failed checks: 6
 - Critical failures: []

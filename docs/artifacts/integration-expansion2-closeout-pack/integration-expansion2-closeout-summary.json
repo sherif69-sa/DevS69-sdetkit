@@ -5,9 +5,9 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-integration-expansion2-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day65_summary": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json",
-    "day65_delivery_board": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md",
-    "gitlab_reference": "templates/ci/gitlab/day66-advanced-reference.yml"
+    "day65_summary": "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json",
+    "day65_delivery_board": "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md",
+    "gitlab_reference": "templates/ci/gitlab/gitlab-advanced-reference.yml"
   },
   "checks": [
     {
@@ -31,32 +31,32 @@
     {
       "check_id": "day65_summary_present",
       "weight": 10,
-      "passed": false,
+      "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
     },
     {
       "check_id": "day65_delivery_board_present",
       "weight": 7,
-      "passed": false,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md"
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md"
     },
     {
       "check_id": "day65_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day65_score": 0,
+        "day65_score": 55,
         "strict_pass": false,
-        "day65_checks": 0
+        "day65_checks": 14
       }
     },
     {
       "check_id": "day65_board_integrity",
       "weight": 5,
-      "passed": false,
+      "passed": true,
       "evidence": {
-        "board_items": 0,
-        "contains_day65": false
+        "board_items": 5,
+        "contains_day65": true
       }
     },
     {
@@ -102,33 +102,31 @@
       "check_id": "gitlab_reference_present",
       "weight": 10,
       "passed": true,
-      "evidence": "templates/ci/gitlab/day66-advanced-reference.yml"
+      "evidence": "templates/ci/gitlab/gitlab-advanced-reference.yml"
     }
   ],
   "rollup": {
-    "day65_activation_score": 0,
-    "day65_checks": 0,
-    "day65_delivery_board_items": 0
+    "day65_activation_score": 55,
+    "day65_checks": 14,
+    "day65_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 30,
-    "passed_checks": 5,
-    "failed_checks": 9,
+    "activation_score": 52,
+    "passed_checks": 8,
+    "failed_checks": 6,
     "critical_failures": [
-      "day65_handoff_inputs",
       "day65_strict_baseline"
     ],
     "strict_pass": false
   },
   "wins": [
+    "Day 65 delivery board integrity validated with 5 checklist items.",
     "Day 66 GitLab reference pipeline is available for integration expansion execution."
   ],
   "misses": [
-    "Day 65 strict continuity signal is missing.",
-    "Day 65 delivery board integrity is incomplete (needs >=5 items and Day 65 anchors)."
+    "Day 65 strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 65 closeout command and restore strict baseline before Day 66 lock.",
-    "Repair Day 65 delivery board entries to include Day 65 anchors."
+    "Re-run Day 65 closeout command and restore strict baseline before Day 66 lock."
   ]
 }

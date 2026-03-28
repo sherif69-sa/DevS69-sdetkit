@@ -99,14 +99,14 @@ def test_day61_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day61-pack/day61-phase3-kickoff-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-phase3-kickoff-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-phase3-kickoff-brief.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-trust-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/day61-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-brief.md").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-trust-ledger.csv").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-validation-commands.md").exists()
     assert (tmp_path / "artifacts/day61-pack/evidence/phase3-kickoff-execution-summary.json").exists()
 
 
