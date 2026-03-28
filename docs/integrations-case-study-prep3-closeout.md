@@ -1,4 +1,4 @@
-# Case-study prep #3 closeout lane
+# Day 71 — Case-study prep #3 closeout lane
 
 Day 71 closes with a major upgrade that turns Day 70 integration outputs into a measurable escalation-quality case-study prep pack.
 
@@ -10,8 +10,8 @@ Day 71 closes with a major upgrade that turns Day 70 integration outputs into a 
 
 ## Required inputs (Day 70)
 
-- `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-case-study-prep2-closeout-summary.json`
-- `docs/artifacts/day70-case-study-prep2-closeout-pack/day70-delivery-board.md`
+- `docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json`
+- `docs/artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md`
 - `docs/roadmap/plans/escalation-quality-case-study.json`
 
 ## Day 71 command lane

@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-community-touchpoint-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY76_SUMMARY_PATH = "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json"
+_DAY76_SUMMARY_PATH = "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
 _DAY76_BOARD_PATH = (
-    "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md"
+    "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/community-touchpoint-plan.json"
 _SECTION_HEADER = "# Community touchpoint closeout lane"
@@ -77,8 +77,8 @@ Day 77 closes with a major upgrade that converts Day 76 contributor-recognition 
 
 ## Required inputs (Day 76)
 
-- `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json`
-- `docs/artifacts/day76-contributor-recognition-closeout-pack/day76-delivery-board.md`
+- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json`
+- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md`
 - `docs/roadmap/plans/community-touchpoint-plan.json`
 
 ## Community touchpoint command lane

@@ -11,7 +11,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/plans").mkdir(parents=True, exist_ok=True)
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-case-study-prep1-closeout.md\nday69-case-study-prep1-closeout\n",
+        "docs/integrations-case-study-prep1-closeout.md\ncase-study-prep1-closeout\n",
         encoding="utf-8",
     )
     (root / "docs/index.md").write_text(
@@ -97,9 +97,9 @@ def test_day69_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day69-pack/day69-case-study-prep1-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day69-pack/day69-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day69-pack/evidence/day69-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day69-pack/case-study-prep1-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/day69-pack/case-study-prep1-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day69-pack/evidence/case-study-prep1-execution-summary.json").exists()
 
 
 def test_day69_strict_fails_without_day68_summary(tmp_path: Path) -> None:
@@ -116,7 +116,7 @@ def test_day69_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     alias_rc = cli.main(
-        ["day69-case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["case-study-prep1-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert alias_rc == 0
     assert "Case Study Prep1 Closeout summary" in capsys.readouterr().out

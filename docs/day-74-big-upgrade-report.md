@@ -15,8 +15,8 @@ Close Day 74 with a high-signal distribution scaling lane that upgrades Day 73 p
 
 ```bash
 python -m sdetkit distribution-scaling-closeout --format json --strict
-python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict
-python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict
+python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict
+python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict
 python scripts/check_distribution_scaling_closeout_contract.py
 ```
 

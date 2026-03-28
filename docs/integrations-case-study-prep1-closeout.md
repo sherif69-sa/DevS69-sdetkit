@@ -1,4 +1,4 @@
-# Case Study Prep1 Closeout (legacy) — Case-study prep #1 closeout lane
+# Day 69 — Case-study prep #1 closeout lane
 
 Day 69 closes with a major upgrade that turns Day 68 integration outputs into a measurable reliability case-study prep pack.
 
@@ -14,12 +14,12 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 - `docs/artifacts/day68-integration-expansion4-closeout-pack/day68-delivery-board.md`
 - `docs/roadmap/plans/reliability-case-study.json`
 
-## Case Study Prep1 Closeout command lane (legacy)
+## Case Study Prep1 Closeout command lane (Legacy Day 69)
 
 ```bash
 python -m sdetkit case-study-prep1-closeout --format json --strict
-python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict
-python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict
+python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/case-study-prep1-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_prep1_closeout_contract.py
 ```
 
@@ -38,7 +38,7 @@ python scripts/check_case_study_prep1_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Case Study Prep1 Closeout delivery board (legacy)
+## Case Study Prep1 Closeout delivery board (Legacy Day 69)
 
 - [ ] Day 69 integration brief committed
 - [ ] Day 69 reliability case-study narrative published

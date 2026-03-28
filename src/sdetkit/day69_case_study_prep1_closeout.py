@@ -27,13 +27,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit case-study-prep1-closeout --format json --strict",
-    "python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict",
-    "python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/case-study-prep1-closeout-pack/evidence --format json --strict",
     "python scripts/check_case_study_prep1_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit case-study-prep1-closeout --format json --strict",
-    "python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict",
+    "python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict",
     "python scripts/check_case_study_prep1_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -85,8 +85,8 @@ Day 69 closes with a major upgrade that turns Day 68 integration outputs into a 
 
 ```bash
 python -m sdetkit case-study-prep1-closeout --format json --strict
-python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/day69-case-study-prep1-closeout-pack --format json --strict
-python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/day69-case-study-prep1-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict
+python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/case-study-prep1-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_prep1_closeout_contract.py
 ```
 
@@ -176,7 +176,7 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day69_command",
             "weight": 7,
-            "passed": ("day69-case-study-prep1-closeout" in readme_text),
+            "passed": ("case-study-prep1-closeout" in readme_text),
             "evidence": "README day69 command lane",
         },
         {
@@ -364,21 +364,21 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day69-case-study-prep1-closeout-summary.json",
+        target / "case-study-prep1-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
-    _write(target / "day69-case-study-prep1-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "day69-integration-brief.md", "# Day 69 integration brief\n")
-    _write(target / "day69-case-study-narrative.md", "# Day 69 case-study narrative\n")
-    _write(target / "day69-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
-    _write(target / "day69-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "day69-execution-log.md", "# Day 69 execution log\n")
+    _write(target / "case-study-prep1-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "case-study-prep1-integration-brief.md", "# Day 69 integration brief\n")
+    _write(target / "case-study-prep1-case-study-narrative.md", "# Day 69 case-study narrative\n")
+    _write(target / "case-study-prep1-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n")
+    _write(target / "case-study-prep1-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
+    _write(target / "case-study-prep1-execution-log.md", "# Day 69 execution log\n")
     _write(
-        target / "day69-delivery-board.md",
+        target / "case-study-prep1-delivery-board.md",
         "\n".join(["# Day 69 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day69-validation-commands.md",
+        target / "case-study-prep1-validation-commands.md",
         "# Day 69 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -401,7 +401,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day69-execution-summary.json",
+        out_dir / "case-study-prep1-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -434,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day69-case-study-prep1-closeout-pack/evidence")
+            else Path("docs/artifacts/case-study-prep1-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

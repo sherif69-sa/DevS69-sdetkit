@@ -1,4 +1,4 @@
-# Case Study Launch Closeout
+# Day 73 — Case-study launch closeout lane
 
 Day 73 closes with a major upgrade that turns Day 72 publication-quality prep into a published case-study launch pack with rollout safeguards.
 
@@ -10,16 +10,16 @@ Day 73 closes with a major upgrade that turns Day 72 publication-quality prep in
 
 ## Required inputs (Day 72)
 
-- `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json`
-- `docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md`
+- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json`
+- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md`
 - `docs/roadmap/plans/published-case-study.json`
 
 ## Day 73 command lane
 
 ```bash
 python -m sdetkit case-study-launch-closeout --format json --strict
-python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/day73-case-study-launch-closeout-pack --format json --strict
-python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/day73-case-study-launch-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict
+python -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_launch_closeout_contract.py
 ```
 

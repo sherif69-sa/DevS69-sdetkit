@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json"
+        / "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md"
+    board = root / "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -116,26 +116,26 @@ def test_day75_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day75-pack/day75-trust-assets-refresh-closeout-summary.json"
+        tmp_path / "artifacts/day75-pack/trust-assets-refresh-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/day75-pack/day75-trust-assets-refresh-closeout-summary.md"
+        tmp_path / "artifacts/day75-pack/trust-assets-refresh-closeout-summary.md"
     ).exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-trust-assets-refresh-plan.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-trust-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-trust-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/day75-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/evidence/day75-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-plan.md").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-trust-controls-log.json").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-trust-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day75-pack/evidence/trust-assets-refresh-execution-summary.json").exists()
 
 
 def test_day75_strict_fails_without_day74(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json"
+        / "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json"
     ).unlink()
     assert d75.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

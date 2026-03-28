@@ -1,4 +1,4 @@
-# Distribution Scaling Closeout
+# Day 74 — Distribution scaling closeout lane
 
 Day 74 closes with a major upgrade that turns Day 73 published case-study outcomes into a scalable distribution execution pack with governance safeguards.
 
@@ -10,16 +10,16 @@ Day 74 closes with a major upgrade that turns Day 73 published case-study outcom
 
 ## Required inputs (Day 73)
 
-- `docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json`
-- `docs/artifacts/day73-case-study-launch-closeout-pack/day73-delivery-board.md`
+- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json`
+- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md`
 - `docs/roadmap/plans/distribution-scaling-plan.json`
 
 ## Day 74 command lane
 
 ```bash
 python -m sdetkit distribution-scaling-closeout --format json --strict
-python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/day74-distribution-scaling-closeout-pack --format json --strict
-python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/day74-distribution-scaling-closeout-pack/evidence --format json --strict
+python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict
+python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict
 python scripts/check_distribution_scaling_closeout_contract.py
 ```
 

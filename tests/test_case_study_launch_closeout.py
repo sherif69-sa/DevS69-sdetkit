@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
+        / "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -56,7 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-delivery-board.md"
+    board = root / "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -116,24 +116,24 @@ def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day73-pack/day73-case-study-launch-closeout-summary.json"
+        tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-case-study-launch-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/day73-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/evidence/day73-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-case-study-narrative.md").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-controls-log.json").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-execution-log.md").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day73-pack/case-study-launch-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/day73-pack/evidence/case-study-launch-execution-summary.json").exists()
 
 
 def test_day73_strict_fails_without_day72(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
+        / "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
     ).unlink()
     assert d73.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-contributor-recognition-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY75_SUMMARY_PATH = "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
+_DAY75_SUMMARY_PATH = "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
 _DAY75_BOARD_PATH = (
-    "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
+    "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/contributor-recognition-plan.json"
 _SECTION_HEADER = "# Day 76 \u2014 Contributor recognition closeout lane"
@@ -27,13 +27,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit contributor-recognition-closeout --format json --strict",
-    "python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict",
-    "python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict",
+    "python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/contributor-recognition-closeout-pack/evidence --format json --strict",
     "python scripts/check_contributor_recognition_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit contributor-recognition-closeout --format json --strict",
-    "python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict",
+    "python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict",
     "python scripts/check_contributor_recognition_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -77,16 +77,16 @@ Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes i
 
 ## Required inputs (Day 75)
 
-- `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json`
-- `docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md`
+- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json`
+- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md`
 - `docs/roadmap/plans/contributor-recognition-plan.json`
 
 ## Day 76 command lane
 
 ```bash
 python -m sdetkit contributor-recognition-closeout --format json --strict
-python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/day76-contributor-recognition-closeout-pack --format json --strict
-python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/day76-contributor-recognition-closeout-pack/evidence --format json --strict
+python -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict
+python -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/contributor-recognition-closeout-pack/evidence --format json --strict
 python scripts/check_contributor_recognition_closeout_contract.py
 ```
 
@@ -362,30 +362,30 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(
-        target / "day76-contributor-recognition-closeout-summary.json",
+        target / "contributor-recognition-closeout-summary.json",
         json.dumps(payload, indent=2) + "\n",
     )
     _write(
-        target / "day76-contributor-recognition-closeout-summary.md", _render_text(payload) + "\n"
+        target / "contributor-recognition-closeout-summary.md", _render_text(payload) + "\n"
     )
-    _write(target / "day76-integration-brief.md", "# Day 76 integration brief\n")
+    _write(target / "contributor-recognition-integration-brief.md", "# Day 76 integration brief\n")
     _write(
-        target / "day76-contributor-recognition-plan.md", "# Day 76 contributor recognition plan\n"
+        target / "contributor-recognition-plan.md", "# Day 76 contributor recognition plan\n"
     )
     _write(
-        target / "day76-recognition-credits-ledger.json",
+        target / "contributor-recognition-credits-ledger.json",
         json.dumps({"credits": []}, indent=2) + "\n",
     )
     _write(
-        target / "day76-recognition-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
+        target / "contributor-recognition-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "day76-execution-log.md", "# Day 76 execution log\n")
+    _write(target / "contributor-recognition-execution-log.md", "# Day 76 execution log\n")
     _write(
-        target / "day76-delivery-board.md",
+        target / "contributor-recognition-delivery-board.md",
         "\n".join(["# Day 76 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day76-validation-commands.md",
+        target / "contributor-recognition-validation-commands.md",
         "# Day 76 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -408,7 +408,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day76-execution-summary.json",
+        out_dir / "contributor-recognition-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
@@ -441,7 +441,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day76-contributor-recognition-closeout-pack/evidence")
+            else Path("docs/artifacts/contributor-recognition-closeout-pack/evidence")
         )
         _execute_commands(root, evidence_dir)
 

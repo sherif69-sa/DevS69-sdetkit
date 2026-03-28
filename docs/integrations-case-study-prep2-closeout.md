@@ -1,4 +1,4 @@
-# Case Study Prep 2 Closeout (legacy) — Case-study prep #2 closeout lane
+# Day 70 — Case-study prep #2 closeout lane
 
 Day 70 closes with a major upgrade that turns Day 69 integration outputs into a measurable triage-speed case-study prep pack.
 
@@ -10,16 +10,16 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 
 ## Required inputs (Day 69)
 
-- `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json`
-- `docs/artifacts/day69-case-study-prep1-closeout-pack/day69-delivery-board.md`
+- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json`
+- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md`
 - `docs/roadmap/plans/triage-speed-case-study.json`
 
-## Case Study Prep 2 Closeout command lane (legacy)
+## Case Study Prep 2 Closeout command lane (Legacy Day 70)
 
 ```bash
 python -m sdetkit case-study-prep2-closeout --format json --strict
-python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/day70-case-study-prep2-closeout-pack --format json --strict
-python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/day70-case-study-prep2-closeout-pack/evidence --format json --strict
+python -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/case-study-prep2-closeout-pack --format json --strict
+python -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/case-study-prep2-closeout-pack/evidence --format json --strict
 python scripts/check_case_study_prep2_closeout_contract.py
 ```
 
@@ -38,7 +38,7 @@ python scripts/check_case_study_prep2_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Case Study Prep 2 Closeout delivery board (legacy)
+## Case Study Prep 2 Closeout delivery board (Legacy Day 70)
 
 - [ ] Day 70 integration brief committed
 - [ ] Day 70 triage-speed case-study narrative published

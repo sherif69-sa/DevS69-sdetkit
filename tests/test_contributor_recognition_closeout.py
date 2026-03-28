@@ -25,7 +25,7 @@ def _seed_repo(root: Path) -> None:
 
     summary = (
         root
-        / "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
+        / "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
     )
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
@@ -38,7 +38,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-delivery-board.md"
+    board = root / "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
     board.write_text(
         "\n".join(["# Day 75 delivery board", *["- [ ] Day 75 item" for _ in range(5)]]) + "\n",
         encoding="utf-8",
@@ -87,17 +87,17 @@ def test_day76_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day76-pack/day76-contributor-recognition-closeout-summary.json"
+        tmp_path / "artifacts/day76-pack/contributor-recognition-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day76-pack/day76-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day76-pack/evidence/day76-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/day76-pack/contributor-recognition-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/day76-pack/evidence/contributor-recognition-execution-summary.json").exists()
 
 
 def test_day76_strict_fails_without_day75_summary(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
+        / "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
     ).unlink()
     assert d76.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 

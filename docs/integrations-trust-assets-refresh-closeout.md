@@ -1,4 +1,4 @@
-# Trust Assets Refresh Closeout
+# Day 75 — Trust assets refresh closeout lane
 
 Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into a governance-grade trust refresh execution pack.
 
@@ -10,16 +10,16 @@ Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into 
 
 ## Required inputs (Day 74)
 
-- `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json`
-- `docs/artifacts/day74-distribution-scaling-closeout-pack/day74-delivery-board.md`
+- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json`
+- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`
 - `docs/roadmap/plans/trust-assets-refresh-plan.json`
 
 ## Day 75 command lane
 
 ```bash
 python -m sdetkit trust-assets-refresh-closeout --format json --strict
-python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack --format json --strict
-python -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/day75-trust-assets-refresh-closeout-pack/evidence --format json --strict
+python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict
+python -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/trust-assets-refresh-closeout-pack/evidence --format json --strict
 python scripts/check_trust_assets_refresh_closeout_contract.py
 ```
 
