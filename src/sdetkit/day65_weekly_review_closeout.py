@@ -29,12 +29,12 @@ _REQUIRED_COMMANDS = [
     "python -m sdetkit weekly-review-closeout --format json --strict",
     "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict",
     "python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-cycle2-pack/evidence --format json --strict",
-    "python scripts/check_weekly_review_closeout_contract.py",
+    "python scripts/check_weekly_review_closeout_cycle2_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit weekly-review-closeout --format json --strict",
     "python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict",
-    "python scripts/check_weekly_review_closeout_contract.py --skip-evidence",
+    "python scripts/check_weekly_review_closeout_cycle2_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 65 weekly review scoring, risk triage, and handoff signoff.",
@@ -79,7 +79,7 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 python -m sdetkit weekly-review-closeout --format json --strict
 python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-cycle2-pack --format json --strict
 python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-cycle2-pack/evidence --format json --strict
-python scripts/check_weekly_review_closeout_contract.py
+python scripts/check_weekly_review_closeout_cycle2_contract.py
 ```
 
 ## Weekly review contract
@@ -362,19 +362,29 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "weekly-review-closeout-cycle2-summary.md", _render_text(payload) + "\n")
-    _write(target / "day65-weekly-brief.md", "# Day 65 weekly brief\n")
-    _write(target / "day65-kpi-dashboard.json", json.dumps({"kpis": []}, indent=2) + "\n")
     _write(
-        target / "day65-governance-decision-register.md", "# Day 65 governance decision register\n"
+        target / "weekly-review-closeout-cycle2-weekly-brief.md",
+        "# Day 65 weekly brief\n",
     )
-    _write(target / "day65-risk-ledger.csv", "risk_id,severity,owner,mitigation,status\n")
-    _write(target / "day65-execution-log.md", "# Day 65 execution log\n")
     _write(
-        target / "day65-delivery-board.md",
+        target / "weekly-review-closeout-cycle2-kpi-dashboard.json",
+        json.dumps({"kpis": []}, indent=2) + "\n",
+    )
+    _write(
+        target / "weekly-review-closeout-cycle2-governance-decision-register.md",
+        "# Day 65 governance decision register\n",
+    )
+    _write(
+        target / "weekly-review-closeout-cycle2-risk-ledger.csv",
+        "risk_id,severity,owner,mitigation,status\n",
+    )
+    _write(target / "weekly-review-closeout-cycle2-execution-log.md", "# Day 65 execution log\n")
+    _write(
+        target / "weekly-review-closeout-cycle2-delivery-board.md",
         "\n".join(["# Day 65 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
-        target / "day65-validation-commands.md",
+        target / "weekly-review-closeout-cycle2-validation-commands.md",
         "# Day 65 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -397,7 +407,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(out_dir / f"command-{idx:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        out_dir / "day65-execution-summary.json",
+        out_dir / "weekly-review-closeout-cycle2-execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 

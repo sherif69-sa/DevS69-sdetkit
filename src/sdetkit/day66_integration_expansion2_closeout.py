@@ -13,7 +13,10 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY65_SUMMARY_PATH = (
     "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json"
 )
-_DAY65_BOARD_PATH = "docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md"
+_DAY65_BOARD_PATH = (
+    "docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md"
+)
+_DAY65_LEGACY_BOARD_PATH = "docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md"
 _GITLAB_PATH = "templates/ci/gitlab/gitlab-advanced-reference.yml"
 _LEGACY_GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
@@ -79,7 +82,7 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 ## Required inputs (Day 65)
 
 - `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-summary.json`
-- `docs/artifacts/weekly-review-closeout-cycle2-pack/day65-delivery-board.md`
+- `docs/artifacts/weekly-review-closeout-cycle2-pack/weekly-review-closeout-cycle2-delivery-board.md`
 - `templates/ci/gitlab/gitlab-advanced-reference.yml`
   - legacy compatibility alias: `templates/ci/gitlab/day66-advanced-reference.yml`
 
@@ -180,6 +183,10 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
 
     day65_summary = root / _DAY65_SUMMARY_PATH
     day65_board = root / _DAY65_BOARD_PATH
+    if not day65_board.exists():
+        legacy_day65_board = root / _DAY65_LEGACY_BOARD_PATH
+        if legacy_day65_board.exists():
+            day65_board = legacy_day65_board
     day65_score, day65_strict, day65_check_count = _load_day65(day65_summary)
     board_count, board_has_day65 = _count_board_items(day65_board, "Day 65")
 

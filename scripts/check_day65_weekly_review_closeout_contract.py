@@ -10,7 +10,9 @@ from sdetkit import day65_weekly_review_closeout as d65
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate Day 65 weekly review closeout contract")
+    parser = argparse.ArgumentParser(
+        description="Validate Day 65 weekly review closeout contract (legacy alias)"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--skip-evidence", action="store_true")
     ns = parser.parse_args()
@@ -31,8 +33,15 @@ def main() -> int:
     if not ns.skip_evidence:
         evidence = (
             root
-            / "docs/artifacts/weekly-review-closeout-cycle2-pack/evidence/day65-execution-summary.json"
+            / "docs/artifacts/weekly-review-closeout-cycle2-pack/evidence/weekly-review-closeout-cycle2-execution-summary.json"
         )
+        if not evidence.exists():
+            legacy_evidence = (
+                root
+                / "docs/artifacts/weekly-review-closeout-cycle2-pack/evidence/day65-execution-summary.json"
+            )
+            if legacy_evidence.exists():
+                evidence = legacy_evidence
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")
         else:
