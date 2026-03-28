@@ -41,10 +41,7 @@ def _seed_repo(root: Path) -> None:
         "# Day 47 report\n", encoding="utf-8"
     )
 
-    summary = (
-        root
-        / "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json"
-    )
+    summary = root / "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
     summary.write_text(
         json.dumps(
@@ -56,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/day46-optimization-closeout-pack/day46-delivery-board.md"
+    board = root / "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -114,7 +111,7 @@ def test_day47_strict_fails_when_day46_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
-        / "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json"
+        / "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
     ).unlink()
     rc = d47.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1

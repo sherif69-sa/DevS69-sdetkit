@@ -10,8 +10,8 @@ Day 47 closes with a major reliability upgrade that converts Day 46 optimization
 
 ## Required inputs (Day 46)
 
-- `docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json`
-- `docs/artifacts/day46-optimization-closeout-pack/day46-delivery-board.md`
+- `docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json`
+- `docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md`
 
 ## Day 47 command lane
 
@@ -19,7 +19,7 @@ Day 47 closes with a major reliability upgrade that converts Day 46 optimization
 python -m sdetkit reliability-closeout --format json --strict
 python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict
 python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict
-python scripts/check_day47_reliability_closeout_contract.py
+python scripts/check_reliability_closeout_contract.py
 ```
 
 ## Reliability closeout contract

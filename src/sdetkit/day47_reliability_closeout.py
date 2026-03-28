@@ -10,10 +10,12 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-reliability-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY46_SUMMARY_PATH = (
+_DAY46_SUMMARY_PATH = "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
+_DAY46_SUMMARY_LEGACY_PATH = (
     "docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json"
 )
-_DAY46_BOARD_PATH = "docs/artifacts/day46-optimization-closeout-pack/day46-delivery-board.md"
+_DAY46_BOARD_PATH = "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md"
+_DAY46_BOARD_LEGACY_PATH = "docs/artifacts/day46-optimization-closeout-pack/day46-delivery-board.md"
 _SECTION_HEADER = "# Day 47 \u2014 Reliability closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 47 matters",
@@ -25,15 +27,15 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day47-reliability-closeout --format json --strict",
-    "python -m sdetkit day47-reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict",
-    "python -m sdetkit day47-reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict",
-    "python scripts/check_day47_reliability_closeout_contract.py",
+    "python -m sdetkit reliability-closeout --format json --strict",
+    "python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict",
+    "python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict",
+    "python scripts/check_reliability_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day47-reliability-closeout --format json --strict",
-    "python -m sdetkit day47-reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict",
-    "python scripts/check_day47_reliability_closeout_contract.py --skip-evidence",
+    "python -m sdetkit reliability-closeout --format json --strict",
+    "python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict",
+    "python scripts/check_reliability_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Day 47 reliability lane execution and KPI follow-up.",
@@ -68,16 +70,16 @@ Day 47 closes with a major reliability upgrade that converts Day 46 optimization
 
 ## Required inputs (Day 46)
 
-- `docs/artifacts/day46-optimization-closeout-pack/day46-optimization-closeout-summary.json`
-- `docs/artifacts/day46-optimization-closeout-pack/day46-delivery-board.md`
+- `docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json`
+- `docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md`
 
 ## Day 47 command lane
 
 ```bash
-python -m sdetkit day47-reliability-closeout --format json --strict
-python -m sdetkit day47-reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict
-python -m sdetkit day47-reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict
-python scripts/check_day47_reliability_closeout_contract.py
+python -m sdetkit reliability-closeout --format json --strict
+python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict
+python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict
+python scripts/check_reliability_closeout_contract.py
 ```
 
 ## Reliability closeout contract
@@ -150,6 +152,16 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
+def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
+    primary_path = root / primary
+    if primary_path.exists():
+        return primary_path
+    legacy_path = root / legacy
+    if legacy_path.exists():
+        return legacy_path
+    return primary_path
+
+
 def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
     readme_path = "README.md"
     docs_index_path = "docs/index.md"
@@ -170,8 +182,10 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day46_summary = root / _DAY46_SUMMARY_PATH
-    day46_board = root / _DAY46_BOARD_PATH
+    day46_summary_primary = root / _DAY46_SUMMARY_PATH
+    day46_board_primary = root / _DAY46_BOARD_PATH
+    day46_summary = _resolve_existing_path(root, _DAY46_SUMMARY_PATH, _DAY46_SUMMARY_LEGACY_PATH)
+    day46_board = _resolve_existing_path(root, _DAY46_BOARD_PATH, _DAY46_BOARD_LEGACY_PATH)
     day46_score, day46_strict, day46_check_count = _load_day46(day46_summary)
     board_count, board_has_day46, board_has_day47 = _board_stats(day46_board)
 
@@ -203,8 +217,8 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day47_command",
             "weight": 4,
-            "passed": "day47-reliability-closeout" in readme_text,
-            "evidence": "day47-reliability-closeout",
+            "passed": ("reliability-closeout" in readme_text) or ("day47-reliability-closeout" in readme_text),
+            "evidence": "reliability-closeout (legacy: day47-reliability-closeout)",
         },
         {
             "check_id": "docs_index_day47_links",
@@ -332,9 +346,11 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "day46_summary": str(day46_summary.relative_to(root))
             if day46_summary.exists()
             else str(day46_summary),
+            "day46_summary_primary": str(day46_summary_primary.relative_to(root)),
             "day46_delivery_board": str(day46_board.relative_to(root))
             if day46_board.exists()
             else str(day46_board),
+            "day46_delivery_board_primary": str(day46_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
@@ -392,7 +408,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "day47-incident-map.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
-        "reliability-floor,qa-lead,platform-owner,2026-03-15T10:00:00Z,docs/integrations-reliability-closeout.md,python -m sdetkit day47-reliability-closeout --format json --strict,failed-checks:0,reliability-drift\n",
+        "reliability-floor,qa-lead,platform-owner,2026-03-15T10:00:00Z,docs/integrations-reliability-closeout.md,python -m sdetkit reliability-closeout --format json --strict,failed-checks:0,reliability-drift\n",
     )
     _write(
         target / "day47-reliability-kpi-scorecard.json",

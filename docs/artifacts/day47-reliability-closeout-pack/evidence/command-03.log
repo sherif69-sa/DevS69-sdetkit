@@ -1,6 +1,6 @@
 {
-  "command": "python scripts/check_day47_reliability_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "{\n  \"errors\": [],\n  \"score\": 100\n}\n",
+  "command": "python scripts/check_reliability_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "{\n  \"errors\": [\n    \"critical failures: ['day46_strict_baseline']\"\n  ],\n  \"score\": 65\n}\n",
   "stderr": ""
 }
