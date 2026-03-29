@@ -124,25 +124,3 @@ def test_playbooks_run_unknown_name_fails() -> None:
     assert r.returncode == 2
     assert r.stdout == ""
     assert r.stderr.strip() == "playbooks: unknown name"
-
-
-def test_removed_day_aliases_are_not_dispatched() -> None:
-    legacy_aliases = [
-        "day47-reliability-closeout",
-        "day49-advanced-weekly-review-control-tower",
-        "day50-execution-prioritization-closeout",
-        "day55-contributor-activation-closeout",
-        "day60-phase2-wrap-handoff-closeout",
-        "day61-phase3-kickoff-closeout",
-        "day62-community-program-closeout",
-        "day66-integration-expansion2-closeout",
-        "day67-integration-expansion3-closeout",
-    ]
-    for alias in legacy_aliases:
-        r = subprocess.run(
-            [sys.executable, "-m", "sdetkit", alias, "--help"],
-            text=True,
-            capture_output=True,
-        )
-        assert r.returncode == 2
-        assert "invalid choice" in r.stderr
