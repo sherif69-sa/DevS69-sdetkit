@@ -17,7 +17,7 @@ Close Cycle 78 with a high-signal ecosystem-priorities lane that upgrades Cycle 
 python -m sdetkit ecosystem-priorities-closeout --format json --strict
 python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/cycle78-ecosystem-priorities-closeout-pack --format json --strict
 python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/cycle78-ecosystem-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_day78_ecosystem_priorities_closeout_contract.py
+python scripts/check_ecosystem_priorities_closeout_contract.py
 ```
 
 ### Outcome

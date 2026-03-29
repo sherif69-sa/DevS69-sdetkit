@@ -152,19 +152,11 @@ def _is_hidden_cmd(name: str) -> bool:
     if name == "playbooks":
         return False
     if name in {
-        "onboarding-time-upgrade",
-        "external-contribution-push",
-        "faq-objections",
         "docs-qa",
         "docs-nav",
-        "startup-use-case",
-        "enterprise-use-case",
         "github-actions-quickstart",
         "gitlab-ci-quickstart",
         "quality-contribution-delta",
-        "release-readiness-board",
-        "release-narrative",
-        "trust-signal-upgrade",
         "proof",
     }:
         return True
@@ -390,24 +382,12 @@ Start here:
 
     ono = sub.add_parser("onboarding-optimization", help="Onboarding optimization playbook")
     ono.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "onboarding-time-upgrade",
-        help_text=argparse.SUPPRESS,
-        default_cmd="onboarding-optimization",
-    )
 
     cau = sub.add_parser("community-activation", help="Community activation rollout playbook")
     cau.add_argument("args", nargs=argparse.REMAINDER)
 
     exc = sub.add_parser("external-contribution", help="External contribution rollout playbook")
     exc.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "external-contribution-push",
-        help_text=argparse.SUPPRESS,
-        default_cmd="external-contribution",
-    )
 
     kpa = sub.add_parser("kpi-audit", help="KPI audit and tracking playbook")
     kpa.add_argument("args", nargs=argparse.REMAINDER)
@@ -688,12 +668,6 @@ Start here:
 
     obj = sub.add_parser("objection-handling", help="Objection handling playbook")
     obj.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "faq-objections",
-        help_text=argparse.SUPPRESS,
-        default_cmd="objection-handling",
-    )
 
     dmo = sub.add_parser("demo")
     dmo.add_argument("args", nargs=argparse.REMAINDER)
@@ -741,24 +715,12 @@ Start here:
 
     suc = sub.add_parser("startup-readiness", help="Startup readiness playbook")
     suc.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "startup-use-case",
-        help_text=argparse.SUPPRESS,
-        default_cmd="startup-readiness",
-    )
 
     spk = sub.add_parser("sdet-package")
     spk.add_argument("args", nargs=argparse.REMAINDER)
 
     eur = sub.add_parser("enterprise-readiness", help="Enterprise readiness playbook")
     eur.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "enterprise-use-case",
-        help_text=argparse.SUPPRESS,
-        default_cmd="enterprise-readiness",
-    )
 
     gha = sub.add_parser("github-actions-onboarding", help="GitHub Actions onboarding playbook")
     gha.add_argument("args", nargs=argparse.REMAINDER)
@@ -792,30 +754,12 @@ Start here:
 
     rrd = sub.add_parser("release-readiness", help="Release readiness board")
     rrd.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "release-readiness-board",
-        help_text=argparse.SUPPRESS,
-        default_cmd="release-readiness",
-    )
 
     rnc = sub.add_parser("release-communications", help="Release communications playbook")
     rnc.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "release-narrative",
-        help_text=argparse.SUPPRESS,
-        default_cmd="release-communications",
-    )
 
     tsa = sub.add_parser("trust-assets", help="Trust assets playbook")
     tsa.add_argument("args", nargs=argparse.REMAINDER)
-    _add_passthrough_subcommand(
-        sub,
-        "trust-signal-upgrade",
-        help_text=argparse.SUPPRESS,
-        default_cmd="trust-assets",
-    )
     _filter_hidden_subcommands(p)
     return p, sub
 
@@ -906,7 +850,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "onboarding":
         return onboarding.main(list(argv[1:]))
 
-    if argv and argv[0] in {"onboarding-optimization", "onboarding-time-upgrade"}:
+    if argv and argv[0] == "onboarding-optimization":
         return onboarding_optimization.main(list(argv[1:]))
 
     if argv and argv[0] == "phase-boost":
@@ -918,7 +862,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "community-activation":
         return community_activation.main(list(argv[1:]))
 
-    if argv and argv[0] in {"external-contribution", "external-contribution-push"}:
+    if argv and argv[0] == "external-contribution":
         return external_contribution.main(list(argv[1:]))
 
     if argv and argv[0] == "kpi-audit":
@@ -1168,7 +1112,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "continuous-upgrade-closeout-11":
         return continuous_upgrade_closeout_11.main(list(argv[1:]))
 
-    if argv and argv[0] in {"objection-handling", "faq-objections"}:
+    if argv and argv[0] == "objection-handling":
         return objection_handling.main(list(argv[1:]))
 
     if argv and argv[0] == "first-contribution":
@@ -1197,13 +1141,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "roadmap":
         return roadmap.main(list(argv[1:]))
 
-    if argv and argv[0] in {"startup-readiness", "startup-use-case"}:
+    if argv and argv[0] == "startup-readiness":
         return startup_readiness.main(list(argv[1:]))
 
     if argv and argv[0] == "sdet-package":
         return sdet_package.main(list(argv[1:]))
 
-    if argv and argv[0] in {"enterprise-readiness", "enterprise-use-case"}:
+    if argv and argv[0] == "enterprise-readiness":
         return enterprise_readiness.main(list(argv[1:]))
 
     if argv and argv[0] in {"github-actions-onboarding", "github-actions-quickstart"}:
@@ -1218,13 +1162,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "reliability-evidence-pack":
         return reliability_evidence_pack.main(list(argv[1:]))
 
-    if argv and argv[0] in {"release-readiness", "release-readiness-board"}:
+    if argv and argv[0] == "release-readiness":
         return release_readiness.main(list(argv[1:]))
 
-    if argv and argv[0] in {"release-communications", "release-narrative"}:
+    if argv and argv[0] == "release-communications":
         return release_communications.main(list(argv[1:]))
 
-    if argv and argv[0] in {"trust-assets", "trust-signal-upgrade"}:
+    if argv and argv[0] == "trust-assets":
         return trust_assets.main(list(argv[1:]))
 
     p, sub = _build_root_parser()

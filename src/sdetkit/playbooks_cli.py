@@ -100,15 +100,9 @@ _PLAYBOOK_MODULE_BY_CANONICAL: dict[str, str] = {
 
 _PLAYBOOK_ALIAS_TO_CANONICAL: dict[str, str] = {
     "proof": "evidence-assets",
-    "onboarding-time-upgrade": "onboarding-optimization",
-    "external-contribution-push": "external-contribution",
-    "faq-objections": "objection-handling",
-    "startup-use-case": "startup-readiness",
-    "enterprise-use-case": "enterprise-readiness",
     "github-actions-quickstart": "github-actions-onboarding",
     "gitlab-ci-quickstart": "gitlab-ci-onboarding",
     "quality-contribution-delta": "contribution-quality-report",
-    "release-narrative": "release-communications",
 }
 
 

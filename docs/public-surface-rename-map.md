@@ -6,19 +6,19 @@ This map defines the current canonical public names and the compatibility aliase
 
 | Legacy command | Canonical command | Status |
 |---|---|---|
-| `onboarding-time-upgrade` | `onboarding-optimization` | compatibility alias retained |
-| `external-contribution-push` | `external-contribution` | compatibility alias retained |
-| `faq-objections` | `objection-handling` | compatibility alias retained |
+| `onboarding-time-upgrade` | `onboarding-optimization` | compatibility alias removed |
+| `external-contribution-push` | `external-contribution` | compatibility alias removed |
+| `faq-objections` | `objection-handling` | compatibility alias removed |
 | `docs-qa` | `docs-quality` | compatibility alias retained |
 | `docs-nav` | `docs-governance` | compatibility alias retained |
-| `startup-use-case` | `startup-readiness` | compatibility alias retained |
-| `enterprise-use-case` | `enterprise-readiness` | compatibility alias retained |
+| `startup-use-case` | `startup-readiness` | compatibility alias removed |
+| `enterprise-use-case` | `enterprise-readiness` | compatibility alias removed |
 | `quality-contribution-delta` | `contribution-quality-report` | compatibility alias retained |
-| `release-readiness-board` | `release-readiness` | compatibility alias retained |
-| `trust-signal-upgrade` | `trust-assets` | compatibility alias retained |
+| `release-readiness-board` | `release-readiness` | compatibility alias removed |
+| `trust-signal-upgrade` | `trust-assets` | compatibility alias removed |
 | `github-actions-quickstart` | `github-actions-onboarding` | compatibility alias retained |
 | `gitlab-ci-quickstart` | `gitlab-ci-onboarding` | compatibility alias retained |
-| `release-narrative` | `release-communications` | compatibility alias retained |
+| `release-narrative` | `release-communications` | compatibility alias removed |
 
 ## Removal policy
 

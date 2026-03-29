@@ -2,7 +2,7 @@
 
 ## What shipped
 
-- Added `onboarding-time-upgrade` command to score and enforce Cycle 24 onboarding readiness.
+- Added `onboarding-optimization` command to score and enforce Cycle 24 onboarding readiness.
 - Added strict docs-contract checks for the Cycle 24 integration page.
 - Added deterministic artifact pack + execution evidence mode.
 - Added contract validation script and dedicated tests.

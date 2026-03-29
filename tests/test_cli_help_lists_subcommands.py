@@ -91,11 +91,11 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "external-contribution" in j["playbooks"]
     assert "objection-handling" in j["playbooks"]
     assert "onboarding-optimization" in j["playbooks"]
-    assert j["aliases"]["startup-use-case"] == "startup-readiness"
-    assert j["aliases"]["enterprise-use-case"] == "enterprise-readiness"
-    assert j["aliases"]["external-contribution-push"] == "external-contribution"
-    assert j["aliases"]["faq-objections"] == "objection-handling"
-    assert j["aliases"]["onboarding-time-upgrade"] == "onboarding-optimization"
+    assert "startup-use-case" not in j["aliases"]
+    assert "enterprise-use-case" not in j["aliases"]
+    assert "external-contribution-push" not in j["aliases"]
+    assert "faq-objections" not in j["aliases"]
+    assert "onboarding-time-upgrade" not in j["aliases"]
     assert "phase1-hardening" in j["playbooks"]
     assert "day29-phase1-hardening" not in j["playbooks"]
     r2 = subprocess.run(
