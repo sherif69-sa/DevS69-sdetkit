@@ -30,6 +30,7 @@ CheckProfileName = Literal["quick", "standard", "strict", "adaptive"]
 CheckStatus = Literal["passed", "failed", "skipped"]
 CheckTargetMode = Literal["full", "smoke", "targeted"]
 
+
 class CheckRecordLike(Protocol):
     id: str
     title: str

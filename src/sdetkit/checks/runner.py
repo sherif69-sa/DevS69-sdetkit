@@ -3,7 +3,7 @@ from __future__ import annotations
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .base import CheckContext, RegistrySnapshot
 from .cache import CheckCache
@@ -268,7 +268,7 @@ class CheckRunner:
                 },
             )
         else:
-            record = definition.run(ctx)
+            record = cast(CheckRecord, definition.run(ctx))
             metadata = dict(record.metadata)
             metadata.setdefault("category", item.category)
             metadata.setdefault("truth_level", item.truth_level)
