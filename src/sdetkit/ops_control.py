@@ -154,6 +154,11 @@ def _task_catalog() -> dict[str, TaskDef]:
 
 
 def _task_order(tasks: dict[str, TaskDef], selected: tuple[str, ...]) -> list[str]:
+    missing = sorted(name for name in selected if name not in tasks)
+    if missing:
+        joined = ", ".join(missing)
+        raise ValueError(f"Unknown ops task(s): {joined}")
+
     indegree = {name: 0 for name in selected}
     dependents: dict[str, list[str]] = {name: [] for name in selected}
     for name in selected:
@@ -322,6 +327,10 @@ def run(
 
 
 def cli(argv: list[str] | None = None) -> int:
+    def _validation_error(exc: ValueError) -> int:
+        sys.stderr.write(f"error: {exc}\n")
+        return 2
+
     p = argparse.ArgumentParser(prog="sdetkit ops")
     sub = p.add_subparsers(dest="cmd", required=True)
     init_p = sub.add_parser("init")
@@ -345,7 +354,10 @@ def cli(argv: list[str] | None = None) -> int:
         return init_layout(force=bool(ns.force))
     if ns.cmd == "plan":
         init_layout(force=False)
-        payload = plan(ns.profile, apply=bool(ns.apply), no_cache=bool(ns.no_cache))
+        try:
+            payload = plan(ns.profile, apply=bool(ns.apply), no_cache=bool(ns.no_cache))
+        except ValueError as exc:
+            return _validation_error(exc)
         sys.stdout.write(
             json.dumps({"profile": ns.profile, "plan": payload}, sort_keys=True, indent=2) + "\n"
         )
@@ -353,4 +365,7 @@ def cli(argv: list[str] | None = None) -> int:
     init_layout(force=False)
     apply = bool(ns.apply) and not bool(ns.dry_run)
     ff = bool(ns.fail_fast) or (ns.profile == "ci" and not ns.keep_going)
-    return run(ns.profile, ns.jobs, apply, bool(ns.no_cache), ff, bool(ns.keep_going))
+    try:
+        return run(ns.profile, ns.jobs, apply, bool(ns.no_cache), ff, bool(ns.keep_going))
+    except ValueError as exc:
+        return _validation_error(exc)

@@ -157,3 +157,40 @@ def test_cli_run_computes_apply_and_failfast(monkeypatch: pytest.MonkeyPatch) ->
     rc2 = oc.cli(["run", "--profile", "local", "--apply", "--dry-run"])
     assert rc2 == 0
     assert seen[-1] == ("local", 1, False, False, False, False)
+
+
+def test_task_order_rejects_unknown_selected_task() -> None:
+    with pytest.raises(ValueError, match="Unknown ops task"):
+        oc._task_order({"quality": TaskDef("quality", ("echo", "ok"))}, ("missing",))
+
+
+def test_cli_plan_reports_unknown_task_error(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(oc, "init_layout", lambda force=False: 0)
+    monkeypatch.setattr(
+        oc, "_task_catalog", lambda: {"quality": TaskDef("quality", ("echo", "ok"))}
+    )
+    monkeypatch.setattr(oc, "_profile_tasks", lambda _p: ("quality", "missing"))
+
+    rc = oc.cli(["plan", "--profile", "default"])
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "Unknown ops task(s): missing" in err
+
+
+def test_cli_run_reports_unknown_task_error(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(oc, "init_layout", lambda force=False: 0)
+    monkeypatch.setattr(
+        oc, "_task_catalog", lambda: {"quality": TaskDef("quality", ("echo", "ok"))}
+    )
+    monkeypatch.setattr(oc, "_profile_tasks", lambda _p: ("quality", "missing"))
+
+    rc = oc.cli(["run", "--profile", "default"])
+
+    assert rc == 2
+    err = capsys.readouterr().err
+    assert "Unknown ops task(s): missing" in err
