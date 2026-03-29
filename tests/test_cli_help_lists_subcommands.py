@@ -91,11 +91,11 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "external-contribution" in j["playbooks"]
     assert "objection-handling" in j["playbooks"]
     assert "onboarding-optimization" in j["playbooks"]
-    assert j["aliases"]["startup-use-case"] == "startup-readiness"
-    assert j["aliases"]["enterprise-use-case"] == "enterprise-readiness"
-    assert j["aliases"]["external-contribution-push"] == "external-contribution"
-    assert j["aliases"]["faq-objections"] == "objection-handling"
-    assert j["aliases"]["onboarding-time-upgrade"] == "onboarding-optimization"
+    assert "startup-use-case" not in j["aliases"]
+    assert "enterprise-use-case" not in j["aliases"]
+    assert "external-contribution-push" not in j["aliases"]
+    assert "faq-objections" not in j["aliases"]
+    assert "onboarding-time-upgrade" not in j["aliases"]
     assert "phase1-hardening" in j["playbooks"]
     assert "day29-phase1-hardening" not in j["playbooks"]
     r2 = subprocess.run(
@@ -124,3 +124,25 @@ def test_playbooks_run_unknown_name_fails() -> None:
     assert r.returncode == 2
     assert r.stdout == ""
     assert r.stderr.strip() == "playbooks: unknown name"
+
+
+def test_removed_day_aliases_are_not_dispatched() -> None:
+    legacy_aliases = [
+        "day47-reliability-closeout",
+        "day49-advanced-weekly-review-control-tower",
+        "day50-execution-prioritization-closeout",
+        "day55-contributor-activation-closeout",
+        "day60-phase2-wrap-handoff-closeout",
+        "day61-phase3-kickoff-closeout",
+        "day62-community-program-closeout",
+        "day66-integration-expansion2-closeout",
+        "day67-integration-expansion3-closeout",
+    ]
+    for alias in legacy_aliases:
+        r = subprocess.run(
+            [sys.executable, "-m", "sdetkit", alias, "--help"],
+            text=True,
+            capture_output=True,
+        )
+        assert r.returncode == 2
+        assert "invalid choice" in r.stderr

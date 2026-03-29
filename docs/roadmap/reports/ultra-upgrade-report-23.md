@@ -51,7 +51,7 @@ python scripts/check_objection_handling_contract.py
 
 ## Rollback plan
 
-1. Remove `faq-objections` command dispatch from CLI.
+1. Remove `objection-handling` command dispatch from CLI.
 2. Remove `src/sdetkit/faq_objections.py` and Cycle 23 docs pages.
 3. Remove Cycle 23 contract checks from validation scripts.
 4. Re-run baseline tests to confirm stable fallback.

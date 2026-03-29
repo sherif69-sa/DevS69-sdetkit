@@ -37,7 +37,7 @@ These appear closest to stable product surface:
 
 ## Confusing/overlapping/internal-feeling areas
 
-- Very large set of impact/closeout command modules in `src/sdetkit/` (for example `day28_*` through `day97_*` and many `*_closeout` modules).
+- Very large set of impact/closeout command modules in `src/sdetkit/` (including many legacy numeric-series modules and many `*_closeout` modules).
 - CLI has to hide many commands from main help, which is itself a signal that product boundaries are still blurred.
 - Docs navigation includes strong flagship pages plus a very large historical/report corpus in the same visible namespace.
 - Command naming has overlap in places (`weekly-review`, `weekly-review-lane`, impact-specific closeouts), which can feel incubator-like to external adopters.

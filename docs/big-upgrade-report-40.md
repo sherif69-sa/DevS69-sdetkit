@@ -9,7 +9,7 @@
 ## Validation
 
 ```bash
-python -m pytest -q tests/test_day40_scale_lane.py tests/test_cli_help_lists_subcommands.py
+python -m pytest -q tests/test_scale_lane.py tests/test_cli_help_lists_subcommands.py
 python scripts/check_scale_lane_contract.py --skip-evidence
 python -m sdetkit cycle40-scale-lane --format json --strict
 ```
