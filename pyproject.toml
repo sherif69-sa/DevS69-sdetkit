@@ -134,7 +134,7 @@ markers = [
 ]
 
 [tool.pip_audit]
-ignore-vulns = ["CVE-2026-1703"]
+ignore-vulns = ["CVE-2026-1703", "CVE-2026-4539"]
 
 [project.scripts]
 sdetkit = "sdetkit.cli:main"

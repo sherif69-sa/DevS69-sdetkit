@@ -5,10 +5,7 @@ import sys
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
-
-if TYPE_CHECKING:
-    from .results import CheckRecord
+from typing import Literal, Protocol
 
 CheckCategory = Literal[
     "repo",
@@ -32,7 +29,16 @@ CheckTruthLevel = Literal["smoke", "standard", "merge", "adaptive"]
 CheckProfileName = Literal["quick", "standard", "strict", "adaptive"]
 CheckStatus = Literal["passed", "failed", "skipped"]
 CheckTargetMode = Literal["full", "smoke", "targeted"]
-CheckRunner = Callable[["CheckContext"], "CheckRecord"]
+
+
+class CheckRecordLike(Protocol):
+    id: str
+    title: str
+    status: CheckStatus
+    blocking: bool
+
+
+CheckRunner = Callable[["CheckContext"], CheckRecordLike]
 
 
 @dataclass(frozen=True)

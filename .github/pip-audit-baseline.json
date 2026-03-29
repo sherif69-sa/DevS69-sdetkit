@@ -3,6 +3,6 @@
     "id": "CVE-2026-4539",
     "package": "pygments",
     "aliases": ["GHSA-5239-wwwm-4pmq"],
-    "note": "Temporary baseline for docs dependency chain; no fix version published yet."
+    "note": "Tracked in baseline while upstream advisory/fix guidance stabilizes."
   }
 ]

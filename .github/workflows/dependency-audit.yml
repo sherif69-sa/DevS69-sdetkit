@@ -28,7 +28,7 @@ jobs:
 
       - name: Install audit tooling
         run: |
-          python -m pip install pip-audit==2.8.0
+          python -m pip install pip-audit==2.10.0
 
       - name: Audit dependencies (blocking, baseline aware)
         run: |

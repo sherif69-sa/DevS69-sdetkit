@@ -25,7 +25,7 @@ from sdetkit.plugins import Finding, RuleMeta
 class MyRule:
     meta = RuleMeta(
         id="ACME_README_MISSING",
-        title="README present",
+        title = "README present",
         description="README.md must exist",
         default_severity="warn",
         tags=("pack:core", "acme"),

@@ -6,9 +6,15 @@ import argparse
 import builtins
 from importlib import import_module
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 __all__ = ["ScalarFunctionRegistrationError", "register_scalar_function", "main_"]
+
+if TYPE_CHECKING:
+    from . import __main__ as main_
+    from .sqlite_scalar import ScalarFunctionRegistrationError, register_scalar_function
+
+_main_module: Any | None = None
 
 
 def _install_mutation_aliases() -> None:
@@ -69,6 +75,7 @@ if not getattr(Path.write_text, "_sdetkit_parent_mkdir", False):
 
 
 def __getattr__(name: str) -> Any:
+    global _main_module
     if name in {"ScalarFunctionRegistrationError", "register_scalar_function"}:
         from .sqlite_scalar import ScalarFunctionRegistrationError, register_scalar_function
 
@@ -78,5 +85,7 @@ def __getattr__(name: str) -> Any:
         }
         return exports[name]
     if name == "main_":
-        return import_module(".__main__", __name__)
+        if _main_module is None:
+            _main_module = import_module(".__main__", __name__)
+        return _main_module
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
