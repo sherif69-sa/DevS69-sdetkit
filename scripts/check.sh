@@ -91,4 +91,4 @@ case "$mode" in
     ;;
 esac
 
-echo "All checks passed!"
+echo "check.sh: $mode checks passed."
