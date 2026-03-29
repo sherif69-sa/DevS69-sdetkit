@@ -6,9 +6,15 @@ import argparse
 import builtins
 from importlib import import_module
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 __all__ = ["ScalarFunctionRegistrationError", "register_scalar_function", "main_"]
+
+if TYPE_CHECKING:
+    from . import __main__ as main_
+    from .sqlite_scalar import ScalarFunctionRegistrationError, register_scalar_function
+
+main_ = import_module(".__main__", __name__)
 
 
 def _install_mutation_aliases() -> None:
@@ -78,5 +84,5 @@ def __getattr__(name: str) -> Any:
         }
         return exports[name]
     if name == "main_":
-        return import_module(".__main__", __name__)
+        return main_
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
