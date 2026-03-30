@@ -386,16 +386,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "objection-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "objection-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day48-objection-plan.md",
+        target / "objection-plan-48.md",
         "# Day 48 Objection Plan\n\n- Objective: close Day 48 with measurable objection-resolution and adoption gains.\n",
     )
     _write(
-        target / "day48-faq-objection-map.csv",
+        target / "faq-objection-map-48.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "objection-floor,qa-lead,docs-owner,2026-03-16T10:00:00Z,docs/integrations-objection-closeout.md,python -m sdetkit objection-closeout --format json --strict,failed-checks:0,faq-drift\n",
     )
     _write(
-        target / "day48-objection-kpi-scorecard.json",
+        target / "objection-kpi-scorecard-48.json",
         json.dumps(
             {
                 "kpis": [
@@ -413,7 +413,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day48-execution-log.md",
+        target / "execution-log-48.md",
         "# Day 48 Execution Log\n\n- [ ] 2026-03-16: Record misses, wins, and Day 49 weekly-review priorities.\n",
     )
     _write(
@@ -421,11 +421,11 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "# Day 48 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day48-delivery-board.md",
+        target / "delivery-board-48.md",
         "# Day 48 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day48-validation-commands.md",
+        target / "validation-commands-48.md",
         "# Day 48 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -448,13 +448,13 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day48-execution-summary.json",
+        evidence_path / "objection-execution-summary-48.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 48 objection closeout checks")
+    parser = argparse.ArgumentParser(description="Objection closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")

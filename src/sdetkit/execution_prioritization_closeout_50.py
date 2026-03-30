@@ -14,7 +14,7 @@ _DAY49_SUMMARY_PATH = (
     "docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json"
 )
 _DAY49_BOARD_PATH = (
-    "docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md"
+    "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
 )
 _DAY49_LEGACY_BOARD_PATH = "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
 _SECTION_HEADER = "# Day 50 \u2014 Execution prioritization closeout lane"
@@ -72,7 +72,7 @@ Day 50 closes with a major execution-prioritization upgrade that converts Day 49
 ## Required inputs (Day 49)
 
 - `docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json`
-- `docs/artifacts/day49-weekly-review-closeout-pack/weekly-review-delivery-board.md`
+- `docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md`
 
 ## Day 50 command lane
 

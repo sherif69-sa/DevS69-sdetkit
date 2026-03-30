@@ -28,13 +28,13 @@ _REQUIRED_SECTIONS = [
 ]
 _REQUIRED_COMMANDS = [
     "python -m sdetkit reliability-closeout --format json --strict",
-    "python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict",
-    "python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict",
+    "python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/reliability-closeout-pack-47 --format json --strict",
+    "python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/reliability-closeout-pack-47/evidence --format json --strict",
     "python scripts/check_reliability_closeout_contract.py",
 ]
 _EXECUTION_COMMANDS = [
     "python -m sdetkit reliability-closeout --format json --strict",
-    "python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict",
+    "python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/reliability-closeout-pack-47 --format json --strict",
     "python scripts/check_reliability_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -77,8 +77,8 @@ Day 47 closes with a major reliability upgrade that converts Day 46 optimization
 
 ```bash
 python -m sdetkit reliability-closeout --format json --strict
-python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/day47-reliability-closeout-pack --format json --strict
-python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/day47-reliability-closeout-pack/evidence --format json --strict
+python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/reliability-closeout-pack-47 --format json --strict
+python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/reliability-closeout-pack-47/evidence --format json --strict
 python scripts/check_reliability_closeout_contract.py
 ```
 
@@ -338,7 +338,7 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     return {
-        "name": "day47-reliability-closeout",
+        "name": "reliability-closeout",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -400,19 +400,19 @@ def _write(path: Path, text: str) -> None:
 def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     target = root / pack_dir
     target.mkdir(parents=True, exist_ok=True)
-    _write(target / "day47-reliability-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
-    _write(target / "day47-reliability-closeout-summary.md", _render_text(payload) + "\n")
+    _write(target / "reliability-closeout-summary-47.json", json.dumps(payload, indent=2) + "\n")
+    _write(target / "reliability-closeout-summary-47.md", _render_text(payload) + "\n")
     _write(
-        target / "day47-reliability-plan.md",
+        target / "reliability-plan-47.md",
         "# Day 47 Reliability Plan\n\n- Objective: close Day 47 with measurable reliability and quality gains.\n",
     )
     _write(
-        target / "day47-incident-map.csv",
+        target / "incident-map-47.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "reliability-floor,qa-lead,platform-owner,2026-03-15T10:00:00Z,docs/integrations-reliability-closeout.md,python -m sdetkit reliability-closeout --format json --strict,failed-checks:0,reliability-drift\n",
     )
     _write(
-        target / "day47-reliability-kpi-scorecard.json",
+        target / "reliability-kpi-scorecard-47.json",
         json.dumps(
             {
                 "kpis": [
@@ -430,15 +430,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day47-execution-log.md",
+        target / "execution-log-47.md",
         "# Day 47 Execution Log\n\n- [ ] 2026-03-15: Record misses, wins, and Day 48 execution priorities.\n",
     )
     _write(
-        target / "day47-delivery-board.md",
+        target / "delivery-board-47.md",
         "# Day 47 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day47-validation-commands.md",
+        target / "validation-commands-47.md",
         "# Day 47 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -461,13 +461,13 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day47-execution-summary.json",
+        evidence_path / "reliability-execution-summary-47.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 47 reliability closeout checks")
+    parser = argparse.ArgumentParser(description="Reliability closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -500,7 +500,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_dir = (
             Path(ns.evidence_dir)
             if ns.evidence_dir
-            else Path("docs/artifacts/day47-reliability-closeout-pack/evidence")
+            else Path("docs/artifacts/reliability-closeout-pack-47/evidence")
         )
         _execute_commands(root, evidence_dir)
 
