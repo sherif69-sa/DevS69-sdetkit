@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase3-preplan-closeout.md\nday59-phase3-preplan-closeout\n",
+        "docs/integrations-phase3-preplan-closeout.md\nphase3-preplan-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)

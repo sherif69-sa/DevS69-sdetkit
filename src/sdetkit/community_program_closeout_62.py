@@ -169,8 +169,8 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day62_command",
             "weight": 7,
-            "passed": ("day62-community-program-closeout" in readme_text),
-            "evidence": "README day62 command lane",
+            "passed": ("community-program-closeout" in readme_text),
+            "evidence": "README community-program-closeout command lane",
         },
         {
             "check_id": "docs_index_day62_links",

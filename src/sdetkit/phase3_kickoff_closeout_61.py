@@ -171,8 +171,8 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day61_command",
             "weight": 7,
-            "passed": ("day61-phase3-kickoff-closeout" in readme_text),
-            "evidence": "README day61 command lane",
+            "passed": ("phase3-kickoff-closeout" in readme_text),
+            "evidence": "README phase3-kickoff-closeout command lane",
         },
         {
             "check_id": "docs_index_day61_links",

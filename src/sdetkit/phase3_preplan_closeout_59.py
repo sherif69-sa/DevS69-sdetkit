@@ -171,8 +171,8 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day59_command",
             "weight": 7,
-            "passed": ("day59-phase3-preplan-closeout" in readme_text),
-            "evidence": "README day59 command lane",
+            "passed": ("phase3-preplan-closeout" in readme_text),
+            "evidence": "README phase3-preplan-closeout command lane",
         },
         {
             "check_id": "docs_index_day59_links",

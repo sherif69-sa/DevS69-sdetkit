@@ -201,8 +201,8 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day66_command",
             "weight": 7,
-            "passed": ("day66-integration-expansion2-closeout" in readme_text),
-            "evidence": "README day66 command lane",
+            "passed": ("integration-expansion2-closeout" in readme_text),
+            "evidence": "README integration-expansion2-closeout command lane",
         },
         {
             "check_id": "docs_index_day66_links",

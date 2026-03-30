@@ -169,8 +169,8 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day60_command",
             "weight": 7,
-            "passed": ("day60-phase2-wrap-handoff-closeout" in readme_text),
-            "evidence": "README day60 command lane",
+            "passed": ("phase2-wrap-handoff-closeout" in readme_text),
+            "evidence": "README phase2-wrap-handoff-closeout command lane",
         },
         {
             "check_id": "docs_index_day60_links",

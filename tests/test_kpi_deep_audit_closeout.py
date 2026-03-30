@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-kpi-deep-audit-closeout.md\nday57-kpi-deep-audit-closeout\n",
+        "docs/integrations-kpi-deep-audit-closeout.md\nkpi-deep-audit-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)

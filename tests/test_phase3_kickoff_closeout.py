@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase3-kickoff-closeout.md\nday61-phase3-kickoff-closeout\n",
+        "docs/integrations-phase3-kickoff-closeout.md\nphase3-kickoff-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -129,7 +129,7 @@ def test_day61_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     alias_rc = cli.main(
-        ["day61-phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert alias_rc == 0
     assert "Phase3 Kickoff Closeout summary" in capsys.readouterr().out

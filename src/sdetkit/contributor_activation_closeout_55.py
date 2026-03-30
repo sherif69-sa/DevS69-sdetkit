@@ -210,8 +210,8 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day55_command",
             "weight": 4,
-            "passed": "day55-contributor-activation-closeout" in readme_text,
-            "evidence": "day55-contributor-activation-closeout",
+            "passed": "contributor-activation-closeout" in readme_text,
+            "evidence": "README contributor-activation-closeout command lane",
         },
         {
             "check_id": "docs_index_day55_links",

@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-phase2-wrap-handoff-closeout.md\nday60-phase2-wrap-handoff-closeout\n",
+        "docs/integrations-phase2-wrap-handoff-closeout.md\nphase2-wrap-handoff-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -123,7 +123,7 @@ def test_day60_strict_fails_without_day59(tmp_path: Path) -> None:
 def test_day60_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day60-phase2-wrap-handoff-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["phase2-wrap-handoff-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Phase 2 Wrap Handoff Closeout summary" in capsys.readouterr().out

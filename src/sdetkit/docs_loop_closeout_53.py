@@ -216,8 +216,8 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day53_command",
             "weight": 4,
-            "passed": "day53-docs-loop-closeout" in readme_text,
-            "evidence": "day53-docs-loop-closeout",
+            "passed": "docs-loop-closeout" in readme_text,
+            "evidence": "README docs-loop-closeout command lane",
         },
         {
             "check_id": "docs_index_day53_links",
