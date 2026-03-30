@@ -112,29 +112,29 @@ def test_day66_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day66-pack",
+            "artifacts/integration-expansion2-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day66-pack/evidence",
+            "artifacts/integration-expansion2-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-pipeline-blueprint.md").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-matrix-plan.json").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day66-pack/integration-expansion2-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-pipeline-blueprint.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-matrix-plan.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-execution-log.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/day66-pack/integration-expansion2-validation-commands.md"
+        tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-validation-commands.md"
     ).exists()
     assert (
-        tmp_path / "artifacts/day66-pack/evidence/integration-expansion2-execution-summary.json"
+        tmp_path / "artifacts/integration-expansion2-closeout-pack/evidence/integration-expansion2-execution-summary.json"
     ).exists()
 
 

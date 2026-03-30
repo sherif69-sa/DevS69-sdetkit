@@ -86,25 +86,25 @@ def test_day46_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day46-pack",
+            "artifacts/optimization-closeout-pack-46",
             "--execute",
             "--evidence-dir",
-            "artifacts/day46-pack/evidence",
+            "artifacts/optimization-closeout-pack-46/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day46-pack/optimization-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-plan.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-bottleneck-map.csv").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/optimization-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day46-pack/evidence/optimization-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-plan.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-bottleneck-map.csv").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-execution-log.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/optimization-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-pack-46/evidence/optimization-execution-summary.json").exists()
 
 
 def test_day46_strict_fails_when_day45_inputs_missing(tmp_path: Path) -> None:

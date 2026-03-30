@@ -86,28 +86,28 @@ def test_day55_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day55-pack",
+            "artifacts/contributor-activation-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day55-pack/evidence",
+            "artifacts/contributor-activation-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-brief.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-ladder.csv").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day55-pack/contributor-activation-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-brief.md").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-ladder.csv").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-execution-log.md").exists()
+    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/day55-pack/contributor-activation-validation-commands.md"
+        tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-validation-commands.md"
     ).exists()
     assert (
-        tmp_path / "artifacts/day55-pack/evidence/contributor-activation-execution-summary.json"
+        tmp_path / "artifacts/contributor-activation-closeout-pack/evidence/contributor-activation-execution-summary.json"
     ).exists()
 
 

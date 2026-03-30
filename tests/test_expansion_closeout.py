@@ -86,25 +86,25 @@ def test_day45_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day45-pack",
+            "artifacts/expansion-closeout-pack-45",
             "--execute",
             "--evidence-dir",
-            "artifacts/day45-pack/evidence",
+            "artifacts/expansion-closeout-pack-45/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day45-pack/expansion-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-plan.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-growth-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/expansion-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day45-pack/evidence/expansion-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-plan.md").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-growth-matrix.csv").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-execution-log.md").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/expansion-closeout-pack-45/evidence/expansion-execution-summary.json").exists()
 
 
 def test_day45_strict_fails_when_day44_inputs_missing(tmp_path: Path) -> None:

@@ -96,31 +96,31 @@ def test_day65_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day65-pack",
+            "artifacts/weekly-review-closeout-2-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day65-pack/evidence",
+            "artifacts/weekly-review-closeout-2-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-summary.json").exists()
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-summary.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-weekly-brief.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-kpi-dashboard.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-summary.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-summary.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-weekly-brief.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-kpi-dashboard.json").exists()
     assert (
-        tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-governance-decision-register.md"
+        tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-governance-decision-register.md"
     ).exists()
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-execution-log.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/day65-pack/weekly-review-closeout-2-validation-commands.md"
+        tmp_path / "artifacts/weekly-review-closeout-2-pack/weekly-review-closeout-2-validation-commands.md"
     ).exists()
     assert (
-        tmp_path / "artifacts/day65-pack/evidence/weekly-review-closeout-2-execution-summary.json"
+        tmp_path / "artifacts/weekly-review-closeout-2-pack/evidence/weekly-review-closeout-2-execution-summary.json"
     ).exists()
 
 

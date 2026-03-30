@@ -91,26 +91,26 @@ def test_day59_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day59-pack",
+            "artifacts/phase3-preplan-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day59-pack/evidence",
+            "artifacts/phase3-preplan-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-brief.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day59-pack/phase3-preplan-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-brief.md").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-execution-log.md").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day59-pack/evidence/phase3-preplan-execution-summary.json"
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/evidence/phase3-preplan-execution-summary.json"
     ).exists()
 
 

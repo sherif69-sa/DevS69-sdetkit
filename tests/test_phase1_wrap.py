@@ -67,22 +67,22 @@ def test_day30_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day30-pack",
+            "artifacts/phase1-wrap-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day30-pack/evidence",
+            "artifacts/phase1-wrap-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-summary.json").exists()
-    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-summary.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-phase2-backlog.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-handoff-actions.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/phase1-wrap-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day30-pack/evidence/phase1-wrap-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-summary.json").exists()
+    assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-summary.md").exists()
+    assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md").exists()
+    assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-handoff-actions.md").exists()
+    assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase1-wrap-pack/evidence/phase1-wrap-execution-summary.json").exists()
 
 
 def test_day30_strict_fails_when_inputs_missing(tmp_path: Path) -> None:

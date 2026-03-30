@@ -88,26 +88,26 @@ def test_day60_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day60-pack",
+            "artifacts/phase2-wrap-handoff-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day60-pack/evidence",
+            "artifacts/phase2-wrap-handoff-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-brief.md").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day60-pack/phase2-wrap-handoff-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-brief.md").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-execution-log.md").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day60-pack/evidence/phase2-wrap-handoff-execution-summary.json"
+        tmp_path / "artifacts/phase2-wrap-handoff-closeout-pack/evidence/phase2-wrap-handoff-execution-summary.json"
     ).exists()
 
 

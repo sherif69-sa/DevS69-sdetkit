@@ -105,27 +105,27 @@ def test_day72_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day72-pack",
+            "artifacts/case-study-prep4-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day72-pack/evidence",
+            "artifacts/case-study-prep4-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day72-pack/case-study-prep4-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-case-study-narrative.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-controls-log.json").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-execution-log.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day72-pack/evidence/case-study-prep4-execution-summary.json"
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/evidence/case-study-prep4-execution-summary.json"
     ).exists()
 
 

@@ -88,26 +88,26 @@ def test_day57_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day57-pack",
+            "artifacts/kpi-deep-audit-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day57-pack/evidence",
+            "artifacts/kpi-deep-audit-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-brief.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day57-pack/kpi-deep-audit-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-brief.md").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-scorecard.json").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-execution-log.md").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day57-pack/evidence/kpi-deep-audit-execution-summary.json"
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/evidence/kpi-deep-audit-execution-summary.json"
     ).exists()
 
 

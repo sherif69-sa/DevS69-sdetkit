@@ -88,26 +88,26 @@ def test_day58_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day58-pack",
+            "artifacts/phase2-hardening-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day58-pack/evidence",
+            "artifacts/phase2-hardening-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-brief.md").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day58-pack/phase2-hardening-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-brief.md").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-scorecard.json").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-execution-log.md").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day58-pack/evidence/phase2-hardening-execution-summary.json"
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/evidence/phase2-hardening-execution-summary.json"
     ).exists()
 
 

@@ -88,28 +88,28 @@ def test_day62_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day62-pack",
+            "artifacts/community-program-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day62-pack/evidence",
+            "artifacts/community-program-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day62-pack/community-program-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-community-launch-brief.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-office-hours-cadence.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-participation-policy.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-moderation-runbook.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day62-pack/community-program-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-community-launch-brief.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-office-hours-cadence.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-participation-policy.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-moderation-runbook.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-execution-log.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/community-program-closeout-pack/community-program-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day62-pack/evidence/community-program-execution-summary.json"
+        tmp_path / "artifacts/community-program-closeout-pack/evidence/community-program-execution-summary.json"
     ).exists()
 
 
