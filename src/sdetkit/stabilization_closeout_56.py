@@ -203,8 +203,8 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day56_command",
             "weight": 4,
-            "passed": "day56-stabilization-closeout" in readme_text,
-            "evidence": "day56-stabilization-closeout",
+            "passed": "stabilization-closeout" in readme_text,
+            "evidence": "README stabilization-closeout command lane",
         },
         {
             "check_id": "docs_index_day56_links",

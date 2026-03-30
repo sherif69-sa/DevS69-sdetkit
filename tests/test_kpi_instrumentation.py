@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-kpi-instrumentation.md\nday35-kpi-instrumentation\n",
+        "docs/integrations-kpi-instrumentation.md\nkpi-instrumentation\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def test_day35_kpi_json(tmp_path: Path, capsys) -> None:
     rc = d35.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day35-kpi-instrumentation"
+    assert out["name"] == "kpi-instrumentation"
     assert out["summary"]["activation_score"] >= 95
 
 

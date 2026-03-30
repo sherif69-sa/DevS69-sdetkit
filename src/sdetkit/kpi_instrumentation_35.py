@@ -23,14 +23,14 @@ _REQUIRED_SECTIONS = [
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day35-kpi-instrumentation --format json --strict",
-    "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
-    "python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict",
+    "python -m sdetkit kpi-instrumentation --format json --strict",
+    "python -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
+    "python -m sdetkit kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict",
     "python scripts/check_kpi_instrumentation_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day35-kpi-instrumentation --format json --strict",
-    "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
+    "python -m sdetkit kpi-instrumentation --format json --strict",
+    "python -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
     "python scripts/check_kpi_instrumentation_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
@@ -72,9 +72,9 @@ Day 35 closes the instrumentation lane by converting demo activity into measurab
 ## Day 35 command lane
 
 ```bash
-python -m sdetkit day35-kpi-instrumentation --format json --strict
-python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict
-python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict
+python -m sdetkit kpi-instrumentation --format json --strict
+python -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict
+python -m sdetkit kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict
 python scripts/check_kpi_instrumentation_contract.py
 ```
 
@@ -213,8 +213,8 @@ def build_day35_kpi_instrumentation_summary(
         {
             "check_id": "readme_day35_command",
             "weight": 4,
-            "passed": "day35-kpi-instrumentation" in readme_text,
-            "evidence": "day35-kpi-instrumentation",
+            "passed": "kpi-instrumentation" in readme_text,
+            "evidence": "README kpi-instrumentation command lane",
         },
         {
             "check_id": "docs_index_day35_links",
@@ -331,7 +331,7 @@ def build_day35_kpi_instrumentation_summary(
         )
 
     return {
-        "name": "day35-kpi-instrumentation",
+        "name": "kpi-instrumentation",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -459,7 +459,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day35-kpi-instrumentation-execution",
+        "name": "kpi-instrumentation-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,

@@ -11,7 +11,7 @@ def _seed_repo(root: Path) -> None:
     (root / "templates/ci/tekton").mkdir(parents=True, exist_ok=True)
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "day68-integration-expansion4-closeout\n",
+        "integration-expansion4-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)

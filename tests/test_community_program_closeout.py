@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-community-program-closeout.md\nday62-community-program-closeout\n",
+        "docs/integrations-community-program-closeout.md\ncommunity-program-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -127,7 +127,7 @@ def test_day62_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["community-program-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     alias_rc = cli.main(
-        ["day62-community-program-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["community-program-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert alias_rc == 0
     assert "Community Program Closeout summary" in capsys.readouterr().out

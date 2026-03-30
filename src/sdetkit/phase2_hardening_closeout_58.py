@@ -178,8 +178,8 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day58_command",
             "weight": 4,
-            "passed": "day58-phase2-hardening-closeout" in readme_text,
-            "evidence": "day58-phase2-hardening-closeout",
+            "passed": "phase2-hardening-closeout" in readme_text,
+            "evidence": "README phase2-hardening-closeout command lane",
         },
         {
             "check_id": "docs_index_day58_links",

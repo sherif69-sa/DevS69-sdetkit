@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-integration-expansion3-closeout.md\nday67-integration-expansion3-closeout\n",
+        "docs/integrations-integration-expansion3-closeout.md\nintegration-expansion3-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -155,7 +155,7 @@ def test_day67_strict_fails_without_day66(tmp_path: Path) -> None:
 def test_day67_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
-        ["day67-integration-expansion3-closeout", "--root", str(tmp_path), "--format", "text"]
+        ["integration-expansion3-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
     assert "Integration Expansion3 Closeout summary" in capsys.readouterr().out

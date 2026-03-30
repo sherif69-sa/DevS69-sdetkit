@@ -196,8 +196,8 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "readme_day57_command",
             "weight": 4,
-            "passed": "day57-kpi-deep-audit-closeout" in readme_text,
-            "evidence": "day57-kpi-deep-audit-closeout",
+            "passed": "kpi-deep-audit-closeout" in readme_text,
+            "evidence": "README kpi-deep-audit-closeout command lane",
         },
         {
             "check_id": "docs_index_day57_links",
