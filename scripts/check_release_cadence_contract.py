@@ -14,7 +14,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d32.build_day32_release_cadence_summary(root)
+    payload = d32.build_release_cadence_summary(root)
 
     strict_failures: list[str] = []
     page = root / d32._PAGE_PATH
