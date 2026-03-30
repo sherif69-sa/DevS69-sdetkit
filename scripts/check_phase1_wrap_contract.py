@@ -18,7 +18,7 @@ def main() -> int:
     ns = parser.parse_args()
 
     root = Path(ns.root).resolve()
-    payload = d30.build_day30_phase1_wrap_summary(root)
+    payload = d30.build_phase1_wrap_summary(root)
 
     strict_failures: list[str] = []
     page = root / d30._PAGE_PATH

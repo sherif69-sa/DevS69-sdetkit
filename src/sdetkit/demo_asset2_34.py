@@ -530,5 +530,23 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def build_demo_asset2_summary(
+    root: Path,
+    *,
+    readme_path: str = "README.md",
+    docs_index_path: str = "docs/index.md",
+    docs_page_path: str = _PAGE_PATH,
+    top10_path: str = _TOP10_PATH,
+) -> dict[str, Any]:
+    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    return build_day34_demo_asset2_summary(
+        root,
+        readme_path=readme_path,
+        docs_index_path=docs_index_path,
+        docs_page_path=docs_page_path,
+        top10_path=top10_path,
+    )
+
+
 if __name__ == "__main__":
     raise SystemExit(main())
