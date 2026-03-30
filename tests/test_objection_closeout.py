@@ -83,25 +83,25 @@ def test_day48_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day48-pack",
+            "artifacts/objection-pack-48",
             "--execute",
             "--evidence-dir",
-            "artifacts/day48-pack/evidence",
+            "artifacts/objection-pack-48/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day48-pack/objection-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day48-pack/objection-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-objection-plan.md").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-faq-objection-map.csv").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-objection-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day48-pack/objection-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day48-pack/day48-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day48-pack/evidence/day48-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/objection-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/objection-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/objection-plan-48.md").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/faq-objection-map-48.csv").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/objection-kpi-scorecard-48.json").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/execution-log-48.md").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/objection-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/validation-commands-48.md").exists()
+    assert (tmp_path / "artifacts/objection-pack-48/evidence/objection-execution-summary-48.json").exists()
 
 
 def test_day48_strict_fails_when_day47_inputs_missing(tmp_path: Path) -> None:

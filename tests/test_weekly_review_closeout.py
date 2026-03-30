@@ -70,8 +70,8 @@ def test_day49_weekly_review_closeout_json(tmp_path: Path, capsys) -> None:
     rc = d49.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day49-advanced-weekly-review-control-tower"
-    assert out["legacy_name"] == "weekly-review-closeout"
+    assert out["name"] == "weekly-review-closeout"
+    assert out["legacy_name"] == "day49-advanced-weekly-review-control-tower"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -82,26 +82,26 @@ def test_day49_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day49-pack",
+            "artifacts/weekly-review-pack-49",
             "--execute",
             "--evidence-dir",
-            "artifacts/day49-pack/evidence",
+            "artifacts/weekly-review-pack-49/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day49-pack/weekly-review-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day49-pack/weekly-review-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day49-pack/day49-weekly-review-brief.md").exists()
-    assert (tmp_path / "artifacts/day49-pack/day49-weekly-review-risk-register.csv").exists()
-    assert (tmp_path / "artifacts/day49-pack/day49-weekly-review-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day49-pack/day49-advanced-priority-matrix.json").exists()
-    assert (tmp_path / "artifacts/day49-pack/day49-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day49-pack/weekly-review-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day49-pack/day49-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day49-pack/evidence/day49-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-brief-49.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-risk-register-49.csv").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-kpi-scorecard-49.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/advanced-priority-matrix-49.json").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/execution-log-49.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/validation-commands-49.md").exists()
+    assert (tmp_path / "artifacts/weekly-review-pack-49/evidence/weekly-review-execution-summary-49.json").exists()
 
 
 def test_day49_strict_fails_when_day48_inputs_missing(tmp_path: Path) -> None:

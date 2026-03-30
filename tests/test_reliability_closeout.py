@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-reliability-closeout.md\nday47-reliability-closeout\n",
+        "docs/integrations-reliability-closeout.md\nreliability-closeout\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -75,7 +75,7 @@ def test_day47_reliability_closeout_json(tmp_path: Path, capsys) -> None:
     rc = d47.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day47-reliability-closeout"
+    assert out["name"] == "reliability-closeout"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -86,25 +86,25 @@ def test_day47_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day47-pack",
+            "artifacts/reliability-pack-47",
             "--execute",
             "--evidence-dir",
-            "artifacts/day47-pack/evidence",
+            "artifacts/reliability-pack-47/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day47-pack/day47-reliability-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-reliability-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-reliability-plan.md").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-incident-map.csv").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-reliability-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day47-pack/day47-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day47-pack/evidence/day47-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/reliability-closeout-summary-47.json").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/reliability-closeout-summary-47.md").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/reliability-plan-47.md").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/incident-map-47.csv").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/reliability-kpi-scorecard-47.json").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/execution-log-47.md").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/delivery-board-47.md").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/validation-commands-47.md").exists()
+    assert (tmp_path / "artifacts/reliability-pack-47/evidence/reliability-execution-summary-47.json").exists()
 
 
 def test_day47_strict_fails_when_day46_inputs_missing(tmp_path: Path) -> None:

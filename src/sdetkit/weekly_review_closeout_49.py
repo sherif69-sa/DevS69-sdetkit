@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-weekly-review-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY48_SUMMARY_PATH = "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
 _DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack/objection-delivery-board.md"
-_DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/day48-delivery-board.md"
+_DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/delivery-board-48.md"
 _SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 49 matters",
@@ -329,8 +329,8 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     return {
-        "name": "day49-advanced-weekly-review-control-tower",
-        "legacy_name": "weekly-review-closeout",
+        "name": "weekly-review-closeout",
+        "legacy_name": "day49-advanced-weekly-review-control-tower",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -393,16 +393,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "weekly-review-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "weekly-review-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day49-weekly-review-brief.md",
+        target / "weekly-review-brief-49.md",
         "# Day 49 Weekly Review Brief\n\n- Objective: close Day 49 with measurable weekly-review discipline and prioritized execution gains.\n",
     )
     _write(
-        target / "day49-weekly-review-risk-register.csv",
+        target / "weekly-review-risk-register-49.csv",
         "stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "weekly-review-floor,qa-lead,docs-owner,2026-03-17T10:00:00Z,docs/integrations-weekly-review-closeout.md,python -m sdetkit weekly-review-closeout --format json --strict,failed-checks:0,priority-drift\n",
     )
     _write(
-        target / "day49-weekly-review-kpi-scorecard.json",
+        target / "weekly-review-kpi-scorecard-49.json",
         json.dumps(
             {
                 "kpis": [
@@ -420,7 +420,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day49-advanced-priority-matrix.json",
+        target / "advanced-priority-matrix-49.json",
         json.dumps(
             {
                 "priority_model": "weighted-weekly-review",
@@ -445,7 +445,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day49-execution-log.md",
+        target / "execution-log-49.md",
         "# Day 49 Execution Log\n\n- [ ] 2026-03-17: Record misses, wins, and Day 50 execution priorities.\n",
     )
     _write(
@@ -453,11 +453,11 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "# Day 49 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day49-delivery-board.md",
+        target / "delivery-board-49.md",
         "# Day 49 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day49-validation-commands.md",
+        target / "validation-commands-49.md",
         "# Day 49 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
@@ -480,14 +480,14 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day49-execution-summary.json",
+        evidence_path / "weekly-review-execution-summary-49.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Day 49 advanced weekly review control tower checks"
+        description="Weekly review closeout checks (legacy alias: day49-advanced-weekly-review-control-tower)"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
