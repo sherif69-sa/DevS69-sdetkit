@@ -12,19 +12,19 @@ _PAGE_PATH = "docs/integrations-acceleration-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY42_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
 _DAY42_BOARD_PATH = (
-    "docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md"
+    "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
 )
 _DAY42_LEGACY_BOARD_PATH = (
-    "docs/artifacts/optimization-closeout-foundation-pack/day42-delivery-board.md"
+    "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
 )
 _SECTION_HEADER = "# Day 43 \u2014 Acceleration closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 43 matters",
-    "## Required inputs (Day 42)",
-    "## Day 43 command lane",
+    "## Why this lane matters",
+    "## Required inputs (optimization closeout foundation)",
+    "## Command lane",
     "## Acceleration closeout contract",
     "## Acceleration quality checklist",
-    "## Day 43 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -61,20 +61,20 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
 
 _DAY43_DEFAULT_PAGE = """# Day 43 \u2014 Acceleration closeout lane
 
-Day 43 closes with a major acceleration upgrade that converts Day 42 optimization evidence into deterministic improvement loops.
+This lane closes with a major acceleration upgrade that converts optimization evidence into deterministic improvement loops.
 
-## Why Day 43 matters
+## Why this lane matters
 
 - Converts Day 42 optimization proof into growth-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
 - Produces a deterministic handoff from acceleration outcomes into Day 44 scale priorities.
 
-## Required inputs (Day 42)
+## Required inputs (optimization closeout foundation)
 
 - `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
-- `docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md`
+- `docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md`
 
-## Day 43 command lane
+## Command lane
 
 ```bash
 python -m sdetkit acceleration-closeout --format json --strict
@@ -98,7 +98,7 @@ python scripts/check_acceleration_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log
 
-## Day 43 delivery board
+## Delivery board
 
 - [ ] Day 43 acceleration plan draft committed
 - [ ] Day 43 review notes captured with owner + backup
@@ -206,19 +206,19 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day43_link",
+            "check_id": "readme_acceleration_closeout_link",
             "weight": 8,
             "passed": "docs/integrations-acceleration-closeout.md" in readme_text,
             "evidence": "docs/integrations-acceleration-closeout.md",
         },
         {
-            "check_id": "readme_day43_command",
+            "check_id": "readme_acceleration_closeout_command",
             "weight": 4,
             "passed": "acceleration-closeout" in readme_text,
             "evidence": "acceleration-closeout",
         },
         {
-            "check_id": "docs_index_day43_links",
+            "check_id": "docs_index_acceleration_closeout_links",
             "weight": 8,
             "passed": (
                 "impact-43-big-upgrade-report.md" in docs_index_text
@@ -227,7 +227,7 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-43-big-upgrade-report.md + integrations-acceleration-closeout.md",
         },
         {
-            "check_id": "top10_day43_alignment",
+            "check_id": "top10_acceleration_closeout_alignment",
             "weight": 5,
             "passed": ("Day 43" in top10_text and "Day 44" in top10_text),
             "evidence": "Day 43 + Day 44 strategy chain",
@@ -368,7 +368,7 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 43 acceleration closeout summary",
+        "Acceleration closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -397,16 +397,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "acceleration-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "acceleration-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day43-acceleration-plan.md",
-        "# Day 43 Acceleration Plan\n\n- Objective: close Day 43 with measurable quality and throughput gains.\n",
+        target / "acceleration-plan.md",
+        "# Acceleration plan\n\n- Objective: close Day 43 with measurable quality and throughput gains.\n",
     )
     _write(
-        target / "day43-growth-matrix.csv",
+        target / "growth-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-acceleration-closeout.md,python -m sdetkit acceleration-closeout --format json --strict,failed-checks:0,baseline-drift\n",
     )
     _write(
-        target / "day43-acceleration-kpi-scorecard.json",
+        target / "acceleration-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -424,20 +424,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day43-execution-log.md",
-        "# Day 43 Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 44 scale priorities.\n",
+        target / "execution-log.md",
+        "# Acceleration execution log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 44 scale priorities.\n",
     )
     _write(
-        target / "acceleration-delivery-board.md",
-        "# Day 43 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        target / "delivery-board.md",
+        "# Acceleration delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day43-delivery-board.md",
-        "# Day 43 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
-    )
-    _write(
-        target / "day43-validation-commands.md",
-        "# Day 43 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        target / "validation-commands.md",
+        "# Acceleration validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -459,13 +455,13 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day43-execution-summary.json",
+        evidence_path / "execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 43 acceleration closeout checks")
+    parser = argparse.ArgumentParser(description="Acceleration closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")

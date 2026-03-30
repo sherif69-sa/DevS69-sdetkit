@@ -16,12 +16,12 @@ _LEGACY_DAY40_SUMMARY_PATH = "docs/artifacts/day40-scale-lane-pack/day40-scale-l
 _LEGACY_DAY40_BOARD_PATH = "docs/artifacts/day40-scale-lane-pack/day40-delivery-board.md"
 _SECTION_HEADER = "# Day 41 \u2014 Expansion automation lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 41 matters",
-    "## Required inputs (Day 40)",
-    "## Day 41 command lane",
+    "## Why this lane matters",
+    "## Required inputs (prior scale lane)",
+    "## Command lane",
     "## Expansion automation contract",
     "## Expansion quality checklist",
-    "## Day 41 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -58,20 +58,20 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
 
 _DAY41_DEFAULT_PAGE = """# Day 41 \u2014 Expansion automation lane
 
-Day 41 closes with a major expansion automation upgrade that converts Day 40 scale evidence into repeatable workflows.
+This lane closes with a major expansion automation upgrade that converts prior scale-lane evidence into repeatable workflows.
 
-## Why Day 41 matters
+## Why this lane matters
 
 - Converts Day 40 scale wins into automation-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
 - Produces a deterministic handoff from expansion outcomes into Day 42 optimization priorities.
 
-## Required inputs (Day 40)
+## Required inputs (prior scale lane)
 
 - `docs/artifacts/scale-lane-pack/scale-lane-summary.json`
 - `docs/artifacts/scale-lane-pack/delivery-board.md`
 
-## Day 41 command lane
+## Command lane
 
 ```bash
 python -m sdetkit expansion-automation --format json --strict
@@ -95,7 +95,7 @@ python scripts/check_expansion_automation_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes expansion plan, automation matrix, KPI scorecard, and execution log
 
-## Day 41 delivery board
+## Delivery board
 
 - [ ] Day 41 expansion plan draft committed
 - [ ] Day 41 review notes captured with owner + backup
@@ -105,7 +105,7 @@ python scripts/check_expansion_automation_contract.py
 
 ## Scoring model
 
-Day 41 weighted score (0-100):
+Weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -204,19 +204,19 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day41_link",
+            "check_id": "readme_expansion_automation_link",
             "weight": 8,
             "passed": "docs/integrations-expansion-automation.md" in readme_text,
             "evidence": "docs/integrations-expansion-automation.md",
         },
         {
-            "check_id": "readme_day41_command",
+            "check_id": "readme_expansion_automation_command",
             "weight": 4,
             "passed": "expansion-automation" in readme_text,
             "evidence": "expansion-automation",
         },
         {
-            "check_id": "docs_index_day41_links",
+            "check_id": "docs_index_expansion_automation_links",
             "weight": 8,
             "passed": (
                 "impact-41-big-upgrade-report.md" in docs_index_text
@@ -225,10 +225,10 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-41-big-upgrade-report.md + integrations-expansion-automation.md",
         },
         {
-            "check_id": "top10_day41_alignment",
+            "check_id": "top10_expansion_automation_alignment",
             "weight": 5,
             "passed": ("Day 41" in top10_text and "Day 42" in top10_text),
-            "evidence": "Day 41 + Day 42 strategy chain",
+            "evidence": "Expansion automation + optimization strategy chain",
         },
         {
             "check_id": "day40_summary_present",
@@ -367,7 +367,7 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 41 expansion automation summary\n"
+        "Expansion automation summary\n"
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -378,7 +378,7 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 41 expansion automation summary",
+        "# Expansion automation summary",
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
@@ -414,8 +414,8 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "expansion-automation-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "expansion-automation-summary.md", _to_markdown(payload))
     _write(
-        target / "day41-expansion-plan.md",
-        "# Day 41 expansion automation lane\n\n"
+        target / "expansion-plan.md",
+        "# Expansion automation lane\n\n"
         "## Automation summary\n"
         "- Day 40 scale winners were converted into reusable automation blocks.\n"
         "- Misses are paired with rollback-ready remediation loops.\n\n"
@@ -425,14 +425,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "- [ ] Capture KPI pulses at 24h and 72h with confidence tag\n",
     )
     _write(
-        target / "day41-automation-matrix.csv",
+        target / "automation-matrix.csv",
         "workflow,owner,backup,publish_window_utc,docs_cta,command_cta,kpi_target,risk_guardrail\n"
         "expansion-summary,pm-owner,backup-pm,2026-03-09T09:00:00Z,docs/integrations-expansion-automation.md,python -m sdetkit expansion-automation --format json --strict,completion:+6%,rollback-doc-ready\n"
         "matrix-rollout,ops-owner,backup-ops,2026-03-09T12:00:00Z,docs/impact-41-big-upgrade-report.md,python scripts/check_expansion_automation_contract.py,adoption:+8%,dry-run-before-rollout\n"
         "kpi-review,growth-owner,backup-growth,2026-03-10T15:00:00Z,docs/top-10-github-strategy.md,python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict,ctr:+3%,trigger-alert-on-regression\n",
     )
     _write(
-        target / "day41-expansion-kpi-scorecard.json",
+        target / "expansion-kpi-scorecard.json",
         json.dumps(
             {
                 "generated_for": "expansion-automation",
@@ -465,19 +465,19 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day41-execution-log.md",
-        "# Day 41 execution log\n\n"
+        target / "execution-log.md",
+        "# Expansion automation execution log\n\n"
         "- [ ] 2026-03-09: Publish expansion plan and collect internal review notes.\n"
         "- [ ] 2026-03-10: Execute automation matrix and capture first KPI pulse.\n"
         "- [ ] 2026-03-11: Record misses, wins, and Day 42 optimization priorities.\n",
     )
     _write(
-        target / "day41-delivery-board.md",
-        "# Day 41 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        target / "delivery-board.md",
+        "# Expansion automation delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
-        target / "day41-validation-commands.md",
-        "# Day 41 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        target / "validation-commands.md",
+        "# Expansion automation validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -504,11 +504,11 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
     }
-    _write(target / "day41-execution-summary.json", json.dumps(summary, indent=2) + "\n")
+    _write(target / "execution-summary.json", json.dumps(summary, indent=2) + "\n")
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 41 expansion automation scorer.")
+    parser = argparse.ArgumentParser(description="Expansion automation scorer.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")

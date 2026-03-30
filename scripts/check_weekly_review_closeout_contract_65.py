@@ -38,7 +38,7 @@ def main() -> int:
         if not evidence.exists():
             legacy_evidence = (
                 root
-                / "docs/artifacts/weekly-review-closeout-2-pack/evidence/day65-execution-summary.json"
+                / "docs/artifacts/weekly-review-closeout-2-pack/evidence/execution-summary.json"
             )
             if legacy_evidence.exists():
                 evidence = legacy_evidence

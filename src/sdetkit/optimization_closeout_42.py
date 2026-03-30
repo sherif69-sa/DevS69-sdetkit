@@ -12,13 +12,13 @@ _PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY41_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
 _DAY41_BOARD_PATH = (
-    "docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md"
+    "docs/artifacts/expansion-automation-pack/delivery-board.md"
 )
-_DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
+_DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Optimization Closeout Foundation matters",
-    "## Required inputs (Day 41)",
+    "## Required inputs (expansion automation)",
     "## Optimization Closeout Foundation command lane",
     "## Optimization closeout contract",
     "## Optimization quality checklist",
@@ -67,10 +67,10 @@ Optimization Closeout Foundation closes with a major optimization upgrade that c
 - Protects quality with owner accountability, command proof, and KPI guardrails.
 - Produces a deterministic handoff from optimization outcomes into Day 43 acceleration priorities.
 
-## Required inputs (Day 41)
+## Required inputs (expansion automation)
 
 - `docs/artifacts/expansion-automation-pack/expansion-automation-summary.json`
-- `docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md`
+- `docs/artifacts/expansion-automation-pack/delivery-board.md`
 
 ## Optimization Closeout Foundation command lane
 
@@ -110,7 +110,7 @@ Optimization Closeout Foundation weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 41 continuity and strict baseline carryover: 35 points.
+- Expansion automation continuity and strict baseline carryover: 35 points.
 - Optimization contract lock + delivery board readiness: 15 points.
 """
 
@@ -204,19 +204,19 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day42_link",
+            "check_id": "readme_optimization_closeout_foundation_link",
             "weight": 8,
             "passed": "docs/integrations-optimization-closeout-foundation.md" in readme_text,
             "evidence": "docs/integrations-optimization-closeout-foundation.md",
         },
         {
-            "check_id": "readme_day42_command",
+            "check_id": "readme_optimization_closeout_foundation_command",
             "weight": 4,
             "passed": "optimization-closeout-foundation" in readme_text,
             "evidence": "optimization-closeout-foundation",
         },
         {
-            "check_id": "docs_index_day42_links",
+            "check_id": "docs_index_optimization_closeout_foundation_links",
             "weight": 8,
             "passed": (
                 "impact-42-big-upgrade-report.md" in docs_index_text
@@ -225,10 +225,10 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-42-big-upgrade-report.md + integrations-optimization-closeout-foundation.md",
         },
         {
-            "check_id": "top10_day42_alignment",
+            "check_id": "top10_optimization_closeout_foundation_alignment",
             "weight": 5,
             "passed": ("Optimization Closeout Foundation" in top10_text and "Day 43" in top10_text),
-            "evidence": "Optimization Closeout Foundation + Day 43 strategy chain",
+            "evidence": "Optimization Closeout Foundation + acceleration strategy chain",
         },
         {
             "check_id": "day41_summary_present",
@@ -371,9 +371,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 41 activation score: `{payload['rollup']['day41_activation_score']}`",
-        f"- Day 41 checks evaluated: `{payload['rollup']['day41_checks']}`",
-        f"- Day 41 delivery board checklist items: `{payload['rollup']['day41_delivery_board_items']}`",
+        f"- Expansion automation activation score: `{payload['rollup']['day41_activation_score']}`",
+        f"- Expansion automation checks evaluated: `{payload['rollup']['day41_checks']}`",
+        f"- Expansion automation delivery board checklist items: `{payload['rollup']['day41_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -398,16 +398,16 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(target / "optimization-closeout-foundation-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "day42-optimization-plan.md",
+        target / "optimization-plan.md",
         "# Optimization Closeout Foundation Optimization Plan\n\n- Objective: close Optimization Closeout Foundation with measurable quality and throughput gains.\n",
     )
     _write(
-        target / "day42-remediation-matrix.csv",
+        target / "remediation-matrix.csv",
         "stream,owner,backup,publish_window,docs_cta,command_cta,kpi_target,risk_flag\n"
         "quality-floor,qa-lead,platform-owner,2026-03-12T10:00:00Z,docs/integrations-optimization-closeout-foundation.md,python -m sdetkit optimization-closeout-foundation --format json --strict,failed-checks:0,baseline-drift\n",
     )
     _write(
-        target / "day42-optimization-kpi-scorecard.json",
+        target / "optimization-kpi-scorecard.json",
         json.dumps(
             {
                 "kpis": [
@@ -425,23 +425,17 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         + "\n",
     )
     _write(
-        target / "day42-execution-log.md",
+        target / "execution-log.md",
         "# Optimization Closeout Foundation Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 43 acceleration priorities.\n",
     )
     _write(
-        target / "optimization-delivery-board.md",
+        target / "delivery-board.md",
         "# Optimization Closeout Foundation Delivery Board\n\n"
         + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES)
         + "\n",
     )
     _write(
-        target / "day42-delivery-board.md",
-        "# Optimization Closeout Foundation Delivery Board\n\n"
-        + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES)
-        + "\n",
-    )
-    _write(
-        target / "day42-validation-commands.md",
+        target / "validation-commands.md",
         "# Optimization Closeout Foundation Validation Commands\n\n```bash\n"
         + "\n".join(_EXECUTION_COMMANDS)
         + "\n```\n",
@@ -466,7 +460,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
         events.append(event)
         _write(evidence_path / f"command-{index:02d}.log", json.dumps(event, indent=2) + "\n")
     _write(
-        evidence_path / "day42-execution-summary.json",
+        evidence_path / "execution-summary.json",
         json.dumps({"total_commands": len(events), "commands": events}, indent=2) + "\n",
     )
 

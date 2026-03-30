@@ -57,7 +57,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     board = (
-        root / "docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md"
+        root / "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
     )
     board.write_text(
         "\n".join(
@@ -91,25 +91,25 @@ def test_day43_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day43-pack",
+            "artifacts/acceleration-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day43-pack/evidence",
+            "artifacts/acceleration-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day43-pack/acceleration-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day43-pack/acceleration-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day43-pack/day43-acceleration-plan.md").exists()
-    assert (tmp_path / "artifacts/day43-pack/day43-growth-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day43-pack/day43-acceleration-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day43-pack/day43-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day43-pack/acceleration-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day43-pack/day43-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day43-pack/evidence/day43-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/acceleration-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/acceleration-plan.md").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/growth-matrix.csv").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/acceleration-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/execution-log.md").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/acceleration-closeout-pack/evidence/execution-summary.json").exists()
 
 
 def test_day43_strict_fails_when_day42_inputs_missing(tmp_path: Path) -> None:
@@ -126,4 +126,4 @@ def test_day43_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["acceleration-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 43 acceleration closeout summary" in capsys.readouterr().out
+    assert "Acceleration closeout summary" in capsys.readouterr().out
