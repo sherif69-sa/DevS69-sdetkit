@@ -92,26 +92,26 @@ def test_day61_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day61-pack",
+            "artifacts/phase3-kickoff-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day61-pack/evidence",
+            "artifacts/phase3-kickoff-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-brief.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-trust-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day61-pack/phase3-kickoff-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-brief.md").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-trust-ledger.csv").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-execution-log.md").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day61-pack/evidence/phase3-kickoff-execution-summary.json"
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/evidence/phase3-kickoff-execution-summary.json"
     ).exists()
 
 

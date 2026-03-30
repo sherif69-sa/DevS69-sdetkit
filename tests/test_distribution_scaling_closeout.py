@@ -107,29 +107,29 @@ def test_day74_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day74-pack",
+            "artifacts/distribution-scaling-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day74-pack/evidence",
+            "artifacts/distribution-scaling-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-plan.md").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-plan.md").exists()
     assert (
-        tmp_path / "artifacts/day74-pack/distribution-scaling-channel-controls-log.json"
+        tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-channel-controls-log.json"
     ).exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day74-pack/distribution-scaling-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-execution-log.md").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/distribution-scaling-closeout-pack/distribution-scaling-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day74-pack/evidence/distribution-scaling-execution-summary.json"
+        tmp_path / "artifacts/distribution-scaling-closeout-pack/evidence/distribution-scaling-execution-summary.json"
     ).exists()
 
 

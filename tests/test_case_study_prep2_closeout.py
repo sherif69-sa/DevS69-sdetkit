@@ -77,20 +77,20 @@ def test_day70_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day70-pack",
+            "artifacts/case-study-prep2-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day70-pack/evidence",
+            "artifacts/case-study-prep2-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day70-pack/case-study-prep2-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day70-pack/case-study-prep2-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/case-study-prep2-closeout-pack/case-study-prep2-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/case-study-prep2-closeout-pack/case-study-prep2-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/day70-pack/evidence/case-study-prep2-execution-summary.json"
+        tmp_path / "artifacts/case-study-prep2-closeout-pack/evidence/case-study-prep2-execution-summary.json"
     ).exists()
 
 

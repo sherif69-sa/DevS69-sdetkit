@@ -86,25 +86,25 @@ def test_day53_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day53-pack",
+            "artifacts/docs-loop-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day53-pack/evidence",
+            "artifacts/docs-loop-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-brief.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-cross-link-map.csv").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/docs-loop-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day53-pack/evidence/docs-loop-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-brief.md").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-cross-link-map.csv").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-execution-log.md").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/docs-loop-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/docs-loop-closeout-pack/evidence/docs-loop-execution-summary.json").exists()
 
 
 def test_day53_strict_fails_when_day52_inputs_missing(tmp_path: Path) -> None:

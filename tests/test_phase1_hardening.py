@@ -60,22 +60,22 @@ def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day29-pack",
+            "artifacts/phase1-hardening-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day29-pack/evidence",
+            "artifacts/phase1-hardening-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.json").exists()
-    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-summary.md").exists()
-    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-stale-gaps.json").exists()
-    assert (tmp_path / "artifacts/day29-pack/phase1-hardening-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-summary.json").exists()
+    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-summary.md").exists()
+    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-stale-gaps.json").exists()
+    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day29-pack/evidence/phase1-hardening-execution-summary.json"
+        tmp_path / "artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
     ).exists()
 
 

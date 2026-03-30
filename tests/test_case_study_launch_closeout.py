@@ -107,27 +107,27 @@ def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day73-pack",
+            "artifacts/case-study-launch-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day73-pack/evidence",
+            "artifacts/case-study-launch-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-controls-log.json").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day73-pack/case-study-launch-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-case-study-narrative.md").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-controls-log.json").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-execution-log.md").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day73-pack/evidence/case-study-launch-execution-summary.json"
+        tmp_path / "artifacts/case-study-launch-closeout-pack/evidence/case-study-launch-execution-summary.json"
     ).exists()
 
 

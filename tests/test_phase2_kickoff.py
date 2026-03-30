@@ -89,23 +89,23 @@ def test_day31_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day31-pack",
+            "artifacts/phase2-kickoff-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day31-pack/evidence",
+            "artifacts/phase2-kickoff-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-summary.json").exists()
-    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-summary.md").exists()
-    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-baseline-snapshot.json").exists()
-    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day31-pack/phase2-kickoff-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json").exists()
+    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-summary.md").exists()
+    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-baseline-snapshot.json").exists()
+    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day31-pack/evidence/phase2-kickoff-execution-summary.json"
+        tmp_path / "artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
     ).exists()
 
 

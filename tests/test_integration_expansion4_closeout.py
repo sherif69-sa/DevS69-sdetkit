@@ -83,25 +83,25 @@ def test_day68_emit_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day68-pack",
+            "artifacts/integration-expansion4-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day68-pack/evidence",
+            "artifacts/integration-expansion4-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-integration-brief.md").exists()
     assert (
-        tmp_path / "artifacts/day68-pack/integration-expansion4-self-hosted-blueprint.md"
+        tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-self-hosted-blueprint.md"
     ).exists()
-    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-policy-plan.json").exists()
-    assert (tmp_path / "artifacts/day68-pack/integration-expansion4-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-policy-plan.json").exists()
+    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-kpi-scorecard.json").exists()
     assert (
-        tmp_path / "artifacts/day68-pack/evidence/integration-expansion4-execution-summary.json"
+        tmp_path / "artifacts/integration-expansion4-closeout-pack/evidence/integration-expansion4-execution-summary.json"
     ).exists()
 
 

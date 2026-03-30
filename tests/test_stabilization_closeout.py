@@ -92,26 +92,26 @@ def test_day56_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day56-pack",
+            "artifacts/stabilization-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day56-pack/evidence",
+            "artifacts/stabilization-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day56-pack/stabilization-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-brief.md").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day56-pack/stabilization-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-brief.md").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-risk-ledger.csv").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-execution-log.md").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day56-pack/evidence/stabilization-execution-summary.json"
+        tmp_path / "artifacts/stabilization-closeout-pack/evidence/stabilization-execution-summary.json"
     ).exists()
 
 

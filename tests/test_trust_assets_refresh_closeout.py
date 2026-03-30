@@ -108,29 +108,29 @@ def test_day75_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day75-pack",
+            "artifacts/trust-assets-refresh-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day75-pack/evidence",
+            "artifacts/trust-assets-refresh-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-plan.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-trust-controls-log.json").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-integration-brief.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-plan.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-trust-controls-log.json").exists()
     assert (
-        tmp_path / "artifacts/day75-pack/trust-assets-refresh-trust-kpi-scorecard.json"
+        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-trust-kpi-scorecard.json"
     ).exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day75-pack/trust-assets-refresh-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-execution-log.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/day75-pack/evidence/trust-assets-refresh-execution-summary.json"
+        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/evidence/trust-assets-refresh-execution-summary.json"
     ).exists()
 
 

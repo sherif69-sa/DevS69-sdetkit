@@ -79,10 +79,10 @@ def test_day76_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day76-pack",
+            "artifacts/contributor-recognition-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day76-pack/evidence",
+            "artifacts/contributor-recognition-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -90,11 +90,11 @@ def test_day76_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day76-pack/contributor-recognition-closeout-summary.json"
+        tmp_path / "artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day76-pack/contributor-recognition-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/day76-pack/evidence/contributor-recognition-execution-summary.json"
+        tmp_path / "artifacts/contributor-recognition-closeout-pack/evidence/contributor-recognition-execution-summary.json"
     ).exists()
 
 
