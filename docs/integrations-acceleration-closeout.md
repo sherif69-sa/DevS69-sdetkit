@@ -11,7 +11,7 @@ Lane closes with a major acceleration upgrade that converts Lane optimization ev
 ## Required inputs (Lane)
 
 - `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
-- `docs/artifacts/optimization-closeout-foundation-pack/optimization-delivery-board.md`
+- `docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md`
 
 ## Lane command lane
 

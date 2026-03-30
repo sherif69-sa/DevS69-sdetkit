@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/expansion-automation-pack/expansion-automation-delivery-board.md"
+    board = root / "docs/artifacts/expansion-automation-pack/delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -86,10 +86,10 @@ def test_day42_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day42-pack",
+            "artifacts/optimization-closeout-foundation-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day42-pack/evidence",
+            "artifacts/optimization-closeout-foundation-pack/evidence",
             "--format",
             "json",
             "--strict",
@@ -97,16 +97,16 @@ def test_day42_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/day42-pack/optimization-closeout-foundation-summary.json"
+        tmp_path / "artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/day42-pack/optimization-closeout-foundation-summary.md").exists()
-    assert (tmp_path / "artifacts/day42-pack/day42-optimization-plan.md").exists()
-    assert (tmp_path / "artifacts/day42-pack/day42-remediation-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day42-pack/day42-optimization-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day42-pack/day42-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day42-pack/optimization-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day42-pack/day42-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day42-pack/evidence/day42-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/optimization-plan.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/remediation-matrix.csv").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/optimization-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/execution-log.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/optimization-closeout-foundation-pack/evidence/execution-summary.json").exists()
 
 
 def test_day42_strict_fails_when_day41_inputs_missing(tmp_path: Path) -> None:

@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = root / "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md"
+    board = root / "docs/artifacts/acceleration-closeout-pack/delivery-board.md"
     board.write_text(
         "\n".join(
             [
@@ -86,25 +86,25 @@ def test_day44_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day44-pack",
+            "artifacts/scale-closeout-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day44-pack/evidence",
+            "artifacts/scale-closeout-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day44-pack/scale-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-plan.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-growth-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/scale-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day44-pack/evidence/scale-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-closeout-summary.json").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-closeout-summary.md").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-plan.md").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-growth-matrix.csv").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-execution-log.md").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-delivery-board.md").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/scale-validation-commands.md").exists()
+    assert (tmp_path / "artifacts/scale-closeout-pack/evidence/scale-execution-summary.json").exists()
 
 
 def test_day44_strict_fails_when_day43_inputs_missing(tmp_path: Path) -> None:
@@ -120,4 +120,4 @@ def test_day44_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["scale-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 44 scale closeout summary" in capsys.readouterr().out
+    assert "Scale closeout summary" in capsys.readouterr().out

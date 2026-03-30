@@ -11,7 +11,7 @@ Lane closes with a big scale upgrade that converts Lane acceleration evidence in
 ## Required inputs (Lane)
 
 - `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
-- `docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md`
+- `docs/artifacts/acceleration-closeout-pack/delivery-board.md`
 
 ## Lane command lane
 

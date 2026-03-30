@@ -86,25 +86,25 @@ def test_day41_emit_pack_and_execute(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--emit-pack-dir",
-            "artifacts/day41-pack",
+            "artifacts/expansion-automation-pack",
             "--execute",
             "--evidence-dir",
-            "artifacts/day41-pack/evidence",
+            "artifacts/expansion-automation-pack/evidence",
             "--format",
             "json",
             "--strict",
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/day41-pack/expansion-automation-summary.json").exists()
-    assert (tmp_path / "artifacts/day41-pack/expansion-automation-summary.md").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-expansion-plan.md").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-automation-matrix.csv").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-expansion-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-execution-log.md").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/day41-pack/day41-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/day41-pack/evidence/day41-execution-summary.json").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/expansion-automation-summary.json").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/expansion-automation-summary.md").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/expansion-plan.md").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/automation-matrix.csv").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/expansion-kpi-scorecard.json").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/execution-log.md").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/delivery-board.md").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/validation-commands.md").exists()
+    assert (tmp_path / "artifacts/expansion-automation-pack/evidence/execution-summary.json").exists()
 
 
 def test_day41_strict_fails_when_day40_inputs_missing(tmp_path: Path) -> None:
@@ -118,4 +118,4 @@ def test_day41_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["expansion-automation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 41 expansion automation summary" in capsys.readouterr().out
+    assert "Expansion automation summary" in capsys.readouterr().out

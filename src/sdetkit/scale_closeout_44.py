@@ -11,15 +11,15 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-scale-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY43_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
-_DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md"
+_DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/delivery-board.md"
 _SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 44 matters",
-    "## Required inputs (Day 43)",
-    "## Day 44 command lane",
+    "## Why this lane matters",
+    "## Required inputs (acceleration closeout)",
+    "## Command lane",
     "## Scale closeout contract",
     "## Scale quality checklist",
-    "## Day 44 delivery board",
+    "## Delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -56,20 +56,20 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
 
 _DAY44_DEFAULT_PAGE = """# Day 44 \u2014 Scale closeout lane
 
-Day 44 closes with a major scale upgrade that converts Day 43 acceleration evidence into deterministic improvement loops.
+This lane closes with a major scale upgrade that converts acceleration evidence into deterministic improvement loops.
 
-## Why Day 44 matters
+## Why this lane matters
 
 - Converts Day 43 acceleration proof into growth-first operating motion.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
 - Produces a deterministic handoff from scale outcomes into Day 45 expansion priorities.
 
-## Required inputs (Day 43)
+## Required inputs (acceleration closeout)
 
 - `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
-- `docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md`
+- `docs/artifacts/acceleration-closeout-pack/delivery-board.md`
 
-## Day 44 command lane
+## Command lane
 
 ```bash
 python -m sdetkit scale-closeout --format json --strict
@@ -93,7 +93,7 @@ python scripts/check_scale_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes scale plan, growth matrix, KPI scorecard, and execution log
 
-## Day 44 delivery board
+## Delivery board
 
 - [ ] Day 44 scale plan draft committed
 - [ ] Day 44 review notes captured with owner + backup
@@ -103,7 +103,7 @@ python scripts/check_scale_closeout_contract.py
 
 ## Scoring model
 
-Day 44 weighted score (0-100):
+Weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -180,7 +180,7 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     day43_board = _resolve_existing_path(
         root,
         _DAY43_BOARD_PATH,
-        "docs/artifacts/acceleration-closeout-pack/day43-delivery-board.md",
+        "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md",
     )
     day43_score, day43_strict, day43_check_count = _load_day43(day43_summary)
     board_count, board_has_day43, board_has_day44 = _board_stats(day43_board)
@@ -205,19 +205,19 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day44_link",
+            "check_id": "readme_scale_closeout_link",
             "weight": 8,
             "passed": "docs/integrations-scale-closeout.md" in readme_text,
             "evidence": "docs/integrations-scale-closeout.md",
         },
         {
-            "check_id": "readme_day44_command",
+            "check_id": "readme_scale_closeout_command",
             "weight": 4,
             "passed": "scale-closeout" in readme_text,
             "evidence": "scale-closeout",
         },
         {
-            "check_id": "docs_index_day44_links",
+            "check_id": "docs_index_scale_closeout_links",
             "weight": 8,
             "passed": (
                 "impact-44-big-upgrade-report.md" in docs_index_text
@@ -226,10 +226,10 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-44-big-upgrade-report.md + integrations-scale-closeout.md",
         },
         {
-            "check_id": "top10_day44_alignment",
+            "check_id": "top10_scale_closeout_alignment",
             "weight": 5,
             "passed": ("Day 44" in top10_text and "Day 45" in top10_text),
-            "evidence": "Day 44 + Day 45 strategy chain",
+            "evidence": "Scale closeout + expansion closeout strategy chain",
         },
         {
             "check_id": "day43_summary_present",
@@ -363,7 +363,7 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 44 scale closeout summary",
+        "Scale closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -393,7 +393,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "scale-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "scale-plan.md",
-        "# Day 44 Scale Plan\n\n- Objective: close Day 44 with measurable quality and throughput gains.\n",
+        "# Scale plan\n\n- Objective: close Day 44 with measurable quality and throughput gains.\n",
     )
     _write(
         target / "scale-growth-matrix.csv",
@@ -420,15 +420,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "scale-execution-log.md",
-        "# Day 44 Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 45 expansion priorities.\n",
+        "# Scale execution log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 45 expansion priorities.\n",
     )
     _write(
         target / "scale-delivery-board.md",
-        "# Day 44 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# Scale delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "scale-validation-commands.md",
-        "# Day 44 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Scale validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -456,7 +456,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 44 scale closeout checks")
+    parser = argparse.ArgumentParser(description="Scale closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
