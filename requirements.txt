@@ -21,7 +21,7 @@ twine==6.2.0
 
 # Security/compliance tooling used in workflows
 pip-audit==2.10.0
-cyclonedx-bom==7.2.2
+cyclonedx-bom==7.3.0
 
 # Docs
 mkdocs==1.6.1
