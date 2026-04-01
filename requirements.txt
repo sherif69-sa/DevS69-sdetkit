@@ -8,7 +8,7 @@ filelock==3.25.2
 
 # Dev + QA tooling
 ruff==0.15.8
-mypy==1.19.1
+mypy==1.20.0
 pre-commit==4.5.1
 pytest==9.0.2
 pygments==2.20.0
