@@ -86,7 +86,6 @@
     "readme": "README.md",
     "top10": "docs/top-10-github-strategy.md"
   },
-  "legacy_name": "day27-kpi-audit",
   "metrics": {
     "baseline": {
       "discussions_per_week": 3.0,

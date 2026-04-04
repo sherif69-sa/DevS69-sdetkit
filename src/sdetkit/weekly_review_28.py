@@ -243,7 +243,6 @@ def build_weekly_review_summary_impl(
 
     return {
         "name": "weekly-review-lane",
-        "legacy_name": "day28-weekly-review",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -369,7 +368,6 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         )
     summary = {
         "name": "weekly-review-lane-execution",
-        "legacy_name": "day28-weekly-review-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,

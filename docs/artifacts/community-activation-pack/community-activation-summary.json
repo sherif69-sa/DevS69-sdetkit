@@ -70,7 +70,6 @@
     "readme": "README.md",
     "top10": "docs/top-10-github-strategy.md"
   },
-  "legacy_name": "day25-community-activation",
   "name": "community-activation",
   "strict_failures": [
     "# Community activation (Day 25)",

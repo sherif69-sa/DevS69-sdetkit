@@ -245,7 +245,6 @@ def build_community_activation_summary(
 
     return {
         "name": "community-activation",
-        "legacy_name": "day25-community-activation",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -360,7 +359,6 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
         )
     payload = {
         "name": "community-activation-execution",
-        "legacy_name": "day25-community-activation-execution",
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }
