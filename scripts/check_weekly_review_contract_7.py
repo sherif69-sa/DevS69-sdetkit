@@ -6,8 +6,8 @@ from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
-DAY7_REPORT = Path("docs/impact-7-ultra-upgrade-report.md")
-DAY7_ARTIFACT = Path("docs/artifacts/weekly-review-sample-7.md")
+LANE_REPORT = Path("docs/impact-7-ultra-upgrade-report.md")
+LANE_ARTIFACT = Path("docs/artifacts/weekly-review-sample-7.md")
 WEEKLY_MODULE = Path("src/sdetkit/weekly_review.py")
 
 REQUIRED_README_SNIPPETS = [
@@ -41,7 +41,7 @@ def main() -> int:
 
     readme = _read(README)
     docs_index = _read(DOCS_INDEX)
-    report = _read(DAY7_REPORT)
+    report = _read(LANE_REPORT)
 
     for s in REQUIRED_README_SNIPPETS:
         if s not in readme:
@@ -55,7 +55,7 @@ def main() -> int:
         if s not in report:
             errors.append(f"missing Day 7 report snippet: {s}")
 
-    for p in [DAY7_REPORT, DAY7_ARTIFACT, WEEKLY_MODULE]:
+    for p in [LANE_REPORT, LANE_ARTIFACT, WEEKLY_MODULE]:
         if not p.exists():
             errors.append(f"missing required file: {p}")
 

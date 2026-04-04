@@ -6,10 +6,10 @@ from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
-DAY8_REPORT = Path("docs/impact-8-ultra-upgrade-report.md")
-DAY8_ARTIFACT = Path("docs/artifacts/good-first-issues-sample-8.md")
+LANE_REPORT = Path("docs/impact-8-ultra-upgrade-report.md")
+LANE_ARTIFACT = Path("docs/artifacts/good-first-issues-sample-8.md")
 ISSUE_PACK = Path("docs/artifacts/contributor-issue-pack")
-DAY8_MODULE = Path("src/sdetkit/contributor_funnel.py")
+LANE_MODULE = Path("src/sdetkit/contributor_funnel.py")
 
 REQUIRED_README_SNIPPETS = [
     "## 🧲 Day 8 ultra: contributor funnel backlog",
@@ -43,7 +43,7 @@ def main() -> int:
 
     readme = _read(README)
     docs_index = _read(DOCS_INDEX)
-    report = _read(DAY8_REPORT)
+    report = _read(LANE_REPORT)
 
     for s in REQUIRED_README_SNIPPETS:
         if s not in readme:
@@ -57,7 +57,7 @@ def main() -> int:
         if s not in report:
             errors.append(f"missing Day 8 report snippet: {s}")
 
-    for p in [DAY8_REPORT, DAY8_ARTIFACT, DAY8_MODULE]:
+    for p in [LANE_REPORT, LANE_ARTIFACT, LANE_MODULE]:
         if not p.exists():
             errors.append(f"missing required file: {p}")
 

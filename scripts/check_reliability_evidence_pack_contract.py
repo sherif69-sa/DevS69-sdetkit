@@ -7,22 +7,22 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY18_PAGE = Path("docs/reliability-evidence-pack.md")
-DAY18_REPORT = Path("docs/reliability-evidence-report.md")
-DAY18_ARTIFACT = Path("docs/reliability-evidence-pack.md")
-DAY18_PACK_SUMMARY = Path(
+LANE_PAGE = Path("docs/reliability-evidence-pack.md")
+LANE_REPORT = Path("docs/reliability-evidence-report.md")
+LANE_ARTIFACT = Path("docs/reliability-evidence-pack.md")
+LANE_PACK_SUMMARY = Path(
     "docs/artifacts/reliability-evidence-pack/reliability-evidence-summary.json"
 )
-DAY18_PACK_SCORECARD = Path(
+LANE_PACK_SCORECARD = Path(
     "docs/artifacts/reliability-evidence-pack/reliability-evidence-scorecard.md"
 )
-DAY18_PACK_CHECKLIST = Path(
+LANE_PACK_CHECKLIST = Path(
     "docs/artifacts/reliability-evidence-pack/reliability-evidence-checklist.md"
 )
-DAY18_PACK_VALIDATION = Path(
+LANE_PACK_VALIDATION = Path(
     "docs/artifacts/reliability-evidence-pack/reliability-evidence-validation-commands.md"
 )
-DAY18_EVIDENCE = Path(
+LANE_EVIDENCE = Path(
     "docs/artifacts/reliability-evidence-pack/evidence/reliability-evidence-execution-summary.json"
 )
 MODULE = Path("src/sdetkit/reliability_evidence_pack.py")
@@ -95,17 +95,17 @@ def main(argv: list[str] | None = None) -> int:
         README,
         DOCS_INDEX,
         DOCS_CLI,
-        DAY18_PAGE,
-        DAY18_REPORT,
-        DAY18_ARTIFACT,
-        DAY18_PACK_SUMMARY,
-        DAY18_PACK_SCORECARD,
-        DAY18_PACK_CHECKLIST,
-        DAY18_PACK_VALIDATION,
+        LANE_PAGE,
+        LANE_REPORT,
+        LANE_ARTIFACT,
+        LANE_PACK_SUMMARY,
+        LANE_PACK_SCORECARD,
+        LANE_PACK_CHECKLIST,
+        LANE_PACK_VALIDATION,
         MODULE,
     ]
     if not ns.skip_evidence:
-        required.append(DAY18_EVIDENCE)
+        required.append(LANE_EVIDENCE)
 
     errors: list[str] = []
     for path in required:
@@ -116,18 +116,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{README}: missing '{m}'" for m in _missing(README, README_EXPECTED))
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
-        errors.extend(f"{DAY18_PAGE}: missing '{m}'" for m in _missing(DAY18_PAGE, PAGE_EXPECTED))
+        errors.extend(f"{LANE_PAGE}: missing '{m}'" for m in _missing(LANE_PAGE, PAGE_EXPECTED))
         errors.extend(
-            f"{DAY18_REPORT}: missing '{m}'" for m in _missing(DAY18_REPORT, REPORT_EXPECTED)
+            f"{LANE_REPORT}: missing '{m}'" for m in _missing(LANE_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
-            f"{DAY18_PACK_SUMMARY}: missing '{m}'"
-            for m in _missing(DAY18_PACK_SUMMARY, SUMMARY_EXPECTED)
+            f"{LANE_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(LANE_PACK_SUMMARY, SUMMARY_EXPECTED)
         )
         if not ns.skip_evidence:
             errors.extend(
-                f"{DAY18_EVIDENCE}: missing '{m}'"
-                for m in _missing(DAY18_EVIDENCE, EVIDENCE_EXPECTED)
+                f"{LANE_EVIDENCE}: missing '{m}'"
+                for m in _missing(LANE_EVIDENCE, EVIDENCE_EXPECTED)
             )
 
     if errors:

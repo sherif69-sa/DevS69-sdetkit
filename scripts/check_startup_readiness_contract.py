@@ -7,8 +7,8 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 USE_CASE_PAGE = Path("docs/use-cases-startup-small-team.md")
-DAY12_REPORT = Path("docs/startup-readiness-report.md")
-DAY12_ARTIFACT = Path("docs/artifacts/startup-readiness-sample.md")
+LANE_REPORT = Path("docs/startup-readiness-report.md")
+LANE_ARTIFACT = Path("docs/artifacts/startup-readiness-sample.md")
 STARTUP_PACK_CI = Path("docs/artifacts/startup-readiness-pack/startup-readiness-ci.yml")
 
 README_EXPECTED = [
@@ -76,8 +76,8 @@ def main() -> int:
         DOCS_INDEX,
         DOCS_CLI,
         USE_CASE_PAGE,
-        DAY12_REPORT,
-        DAY12_ARTIFACT,
+        LANE_REPORT,
+        LANE_ARTIFACT,
         STARTUP_PACK_CI,
     ]
     for path in required:
@@ -94,10 +94,10 @@ def main() -> int:
             f'{USE_CASE_PAGE}: missing "{m}"' for m in _missing(USE_CASE_PAGE, USE_CASE_EXPECTED)
         )
         errors.extend(
-            f'{DAY12_REPORT}: missing "{m}"' for m in _missing(DAY12_REPORT, REPORT_EXPECTED)
+            f'{LANE_REPORT}: missing "{m}"' for m in _missing(LANE_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
-            f'{DAY12_ARTIFACT}: missing "{m}"' for m in _missing(DAY12_ARTIFACT, ARTIFACT_EXPECTED)
+            f'{LANE_ARTIFACT}: missing "{m}"' for m in _missing(LANE_ARTIFACT, ARTIFACT_EXPECTED)
         )
         errors.extend(
             f'{STARTUP_PACK_CI}: missing "{m}"' for m in _missing(STARTUP_PACK_CI, PACK_CI_EXPECTED)

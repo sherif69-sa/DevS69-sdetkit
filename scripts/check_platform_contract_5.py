@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 README = Path("README.md")
-DAY5_REPORT = Path("docs/impact-5-ultra-upgrade-report.md")
-DAY5_ARTIFACT = Path("docs/artifacts/platform-onboarding-sample-5.md")
+LANE_REPORT = Path("docs/impact-5-ultra-upgrade-report.md")
+LANE_ARTIFACT = Path("docs/artifacts/platform-onboarding-sample-5.md")
 
 REQUIRED_README_SNIPPETS = [
     "## 🖥️ Day 5 ultra: platform onboarding boost",
@@ -16,7 +16,7 @@ REQUIRED_README_SNIPPETS = [
     "docs/impact-5-ultra-upgrade-report.md",
 ]
 
-REQUIRED_DAY5_SECTION_LINKS = [
+REQUIRED_PLATFORM_SECTION_LINKS = [
     "docs/impact-5-ultra-upgrade-report.md",
     "docs/artifacts/platform-onboarding-sample-5.md",
 ]
@@ -29,7 +29,7 @@ REQUIRED_REPORT_SNIPPETS = [
 ]
 
 
-def _day5_section(text: str) -> str:
+def _platform_section(text: str) -> str:
     start = text.find("## 🖥️ Day 5 ultra: platform onboarding boost")
     if start == -1:
         return ""
@@ -48,30 +48,30 @@ def main() -> int:
         return 2
 
     readme_text = README.read_text(encoding="utf-8")
-    day5_section = _day5_section(readme_text)
+    platform_section = _platform_section(readme_text)
 
     for snippet in REQUIRED_README_SNIPPETS:
         if snippet not in readme_text:
             errors.append(f"missing README snippet: {snippet}")
 
-    if not day5_section:
+    if not platform_section:
         errors.append("missing Day 5 ultra section in README")
 
-    for link in REQUIRED_DAY5_SECTION_LINKS:
-        if link not in day5_section:
+    for link in REQUIRED_PLATFORM_SECTION_LINKS:
+        if link not in platform_section:
             errors.append(f"missing Day 5 section link: {link}")
         if not Path(link).exists():
             errors.append(f"missing link target: {link}")
 
-    if not DAY5_REPORT.exists():
+    if not LANE_REPORT.exists():
         errors.append("missing docs/impact-5-ultra-upgrade-report.md")
     else:
-        report_text = DAY5_REPORT.read_text(encoding="utf-8")
+        report_text = LANE_REPORT.read_text(encoding="utf-8")
         for snippet in REQUIRED_REPORT_SNIPPETS:
             if snippet not in report_text:
                 errors.append(f"missing Day 5 report snippet: {snippet}")
 
-    if not DAY5_ARTIFACT.exists():
+    if not LANE_ARTIFACT.exists():
         errors.append("missing docs/artifacts/platform-onboarding-sample-5.md")
 
     if errors:

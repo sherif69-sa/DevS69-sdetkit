@@ -7,21 +7,21 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY23_PAGE = Path("docs/objection-handling.md")
-DAY23_REPORT = Path("docs/objection-handling-report.md")
-DAY23_ARTIFACT = Path("docs/objection-handling.md")
-DAY23_PACK_SUMMARY = Path("docs/artifacts/objection-handling-pack/objection-handling-summary.json")
-DAY23_PACK_SCORECARD = Path(
+LANE_PAGE = Path("docs/objection-handling.md")
+LANE_REPORT = Path("docs/objection-handling-report.md")
+LANE_ARTIFACT = Path("docs/objection-handling.md")
+LANE_PACK_SUMMARY = Path("docs/artifacts/objection-handling-pack/objection-handling-summary.json")
+LANE_PACK_SCORECARD = Path(
     "docs/artifacts/objection-handling-pack/objection-handling-scorecard.md"
 )
-DAY23_PACK_MATRIX = Path(
+LANE_PACK_MATRIX = Path(
     "docs/artifacts/objection-handling-pack/objection-handling-response-matrix.md"
 )
-DAY23_PACK_PLAYBOOK = Path("docs/artifacts/objection-handling-pack/objection-handling-playbook.md")
-DAY23_PACK_VALIDATION = Path(
+LANE_PACK_PLAYBOOK = Path("docs/artifacts/objection-handling-pack/objection-handling-playbook.md")
+LANE_PACK_VALIDATION = Path(
     "docs/artifacts/objection-handling-pack/objection-handling-validation-commands.md"
 )
-DAY23_EVIDENCE = Path(
+LANE_EVIDENCE = Path(
     "docs/artifacts/objection-handling-pack/evidence/objection-handling-execution-summary.json"
 )
 MODULE = Path("src/sdetkit/objection_handling.py")
@@ -78,18 +78,18 @@ def main(argv: list[str] | None = None) -> int:
         README,
         DOCS_INDEX,
         DOCS_CLI,
-        DAY23_PAGE,
-        DAY23_REPORT,
-        DAY23_ARTIFACT,
-        DAY23_PACK_SUMMARY,
-        DAY23_PACK_SCORECARD,
-        DAY23_PACK_MATRIX,
-        DAY23_PACK_PLAYBOOK,
-        DAY23_PACK_VALIDATION,
+        LANE_PAGE,
+        LANE_REPORT,
+        LANE_ARTIFACT,
+        LANE_PACK_SUMMARY,
+        LANE_PACK_SCORECARD,
+        LANE_PACK_MATRIX,
+        LANE_PACK_PLAYBOOK,
+        LANE_PACK_VALIDATION,
         MODULE,
     ]
     if not ns.skip_evidence:
-        required.append(DAY23_EVIDENCE)
+        required.append(LANE_EVIDENCE)
 
     errors: list[str] = []
     for path in required:
@@ -100,18 +100,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{README}: missing '{m}'" for m in _missing(README, README_EXPECTED))
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
-        errors.extend(f"{DAY23_PAGE}: missing '{m}'" for m in _missing(DAY23_PAGE, PAGE_EXPECTED))
+        errors.extend(f"{LANE_PAGE}: missing '{m}'" for m in _missing(LANE_PAGE, PAGE_EXPECTED))
         errors.extend(
-            f"{DAY23_REPORT}: missing '{m}'" for m in _missing(DAY23_REPORT, REPORT_EXPECTED)
+            f"{LANE_REPORT}: missing '{m}'" for m in _missing(LANE_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
-            f"{DAY23_PACK_SUMMARY}: missing '{m}'"
-            for m in _missing(DAY23_PACK_SUMMARY, SUMMARY_EXPECTED)
+            f"{LANE_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(LANE_PACK_SUMMARY, SUMMARY_EXPECTED)
         )
         if not ns.skip_evidence:
             errors.extend(
-                f"{DAY23_EVIDENCE}: missing '{m}'"
-                for m in _missing(DAY23_EVIDENCE, EVIDENCE_EXPECTED)
+                f"{LANE_EVIDENCE}: missing '{m}'"
+                for m in _missing(LANE_EVIDENCE, EVIDENCE_EXPECTED)
             )
 
     if errors:

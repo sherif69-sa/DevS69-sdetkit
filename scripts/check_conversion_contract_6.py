@@ -6,8 +6,8 @@ from pathlib import Path
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
-DAY6_REPORT = Path("docs/impact-6-ultra-upgrade-report.md")
-DAY6_ARTIFACT = Path("docs/artifacts/conversion-qa-sample-6.md")
+LANE_REPORT = Path("docs/impact-6-ultra-upgrade-report.md")
+LANE_ARTIFACT = Path("docs/artifacts/conversion-qa-sample-6.md")
 DOCS_QA_MODULE = Path("src/sdetkit/docs_qa.py")
 
 REQUIRED_README_SNIPPETS = [
@@ -41,7 +41,7 @@ def main() -> int:
 
     readme = _read(README)
     docs_index = _read(DOCS_INDEX)
-    report = _read(DAY6_REPORT)
+    report = _read(LANE_REPORT)
 
     for s in REQUIRED_README_SNIPPETS:
         if s not in readme:
@@ -55,7 +55,7 @@ def main() -> int:
         if s not in report:
             errors.append(f"missing Day 6 report snippet: {s}")
 
-    for p in [DAY6_REPORT, DAY6_ARTIFACT, DOCS_QA_MODULE]:
+    for p in [LANE_REPORT, LANE_ARTIFACT, DOCS_QA_MODULE]:
         if not p.exists():
             errors.append(f"missing required file: {p}")
 

@@ -8,7 +8,7 @@ CONTRIBUTING = Path("CONTRIBUTING.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DOCS_CONTRIBUTING = Path("docs/contributing.md")
-DAY10_REPORT = Path("docs/impact-10-ultra-upgrade-report.md")
+LANE_REPORT = Path("docs/impact-10-ultra-upgrade-report.md")
 FIRST_CONTRIBUTION_ARTIFACT = Path("docs/artifacts/first-contribution-checklist-sample.md")
 
 README_EXPECTED = [
@@ -72,7 +72,7 @@ def main() -> int:
         DOCS_INDEX,
         DOCS_CLI,
         DOCS_CONTRIBUTING,
-        DAY10_REPORT,
+        LANE_REPORT,
         FIRST_CONTRIBUTION_ARTIFACT,
     ]
     for path in required:
@@ -93,7 +93,7 @@ def main() -> int:
             for m in _missing(DOCS_CONTRIBUTING, DOCS_CONTRIBUTING_EXPECTED)
         )
         errors.extend(
-            f'{DAY10_REPORT}: missing "{m}"' for m in _missing(DAY10_REPORT, REPORT_EXPECTED)
+            f'{LANE_REPORT}: missing "{m}"' for m in _missing(LANE_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
             f'{FIRST_CONTRIBUTION_ARTIFACT}: missing "{m}"'
