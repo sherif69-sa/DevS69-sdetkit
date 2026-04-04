@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-case-study-launch-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day72_summary": "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json",
-    "day72_delivery_board": "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md",
+    "prior_closeout_summary": "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json",
+    "prior_closeout_delivery_board": "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md",
     "case_study_data": "docs/roadmap/plans/published-case-study.json"
   },
   "checks": [
@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day73 command lane"
+      "evidence": "README case-study-launch-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -29,47 +29,52 @@
       "evidence": "Day 73 + Day 74 strategy chain"
     },
     {
-      "check_id": "day72_summary_present",
+      "check_id": "prior_closeout_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
     },
     {
-      "check_id": "day72_delivery_board_present",
+      "check_id": "prior_closeout_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
     },
     {
-      "check_id": "day72_quality_floor",
+      "check_id": "prior_closeout_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day72_score": 92,
+        "prior_closeout_score": 54,
         "strict_pass": false,
-        "day72_checks": 14
+        "prior_closeout_checks": 14
       }
     },
     {
-      "check_id": "day72_board_integrity",
+      "check_id": "prior_closeout_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day72": true
+        "contains_prior_closeout": true
       }
     },
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 73 \u2014 Case-study launch closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Why Day 73 matters",
+        "## Required inputs (Day 72)",
+        "## Day 73 command lane",
+        "## Day 73 delivery board"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +85,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 73 published case-study launch execution and signoff.",
+        "The Day 73 lane references Day 72 prep outputs, governance decisions, and KPI continuity signals.",
+        "Every Day 73 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 73 closeout records publication outcomes, evidence confidence notes, and Day 74 scaling priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +102,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 73 integration brief committed",
+        "- [ ] Day 73 published case-study narrative committed",
+        "- [ ] Day 73 controls and assumptions log exported",
+        "- [ ] Day 73 KPI scorecard snapshot exported",
+        "- [ ] Day 74 distribution scaling priorities drafted from Day 73 learnings"
+      ]
     },
     {
       "check_id": "case_study_data_present",
@@ -103,16 +119,16 @@
     }
   ],
   "rollup": {
-    "day72_activation_score": 92,
-    "day72_checks": 14,
-    "day72_delivery_board_items": 5
+    "prior_closeout_activation_score": 54,
+    "prior_closeout_checks": 14,
+    "prior_closeout_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 67,
-    "passed_checks": 10,
-    "failed_checks": 4,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
-      "day72_strict_baseline"
+      "prior_closeout_strict_baseline"
     ],
     "strict_pass": false
   },

@@ -1,5 +1,5 @@
 Case Study Prep3 Closeout summary
-- Activation score: 74
-- Passed checks: 11
-- Failed checks: 3
-- Critical failures: ['day70_strict_baseline']
+- Activation score: 49
+- Passed checks: 7
+- Failed checks: 7
+- Critical failures: ['prior_closeout_strict_baseline']

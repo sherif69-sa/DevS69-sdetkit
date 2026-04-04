@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     case_study.write_text(
         json.dumps(
             {
-                "case_id": "day72-publication-quality-001",
+                "case_id": "case-study-prep4-publication-quality-001",
                 "metric": "publication-quality-score",
                 "baseline": {"score": 61.4},
                 "after": {"score": 84.9},
@@ -150,7 +150,7 @@ def test_lane72_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane72_strict_fails_without_day71(tmp_path: Path) -> None:
+def test_lane72_strict_fails_without_prior_closeout(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-case-study-prep2-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day69_summary": "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json",
-    "day69_delivery_board": "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md",
+    "prior_closeout_summary": "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json",
+    "prior_closeout_delivery_board": "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md",
     "case_study_data": "docs/roadmap/plans/triage-speed-case-study.json"
   },
   "checks": [
@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day70 command lane"
+      "evidence": "README case-study-prep2-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -29,47 +29,51 @@
       "evidence": "Day 70 + Day 71 strategy chain"
     },
     {
-      "check_id": "day69_summary_present",
+      "check_id": "prior_closeout_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json"
     },
     {
-      "check_id": "day69_delivery_board_present",
+      "check_id": "prior_closeout_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
     },
     {
-      "check_id": "day69_quality_floor",
+      "check_id": "prior_closeout_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day69_score": 80,
+        "prior_closeout_score": 37,
         "strict_pass": false,
-        "day69_checks": 14
+        "prior_closeout_checks": 14
       }
     },
     {
-      "check_id": "day69_board_integrity",
+      "check_id": "prior_closeout_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day69": true
+        "contains_prior_closeout": true
       }
     },
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 70 \u2014 Case-study prep #2 closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 69)",
+        "## Case Study Prep 2 Closeout command lane (Legacy Day 70)",
+        "## Case Study Prep 2 Closeout delivery board (Legacy Day 70)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +84,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 70 triage-speed case-study prep and signoff.",
+        "The Day 70 lane references Day 69 case-study prep outputs, governance decisions, and KPI continuity signals.",
+        "Every Day 70 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 70 closeout records before/after triage-speed deltas, evidence confidence notes, and Day 71 prep priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +101,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 70 integration brief committed",
+        "- [ ] Day 70 triage-speed case-study narrative published",
+        "- [ ] Day 70 controls and assumptions log exported",
+        "- [ ] Day 70 KPI scorecard snapshot exported",
+        "- [ ] Day 71 case-study prep priorities drafted from Day 70 learnings"
+      ]
     },
     {
       "check_id": "case_study_data_present",
@@ -103,16 +118,16 @@
     }
   ],
   "rollup": {
-    "day69_activation_score": 80,
-    "day69_checks": 14,
-    "day69_delivery_board_items": 5
+    "prior_closeout_activation_score": 37,
+    "prior_closeout_checks": 14,
+    "prior_closeout_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 67,
-    "passed_checks": 10,
-    "failed_checks": 4,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
-      "day69_strict_baseline"
+      "prior_closeout_strict_baseline"
     ],
     "strict_pass": false
   },

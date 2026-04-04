@@ -131,7 +131,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day71(summary_path: Path) -> tuple[int, bool, int]:
+def _load_prior_closeout(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     try:
@@ -162,10 +162,10 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     case_data_text = _read(root / _CASE_STUDY_DATA_PATH)
 
-    day71_summary = root / _DAY71_SUMMARY_PATH
-    day71_board = root / _DAY71_BOARD_PATH
-    day71_score, day71_strict, day71_check_count = _load_day71(day71_summary)
-    board_count, board_has_day71 = _count_board_items(day71_board, "Day 71")
+    prior_closeout_summary = root / _DAY71_SUMMARY_PATH
+    prior_closeout_board = root / _DAY71_BOARD_PATH
+    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(prior_closeout_summary)
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 71")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -208,32 +208,32 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Case-study prep #4 + publication launch strategy chain",
         },
         {
-            "check_id": "day71_summary_present",
+            "check_id": "prior_closeout_summary_present",
             "weight": 10,
-            "passed": day71_summary.exists(),
-            "evidence": str(day71_summary),
+            "passed": prior_closeout_summary.exists(),
+            "evidence": str(prior_closeout_summary),
         },
         {
-            "check_id": "day71_delivery_board_present",
+            "check_id": "prior_closeout_delivery_board_present",
             "weight": 7,
-            "passed": day71_board.exists(),
-            "evidence": str(day71_board),
+            "passed": prior_closeout_board.exists(),
+            "evidence": str(prior_closeout_board),
         },
         {
-            "check_id": "day71_quality_floor",
+            "check_id": "prior_closeout_quality_floor",
             "weight": 13,
-            "passed": day71_strict and day71_score >= 95,
+            "passed": prior_closeout_strict and prior_closeout_score >= 95,
             "evidence": {
-                "day71_score": day71_score,
-                "strict_pass": day71_strict,
-                "day71_checks": day71_check_count,
+                "prior_closeout_score": prior_closeout_score,
+                "strict_pass": prior_closeout_strict,
+                "prior_closeout_checks": prior_closeout_check_count,
             },
         },
         {
-            "check_id": "day71_board_integrity",
+            "check_id": "prior_closeout_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day71,
-            "evidence": {"board_items": board_count, "contains_day71": board_has_day71},
+            "passed": board_count >= 5 and board_has_prior_closeout,
+            "evidence": {"board_items": board_count, "contains_prior_closeout": board_has_prior_closeout},
         },
         {
             "check_id": "page_header",
@@ -289,24 +289,24 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day71_summary.exists() or not day71_board.exists():
-        critical_failures.append("day71_handoff_inputs")
-    if not day71_strict:
-        critical_failures.append("day71_strict_baseline")
+    if not prior_closeout_summary.exists() or not prior_closeout_board.exists():
+        critical_failures.append("prior_closeout_handoff_inputs")
+    if not prior_closeout_strict:
+        critical_failures.append("prior_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day71_strict:
-        wins.append(f"Day 71 continuity is strict-pass with activation score={day71_score}.")
+    if prior_closeout_strict:
+        wins.append(f"Day 71 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
         misses.append("Day 71 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 71 closeout command and restore strict baseline before Day 72 lock."
         )
 
-    if board_count >= 5 and board_has_day71:
+    if board_count >= 5 and board_has_prior_closeout:
         wins.append(
             f"Day 71 delivery board integrity validated with {board_count} checklist items."
         )
@@ -339,19 +339,19 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day71_summary": str(day71_summary.relative_to(root))
-            if day71_summary.exists()
-            else str(day71_summary),
-            "day71_delivery_board": str(day71_board.relative_to(root))
-            if day71_board.exists()
-            else str(day71_board),
+            "prior_closeout_summary": str(prior_closeout_summary.relative_to(root))
+            if prior_closeout_summary.exists()
+            else str(prior_closeout_summary),
+            "prior_closeout_delivery_board": str(prior_closeout_board.relative_to(root))
+            if prior_closeout_board.exists()
+            else str(prior_closeout_board),
             "case_study_data": _CASE_STUDY_DATA_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day71_activation_score": day71_score,
-            "day71_checks": day71_check_count,
-            "day71_delivery_board_items": board_count,
+            "prior_closeout_activation_score": prior_closeout_score,
+            "prior_closeout_checks": prior_closeout_check_count,
+            "prior_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

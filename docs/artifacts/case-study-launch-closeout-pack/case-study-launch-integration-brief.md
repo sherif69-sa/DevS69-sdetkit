@@ -1,1 +1,1 @@
-# Cycle 73 integration brief
+# Day 73 integration brief

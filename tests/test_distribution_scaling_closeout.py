@@ -78,7 +78,7 @@ def _seed_repo(root: Path) -> None:
     scaling_plan.write_text(
         json.dumps(
             {
-                "plan_id": "day74-distribution-scaling-001",
+                "plan_id": "distribution-scaling-001",
                 "channels": ["github", "linkedin", "newsletter"],
                 "baseline": {"qualified_leads": 22, "ctr": 0.038},
                 "target": {"qualified_leads": 35, "ctr": 0.051},
@@ -158,7 +158,7 @@ def test_lane74_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane74_strict_fails_without_day73(tmp_path: Path) -> None:
+def test_lane74_strict_fails_without_prior_closeout(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
