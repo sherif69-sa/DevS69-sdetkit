@@ -156,7 +156,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
-def build_day35_kpi_instrumentation_summary(
+def build_kpi_instrumentation_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -205,19 +205,19 @@ def build_day35_kpi_instrumentation_summary(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day35_link",
+            "check_id": "readme_kpi_instrumentation_link",
             "weight": 8,
             "passed": "docs/integrations-kpi-instrumentation.md" in readme_text,
             "evidence": "docs/integrations-kpi-instrumentation.md",
         },
         {
-            "check_id": "readme_day35_command",
+            "check_id": "readme_kpi_instrumentation_command",
             "weight": 4,
             "passed": "kpi-instrumentation" in readme_text,
             "evidence": "README kpi-instrumentation command lane",
         },
         {
-            "check_id": "docs_index_day35_links",
+            "check_id": "docs_index_kpi_instrumentation_links",
             "weight": 8,
             "passed": (
                 "impact-35-big-upgrade-report.md" in docs_index_text
@@ -226,7 +226,7 @@ def build_day35_kpi_instrumentation_summary(
             "evidence": "impact-35-big-upgrade-report.md + integrations-kpi-instrumentation.md",
         },
         {
-            "check_id": "top10_day35_alignment",
+            "check_id": "top10_kpi_instrumentation_alignment",
             "weight": 5,
             "passed": ("Day 35" in top10_text and "Day 36" in top10_text),
             "evidence": "Day 35 + Day 36 strategy chain",
@@ -492,7 +492,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY35_DEFAULT_PAGE)
 
-    payload = build_day35_kpi_instrumentation_summary(root)
+    payload = build_kpi_instrumentation_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -535,7 +535,7 @@ def build_kpi_instrumentation_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day35_kpi_instrumentation_summary(
+    return build_kpi_instrumentation_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

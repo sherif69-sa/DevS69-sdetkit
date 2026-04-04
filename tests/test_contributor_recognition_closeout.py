@@ -63,7 +63,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day76_json(tmp_path: Path, capsys) -> None:
+def test_lane76_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d76.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -72,7 +72,7 @@ def test_day76_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["strict_pass"] is True
 
 
-def test_day76_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane76_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d76.main(
         [
@@ -90,15 +90,20 @@ def test_day76_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
+        tmp_path
+        / "artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/contributor-recognition-closeout-pack/evidence/contributor-recognition-execution-summary.json"
+        tmp_path
+        / "artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/contributor-recognition-closeout-pack/evidence/contributor-recognition-execution-summary.json"
     ).exists()
 
 
-def test_day76_strict_fails_without_day75_summary(tmp_path: Path) -> None:
+def test_lane76_strict_fails_without_lane75_summary(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -107,7 +112,7 @@ def test_day76_strict_fails_without_day75_summary(tmp_path: Path) -> None:
     assert d76.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day76_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane76_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["contributor-recognition-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

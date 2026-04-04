@@ -68,7 +68,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day40_scale_lane_json(tmp_path: Path, capsys) -> None:
+def test_lane40_scale_lane_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d40.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -77,7 +77,7 @@ def test_day40_scale_lane_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day40_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane40_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d40.main(
         [
@@ -105,14 +105,14 @@ def test_day40_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/scale-lane-pack/evidence/execution-summary.json").exists()
 
 
-def test_day40_strict_fails_when_day39_inputs_missing(tmp_path: Path) -> None:
+def test_lane40_strict_fails_when_lane39_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/playbook-post-pack/playbook-post-summary.json").unlink()
     rc = d40.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day40_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane40_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["scale-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

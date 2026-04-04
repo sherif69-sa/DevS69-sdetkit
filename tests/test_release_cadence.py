@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day32_release_cadence_json(tmp_path: Path, capsys) -> None:
+def test_release_cadence_release_cadence_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d32.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day32_release_cadence_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day32_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_release_cadence_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d32.main(
         [
@@ -107,14 +107,14 @@ def test_day32_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day32_strict_fails_when_day31_inputs_missing(tmp_path: Path) -> None:
+def test_release_cadence_strict_fails_when_lane31_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json").unlink()
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day32_strict_fails_when_day31_board_is_not_ready(tmp_path: Path) -> None:
+def test_release_cadence_strict_fails_when_lane31_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").write_text(
         "- [ ] Day 32 release cadence checklist drafted\n", encoding="utf-8"
@@ -123,7 +123,7 @@ def test_day32_strict_fails_when_day31_board_is_not_ready(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_day32_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_release_cadence_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["release-cadence", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

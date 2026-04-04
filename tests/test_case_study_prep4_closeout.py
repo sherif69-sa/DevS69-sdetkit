@@ -89,7 +89,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day72_json(tmp_path: Path, capsys) -> None:
+def test_lane72_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d72.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -98,7 +98,7 @@ def test_day72_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day72_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane72_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d72.main(
         [
@@ -115,21 +115,42 @@ def test_day72_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-controls-log.json").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-execution-log.md").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/case-study-prep4-closeout-pack/evidence/case-study-prep4-execution-summary.json"
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-case-study-narrative.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-controls-log.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-prep4-closeout-pack/case-study-prep4-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-prep4-closeout-pack/evidence/case-study-prep4-execution-summary.json"
     ).exists()
 
 
-def test_day72_strict_fails_without_day71(tmp_path: Path) -> None:
+def test_lane72_strict_fails_without_day71(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -138,7 +159,7 @@ def test_day72_strict_fails_without_day71(tmp_path: Path) -> None:
     assert d72.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day72_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane72_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["case-study-prep4-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day56_json(tmp_path: Path, capsys) -> None:
+def test_lane56_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d56.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -85,7 +85,7 @@ def test_day56_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day56_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane56_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d56.main(
         [
@@ -102,20 +102,35 @@ def test_day56_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-brief.md").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-execution-log.md").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/stabilization-closeout-pack/evidence/stabilization-execution-summary.json"
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-closeout-summary.md"
+    ).exists()
+    assert (tmp_path / "artifacts/stabilization-closeout-pack/stabilization-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-risk-ledger.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/stabilization-closeout-pack/stabilization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/stabilization-closeout-pack/evidence/stabilization-execution-summary.json"
     ).exists()
 
 
-def test_day56_strict_fails_without_day55(tmp_path: Path) -> None:
+def test_lane56_strict_fails_without_day55(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -124,7 +139,7 @@ def test_day56_strict_fails_without_day55(tmp_path: Path) -> None:
     assert d56.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day56_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane56_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["stabilization-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

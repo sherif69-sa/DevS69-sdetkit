@@ -72,7 +72,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day58_json(tmp_path: Path, capsys) -> None:
+def test_lane58_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d58.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -81,7 +81,7 @@ def test_day58_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day58_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane58_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d58.main(
         [
@@ -98,20 +98,38 @@ def test_day58_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-brief.md").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-scorecard.json").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-execution-log.md").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/phase2-hardening-closeout-pack/evidence/phase2-hardening-execution-summary.json"
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-risk-ledger.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase2-hardening-closeout-pack/phase2-hardening-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase2-hardening-closeout-pack/evidence/phase2-hardening-execution-summary.json"
     ).exists()
 
 
-def test_day58_strict_fails_without_day57(tmp_path: Path) -> None:
+def test_lane58_strict_fails_without_day57(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -120,7 +138,7 @@ def test_day58_strict_fails_without_day57(tmp_path: Path) -> None:
     assert d58.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day58_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane58_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase2-hardening-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

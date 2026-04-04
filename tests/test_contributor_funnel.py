@@ -8,7 +8,7 @@ import pytest
 from sdetkit import contributor_funnel
 
 
-def test_day8_backlog_has_ten_curated_issues() -> None:
+def test_lane8_backlog_has_ten_curated_issues() -> None:
     payload = json.loads(contributor_funnel._render_json(contributor_funnel.build_backlog()))
     assert payload["name"] == "contributor-funnel"
     assert payload["kpis"]["issue_count"] == 10

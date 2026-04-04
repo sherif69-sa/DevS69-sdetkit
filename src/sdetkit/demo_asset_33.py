@@ -156,7 +156,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
-def build_day33_demo_asset_summary(
+def build_demo_asset_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -205,19 +205,19 @@ def build_day33_demo_asset_summary(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day33_link",
+            "check_id": "readme_demo_asset_link",
             "weight": 8,
             "passed": "docs/integrations-demo-asset.md" in readme_text,
             "evidence": "docs/integrations-demo-asset.md",
         },
         {
-            "check_id": "readme_day33_command",
+            "check_id": "readme_demo_asset_command",
             "weight": 4,
             "passed": "demo-asset" in readme_text,
             "evidence": "demo-asset",
         },
         {
-            "check_id": "docs_index_day33_links",
+            "check_id": "docs_index_demo_asset_links",
             "weight": 8,
             "passed": (
                 "impact-33-ultra-upgrade-report.md" in docs_index_text
@@ -226,7 +226,7 @@ def build_day33_demo_asset_summary(
             "evidence": "impact-33-ultra-upgrade-report.md + integrations-demo-asset.md",
         },
         {
-            "check_id": "top10_day33_alignment",
+            "check_id": "top10_demo_asset_alignment",
             "weight": 5,
             "passed": (
                 "Day 33 \u2014 Demo asset #1" in top10_text
@@ -495,7 +495,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY33_DEFAULT_PAGE)
 
-    payload = build_day33_demo_asset_summary(root)
+    payload = build_demo_asset_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -538,7 +538,7 @@ def build_demo_asset_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day33_demo_asset_summary(
+    return build_demo_asset_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

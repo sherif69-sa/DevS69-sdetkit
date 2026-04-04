@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day45_expansion_closeout_json(tmp_path: Path, capsys) -> None:
+def test_lane45_expansion_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d45.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day45_expansion_closeout_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day45_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane45_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d45.main(
         [
@@ -96,25 +96,33 @@ def test_day45_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-closeout-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/expansion-closeout-pack-45/expansion-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/expansion-closeout-pack-45/expansion-closeout-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-plan.md").exists()
     assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-growth-matrix.csv").exists()
     assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-execution-log.md").exists()
     assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/expansion-closeout-pack-45/expansion-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/expansion-closeout-pack-45/evidence/expansion-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/expansion-closeout-pack-45/expansion-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/expansion-closeout-pack-45/evidence/expansion-execution-summary.json"
+    ).exists()
 
 
-def test_day45_strict_fails_when_day44_inputs_missing(tmp_path: Path) -> None:
+def test_lane45_strict_fails_when_lane44_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json").unlink()
     rc = d45.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day45_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane45_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["expansion-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

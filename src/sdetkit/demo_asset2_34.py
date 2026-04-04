@@ -156,7 +156,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
-def build_day34_demo_asset2_summary(
+def build_demo_asset2_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -496,7 +496,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY34_DEFAULT_PAGE)
 
-    payload = build_day34_demo_asset2_summary(root)
+    payload = build_demo_asset2_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -539,7 +539,7 @@ def build_demo_asset2_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day34_demo_asset2_summary(
+    return build_demo_asset2_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

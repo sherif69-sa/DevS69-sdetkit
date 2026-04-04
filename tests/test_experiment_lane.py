@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day37_distribution_json(tmp_path: Path, capsys) -> None:
+def test_lane37_distribution_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d37.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day37_distribution_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day37_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane37_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d37.main(
         [
@@ -107,7 +107,7 @@ def test_day37_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/experiment-lane-pack/evidence/execution-summary.json").exists()
 
 
-def test_day37_strict_fails_when_day36_inputs_missing(tmp_path: Path) -> None:
+def test_lane37_strict_fails_when_lane36_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path / "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
@@ -116,7 +116,7 @@ def test_day37_strict_fails_when_day36_inputs_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day37_strict_fails_when_day36_board_is_not_ready(tmp_path: Path) -> None:
+def test_lane37_strict_fails_when_lane36_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/distribution-closeout-pack/delivery-board.md").write_text(
         "- [ ] Day 37 experiment backlog seeded from channel misses\n", encoding="utf-8"
@@ -125,7 +125,7 @@ def test_day37_strict_fails_when_day36_board_is_not_ready(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_day37_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane37_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["experiment-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

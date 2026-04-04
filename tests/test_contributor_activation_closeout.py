@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day55_json(tmp_path: Path, capsys) -> None:
+def test_lane55_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d55.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day55_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day55_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane55_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d55.main(
         [
@@ -96,31 +96,50 @@ def test_day55_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-brief.md").exists()
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-ladder.csv").exists()
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-execution-log.md").exists()
-    assert (tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-validation-commands.md"
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/contributor-activation-closeout-pack/evidence/contributor-activation-execution-summary.json"
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-activation-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/contributor-activation-closeout-pack/contributor-ladder.csv"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/contributor-activation-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/contributor-activation-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/contributor-activation-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/contributor-activation-closeout-pack/evidence/contributor-activation-execution-summary.json"
     ).exists()
 
 
-def test_day55_strict_fails_without_day53(tmp_path: Path) -> None:
+def test_lane55_strict_fails_without_day53(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json").unlink()
     assert d55.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day55_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane55_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["contributor-activation-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["contributor-activation-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Contributor Activation Closeout summary" in capsys.readouterr().out

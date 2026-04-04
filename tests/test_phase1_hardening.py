@@ -44,7 +44,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day29_hardening_json(tmp_path: Path, capsys) -> None:
+def test_phase1_hardening_hardening_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d29.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -53,7 +53,7 @@ def test_day29_hardening_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 90
 
 
-def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_phase1_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d29.main(
         [
@@ -73,13 +73,16 @@ def test_day29_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-summary.json").exists()
     assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-summary.md").exists()
     assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-stale-gaps.json").exists()
-    assert (tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
+        tmp_path / "artifacts/phase1-hardening-pack/phase1-hardening-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase1-hardening-pack/evidence/phase1-hardening-execution-summary.json"
     ).exists()
 
 
-def test_day29_strict_fails_when_sections_missing(tmp_path: Path) -> None:
+def test_phase1_hardening_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/integrations-phase1-hardening.md").write_text(
         "# Day 29 — Phase-1 hardening\n", encoding="utf-8"
@@ -88,7 +91,7 @@ def test_day29_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day29_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_phase1_hardening_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase1-hardening", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

@@ -51,7 +51,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day28_weekly_review_json(tmp_path: Path, capsys) -> None:
+def test_lane28_weekly_review_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d28.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -60,7 +60,7 @@ def test_day28_weekly_review_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 90
 
 
-def test_day28_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane28_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d28.main(
         [
@@ -86,7 +86,7 @@ def test_day28_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day28_strict_fails_when_sections_missing(tmp_path: Path) -> None:
+def test_lane28_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/integrations-weekly-review.md").write_text(
         "# Weekly review #4 (Day 28)\n", encoding="utf-8"
@@ -95,7 +95,7 @@ def test_day28_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day28_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane28_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

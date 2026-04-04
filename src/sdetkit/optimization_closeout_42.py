@@ -11,9 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY41_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
-_DAY41_BOARD_PATH = (
-    "docs/artifacts/expansion-automation-pack/delivery-board.md"
-)
+_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack/delivery-board.md"
 _DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -479,7 +477,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day42_optimization_closeout_summary(root: Path) -> dict[str, Any]:
+def build_optimization_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_optimization_closeout_summary(root)
 

@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day61_json(tmp_path: Path, capsys) -> None:
+def test_lane61_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d61.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -85,7 +85,7 @@ def test_day61_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day61_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane61_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d61.main(
         [
@@ -102,20 +102,35 @@ def test_day61_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-brief.md").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-trust-ledger.csv").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-execution-log.md").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/phase3-kickoff-closeout-pack/evidence/phase3-kickoff-execution-summary.json"
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.md"
+    ).exists()
+    assert (tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-trust-ledger.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-kickoff-closeout-pack/evidence/phase3-kickoff-execution-summary.json"
     ).exists()
 
 
-def test_day61_strict_fails_without_day60(tmp_path: Path) -> None:
+def test_lane61_strict_fails_without_day60(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -124,12 +139,10 @@ def test_day61_strict_fails_without_day60(tmp_path: Path) -> None:
     assert d61.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day61_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane61_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    alias_rc = cli.main(
-        ["phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    alias_rc = cli.main(["phase3-kickoff-closeout", "--root", str(tmp_path), "--format", "text"])
     assert alias_rc == 0
     assert "Phase3 Kickoff Closeout summary" in capsys.readouterr().out

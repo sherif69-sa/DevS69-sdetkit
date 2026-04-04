@@ -51,7 +51,7 @@ def _seed_repo(root: Path) -> None:
         p.write_text(json.dumps({"summary": {"activation_score": 93}}, indent=2), encoding="utf-8")
 
 
-def test_day30_wrap_json(tmp_path: Path, capsys) -> None:
+def test_phase1_wrap_wrap_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d30.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -60,7 +60,7 @@ def test_day30_wrap_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 90
 
 
-def test_day30_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_phase1_wrap_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d30.main(
         [
@@ -82,17 +82,19 @@ def test_day30_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md").exists()
     assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-handoff-actions.md").exists()
     assert (tmp_path / "artifacts/phase1-wrap-pack/phase1-wrap-validation-commands.md").exists()
-    assert (tmp_path / "artifacts/phase1-wrap-pack/evidence/phase1-wrap-execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/phase1-wrap-pack/evidence/phase1-wrap-execution-summary.json"
+    ).exists()
 
 
-def test_day30_strict_fails_when_inputs_missing(tmp_path: Path) -> None:
+def test_phase1_wrap_strict_fails_when_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json").unlink()
     rc = d30.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day30_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_phase1_wrap_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase1-wrap", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

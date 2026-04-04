@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day36_distribution_json(tmp_path: Path, capsys) -> None:
+def test_lane36_distribution_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d36.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day36_distribution_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day36_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane36_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d36.main(
         [
@@ -112,14 +112,14 @@ def test_day36_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day36_strict_fails_when_day35_inputs_missing(tmp_path: Path) -> None:
+def test_lane36_strict_fails_when_lane35_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json").unlink()
     rc = d36.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day36_strict_fails_when_day35_board_is_not_ready(tmp_path: Path) -> None:
+def test_lane36_strict_fails_when_lane35_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/kpi-instrumentation-pack/delivery-board.md").write_text(
         "- [ ] Day 36 distribution message references KPI shifts\n", encoding="utf-8"
@@ -128,7 +128,7 @@ def test_day36_strict_fails_when_day35_board_is_not_ready(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_day36_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane36_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["distribution-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
