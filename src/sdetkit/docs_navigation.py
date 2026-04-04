@@ -18,8 +18,8 @@ _REQUIRED_LINKS = [
     "[\U0001f4e6 Legacy reports](#legacy-reports)",
 ]
 
-_DAY11_SECTION_HEADER = "## Legacy reports"
-_DAY11_JOURNEYS_HEADER = "### Top journeys"
+_LEGACY_REPORTS_SECTION_HEADER = "## Legacy reports"
+_TOP_JOURNEYS_HEADER = "### Top journeys"
 
 _TOP_JOURNEYS = [
     "Run first command in under 60 seconds",
@@ -27,14 +27,14 @@ _TOP_JOURNEYS = [
     "Ship a first contribution with deterministic quality gates",
 ]
 
-_DAY11_QUICK_JUMP_BLOCK = """<div class=\"quick-jump\" markdown>
+_DEFAULT_QUICK_JUMP_BLOCK = """<div class=\"quick-jump\" markdown>
 
 [\u26a1 Fast start](#fast-start) \u00b7 [\U0001f9ed Repo tour](repo-tour.md) \u00b7 [\U0001f4c8 Top-10 strategy](top-10-github-strategy.md) \u00b7 [\U0001f916 AgentOS](agentos-foundation.md) \u00b7 [\U0001f373 Cookbook](agentos-cookbook.md) \u00b7 [\U0001f6e0 CLI commands](cli.md) \u00b7 [\U0001fa7a Doctor checks](doctor.md) \u00b7 [\U0001f91d Contribute](contributing.md) \u00b7 [\U0001f4e6 Legacy reports](#legacy-reports)
 
 </div>
 """
 
-_DAY11_JOURNEYS_BLOCK = """### Top journeys
+_DEFAULT_JOURNEYS_BLOCK = """### Top journeys
 
 - Run first command in under 60 seconds
 - Validate docs links and anchors before publishing
@@ -103,18 +103,18 @@ def _replace_or_append_block(
     return updated, updated != text
 
 
-def _ensure_day11_section_header(text: str) -> tuple[str, bool]:
-    if _DAY11_SECTION_HEADER in text:
+def _ensure_legacy_reports_section_header(text: str) -> tuple[str, bool]:
+    if _LEGACY_REPORTS_SECTION_HEADER in text:
         return text, False
-    updated = text.rstrip() + "\n\n" + _DAY11_SECTION_HEADER + "\n"
+    updated = text.rstrip() + "\n\n" + _LEGACY_REPORTS_SECTION_HEADER + "\n"
     return updated, updated != text
 
 
 def _ensure_journey_block(text: str) -> tuple[str, bool]:
-    if _DAY11_JOURNEYS_HEADER in text and all(f"- {journey}" in text for journey in _TOP_JOURNEYS):
+    if _TOP_JOURNEYS_HEADER in text and all(f"- {journey}" in text for journey in _TOP_JOURNEYS):
         return text, False
 
-    updated = text.rstrip() + "\n\n" + _DAY11_JOURNEYS_BLOCK + "\n"
+    updated = text.rstrip() + "\n\n" + _DEFAULT_JOURNEYS_BLOCK + "\n"
     return updated, updated != text
 
 
@@ -122,8 +122,8 @@ def _check_results(index_text: str) -> list[dict[str, Any]]:
     quick_jump = _extract_quick_jump(index_text)
     checks: list[tuple[str, str, str]] = [
         ("quick-jump-wrapper", _QUICK_JUMP_START, "quick_jump"),
-        ("day11-upgrade-section", _DAY11_SECTION_HEADER, "index"),
-        ("day11-top-journeys-header", _DAY11_JOURNEYS_HEADER, "index"),
+        ("legacy-reports-section", _LEGACY_REPORTS_SECTION_HEADER, "index"),
+        ("top-journeys-header", _TOP_JOURNEYS_HEADER, "index"),
     ]
     checks.extend((f"quick-jump-link:{link}", link, "quick_jump") for link in _REQUIRED_LINKS)
     checks.extend((f"top-journey:{journey}", f"- {journey}", "index") for journey in _TOP_JOURNEYS)
@@ -149,9 +149,9 @@ def _write_defaults(base: Path) -> list[str]:
         current = "# Documentation Home\n\n"
 
     updated, changed_quick_jump = _replace_or_append_block(
-        current, _QUICK_JUMP_START, _QUICK_JUMP_END, _DAY11_QUICK_JUMP_BLOCK
+        current, _QUICK_JUMP_START, _QUICK_JUMP_END, _DEFAULT_QUICK_JUMP_BLOCK
     )
-    updated, changed_section = _ensure_day11_section_header(updated)
+    updated, changed_section = _ensure_legacy_reports_section_header(updated)
     updated, changed_journeys = _ensure_journey_block(updated)
 
     if not (changed_quick_jump or changed_section or changed_journeys or not path.exists()):
