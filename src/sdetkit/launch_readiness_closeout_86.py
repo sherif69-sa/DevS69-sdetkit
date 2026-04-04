@@ -143,22 +143,22 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day85_summary = root / _DAY85_SUMMARY_PATH
-    day85_board = root / _DAY85_BOARD_PATH
+    release_prioritization_summary = root / _DAY85_SUMMARY_PATH
+    release_prioritization_board = root / _DAY85_BOARD_PATH
 
-    day85_data = _load_json(day85_summary)
-    day85_summary_data = (
-        day85_data.get("summary", {}) if isinstance(day85_data.get("summary"), dict) else {}
+    release_prioritization_data = _load_json(release_prioritization_summary)
+    release_prioritization_summary_data = (
+        release_prioritization_data.get("summary", {}) if isinstance(release_prioritization_data.get("summary"), dict) else {}
     )
-    day85_score = int(day85_summary_data.get("activation_score", 0) or 0)
-    day85_strict = bool(day85_summary_data.get("strict_pass", False))
-    day85_check_count = (
-        len(day85_data.get("checks", [])) if isinstance(day85_data.get("checks"), list) else 0
+    release_prioritization_score = int(release_prioritization_summary_data.get("activation_score", 0) or 0)
+    release_prioritization_strict = bool(release_prioritization_summary_data.get("strict_pass", False))
+    release_prioritization_check_count = (
+        len(release_prioritization_data.get("checks", [])) if isinstance(release_prioritization_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day85_board)
+    board_text = _read_text(release_prioritization_board)
     board_count = _checklist_count(board_text)
-    board_has_day85 = "Day 85" in board_text
+    board_has_release_prioritization = "Day 85" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -174,7 +174,7 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("launch-readiness-closeout" in readme_text),
-            "evidence": "README day86 command lane",
+            "evidence": "README launch-readiness-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -192,32 +192,32 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 85 + Day 86 strategy chain",
         },
         {
-            "check_id": "day85_summary_present",
+            "check_id": "release_prioritization_summary_present",
             "weight": 10,
-            "passed": day85_summary.exists(),
-            "evidence": str(day85_summary),
+            "passed": release_prioritization_summary.exists(),
+            "evidence": str(release_prioritization_summary),
         },
         {
-            "check_id": "day85_delivery_board_present",
+            "check_id": "release_prioritization_delivery_board_present",
             "weight": 7,
-            "passed": day85_board.exists(),
-            "evidence": str(day85_board),
+            "passed": release_prioritization_board.exists(),
+            "evidence": str(release_prioritization_board),
         },
         {
-            "check_id": "day85_quality_floor",
+            "check_id": "release_prioritization_quality_floor",
             "weight": 13,
-            "passed": day85_score >= 85 and day85_strict,
+            "passed": release_prioritization_score >= 85 and release_prioritization_strict,
             "evidence": {
-                "day85_score": day85_score,
-                "strict_pass": day85_strict,
-                "day85_checks": day85_check_count,
+                "release_prioritization_score": release_prioritization_score,
+                "strict_pass": release_prioritization_strict,
+                "release_prioritization_checks": release_prioritization_check_count,
             },
         },
         {
-            "check_id": "day85_board_integrity",
+            "check_id": "release_prioritization_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day85,
-            "evidence": {"board_items": board_count, "contains_day85": board_has_day85},
+            "passed": board_count >= 5 and board_has_release_prioritization,
+            "evidence": {"board_items": board_count, "contains_release_prioritization": board_has_release_prioritization},
         },
         {
             "check_id": "page_header",
@@ -265,22 +265,22 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day85_summary.exists() or not day85_board.exists():
-        critical_failures.append("day85_handoff_inputs")
+    if not release_prioritization_summary.exists() or not release_prioritization_board.exists():
+        critical_failures.append("release_prioritization_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day85_score >= 85 and day85_strict:
-        wins.append(f"Day 85 continuity baseline is stable with activation score={day85_score}.")
+    if release_prioritization_score >= 85 and release_prioritization_strict:
+        wins.append(f"Release prioritization continuity baseline is stable with activation score={release_prioritization_score}.")
     else:
         misses.append("Day 85 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 85 closeout command and raise baseline quality above 85 with strict pass before Day 86 lock."
         )
 
-    if board_count >= 5 and board_has_day85:
+    if board_count >= 5 and board_has_release_prioritization:
         wins.append(
             f"Day 85 delivery board integrity validated with {board_count} checklist items."
         )
@@ -311,19 +311,19 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day85_summary": str(day85_summary.relative_to(root))
-            if day85_summary.exists()
-            else str(day85_summary),
-            "day85_delivery_board": str(day85_board.relative_to(root))
-            if day85_board.exists()
-            else str(day85_board),
+            "release_prioritization_summary": str(release_prioritization_summary.relative_to(root))
+            if release_prioritization_summary.exists()
+            else str(release_prioritization_summary),
+            "release_prioritization_delivery_board": str(release_prioritization_board.relative_to(root))
+            if release_prioritization_board.exists()
+            else str(release_prioritization_board),
             "launch_readiness_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day85_activation_score": day85_score,
-            "day85_checks": day85_check_count,
-            "day85_delivery_board_items": board_count,
+            "release_prioritization_activation_score": release_prioritization_score,
+            "release_prioritization_checks": release_prioritization_check_count,
+            "release_prioritization_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

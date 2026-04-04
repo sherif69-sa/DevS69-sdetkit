@@ -145,22 +145,22 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day86_summary = root / _DAY86_SUMMARY_PATH
-    day86_board = root / _DAY86_BOARD_PATH
+    launch_readiness_summary = root / _DAY86_SUMMARY_PATH
+    launch_readiness_board = root / _DAY86_BOARD_PATH
 
-    day86_data = _load_json(day86_summary)
-    day86_summary_data = (
-        day86_data.get("summary", {}) if isinstance(day86_data.get("summary"), dict) else {}
+    launch_readiness_data = _load_json(launch_readiness_summary)
+    launch_readiness_summary_data = (
+        launch_readiness_data.get("summary", {}) if isinstance(launch_readiness_data.get("summary"), dict) else {}
     )
-    day86_score = int(day86_summary_data.get("activation_score", 0) or 0)
-    day86_strict = bool(day86_summary_data.get("strict_pass", False))
-    day86_check_count = (
-        len(day86_data.get("checks", [])) if isinstance(day86_data.get("checks"), list) else 0
+    launch_readiness_score = int(launch_readiness_summary_data.get("activation_score", 0) or 0)
+    launch_readiness_strict = bool(launch_readiness_summary_data.get("strict_pass", False))
+    launch_readiness_check_count = (
+        len(launch_readiness_data.get("checks", [])) if isinstance(launch_readiness_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day86_board)
+    board_text = _read_text(launch_readiness_board)
     board_count = _checklist_count(board_text)
-    board_has_day86 = "Day 86" in board_text
+    board_has_launch_readiness = "Day 86" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -176,7 +176,7 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("governance-handoff-closeout" in readme_text),
-            "evidence": "README day87 command lane",
+            "evidence": "README governance-handoff-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -194,32 +194,32 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 86 + Day 87 strategy chain",
         },
         {
-            "check_id": "day86_summary_present",
+            "check_id": "launch_readiness_summary_present",
             "weight": 10,
-            "passed": day86_summary.exists(),
-            "evidence": str(day86_summary),
+            "passed": launch_readiness_summary.exists(),
+            "evidence": str(launch_readiness_summary),
         },
         {
-            "check_id": "day86_delivery_board_present",
+            "check_id": "launch_readiness_delivery_board_present",
             "weight": 7,
-            "passed": day86_board.exists(),
-            "evidence": str(day86_board),
+            "passed": launch_readiness_board.exists(),
+            "evidence": str(launch_readiness_board),
         },
         {
-            "check_id": "day86_quality_floor",
+            "check_id": "launch_readiness_quality_floor",
             "weight": 13,
-            "passed": day86_score >= 85 and day86_strict,
+            "passed": launch_readiness_score >= 85 and launch_readiness_strict,
             "evidence": {
-                "day86_score": day86_score,
-                "strict_pass": day86_strict,
-                "day86_checks": day86_check_count,
+                "launch_readiness_score": launch_readiness_score,
+                "strict_pass": launch_readiness_strict,
+                "launch_readiness_checks": launch_readiness_check_count,
             },
         },
         {
-            "check_id": "day86_board_integrity",
+            "check_id": "launch_readiness_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day86,
-            "evidence": {"board_items": board_count, "contains_day86": board_has_day86},
+            "passed": board_count >= 5 and board_has_launch_readiness,
+            "evidence": {"board_items": board_count, "contains_launch_readiness": board_has_launch_readiness},
         },
         {
             "check_id": "page_header",
@@ -267,22 +267,22 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day86_summary.exists() or not day86_board.exists():
-        critical_failures.append("day86_handoff_inputs")
+    if not launch_readiness_summary.exists() or not launch_readiness_board.exists():
+        critical_failures.append("launch_readiness_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day86_score >= 85 and day86_strict:
-        wins.append(f"Day 86 continuity baseline is stable with activation score={day86_score}.")
+    if launch_readiness_score >= 85 and launch_readiness_strict:
+        wins.append(f"Launch readiness continuity baseline is stable with activation score={launch_readiness_score}.")
     else:
         misses.append("Day 86 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 86 closeout command and raise baseline quality above 85 with strict pass before Day 87 lock."
         )
 
-    if board_count >= 5 and board_has_day86:
+    if board_count >= 5 and board_has_launch_readiness:
         wins.append(
             f"Day 86 delivery board integrity validated with {board_count} checklist items."
         )
@@ -313,19 +313,19 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day86_summary": str(day86_summary.relative_to(root))
-            if day86_summary.exists()
-            else str(day86_summary),
-            "day86_delivery_board": str(day86_board.relative_to(root))
-            if day86_board.exists()
-            else str(day86_board),
+            "launch_readiness_summary": str(launch_readiness_summary.relative_to(root))
+            if launch_readiness_summary.exists()
+            else str(launch_readiness_summary),
+            "launch_readiness_delivery_board": str(launch_readiness_board.relative_to(root))
+            if launch_readiness_board.exists()
+            else str(launch_readiness_board),
             "launch_readiness_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day86_activation_score": day86_score,
-            "day86_checks": day86_check_count,
-            "day86_delivery_board_items": board_count,
+            "launch_readiness_activation_score": launch_readiness_score,
+            "launch_readiness_checks": launch_readiness_check_count,
+            "launch_readiness_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

@@ -145,22 +145,22 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day88_summary = root / _DAY88_SUMMARY_PATH
-    day88_board = root / _DAY88_BOARD_PATH
+    governance_priorities_summary = root / _DAY88_SUMMARY_PATH
+    governance_priorities_board = root / _DAY88_BOARD_PATH
 
-    day88_data = _load_json(day88_summary)
-    day88_summary_data = (
-        day88_data.get("summary", {}) if isinstance(day88_data.get("summary"), dict) else {}
+    governance_priorities_data = _load_json(governance_priorities_summary)
+    governance_priorities_summary_data = (
+        governance_priorities_data.get("summary", {}) if isinstance(governance_priorities_data.get("summary"), dict) else {}
     )
-    day88_score = int(day88_summary_data.get("activation_score", 0) or 0)
-    day88_strict = bool(day88_summary_data.get("strict_pass", False))
-    day88_check_count = (
-        len(day88_data.get("checks", [])) if isinstance(day88_data.get("checks"), list) else 0
+    governance_priorities_score = int(governance_priorities_summary_data.get("activation_score", 0) or 0)
+    governance_priorities_strict = bool(governance_priorities_summary_data.get("strict_pass", False))
+    governance_priorities_check_count = (
+        len(governance_priorities_data.get("checks", [])) if isinstance(governance_priorities_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day88_board)
+    board_text = _read_text(governance_priorities_board)
     board_count = _checklist_count(board_text)
-    board_has_day88 = "Day 88" in board_text
+    board_has_governance_priorities = "Day 88" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -176,7 +176,7 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("governance-scale-closeout" in readme_text),
-            "evidence": "README day89 command lane",
+            "evidence": "README governance-scale-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -194,32 +194,32 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 88 + Day 89 strategy chain",
         },
         {
-            "check_id": "day88_summary_present",
+            "check_id": "governance_priorities_summary_present",
             "weight": 10,
-            "passed": day88_summary.exists(),
-            "evidence": str(day88_summary),
+            "passed": governance_priorities_summary.exists(),
+            "evidence": str(governance_priorities_summary),
         },
         {
-            "check_id": "day88_delivery_board_present",
+            "check_id": "governance_priorities_delivery_board_present",
             "weight": 7,
-            "passed": day88_board.exists(),
-            "evidence": str(day88_board),
+            "passed": governance_priorities_board.exists(),
+            "evidence": str(governance_priorities_board),
         },
         {
-            "check_id": "day88_quality_floor",
+            "check_id": "governance_priorities_quality_floor",
             "weight": 13,
-            "passed": day88_score >= 85 and day88_strict,
+            "passed": governance_priorities_score >= 85 and governance_priorities_strict,
             "evidence": {
-                "day88_score": day88_score,
-                "strict_pass": day88_strict,
-                "day88_checks": day88_check_count,
+                "governance_priorities_score": governance_priorities_score,
+                "strict_pass": governance_priorities_strict,
+                "governance_priorities_checks": governance_priorities_check_count,
             },
         },
         {
-            "check_id": "day88_board_integrity",
+            "check_id": "governance_priorities_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day88,
-            "evidence": {"board_items": board_count, "contains_day88": board_has_day88},
+            "passed": board_count >= 5 and board_has_governance_priorities,
+            "evidence": {"board_items": board_count, "contains_governance_priorities": board_has_governance_priorities},
         },
         {
             "check_id": "page_header",
@@ -267,22 +267,22 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day88_summary.exists() or not day88_board.exists():
-        critical_failures.append("day88_handoff_inputs")
+    if not governance_priorities_summary.exists() or not governance_priorities_board.exists():
+        critical_failures.append("governance_priorities_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day88_score >= 85 and day88_strict:
-        wins.append(f"Day 88 continuity baseline is stable with activation score={day88_score}.")
+    if governance_priorities_score >= 85 and governance_priorities_strict:
+        wins.append(f"Governance priorities continuity baseline is stable with activation score={governance_priorities_score}.")
     else:
         misses.append("Day 88 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 88 closeout command and raise baseline quality above 85 with strict pass before Day 89 lock."
         )
 
-    if board_count >= 5 and board_has_day88:
+    if board_count >= 5 and board_has_governance_priorities:
         wins.append(
             f"Day 88 delivery board integrity validated with {board_count} checklist items."
         )
@@ -313,19 +313,19 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day88_summary": str(day88_summary.relative_to(root))
-            if day88_summary.exists()
-            else str(day88_summary),
-            "day88_delivery_board": str(day88_board.relative_to(root))
-            if day88_board.exists()
-            else str(day88_board),
+            "governance_priorities_summary": str(governance_priorities_summary.relative_to(root))
+            if governance_priorities_summary.exists()
+            else str(governance_priorities_summary),
+            "governance_priorities_delivery_board": str(governance_priorities_board.relative_to(root))
+            if governance_priorities_board.exists()
+            else str(governance_priorities_board),
             "governance_scale_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day88_activation_score": day88_score,
-            "day88_checks": day88_check_count,
-            "day88_delivery_board_items": board_count,
+            "governance_priorities_activation_score": governance_priorities_score,
+            "governance_priorities_checks": governance_priorities_check_count,
+            "governance_priorities_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

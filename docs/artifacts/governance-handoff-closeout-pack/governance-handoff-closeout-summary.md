@@ -1,5 +1,5 @@
-Cycle 87 governance handoff closeout summary
-- Activation score: 73
-- Passed checks: 10
-- Failed checks: 4
+Day 87 governance handoff closeout summary
+- Activation score: 42
+- Passed checks: 6
+- Failed checks: 8
 - Critical failures: []

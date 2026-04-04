@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-governance-scale-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day88_summary": "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json",
-    "day88_delivery_board": "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md",
+    "governance_priorities_summary": "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json",
+    "governance_priorities_delivery_board": "docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md",
     "governance_scale_plan": "docs/roadmap/plans/governance-scale-plan.json"
   },
   "checks": [
@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day89 command lane"
+      "evidence": "README governance-scale-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -29,34 +29,34 @@
       "evidence": "Day 88 + Day 89 strategy chain"
     },
     {
-      "check_id": "day88_summary_present",
+      "check_id": "governance_priorities_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-priorities-closeout-pack/governance-priorities-closeout-summary.json"
     },
     {
-      "check_id": "day88_delivery_board_present",
+      "check_id": "governance_priorities_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-priorities-closeout-pack/governance-priorities-delivery-board.md"
     },
     {
-      "check_id": "day88_quality_floor",
+      "check_id": "governance_priorities_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day88_score": 60,
+        "governance_priorities_score": 42,
         "strict_pass": false,
-        "day88_checks": 14
+        "governance_priorities_checks": 14
       }
     },
     {
-      "check_id": "day88_board_integrity",
+      "check_id": "governance_priorities_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day88": true
+        "contains_governance_priorities": true
       }
     },
     {
@@ -68,8 +68,10 @@
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 88)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 89 governance scale execution and signoff.",
+        "The Day 89 lane references Day 88 outcomes, controls, and trust continuity signals.",
+        "Every Day 89 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 89 closeout records governance scale pack upgrades, storyline outcomes, and Day 90 governance planning inputs."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 89 evidence brief committed",
+        "- [ ] Day 89 governance scale plan committed",
+        "- [ ] Day 89 narrative template upgrade ledger exported",
+        "- [ ] Day 89 storyline outcomes ledger exported",
+        "- [ ] Day 90 governance planning drafted from Day 89 outcomes"
+      ]
     },
     {
       "check_id": "evidence_plan_data_present",
@@ -103,14 +116,14 @@
     }
   ],
   "rollup": {
-    "day88_activation_score": 60,
-    "day88_checks": 14,
-    "day88_delivery_board_items": 5
+    "governance_priorities_activation_score": 42,
+    "governance_priorities_checks": 14,
+    "governance_priorities_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 60,
-    "passed_checks": 9,
-    "failed_checks": 5,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [],
     "strict_pass": false
   },

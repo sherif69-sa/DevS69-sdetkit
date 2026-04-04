@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-governance-handoff-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day86_summary": "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json",
-    "day86_delivery_board": "docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md",
+    "launch_readiness_summary": "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json",
+    "launch_readiness_delivery_board": "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md",
     "launch_readiness_plan": "docs/roadmap/plans/governance-handoff-plan.json"
   },
   "checks": [
@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day87 command lane"
+      "evidence": "README governance-handoff-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -29,34 +29,34 @@
       "evidence": "Day 86 + Day 87 strategy chain"
     },
     {
-      "check_id": "day86_summary_present",
+      "check_id": "launch_readiness_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json"
     },
     {
-      "check_id": "day86_delivery_board_present",
+      "check_id": "launch_readiness_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day86-launch-readiness-closeout-pack/day86-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
     },
     {
-      "check_id": "day86_quality_floor",
+      "check_id": "launch_readiness_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day86_score": 100,
-        "strict_pass": true,
-        "day86_checks": 14
+        "launch_readiness_score": 50,
+        "strict_pass": false,
+        "launch_readiness_checks": 14
       }
     },
     {
-      "check_id": "day86_board_integrity",
+      "check_id": "launch_readiness_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day86": true
+        "contains_launch_readiness": true
       }
     },
     {
@@ -68,8 +68,10 @@
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 86)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 87 governance handoff execution and signoff.",
+        "The Day 87 lane references Day 86 outcomes, controls, and trust continuity signals.",
+        "Every Day 87 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 87 closeout records governance handoff pack upgrades, storyline outcomes, and Day 88 governance priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 87 evidence brief committed",
+        "- [ ] Day 87 governance handoff plan committed",
+        "- [ ] Day 87 narrative template upgrade ledger exported",
+        "- [ ] Day 87 storyline outcomes ledger exported",
+        "- [ ] Day 88 governance priorities drafted from Day 87 outcomes"
+      ]
     },
     {
       "check_id": "evidence_plan_data_present",
@@ -103,22 +116,25 @@
     }
   ],
   "rollup": {
-    "day86_activation_score": 100,
-    "day86_checks": 14,
-    "day86_delivery_board_items": 5
+    "launch_readiness_activation_score": 50,
+    "launch_readiness_checks": 14,
+    "launch_readiness_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 73,
-    "passed_checks": 10,
-    "failed_checks": 4,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [],
     "strict_pass": false
   },
   "wins": [
-    "Day 86 continuity baseline is stable with activation score=100.",
     "Day 86 delivery board integrity validated with 5 checklist items.",
     "Day 87 governance handoff dataset is available for governance execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 86 continuity baseline is below the floor (<85) or not strict-pass."
+  ],
+  "handoff_actions": [
+    "Re-run Day 86 closeout command and raise baseline quality above 85 with strict pass before Day 87 lock."
+  ]
 }

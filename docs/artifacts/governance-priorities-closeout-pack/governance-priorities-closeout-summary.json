@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-governance-priorities-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day87_summary": "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json",
-    "day87_delivery_board": "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md",
+    "governance_handoff_summary": "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json",
+    "governance_handoff_delivery_board": "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md",
     "governance_priorities_plan": "docs/roadmap/plans/governance-priorities-plan.json"
   },
   "checks": [
@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day88 command lane"
+      "evidence": "README governance-priorities-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -29,34 +29,34 @@
       "evidence": "Day 87 + Day 88 strategy chain"
     },
     {
-      "check_id": "day87_summary_present",
+      "check_id": "governance_handoff_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json"
     },
     {
-      "check_id": "day87_delivery_board_present",
+      "check_id": "governance_handoff_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
     },
     {
-      "check_id": "day87_quality_floor",
+      "check_id": "governance_handoff_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day87_score": 73,
+        "governance_handoff_score": 42,
         "strict_pass": false,
-        "day87_checks": 14
+        "governance_handoff_checks": 14
       }
     },
     {
-      "check_id": "day87_board_integrity",
+      "check_id": "governance_handoff_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day87": true
+        "contains_governance_handoff": true
       }
     },
     {
@@ -68,8 +68,10 @@
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 87)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 88 governance priorities execution and signoff.",
+        "The Day 88 lane references Day 87 outcomes, controls, and trust continuity signals.",
+        "Every Day 88 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 88 closeout records governance priorities pack upgrades, storyline outcomes, and Day 89 governance priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 88 evidence brief committed",
+        "- [ ] Day 88 governance priorities plan committed",
+        "- [ ] Day 88 narrative template upgrade ledger exported",
+        "- [ ] Day 88 storyline outcomes ledger exported",
+        "- [ ] Day 89 governance priorities drafted from Day 88 outcomes"
+      ]
     },
     {
       "check_id": "evidence_plan_data_present",
@@ -103,14 +116,14 @@
     }
   ],
   "rollup": {
-    "day87_activation_score": 73,
-    "day87_checks": 14,
-    "day87_delivery_board_items": 5
+    "governance_handoff_activation_score": 42,
+    "governance_handoff_checks": 14,
+    "governance_handoff_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 60,
-    "passed_checks": 9,
-    "failed_checks": 5,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [],
     "strict_pass": false
   },

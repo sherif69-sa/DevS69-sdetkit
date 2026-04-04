@@ -1,1 +1,1 @@
-# Cycle 88 governance priorities plan
+# Day 88 governance priorities plan
