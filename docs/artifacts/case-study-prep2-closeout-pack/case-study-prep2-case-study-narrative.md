@@ -1,1 +1,1 @@
-# Cycle 70 case-study narrative
+# Day 70 case-study narrative

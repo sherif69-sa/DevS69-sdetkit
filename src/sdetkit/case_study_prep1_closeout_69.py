@@ -129,7 +129,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day68(summary_path: Path) -> tuple[int, bool, int]:
+def _load_prior_closeout(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     try:
@@ -160,10 +160,10 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     case_data_text = _read(root / _CASE_STUDY_DATA_PATH)
 
-    day68_summary = root / _DAY68_SUMMARY_PATH
-    day68_board = root / _DAY68_BOARD_PATH
-    day68_score, day68_strict, day68_check_count = _load_day68(day68_summary)
-    board_count, board_has_day68 = _count_board_items(day68_board, "Day 68")
+    prior_closeout_summary = root / _DAY68_SUMMARY_PATH
+    prior_closeout_board = root / _DAY68_BOARD_PATH
+    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(prior_closeout_summary)
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 68")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -177,7 +177,7 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("case-study-prep1-closeout" in readme_text),
-            "evidence": "README day69 command lane",
+            "evidence": "README case-study-prep1-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -195,32 +195,32 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 69 + Day 70 strategy chain",
         },
         {
-            "check_id": "day68_summary_present",
+            "check_id": "prior_closeout_summary_present",
             "weight": 10,
-            "passed": day68_summary.exists(),
-            "evidence": str(day68_summary),
+            "passed": prior_closeout_summary.exists(),
+            "evidence": str(prior_closeout_summary),
         },
         {
-            "check_id": "day68_delivery_board_present",
+            "check_id": "prior_closeout_delivery_board_present",
             "weight": 7,
-            "passed": day68_board.exists(),
-            "evidence": str(day68_board),
+            "passed": prior_closeout_board.exists(),
+            "evidence": str(prior_closeout_board),
         },
         {
-            "check_id": "day68_quality_floor",
+            "check_id": "prior_closeout_quality_floor",
             "weight": 13,
-            "passed": day68_strict and day68_score >= 95,
+            "passed": prior_closeout_strict and prior_closeout_score >= 95,
             "evidence": {
-                "day68_score": day68_score,
-                "strict_pass": day68_strict,
-                "day68_checks": day68_check_count,
+                "prior_closeout_score": prior_closeout_score,
+                "strict_pass": prior_closeout_strict,
+                "prior_closeout_checks": prior_closeout_check_count,
             },
         },
         {
-            "check_id": "day68_board_integrity",
+            "check_id": "prior_closeout_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day68,
-            "evidence": {"board_items": board_count, "contains_day68": board_has_day68},
+            "passed": board_count >= 5 and board_has_prior_closeout,
+            "evidence": {"board_items": board_count, "contains_prior_closeout": board_has_prior_closeout},
         },
         {
             "check_id": "page_header",
@@ -268,24 +268,24 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day68_summary.exists() or not day68_board.exists():
-        critical_failures.append("day68_handoff_inputs")
-    if not day68_strict:
-        critical_failures.append("day68_strict_baseline")
+    if not prior_closeout_summary.exists() or not prior_closeout_board.exists():
+        critical_failures.append("prior_closeout_handoff_inputs")
+    if not prior_closeout_strict:
+        critical_failures.append("prior_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day68_strict:
-        wins.append(f"Day 68 continuity is strict-pass with activation score={day68_score}.")
+    if prior_closeout_strict:
+        wins.append(f"Day 68 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
         misses.append("Day 68 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 68 closeout command and restore strict baseline before Day 69 lock."
         )
 
-    if board_count >= 5 and board_has_day68:
+    if board_count >= 5 and board_has_prior_closeout:
         wins.append(
             f"Day 68 delivery board integrity validated with {board_count} checklist items."
         )
@@ -318,19 +318,19 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day68_summary": str(day68_summary.relative_to(root))
-            if day68_summary.exists()
-            else str(day68_summary),
-            "day68_delivery_board": str(day68_board.relative_to(root))
-            if day68_board.exists()
-            else str(day68_board),
+            "prior_closeout_summary": str(prior_closeout_summary.relative_to(root))
+            if prior_closeout_summary.exists()
+            else str(prior_closeout_summary),
+            "prior_closeout_delivery_board": str(prior_closeout_board.relative_to(root))
+            if prior_closeout_board.exists()
+            else str(prior_closeout_board),
             "case_study_data": _CASE_STUDY_DATA_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day68_activation_score": day68_score,
-            "day68_checks": day68_check_count,
-            "day68_delivery_board_items": board_count,
+            "prior_closeout_activation_score": prior_closeout_score,
+            "prior_closeout_checks": prior_closeout_check_count,
+            "prior_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

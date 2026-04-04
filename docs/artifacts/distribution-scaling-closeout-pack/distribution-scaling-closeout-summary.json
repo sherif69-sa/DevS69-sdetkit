@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-distribution-scaling-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day73_summary": "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json",
-    "day73_delivery_board": "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md",
+    "prior_closeout_summary": "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json",
+    "prior_closeout_delivery_board": "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md",
     "distribution_scaling_plan": "docs/roadmap/plans/distribution-scaling-plan.json"
   },
   "checks": [
@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day74 command lane"
+      "evidence": "README distribution-scaling-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -29,47 +29,52 @@
       "evidence": "Day 74 + Day 75 strategy chain"
     },
     {
-      "check_id": "day73_summary_present",
+      "check_id": "prior_closeout_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json"
     },
     {
-      "check_id": "day73_delivery_board_present",
+      "check_id": "prior_closeout_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
     },
     {
-      "check_id": "day73_quality_floor",
+      "check_id": "prior_closeout_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day73_score": 67,
+        "prior_closeout_score": 42,
         "strict_pass": false,
-        "day73_checks": 14
+        "prior_closeout_checks": 14
       }
     },
     {
-      "check_id": "day73_board_integrity",
+      "check_id": "prior_closeout_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day73": true
+        "contains_prior_closeout": true
       }
     },
     {
       "check_id": "page_header",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": "# Day 74 \u2014 Distribution scaling closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Why Day 74 matters",
+        "## Required inputs (Day 73)",
+        "## Day 74 command lane",
+        "## Day 74 delivery board"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +85,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 74 distribution scaling execution and signoff.",
+        "The Day 74 lane references Day 73 publication outcomes, controls, and KPI continuity signals.",
+        "Every Day 74 section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 74 closeout records distribution outcomes, confidence notes, and Day 75 trust refresh priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +102,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 74 integration brief committed",
+        "- [ ] Day 74 distribution scaling plan committed",
+        "- [ ] Day 74 channel controls and assumptions log exported",
+        "- [ ] Day 74 KPI scorecard snapshot exported",
+        "- [ ] Day 75 trust refresh priorities drafted from Day 74 learnings"
+      ]
     },
     {
       "check_id": "distribution_plan_data_present",
@@ -103,16 +119,16 @@
     }
   ],
   "rollup": {
-    "day73_activation_score": 67,
-    "day73_checks": 14,
-    "day73_delivery_board_items": 5
+    "prior_closeout_activation_score": 42,
+    "prior_closeout_checks": 14,
+    "prior_closeout_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 67,
-    "passed_checks": 10,
-    "failed_checks": 4,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
-      "day73_strict_baseline"
+      "prior_closeout_strict_baseline"
     ],
     "strict_pass": false
   },

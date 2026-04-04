@@ -1,1 +1,1 @@
-# Cycle 74 distribution scaling plan
+# Day 74 distribution scaling plan

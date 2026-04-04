@@ -48,7 +48,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/plans/triage-speed-case-study.json").write_text(
         json.dumps(
             {
-                "case_id": "day70-001",
+                "case_id": "case-study-prep2-001",
                 "metric": "triage-speed",
                 "baseline": {"value": 41},
                 "after": {"value": 19},

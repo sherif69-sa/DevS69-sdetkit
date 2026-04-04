@@ -78,7 +78,7 @@ def _seed_repo(root: Path) -> None:
     case_study.write_text(
         json.dumps(
             {
-                "case_id": "day73-published-case-study-001",
+                "case_id": "case-study-launch-001",
                 "metric": "incident-triage-mttr",
                 "baseline": {"hours": 6.2},
                 "after": {"hours": 3.1},
@@ -154,7 +154,7 @@ def test_lane73_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane73_strict_fails_without_day72(tmp_path: Path) -> None:
+def test_lane73_strict_fails_without_prior_closeout(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

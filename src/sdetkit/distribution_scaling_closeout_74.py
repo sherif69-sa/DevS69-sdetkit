@@ -131,7 +131,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day73(summary_path: Path) -> tuple[int, bool, int]:
+def _load_prior_closeout(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     try:
@@ -162,10 +162,10 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     scaling_plan_text = _read(root / _SCALING_PLAN_PATH)
 
-    day73_summary = root / _DAY73_SUMMARY_PATH
-    day73_board = root / _DAY73_BOARD_PATH
-    day73_score, day73_strict, day73_check_count = _load_day73(day73_summary)
-    board_count, board_has_day73 = _count_board_items(day73_board, "Day 73")
+    prior_closeout_summary = root / _DAY73_SUMMARY_PATH
+    prior_closeout_board = root / _DAY73_BOARD_PATH
+    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(prior_closeout_summary)
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 73")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -182,7 +182,7 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
                 "distribution-scaling-closeout" in readme_text
                 or "distribution-scaling-closeout" in readme_text
             ),
-            "evidence": "README day74 command lane",
+            "evidence": "README distribution-scaling-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -200,32 +200,32 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 74 + Day 75 strategy chain",
         },
         {
-            "check_id": "day73_summary_present",
+            "check_id": "prior_closeout_summary_present",
             "weight": 10,
-            "passed": day73_summary.exists(),
-            "evidence": str(day73_summary),
+            "passed": prior_closeout_summary.exists(),
+            "evidence": str(prior_closeout_summary),
         },
         {
-            "check_id": "day73_delivery_board_present",
+            "check_id": "prior_closeout_delivery_board_present",
             "weight": 7,
-            "passed": day73_board.exists(),
-            "evidence": str(day73_board),
+            "passed": prior_closeout_board.exists(),
+            "evidence": str(prior_closeout_board),
         },
         {
-            "check_id": "day73_quality_floor",
+            "check_id": "prior_closeout_quality_floor",
             "weight": 13,
-            "passed": day73_strict and day73_score >= 95,
+            "passed": prior_closeout_strict and prior_closeout_score >= 95,
             "evidence": {
-                "day73_score": day73_score,
-                "strict_pass": day73_strict,
-                "day73_checks": day73_check_count,
+                "prior_closeout_score": prior_closeout_score,
+                "strict_pass": prior_closeout_strict,
+                "prior_closeout_checks": prior_closeout_check_count,
             },
         },
         {
-            "check_id": "day73_board_integrity",
+            "check_id": "prior_closeout_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day73,
-            "evidence": {"board_items": board_count, "contains_day73": board_has_day73},
+            "passed": board_count >= 5 and board_has_prior_closeout,
+            "evidence": {"board_items": board_count, "contains_prior_closeout": board_has_prior_closeout},
         },
         {
             "check_id": "page_header",
@@ -273,24 +273,24 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day73_summary.exists() or not day73_board.exists():
-        critical_failures.append("day73_handoff_inputs")
-    if not day73_strict:
-        critical_failures.append("day73_strict_baseline")
+    if not prior_closeout_summary.exists() or not prior_closeout_board.exists():
+        critical_failures.append("prior_closeout_handoff_inputs")
+    if not prior_closeout_strict:
+        critical_failures.append("prior_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day73_strict:
-        wins.append(f"Day 73 continuity is strict-pass with activation score={day73_score}.")
+    if prior_closeout_strict:
+        wins.append(f"Day 73 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
         misses.append("Day 73 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 73 closeout command and restore strict baseline before Day 74 lock."
         )
 
-    if board_count >= 5 and board_has_day73:
+    if board_count >= 5 and board_has_prior_closeout:
         wins.append(
             f"Day 73 delivery board integrity validated with {board_count} checklist items."
         )
@@ -321,19 +321,19 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day73_summary": str(day73_summary.relative_to(root))
-            if day73_summary.exists()
-            else str(day73_summary),
-            "day73_delivery_board": str(day73_board.relative_to(root))
-            if day73_board.exists()
-            else str(day73_board),
+            "prior_closeout_summary": str(prior_closeout_summary.relative_to(root))
+            if prior_closeout_summary.exists()
+            else str(prior_closeout_summary),
+            "prior_closeout_delivery_board": str(prior_closeout_board.relative_to(root))
+            if prior_closeout_board.exists()
+            else str(prior_closeout_board),
             "distribution_scaling_plan": _SCALING_PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day73_activation_score": day73_score,
-            "day73_checks": day73_check_count,
-            "day73_delivery_board_items": board_count,
+            "prior_closeout_activation_score": prior_closeout_score,
+            "prior_closeout_checks": prior_closeout_check_count,
+            "prior_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

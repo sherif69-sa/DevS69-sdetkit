@@ -2,5 +2,5 @@
   "command": "python scripts/check_case_study_prep4_closeout_contract.py --skip-evidence",
   "returncode": 1,
   "stdout": "",
-  "stderr": "day72-case-study-prep4-closeout contract check failed:\n- activation_score too low: 92\n- strict_pass is false\n- failed checks: ['docs_index_case_study_prep4_links']\n"
+  "stderr": "case-study-prep4-closeout contract check failed:\n- activation_score too low: 54\n- strict_pass is false\n- failed checks: ['docs_index_case_study_prep4_links', 'prior_closeout_quality_floor', 'page_header', 'required_sections', 'contract_lock', 'delivery_board_lock']\n"
 }

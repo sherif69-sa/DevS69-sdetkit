@@ -1,1 +1,1 @@
-# Cycle 69 case-study narrative
+# Day 69 case-study narrative

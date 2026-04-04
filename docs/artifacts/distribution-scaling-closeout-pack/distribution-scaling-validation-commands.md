@@ -1,4 +1,4 @@
-# Cycle 74 validation commands
+# Day 74 validation commands
 
 ```bash
 python -m sdetkit distribution-scaling-closeout --format json --strict
