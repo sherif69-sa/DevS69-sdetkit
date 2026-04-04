@@ -199,19 +199,19 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day53_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-docs-loop-closeout.md" in readme_text,
             "evidence": "docs/integrations-docs-loop-closeout.md",
         },
         {
-            "check_id": "readme_day53_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "docs-loop-closeout" in readme_text,
             "evidence": "README docs-loop-closeout command lane",
         },
         {
-            "check_id": "docs_index_day53_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-53-big-upgrade-report.md" in docs_index_text
@@ -220,7 +220,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-53-big-upgrade-report.md + integrations-docs-loop-closeout.md",
         },
         {
-            "check_id": "top10_day53_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 52" in top10_text and "Day 53" in top10_text),
             "evidence": "Day 52 + Day 53 strategy chain",

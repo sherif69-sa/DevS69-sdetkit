@@ -195,19 +195,19 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day48_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-objection-closeout.md" in readme_text,
             "evidence": "docs/integrations-objection-closeout.md",
         },
         {
-            "check_id": "readme_day48_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "objection-closeout" in readme_text,
             "evidence": "objection-closeout",
         },
         {
-            "check_id": "docs_index_day48_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-48-big-upgrade-report.md" in docs_index_text
@@ -216,7 +216,7 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-48-big-upgrade-report.md + integrations-objection-closeout.md",
         },
         {
-            "check_id": "top10_day48_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 48" in top10_text and "Day 49" in top10_text),
             "evidence": "Day 48 + Day 49 strategy chain",

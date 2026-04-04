@@ -32,7 +32,7 @@
       }
     },
     {
-      "check_id": "readme_day50_link",
+      "check_id": "readme_integration_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-execution-prioritization-closeout.md"
@@ -44,13 +44,13 @@
       "evidence": "execution-prioritization-closeout"
     },
     {
-      "check_id": "docs_index_day50_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-50-big-upgrade-report.md + integrations-execution-prioritization-closeout.md"
     },
     {
-      "check_id": "top10_day50_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 50 + Day 51 strategy chain"

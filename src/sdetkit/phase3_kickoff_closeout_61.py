@@ -169,13 +169,13 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day61_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("phase3-kickoff-closeout" in readme_text),
             "evidence": "README phase3-kickoff-closeout command lane",
         },
         {
-            "check_id": "docs_index_day61_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-61-big-upgrade-report.md" in docs_index_text
@@ -184,7 +184,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-61-big-upgrade-report.md + integrations-phase3-kickoff-closeout.md",
         },
         {
-            "check_id": "top10_day61_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 61" in top10_text and "Day 62" in top10_text),
             "evidence": "Day 61 + Day 62 strategy chain",

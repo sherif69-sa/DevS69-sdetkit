@@ -35,25 +35,25 @@
       }
     },
     {
-      "check_id": "readme_day30_link",
+      "check_id": "readme_integration_link",
       "weight": 10,
       "passed": false,
       "evidence": "docs/integrations-phase1-wrap.md"
     },
     {
-      "check_id": "readme_day30_command",
+      "check_id": "readme_command_lane",
       "weight": 5,
       "passed": false,
       "evidence": "phase1-wrap (legacy: day30-phase1-wrap)"
     },
     {
-      "check_id": "docs_index_day30_links",
+      "check_id": "docs_index_links",
       "weight": 10,
       "passed": false,
       "evidence": "impact-30-ultra-upgrade-report.md + integrations-phase1-wrap.md"
     },
     {
-      "check_id": "top10_day30_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 30 + Day 31 strategy chain"

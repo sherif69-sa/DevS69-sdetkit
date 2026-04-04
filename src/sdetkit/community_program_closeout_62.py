@@ -167,13 +167,13 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day62_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("community-program-closeout" in readme_text),
             "evidence": "README community-program-closeout command lane",
         },
         {
-            "check_id": "docs_index_day62_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-62-big-upgrade-report.md" in docs_index_text
@@ -182,7 +182,7 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-62-big-upgrade-report.md + integrations-community-program-closeout.md",
         },
         {
-            "check_id": "top10_day62_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 62" in top10_text and "Day 63" in top10_text),
             "evidence": "Day 62 + Day 63 strategy chain",

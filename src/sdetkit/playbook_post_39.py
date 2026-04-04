@@ -203,19 +203,19 @@ def build_playbook_post_summary_impl(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day39_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-playbook-post.md" in readme_text,
             "evidence": "docs/integrations-playbook-post.md",
         },
         {
-            "check_id": "readme_day39_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "playbook-post" in readme_text,
             "evidence": "playbook-post",
         },
         {
-            "check_id": "docs_index_day39_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-39-big-upgrade-report.md" in docs_index_text
@@ -224,7 +224,7 @@ def build_playbook_post_summary_impl(
             "evidence": "impact-39-big-upgrade-report.md + integrations-playbook-post.md",
         },
         {
-            "check_id": "top10_day39_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 39" in top10_text and "Day 40" in top10_text),
             "evidence": "Day 39 + Day 40 strategy chain",

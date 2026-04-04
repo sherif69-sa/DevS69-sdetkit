@@ -172,13 +172,13 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day65_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("weekly-review-closeout-2" in readme_text),
             "evidence": "README day65 command lane",
         },
         {
-            "check_id": "docs_index_day65_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-65-big-upgrade-report.md" in docs_index_text
@@ -187,7 +187,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-65-big-upgrade-report.md + integrations-weekly-review-closeout-2.md",
         },
         {
-            "check_id": "top10_day65_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 65" in top10_text and "Day 66" in top10_text),
             "evidence": "Day 65 + Day 66 strategy chain",

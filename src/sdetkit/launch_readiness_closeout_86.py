@@ -171,13 +171,13 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day86_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("launch-readiness-closeout" in readme_text),
             "evidence": "README day86 command lane",
         },
         {
-            "check_id": "docs_index_day86_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-86-big-upgrade-report.md" in docs_index_text
@@ -186,7 +186,7 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-86-big-upgrade-report.md + integrations-launch-readiness-closeout.md",
         },
         {
-            "check_id": "top10_day86_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 85" in top10_text and "Day 86" in top10_text),
             "evidence": "Day 85 + Day 86 strategy chain",

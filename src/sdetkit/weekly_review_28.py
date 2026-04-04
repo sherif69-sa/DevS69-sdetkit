@@ -146,21 +146,21 @@ def build_weekly_review_summary_impl(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day28_link",
+            "check_id": "readme_integration_link",
             "category": "discoverability",
             "weight": 10,
             "passed": "docs/integrations-weekly-review.md" in readme_text,
             "evidence": "docs/integrations-weekly-review.md",
         },
         {
-            "check_id": "docs_index_day28_link",
+            "check_id": "docs_index_links",
             "category": "discoverability",
             "weight": 10,
             "passed": "impact-28-ultra-upgrade-report.md" in docs_index_text,
             "evidence": "impact-28-ultra-upgrade-report.md",
         },
         {
-            "check_id": "top10_day28_alignment",
+            "check_id": "top10_strategy_alignment",
             "category": "strategy",
             "weight": 8,
             "passed": "Day 28 \u2014 Weekly review #4" in top10_text,
@@ -201,7 +201,7 @@ def build_weekly_review_summary_impl(
         "docs_page_exists",
         "required_sections_present",
         "required_commands_present",
-        "top10_day28_alignment",
+        "top10_strategy_alignment",
     }
     critical_failures = [item["check_id"] for item in failed if item["check_id"] in critical]
 

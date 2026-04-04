@@ -180,13 +180,13 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day67_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("integration-expansion3-closeout" in readme_text),
             "evidence": "README integration-expansion3-closeout command lane",
         },
         {
-            "check_id": "docs_index_day67_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-67-big-upgrade-report.md" in docs_index_text
@@ -195,7 +195,7 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-67-big-upgrade-report.md + integrations-integration-expansion3-closeout.md",
         },
         {
-            "check_id": "top10_day67_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 67" in top10_text and "Day 68" in top10_text),
             "evidence": "Day 67 + Day 68 strategy chain",

@@ -37,25 +37,25 @@
       }
     },
     {
-      "check_id": "readme_day55_link",
+      "check_id": "readme_integration_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-contributor-activation-closeout.md"
     },
     {
-      "check_id": "readme_day55_command",
+      "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
       "evidence": "day55-contributor-activation-closeout"
     },
     {
-      "check_id": "docs_index_day55_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-55-big-upgrade-report.md + integrations-contributor-activation-closeout.md"
     },
     {
-      "check_id": "top10_day55_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 55 + Day 56 strategy chain"

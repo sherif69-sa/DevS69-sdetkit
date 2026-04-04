@@ -177,13 +177,13 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day90_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("phase3-wrap-publication-closeout" in readme_text),
             "evidence": "README phase3-wrap-publication-closeout command lane",
         },
         {
-            "check_id": "docs_index_day90_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-90-big-upgrade-report.md" in docs_index_text
@@ -192,7 +192,7 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
             "evidence": "impact-90-big-upgrade-report.md + integrations-phase3-wrap-publication-closeout.md",
         },
         {
-            "check_id": "top10_day90_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 89" in top10_text and "Day 90" in top10_text),
             "evidence": "Day 89 + Day 90 strategy chain",

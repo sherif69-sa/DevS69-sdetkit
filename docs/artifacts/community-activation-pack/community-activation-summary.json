@@ -30,28 +30,28 @@
     },
     {
       "category": "discoverability",
-      "check_id": "readme_day25_link",
+      "check_id": "readme_integration_link",
       "evidence": "docs/integrations-community-activation.md",
       "passed": false,
       "weight": 10
     },
     {
       "category": "discoverability",
-      "check_id": "readme_day25_command",
+      "check_id": "readme_command_lane",
       "evidence": "community-activation",
       "passed": false,
       "weight": 8
     },
     {
       "category": "discoverability",
-      "check_id": "docs_index_day25_link",
+      "check_id": "docs_index_links",
       "evidence": "impact-25-ultra-upgrade-report.md",
       "passed": false,
       "weight": 7
     },
     {
       "category": "strategy",
-      "check_id": "top10_day25_alignment",
+      "check_id": "top10_strategy_alignment",
       "evidence": "Day 25 \u2014 Community activation",
       "passed": false,
       "weight": 20
@@ -80,14 +80,14 @@
     "activation_score": 35.0,
     "critical_failures": [
       "required_sections_present",
-      "top10_day25_alignment"
+      "top10_strategy_alignment"
     ],
     "failed_checks": [
       "required_sections_present",
-      "readme_day25_link",
-      "readme_day25_command",
-      "docs_index_day25_link",
-      "top10_day25_alignment"
+      "readme_integration_link",
+      "readme_command_lane",
+      "docs_index_links",
+      "top10_strategy_alignment"
     ],
     "recommendations": [
       "Restore Day 25 docs contract sections and required command lane before launch.",

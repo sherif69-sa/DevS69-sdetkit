@@ -192,19 +192,19 @@ def build_phase2_kickoff_summary_impl(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day31_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-phase2-kickoff.md" in readme_text,
             "evidence": "docs/integrations-phase2-kickoff.md",
         },
         {
-            "check_id": "readme_day31_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": ("phase2-kickoff" in readme_text) or ("day31-phase2-kickoff" in readme_text),
             "evidence": "phase2-kickoff (legacy: day31-phase2-kickoff)",
         },
         {
-            "check_id": "docs_index_day31_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-31-ultra-upgrade-report.md" in docs_index_text
@@ -213,7 +213,7 @@ def build_phase2_kickoff_summary_impl(
             "evidence": "impact-31-ultra-upgrade-report.md + integrations-phase2-kickoff.md",
         },
         {
-            "check_id": "top10_day31_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": (
                 "Day 31 \u2014 Phase-2 kickoff" in top10_text

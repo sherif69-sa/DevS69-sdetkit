@@ -30,19 +30,19 @@
       }
     },
     {
-      "check_id": "readme_day29_link",
+      "check_id": "readme_integration_link",
       "weight": 12,
       "passed": false,
       "evidence": "docs/integrations-phase1-hardening.md"
     },
     {
-      "check_id": "docs_index_day29_links",
+      "check_id": "docs_index_links",
       "weight": 12,
       "passed": false,
       "evidence": "impact-29-ultra-upgrade-report.md + integrations-phase1-hardening.md"
     },
     {
-      "check_id": "top10_day29_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 11,
       "passed": false,
       "evidence": "Day 29 \u2014 Phase-1 hardening"
@@ -76,9 +76,9 @@
     "stale_markers_clean passed"
   ],
   "corrective_actions": [
-    "Fix check: readme_day29_link",
-    "Fix check: docs_index_day29_links",
-    "Fix check: top10_day29_alignment",
+    "Fix check: readme_integration_link",
+    "Fix check: docs_index_links",
+    "Fix check: top10_strategy_alignment",
     "Fix check: report_exists"
   ]
 }

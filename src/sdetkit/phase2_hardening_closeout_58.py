@@ -170,19 +170,19 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day58_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": _PAGE_PATH in readme_text,
             "evidence": _PAGE_PATH,
         },
         {
-            "check_id": "readme_day58_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "phase2-hardening-closeout" in readme_text,
             "evidence": "README phase2-hardening-closeout command lane",
         },
         {
-            "check_id": "docs_index_day58_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-58-big-upgrade-report.md" in docs_index_text
@@ -191,7 +191,7 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-58-big-upgrade-report.md + integrations-phase2-hardening-closeout.md",
         },
         {
-            "check_id": "top10_day58_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 58" in top10_text and "Day 59" in top10_text),
             "evidence": "Day 58 + Day 59 strategy chain",

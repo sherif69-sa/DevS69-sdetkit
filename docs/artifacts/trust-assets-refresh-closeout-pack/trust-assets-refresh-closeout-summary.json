@@ -11,19 +11,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day75_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
       "evidence": "README day75 command lane"
     },
     {
-      "check_id": "docs_index_day75_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-75-big-upgrade-report.md + integrations-trust-assets-refresh-closeout.md"
     },
     {
-      "check_id": "top10_day75_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 75 + Day 76 strategy chain"
