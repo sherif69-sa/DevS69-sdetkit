@@ -11,9 +11,12 @@
       "category": "contract",
       "check_id": "required_sections_present",
       "evidence": {
-        "missing_sections": []
+        "missing_sections": [
+          "# KPI audit (Day 27)",
+          "## Who should run Day 27"
+        ]
       },
-      "passed": true,
+      "passed": false,
       "weight": 20
     },
     {
@@ -83,6 +86,7 @@
     "readme": "README.md",
     "top10": "docs/top-10-github-strategy.md"
   },
+  "legacy_name": "day27-kpi-audit",
   "metrics": {
     "baseline": {
       "discussions_per_week": 3.0,
@@ -127,20 +131,26 @@
       }
     }
   },
-  "name": "day27-kpi-audit",
-  "strict_failures": [],
+  "name": "kpi-audit",
+  "strict_failures": [
+    "# KPI audit (Day 27)",
+    "## Who should run Day 27"
+  ],
   "summary": {
-    "activation_score": 72.0,
+    "activation_score": 52.0,
     "critical_failures": [
+      "required_sections_present",
       "top10_day27_alignment"
     ],
     "failed_checks": [
+      "required_sections_present",
       "readme_day27_link",
       "readme_day27_command",
       "docs_index_day27_link",
       "top10_day27_alignment"
     ],
     "recommendations": [
+      "Restore Day 27 KPI docs contract and command lane before closeout.",
       "Add Day 27 KPI links and command examples in README/docs index for operator visibility."
     ],
     "total_checks": 10

@@ -1,5 +1,6 @@
 {
-  "name": "day28-weekly-review",
+  "name": "weekly-review-lane",
+  "legacy_name": "day28-weekly-review",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
@@ -21,9 +22,12 @@
       "check_id": "required_sections_present",
       "category": "contract",
       "weight": 20,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "missing_sections": []
+        "missing_sections": [
+          "# Weekly review #4 (Day 28)",
+          "## Who should run Day 28"
+        ]
       }
     },
     {
@@ -33,9 +37,9 @@
       "passed": false,
       "evidence": {
         "missing_commands": [
-          "python -m sdetkit day28-weekly-review --format json --strict",
-          "python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict",
-          "python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict"
+          "python -m sdetkit weekly-review-lane --format json --strict",
+          "python -m sdetkit weekly-review-lane --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict",
+          "python -m sdetkit weekly-review-lane --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict"
         ]
       }
     },
@@ -90,16 +94,17 @@
     }
   ],
   "rollup": {
-    "day25_activation_score": 55.0,
+    "day25_activation_score": 35.0,
     "external_contribution_activation_score": 100.0,
-    "day27_activation_score": 72.0,
-    "average_activation_score": 75.67
+    "day27_activation_score": 52.0,
+    "average_activation_score": 62.33
   },
   "summary": {
-    "activation_score": 62.0,
-    "passed_checks": 6,
-    "failed_checks": 4,
+    "activation_score": 42.0,
+    "passed_checks": 5,
+    "failed_checks": 5,
     "critical_failures": [
+      "required_sections_present",
       "required_commands_present",
       "top10_day28_alignment"
     ],

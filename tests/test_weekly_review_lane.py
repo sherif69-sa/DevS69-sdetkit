@@ -21,7 +21,7 @@ def _seed_repo(root: Path) -> None:
 
     (root / "docs/artifacts").mkdir(parents=True, exist_ok=True)
     (root / "README.md").write_text(
-        "docs/integrations-weekly-review.md\nday28-weekly-review\n",
+        "docs/integrations-weekly-review.md\nweekly-review-lane\n",
         encoding="utf-8",
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -56,7 +56,7 @@ def test_day28_weekly_review_json(tmp_path: Path, capsys) -> None:
     rc = d28.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day28-weekly-review"
+    assert out["name"] == "weekly-review-lane"
     assert out["summary"]["activation_score"] >= 90
 
 

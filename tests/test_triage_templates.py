@@ -27,7 +27,7 @@ def _seed_templates(root: Path) -> None:
 def test_day9_template_health_payload_is_complete(tmp_path: Path) -> None:
     _seed_templates(tmp_path)
     payload = triage_templates.build_template_health(str(tmp_path))
-    assert payload["name"] == "day9-contribution-templates"
+    assert payload["name"] == "triage-templates"
     assert payload["score"] == 100.0
     assert payload["passed_checks"] == payload["total_checks"]
     assert len(payload["templates"]) == 4

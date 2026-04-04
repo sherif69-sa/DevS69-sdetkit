@@ -291,7 +291,8 @@ def build_template_health(root: str = ".") -> dict[str, Any]:
     score = round((passed_checks / total_checks) * 100, 1) if total_checks else 0.0
 
     return {
-        "name": "day9-contribution-templates",
+        "name": "triage-templates",
+        "legacy_name": "day9-contribution-templates",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,

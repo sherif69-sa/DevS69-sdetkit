@@ -19,13 +19,13 @@ _REQUIRED_SECTIONS = [
     "## Evidence mode",
 ]
 _REQUIRED_COMMANDS = [
-    "python -m sdetkit day28-weekly-review --format json --strict",
-    "python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict",
-    "python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict",
+    "python -m sdetkit weekly-review-lane --format json --strict",
+    "python -m sdetkit weekly-review-lane --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict",
+    "python -m sdetkit weekly-review-lane --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict",
     "python scripts/check_weekly_review_contract.py",
 ]
 _EXECUTION_COMMANDS = [
-    "python -m sdetkit day28-weekly-review --format json --strict",
+    "python -m sdetkit weekly-review-lane --format json --strict",
     "python scripts/check_weekly_review_contract.py --skip-evidence",
 ]
 
@@ -48,9 +48,9 @@ Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wi
 ## Closeout checklist
 
 ```bash
-python -m sdetkit day28-weekly-review --format json --strict
-python -m sdetkit day28-weekly-review --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict
-python -m sdetkit day28-weekly-review --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict
+python -m sdetkit weekly-review-lane --format json --strict
+python -m sdetkit weekly-review-lane --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict
+python -m sdetkit weekly-review-lane --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict
 python scripts/check_weekly_review_contract.py
 ```
 
@@ -242,7 +242,8 @@ def build_day28_weekly_review_summary(
         )
 
     return {
-        "name": "day28-weekly-review",
+        "name": "weekly-review-lane",
+        "legacy_name": "day28-weekly-review",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -367,7 +368,8 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
             }
         )
     summary = {
-        "name": "day28-weekly-review-execution",
+        "name": "weekly-review-lane-execution",
+        "legacy_name": "day28-weekly-review-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,

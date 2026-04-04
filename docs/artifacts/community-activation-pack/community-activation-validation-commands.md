@@ -1,4 +1,4 @@
-# Cycle 25 validation commands
+# Day 25 validation commands
 
 ```bash
 python -m sdetkit community-activation --format json --strict

@@ -11,9 +11,12 @@
       "category": "contract",
       "check_id": "required_sections_present",
       "evidence": {
-        "missing_sections": []
+        "missing_sections": [
+          "# Community activation (Day 25)",
+          "## Who should run Day 25"
+        ]
       },
-      "passed": true,
+      "passed": false,
       "weight": 20
     },
     {
@@ -67,20 +70,27 @@
     "readme": "README.md",
     "top10": "docs/top-10-github-strategy.md"
   },
-  "name": "day25-community-activation",
-  "strict_failures": [],
+  "legacy_name": "day25-community-activation",
+  "name": "community-activation",
+  "strict_failures": [
+    "# Community activation (Day 25)",
+    "## Who should run Day 25"
+  ],
   "summary": {
-    "activation_score": 55.0,
+    "activation_score": 35.0,
     "critical_failures": [
+      "required_sections_present",
       "top10_day25_alignment"
     ],
     "failed_checks": [
+      "required_sections_present",
       "readme_day25_link",
       "readme_day25_command",
       "docs_index_day25_link",
       "top10_day25_alignment"
     ],
     "recommendations": [
+      "Restore Day 25 docs contract sections and required command lane before launch.",
       "Add Day 25 links and command snippets to README/docs index for contributor visibility.",
       "Align Day 25 outputs with top-10 roadmap activation objective and roadmap-voting messaging."
     ],

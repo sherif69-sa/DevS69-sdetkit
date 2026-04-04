@@ -1,4 +1,4 @@
-# Cycle 27 validation commands
+# Day 27 validation commands
 
 ```bash
 python -m sdetkit kpi-audit --format json --strict

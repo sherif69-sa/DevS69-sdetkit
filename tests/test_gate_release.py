@@ -95,7 +95,7 @@ def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys
             "--format",
             "json",
             "--playbook-name",
-            "day28-weekly-review",
+            "weekly-review-lane",
             "--playbook-name",
             "day29-phase1-hardening",
         ]
@@ -106,7 +106,7 @@ def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys
         "playbooks",
         "validate",
         "--name",
-        "day28-weekly-review",
+        "weekly-review-lane",
         "--name",
         "day29-phase1-hardening",
         "--format",

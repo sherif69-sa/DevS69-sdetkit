@@ -270,7 +270,8 @@ def build_kpi_audit_summary(
         )
 
     return {
-        "name": "day27-kpi-audit",
+        "name": "kpi-audit",
+        "legacy_name": "day27-kpi-audit",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -392,7 +393,8 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
         )
 
     payload = {
-        "name": "day27-kpi-audit-execution",
+        "name": "kpi-audit-execution",
+        "legacy_name": "day27-kpi-audit-execution",
         "total_commands": len(_EXECUTION_COMMANDS),
         "results": results,
     }

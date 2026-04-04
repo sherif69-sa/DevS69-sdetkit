@@ -46,7 +46,7 @@ def test_kpi_audit_json(tmp_path: Path, capsys) -> None:
     rc = kpa.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day27-kpi-audit"
+    assert out["name"] == "kpi-audit"
     assert out["summary"]["activation_score"] >= 90
 
 
