@@ -93,7 +93,7 @@ case "$mode" in
     python scripts/check_release_communications_contract.py
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|cycle3-proof|cycle4-skills|day3|day4|github-actions-onboarding|gitlab-ci-onboarding|release-readiness|release-communications|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|cycle3-proof|cycle4-skills|github-actions-onboarding|gitlab-ci-onboarding|release-readiness|release-communications|all}" >&2
     exit 2
     ;;
 esac
