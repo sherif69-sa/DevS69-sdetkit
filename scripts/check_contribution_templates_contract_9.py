@@ -21,7 +21,7 @@ DOCS_INDEX_EXPECTED = [
     "## Day 9 ultra upgrades (contribution templates)",
     "sdetkit triage-templates --format text --strict",
     "sdetkit triage-templates --write-defaults --format json --strict",
-    "artifacts/day9-triage-templates-sample.md",
+    "artifacts/triage-templates-sample-9.md",
 ]
 
 DOCS_CLI_EXPECTED = [

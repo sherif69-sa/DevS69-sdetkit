@@ -25,4 +25,4 @@ def test_main_strict_fails_when_full_backlog_invalid(monkeypatch, capsys) -> Non
     )
     rc = cf.main(["--strict", "--format", "json"])
     assert rc == 1
-    assert "day8-validation" in capsys.readouterr().out
+    assert "contributor-funnel-validation" in capsys.readouterr().out

@@ -216,7 +216,6 @@ def _render_json(backlog: list[dict[str, Any]]) -> str:
     area_counts = Counter(str(i["area"]) for i in backlog)
     payload = {
         "name": "contributor-funnel",
-        "legacy_name": "day8-contributor-funnel",
         "issues": backlog,
         "kpis": {
             "issue_count": len(backlog),
@@ -273,7 +272,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if errors and args.strict:
         for err in errors:
-            print(f"[day8-validation] {err}")
+            print(f"[contributor-funnel-validation] {err}")
         return 1
     return 0
 

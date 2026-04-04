@@ -35,7 +35,7 @@ def test_lane9_template_health_payload_is_complete(tmp_path: Path) -> None:
 
 def test_markdown_export_writes_lane9_artifact(tmp_path: Path) -> None:
     _seed_templates(tmp_path)
-    out = tmp_path / "day9.md"
+    out = tmp_path / "triage-templates.md"
     rc = triage_templates.main(
         [
             "--root",
