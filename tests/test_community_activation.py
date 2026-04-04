@@ -29,7 +29,7 @@ def test_community_activation_json(tmp_path: Path, capsys) -> None:
 
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
-    assert out["name"] == "day25-community-activation"
+    assert out["name"] == "community-activation"
     assert out["summary"]["activation_score"] == 100.0
 
 

@@ -10,7 +10,7 @@ from sdetkit import contributor_funnel
 
 def test_day8_backlog_has_ten_curated_issues() -> None:
     payload = json.loads(contributor_funnel._render_json(contributor_funnel.build_backlog()))
-    assert payload["name"] == "day8-contributor-funnel"
+    assert payload["name"] == "contributor-funnel"
     assert payload["kpis"]["issue_count"] == 10
     assert len(payload["issues"]) == 10
     assert all(len(item["acceptance"]) >= 3 for item in payload["issues"])

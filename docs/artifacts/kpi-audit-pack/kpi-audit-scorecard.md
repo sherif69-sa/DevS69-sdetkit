@@ -1,7 +1,7 @@
-Cycle 27 KPI audit summary
-score=72.0
-failed=readme_day27_link,readme_day27_command,docs_index_day27_link,top10_day27_alignment
-critical=top10_day27_alignment
+Day 27 KPI audit summary
+score=52.0
+failed=required_sections_present,readme_day27_link,readme_day27_command,docs_index_day27_link,top10_day27_alignment
+critical=required_sections_present,top10_day27_alignment
 
 KPI deltas:
 - stars_per_week: baseline=8.0 current=13.0 delta=5.0 (62.5%), trend=up

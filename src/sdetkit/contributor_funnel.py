@@ -215,7 +215,8 @@ def _render_markdown(backlog: list[dict[str, Any]]) -> str:
 def _render_json(backlog: list[dict[str, Any]]) -> str:
     area_counts = Counter(str(i["area"]) for i in backlog)
     payload = {
-        "name": "day8-contributor-funnel",
+        "name": "contributor-funnel",
+        "legacy_name": "day8-contributor-funnel",
         "issues": backlog,
         "kpis": {
             "issue_count": len(backlog),
