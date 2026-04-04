@@ -130,7 +130,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day58(path: Path) -> tuple[int, bool, int]:
+def _load_phase2_hardening(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -156,10 +156,10 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
 
-    day58_summary = root / _DAY58_SUMMARY_PATH
-    day58_board = root / _DAY58_BOARD_PATH
-    day58_score, day58_strict, day58_check_count = _load_day58(day58_summary)
-    board_count, board_has_day58 = _count_board_items(day58_board, "Day 58")
+    phase2_hardening_summary = root / _DAY58_SUMMARY_PATH
+    phase2_hardening_board = root / _DAY58_BOARD_PATH
+    phase2_hardening_score, phase2_hardening_strict, phase2_hardening_check_count = _load_phase2_hardening(phase2_hardening_summary)
+    board_count, board_has_phase2_hardening = _count_board_items(phase2_hardening_board, "Day 58")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -190,32 +190,32 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 59 + Day 60 strategy chain",
         },
         {
-            "check_id": "day58_summary_present",
+            "check_id": "phase2_hardening_summary_present",
             "weight": 10,
-            "passed": day58_summary.exists(),
-            "evidence": str(day58_summary),
+            "passed": phase2_hardening_summary.exists(),
+            "evidence": str(phase2_hardening_summary),
         },
         {
-            "check_id": "day58_delivery_board_present",
+            "check_id": "phase2_hardening_delivery_board_present",
             "weight": 8,
-            "passed": day58_board.exists(),
-            "evidence": str(day58_board),
+            "passed": phase2_hardening_board.exists(),
+            "evidence": str(phase2_hardening_board),
         },
         {
-            "check_id": "day58_quality_floor",
+            "check_id": "phase2_hardening_quality_floor",
             "weight": 15,
-            "passed": day58_strict and day58_score >= 95,
+            "passed": phase2_hardening_strict and phase2_hardening_score >= 95,
             "evidence": {
-                "day58_score": day58_score,
-                "strict_pass": day58_strict,
-                "day58_checks": day58_check_count,
+                "phase2_hardening_score": phase2_hardening_score,
+                "strict_pass": phase2_hardening_strict,
+                "phase2_hardening_checks": phase2_hardening_check_count,
             },
         },
         {
-            "check_id": "day58_board_integrity",
+            "check_id": "phase2_hardening_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day58,
-            "evidence": {"board_items": board_count, "contains_day58": board_has_day58},
+            "passed": board_count >= 5 and board_has_phase2_hardening,
+            "evidence": {"board_items": board_count, "contains_phase2_hardening": board_has_phase2_hardening},
         },
         {
             "check_id": "page_header",
@@ -257,24 +257,24 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day58_summary.exists() or not day58_board.exists():
-        critical_failures.append("day58_handoff_inputs")
-    if not day58_strict:
-        critical_failures.append("day58_strict_baseline")
+    if not phase2_hardening_summary.exists() or not phase2_hardening_board.exists():
+        critical_failures.append("phase2_hardening_handoff_inputs")
+    if not phase2_hardening_strict:
+        critical_failures.append("phase2_hardening_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day58_strict:
-        wins.append(f"Day 58 continuity is strict-pass with activation score={day58_score}.")
+    if phase2_hardening_strict:
+        wins.append(f"Day 58 continuity is strict-pass with activation score={phase2_hardening_score}.")
     else:
         misses.append("Day 58 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 58 Phase-2 hardening closeout command and restore strict baseline before Day 59 lock."
         )
 
-    if board_count >= 5 and board_has_day58:
+    if board_count >= 5 and board_has_phase2_hardening:
         wins.append(
             f"Day 58 delivery board integrity validated with {board_count} checklist items."
         )
@@ -307,18 +307,18 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day58_summary": str(day58_summary.relative_to(root))
-            if day58_summary.exists()
-            else str(day58_summary),
-            "day58_delivery_board": str(day58_board.relative_to(root))
-            if day58_board.exists()
-            else str(day58_board),
+            "phase2_hardening_summary": str(phase2_hardening_summary.relative_to(root))
+            if phase2_hardening_summary.exists()
+            else str(phase2_hardening_summary),
+            "phase2_hardening_delivery_board": str(phase2_hardening_board.relative_to(root))
+            if phase2_hardening_board.exists()
+            else str(phase2_hardening_board),
         },
         "checks": checks,
         "rollup": {
-            "day58_activation_score": day58_score,
-            "day58_checks": day58_check_count,
-            "day58_delivery_board_items": board_count,
+            "phase2_hardening_activation_score": phase2_hardening_score,
+            "phase2_hardening_checks": phase2_hardening_check_count,
+            "phase2_hardening_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

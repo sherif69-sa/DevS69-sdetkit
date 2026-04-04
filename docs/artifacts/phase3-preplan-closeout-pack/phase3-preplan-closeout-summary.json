@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase3-preplan-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day58_summary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json",
-    "day58_delivery_board": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
+    "phase2_hardening_summary": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json",
+    "phase2_hardening_delivery_board": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
   },
   "checks": [
     {
@@ -28,34 +28,34 @@
       "evidence": "Day 59 + Day 60 strategy chain"
     },
     {
-      "check_id": "day58_summary_present",
+      "check_id": "phase2_hardening_summary_present",
       "weight": 10,
       "passed": false,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json"
     },
     {
-      "check_id": "day58_delivery_board_present",
+      "check_id": "phase2_hardening_delivery_board_present",
       "weight": 8,
       "passed": false,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
     },
     {
-      "check_id": "day58_quality_floor",
+      "check_id": "phase2_hardening_quality_floor",
       "weight": 15,
       "passed": false,
       "evidence": {
-        "day58_score": 0,
+        "phase2_hardening_score": 0,
         "strict_pass": false,
-        "day58_checks": 0
+        "phase2_hardening_checks": 0
       }
     },
     {
-      "check_id": "day58_board_integrity",
+      "check_id": "phase2_hardening_board_integrity",
       "weight": 7,
       "passed": false,
       "evidence": {
         "board_items": 0,
-        "contains_day58": false
+        "contains_phase2_hardening": false
       }
     },
     {
@@ -98,17 +98,17 @@
     }
   ],
   "rollup": {
-    "day58_activation_score": 0,
-    "day58_checks": 0,
-    "day58_delivery_board_items": 0
+    "phase2_hardening_activation_score": 0,
+    "phase2_hardening_checks": 0,
+    "phase2_hardening_delivery_board_items": 0
   },
   "summary": {
     "activation_score": 18,
     "passed_checks": 4,
     "failed_checks": 9,
     "critical_failures": [
-      "day58_handoff_inputs",
-      "day58_strict_baseline"
+      "phase2_hardening_handoff_inputs",
+      "phase2_hardening_strict_baseline"
     ],
     "strict_pass": false
   },

@@ -128,7 +128,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day57(path: Path) -> tuple[int, bool, int]:
+def _load_kpi_deep_audit(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -147,8 +147,8 @@ def _load_board(path: Path) -> tuple[int, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines()]
     items = [line for line in lines if line.startswith("- [")]
-    has_day57 = any("Day 57" in line for line in lines)
-    return len(items), has_day57
+    has_kpi_deep_audit = any("Day 57" in line for line in lines)
+    return len(items), has_kpi_deep_audit
 
 
 def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
@@ -156,11 +156,11 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     top10_text = _read(root / _TOP10_PATH)
     page_text = _read(root / _PAGE_PATH)
-    day57_summary = root / _DAY57_SUMMARY_PATH
-    day57_board = root / _DAY57_BOARD_PATH
+    kpi_deep_audit_summary = root / _DAY57_SUMMARY_PATH
+    kpi_deep_audit_board = root / _DAY57_BOARD_PATH
 
-    day57_score, day57_strict, day57_check_count = _load_day57(day57_summary)
-    board_count, board_has_day57 = _load_board(day57_board)
+    kpi_deep_audit_score, kpi_deep_audit_strict, kpi_deep_audit_check_count = _load_kpi_deep_audit(kpi_deep_audit_summary)
+    board_count, board_has_kpi_deep_audit = _load_board(kpi_deep_audit_board)
 
     missing_sections = [s for s in _REQUIRED_SECTIONS if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
@@ -197,32 +197,32 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 58 + Day 59 strategy chain",
         },
         {
-            "check_id": "day57_summary_present",
+            "check_id": "kpi_deep_audit_summary_present",
             "weight": 10,
-            "passed": day57_summary.exists(),
-            "evidence": str(day57_summary),
+            "passed": kpi_deep_audit_summary.exists(),
+            "evidence": str(kpi_deep_audit_summary),
         },
         {
-            "check_id": "day57_delivery_board_present",
+            "check_id": "kpi_deep_audit_delivery_board_present",
             "weight": 8,
-            "passed": day57_board.exists(),
-            "evidence": str(day57_board),
+            "passed": kpi_deep_audit_board.exists(),
+            "evidence": str(kpi_deep_audit_board),
         },
         {
-            "check_id": "day57_quality_floor",
+            "check_id": "kpi_deep_audit_quality_floor",
             "weight": 15,
-            "passed": day57_strict and day57_score >= 95,
+            "passed": kpi_deep_audit_strict and kpi_deep_audit_score >= 95,
             "evidence": {
-                "day57_score": day57_score,
-                "strict_pass": day57_strict,
-                "day57_checks": day57_check_count,
+                "kpi_deep_audit_score": kpi_deep_audit_score,
+                "strict_pass": kpi_deep_audit_strict,
+                "kpi_deep_audit_checks": kpi_deep_audit_check_count,
             },
         },
         {
-            "check_id": "day57_board_integrity",
+            "check_id": "kpi_deep_audit_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day57,
-            "evidence": {"board_items": board_count, "contains_day57": board_has_day57},
+            "passed": board_count >= 5 and board_has_kpi_deep_audit,
+            "evidence": {"board_items": board_count, "contains_kpi_deep_audit": board_has_kpi_deep_audit},
         },
         {
             "check_id": "page_header",
@@ -264,24 +264,24 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day57_summary.exists() or not day57_board.exists():
-        critical_failures.append("day57_handoff_inputs")
-    if not day57_strict:
-        critical_failures.append("day57_strict_baseline")
+    if not kpi_deep_audit_summary.exists() or not kpi_deep_audit_board.exists():
+        critical_failures.append("kpi_deep_audit_handoff_inputs")
+    if not kpi_deep_audit_strict:
+        critical_failures.append("kpi_deep_audit_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day57_strict:
-        wins.append(f"Day 57 continuity is strict-pass with activation score={day57_score}.")
+    if kpi_deep_audit_strict:
+        wins.append(f"Day 57 continuity is strict-pass with activation score={kpi_deep_audit_score}.")
     else:
         misses.append("Day 57 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 57 KPI deep-audit closeout command and restore strict baseline before Day 58 lock."
         )
 
-    if board_count >= 5 and board_has_day57:
+    if board_count >= 5 and board_has_kpi_deep_audit:
         wins.append(
             f"Day 57 delivery board integrity validated with {board_count} checklist items."
         )
@@ -314,18 +314,18 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day57_summary": str(day57_summary.relative_to(root))
-            if day57_summary.exists()
-            else str(day57_summary),
-            "day57_delivery_board": str(day57_board.relative_to(root))
-            if day57_board.exists()
-            else str(day57_board),
+            "kpi_deep_audit_summary": str(kpi_deep_audit_summary.relative_to(root))
+            if kpi_deep_audit_summary.exists()
+            else str(kpi_deep_audit_summary),
+            "kpi_deep_audit_delivery_board": str(kpi_deep_audit_board.relative_to(root))
+            if kpi_deep_audit_board.exists()
+            else str(kpi_deep_audit_board),
         },
         "checks": checks,
         "rollup": {
-            "day57_activation_score": day57_score,
-            "day57_checks": day57_check_count,
-            "day57_delivery_board_items": board_count,
+            "kpi_deep_audit_activation_score": kpi_deep_audit_score,
+            "kpi_deep_audit_checks": kpi_deep_audit_check_count,
+            "kpi_deep_audit_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
