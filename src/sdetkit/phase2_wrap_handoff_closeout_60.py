@@ -128,7 +128,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day59(path: Path) -> tuple[int, bool, int]:
+def _load_phase3_preplan(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -154,10 +154,10 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
 
-    day59_summary = root / _DAY58_SUMMARY_PATH
-    day59_board = root / _DAY58_BOARD_PATH
-    day59_score, day59_strict, day59_check_count = _load_day59(day59_summary)
-    board_count, board_has_day59 = _count_board_items(day59_board, "Day 59")
+    phase3_preplan_summary = root / _DAY58_SUMMARY_PATH
+    phase3_preplan_board = root / _DAY58_BOARD_PATH
+    phase3_preplan_score, phase3_preplan_strict, phase3_preplan_check_count = _load_phase3_preplan(phase3_preplan_summary)
+    board_count, board_has_phase3_preplan = _count_board_items(phase3_preplan_board, "Day 59")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -188,32 +188,32 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 60 + Day 61 strategy chain",
         },
         {
-            "check_id": "day59_summary_present",
+            "check_id": "phase3_preplan_summary_present",
             "weight": 10,
-            "passed": day59_summary.exists(),
-            "evidence": str(day59_summary),
+            "passed": phase3_preplan_summary.exists(),
+            "evidence": str(phase3_preplan_summary),
         },
         {
-            "check_id": "day59_delivery_board_present",
+            "check_id": "phase3_preplan_delivery_board_present",
             "weight": 8,
-            "passed": day59_board.exists(),
-            "evidence": str(day59_board),
+            "passed": phase3_preplan_board.exists(),
+            "evidence": str(phase3_preplan_board),
         },
         {
-            "check_id": "day59_quality_floor",
+            "check_id": "phase3_preplan_quality_floor",
             "weight": 15,
-            "passed": day59_strict and day59_score >= 95,
+            "passed": phase3_preplan_strict and phase3_preplan_score >= 95,
             "evidence": {
-                "day59_score": day59_score,
-                "strict_pass": day59_strict,
-                "day59_checks": day59_check_count,
+                "phase3_preplan_score": phase3_preplan_score,
+                "strict_pass": phase3_preplan_strict,
+                "phase3_preplan_checks": phase3_preplan_check_count,
             },
         },
         {
-            "check_id": "day59_board_integrity",
+            "check_id": "phase3_preplan_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day59,
-            "evidence": {"board_items": board_count, "contains_day59": board_has_day59},
+            "passed": board_count >= 5 and board_has_phase3_preplan,
+            "evidence": {"board_items": board_count, "contains_phase3_preplan": board_has_phase3_preplan},
         },
         {
             "check_id": "page_header",
@@ -255,24 +255,24 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day59_summary.exists() or not day59_board.exists():
-        critical_failures.append("day59_handoff_inputs")
-    if not day59_strict:
-        critical_failures.append("day59_strict_baseline")
+    if not phase3_preplan_summary.exists() or not phase3_preplan_board.exists():
+        critical_failures.append("phase3_preplan_handoff_inputs")
+    if not phase3_preplan_strict:
+        critical_failures.append("phase3_preplan_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day59_strict:
-        wins.append(f"Day 59 continuity is strict-pass with activation score={day59_score}.")
+    if phase3_preplan_strict:
+        wins.append(f"Day 59 continuity is strict-pass with activation score={phase3_preplan_score}.")
     else:
         misses.append("Day 59 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 59 Phase-3 pre-plan closeout command and restore strict baseline before Day 60 lock."
         )
 
-    if board_count >= 5 and board_has_day59:
+    if board_count >= 5 and board_has_phase3_preplan:
         wins.append(
             f"Day 59 delivery board integrity validated with {board_count} checklist items."
         )
@@ -307,18 +307,18 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day59_summary": str(day59_summary.relative_to(root))
-            if day59_summary.exists()
-            else str(day59_summary),
-            "day59_delivery_board": str(day59_board.relative_to(root))
-            if day59_board.exists()
-            else str(day59_board),
+            "phase3_preplan_summary": str(phase3_preplan_summary.relative_to(root))
+            if phase3_preplan_summary.exists()
+            else str(phase3_preplan_summary),
+            "phase3_preplan_delivery_board": str(phase3_preplan_board.relative_to(root))
+            if phase3_preplan_board.exists()
+            else str(phase3_preplan_board),
         },
         "checks": checks,
         "rollup": {
-            "day59_activation_score": day59_score,
-            "day59_checks": day59_check_count,
-            "day59_delivery_board_items": board_count,
+            "phase3_preplan_activation_score": phase3_preplan_score,
+            "phase3_preplan_checks": phase3_preplan_check_count,
+            "phase3_preplan_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

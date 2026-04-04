@@ -134,7 +134,7 @@ def test_lane60_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane60_strict_fails_without_day59(tmp_path: Path) -> None:
+def test_lane60_strict_fails_without_phase3_preplan(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
