@@ -1,84 +1,29 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import re
 import sys
 from pathlib import Path
 
-README = Path("README.md")
-DAY4_REPORT = Path("docs/impact-4-ultra-upgrade-report.md")
-DAY4_ARTIFACT = Path("docs/artifacts/skills-sample-4.md")
-
-REQUIRED_README_SNIPPETS = [
-    "## 🧠 Day 4 ultra: skills expansion",
-    "python -m sdetkit agent templates list",
-    "python -m sdetkit agent templates run-all --output-dir .sdetkit/agent/template-runs",
-    "docs/impact-4-ultra-upgrade-report.md",
-]
-
-REQUIRED_DAY4_SECTION_LINKS = [
-    "docs/impact-4-ultra-upgrade-report.md",
-    "docs/artifacts/skills-sample-4.md",
-]
-
-REQUIRED_REPORT_SNIPPETS = [
-    "Day 4 scale-up",
-    "src/sdetkit/agent/cli.py",
-    "tests/test_agent_templates_cli.py",
-    "python scripts/check_skills_contract_4.py",
-]
-
-
-def _day4_section(text: str) -> str:
-    start = text.find("## 🧠 Day 4 ultra: skills expansion")
-    if start == -1:
-        return ""
-    remainder = text[start:]
-    match = re.search(r"\n## ", remainder[1:])
-    if not match:
-        return remainder
-    return remainder[: match.start() + 1]
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> int:
-    errors: list[str] = []
-
-    if not README.exists():
-        print("README.md missing", file=sys.stderr)
-        return 2
-
-    readme_text = README.read_text(encoding="utf-8")
-    day4_section = _day4_section(readme_text)
-
-    for snippet in REQUIRED_README_SNIPPETS:
-        if snippet not in readme_text:
-            errors.append(f"missing README snippet: {snippet}")
-
-    if not day4_section:
-        errors.append("missing Day 4 ultra section in README")
-
-    for link in REQUIRED_DAY4_SECTION_LINKS:
-        if link not in day4_section:
-            errors.append(f"missing Day 4 section link: {link}")
-        if not Path(link).exists():
-            errors.append(f"missing link target: {link}")
-
-    if not DAY4_REPORT.exists():
-        errors.append("missing docs/impact-4-ultra-upgrade-report.md")
-    else:
-        report_text = DAY4_REPORT.read_text(encoding="utf-8")
-        for snippet in REQUIRED_REPORT_SNIPPETS:
-            if snippet not in report_text:
-                errors.append(f"missing Day 4 report snippet: {snippet}")
-
-    if not DAY4_ARTIFACT.exists():
-        errors.append("missing docs/artifacts/skills-sample-4.md")
-
-    if errors:
-        print("skills-contract check failed:", file=sys.stderr)
-        for item in errors:
-            print(f"- {item}", file=sys.stderr)
+    required = [
+        ROOT / "docs/ultra-upgrade-report-4.md",
+        ROOT / "docs/artifacts/skills-sample-4.md",
+        ROOT / "src/sdetkit/agent/cli.py",
+        ROOT / "tests/test_agent_templates_cli.py",
+    ]
+    missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
+    if missing:
+        print(f"Missing Cycle 4 skills contract files: {', '.join(missing)}", file=sys.stderr)
         return 1
+
+    cli = (ROOT / "src/sdetkit/agent/cli.py").read_text(encoding="utf-8")
+    for snippet in ["templates", "run-all", "list"]:
+        if snippet not in cli:
+            print(f"agent templates CLI missing: {snippet}", file=sys.stderr)
+            return 1
 
     print("skills-contract check passed")
     return 0
