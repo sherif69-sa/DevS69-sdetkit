@@ -17,7 +17,7 @@ def test_lane8_backlog_has_ten_curated_issues() -> None:
 
 
 def test_markdown_output_and_issue_pack_written(tmp_path: Path) -> None:
-    out = tmp_path / "day8.md"
+    out = tmp_path / "contributor-funnel.md"
     pack_dir = tmp_path / "issue-pack"
     rc = contributor_funnel.main(
         [

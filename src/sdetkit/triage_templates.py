@@ -292,7 +292,6 @@ def build_template_health(root: str = ".") -> dict[str, Any]:
 
     return {
         "name": "triage-templates",
-        "legacy_name": "day9-contribution-templates",
         "score": score,
         "total_checks": total_checks,
         "passed_checks": passed_checks,

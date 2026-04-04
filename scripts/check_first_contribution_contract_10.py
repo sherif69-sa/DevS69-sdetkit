@@ -9,7 +9,7 @@ DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DOCS_CONTRIBUTING = Path("docs/contributing.md")
 DAY10_REPORT = Path("docs/impact-10-ultra-upgrade-report.md")
-DAY10_ARTIFACT = Path("docs/artifacts/first-contribution-checklist-sample-10.md")
+FIRST_CONTRIBUTION_ARTIFACT = Path("docs/artifacts/first-contribution-checklist-sample.md")
 
 README_EXPECTED = [
     "## ✅ Day 10 ultra: first-contribution checklist",
@@ -30,12 +30,12 @@ DOCS_INDEX_EXPECTED = [
     "## Day 10 ultra upgrades (first-contribution checklist)",
     "sdetkit first-contribution --format text --strict",
     "sdetkit first-contribution --write-defaults --format json --strict",
-    "artifacts/day10-first-contribution-checklist-sample.md",
+    "artifacts/first-contribution-checklist-sample.md",
 ]
 
 DOCS_CLI_EXPECTED = [
     "## first-contribution",
-    "sdetkit first-contribution --format markdown --output docs/artifacts/first-contribution-checklist-sample-10.md",
+    "sdetkit first-contribution --format markdown --output docs/artifacts/first-contribution-checklist-sample.md",
     "--strict",
     "--write-defaults",
 ]
@@ -73,7 +73,7 @@ def main() -> int:
         DOCS_CLI,
         DOCS_CONTRIBUTING,
         DAY10_REPORT,
-        DAY10_ARTIFACT,
+        FIRST_CONTRIBUTION_ARTIFACT,
     ]
     for path in required:
         if not path.exists():
@@ -96,7 +96,8 @@ def main() -> int:
             f'{DAY10_REPORT}: missing "{m}"' for m in _missing(DAY10_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
-            f'{DAY10_ARTIFACT}: missing "{m}"' for m in _missing(DAY10_ARTIFACT, ARTIFACT_EXPECTED)
+            f'{FIRST_CONTRIBUTION_ARTIFACT}: missing "{m}"'
+            for m in _missing(FIRST_CONTRIBUTION_ARTIFACT, ARTIFACT_EXPECTED)
         )
 
     if errors:

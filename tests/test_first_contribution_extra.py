@@ -17,7 +17,7 @@ def test_write_defaults_and_main_markdown_output(tmp_path: Path) -> None:
     (tmp_path / ".github" / "ISSUE_TEMPLATE" / "feature_request.yml").write_text(
         "name: feature\n", encoding="utf-8"
     )
-    out = tmp_path / "artifacts/day10.md"
+    out = tmp_path / "artifacts/first-contribution.md"
     rc = fc.main(
         [
             "--root",

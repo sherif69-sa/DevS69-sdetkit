@@ -7,7 +7,7 @@ README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
 DAY11_REPORT = Path("docs/impact-11-ultra-upgrade-report.md")
-DAY11_ARTIFACT = Path("docs/artifacts/day11-docs-navigation-sample.md")
+DOCS_NAV_ARTIFACT = Path("docs/artifacts/docs-governance-sample.md")
 
 README_EXPECTED = [
     "## 🧭 Day 11 ultra: docs navigation tune-up",
@@ -29,7 +29,7 @@ DOCS_INDEX_EXPECTED = [
 
 DOCS_CLI_EXPECTED = [
     "## docs-nav",
-    "sdetkit docs-nav --format markdown --output docs/artifacts/day11-docs-navigation-sample.md",
+    "sdetkit docs-nav --format markdown --output docs/artifacts/docs-governance-sample.md",
     "--strict",
     "--write-defaults",
 ]
@@ -54,7 +54,7 @@ def _missing(path: Path, expected: list[str]) -> list[str]:
 
 def main() -> int:
     errors: list[str] = []
-    required = [README, DOCS_INDEX, DOCS_CLI, DAY11_REPORT, DAY11_ARTIFACT]
+    required = [README, DOCS_INDEX, DOCS_CLI, DAY11_REPORT, DOCS_NAV_ARTIFACT]
     for path in required:
         if not path.exists():
             errors.append(f"missing required file: {path}")
@@ -69,7 +69,8 @@ def main() -> int:
             f'{DAY11_REPORT}: missing "{m}"' for m in _missing(DAY11_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
-            f'{DAY11_ARTIFACT}: missing "{m}"' for m in _missing(DAY11_ARTIFACT, ARTIFACT_EXPECTED)
+            f'{DOCS_NAV_ARTIFACT}: missing "{m}"'
+            for m in _missing(DOCS_NAV_ARTIFACT, ARTIFACT_EXPECTED)
         )
 
     if errors:
