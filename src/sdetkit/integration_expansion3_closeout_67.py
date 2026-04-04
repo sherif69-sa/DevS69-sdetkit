@@ -15,7 +15,6 @@ _DAY66_BOARD_PATH = (
     "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
 )
 _JENKINS_PATH = "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
-_LEGACY_JENKINS_PATH = "templates/ci/jenkins/day67-advanced-reference.Jenkinsfile"
 _SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion3 Closeout matters",
@@ -81,7 +80,6 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
 - `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`
-  - legacy compatibility alias: `templates/ci/jenkins/day67-advanced-reference.Jenkinsfile`
 
 ## Integration Expansion3 Closeout command lane (Legacy Day 67)
 
@@ -130,16 +128,6 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    if canonical_path.exists():
-        return canonical_path
-    legacy_path = root / legacy
-    if legacy_path.exists():
-        return legacy_path
-    return canonical_path
-
-
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -175,7 +163,7 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
-    jenkins_path = _resolve_input_path(root, _JENKINS_PATH, _LEGACY_JENKINS_PATH)
+    jenkins_path = root / _JENKINS_PATH
     jenkins_text = _read(jenkins_path)
 
     day66_summary = root / _DAY66_SUMMARY_PATH

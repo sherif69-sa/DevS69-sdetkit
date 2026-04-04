@@ -16,9 +16,7 @@ _DAY65_SUMMARY_PATH = (
 _DAY65_BOARD_PATH = (
     "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md"
 )
-_DAY65_LEGACY_BOARD_PATH = "docs/artifacts/weekly-review-closeout-2-pack/day65-delivery-board.md"
 _GITLAB_PATH = "templates/ci/gitlab/gitlab-advanced-reference.yml"
-_LEGACY_GITLAB_PATH = "templates/ci/gitlab/day66-advanced-reference.yml"
 _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion 2 Closeout matters",
@@ -84,7 +82,6 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 - `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json`
 - `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md`
 - `templates/ci/gitlab/gitlab-advanced-reference.yml`
-  - legacy compatibility alias: `templates/ci/gitlab/day66-advanced-reference.yml`
 
 ## Integration Expansion 2 Closeout command lane (Legacy Day 66)
 
@@ -133,16 +130,6 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    if canonical_path.exists():
-        return canonical_path
-    legacy_path = root / legacy
-    if legacy_path.exists():
-        return legacy_path
-    return canonical_path
-
-
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -178,15 +165,11 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
-    gitlab_path = _resolve_input_path(root, _GITLAB_PATH, _LEGACY_GITLAB_PATH)
+    gitlab_path = root / _GITLAB_PATH
     gitlab_text = _read(gitlab_path)
 
     day65_summary = root / _DAY65_SUMMARY_PATH
     day65_board = root / _DAY65_BOARD_PATH
-    if not day65_board.exists():
-        legacy_day65_board = root / _DAY65_LEGACY_BOARD_PATH
-        if legacy_day65_board.exists():
-            day65_board = legacy_day65_board
     day65_score, day65_strict, day65_check_count = _load_day65(day65_summary)
     board_count, board_has_day65 = _count_board_items(day65_board, "Day 65")
 

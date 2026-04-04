@@ -11,11 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-contributor-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY53_SUMMARY_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
-_DAY53_SUMMARY_FALLBACK_PATH = (
-    "docs/artifacts/docs-loop-closeout-pack/day53-docs-loop-closeout-summary.json"
-)
 _DAY53_BOARD_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
-_DAY53_BOARD_FALLBACK_PATH = "docs/artifacts/docs-loop-closeout-pack/day53-delivery-board.md"
 _SECTION_HEADER = "# Day 55 \u2014 Contributor activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 55 matters",
@@ -72,7 +68,6 @@ Day 55 closes with a major contributor activation upgrade that turns Day 53 docs
 
 - `docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json`
 - `docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md`
-- Compatibility fallback: day53-named files remain accepted.
 
 ## Day 55 command lane
 
@@ -172,13 +167,9 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day53_summary_primary = root / _DAY53_SUMMARY_PATH
-    day53_summary_fallback = root / _DAY53_SUMMARY_FALLBACK_PATH
-    day53_summary = (
-        day53_summary_primary if day53_summary_primary.exists() else day53_summary_fallback
-    )
+    day53_summary = day53_summary_primary
     day53_board_primary = root / _DAY53_BOARD_PATH
-    day53_board_fallback = root / _DAY53_BOARD_FALLBACK_PATH
-    day53_board = day53_board_primary if day53_board_primary.exists() else day53_board_fallback
+    day53_board = day53_board_primary
     day53_score, day53_strict, day53_check_count = _load_day53(day53_summary)
     board_count, board_has_day53 = _board_stats(day53_board)
 

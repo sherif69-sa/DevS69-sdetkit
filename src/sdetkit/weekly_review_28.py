@@ -73,10 +73,6 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _resolve_existing_path(primary: Path, fallback: Path) -> Path:
-    return primary if primary.exists() else fallback
-
-
 def _load_score(path: Path) -> tuple[float, bool]:
     if not path.exists():
         return 0.0, False
@@ -111,14 +107,12 @@ def build_day28_weekly_review_summary(
     day25_primary = (
         root / "docs/artifacts/community-activation-pack/community-activation-summary.json"
     )
-    day25_fallback = root / "docs/artifacts/community-activation-pack/day25-community-summary.json"
-    day25_path = _resolve_existing_path(day25_primary, day25_fallback)
+    day25_path = day25_primary
     external_contribution_path = (
         root / "docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     )
     day27_primary = root / "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
-    day27_fallback = root / "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
-    day27_path = _resolve_existing_path(day27_primary, day27_fallback)
+    day27_path = day27_primary
 
     day25_score, day25_ok = _load_score(day25_path)
     external_contribution_score, external_contribution_ok = _load_score(external_contribution_path)

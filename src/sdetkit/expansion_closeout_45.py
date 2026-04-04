@@ -116,13 +116,6 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
-    primary_path = root / primary
-    if primary_path.exists():
-        return primary_path
-    return root / legacy
-
-
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -177,11 +170,7 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day44_summary = root / _DAY44_SUMMARY_PATH
-    day44_board = _resolve_existing_path(
-        root,
-        _DAY44_BOARD_PATH,
-        "docs/artifacts/scale-closeout-pack/day44-delivery-board.md",
-    )
+    day44_board = root / _DAY44_BOARD_PATH
     day44_score, day44_strict, day44_check_count = _load_day44(day44_summary)
     board_count, board_has_day44, board_has_day45 = _board_stats(day44_board)
 
