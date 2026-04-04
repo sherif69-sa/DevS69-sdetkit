@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_launch_readiness_closeout_contract.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "day86-launch-readiness-closeout contract check passed\n",
-  "stderr": ""
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "launch-readiness-closeout contract check failed:\n- summary.strict_pass is false\n- activation_score below 95\n"
 }
