@@ -1,0 +1,2 @@
+stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag
+docs-loop-floor,qa-lead,docs-owner,2026-03-20T10:00:00Z,docs/integrations-docs-loop-closeout.md,python -m sdetkit docs-loop-closeout --format json --strict,failed-checks:0,link-drift
