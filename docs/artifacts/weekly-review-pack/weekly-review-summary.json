@@ -1,6 +1,5 @@
 {
   "name": "weekly-review-lane",
-  "legacy_name": "day28-weekly-review",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
