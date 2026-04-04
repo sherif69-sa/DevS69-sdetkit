@@ -1,1 +1,1 @@
-# Cycle 87 governance handoff brief
+# Day 87 governance handoff brief

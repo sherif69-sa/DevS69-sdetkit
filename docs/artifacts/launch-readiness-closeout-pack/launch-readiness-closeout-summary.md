@@ -1,5 +1,5 @@
-Cycle 86 launch readiness closeout summary
-- Activation score: 100
-- Passed checks: 14
-- Failed checks: 0
+Day 86 launch readiness closeout summary
+- Activation score: 50
+- Passed checks: 6
+- Failed checks: 8
 - Critical failures: []

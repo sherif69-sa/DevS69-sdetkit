@@ -1,5 +1,5 @@
-Cycle 88 governance priorities closeout summary
-- Activation score: 60
-- Passed checks: 9
-- Failed checks: 5
+Day 88 governance priorities closeout summary
+- Activation score: 42
+- Passed checks: 6
+- Failed checks: 8
 - Critical failures: []
