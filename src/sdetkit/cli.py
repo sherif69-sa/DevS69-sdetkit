@@ -497,10 +497,7 @@ Start here:
     d53.set_defaults(cmd="docs-loop-closeout")
     d53.add_argument("args", nargs=argparse.REMAINDER)
 
-    d55 = sub.add_parser(
-        "contributor-activation-closeout",
-        aliases=["day55-contributor-activation-closeout"],
-    )
+    d55 = sub.add_parser("contributor-activation-closeout")
     d55.set_defaults(cmd="contributor-activation-closeout")
     d55.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -520,18 +517,15 @@ Start here:
     d59.set_defaults(cmd="phase3-preplan-closeout")
     d59.add_argument("args", nargs=argparse.REMAINDER)
 
-    d60 = sub.add_parser(
-        "phase2-wrap-handoff-closeout",
-        aliases=["day60-phase2-wrap-handoff-closeout"],
-    )
+    d60 = sub.add_parser("phase2-wrap-handoff-closeout")
     d60.set_defaults(cmd="phase2-wrap-handoff-closeout")
     d60.add_argument("args", nargs=argparse.REMAINDER)
 
-    d61 = sub.add_parser("phase3-kickoff-closeout", aliases=["day61-phase3-kickoff-closeout"])
+    d61 = sub.add_parser("phase3-kickoff-closeout")
     d61.set_defaults(cmd="phase3-kickoff-closeout")
     d61.add_argument("args", nargs=argparse.REMAINDER)
 
-    d62 = sub.add_parser("community-program-closeout", aliases=["day62-community-program-closeout"])
+    d62 = sub.add_parser("community-program-closeout")
     d62.set_defaults(cmd="community-program-closeout")
     d62.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -547,17 +541,11 @@ Start here:
     d65.set_defaults(cmd="weekly-review-closeout-2")
     d65.add_argument("args", nargs=argparse.REMAINDER)
 
-    d66 = sub.add_parser(
-        "integration-expansion2-closeout",
-        aliases=["day66-integration-expansion2-closeout"],
-    )
+    d66 = sub.add_parser("integration-expansion2-closeout")
     d66.set_defaults(cmd="integration-expansion2-closeout")
     d66.add_argument("args", nargs=argparse.REMAINDER)
 
-    d67 = sub.add_parser(
-        "integration-expansion3-closeout",
-        aliases=["day67-integration-expansion3-closeout"],
-    )
+    d67 = sub.add_parser("integration-expansion3-closeout")
     d67.set_defaults(cmd="integration-expansion3-closeout")
     d67.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -776,12 +764,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             "day47-reliability-closeout": "reliability-closeout",
             "day49-advanced-weekly-review-control-tower": "weekly-review-closeout",
             "day50-execution-prioritization-closeout": "execution-prioritization-closeout",
-            "day55-contributor-activation-closeout": "contributor-activation-closeout",
-            "day60-phase2-wrap-handoff-closeout": "phase2-wrap-handoff-closeout",
-            "day61-phase3-kickoff-closeout": "phase3-kickoff-closeout",
-            "day62-community-program-closeout": "community-program-closeout",
-            "day66-integration-expansion2-closeout": "integration-expansion2-closeout",
-            "day67-integration-expansion3-closeout": "integration-expansion3-closeout",
         }
         argv[0] = legacy_aliases.get(str(argv[0]), str(argv[0]))
 
