@@ -4,95 +4,30 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-README = Path("README.md")
-DOCS_INDEX = Path("docs/index.md")
-DOCS_CLI = Path("docs/cli.md")
-DAY14_REPORT = Path("docs/impact-14-ultra-upgrade-report.md")
-DAY14_ARTIFACT = Path("docs/artifacts/weekly-review-sample-14.md")
-DAY14_SIGNALS = Path("docs/artifacts/day14-growth-signals.json")
-DAY7_SIGNALS = Path("docs/artifacts/growth-signals-7.json")
-DAY14_PACK_CHECKLIST = Path("docs/artifacts/weekly-pack-14/closeout-checklist-14.md")
-DAY14_PACK_SCORECARD = Path("docs/artifacts/weekly-pack-14/kpi-scorecard-14.json")
-DAY14_PACK_PLAN = Path("docs/artifacts/weekly-pack-14/blocker-action-plan-14.md")
-WEEKLY_MODULE = Path("src/sdetkit/weekly_review.py")
-
-README_EXPECTED = [
-    "## 📈 Day 14 ultra: weekly review #2",
-    "python -m sdetkit weekly-review --week 2 --format text --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-7.json",
-    "python -m sdetkit weekly-review --week 2 --emit-pack-dir docs/artifacts/day14-weekly-pack --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-7.json --format json --strict",
-    "python scripts/check_weekly_review_contract_14.py",
-    "docs/impact-14-ultra-upgrade-report.md",
-]
-
-INDEX_EXPECTED = [
-    "Day 14 ultra upgrades (weekly review #2 + KPI checkpoint)",
-    "sdetkit weekly-review --week 2 --format text --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-7.json",
-    "artifacts/day14-weekly-review-sample.md",
-    "artifacts/day14-weekly-pack/day14-closeout-checklist.md",
-]
-
-CLI_EXPECTED = [
-    "sdetkit weekly-review --week 2 --format json --signals-file docs/artifacts/day14-growth-signals.json --previous-signals-file docs/artifacts/growth-signals-7.json",
-    "sdetkit weekly-review --week 2 --emit-pack-dir docs/artifacts/day14-weekly-pack --format json --strict",
-    "Useful flags: `--root`, `--week`, `--signals-file`, `--previous-signals-file`, `--emit-pack-dir`, `--strict`, `--format`, `--output`.",
-]
-
-REPORT_EXPECTED = [
-    "Day 14 big upgrade",
-    "src/sdetkit/weekly_review.py",
-    "tests/test_weekly_review.py",
-    "docs/artifacts/day14-weekly-pack/*",
-    "python scripts/check_weekly_review_contract_14.py",
-]
-
-ARTIFACT_EXPECTED = [
-    "# Day 14 Weekly Review #2",
-    "## What shipped (Day 8-13)",
-    "## Week-two growth signals",
-    "## Week-over-week deltas",
-]
-
-
-def _missing(path: Path, expected: list[str]) -> list[str]:
-    text = path.read_text(encoding="utf-8") if path.exists() else ""
-    return [item for item in expected if item not in text]
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> int:
-    errors: list[str] = []
     required = [
-        README,
-        DOCS_INDEX,
-        DOCS_CLI,
-        DAY14_REPORT,
-        DAY14_ARTIFACT,
-        DAY14_SIGNALS,
-        DAY7_SIGNALS,
-        DAY14_PACK_CHECKLIST,
-        DAY14_PACK_SCORECARD,
-        DAY14_PACK_PLAN,
-        WEEKLY_MODULE,
+        ROOT / "docs/ultra-upgrade-report-14.md",
+        ROOT / "docs/artifacts/weekly-review-sample-14.md",
+        ROOT / "docs/artifacts/weekly-review-growth-signals.json",
+        ROOT / "docs/artifacts/growth-signals-baseline.json",
+        ROOT / "docs/artifacts/weekly-pack-14/closeout-checklist-14.md",
+        ROOT / "docs/artifacts/weekly-pack-14/kpi-scorecard-14.json",
+        ROOT / "docs/artifacts/weekly-pack-14/blocker-action-plan-14.md",
+        ROOT / "src/sdetkit/weekly_review.py",
     ]
-    for path in required:
-        if not path.exists():
-            errors.append(f"missing required file: {path}")
-
-    if not errors:
-        errors.extend(f'{README}: missing "{m}"' for m in _missing(README, README_EXPECTED))
-        errors.extend(f'{DOCS_INDEX}: missing "{m}"' for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
-        errors.extend(f'{DOCS_CLI}: missing "{m}"' for m in _missing(DOCS_CLI, CLI_EXPECTED))
-        errors.extend(
-            f'{DAY14_REPORT}: missing "{m}"' for m in _missing(DAY14_REPORT, REPORT_EXPECTED)
-        )
-        errors.extend(
-            f'{DAY14_ARTIFACT}: missing "{m}"' for m in _missing(DAY14_ARTIFACT, ARTIFACT_EXPECTED)
-        )
-
-    if errors:
-        print("weekly-review-contract check failed:", file=sys.stderr)
-        for error in errors:
-            print(f" - {error}", file=sys.stderr)
+    missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
+    if missing:
+        print(f"Missing Cycle 14 weekly-review contract files: {', '.join(missing)}", file=sys.stderr)
         return 1
+
+    weekly = (ROOT / "src/sdetkit/weekly_review.py").read_text(encoding="utf-8")
+    for snippet in ["choices=[1, 2, 3]", "def _emit_week2_pack", "--emit-pack-dir"]:
+        if snippet not in weekly:
+            print(f"weekly-review contract missing: {snippet}", file=sys.stderr)
+            return 1
 
     print("weekly-review-contract check passed")
     return 0

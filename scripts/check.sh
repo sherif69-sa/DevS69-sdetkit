@@ -43,6 +43,13 @@ case "$mode" in
   onboarding)
     python scripts/check_onboarding_contract.py
     ;;
+  cycle3-proof)
+    python scripts/check_proof_contract_3.py
+    ;;
+  cycle4-skills)
+    python scripts/check_skills_contract_4.py
+    ;;
+  # Legacy aliases retained for compatibility with transition-era lanes.
   day3)
     python scripts/check_proof_contract_3.py
     ;;
@@ -86,7 +93,7 @@ case "$mode" in
     python scripts/check_release_communications_contract.py
     ;;
   *)
-    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|day3|day4|github-actions-onboarding|gitlab-ci-onboarding|release-readiness|release-communications|all}" >&2
+    echo "Usage: bash scripts/check.sh {fmt|lint|types|tests|coverage|docs|onboarding|cycle3-proof|cycle4-skills|day3|day4|github-actions-onboarding|gitlab-ci-onboarding|release-readiness|release-communications|all}" >&2
     exit 2
     ;;
 esac

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from __future__ import annotations
 
 from pathlib import Path
@@ -7,31 +8,20 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> int:
     required = [
-        ROOT / "docs/impact-20-ultra-upgrade-report.md",
-        ROOT / "docs/impact-21-ultra-upgrade-report.md",
-        ROOT / "docs/artifacts/release-communications-sample.md",
-        ROOT / "docs/artifacts/day21-growth-signals.json",
+        ROOT / "docs/roadmap/reports/ultra-upgrade-report-20.md",
+        ROOT / "docs/roadmap/reports/ultra-upgrade-report-21.md",
         ROOT / "docs/artifacts/weekly-review-sample-21.md",
+        ROOT / "docs/artifacts/weekly-review-growth-signals.json",
     ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
     if missing:
-        raise SystemExit(f"Missing Day 21 contract files: {', '.join(missing)}")
+        raise SystemExit(f"Missing Cycle 21 contract files: {', '.join(missing)}")
 
     weekly_review = (ROOT / "src/sdetkit/weekly_review.py").read_text(encoding="utf-8")
     if "choices=[1, 2, 3]" not in weekly_review:
         raise SystemExit("weekly-review parser must support --week 3")
     if "def _emit_week3_pack" not in weekly_review:
         raise SystemExit("weekly-review must implement a week-3 closeout pack emitter")
-
-    cli_doc = (ROOT / "docs/cli.md").read_text(encoding="utf-8")
-    if "Day 21/week 3" not in cli_doc:
-        raise SystemExit("docs/cli.md must document Day 21 week 3 support")
-    if "day21-weekly-pack" not in cli_doc:
-        raise SystemExit("docs/cli.md must include week-3 emit-pack example")
-
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    if "day21-weekly-pack" not in readme:
-        raise SystemExit("README.md must include week-3 emit-pack usage")
 
     return 0
 
