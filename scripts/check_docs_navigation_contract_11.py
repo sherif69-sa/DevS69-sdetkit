@@ -6,7 +6,7 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY11_REPORT = Path("docs/impact-11-ultra-upgrade-report.md")
+LANE_REPORT = Path("docs/impact-11-ultra-upgrade-report.md")
 DOCS_NAV_ARTIFACT = Path("docs/artifacts/docs-governance-sample.md")
 
 README_EXPECTED = [
@@ -54,7 +54,7 @@ def _missing(path: Path, expected: list[str]) -> list[str]:
 
 def main() -> int:
     errors: list[str] = []
-    required = [README, DOCS_INDEX, DOCS_CLI, DAY11_REPORT, DOCS_NAV_ARTIFACT]
+    required = [README, DOCS_INDEX, DOCS_CLI, LANE_REPORT, DOCS_NAV_ARTIFACT]
     for path in required:
         if not path.exists():
             errors.append(f"missing required file: {path}")
@@ -66,7 +66,7 @@ def main() -> int:
         )
         errors.extend(f'{DOCS_CLI}: missing "{m}"' for m in _missing(DOCS_CLI, DOCS_CLI_EXPECTED))
         errors.extend(
-            f'{DAY11_REPORT}: missing "{m}"' for m in _missing(DAY11_REPORT, REPORT_EXPECTED)
+            f'{LANE_REPORT}: missing "{m}"' for m in _missing(LANE_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
             f'{DOCS_NAV_ARTIFACT}: missing "{m}"'

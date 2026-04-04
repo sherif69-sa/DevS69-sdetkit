@@ -7,15 +7,15 @@ from pathlib import Path
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")
-DAY22_PAGE = Path("docs/trust-assets.md")
-DAY22_REPORT = Path("docs/trust-assets-report.md")
-DAY22_ARTIFACT = Path("docs/trust-assets.md")
-DAY22_PACK_SUMMARY = Path("docs/artifacts/trust-assets-pack/trust-assets-summary.json")
-DAY22_PACK_SCORECARD = Path("docs/artifacts/trust-assets-pack/trust-assets-scorecard.md")
-DAY22_PACK_CHECKLIST = Path("docs/artifacts/trust-assets-pack/trust-assets-visibility-checklist.md")
-DAY22_PACK_VALIDATION = Path("docs/artifacts/trust-assets-pack/trust-assets-validation-commands.md")
-DAY22_PACK_ACTION_PLAN = Path("docs/artifacts/trust-assets-pack/trust-assets-action-plan.md")
-DAY22_EVIDENCE = Path(
+LANE_PAGE = Path("docs/trust-assets.md")
+LANE_REPORT = Path("docs/trust-assets-report.md")
+LANE_ARTIFACT = Path("docs/trust-assets.md")
+LANE_PACK_SUMMARY = Path("docs/artifacts/trust-assets-pack/trust-assets-summary.json")
+LANE_PACK_SCORECARD = Path("docs/artifacts/trust-assets-pack/trust-assets-scorecard.md")
+LANE_PACK_CHECKLIST = Path("docs/artifacts/trust-assets-pack/trust-assets-visibility-checklist.md")
+LANE_PACK_VALIDATION = Path("docs/artifacts/trust-assets-pack/trust-assets-validation-commands.md")
+LANE_PACK_ACTION_PLAN = Path("docs/artifacts/trust-assets-pack/trust-assets-action-plan.md")
+LANE_EVIDENCE = Path(
     "docs/artifacts/trust-assets-pack/evidence/trust-assets-execution-summary.json"
 )
 MODULE = Path("src/sdetkit/trust_assets.py")
@@ -73,18 +73,18 @@ def main(argv: list[str] | None = None) -> int:
         README,
         DOCS_INDEX,
         DOCS_CLI,
-        DAY22_PAGE,
-        DAY22_REPORT,
-        DAY22_ARTIFACT,
-        DAY22_PACK_SUMMARY,
-        DAY22_PACK_SCORECARD,
-        DAY22_PACK_CHECKLIST,
-        DAY22_PACK_VALIDATION,
-        DAY22_PACK_ACTION_PLAN,
+        LANE_PAGE,
+        LANE_REPORT,
+        LANE_ARTIFACT,
+        LANE_PACK_SUMMARY,
+        LANE_PACK_SCORECARD,
+        LANE_PACK_CHECKLIST,
+        LANE_PACK_VALIDATION,
+        LANE_PACK_ACTION_PLAN,
         MODULE,
     ]
     if not ns.skip_evidence:
-        required.append(DAY22_EVIDENCE)
+        required.append(LANE_EVIDENCE)
 
     errors: list[str] = []
     for path in required:
@@ -95,18 +95,18 @@ def main(argv: list[str] | None = None) -> int:
         errors.extend(f"{README}: missing '{m}'" for m in _missing(README, README_EXPECTED))
         errors.extend(f"{DOCS_INDEX}: missing '{m}'" for m in _missing(DOCS_INDEX, INDEX_EXPECTED))
         errors.extend(f"{DOCS_CLI}: missing '{m}'" for m in _missing(DOCS_CLI, CLI_EXPECTED))
-        errors.extend(f"{DAY22_PAGE}: missing '{m}'" for m in _missing(DAY22_PAGE, PAGE_EXPECTED))
+        errors.extend(f"{LANE_PAGE}: missing '{m}'" for m in _missing(LANE_PAGE, PAGE_EXPECTED))
         errors.extend(
-            f"{DAY22_REPORT}: missing '{m}'" for m in _missing(DAY22_REPORT, REPORT_EXPECTED)
+            f"{LANE_REPORT}: missing '{m}'" for m in _missing(LANE_REPORT, REPORT_EXPECTED)
         )
         errors.extend(
-            f"{DAY22_PACK_SUMMARY}: missing '{m}'"
-            for m in _missing(DAY22_PACK_SUMMARY, SUMMARY_EXPECTED)
+            f"{LANE_PACK_SUMMARY}: missing '{m}'"
+            for m in _missing(LANE_PACK_SUMMARY, SUMMARY_EXPECTED)
         )
         if not ns.skip_evidence:
             errors.extend(
-                f"{DAY22_EVIDENCE}: missing '{m}'"
-                for m in _missing(DAY22_EVIDENCE, EVIDENCE_EXPECTED)
+                f"{LANE_EVIDENCE}: missing '{m}'"
+                for m in _missing(LANE_EVIDENCE, EVIDENCE_EXPECTED)
             )
 
     if errors:
