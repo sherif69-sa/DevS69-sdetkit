@@ -458,7 +458,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Docs Loop Closeout checks (legacy alias: day53-docs-loop-closeout)"
+        description="Docs Loop Closeout checks"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
