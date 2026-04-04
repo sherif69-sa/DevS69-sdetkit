@@ -1,0 +1,2 @@
+stream,owner,backup,review_window,docs_cta,command_cta,kpi_target,risk_flag
+execution-prioritization-floor,qa-lead,docs-owner,2026-03-18T10:00:00Z,docs/integrations-execution-prioritization-closeout.md,python -m sdetkit execution-prioritization-closeout --format json --strict,failed-checks:0,priority-drift
