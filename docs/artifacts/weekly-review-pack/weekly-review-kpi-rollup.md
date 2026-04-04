@@ -3,7 +3,7 @@
 - Activation score: **42.0**
 - Passed checks: **5**
 - Failed checks: **5**
-- Critical failures: **required_sections_present, required_commands_present, top10_day28_alignment**
+- Critical failures: **required_sections_present, required_commands_present, top10_strategy_alignment**
 
 ## KPI rollup (Day 25-27)
 

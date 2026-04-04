@@ -201,19 +201,19 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day49_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-weekly-review-closeout.md" in readme_text,
             "evidence": "docs/integrations-weekly-review-closeout.md",
         },
         {
-            "check_id": "readme_day49_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "weekly-review-closeout" in readme_text,
             "evidence": "weekly-review-closeout",
         },
         {
-            "check_id": "docs_index_day49_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-49-big-upgrade-report.md" in docs_index_text
@@ -222,7 +222,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-49-big-upgrade-report.md + integrations-weekly-review-closeout.md",
         },
         {
-            "check_id": "top10_day49_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 49" in top10_text and "Day 50" in top10_text),
             "evidence": "Day 49 + Day 50 strategy chain",

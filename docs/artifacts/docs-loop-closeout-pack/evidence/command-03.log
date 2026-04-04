@@ -2,5 +2,5 @@
   "command": "python scripts/check_docs_loop_closeout_contract.py --skip-evidence",
   "returncode": 1,
   "stdout": "",
-  "stderr": "day53-docs-loop-closeout contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['required_sections_present', 'readme_day53_link', 'readme_day53_command', 'docs_index_day53_links', 'top10_day53_alignment', 'day52_quality_floor']\n"
+  "stderr": "day53-docs-loop-closeout contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['required_sections_present', 'readme_integration_link', 'readme_command_lane', 'docs_index_links', 'top10_strategy_alignment', 'day52_quality_floor']\n"
 }

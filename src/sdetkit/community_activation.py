@@ -93,28 +93,28 @@ _SIGNALS = [
         "evaluator": "required_commands",
     },
     {
-        "check_id": "readme_day25_link",
+        "check_id": "readme_integration_link",
         "category": "discoverability",
         "weight": 10,
         "marker": "docs/integrations-community-activation.md",
         "source": "readme",
     },
     {
-        "check_id": "readme_day25_command",
+        "check_id": "readme_command_lane",
         "category": "discoverability",
         "weight": 8,
         "marker": "community-activation",
         "source": "readme",
     },
     {
-        "check_id": "docs_index_day25_link",
+        "check_id": "docs_index_links",
         "category": "discoverability",
         "weight": 7,
         "marker": "impact-25-ultra-upgrade-report.md",
         "source": "docs_index",
     },
     {
-        "check_id": "top10_day25_alignment",
+        "check_id": "top10_strategy_alignment",
         "category": "strategy",
         "weight": 20,
         "marker": "Day 25 \u2014 Community activation",
@@ -133,7 +133,7 @@ _CRITICAL_FAILURE_KEYS = {
     "docs_page_exists",
     "required_sections_present",
     "required_commands_present",
-    "top10_day25_alignment",
+    "top10_strategy_alignment",
 }
 
 

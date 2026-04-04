@@ -209,20 +209,20 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day47_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-reliability-closeout.md" in readme_text,
             "evidence": "docs/integrations-reliability-closeout.md",
         },
         {
-            "check_id": "readme_day47_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": ("reliability-closeout" in readme_text)
             or ("day47-reliability-closeout" in readme_text),
             "evidence": "reliability-closeout (legacy: day47-reliability-closeout)",
         },
         {
-            "check_id": "docs_index_day47_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-47-big-upgrade-report.md" in docs_index_text
@@ -231,7 +231,7 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-47-big-upgrade-report.md + integrations-reliability-closeout.md",
         },
         {
-            "check_id": "top10_day47_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 46" in top10_text and "Day 47" in top10_text),
             "evidence": "Day 46 + Day 47 strategy chain",

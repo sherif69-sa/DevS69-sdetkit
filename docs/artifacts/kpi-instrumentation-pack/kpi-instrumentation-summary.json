@@ -36,25 +36,25 @@
       }
     },
     {
-      "check_id": "readme_day35_link",
+      "check_id": "readme_integration_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-kpi-instrumentation.md"
     },
     {
-      "check_id": "readme_day35_command",
+      "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
       "evidence": "day35-kpi-instrumentation"
     },
     {
-      "check_id": "docs_index_day35_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-35-big-upgrade-report.md + integrations-kpi-instrumentation.md"
     },
     {
-      "check_id": "top10_day35_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 35 + Day 36 strategy chain"

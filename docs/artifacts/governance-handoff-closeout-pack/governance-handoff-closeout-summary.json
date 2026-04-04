@@ -11,19 +11,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day87_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
       "evidence": "README day87 command lane"
     },
     {
-      "check_id": "docs_index_day87_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-87-big-upgrade-report.md + integrations-governance-handoff-closeout.md"
     },
     {
-      "check_id": "top10_day87_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 86 + Day 87 strategy chain"

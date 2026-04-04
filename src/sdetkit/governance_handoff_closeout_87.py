@@ -173,13 +173,13 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day87_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("governance-handoff-closeout" in readme_text),
             "evidence": "README day87 command lane",
         },
         {
-            "check_id": "docs_index_day87_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-87-big-upgrade-report.md" in docs_index_text
@@ -188,7 +188,7 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-87-big-upgrade-report.md + integrations-governance-handoff-closeout.md",
         },
         {
-            "check_id": "top10_day87_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 86" in top10_text and "Day 87" in top10_text),
             "evidence": "Day 86 + Day 87 strategy chain",

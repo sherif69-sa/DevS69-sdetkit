@@ -30,28 +30,28 @@
     },
     {
       "category": "discoverability",
-      "check_id": "readme_day27_link",
+      "check_id": "readme_integration_link",
       "evidence": "docs/integrations-kpi-audit.md",
       "passed": false,
       "weight": 8
     },
     {
       "category": "discoverability",
-      "check_id": "readme_day27_command",
+      "check_id": "readme_command_lane",
       "evidence": "kpi-audit",
       "passed": false,
       "weight": 6
     },
     {
       "category": "discoverability",
-      "check_id": "docs_index_day27_link",
+      "check_id": "docs_index_links",
       "evidence": "impact-27-ultra-upgrade-report.md",
       "passed": false,
       "weight": 6
     },
     {
       "category": "strategy",
-      "check_id": "top10_day27_alignment",
+      "check_id": "top10_strategy_alignment",
       "evidence": "Day 27 \u2014 KPI audit",
       "passed": false,
       "weight": 8
@@ -140,14 +140,14 @@
     "activation_score": 52.0,
     "critical_failures": [
       "required_sections_present",
-      "top10_day27_alignment"
+      "top10_strategy_alignment"
     ],
     "failed_checks": [
       "required_sections_present",
-      "readme_day27_link",
-      "readme_day27_command",
-      "docs_index_day27_link",
-      "top10_day27_alignment"
+      "readme_integration_link",
+      "readme_command_lane",
+      "docs_index_links",
+      "top10_strategy_alignment"
     ],
     "recommendations": [
       "Restore Day 27 KPI docs contract and command lane before closeout.",

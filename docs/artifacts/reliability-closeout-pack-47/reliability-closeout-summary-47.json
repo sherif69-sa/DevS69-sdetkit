@@ -34,25 +34,25 @@
       }
     },
     {
-      "check_id": "readme_day47_link",
+      "check_id": "readme_integration_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-reliability-closeout.md"
     },
     {
-      "check_id": "readme_day47_command",
+      "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
       "evidence": "reliability-closeout (legacy: day47-reliability-closeout)"
     },
     {
-      "check_id": "docs_index_day47_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-47-big-upgrade-report.md + integrations-reliability-closeout.md"
     },
     {
-      "check_id": "top10_day47_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 46 + Day 47 strategy chain"

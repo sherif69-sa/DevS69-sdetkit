@@ -194,19 +194,19 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day45_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-expansion-closeout.md" in readme_text,
             "evidence": "docs/integrations-expansion-closeout.md",
         },
         {
-            "check_id": "readme_day45_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "expansion-closeout" in readme_text,
             "evidence": "expansion-closeout",
         },
         {
-            "check_id": "docs_index_day45_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-45-big-upgrade-report.md" in docs_index_text
@@ -215,7 +215,7 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-45-big-upgrade-report.md + integrations-expansion-closeout.md",
         },
         {
-            "check_id": "top10_day45_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 45" in top10_text and "Day 46" in top10_text),
             "evidence": "Day 45 + Day 46 strategy chain",

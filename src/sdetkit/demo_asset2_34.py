@@ -205,19 +205,19 @@ def build_demo_asset2_summary_impl(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day34_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-demo-asset2.md" in readme_text,
             "evidence": "docs/integrations-demo-asset2.md",
         },
         {
-            "check_id": "readme_day34_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "demo-asset2" in readme_text,
             "evidence": "demo-asset2",
         },
         {
-            "check_id": "docs_index_day34_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-34-ultra-upgrade-report.md" in docs_index_text
@@ -226,7 +226,7 @@ def build_demo_asset2_summary_impl(
             "evidence": "impact-34-ultra-upgrade-report.md + integrations-demo-asset2.md",
         },
         {
-            "check_id": "top10_day34_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 34 \u2014 Demo asset #2" in top10_text and "Day 35" in top10_text),
             "evidence": "Day 34 + Day 35 strategy chain",

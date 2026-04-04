@@ -44,21 +44,21 @@
       }
     },
     {
-      "check_id": "readme_day28_link",
+      "check_id": "readme_integration_link",
       "category": "discoverability",
       "weight": 10,
       "passed": false,
       "evidence": "docs/integrations-weekly-review.md"
     },
     {
-      "check_id": "docs_index_day28_link",
+      "check_id": "docs_index_links",
       "category": "discoverability",
       "weight": 10,
       "passed": false,
       "evidence": "impact-28-ultra-upgrade-report.md"
     },
     {
-      "check_id": "top10_day28_alignment",
+      "check_id": "top10_strategy_alignment",
       "category": "strategy",
       "weight": 8,
       "passed": false,
@@ -106,7 +106,7 @@
     "critical_failures": [
       "required_sections_present",
       "required_commands_present",
-      "top10_day28_alignment"
+      "top10_strategy_alignment"
     ],
     "strict_pass": false
   },

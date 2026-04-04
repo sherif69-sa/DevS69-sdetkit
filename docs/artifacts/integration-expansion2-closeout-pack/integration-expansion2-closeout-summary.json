@@ -11,19 +11,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day66_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
       "evidence": "README day66 command lane"
     },
     {
-      "check_id": "docs_index_day66_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-66-big-upgrade-report.md + integrations-integration-expansion2-closeout.md"
     },
     {
-      "check_id": "top10_day66_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 66 + Day 67 strategy chain"

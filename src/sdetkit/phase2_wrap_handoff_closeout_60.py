@@ -167,13 +167,13 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day60_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("phase2-wrap-handoff-closeout" in readme_text),
             "evidence": "README phase2-wrap-handoff-closeout command lane",
         },
         {
-            "check_id": "docs_index_day60_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-60-big-upgrade-report.md" in docs_index_text
@@ -182,7 +182,7 @@ def build_phase2_wrap_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-60-big-upgrade-report.md + integrations-phase2-wrap-handoff-closeout.md",
         },
         {
-            "check_id": "top10_day60_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 60" in top10_text and "Day 61" in top10_text),
             "evidence": "Day 60 + Day 61 strategy chain",

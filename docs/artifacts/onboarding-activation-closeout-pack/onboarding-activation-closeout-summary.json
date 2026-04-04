@@ -10,19 +10,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day63_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": true,
       "evidence": "README day63 command lane"
     },
     {
-      "check_id": "docs_index_day63_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": true,
       "evidence": "impact-63-big-upgrade-report.md + integrations-day63-onboarding-activation-closeout.md"
     },
     {
-      "check_id": "top10_day63_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": true,
       "evidence": "Day 63 + Day 64 strategy chain"

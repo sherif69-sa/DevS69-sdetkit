@@ -203,19 +203,19 @@ def build_experiment_lane_summary_impl(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day37_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-experiment-lane.md" in readme_text,
             "evidence": "docs/integrations-experiment-lane.md",
         },
         {
-            "check_id": "readme_day37_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "experiment-lane" in readme_text,
             "evidence": "experiment-lane",
         },
         {
-            "check_id": "docs_index_day37_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-37-big-upgrade-report.md" in docs_index_text
@@ -224,7 +224,7 @@ def build_experiment_lane_summary_impl(
             "evidence": "impact-37-big-upgrade-report.md + integrations-experiment-lane.md",
         },
         {
-            "check_id": "top10_day37_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 37" in top10_text and "Day 38" in top10_text),
             "evidence": "Day 37 + Day 38 strategy chain",

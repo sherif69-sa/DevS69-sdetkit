@@ -207,7 +207,7 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day50_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": "docs/integrations-execution-prioritization-closeout.md" in readme_text,
             "evidence": "docs/integrations-execution-prioritization-closeout.md",
@@ -219,7 +219,7 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
             "evidence": "execution-prioritization-closeout",
         },
         {
-            "check_id": "docs_index_day50_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-50-big-upgrade-report.md" in docs_index_text
@@ -228,7 +228,7 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
             "evidence": "impact-50-big-upgrade-report.md + integrations-execution-prioritization-closeout.md",
         },
         {
-            "check_id": "top10_day50_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 50" in top10_text and "Day 51" in top10_text),
             "evidence": "Day 50 + Day 51 strategy chain",

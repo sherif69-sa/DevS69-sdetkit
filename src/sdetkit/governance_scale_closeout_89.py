@@ -173,13 +173,13 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day89_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("governance-scale-closeout" in readme_text),
             "evidence": "README day89 command lane",
         },
         {
-            "check_id": "docs_index_day89_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-89-big-upgrade-report.md" in docs_index_text
@@ -188,7 +188,7 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-89-big-upgrade-report.md + integrations-governance-scale-closeout.md",
         },
         {
-            "check_id": "top10_day89_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 88" in top10_text and "Day 89" in top10_text),
             "evidence": "Day 88 + Day 89 strategy chain",

@@ -11,19 +11,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day74_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
       "evidence": "README day74 command lane"
     },
     {
-      "check_id": "docs_index_day74_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-74-big-upgrade-report.md + integrations-distribution-scaling-closeout.md"
     },
     {
-      "check_id": "top10_day74_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 74 + Day 75 strategy chain"

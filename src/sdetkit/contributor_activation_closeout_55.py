@@ -193,19 +193,19 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day55_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": _PAGE_PATH in readme_text,
             "evidence": _PAGE_PATH,
         },
         {
-            "check_id": "readme_day55_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "contributor-activation-closeout" in readme_text,
             "evidence": "README contributor-activation-closeout command lane",
         },
         {
-            "check_id": "docs_index_day55_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-55-big-upgrade-report.md" in docs_index_text
@@ -214,7 +214,7 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-55-big-upgrade-report.md + integrations-contributor-activation-closeout.md",
         },
         {
-            "check_id": "top10_day55_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 55" in top10_text and "Day 56" in top10_text),
             "evidence": "Day 55 + Day 56 strategy chain",

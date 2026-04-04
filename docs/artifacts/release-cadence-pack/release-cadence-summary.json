@@ -34,25 +34,25 @@
       }
     },
     {
-      "check_id": "readme_day32_link",
+      "check_id": "readme_integration_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-release-cadence.md"
     },
     {
-      "check_id": "readme_day32_command",
+      "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
       "evidence": "release-cadence"
     },
     {
-      "check_id": "docs_index_day32_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-32-ultra-upgrade-report.md + integrations-release-cadence.md"
     },
     {
-      "check_id": "top10_day32_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 32 + Day 33 strategy chain"

@@ -173,7 +173,7 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day76_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": (
                 "contributor-recognition-closeout" in readme_text
@@ -182,7 +182,7 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
             "evidence": "README day76 command lane",
         },
         {
-            "check_id": "docs_index_day76_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-76-big-upgrade-report.md" in docs_index_text
@@ -191,7 +191,7 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
             "evidence": "impact-76-big-upgrade-report.md + integrations-contributor-recognition-closeout.md",
         },
         {
-            "check_id": "top10_day76_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 75" in top10_text and "Day 76" in top10_text),
             "evidence": "Day 75 + Day 76 strategy chain",

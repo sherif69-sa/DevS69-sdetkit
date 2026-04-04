@@ -188,19 +188,19 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day57_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": _PAGE_PATH in readme_text,
             "evidence": _PAGE_PATH,
         },
         {
-            "check_id": "readme_day57_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "kpi-deep-audit-closeout" in readme_text,
             "evidence": "README kpi-deep-audit-closeout command lane",
         },
         {
-            "check_id": "docs_index_day57_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-57-big-upgrade-report.md" in docs_index_text
@@ -209,7 +209,7 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-57-big-upgrade-report.md + integrations-kpi-deep-audit-closeout.md",
         },
         {
-            "check_id": "top10_day57_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 57" in top10_text and "Day 58" in top10_text),
             "evidence": "Day 57 + Day 58 strategy chain",

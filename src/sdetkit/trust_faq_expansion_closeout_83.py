@@ -181,13 +181,13 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day83_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("trust-faq-expansion-closeout" in readme_text),
             "evidence": "README day83 command lane",
         },
         {
-            "check_id": "docs_index_day83_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-83-big-upgrade-report.md" in docs_index_text
@@ -196,7 +196,7 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-83-big-upgrade-report.md + integrations-trust-faq-expansion-closeout.md",
         },
         {
-            "check_id": "top10_day83_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 82" in top10_text and "Day 83" in top10_text),
             "evidence": "Day 82 + Day 83 strategy chain",

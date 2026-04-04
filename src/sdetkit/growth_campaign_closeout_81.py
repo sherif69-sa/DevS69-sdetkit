@@ -174,13 +174,13 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day81_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("growth-campaign-closeout" in readme_text),
             "evidence": "README day81 command lane",
         },
         {
-            "check_id": "docs_index_day81_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-81-big-upgrade-report.md" in docs_index_text
@@ -189,7 +189,7 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-81-big-upgrade-report.md + integrations-growth-campaign-closeout.md",
         },
         {
-            "check_id": "top10_day81_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 80" in top10_text and "Day 81" in top10_text),
             "evidence": "Day 80 + Day 81 strategy chain",

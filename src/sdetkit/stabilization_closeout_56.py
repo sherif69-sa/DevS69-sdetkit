@@ -195,19 +195,19 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day56_link",
+            "check_id": "readme_integration_link",
             "weight": 8,
             "passed": _PAGE_PATH in readme_text,
             "evidence": _PAGE_PATH,
         },
         {
-            "check_id": "readme_day56_command",
+            "check_id": "readme_command_lane",
             "weight": 4,
             "passed": "stabilization-closeout" in readme_text,
             "evidence": "README stabilization-closeout command lane",
         },
         {
-            "check_id": "docs_index_day56_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-56-big-upgrade-report.md" in docs_index_text
@@ -216,7 +216,7 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-56-big-upgrade-report.md + integrations-stabilization-closeout.md",
         },
         {
-            "check_id": "top10_day56_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 56" in top10_text and "Day 57" in top10_text),
             "evidence": "Day 56 + Day 57 strategy chain",

@@ -176,7 +176,7 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_day74_command",
+            "check_id": "readme_command_lane",
             "weight": 7,
             "passed": (
                 "distribution-scaling-closeout" in readme_text
@@ -185,7 +185,7 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "README day74 command lane",
         },
         {
-            "check_id": "docs_index_day74_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-74-big-upgrade-report.md" in docs_index_text
@@ -194,7 +194,7 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-74-big-upgrade-report.md + integrations-distribution-scaling-closeout.md",
         },
         {
-            "check_id": "top10_day74_alignment",
+            "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": ("Day 74" in top10_text and "Day 75" in top10_text),
             "evidence": "Day 74 + Day 75 strategy chain",

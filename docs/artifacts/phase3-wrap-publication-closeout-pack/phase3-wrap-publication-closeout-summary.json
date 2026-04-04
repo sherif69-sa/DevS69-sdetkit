@@ -11,19 +11,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day90_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
       "evidence": "README phase3-wrap-publication-closeout command lane"
     },
     {
-      "check_id": "docs_index_day90_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-90-big-upgrade-report.md + integrations-phase3-wrap-publication-closeout.md"
     },
     {
-      "check_id": "top10_day90_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 89 + Day 90 strategy chain"

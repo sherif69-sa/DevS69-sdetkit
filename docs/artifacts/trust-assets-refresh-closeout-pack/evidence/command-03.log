@@ -2,5 +2,5 @@
   "command": "python scripts/check_trust_assets_refresh_closeout_contract.py --skip-evidence",
   "returncode": 1,
   "stdout": "",
-  "stderr": "day75-trust-assets-refresh-closeout contract check failed:\n- activation_score too low: 67\n- strict_pass is false\n- failed checks: ['readme_day75_command', 'docs_index_day75_links', 'top10_day75_alignment', 'day74_quality_floor']\n"
+  "stderr": "day75-trust-assets-refresh-closeout contract check failed:\n- activation_score too low: 67\n- strict_pass is false\n- failed checks: ['readme_command_lane', 'docs_index_links', 'top10_strategy_alignment', 'day74_quality_floor']\n"
 }

@@ -10,19 +10,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_day61_command",
+      "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
       "evidence": "README day61 command lane"
     },
     {
-      "check_id": "docs_index_day61_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-61-big-upgrade-report.md + integrations-phase3-kickoff-closeout.md"
     },
     {
-      "check_id": "top10_day61_alignment",
+      "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 61 + Day 62 strategy chain"
