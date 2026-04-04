@@ -411,7 +411,7 @@ def build_stabilization_closeout_summary_impl(root: Path) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Stabilization Closeout checks (legacy alias: day56-stabilization-closeout)"
+        description="Stabilization Closeout checks"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")

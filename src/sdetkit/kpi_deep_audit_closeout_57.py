@@ -404,7 +404,7 @@ def build_kpi_deep_audit_closeout_summary_impl(root: Path) -> dict[str, Any]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="KPI Deep Audit Closeout checks (legacy alias: day57-kpi-deep-audit-closeout)"
+        description="KPI Deep Audit Closeout checks"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
