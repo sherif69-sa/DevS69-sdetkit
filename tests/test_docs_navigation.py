@@ -44,7 +44,7 @@ def test_docs_navigation_json_and_strict_success(capsys):
     assert data["name"] == "docs-governance"
     assert data["passed_checks"] == data["total_checks"]
     assert data["total_checks"] == 12
-    assert any(check["id"] == "day11-upgrade-section" for check in data["checks"])
+    assert any(check["id"] == "legacy-reports-section" for check in data["checks"])
 
 
 def test_docs_navigation_strict_fails_when_content_missing(tmp_path, capsys):
@@ -59,7 +59,7 @@ def test_docs_navigation_strict_fails_when_content_missing(tmp_path, capsys):
 def test_docs_navigation_write_defaults_recovers_missing_quick_jump(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/index.md").write_text(
-        '## Day 11 ultra upgrades (docs navigation tune-up)\n\n<div class="quick-jump" markdown>\nold\n</div>\n',
+        '## Legacy reports\n\n<div class="quick-jump" markdown>\nold\n</div>\n',
         encoding="utf-8",
     )
     rc = docs_navigation.main(
@@ -112,11 +112,11 @@ def test_docs_navigation_markdown_output_file_written(tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     content = (
         "# Documentation Home\n\n"
-        + docs_navigation._DAY11_QUICK_JUMP_BLOCK
+        + docs_navigation._DEFAULT_QUICK_JUMP_BLOCK
         + "\n\n"
-        + docs_navigation._DAY11_SECTION_HEADER
+        + docs_navigation._LEGACY_REPORTS_SECTION_HEADER
         + "\n\n"
-        + docs_navigation._DAY11_JOURNEYS_BLOCK
+        + docs_navigation._DEFAULT_JOURNEYS_BLOCK
         + "\n"
     )
     (tmp_path / "docs/index.md").write_text(content, encoding="utf-8")
