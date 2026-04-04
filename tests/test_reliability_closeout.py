@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day47_reliability_closeout_json(tmp_path: Path, capsys) -> None:
+def test_lane47_reliability_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d47.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day47_reliability_closeout_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day47_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane47_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d47.main(
         [
@@ -96,7 +96,9 @@ def test_day47_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/reliability-pack-47/reliability-closeout-summary-47.json").exists()
+    assert (
+        tmp_path / "artifacts/reliability-pack-47/reliability-closeout-summary-47.json"
+    ).exists()
     assert (tmp_path / "artifacts/reliability-pack-47/reliability-closeout-summary-47.md").exists()
     assert (tmp_path / "artifacts/reliability-pack-47/reliability-plan-47.md").exists()
     assert (tmp_path / "artifacts/reliability-pack-47/incident-map-47.csv").exists()
@@ -104,10 +106,12 @@ def test_day47_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/reliability-pack-47/execution-log-47.md").exists()
     assert (tmp_path / "artifacts/reliability-pack-47/delivery-board-47.md").exists()
     assert (tmp_path / "artifacts/reliability-pack-47/validation-commands-47.md").exists()
-    assert (tmp_path / "artifacts/reliability-pack-47/evidence/reliability-execution-summary-47.json").exists()
+    assert (
+        tmp_path / "artifacts/reliability-pack-47/evidence/reliability-execution-summary-47.json"
+    ).exists()
 
 
-def test_day47_strict_fails_when_day46_inputs_missing(tmp_path: Path) -> None:
+def test_lane47_strict_fails_when_lane46_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path / "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
@@ -116,7 +120,7 @@ def test_day47_strict_fails_when_day46_inputs_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day47_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane47_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["reliability-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

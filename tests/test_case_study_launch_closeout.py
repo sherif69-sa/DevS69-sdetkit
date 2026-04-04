@@ -91,7 +91,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day73_json(tmp_path: Path, capsys) -> None:
+def test_lane73_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d73.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -100,7 +100,7 @@ def test_day73_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane73_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d73.main(
         [
@@ -117,21 +117,44 @@ def test_day73_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-case-study-narrative.md").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-controls-log.json").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-execution-log.md").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/case-study-launch-closeout-pack/evidence/case-study-launch-execution-summary.json"
+        tmp_path
+        / "artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-launch-closeout-pack/case-study-launch-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-launch-closeout-pack/case-study-launch-case-study-narrative.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-controls-log.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-launch-closeout-pack/case-study-launch-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/case-study-launch-closeout-pack/evidence/case-study-launch-execution-summary.json"
     ).exists()
 
 
-def test_day73_strict_fails_without_day72(tmp_path: Path) -> None:
+def test_lane73_strict_fails_without_day72(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -140,7 +163,7 @@ def test_day73_strict_fails_without_day72(tmp_path: Path) -> None:
     assert d73.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day73_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane73_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["case-study-launch-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

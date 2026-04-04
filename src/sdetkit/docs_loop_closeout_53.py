@@ -470,7 +470,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day53_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
+def build_docs_loop_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_docs_loop_closeout_summary(root)
 

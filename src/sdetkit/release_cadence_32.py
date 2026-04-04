@@ -156,7 +156,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
-def build_day32_release_cadence_summary(
+def build_release_cadence_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -205,19 +205,19 @@ def build_day32_release_cadence_summary(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day32_link",
+            "check_id": "readme_release_cadence_link",
             "weight": 8,
             "passed": "docs/integrations-release-cadence.md" in readme_text,
             "evidence": "docs/integrations-release-cadence.md",
         },
         {
-            "check_id": "readme_day32_command",
+            "check_id": "readme_release_cadence_command",
             "weight": 4,
             "passed": "release-cadence" in readme_text,
             "evidence": "release-cadence",
         },
         {
-            "check_id": "docs_index_day32_links",
+            "check_id": "docs_index_release_cadence_links",
             "weight": 8,
             "passed": (
                 "impact-32-ultra-upgrade-report.md" in docs_index_text
@@ -226,7 +226,7 @@ def build_day32_release_cadence_summary(
             "evidence": "impact-32-ultra-upgrade-report.md + integrations-release-cadence.md",
         },
         {
-            "check_id": "top10_day32_alignment",
+            "check_id": "top10_release_cadence_alignment",
             "weight": 5,
             "passed": (
                 "Day 32 \u2014 Release cadence setup" in top10_text
@@ -511,7 +511,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY32_DEFAULT_PAGE)
 
-    payload = build_day32_release_cadence_summary(root)
+    payload = build_release_cadence_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -554,7 +554,7 @@ def build_release_cadence_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day32_release_cadence_summary(
+    return build_release_cadence_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

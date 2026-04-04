@@ -73,7 +73,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day31_kickoff_json(tmp_path: Path, capsys) -> None:
+def test_lane31_kickoff_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d31.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -82,7 +82,7 @@ def test_day31_kickoff_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day31_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane31_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d31.main(
         [
@@ -101,22 +101,26 @@ def test_day31_emit_pack_and_execute(tmp_path: Path) -> None:
     assert rc == 0
     assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json").exists()
     assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-summary.md").exists()
-    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-baseline-snapshot.json").exists()
+    assert (
+        tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-baseline-snapshot.json"
+    ).exists()
     assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-validation-commands.md").exists()
+    assert (
+        tmp_path / "artifacts/phase2-kickoff-pack/phase2-kickoff-validation-commands.md"
+    ).exists()
     assert (
         tmp_path / "artifacts/phase2-kickoff-pack/evidence/phase2-kickoff-execution-summary.json"
     ).exists()
 
 
-def test_day31_strict_fails_when_day30_inputs_missing(tmp_path: Path) -> None:
+def test_lane31_strict_fails_when_lane30_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json").unlink()
     rc = d31.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> None:
+def test_lane31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md").write_text(
         "- [ ] Day 31 baseline\n", encoding="utf-8"
@@ -125,7 +129,7 @@ def test_day31_strict_fails_when_backlog_is_not_phase2_ready(tmp_path: Path) -> 
     assert rc == 1
 
 
-def test_day31_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane31_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase2-kickoff", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

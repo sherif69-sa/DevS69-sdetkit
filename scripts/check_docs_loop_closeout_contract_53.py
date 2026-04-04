@@ -36,8 +36,7 @@ def main() -> int:
         )
         if not evidence.exists():
             evidence = (
-                root
-                / "docs/artifacts/docs-loop-closeout-pack/evidence/execution-summary.json"
+                root / "docs/artifacts/docs-loop-closeout-pack/evidence/execution-summary.json"
             )
         if not evidence.exists():
             errors.append(f"missing evidence summary: {evidence}")

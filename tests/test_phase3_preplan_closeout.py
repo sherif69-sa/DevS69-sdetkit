@@ -75,7 +75,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day59_json(tmp_path: Path, capsys) -> None:
+def test_lane59_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d59.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -84,7 +84,7 @@ def test_day59_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day59_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane59_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d59.main(
         [
@@ -101,20 +101,35 @@ def test_day59_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-brief.md").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-execution-log.md").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/phase3-preplan-closeout-pack/evidence/phase3-preplan-execution-summary.json"
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.md"
+    ).exists()
+    assert (tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-risk-ledger.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/phase3-preplan-closeout-pack/phase3-preplan-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/phase3-preplan-closeout-pack/evidence/phase3-preplan-execution-summary.json"
     ).exists()
 
 
-def test_day59_strict_fails_without_day58(tmp_path: Path) -> None:
+def test_lane59_strict_fails_without_day58(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -123,7 +138,7 @@ def test_day59_strict_fails_without_day58(tmp_path: Path) -> None:
     assert d59.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day59_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane59_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase3-preplan-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

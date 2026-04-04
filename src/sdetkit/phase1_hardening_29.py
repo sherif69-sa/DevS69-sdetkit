@@ -11,9 +11,9 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-phase1-hardening.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CANONICAL_LANE_NAME = "phase1-hardening"
-_LEGACY_LANE_NAME = "day29-phase1-hardening"
+_LEGACY_LANE_NAME = "legacy-phase1-hardening"
 _CANONICAL_PACK_DIR = "docs/artifacts/phase1-hardening-pack"
-_LEGACY_PACK_DIR = "docs/artifacts/day29-hardening-pack"
+_LEGACY_PACK_DIR = "docs/artifacts/legacy-phase1-hardening-pack"
 _CANONICAL_SUMMARY_JSON = "phase1-hardening-summary.json"
 _CANONICAL_SUMMARY_MD = "phase1-hardening-summary.md"
 _CANONICAL_STALE_GAPS = "phase1-hardening-stale-gaps.json"
@@ -87,7 +87,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def build_day29_phase1_hardening_summary(
+def build_phase1_hardening_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -142,13 +142,13 @@ def build_day29_phase1_hardening_summary(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day29_link",
+            "check_id": "readme_phase1_hardening_link",
             "weight": 12,
             "passed": "docs/integrations-phase1-hardening.md" in readme_text,
             "evidence": "docs/integrations-phase1-hardening.md",
         },
         {
-            "check_id": "docs_index_day29_links",
+            "check_id": "docs_index_phase1_hardening_links",
             "weight": 12,
             "passed": all(
                 token in docs_index_text
@@ -160,7 +160,7 @@ def build_day29_phase1_hardening_summary(
             "evidence": "impact-29-ultra-upgrade-report.md + integrations-phase1-hardening.md",
         },
         {
-            "check_id": "top10_day29_alignment",
+            "check_id": "top10_phase1_hardening_alignment",
             "weight": 11,
             "passed": "Day 29 \u2014 Phase-1 hardening" in top10_text,
             "evidence": "Day 29 \u2014 Phase-1 hardening",
@@ -291,7 +291,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         )
     summary = {
         "name": "phase1-hardening-execution",
-        "legacy_name": "day29-phase1-hardening-execution",
+        "legacy_name": "legacy-phase1-hardening-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
@@ -323,7 +323,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY29_DEFAULT_PAGE)
 
-    payload = build_day29_phase1_hardening_summary(root)
+    payload = build_phase1_hardening_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -366,7 +366,7 @@ def build_phase1_hardening_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day29_phase1_hardening_summary(
+    return build_phase1_hardening_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

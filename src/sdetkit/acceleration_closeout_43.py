@@ -11,12 +11,8 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-acceleration-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY42_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
-_DAY42_BOARD_PATH = (
-    "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
-)
-_DAY42_LEGACY_BOARD_PATH = (
-    "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
-)
+_DAY42_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
+_DAY42_LEGACY_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
 _SECTION_HEADER = "# Day 43 \u2014 Acceleration closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why this lane matters",
@@ -433,7 +429,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "validation-commands.md",
-        "# Acceleration validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Acceleration validation commands\n\n```bash\n"
+        + "\n".join(_EXECUTION_COMMANDS)
+        + "\n```\n",
     )
 
 
@@ -472,7 +470,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day43_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
+def build_acceleration_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_acceleration_closeout_summary(root)
 

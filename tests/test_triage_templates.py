@@ -24,7 +24,7 @@ def _seed_templates(root: Path) -> None:
     )
 
 
-def test_day9_template_health_payload_is_complete(tmp_path: Path) -> None:
+def test_lane9_template_health_payload_is_complete(tmp_path: Path) -> None:
     _seed_templates(tmp_path)
     payload = triage_templates.build_template_health(str(tmp_path))
     assert payload["name"] == "triage-templates"
@@ -33,7 +33,7 @@ def test_day9_template_health_payload_is_complete(tmp_path: Path) -> None:
     assert len(payload["templates"]) == 4
 
 
-def test_markdown_export_writes_day9_artifact(tmp_path: Path) -> None:
+def test_markdown_export_writes_lane9_artifact(tmp_path: Path) -> None:
     _seed_templates(tmp_path)
     out = tmp_path / "day9.md"
     rc = triage_templates.main(

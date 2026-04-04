@@ -96,7 +96,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day66_json(tmp_path: Path, capsys) -> None:
+def test_lane66_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d66.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -105,7 +105,7 @@ def test_day66_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day66_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane66_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d66.main(
         [
@@ -122,23 +122,49 @@ def test_day66_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-pipeline-blueprint.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-matrix-plan.json").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-execution-log.md").exists()
-    assert (tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md").exists()
     assert (
-        tmp_path / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-validation-commands.md"
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/integration-expansion2-closeout-pack/evidence/integration-expansion2-execution-summary.json"
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-pipeline-blueprint.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-matrix-plan.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/integration-expansion2-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion2-closeout-pack/evidence/integration-expansion2-execution-summary.json"
     ).exists()
 
 
-def test_day66_strict_fails_without_day65(tmp_path: Path) -> None:
+def test_lane66_strict_fails_without_day65(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -147,10 +173,8 @@ def test_day66_strict_fails_without_day65(tmp_path: Path) -> None:
     assert d66.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day66_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane66_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["integration-expansion2-closeout", "--root", str(tmp_path), "--format", "text"]
-    )
+    rc = cli.main(["integration-expansion2-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Integration Expansion 2 Closeout summary" in capsys.readouterr().out

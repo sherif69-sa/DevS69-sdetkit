@@ -97,7 +97,7 @@ def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys
             "--playbook-name",
             "weekly-review-lane",
             "--playbook-name",
-            "day29-phase1-hardening",
+            "legacy-phase1-hardening",
         ]
     )
     assert rc == 0
@@ -108,7 +108,7 @@ def test_gate_release_passes_named_playbooks(monkeypatch, tmp_path: Path, capsys
         "--name",
         "weekly-review-lane",
         "--name",
-        "day29-phase1-hardening",
+        "legacy-phase1-hardening",
         "--format",
         "json",
     ]

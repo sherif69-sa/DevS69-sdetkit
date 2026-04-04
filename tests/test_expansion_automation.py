@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day41_expansion_automation_json(tmp_path: Path, capsys) -> None:
+def test_lane41_expansion_automation_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d41.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day41_expansion_automation_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day41_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane41_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d41.main(
         [
@@ -96,25 +96,31 @@ def test_day41_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/expansion-automation-pack/expansion-automation-summary.json").exists()
-    assert (tmp_path / "artifacts/expansion-automation-pack/expansion-automation-summary.md").exists()
+    assert (
+        tmp_path / "artifacts/expansion-automation-pack/expansion-automation-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/expansion-automation-pack/expansion-automation-summary.md"
+    ).exists()
     assert (tmp_path / "artifacts/expansion-automation-pack/expansion-plan.md").exists()
     assert (tmp_path / "artifacts/expansion-automation-pack/automation-matrix.csv").exists()
     assert (tmp_path / "artifacts/expansion-automation-pack/expansion-kpi-scorecard.json").exists()
     assert (tmp_path / "artifacts/expansion-automation-pack/execution-log.md").exists()
     assert (tmp_path / "artifacts/expansion-automation-pack/delivery-board.md").exists()
     assert (tmp_path / "artifacts/expansion-automation-pack/validation-commands.md").exists()
-    assert (tmp_path / "artifacts/expansion-automation-pack/evidence/execution-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/expansion-automation-pack/evidence/execution-summary.json"
+    ).exists()
 
 
-def test_day41_strict_fails_when_day40_inputs_missing(tmp_path: Path) -> None:
+def test_lane41_strict_fails_when_lane40_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/scale-lane-pack/scale-lane-summary.json").unlink()
     rc = d41.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day41_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane41_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["expansion-automation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

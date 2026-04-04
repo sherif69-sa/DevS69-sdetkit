@@ -56,9 +56,7 @@ def _seed_repo(root: Path) -> None:
         ),
         encoding="utf-8",
     )
-    board = (
-        root / "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
-    )
+    board = root / "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
     board.write_text(
         "\n".join(
             [
@@ -75,7 +73,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day50_execution_prioritization_closeout_json(tmp_path: Path, capsys) -> None:
+def test_lane50_execution_prioritization_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d50.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -84,7 +82,7 @@ def test_day50_execution_prioritization_closeout_json(tmp_path: Path, capsys) ->
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day50_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane50_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d50.main(
         [
@@ -118,7 +116,7 @@ def test_day50_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day50_strict_fails_when_day49_inputs_missing(tmp_path: Path) -> None:
+def test_lane50_strict_fails_when_lane49_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -128,7 +126,7 @@ def test_day50_strict_fails_when_day49_inputs_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day50_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane50_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
         ["execution-prioritization-closeout", "--root", str(tmp_path), "--format", "text"]

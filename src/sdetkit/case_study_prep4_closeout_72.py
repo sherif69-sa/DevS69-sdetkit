@@ -431,7 +431,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_day72_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
+def build_case_study_prep4_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_case_study_prep4_closeout_summary(root)
 

@@ -156,7 +156,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
-def build_day38_distribution_batch_summary(
+def build_distribution_batch_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -203,19 +203,19 @@ def build_day38_distribution_batch_summary(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day38_link",
+            "check_id": "readme_distribution_batch_link",
             "weight": 8,
             "passed": "docs/integrations-distribution-batch.md" in readme_text,
             "evidence": "docs/integrations-distribution-batch.md",
         },
         {
-            "check_id": "readme_day38_command",
+            "check_id": "readme_distribution_batch_command",
             "weight": 4,
             "passed": "distribution-batch" in readme_text,
             "evidence": "distribution-batch",
         },
         {
-            "check_id": "docs_index_day38_links",
+            "check_id": "docs_index_distribution_batch_links",
             "weight": 8,
             "passed": (
                 "impact-38-big-upgrade-report.md" in docs_index_text
@@ -224,7 +224,7 @@ def build_day38_distribution_batch_summary(
             "evidence": "impact-38-big-upgrade-report.md + integrations-distribution-batch.md",
         },
         {
-            "check_id": "top10_day38_alignment",
+            "check_id": "top10_distribution_batch_alignment",
             "weight": 5,
             "passed": ("Day 38" in top10_text and "Day 39" in top10_text),
             "evidence": "Day 38 + Day 39 strategy chain",
@@ -532,7 +532,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY38_DEFAULT_PAGE)
 
-    payload = build_day38_distribution_batch_summary(root)
+    payload = build_distribution_batch_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -575,7 +575,7 @@ def build_distribution_batch_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day38_distribution_batch_summary(
+    return build_distribution_batch_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

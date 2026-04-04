@@ -88,7 +88,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day82_json(tmp_path: Path, capsys) -> None:
+def test_lane82_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d82.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -97,7 +97,7 @@ def test_day82_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane82_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d82.main(
         [
@@ -150,7 +150,7 @@ def test_day82_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day82_strict_fails_without_day81(tmp_path: Path) -> None:
+def test_lane82_strict_fails_without_day81(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -159,7 +159,7 @@ def test_day82_strict_fails_without_day81(tmp_path: Path) -> None:
     assert d82.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day82_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane82_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["integration-feedback-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

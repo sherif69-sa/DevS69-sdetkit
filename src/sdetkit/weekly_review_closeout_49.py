@@ -499,7 +499,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day49_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
+def build_weekly_review_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_weekly_review_closeout_summary(root)
 

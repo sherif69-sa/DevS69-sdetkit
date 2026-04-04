@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day38_distribution_json(tmp_path: Path, capsys) -> None:
+def test_distribution_batch_distribution_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d38.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day38_distribution_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day38_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_distribution_batch_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d38.main(
         [
@@ -107,14 +107,14 @@ def test_day38_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/distribution-batch-pack/evidence/execution-summary.json").exists()
 
 
-def test_day38_strict_fails_when_day37_inputs_missing(tmp_path: Path) -> None:
+def test_distribution_batch_strict_fails_when_lane37_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json").unlink()
     rc = d38.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day38_strict_fails_when_day37_board_is_not_ready(tmp_path: Path) -> None:
+def test_distribution_batch_strict_fails_when_lane37_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/experiment-lane-pack/delivery-board.md").write_text(
         "- [ ] Day 38 distribution batch actions selected from winners\n", encoding="utf-8"
@@ -123,7 +123,7 @@ def test_day38_strict_fails_when_day37_board_is_not_ready(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_day38_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_distribution_batch_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["distribution-batch", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

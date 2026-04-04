@@ -67,7 +67,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day48_objection_closeout_json(tmp_path: Path, capsys) -> None:
+def test_lane48_objection_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d48.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -76,7 +76,7 @@ def test_day48_objection_closeout_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day48_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane48_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d48.main(
         [
@@ -101,10 +101,12 @@ def test_day48_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/objection-pack-48/execution-log-48.md").exists()
     assert (tmp_path / "artifacts/objection-pack-48/objection-delivery-board.md").exists()
     assert (tmp_path / "artifacts/objection-pack-48/validation-commands-48.md").exists()
-    assert (tmp_path / "artifacts/objection-pack-48/evidence/objection-execution-summary-48.json").exists()
+    assert (
+        tmp_path / "artifacts/objection-pack-48/evidence/objection-execution-summary-48.json"
+    ).exists()
 
 
-def test_day48_strict_fails_when_day47_inputs_missing(tmp_path: Path) -> None:
+def test_lane48_strict_fails_when_lane47_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -114,7 +116,7 @@ def test_day48_strict_fails_when_day47_inputs_missing(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day48_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane48_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["objection-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

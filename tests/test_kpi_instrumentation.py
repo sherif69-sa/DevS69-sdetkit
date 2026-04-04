@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day35_kpi_json(tmp_path: Path, capsys) -> None:
+def test_kpi_instrumentation_kpi_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d35.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_day35_kpi_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day35_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_kpi_instrumentation_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d35.main(
         [
@@ -112,14 +112,14 @@ def test_day35_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day35_strict_fails_when_day34_inputs_missing(tmp_path: Path) -> None:
+def test_kpi_instrumentation_strict_fails_when_lane34_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json").unlink()
     rc = d35.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day35_strict_fails_when_day34_board_is_not_ready(tmp_path: Path) -> None:
+def test_kpi_instrumentation_strict_fails_when_lane34_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").write_text(
         "- [ ] Day 35 KPI instrumentation backlog pre-scoped\n", encoding="utf-8"
@@ -128,7 +128,7 @@ def test_day35_strict_fails_when_day34_board_is_not_ready(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_day35_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_kpi_instrumentation_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["kpi-instrumentation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

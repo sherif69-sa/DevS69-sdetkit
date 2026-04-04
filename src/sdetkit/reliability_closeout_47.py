@@ -478,7 +478,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day47_reliability_closeout_summary(root: Path) -> dict[str, Any]:
+def build_reliability_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_reliability_closeout_summary(root)
 

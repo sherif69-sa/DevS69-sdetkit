@@ -65,7 +65,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day49_weekly_review_closeout_json(tmp_path: Path, capsys) -> None:
+def test_lane49_weekly_review_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d49.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -75,7 +75,7 @@ def test_day49_weekly_review_closeout_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day49_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane49_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d49.main(
         [
@@ -92,33 +92,42 @@ def test_day49_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-closeout-summary.json").exists()
+    assert (
+        tmp_path / "artifacts/weekly-review-pack-49/weekly-review-closeout-summary.json"
+    ).exists()
     assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-closeout-summary.md").exists()
     assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-brief-49.md").exists()
-    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-risk-register-49.csv").exists()
-    assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-kpi-scorecard-49.json").exists()
+    assert (
+        tmp_path / "artifacts/weekly-review-pack-49/weekly-review-risk-register-49.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/weekly-review-pack-49/weekly-review-kpi-scorecard-49.json"
+    ).exists()
     assert (tmp_path / "artifacts/weekly-review-pack-49/advanced-priority-matrix-49.json").exists()
     assert (tmp_path / "artifacts/weekly-review-pack-49/execution-log-49.md").exists()
     assert (tmp_path / "artifacts/weekly-review-pack-49/weekly-review-delivery-board.md").exists()
     assert (tmp_path / "artifacts/weekly-review-pack-49/validation-commands-49.md").exists()
-    assert (tmp_path / "artifacts/weekly-review-pack-49/evidence/weekly-review-execution-summary-49.json").exists()
+    assert (
+        tmp_path
+        / "artifacts/weekly-review-pack-49/evidence/weekly-review-execution-summary-49.json"
+    ).exists()
 
 
-def test_day49_strict_fails_when_day48_inputs_missing(tmp_path: Path) -> None:
+def test_lane49_strict_fails_when_lane48_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json").unlink()
     rc = d49.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day49_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane49_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
     assert "Day 49 advanced weekly review control tower summary" in capsys.readouterr().out
 
 
-def test_day49_advanced_alias_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane49_advanced_alias_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(
         ["day49-advanced-weekly-review-control-tower", "--root", str(tmp_path), "--format", "text"]
@@ -127,7 +136,7 @@ def test_day49_advanced_alias_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "advanced weekly review control tower" in capsys.readouterr().out
 
 
-def test_day49_non_day_alias_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane49_non_day_alias_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

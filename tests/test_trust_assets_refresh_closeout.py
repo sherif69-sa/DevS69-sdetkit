@@ -92,7 +92,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day75_json(tmp_path: Path, capsys) -> None:
+def test_lane75_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d75.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -101,7 +101,7 @@ def test_day75_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day75_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane75_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d75.main(
         [
@@ -118,23 +118,48 @@ def test_day75_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-integration-brief.md").exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-plan.md").exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-trust-controls-log.json").exists()
     assert (
-        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-trust-kpi-scorecard.json"
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-execution-log.md").exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/evidence/trust-assets-refresh-execution-summary.json"
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-plan.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-trust-controls-log.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-trust-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/trust-assets-refresh-closeout-pack/evidence/trust-assets-refresh-execution-summary.json"
     ).exists()
 
 
-def test_day75_strict_fails_without_day74(tmp_path: Path) -> None:
+def test_lane75_strict_fails_without_day74(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -143,7 +168,7 @@ def test_day75_strict_fails_without_day74(tmp_path: Path) -> None:
     assert d75.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day75_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane75_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["trust-assets-refresh-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

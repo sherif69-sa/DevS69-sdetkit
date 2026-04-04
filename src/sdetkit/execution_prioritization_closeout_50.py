@@ -13,9 +13,7 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY49_SUMMARY_PATH = (
     "docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json"
 )
-_DAY49_BOARD_PATH = (
-    "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
-)
+_DAY49_BOARD_PATH = "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
 _DAY49_LEGACY_BOARD_PATH = "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
 _SECTION_HEADER = "# Day 50 \u2014 Execution prioritization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -480,7 +478,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day50_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
+def build_execution_prioritization_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_execution_prioritization_closeout_summary(root)
 

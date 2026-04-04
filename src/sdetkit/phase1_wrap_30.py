@@ -11,7 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-phase1-wrap.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CANONICAL_LANE_NAME = "phase1-wrap"
-_LEGACY_LANE_NAME = "day30-phase1-wrap"
+_LEGACY_LANE_NAME = "legacy-phase1-wrap"
 _DAY29_CANONICAL_SUMMARY_PATH = "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
 _CANONICAL_EXECUTION_SUMMARY = "phase1-wrap-execution-summary.json"
 _SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
@@ -98,7 +98,7 @@ def _load_score(path: Path) -> tuple[float, bool]:
     return 0.0, False
 
 
-def build_day30_phase1_wrap_summary(
+def build_phase1_wrap_summary_impl(
     root: Path,
     *,
     readme_path: str = "README.md",
@@ -151,19 +151,19 @@ def build_day30_phase1_wrap_summary(
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_day30_link",
+            "check_id": "readme_phase1_wrap_link",
             "weight": 10,
             "passed": "docs/integrations-phase1-wrap.md" in readme_text,
             "evidence": "docs/integrations-phase1-wrap.md",
         },
         {
-            "check_id": "readme_day30_command",
+            "check_id": "readme_phase1_wrap_command",
             "weight": 5,
-            "passed": ("phase1-wrap" in readme_text) or ("day30-phase1-wrap" in readme_text),
-            "evidence": "phase1-wrap (legacy: day30-phase1-wrap)",
+            "passed": ("phase1-wrap" in readme_text) or ("legacy-phase1-wrap" in readme_text),
+            "evidence": "phase1-wrap (legacy: legacy-phase1-wrap)",
         },
         {
-            "check_id": "docs_index_day30_links",
+            "check_id": "docs_index_phase1_wrap_links",
             "weight": 10,
             "passed": (
                 "impact-30-ultra-upgrade-report.md" in docs_index_text
@@ -172,7 +172,7 @@ def build_day30_phase1_wrap_summary(
             "evidence": "impact-30-ultra-upgrade-report.md + integrations-phase1-wrap.md",
         },
         {
-            "check_id": "top10_day30_alignment",
+            "check_id": "top10_phase1_wrap_alignment",
             "weight": 5,
             "passed": (
                 "Day 30 \u2014 Phase-1 wrap + handoff" in top10_text
@@ -385,7 +385,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         )
     summary = {
         "name": "phase1-wrap-execution",
-        "legacy_name": "day30-phase1-wrap-execution",
+        "legacy_name": "legacy-phase1-wrap-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
@@ -417,7 +417,7 @@ def main(argv: list[str] | None = None) -> int:
         if not page.exists():
             _write(page, _DAY30_DEFAULT_PAGE)
 
-    payload = build_day30_phase1_wrap_summary(root)
+    payload = build_phase1_wrap_summary_impl(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, payload, Path(ns.emit_pack_dir))
@@ -460,7 +460,7 @@ def build_phase1_wrap_summary(
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
     """Canonical summary builder (day-based name retained as compatibility alias)."""
-    return build_day30_phase1_wrap_summary(
+    return build_phase1_wrap_summary_impl(
         root,
         readme_path=readme_path,
         docs_index_path=docs_index_path,

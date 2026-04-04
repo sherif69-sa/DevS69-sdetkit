@@ -67,7 +67,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day68_json_strict(tmp_path: Path, capsys) -> None:
+def test_lane68_json_strict(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d68.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -76,7 +76,7 @@ def test_day68_json_strict(tmp_path: Path, capsys) -> None:
     assert payload["summary"]["activation_score"] >= 95
 
 
-def test_day68_emit_and_execute(tmp_path: Path) -> None:
+def test_lane68_emit_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d68.main(
         [
@@ -93,19 +93,33 @@ def test_day68_emit_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-integration-brief.md").exists()
     assert (
-        tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-self-hosted-blueprint.md"
+        tmp_path
+        / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json"
     ).exists()
-    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-policy-plan.json").exists()
-    assert (tmp_path / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-kpi-scorecard.json").exists()
     assert (
-        tmp_path / "artifacts/integration-expansion4-closeout-pack/evidence/integration-expansion4-execution-summary.json"
+        tmp_path
+        / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-integration-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-self-hosted-blueprint.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-policy-plan.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion4-closeout-pack/integration-expansion4-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/integration-expansion4-closeout-pack/evidence/integration-expansion4-execution-summary.json"
     ).exists()
 
 
-def test_day68_strict_fails_without_day67_summary(tmp_path: Path) -> None:
+def test_lane68_strict_fails_without_lane67_summary(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -115,7 +129,7 @@ def test_day68_strict_fails_without_day67_summary(tmp_path: Path) -> None:
     assert rc == 1
 
 
-def test_day68_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane68_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["integration-expansion4-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

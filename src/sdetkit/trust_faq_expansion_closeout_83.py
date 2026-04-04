@@ -419,7 +419,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_day83_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+def build_trust_faq_expansion_closeout_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_trust_faq_expansion_closeout_summary(root)
 

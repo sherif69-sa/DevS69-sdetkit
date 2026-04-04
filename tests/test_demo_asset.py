@@ -68,7 +68,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day33_demo_asset_json(tmp_path: Path, capsys) -> None:
+def test_demo_asset_demo_asset_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d33.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -77,7 +77,7 @@ def test_day33_demo_asset_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day33_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_demo_asset_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d33.main(
         [
@@ -103,14 +103,14 @@ def test_day33_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (tmp_path / "artifacts/demo-asset-pack/evidence/demo-execution-summary.json").exists()
 
 
-def test_day33_strict_fails_when_day32_inputs_missing(tmp_path: Path) -> None:
+def test_demo_asset_strict_fails_when_lane32_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/release-cadence-pack/release-cadence-summary.json").unlink()
     rc = d33.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
 
 
-def test_day33_strict_fails_when_day32_board_is_not_ready(tmp_path: Path) -> None:
+def test_demo_asset_strict_fails_when_lane32_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/release-cadence-pack/release-delivery-board.md").write_text(
         "- [ ] Day 33 demo asset #1 scope frozen\n", encoding="utf-8"
@@ -119,7 +119,7 @@ def test_day33_strict_fails_when_day32_board_is_not_ready(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_day33_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_demo_asset_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["demo-asset", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

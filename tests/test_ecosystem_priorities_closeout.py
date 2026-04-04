@@ -66,7 +66,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day78_json(tmp_path: Path, capsys) -> None:
+def test_lane78_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d78.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -75,7 +75,7 @@ def test_day78_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["strict_pass"] is True
 
 
-def test_day78_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane78_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d78.main(
         [
@@ -116,7 +116,7 @@ def test_day78_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_day78_strict_fails_without_day77_summary(tmp_path: Path) -> None:
+def test_lane78_strict_fails_without_lane77_summary(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -125,7 +125,7 @@ def test_day78_strict_fails_without_day77_summary(tmp_path: Path) -> None:
     assert d78.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day78_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane78_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["ecosystem-priorities-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

@@ -463,11 +463,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "delivery-board.md",
-        "# Expansion automation delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# Expansion automation delivery board\n\n"
+        + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES)
+        + "\n",
     )
     _write(
         target / "validation-commands.md",
-        "# Expansion automation validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        "# Expansion automation validation commands\n\n```bash\n"
+        + "\n".join(_REQUIRED_COMMANDS)
+        + "\n```\n",
     )
 
 
@@ -510,7 +514,7 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_day41_expansion_automation_summary(root: Path) -> dict[str, Any]:
+def build_expansion_automation_summary_impl(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy day-based builder name."""
     return build_expansion_automation_summary(root)
 

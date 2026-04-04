@@ -72,7 +72,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_day57_json(tmp_path: Path, capsys) -> None:
+def test_lane57_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d57.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -81,7 +81,7 @@ def test_day57_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_day57_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_lane57_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d57.main(
         [
@@ -98,20 +98,35 @@ def test_day57_emit_pack_and_execute(tmp_path: Path) -> None:
         ]
     )
     assert rc == 0
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-brief.md").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-risk-ledger.csv").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-scorecard.json").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-execution-log.md").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md").exists()
-    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-validation-commands.md").exists()
     assert (
-        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/evidence/kpi-deep-audit-execution-summary.json"
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.md"
+    ).exists()
+    assert (tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-brief.md").exists()
+    assert (
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-risk-ledger.csv"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/kpi-deep-audit-closeout-pack/evidence/kpi-deep-audit-execution-summary.json"
     ).exists()
 
 
-def test_day57_strict_fails_without_day56(tmp_path: Path) -> None:
+def test_lane57_strict_fails_without_day56(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
@@ -119,7 +134,7 @@ def test_day57_strict_fails_without_day56(tmp_path: Path) -> None:
     assert d57.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_day57_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane57_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["kpi-deep-audit-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
