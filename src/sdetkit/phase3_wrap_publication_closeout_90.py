@@ -10,10 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-phase3-wrap-publication-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY89_SUMMARY_PATH = (
+_GOVERNANCE_SCALE_SUMMARY_PATH = (
     "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
 )
-_DAY89_BOARD_PATH = (
+_GOVERNANCE_SCALE_BOARD_PATH = (
     "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/phase3-wrap-publication-plan.json"
@@ -149,22 +149,22 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day89_summary = root / _DAY89_SUMMARY_PATH
-    day89_board = root / _DAY89_BOARD_PATH
+    governance_scale_summary = root / _GOVERNANCE_SCALE_SUMMARY_PATH
+    governance_scale_board = root / _GOVERNANCE_SCALE_BOARD_PATH
 
-    day89_data = _load_json(day89_summary)
-    day89_summary_data = (
-        day89_data.get("summary", {}) if isinstance(day89_data.get("summary"), dict) else {}
+    governance_scale_data = _load_json(governance_scale_summary)
+    governance_scale_summary_data = (
+        governance_scale_data.get("summary", {}) if isinstance(governance_scale_data.get("summary"), dict) else {}
     )
-    day89_score = int(day89_summary_data.get("activation_score", 0) or 0)
-    day89_strict = bool(day89_summary_data.get("strict_pass", False))
-    day89_check_count = (
-        len(day89_data.get("checks", [])) if isinstance(day89_data.get("checks"), list) else 0
+    governance_scale_score = int(governance_scale_summary_data.get("activation_score", 0) or 0)
+    governance_scale_strict = bool(governance_scale_summary_data.get("strict_pass", False))
+    governance_scale_check_count = (
+        len(governance_scale_data.get("checks", [])) if isinstance(governance_scale_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day89_board)
+    board_text = _read_text(governance_scale_board)
     board_count = _checklist_count(board_text)
-    board_has_day89 = "Day 89" in board_text
+    board_has_governance_scale = "governance scale" in board_text.lower()
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -198,32 +198,32 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
             "evidence": "Day 89 + Day 90 strategy chain",
         },
         {
-            "check_id": "day89_summary_present",
+            "check_id": "governance_scale_summary_present",
             "weight": 10,
-            "passed": day89_summary.exists(),
-            "evidence": str(day89_summary),
+            "passed": governance_scale_summary.exists(),
+            "evidence": str(governance_scale_summary),
         },
         {
-            "check_id": "day89_delivery_board_present",
+            "check_id": "governance_scale_delivery_board_present",
             "weight": 7,
-            "passed": day89_board.exists(),
-            "evidence": str(day89_board),
+            "passed": governance_scale_board.exists(),
+            "evidence": str(governance_scale_board),
         },
         {
-            "check_id": "day89_quality_floor",
+            "check_id": "governance_scale_quality_floor",
             "weight": 13,
-            "passed": day89_score >= 85 and day89_strict,
+            "passed": governance_scale_score >= 85 and governance_scale_strict,
             "evidence": {
-                "day89_score": day89_score,
-                "strict_pass": day89_strict,
-                "day89_checks": day89_check_count,
+                "governance_scale_score": governance_scale_score,
+                "strict_pass": governance_scale_strict,
+                "governance_scale_checks": governance_scale_check_count,
             },
         },
         {
-            "check_id": "day89_board_integrity",
+            "check_id": "governance_scale_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day89,
-            "evidence": {"board_items": board_count, "contains_day89": board_has_day89},
+            "passed": board_count >= 5 and board_has_governance_scale,
+            "evidence": {"board_items": board_count, "contains_governance_scale": board_has_governance_scale},
         },
         {
             "check_id": "page_header",
@@ -271,24 +271,24 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day89_summary.exists() or not day89_board.exists():
-        critical_failures.append("day89_handoff_inputs")
+    if not governance_scale_summary.exists() or not governance_scale_board.exists():
+        critical_failures.append("governance_scale_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day89_score >= 85 and day89_strict:
-        wins.append(f"Day 89 continuity baseline is stable with activation score={day89_score}.")
+    if governance_scale_score >= 85 and governance_scale_strict:
+        wins.append(f"Day 89 continuity baseline is stable with activation score={governance_scale_score}.")
     else:
         misses.append("Day 89 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 89 closeout command and raise baseline quality above 85 with strict pass before Day 90 lock."
         )
 
-    if board_count >= 5 and board_has_day89:
+    if board_count >= 5 and board_has_governance_scale:
         wins.append(
-            f"Day 89 delivery board integrity validated with {board_count} checklist items."
+            f"Governance scale delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
@@ -319,19 +319,19 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day89_summary": str(day89_summary.relative_to(root))
-            if day89_summary.exists()
-            else str(day89_summary),
-            "day89_delivery_board": str(day89_board.relative_to(root))
-            if day89_board.exists()
-            else str(day89_board),
+            "governance_scale_summary": str(governance_scale_summary.relative_to(root))
+            if governance_scale_summary.exists()
+            else str(governance_scale_summary),
+            "governance_scale_delivery_board": str(governance_scale_board.relative_to(root))
+            if governance_scale_board.exists()
+            else str(governance_scale_board),
             "phase3_wrap_publication_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day89_activation_score": day89_score,
-            "day89_checks": day89_check_count,
-            "day89_delivery_board_items": board_count,
+            "governance_scale_activation_score": governance_scale_score,
+            "governance_scale_checks": governance_scale_check_count,
+            "governance_scale_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

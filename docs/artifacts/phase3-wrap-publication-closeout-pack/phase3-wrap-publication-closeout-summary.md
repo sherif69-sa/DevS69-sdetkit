@@ -1,5 +1,5 @@
-Cycle 90 phase-3 wrap publication closeout summary
-- Activation score: 60
-- Passed checks: 9
-- Failed checks: 5
+Day 90 phase-3 wrap publication closeout summary
+- Activation score: 42
+- Passed checks: 6
+- Failed checks: 8
 - Critical failures: []

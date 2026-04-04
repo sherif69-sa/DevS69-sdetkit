@@ -78,7 +78,7 @@ def _seed_repo(root: Path) -> None:
     plan.write_text(
         json.dumps(
             {
-                "plan_id": "day90-phase3-wrap-publication-001",
+                "plan_id": "phase3-wrap-publication-001",
                 "contributors": ["maintainers", "release-ops"],
                 "narrative_channels": ["launch-brief", "release-report", "faq"],
                 "baseline": {"launch_confidence": 0.64, "narrative_reuse": 0.42},
@@ -161,7 +161,7 @@ def test_lane90_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane90_strict_fails_without_day89(tmp_path: Path) -> None:
+def test_lane90_strict_fails_without_governance_scale(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

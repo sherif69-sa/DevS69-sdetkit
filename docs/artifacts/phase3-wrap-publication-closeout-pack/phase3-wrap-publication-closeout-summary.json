@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase3-wrap-publication-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day89_summary": "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json",
-    "day89_delivery_board": "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md",
+    "governance_scale_summary": "docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json",
+    "governance_scale_delivery_board": "docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md",
     "phase3_wrap_publication_plan": "docs/roadmap/plans/phase3-wrap-publication-plan.json"
   },
   "checks": [
@@ -29,34 +29,34 @@
       "evidence": "Day 89 + Day 90 strategy chain"
     },
     {
-      "check_id": "day89_summary_present",
+      "check_id": "governance_scale_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json"
     },
     {
-      "check_id": "day89_delivery_board_present",
+      "check_id": "governance_scale_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md"
     },
     {
-      "check_id": "day89_quality_floor",
+      "check_id": "governance_scale_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day89_score": 60,
+        "governance_scale_score": 42,
         "strict_pass": false,
-        "day89_checks": 14
+        "governance_scale_checks": 14
       }
     },
     {
-      "check_id": "day89_board_integrity",
+      "check_id": "governance_scale_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day89": true
+        "contains_governance_scale": true
       }
     },
     {
@@ -68,8 +68,10 @@
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 89)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 90 phase-3 wrap publication execution and signoff.",
+        "The Day 90 lane references Day 89 outcomes, controls, and trust continuity signals.",
+        "Every Day 90 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 90 evidence brief committed",
+        "- [ ] Day 90 phase-3 wrap publication plan committed",
+        "- [ ] Day 90 narrative template upgrade ledger exported",
+        "- [ ] Day 90 storyline outcomes ledger exported",
+        "- [ ] Next-impact roadmap draft captured from Day 90 outcomes"
+      ]
     },
     {
       "check_id": "evidence_plan_data_present",
@@ -103,19 +116,19 @@
     }
   ],
   "rollup": {
-    "day89_activation_score": 60,
-    "day89_checks": 14,
-    "day89_delivery_board_items": 5
+    "governance_scale_activation_score": 42,
+    "governance_scale_checks": 14,
+    "governance_scale_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 60,
-    "passed_checks": 9,
-    "failed_checks": 5,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [],
     "strict_pass": false
   },
   "wins": [
-    "Day 89 delivery board integrity validated with 5 checklist items.",
+    "Governance scale delivery board integrity validated with 5 checklist items.",
     "Day 90 phase-3 wrap publication dataset is available for governance execution."
   ],
   "misses": [
