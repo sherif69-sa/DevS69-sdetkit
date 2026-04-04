@@ -419,7 +419,7 @@ def build_contributor_activation_closeout_summary_impl(root: Path) -> dict[str, 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Contributor Activation Closeout checks (legacy alias: day55-contributor-activation-closeout)"
+        description="Contributor Activation Closeout checks"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
