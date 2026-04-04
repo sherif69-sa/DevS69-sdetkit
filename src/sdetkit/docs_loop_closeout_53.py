@@ -11,11 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-docs-loop-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY52_SUMMARY_PATH = "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json"
-_DAY52_SUMMARY_FALLBACK_PATH = (
-    "docs/artifacts/narrative-closeout-pack/day52-narrative-closeout-summary.json"
-)
 _DAY52_BOARD_PATH = "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md"
-_DAY52_BOARD_FALLBACK_PATH = "docs/artifacts/narrative-closeout-pack/day52-delivery-board.md"
 _SECTION_HEADER = "# Day 53 \u2014 Docs loop optimization closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 53 matters",
@@ -72,7 +68,6 @@ Day 53 closes with a major docs loop optimization upgrade that converts Day 52 n
 
 - `docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json`
 - `docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md`
-- Compatibility fallback: day52-named files remain accepted.
 
 ## Day 53 command lane
 
@@ -178,13 +173,9 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
     day52_summary_primary = root / _DAY52_SUMMARY_PATH
-    day52_summary_fallback = root / _DAY52_SUMMARY_FALLBACK_PATH
-    day52_summary = (
-        day52_summary_primary if day52_summary_primary.exists() else day52_summary_fallback
-    )
+    day52_summary = day52_summary_primary
     day52_board_primary = root / _DAY52_BOARD_PATH
-    day52_board_fallback = root / _DAY52_BOARD_FALLBACK_PATH
-    day52_board = day52_board_primary if day52_board_primary.exists() else day52_board_fallback
+    day52_board = day52_board_primary
     day52_score, day52_strict, day52_check_count = _load_day52(day52_summary)
     board_count, board_has_day52, board_has_day53 = _board_stats(day52_board)
 

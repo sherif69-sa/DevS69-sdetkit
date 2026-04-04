@@ -12,10 +12,6 @@ _PAGE_PATH = "docs/integrations-distribution-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY35_SUMMARY_PATH = "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
 _DAY35_BOARD_PATH = "docs/artifacts/kpi-instrumentation-pack/delivery-board.md"
-_DAY35_SUMMARY_FALLBACK_PATH = (
-    "docs/artifacts/kpi-instrumentation-pack/day35-kpi-instrumentation-summary.json"
-)
-_DAY35_BOARD_FALLBACK_PATH = "docs/artifacts/kpi-instrumentation-pack/day35-delivery-board.md"
 _SECTION_HEADER = "# Day 36 \u2014 Community distribution closeout"
 _REQUIRED_SECTIONS = [
     "## Why Day 36 matters",
@@ -120,10 +116,6 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _resolve_existing_path(primary: Path, fallback: Path) -> Path:
-    return primary if primary.exists() else fallback
-
-
 def _load_json(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
@@ -186,13 +178,8 @@ def build_day36_distribution_closeout_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day35_summary = _resolve_existing_path(
-        root / _DAY35_SUMMARY_PATH,
-        root / _DAY35_SUMMARY_FALLBACK_PATH,
-    )
-    day35_board = _resolve_existing_path(
-        root / _DAY35_BOARD_PATH, root / _DAY35_BOARD_FALLBACK_PATH
-    )
+    day35_summary = root / _DAY35_SUMMARY_PATH
+    day35_board = root / _DAY35_BOARD_PATH
     day35_score, day35_strict, day35_check_count = _load_day35(day35_summary)
     board_count, board_has_day36, board_has_day37 = _board_stats(day35_board)
 

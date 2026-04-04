@@ -12,10 +12,6 @@ _PAGE_PATH = "docs/integrations-playbook-post.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY38_SUMMARY_PATH = "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
 _DAY38_BOARD_PATH = "docs/artifacts/distribution-batch-pack/delivery-board.md"
-_LEGACY_DAY38_SUMMARY_PATH = (
-    "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
-)
-_LEGACY_DAY38_BOARD_PATH = "docs/artifacts/day38-distribution-batch-pack/day38-delivery-board.md"
 _SECTION_HEADER = "# Day 39 \u2014 Playbook post #1"
 _REQUIRED_SECTIONS = [
     "## Why Day 39 matters",
@@ -160,14 +156,6 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
     return [line for line in lines if line not in text]
 
 
-def _resolve_input_path(root: Path, canonical: str, legacy: str) -> Path:
-    canonical_path = root / canonical
-    if canonical_path.exists():
-        return canonical_path
-    legacy_path = root / legacy
-    return legacy_path if legacy_path.exists() else canonical_path
-
-
 def build_day39_playbook_post_summary(
     root: Path,
     *,
@@ -190,8 +178,8 @@ def build_day39_playbook_post_summary(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day38_summary = _resolve_input_path(root, _DAY38_SUMMARY_PATH, _LEGACY_DAY38_SUMMARY_PATH)
-    day38_board = _resolve_input_path(root, _DAY38_BOARD_PATH, _LEGACY_DAY38_BOARD_PATH)
+    day38_summary = root / _DAY38_SUMMARY_PATH
+    day38_board = root / _DAY38_BOARD_PATH
     day38_score, day38_strict, day38_check_count = _load_day38(day38_summary)
     board_count, board_has_day38, board_has_day39 = _board_stats(day38_board)
 
