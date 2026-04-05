@@ -175,7 +175,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("weekly-review-closeout-2" in readme_text),
-            "evidence": "README day65 command lane",
+            "evidence": "README weekly-review-closeout-2 command lane",
         },
         {
             "check_id": "docs_index_links",
