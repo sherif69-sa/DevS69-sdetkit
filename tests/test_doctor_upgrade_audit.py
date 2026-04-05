@@ -1,9 +1,14 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from sdetkit import doctor
+
+
+def _iso_days_ago(days: int) -> str:
+    return (datetime.now(UTC) - timedelta(days=days)).replace(microsecond=0).isoformat()
 
 
 def _write_minimal_pyproject(root: Path) -> None:
@@ -370,9 +375,9 @@ def test_doctor_upgrade_audit_supports_release_age_filters_and_freshness_hints(
         lambda *_args, **_kwargs: {
             "httpx": doctor.upgrade_audit.PackageMetadata(
                 latest_version="0.29.0",
-                release_date="2026-03-15T00:00:00+00:00",
+                release_date=_iso_days_ago(5),
                 compatible_version="0.29.0",
-                compatible_release_date="2026-03-15T00:00:00+00:00",
+                compatible_release_date=_iso_days_ago(5),
                 compatibility_status="compatible-latest",
                 source="cache",
             ),
@@ -544,9 +549,9 @@ def test_doctor_upgrade_audit_supports_lane_and_release_freshness_filters(
         lambda *_args, **_kwargs: {
             "httpx": doctor.upgrade_audit.PackageMetadata(
                 latest_version="1.0.0",
-                release_date="2026-03-15T00:00:00+00:00",
+                release_date=_iso_days_ago(4),
                 compatible_version="1.0.0",
-                compatible_release_date="2026-03-15T00:00:00+00:00",
+                compatible_release_date=_iso_days_ago(4),
                 compatibility_status="compatible-latest",
                 source="cache",
             ),

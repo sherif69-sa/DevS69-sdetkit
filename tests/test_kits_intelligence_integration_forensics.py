@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 import zipfile
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 
@@ -11,6 +12,10 @@ def _run(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str
     return subprocess.run(
         [sys.executable, "-m", "sdetkit", *args], text=True, capture_output=True, cwd=cwd
     )
+
+
+def _iso_days_ago(days: int) -> str:
+    return (datetime.now(UTC) - timedelta(days=days)).replace(microsecond=0).isoformat()
 
 
 def test_intelligence_contracts_and_failure_fingerprinting() -> None:
@@ -83,7 +88,7 @@ dependencies = ["httpx==0.28.1"]
                     "httpx": {
                         "fetched_at": 1_767_000_000.0,
                         "latest_version": "0.28.1",
-                        "release_date": "2026-03-18T00:00:00Z",
+                        "release_date": _iso_days_ago(5),
                     }
                 },
             }

@@ -182,10 +182,18 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    acceleration_closeout_summary = _resolve_existing_path(root, _DAY43_SUMMARY_PATH, _DAY43_LEGACY_SUMMARY_PATH)
-    acceleration_closeout_board = _resolve_existing_path(root, _DAY43_BOARD_PATH, _DAY43_LEGACY_BOARD_PATH)
-    acceleration_closeout_score, acceleration_closeout_strict, acceleration_closeout_check_count = _load_acceleration_closeout(acceleration_closeout_summary)
-    board_count, board_has_acceleration_closeout, board_has_scale_closeout = _board_stats(acceleration_closeout_board)
+    acceleration_closeout_summary = _resolve_existing_path(
+        root, _DAY43_SUMMARY_PATH, _DAY43_LEGACY_SUMMARY_PATH
+    )
+    acceleration_closeout_board = _resolve_existing_path(
+        root, _DAY43_BOARD_PATH, _DAY43_LEGACY_BOARD_PATH
+    )
+    acceleration_closeout_score, acceleration_closeout_strict, acceleration_closeout_check_count = (
+        _load_acceleration_closeout(acceleration_closeout_summary)
+    )
+    board_count, board_has_acceleration_closeout, board_has_scale_closeout = _board_stats(
+        acceleration_closeout_board
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -258,7 +266,9 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "acceleration_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_acceleration_closeout and board_has_scale_closeout,
+            "passed": board_count >= 5
+            and board_has_acceleration_closeout
+            and board_has_scale_closeout,
             "evidence": {
                 "board_items": board_count,
                 "contains_acceleration_closeout": board_has_acceleration_closeout,
@@ -298,7 +308,9 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if acceleration_closeout_strict:
-        wins.append(f"Day 43 continuity is strict-pass with activation score={acceleration_closeout_score}.")
+        wins.append(
+            f"Day 43 continuity is strict-pass with activation score={acceleration_closeout_score}."
+        )
     else:
         misses.append("Day 43 strict continuity signal is missing.")
         handoff_actions.append(
@@ -340,7 +352,9 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "acceleration_closeout_summary": str(acceleration_closeout_summary.relative_to(root))
             if acceleration_closeout_summary.exists()
             else str(acceleration_closeout_summary),
-            "acceleration_closeout_delivery_board": str(acceleration_closeout_board.relative_to(root))
+            "acceleration_closeout_delivery_board": str(
+                acceleration_closeout_board.relative_to(root)
+            )
             if acceleration_closeout_board.exists()
             else str(acceleration_closeout_board),
         },

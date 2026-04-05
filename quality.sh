@@ -11,6 +11,12 @@ ensure_venv() {
     return 0
   fi
 
+  if command -v ruff >/dev/null 2>&1 \
+    && command -v mypy >/dev/null 2>&1 \
+    && python3 -c "import pytest" >/dev/null 2>&1; then
+    return 0
+  fi
+
   bash scripts/bootstrap.sh
   . .venv/bin/activate
 }

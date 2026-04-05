@@ -171,8 +171,12 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     scale_closeout_summary = root / _DAY44_SUMMARY_PATH
     scale_closeout_board = root / _DAY44_BOARD_PATH
-    scale_closeout_score, scale_closeout_strict, scale_closeout_check_count = _load_scale_closeout(scale_closeout_summary)
-    board_count, board_has_scale_closeout, board_has_expansion_closeout = _board_stats(scale_closeout_board)
+    scale_closeout_score, scale_closeout_strict, scale_closeout_check_count = _load_scale_closeout(
+        scale_closeout_summary
+    )
+    board_count, board_has_scale_closeout, board_has_expansion_closeout = _board_stats(
+        scale_closeout_board
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -245,7 +249,9 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "scale_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_scale_closeout and board_has_expansion_closeout,
+            "passed": board_count >= 5
+            and board_has_scale_closeout
+            and board_has_expansion_closeout,
             "evidence": {
                 "board_items": board_count,
                 "contains_scale_closeout": board_has_scale_closeout,
@@ -285,7 +291,9 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if scale_closeout_strict:
-        wins.append(f"Day 44 continuity is strict-pass with activation score={scale_closeout_score}.")
+        wins.append(
+            f"Day 44 continuity is strict-pass with activation score={scale_closeout_score}."
+        )
     else:
         misses.append("Day 44 strict continuity signal is missing.")
         handoff_actions.append(

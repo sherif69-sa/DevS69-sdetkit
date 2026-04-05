@@ -33,3 +33,17 @@ Use this page as the primary navigation for repository documentation.
 - Integration closeout docs: search for `docs/integrations-*.md`
 - Upgrade reports: search for `docs/*big-upgrade-report*.md`
 - Evidence packs: [`docs/artifacts/`](artifacts/)
+
+<div class="quick-jump" markdown>
+
+[⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
+
+</div>
+
+## Legacy reports
+
+### Top journeys
+
+- Run first command in under 60 seconds
+- Validate docs links and anchors before publishing
+- Ship a first contribution with deterministic quality gates
