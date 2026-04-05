@@ -331,7 +331,6 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
     return {
         "name": "weekly-review-closeout",
-        "legacy_name": "day49-advanced-weekly-review-control-tower",
         "inputs": {
             "readme": readme_path,
             "docs_index": docs_index_path,
@@ -488,7 +487,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Weekly review closeout checks (legacy alias: day49-advanced-weekly-review-control-tower)"
+        description="Weekly review closeout checks"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")

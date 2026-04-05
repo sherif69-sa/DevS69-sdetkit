@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from sdetkit import cli
 from sdetkit import weekly_review_closeout_49 as d49
 
@@ -71,7 +73,6 @@ def test_lane49_weekly_review_closeout_json(tmp_path: Path, capsys) -> None:
     assert rc == 0
     out = json.loads(capsys.readouterr().out)
     assert out["name"] == "weekly-review-closeout"
-    assert out["legacy_name"] == "day49-advanced-weekly-review-control-tower"
     assert out["summary"]["activation_score"] >= 95
 
 
@@ -127,13 +128,14 @@ def test_lane49_cli_dispatch(tmp_path: Path, capsys) -> None:
     assert "Day 49 advanced weekly review control tower summary" in capsys.readouterr().out
 
 
-def test_lane49_advanced_alias_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_lane49_advanced_alias_cli_rejected(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
-    rc = cli.main(
-        ["day49-advanced-weekly-review-control-tower", "--root", str(tmp_path), "--format", "text"]
-    )
-    assert rc == 0
-    assert "advanced weekly review control tower" in capsys.readouterr().out
+    with pytest.raises(SystemExit) as excinfo:
+        cli.main(
+            ["day49-advanced-weekly-review-control-tower", "--root", str(tmp_path), "--format", "text"]
+        )
+    assert excinfo.value.code == 2
+    assert "invalid choice" in capsys.readouterr().err
 
 
 def test_lane49_non_day_alias_cli_dispatch(tmp_path: Path, capsys) -> None:

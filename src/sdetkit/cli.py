@@ -474,10 +474,7 @@ Start here:
     d48 = sub.add_parser("objection-closeout")
     d48.set_defaults(cmd="objection-closeout")
     d48.add_argument("args", nargs=argparse.REMAINDER)
-    d49 = sub.add_parser(
-        "weekly-review-closeout",
-        aliases=["day49-advanced-weekly-review-control-tower"],
-    )
+    d49 = sub.add_parser("weekly-review-closeout")
     d49.set_defaults(cmd="weekly-review-closeout")
     d49.add_argument("args", nargs=argparse.REMAINDER)
     d50 = sub.add_parser(
@@ -762,7 +759,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         argv[0] = _resolve_non_day_playbook_alias(str(argv[0]))
         legacy_aliases = {
             "day47-reliability-closeout": "reliability-closeout",
-            "day49-advanced-weekly-review-control-tower": "weekly-review-closeout",
             "day50-execution-prioritization-closeout": "execution-prioritization-closeout",
         }
         argv[0] = legacy_aliases.get(str(argv[0]), str(argv[0]))
