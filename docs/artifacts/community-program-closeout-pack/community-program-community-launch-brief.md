@@ -1,1 +1,1 @@
-# Cycle 62 community launch brief
+# Day 62 community launch brief

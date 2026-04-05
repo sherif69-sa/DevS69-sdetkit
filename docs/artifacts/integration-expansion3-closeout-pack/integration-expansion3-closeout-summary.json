@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day67 command lane"
+      "evidence": "README integration-expansion3-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -45,7 +45,7 @@
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day66_score": 52,
+        "day66_score": 37,
         "strict_pass": false,
         "day66_checks": 14
       }
@@ -70,8 +70,7 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Integration Expansion3 Closeout command lane (Legacy Day 67)",
-        "## Integration Expansion3 Closeout delivery board (Legacy Day 67)"
+        "## Required inputs (Day 66)"
       ]
     },
     {
@@ -83,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 67 advanced Jenkins rollout and signoff.",
+        "The Day 67 lane references Day 66 integration expansion outputs, governance decisions, and KPI continuity signals.",
+        "Every Day 67 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 67 closeout records Jenkins pipeline stages, matrix controls, shared library strategy, and Day 68 integration priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -95,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 67 integration brief committed",
+        "- [ ] Day 67 advanced Jenkins pipeline blueprint published",
+        "- [ ] Day 67 matrix and cache strategy exported",
+        "- [ ] Day 67 KPI scorecard snapshot exported",
+        "- [ ] Day 68 integration expansion priorities drafted from Day 67 learnings"
+      ]
     },
     {
       "check_id": "jenkins_reference_present",
@@ -106,14 +116,14 @@
     }
   ],
   "rollup": {
-    "day66_activation_score": 52,
+    "day66_activation_score": 37,
     "day66_checks": 14,
     "day66_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 52,
-    "passed_checks": 8,
-    "failed_checks": 6,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
       "day66_strict_baseline"
     ],

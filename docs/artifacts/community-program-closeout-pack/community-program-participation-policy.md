@@ -1,1 +1,1 @@
-# Cycle 62 participation policy
+# Day 62 participation policy

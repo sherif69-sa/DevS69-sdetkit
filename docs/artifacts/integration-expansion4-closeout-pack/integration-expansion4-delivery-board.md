@@ -1,6 +1,6 @@
-# Cycle 68 delivery board
-- [ ] Cycle 68 integration brief committed
-- [ ] Cycle 68 self-hosted enterprise pipeline blueprint published
-- [ ] Cycle 68 identity and runner policy strategy exported
-- [ ] Cycle 68 KPI scorecard snapshot exported
-- [ ] Cycle 69 case-study prep priorities drafted from Cycle 68 learnings
+# Day 68 delivery board
+- [ ] Day 68 integration brief committed
+- [ ] Day 68 self-hosted enterprise pipeline blueprint published
+- [ ] Day 68 identity and runner policy strategy exported
+- [ ] Day 68 KPI scorecard snapshot exported
+- [ ] Day 69 case-study prep priorities drafted from Day 68 learnings

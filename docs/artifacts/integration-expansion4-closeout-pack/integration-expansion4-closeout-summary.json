@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day68 command lane"
+      "evidence": "README integration-expansion4-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -45,7 +45,7 @@
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day67_score": 52,
+        "day67_score": 42,
         "strict_pass": false,
         "day67_checks": 14
       }
@@ -70,8 +70,7 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Integration Expansion4 Closeout command lane (Legacy Day 68)",
-        "## Integration Expansion4 Closeout delivery board (Legacy Day 68)"
+        "## Required inputs (Day 67)"
       ]
     },
     {
@@ -83,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 68 self-hosted enterprise rollout and signoff.",
+        "The Day 68 lane references Day 67 integration expansion outputs, governance decisions, and KPI continuity signals.",
+        "Every Day 68 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 68 closeout records self-hosted pipeline stages, identity controls, runner policy strategy, and Day 69 case-study prep priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -95,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 68 integration brief committed",
+        "- [ ] Day 68 self-hosted enterprise pipeline blueprint published",
+        "- [ ] Day 68 identity and runner policy strategy exported",
+        "- [ ] Day 68 KPI scorecard snapshot exported",
+        "- [ ] Day 69 case-study prep priorities drafted from Day 68 learnings"
+      ]
     },
     {
       "check_id": "self_hosted_reference_present",
@@ -106,14 +116,14 @@
     }
   ],
   "rollup": {
-    "day67_activation_score": 52,
+    "day67_activation_score": 42,
     "day67_checks": 14,
     "day67_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 52,
-    "passed_checks": 8,
-    "failed_checks": 6,
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
       "day67_strict_baseline"
     ],

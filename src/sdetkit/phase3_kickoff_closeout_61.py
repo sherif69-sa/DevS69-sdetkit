@@ -20,10 +20,10 @@ _SECTION_HEADER = "# Day 61 \u2014 Phase-3 kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Kickoff Closeout matters",
     "## Required inputs (Day 60)",
-    "## Phase3 Kickoff Closeout command lane (Legacy Day 61)",
+    "## Phase3 Kickoff Closeout command lane",
     "## Phase-3 kickoff execution contract",
     "## Phase-3 kickoff quality checklist",
-    "## Phase3 Kickoff Closeout delivery board (Legacy Day 61)",
+    "## Phase3 Kickoff Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -73,7 +73,7 @@ Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence 
 - `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json`
 - `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md`
 
-## Phase3 Kickoff Closeout command lane (Legacy Day 61)
+## Phase3 Kickoff Closeout command lane
 
 ```bash
 python -m sdetkit phase3-kickoff-closeout --format json --strict
@@ -97,7 +97,7 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each trust KPI
 - [ ] Artifact pack includes kickoff brief, trust ledger, KPI scorecard, and execution log
 
-## Phase3 Kickoff Closeout delivery board (Legacy Day 61)
+## Phase3 Kickoff Closeout delivery board
 
 - [ ] Day 61 Phase-3 kickoff brief committed
 - [ ] Day 61 kickoff reviewed with owner + backup

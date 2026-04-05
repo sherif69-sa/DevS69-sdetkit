@@ -21,10 +21,10 @@ _SECTION_HEADER = "# Day 66 \u2014 Integration expansion #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion 2 Closeout matters",
     "## Required inputs (Day 65)",
-    "## Integration Expansion 2 Closeout command lane (Legacy Day 66)",
+    "## Integration Expansion 2 Closeout command lane",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Integration Expansion 2 Closeout delivery board (Legacy Day 66)",
+    "## Integration Expansion 2 Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -83,7 +83,7 @@ Day 66 closes with a major integration upgrade that converts Day 65 weekly revie
 - `docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md`
 - `templates/ci/gitlab/gitlab-advanced-reference.yml`
 
-## Integration Expansion 2 Closeout command lane (Legacy Day 66)
+## Integration Expansion 2 Closeout command lane
 
 ```bash
 python -m sdetkit integration-expansion2-closeout --format json --strict
@@ -107,7 +107,7 @@ python scripts/check_integration_expansion2_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, pipeline blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion 2 Closeout delivery board (Legacy Day 66)
+## Integration Expansion 2 Closeout delivery board
 
 - [ ] Day 66 integration brief committed
 - [ ] Day 66 advanced GitLab pipeline blueprint published

@@ -6,72 +6,73 @@
     "docs_page": "docs/integrations-integration-expansion-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "workflow": ".github/workflows/advanced-github-actions-reference-64.yml",
-    "day63_summary": "docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json",
-    "day63_delivery_board": "docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
+    "cycle63_summary": "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json",
+    "cycle63_delivery_board": "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
   },
   "checks": [
     {
-      "check_id": "readme_command_lane",
+      "check_id": "readme_cycle64_command",
       "weight": 7,
       "passed": false,
-      "evidence": "README day64 command lane"
+      "evidence": "README cycle64 command lane"
     },
     {
-      "check_id": "docs_index_links",
+      "check_id": "docs_index_cycle64_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-64-big-upgrade-report.md + integrations-integration-expansion-closeout.md"
     },
     {
-      "check_id": "top10_strategy_alignment",
+      "check_id": "top10_cycle64_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 64 + Day 65 strategy chain"
+      "evidence": "Cycle 64 + Day 65 strategy chain"
     },
     {
-      "check_id": "day63_summary_present",
+      "check_id": "cycle63_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack-63/onboarding-activation-closeout-summary-63.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
     },
     {
-      "check_id": "day63_delivery_board_present",
+      "check_id": "cycle63_delivery_board_present",
       "weight": 7,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack-63/delivery-board-63.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
     },
     {
-      "check_id": "day63_quality_floor",
+      "check_id": "cycle63_quality_floor",
       "weight": 13,
       "passed": true,
       "evidence": {
-        "day63_score": 95,
+        "cycle63_score": 95,
         "strict_pass": true,
-        "day63_checks": 13
+        "cycle63_checks": 13
       }
     },
     {
-      "check_id": "day63_board_integrity",
+      "check_id": "cycle63_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day63": true
+        "contains_cycle63": true
       }
     },
     {
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 64 \u2014 Integration expansion #1 closeout lane"
+      "evidence": "# Cycle 64 \u2014 Integration expansion #1 closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Integration Expansion Closeout command lane (Legacy Day 64)",
-        "## Integration Expansion Closeout delivery board (Legacy Day 64)"
+        "## Required inputs (Cycle 63)",
+        "## Integration Expansion Closeout command lane (Legacy Cycle 64)",
+        "## Integration Expansion Closeout delivery board (Legacy Cycle 64)"
       ]
     },
     {
@@ -83,8 +84,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.",
+        "The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.",
+        "Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -95,34 +101,40 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Cycle 64 integration brief committed",
+        "- [ ] Cycle 64 advanced workflow blueprint published",
+        "- [ ] Cycle 64 matrix and concurrency plan exported",
+        "- [ ] Cycle 64 KPI scorecard snapshot exported",
+        "- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings"
+      ]
     },
     {
       "check_id": "workflow_reference_lock",
       "weight": 10,
       "passed": false,
       "evidence": [
-        "name: Day64 Advanced GitHub Actions Reference",
+        "name: Cycle64 Advanced GitHub Actions Reference",
         "actions/cache@v4"
       ]
     }
   ],
   "rollup": {
-    "day63_activation_score": 95,
-    "day63_checks": 13,
-    "day63_delivery_board_items": 5
+    "cycle63_activation_score": 95,
+    "cycle63_checks": 13,
+    "cycle63_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 55,
-    "passed_checks": 8,
-    "failed_checks": 6,
+    "activation_score": 45,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [],
     "strict_pass": false
   },
   "wins": [
-    "Day 63 continuity is strict-pass with activation score=95.",
-    "Day 63 delivery board integrity validated with 5 checklist items."
+    "Cycle 63 continuity is strict-pass with activation score=95.",
+    "Cycle 63 delivery board integrity validated with 5 checklist items."
   ],
   "misses": [
     "Advanced workflow reference is missing required controls."

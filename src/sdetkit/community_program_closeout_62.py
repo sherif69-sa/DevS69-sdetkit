@@ -18,10 +18,10 @@ _SECTION_HEADER = "# Day 62 \u2014 Community program setup closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Community Program Closeout matters",
     "## Required inputs (Day 61)",
-    "## Community Program Closeout command lane (Legacy Day 62)",
+    "## Community Program Closeout command lane",
     "## Community program execution contract",
     "## Community program quality checklist",
-    "## Community Program Closeout delivery board (Legacy Day 62)",
+    "## Community Program Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -71,7 +71,7 @@ Day 62 ships a major community-program upgrade that converts Day 61 kickoff evid
 - `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`
 - `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`
 
-## Community Program Closeout command lane (Legacy Day 62)
+## Community Program Closeout command lane
 
 ```bash
 python -m sdetkit community-program-closeout --format json --strict
@@ -95,7 +95,7 @@ python scripts/check_community_program_closeout_contract.py
 - [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner
 - [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log
 
-## Community Program Closeout delivery board (Legacy Day 62)
+## Community Program Closeout delivery board
 
 - [ ] Day 62 community launch brief committed
 - [ ] Day 62 office-hours cadence published

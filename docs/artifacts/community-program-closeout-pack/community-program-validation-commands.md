@@ -1,4 +1,4 @@
-# Cycle 62 validation commands
+# Day 62 validation commands
 
 ```bash
 python -m sdetkit community-program-closeout --format json --strict

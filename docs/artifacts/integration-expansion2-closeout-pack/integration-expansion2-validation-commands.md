@@ -1,4 +1,4 @@
-# Cycle 66 validation commands
+# Day 66 validation commands
 
 ```bash
 python -m sdetkit integration-expansion2-closeout --format json --strict

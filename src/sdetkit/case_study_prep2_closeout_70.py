@@ -21,10 +21,10 @@ _SECTION_HEADER = "# Day 70 \u2014 Case-study prep #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Case Study Prep 2 Closeout matters",
     "## Required inputs (Day 69)",
-    "## Case Study Prep 2 Closeout command lane (Legacy Day 70)",
+    "## Case Study Prep 2 Closeout command lane",
     "## Case-study prep contract",
     "## Case-study quality checklist",
-    "## Case Study Prep 2 Closeout delivery board (Legacy Day 70)",
+    "## Case Study Prep 2 Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -83,7 +83,7 @@ Day 70 closes with a major upgrade that turns Day 69 integration outputs into a 
 - `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md`
 - `docs/roadmap/plans/triage-speed-case-study.json`
 
-## Case Study Prep 2 Closeout command lane (Legacy Day 70)
+## Case Study Prep 2 Closeout command lane
 
 ```bash
 python -m sdetkit case-study-prep2-closeout --format json --strict
@@ -107,7 +107,7 @@ python scripts/check_case_study_prep2_closeout_contract.py
 - [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
 - [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
 
-## Case Study Prep 2 Closeout delivery board (Legacy Day 70)
+## Case Study Prep 2 Closeout delivery board
 
 - [ ] Day 70 integration brief committed
 - [ ] Day 70 triage-speed case-study narrative published
