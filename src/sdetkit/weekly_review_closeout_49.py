@@ -10,9 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-weekly-review-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY48_SUMMARY_PATH = "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
-_DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack/objection-delivery-board.md"
-_DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/delivery-board-48.md"
+_DAY48_SUMMARY_PATH = "docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json"
+_DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack-48/delivery-board-48.md"
+_DAY48_LEGACY_SUMMARY_PATH = "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
+_DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/objection-delivery-board.md"
 _SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Day 49 matters",
@@ -67,8 +68,8 @@ Day 49 closes with a major weekly-review upgrade that converts Day 48 objection 
 
 ## Required inputs (Day 48)
 
-- `docs/artifacts/objection-closeout-pack/objection-closeout-summary.json`
-- `docs/artifacts/objection-closeout-pack/objection-delivery-board.md`
+- `docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json`
+- `docs/artifacts/objection-closeout-pack-48/delivery-board-48.md`
 
 ## Day 49 command lane
 
@@ -176,7 +177,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day48_summary = root / _DAY48_SUMMARY_PATH
+    day48_summary = _resolve_existing_path(root, _DAY48_SUMMARY_PATH, _DAY48_LEGACY_SUMMARY_PATH)
     day48_board = _resolve_existing_path(root, _DAY48_BOARD_PATH, _DAY48_LEGACY_BOARD_PATH)
     day48_score, day48_strict, day48_check_count = _load_day48(day48_summary)
     board_count, board_has_day48, board_has_day49 = _board_stats(day48_board)

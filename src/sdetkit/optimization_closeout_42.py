@@ -10,8 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY41_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
-_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack/delivery-board.md"
+_DAY41_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json"
+_DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
+_DAY41_LEGACY_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
 _DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -67,8 +68,8 @@ Optimization Closeout Foundation closes with a major optimization upgrade that c
 
 ## Required inputs (expansion automation)
 
-- `docs/artifacts/expansion-automation-pack/expansion-automation-summary.json`
-- `docs/artifacts/expansion-automation-pack/delivery-board.md`
+- `docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json`
+- `docs/artifacts/expansion-automation-pack-41/delivery-board-41.md`
 
 ## Optimization Closeout Foundation command lane
 
@@ -177,7 +178,7 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day41_summary = root / _DAY41_SUMMARY_PATH
+    day41_summary = _resolve_existing_path(root, _DAY41_SUMMARY_PATH, _DAY41_LEGACY_SUMMARY_PATH)
     day41_board = _resolve_existing_path(root, _DAY41_BOARD_PATH, _DAY41_LEGACY_BOARD_PATH)
     day41_score, day41_strict, day41_check_count = _load_day41(day41_summary)
     board_count, board_has_day41, board_has_day42 = _board_stats(day41_board)

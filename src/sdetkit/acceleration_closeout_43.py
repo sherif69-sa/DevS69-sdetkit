@@ -10,8 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-acceleration-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY42_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
-_DAY42_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
+_DAY42_SUMMARY_PATH = "docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json"
+_DAY42_BOARD_PATH = "docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md"
+_DAY42_LEGACY_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
 _DAY42_LEGACY_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
 _SECTION_HEADER = "# Day 43 \u2014 Acceleration closeout lane"
 _REQUIRED_SECTIONS = [
@@ -67,8 +68,8 @@ This lane closes with a major acceleration upgrade that converts optimization ev
 
 ## Required inputs (optimization closeout foundation)
 
-- `docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json`
-- `docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md`
+- `docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json`
+- `docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md`
 
 ## Command lane
 
@@ -177,7 +178,7 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day42_summary = root / _DAY42_SUMMARY_PATH
+    day42_summary = _resolve_existing_path(root, _DAY42_SUMMARY_PATH, _DAY42_LEGACY_SUMMARY_PATH)
     day42_board = _resolve_existing_path(root, _DAY42_BOARD_PATH, _DAY42_LEGACY_BOARD_PATH)
     day42_score, day42_strict, day42_check_count = _load_day42(day42_summary)
     board_count, board_has_day42, board_has_day43 = _board_stats(day42_board)

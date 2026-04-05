@@ -10,8 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-scale-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY43_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
-_DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/delivery-board.md"
+_DAY43_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json"
+_DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md"
+_DAY43_LEGACY_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
+_DAY43_LEGACY_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/delivery-board.md"
 _SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why this lane matters",
@@ -66,8 +68,8 @@ This lane closes with a major scale upgrade that converts acceleration evidence 
 
 ## Required inputs (acceleration closeout)
 
-- `docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json`
-- `docs/artifacts/acceleration-closeout-pack/delivery-board.md`
+- `docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json`
+- `docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md`
 
 ## Command lane
 
@@ -176,12 +178,8 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day43_summary = root / _DAY43_SUMMARY_PATH
-    day43_board = _resolve_existing_path(
-        root,
-        _DAY43_BOARD_PATH,
-        "docs/artifacts/acceleration-closeout-pack/acceleration-delivery-board.md",
-    )
+    day43_summary = _resolve_existing_path(root, _DAY43_SUMMARY_PATH, _DAY43_LEGACY_SUMMARY_PATH)
+    day43_board = _resolve_existing_path(root, _DAY43_BOARD_PATH, _DAY43_LEGACY_BOARD_PATH)
     day43_score, day43_strict, day43_check_count = _load_day43(day43_summary)
     board_count, board_has_day43, board_has_day44 = _board_stats(day43_board)
 

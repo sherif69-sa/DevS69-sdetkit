@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-optimization-closeout-foundation.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day41_summary": "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json",
-    "day41_delivery_board": "docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
+    "day41_summary": "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json",
+    "day41_delivery_board": "docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
   },
   "checks": [
     {
@@ -59,13 +59,13 @@
       "check_id": "day41_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json"
     },
     {
       "check_id": "day41_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack/day41-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
     },
     {
       "check_id": "day41_quality_floor",
