@@ -100,3 +100,8 @@ Use this before introducing a new file or folder:
 - Is this content **documentation**? If yes, prefer `docs/`.
 - Is this content **an example/template**? If yes, prefer `examples/` or `templates/`.
 - Can the change be explained by linking from an existing page instead of adding another root file?
+
+
+## Repository cleanup policy
+
+For concrete placement standards, naming guidance, and a repeatable hygiene checklist, see [`docs/repo-cleanup-plan.md`](repo-cleanup-plan.md).
