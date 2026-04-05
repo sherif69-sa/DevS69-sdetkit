@@ -47,4 +47,3 @@ Use this page as the primary navigation for repository documentation.
 - Run first command in under 60 seconds
 - Validate docs links and anchors before publishing
 - Ship a first contribution with deterministic quality gates
-
