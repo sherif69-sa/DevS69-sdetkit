@@ -70,7 +70,7 @@ _REQUIRED_DATA_KEYS = [
     "cadence_days",
 ]
 
-_DAY92_DEFAULT_PAGE = """# Cycle 2 \u2014 Continuous upgrade closeout lane
+_CYCLE2_DEFAULT_PAGE = """# Cycle 2 \u2014 Continuous upgrade closeout lane
 
 Cycle 2 closes with a major upgrade that converts Cycle 1 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
@@ -122,6 +122,9 @@ python scripts/check_continuous_upgrade_contract_2.py
 
 Cycle 2 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
 """
+
+# Backward-compatible alias retained for transition-era imports.
+_DAY92_DEFAULT_PAGE = _CYCLE2_DEFAULT_PAGE
 
 
 def _read_text(path: Path) -> str:
@@ -554,7 +557,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY92_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _CYCLE2_DEFAULT_PAGE)
 
     payload = build_continuous_upgrade_cycle2_closeout_summary(root)
 
