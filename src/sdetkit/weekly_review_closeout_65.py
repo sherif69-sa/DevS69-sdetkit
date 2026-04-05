@@ -10,13 +10,13 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-weekly-review-closeout-2.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY64_SUMMARY_PATH = (
+_INTEGRATION_EXPANSION_SUMMARY_PATH = (
     "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
 )
-_DAY64_BOARD_PATH = (
+_INTEGRATION_EXPANSION_BOARD_PATH = (
     "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
 )
-_DAY64_WORKFLOW_PATH = ".github/workflows/advanced-github-actions-reference-64.yml"
+_INTEGRATION_EXPANSION_WORKFLOW_PATH = ".github/workflows/advanced-github-actions-reference-64.yml"
 _SECTION_HEADER = "# Day 65 \u2014 Weekly review #9 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Weekly Review Closeout matters",
@@ -132,7 +132,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day64(path: Path) -> tuple[int, bool, int]:
+def _load_integration_expansion(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -157,12 +157,12 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
     docs_index_text = _read(root / "docs/index.md")
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
-    day64_workflow_text = _read(root / _DAY64_WORKFLOW_PATH)
+    integration_expansion_workflow_text = _read(root / _INTEGRATION_EXPANSION_WORKFLOW_PATH)
 
-    day64_summary = root / _DAY64_SUMMARY_PATH
-    day64_board = root / _DAY64_BOARD_PATH
-    day64_score, day64_strict, day64_check_count = _load_day64(day64_summary)
-    board_count, board_has_day64 = _count_board_items(day64_board, "Day 64")
+    integration_expansion_summary = root / _INTEGRATION_EXPANSION_SUMMARY_PATH
+    integration_expansion_board = root / _INTEGRATION_EXPANSION_BOARD_PATH
+    integration_expansion_score, integration_expansion_strict, integration_expansion_check_count = _load_integration_expansion(integration_expansion_summary)
+    board_count, board_has_integration_expansion = _count_board_items(integration_expansion_board, "Day 64")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -193,32 +193,32 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 65 + Day 66 strategy chain",
         },
         {
-            "check_id": "day64_summary_present",
+            "check_id": "integration_expansion_summary_present",
             "weight": 10,
-            "passed": day64_summary.exists(),
-            "evidence": str(day64_summary),
+            "passed": integration_expansion_summary.exists(),
+            "evidence": str(integration_expansion_summary),
         },
         {
-            "check_id": "day64_delivery_board_present",
+            "check_id": "integration_expansion_delivery_board_present",
             "weight": 7,
-            "passed": day64_board.exists(),
-            "evidence": str(day64_board),
+            "passed": integration_expansion_board.exists(),
+            "evidence": str(integration_expansion_board),
         },
         {
-            "check_id": "day64_quality_floor",
+            "check_id": "integration_expansion_quality_floor",
             "weight": 13,
-            "passed": day64_strict and day64_score >= 95,
+            "passed": integration_expansion_strict and integration_expansion_score >= 95,
             "evidence": {
-                "day64_score": day64_score,
-                "strict_pass": day64_strict,
-                "day64_checks": day64_check_count,
+                "integration_expansion_score": integration_expansion_score,
+                "strict_pass": integration_expansion_strict,
+                "integration_expansion_checks": integration_expansion_check_count,
             },
         },
         {
-            "check_id": "day64_board_integrity",
+            "check_id": "integration_expansion_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day64,
-            "evidence": {"board_items": board_count, "contains_day64": board_has_day64},
+            "passed": board_count >= 5 and board_has_integration_expansion,
+            "evidence": {"board_items": board_count, "contains_integration_expansion": board_has_integration_expansion},
         },
         {
             "check_id": "page_header",
@@ -257,33 +257,33 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": missing_board_items or "delivery board locked",
         },
         {
-            "check_id": "day64_workflow_reference_present",
+            "check_id": "integration_expansion_workflow_reference_present",
             "weight": 10,
-            "passed": "Day64 Advanced GitHub Actions Reference" in day64_workflow_text,
+            "passed": "Day64 Advanced GitHub Actions Reference" in integration_expansion_workflow_text,
             "evidence": ".github/workflows/advanced-github-actions-reference-64.yml",
         },
     ]
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day64_summary.exists() or not day64_board.exists():
-        critical_failures.append("day64_handoff_inputs")
-    if not day64_strict:
-        critical_failures.append("day64_strict_baseline")
+    if not integration_expansion_summary.exists() or not integration_expansion_board.exists():
+        critical_failures.append("integration_expansion_handoff_inputs")
+    if not integration_expansion_strict:
+        critical_failures.append("integration_expansion_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day64_strict:
-        wins.append(f"Day 64 continuity is strict-pass with activation score={day64_score}.")
+    if integration_expansion_strict:
+        wins.append(f"Day 64 continuity is strict-pass with activation score={integration_expansion_score}.")
     else:
         misses.append("Day 64 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 64 closeout command and restore strict baseline before Day 65 lock."
         )
 
-    if board_count >= 5 and board_has_day64:
+    if board_count >= 5 and board_has_integration_expansion:
         wins.append(
             f"Day 64 delivery board integrity validated with {board_count} checklist items."
         )
@@ -293,12 +293,12 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         )
         handoff_actions.append("Repair Day 64 delivery board entries to include Day 64 anchors.")
 
-    if "Day64 Advanced GitHub Actions Reference" in day64_workflow_text:
+    if "Day64 Advanced GitHub Actions Reference" in integration_expansion_workflow_text:
         wins.append("Day 64 workflow reference remains available for weekly KPI baseline review.")
     else:
         misses.append("Day 64 workflow reference is missing for weekly review context.")
         handoff_actions.append(
-            "Restore day64 workflow reference before publishing Day 65 outcomes."
+            "Restore integration_expansion workflow reference before publishing Day 65 outcomes."
         )
 
     if not failed and not critical_failures:
@@ -314,19 +314,19 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day64_summary": str(day64_summary.relative_to(root))
-            if day64_summary.exists()
-            else str(day64_summary),
-            "day64_delivery_board": str(day64_board.relative_to(root))
-            if day64_board.exists()
-            else str(day64_board),
-            "day64_workflow": _DAY64_WORKFLOW_PATH,
+            "integration_expansion_summary": str(integration_expansion_summary.relative_to(root))
+            if integration_expansion_summary.exists()
+            else str(integration_expansion_summary),
+            "integration_expansion_delivery_board": str(integration_expansion_board.relative_to(root))
+            if integration_expansion_board.exists()
+            else str(integration_expansion_board),
+            "integration_expansion_workflow": _INTEGRATION_EXPANSION_WORKFLOW_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day64_activation_score": day64_score,
-            "day64_checks": day64_check_count,
-            "day64_delivery_board_items": board_count,
+            "integration_expansion_activation_score": integration_expansion_score,
+            "integration_expansion_checks": integration_expansion_check_count,
+            "integration_expansion_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

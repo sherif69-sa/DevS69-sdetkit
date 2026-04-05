@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-integration-expansion3-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day66_summary": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json",
-    "day66_delivery_board": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md",
+    "integration_expansion2_summary": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json",
+    "integration_expansion2_delivery_board": "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md",
     "jenkins_reference": "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
   },
   "checks": [
@@ -29,34 +29,34 @@
       "evidence": "Day 67 + Day 68 strategy chain"
     },
     {
-      "check_id": "day66_summary_present",
+      "check_id": "integration_expansion2_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json"
     },
     {
-      "check_id": "day66_delivery_board_present",
+      "check_id": "integration_expansion2_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
     },
     {
-      "check_id": "day66_quality_floor",
+      "check_id": "integration_expansion2_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day66_score": 37,
+        "integration_expansion2_score": 37,
         "strict_pass": false,
-        "day66_checks": 14
+        "integration_expansion2_checks": 14
       }
     },
     {
-      "check_id": "day66_board_integrity",
+      "check_id": "integration_expansion2_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day66": true
+        "contains_integration_expansion2": true
       }
     },
     {
@@ -116,16 +116,16 @@
     }
   ],
   "rollup": {
-    "day66_activation_score": 37,
-    "day66_checks": 14,
-    "day66_delivery_board_items": 5
+    "integration_expansion2_activation_score": 37,
+    "integration_expansion2_checks": 14,
+    "integration_expansion2_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 42,
     "passed_checks": 6,
     "failed_checks": 8,
     "critical_failures": [
-      "day66_strict_baseline"
+      "integration_expansion2_strict_baseline"
     ],
     "strict_pass": false
   },
