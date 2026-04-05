@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-community-touchpoint-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day76_summary": "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json",
-    "day76_delivery_board": "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md",
+    "contributor_recognition_summary": "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json",
+    "contributor_recognition_delivery_board": "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md",
     "touchpoint_plan": "docs/roadmap/plans/community-touchpoint-plan.json"
   },
   "checks": [
@@ -29,34 +29,34 @@
       "evidence": "Contributor recognition + community touchpoint strategy chain"
     },
     {
-      "check_id": "day76_summary_present",
+      "check_id": "contributor_recognition_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
     },
     {
-      "check_id": "day76_delivery_board_present",
+      "check_id": "contributor_recognition_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md"
     },
     {
-      "check_id": "day76_quality_floor",
+      "check_id": "contributor_recognition_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day76_score": 67,
+        "contributor_recognition_score": 42,
         "strict_pass": false,
-        "day76_checks": 14
+        "contributor_recognition_checks": 14
       }
     },
     {
-      "check_id": "day76_board_integrity",
+      "check_id": "contributor_recognition_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day76": true
+        "contains_contributor_recognition": true
       }
     },
     {
@@ -68,8 +68,11 @@
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Why Day 77 matters",
+        "## Required inputs (Day 76)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +83,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 77 community touchpoint execution and signoff.",
+        "The Day 77 lane references Day 76 outcomes, controls, and KPI continuity signals.",
+        "Every Day 77 section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 77 closeout records touchpoint outcomes, confidence notes, and Day 78 ecosystem priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +100,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 77 integration brief committed",
+        "- [ ] Day 77 community touchpoint plan committed",
+        "- [ ] Day 77 touchpoint session ledger exported",
+        "- [ ] Day 77 touchpoint KPI scorecard snapshot exported",
+        "- [ ] Day 78 ecosystem priorities drafted from Day 77 learnings"
+      ]
     },
     {
       "check_id": "touchpoint_plan_data_present",
@@ -103,16 +117,16 @@
     }
   ],
   "rollup": {
-    "day76_activation_score": 67,
-    "day76_checks": 14,
-    "day76_delivery_board_items": 5
+    "contributor_recognition_activation_score": 42,
+    "contributor_recognition_checks": 14,
+    "contributor_recognition_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 87,
-    "passed_checks": 13,
-    "failed_checks": 1,
+    "activation_score": 69,
+    "passed_checks": 10,
+    "failed_checks": 4,
     "critical_failures": [
-      "day76_strict_baseline"
+      "contributor_recognition_strict_baseline"
     ],
     "strict_pass": false
   },

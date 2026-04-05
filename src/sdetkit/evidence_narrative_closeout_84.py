@@ -145,22 +145,22 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day83_summary = root / _DAY83_SUMMARY_PATH
-    day83_board = root / _DAY83_BOARD_PATH
+    trust_faq_expansion_summary = root / _DAY83_SUMMARY_PATH
+    trust_faq_expansion_board = root / _DAY83_BOARD_PATH
 
-    day83_data = _load_json(day83_summary)
-    day83_summary_data = (
-        day83_data.get("summary", {}) if isinstance(day83_data.get("summary"), dict) else {}
+    trust_faq_expansion_data = _load_json(trust_faq_expansion_summary)
+    trust_faq_expansion_summary_data = (
+        trust_faq_expansion_data.get("summary", {}) if isinstance(trust_faq_expansion_data.get("summary"), dict) else {}
     )
-    day83_score = int(day83_summary_data.get("activation_score", 0) or 0)
-    day83_strict = bool(day83_summary_data.get("strict_pass", False))
-    day83_check_count = (
-        len(day83_data.get("checks", [])) if isinstance(day83_data.get("checks"), list) else 0
+    trust_faq_expansion_score = int(trust_faq_expansion_summary_data.get("activation_score", 0) or 0)
+    trust_faq_expansion_strict = bool(trust_faq_expansion_summary_data.get("strict_pass", False))
+    trust_faq_expansion_check_count = (
+        len(trust_faq_expansion_data.get("checks", [])) if isinstance(trust_faq_expansion_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day83_board)
+    board_text = _read_text(trust_faq_expansion_board)
     board_count = _checklist_count(board_text)
-    board_has_day83 = "Day 83" in board_text
+    board_has_trust_faq_expansion = ("trust faq expansion" in board_text.lower() or "Day 83" in board_text)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -176,7 +176,7 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("evidence-narrative-closeout" in readme_text),
-            "evidence": "README day84 command lane",
+            "evidence": "README evidence-narrative-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -194,32 +194,32 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 83 + Day 84 strategy chain",
         },
         {
-            "check_id": "day83_summary_present",
+            "check_id": "trust_faq_expansion_summary_present",
             "weight": 10,
-            "passed": day83_summary.exists(),
-            "evidence": str(day83_summary),
+            "passed": trust_faq_expansion_summary.exists(),
+            "evidence": str(trust_faq_expansion_summary),
         },
         {
-            "check_id": "day83_delivery_board_present",
+            "check_id": "trust_faq_expansion_delivery_board_present",
             "weight": 7,
-            "passed": day83_board.exists(),
-            "evidence": str(day83_board),
+            "passed": trust_faq_expansion_board.exists(),
+            "evidence": str(trust_faq_expansion_board),
         },
         {
-            "check_id": "day83_quality_floor",
+            "check_id": "trust_faq_expansion_quality_floor",
             "weight": 13,
-            "passed": day83_score >= 85 and day83_strict,
+            "passed": trust_faq_expansion_score >= 85 and trust_faq_expansion_strict,
             "evidence": {
-                "day83_score": day83_score,
-                "strict_pass": day83_strict,
-                "day83_checks": day83_check_count,
+                "trust_faq_expansion_score": trust_faq_expansion_score,
+                "strict_pass": trust_faq_expansion_strict,
+                "trust_faq_expansion_checks": trust_faq_expansion_check_count,
             },
         },
         {
-            "check_id": "day83_board_integrity",
+            "check_id": "trust_faq_expansion_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day83,
-            "evidence": {"board_items": board_count, "contains_day83": board_has_day83},
+            "passed": board_count >= 5 and board_has_trust_faq_expansion,
+            "evidence": {"board_items": board_count, "contains_trust_faq_expansion": board_has_trust_faq_expansion},
         },
         {
             "check_id": "page_header",
@@ -267,22 +267,22 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day83_summary.exists() or not day83_board.exists():
-        critical_failures.append("day83_handoff_inputs")
+    if not trust_faq_expansion_summary.exists() or not trust_faq_expansion_board.exists():
+        critical_failures.append("trust_faq_expansion_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day83_score >= 85 and day83_strict:
-        wins.append(f"Day 83 continuity baseline is stable with activation score={day83_score}.")
+    if trust_faq_expansion_score >= 85 and trust_faq_expansion_strict:
+        wins.append(f"Trust Faq Expansion continuity baseline is stable with activation score={trust_faq_expansion_score}.")
     else:
         misses.append("Day 83 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 83 closeout command and raise baseline quality above 85 with strict pass before Day 84 lock."
         )
 
-    if board_count >= 5 and board_has_day83:
+    if board_count >= 5 and board_has_trust_faq_expansion:
         wins.append(
             f"Day 83 delivery board integrity validated with {board_count} checklist items."
         )
@@ -313,19 +313,19 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day83_summary": str(day83_summary.relative_to(root))
-            if day83_summary.exists()
-            else str(day83_summary),
-            "day83_delivery_board": str(day83_board.relative_to(root))
-            if day83_board.exists()
-            else str(day83_board),
+            "trust_faq_expansion_summary": str(trust_faq_expansion_summary.relative_to(root))
+            if trust_faq_expansion_summary.exists()
+            else str(trust_faq_expansion_summary),
+            "trust_faq_expansion_delivery_board": str(trust_faq_expansion_board.relative_to(root))
+            if trust_faq_expansion_board.exists()
+            else str(trust_faq_expansion_board),
             "evidence_narrative_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day83_activation_score": day83_score,
-            "day83_checks": day83_check_count,
-            "day83_delivery_board_items": board_count,
+            "trust_faq_expansion_activation_score": trust_faq_expansion_score,
+            "trust_faq_expansion_checks": trust_faq_expansion_check_count,
+            "trust_faq_expansion_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

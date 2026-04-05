@@ -131,7 +131,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day75(summary_path: Path) -> tuple[int, bool, int]:
+def _load_trust_assets_refresh(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     data = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -159,10 +159,10 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
     top10_text = _read(root / _TOP10_PATH)
     plan_text = _read(root / _PLAN_PATH)
 
-    day75_summary = root / _DAY75_SUMMARY_PATH
-    day75_board = root / _DAY75_BOARD_PATH
-    day75_score, day75_strict, day75_check_count = _load_day75(day75_summary)
-    board_count, board_has_day75 = _count_board_items(day75_board, "Day 75")
+    trust_assets_refresh_summary = root / _DAY75_SUMMARY_PATH
+    trust_assets_refresh_board = root / _DAY75_BOARD_PATH
+    trust_assets_refresh_score, trust_assets_refresh_strict, trust_assets_refresh_check_count = _load_trust_assets_refresh(trust_assets_refresh_summary)
+    board_count, board_has_trust_assets_refresh = _count_board_items(trust_assets_refresh_board, "Day 75")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -179,7 +179,7 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
                 "contributor-recognition-closeout" in readme_text
                 or "contributor-recognition-closeout" in readme_text
             ),
-            "evidence": "README day76 command lane",
+            "evidence": "README contributor-recognition-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -197,32 +197,32 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
             "evidence": "Day 75 + Day 76 strategy chain",
         },
         {
-            "check_id": "day75_summary_present",
+            "check_id": "trust_assets_refresh_summary_present",
             "weight": 10,
-            "passed": day75_summary.exists(),
-            "evidence": str(day75_summary),
+            "passed": trust_assets_refresh_summary.exists(),
+            "evidence": str(trust_assets_refresh_summary),
         },
         {
-            "check_id": "day75_delivery_board_present",
+            "check_id": "trust_assets_refresh_delivery_board_present",
             "weight": 7,
-            "passed": day75_board.exists(),
-            "evidence": str(day75_board),
+            "passed": trust_assets_refresh_board.exists(),
+            "evidence": str(trust_assets_refresh_board),
         },
         {
-            "check_id": "day75_quality_floor",
+            "check_id": "trust_assets_refresh_quality_floor",
             "weight": 13,
-            "passed": day75_strict and day75_score >= 95,
+            "passed": trust_assets_refresh_strict and trust_assets_refresh_score >= 95,
             "evidence": {
-                "day75_score": day75_score,
-                "strict_pass": day75_strict,
-                "day75_checks": day75_check_count,
+                "trust_assets_refresh_score": trust_assets_refresh_score,
+                "strict_pass": trust_assets_refresh_strict,
+                "trust_assets_refresh_checks": trust_assets_refresh_check_count,
             },
         },
         {
-            "check_id": "day75_board_integrity",
+            "check_id": "trust_assets_refresh_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day75,
-            "evidence": {"board_items": board_count, "contains_day75": board_has_day75},
+            "passed": board_count >= 5 and board_has_trust_assets_refresh,
+            "evidence": {"board_items": board_count, "contains_trust_assets_refresh": board_has_trust_assets_refresh},
         },
         {
             "check_id": "page_header",
@@ -270,24 +270,24 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day75_summary.exists() or not day75_board.exists():
-        critical_failures.append("day75_handoff_inputs")
-    if not day75_strict:
-        critical_failures.append("day75_strict_baseline")
+    if not trust_assets_refresh_summary.exists() or not trust_assets_refresh_board.exists():
+        critical_failures.append("trust_assets_refresh_handoff_inputs")
+    if not trust_assets_refresh_strict:
+        critical_failures.append("trust_assets_refresh_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day75_strict:
-        wins.append(f"Day 75 continuity is strict-pass with activation score={day75_score}.")
+    if trust_assets_refresh_strict:
+        wins.append(f"Day 75 continuity is strict-pass with activation score={trust_assets_refresh_score}.")
     else:
         misses.append("Day 75 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 75 closeout command and restore strict baseline before Day 76 lock."
         )
 
-    if board_count >= 5 and board_has_day75:
+    if board_count >= 5 and board_has_trust_assets_refresh:
         wins.append(
             f"Day 75 delivery board integrity validated with {board_count} checklist items."
         )
@@ -318,19 +318,19 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day75_summary": str(day75_summary.relative_to(root))
-            if day75_summary.exists()
-            else str(day75_summary),
-            "day75_delivery_board": str(day75_board.relative_to(root))
-            if day75_board.exists()
-            else str(day75_board),
+            "trust_assets_refresh_summary": str(trust_assets_refresh_summary.relative_to(root))
+            if trust_assets_refresh_summary.exists()
+            else str(trust_assets_refresh_summary),
+            "trust_assets_refresh_delivery_board": str(trust_assets_refresh_board.relative_to(root))
+            if trust_assets_refresh_board.exists()
+            else str(trust_assets_refresh_board),
             "recognition_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day75_activation_score": day75_score,
-            "day75_checks": day75_check_count,
-            "day75_delivery_board_items": board_count,
+            "trust_assets_refresh_activation_score": trust_assets_refresh_score,
+            "trust_assets_refresh_checks": trust_assets_refresh_check_count,
+            "trust_assets_refresh_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

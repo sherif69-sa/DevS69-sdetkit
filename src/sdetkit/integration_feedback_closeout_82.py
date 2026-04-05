@@ -151,22 +151,22 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day81_summary = root / _DAY81_SUMMARY_PATH
-    day81_board = root / _DAY81_BOARD_PATH
+    growth_campaign_summary = root / _DAY81_SUMMARY_PATH
+    growth_campaign_board = root / _DAY81_BOARD_PATH
 
-    day81_data = _load_json(day81_summary)
-    day81_summary_data = (
-        day81_data.get("summary", {}) if isinstance(day81_data.get("summary"), dict) else {}
+    growth_campaign_data = _load_json(growth_campaign_summary)
+    growth_campaign_summary_data = (
+        growth_campaign_data.get("summary", {}) if isinstance(growth_campaign_data.get("summary"), dict) else {}
     )
-    day81_score = int(day81_summary_data.get("activation_score", 0) or 0)
-    day81_strict = bool(day81_summary_data.get("strict_pass", False))
-    day81_check_count = (
-        len(day81_data.get("checks", [])) if isinstance(day81_data.get("checks"), list) else 0
+    growth_campaign_score = int(growth_campaign_summary_data.get("activation_score", 0) or 0)
+    growth_campaign_strict = bool(growth_campaign_summary_data.get("strict_pass", False))
+    growth_campaign_check_count = (
+        len(growth_campaign_data.get("checks", [])) if isinstance(growth_campaign_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day81_board)
+    board_text = _read_text(growth_campaign_board)
     board_count = _checklist_count(board_text)
-    board_has_day81 = "Day 81" in board_text
+    board_has_growth_campaign = ("growth campaign" in board_text.lower() or "Day 81" in board_text)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -182,7 +182,7 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("integration-feedback-closeout" in readme_text),
-            "evidence": "README day82 command lane",
+            "evidence": "README integration-feedback-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -200,32 +200,32 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 81 + Day 82 strategy chain",
         },
         {
-            "check_id": "day81_summary_present",
+            "check_id": "growth_campaign_summary_present",
             "weight": 10,
-            "passed": day81_summary.exists(),
-            "evidence": str(day81_summary),
+            "passed": growth_campaign_summary.exists(),
+            "evidence": str(growth_campaign_summary),
         },
         {
-            "check_id": "day81_delivery_board_present",
+            "check_id": "growth_campaign_delivery_board_present",
             "weight": 7,
-            "passed": day81_board.exists(),
-            "evidence": str(day81_board),
+            "passed": growth_campaign_board.exists(),
+            "evidence": str(growth_campaign_board),
         },
         {
-            "check_id": "day81_quality_floor",
+            "check_id": "growth_campaign_quality_floor",
             "weight": 13,
-            "passed": day81_score >= 85 and day81_strict,
+            "passed": growth_campaign_score >= 85 and growth_campaign_strict,
             "evidence": {
-                "day81_score": day81_score,
-                "strict_pass": day81_strict,
-                "day81_checks": day81_check_count,
+                "growth_campaign_score": growth_campaign_score,
+                "strict_pass": growth_campaign_strict,
+                "growth_campaign_checks": growth_campaign_check_count,
             },
         },
         {
-            "check_id": "day81_board_integrity",
+            "check_id": "growth_campaign_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day81,
-            "evidence": {"board_items": board_count, "contains_day81": board_has_day81},
+            "passed": board_count >= 5 and board_has_growth_campaign,
+            "evidence": {"board_items": board_count, "contains_growth_campaign": board_has_growth_campaign},
         },
         {
             "check_id": "page_header",
@@ -273,22 +273,22 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day81_summary.exists() or not day81_board.exists():
-        critical_failures.append("day81_handoff_inputs")
+    if not growth_campaign_summary.exists() or not growth_campaign_board.exists():
+        critical_failures.append("growth_campaign_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day81_score >= 85 and day81_strict:
-        wins.append(f"Day 81 continuity baseline is stable with activation score={day81_score}.")
+    if growth_campaign_score >= 85 and growth_campaign_strict:
+        wins.append(f"Growth Campaign continuity baseline is stable with activation score={growth_campaign_score}.")
     else:
         misses.append("Day 81 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 81 closeout command and raise baseline quality above 85 with strict pass before Day 82 lock."
         )
 
-    if board_count >= 5 and board_has_day81:
+    if board_count >= 5 and board_has_growth_campaign:
         wins.append(
             f"Day 81 delivery board integrity validated with {board_count} checklist items."
         )
@@ -319,19 +319,19 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day81_summary": str(day81_summary.relative_to(root))
-            if day81_summary.exists()
-            else str(day81_summary),
-            "day81_delivery_board": str(day81_board.relative_to(root))
-            if day81_board.exists()
-            else str(day81_board),
+            "growth_campaign_summary": str(growth_campaign_summary.relative_to(root))
+            if growth_campaign_summary.exists()
+            else str(growth_campaign_summary),
+            "growth_campaign_delivery_board": str(growth_campaign_board.relative_to(root))
+            if growth_campaign_board.exists()
+            else str(growth_campaign_board),
             "integration_feedback_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day81_activation_score": day81_score,
-            "day81_checks": day81_check_count,
-            "day81_delivery_board_items": board_count,
+            "growth_campaign_activation_score": growth_campaign_score,
+            "growth_campaign_checks": growth_campaign_check_count,
+            "growth_campaign_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
