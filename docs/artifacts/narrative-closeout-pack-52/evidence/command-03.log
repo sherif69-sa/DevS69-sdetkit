@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_narrative_closeout_contract_52.py --skip-evidence",
   "returncode": 0,
-  "stdout": "day52-narrative-closeout contract check passed\n",
+  "stdout": "narrative-closeout contract check passed\n",
   "stderr": ""
 }

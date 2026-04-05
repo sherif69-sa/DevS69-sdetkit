@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_phase3_kickoff_closeout_contract_61.py --skip-evidence",
   "returncode": 0,
-  "stdout": "day61-phase3-kickoff-closeout contract check passed\n",
+  "stdout": "phase3-kickoff-closeout contract check passed\n",
   "stderr": ""
 }

@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-expansion-automation.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day40_summary": "docs/artifacts/day40-scale-lane-pack/day40-scale-lane-summary.json",
-    "day40_delivery_board": "docs/artifacts/day40-scale-lane-pack/day40-delivery-board.md"
+    "day40_summary": "docs/artifacts/scale-lane-pack/day40-scale-lane-summary.json",
+    "day40_delivery_board": "docs/artifacts/scale-lane-pack/day40-delivery-board.md"
   },
   "checks": [
     {
@@ -59,13 +59,13 @@
       "check_id": "day40_summary_present",
       "weight": 10,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day40-scale-lane-pack/day40-scale-lane-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-lane-pack/day40-scale-lane-summary.json"
     },
     {
       "check_id": "day40_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/day40-scale-lane-pack/day40-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-lane-pack/day40-delivery-board.md"
     },
     {
       "check_id": "day40_quality_floor",
