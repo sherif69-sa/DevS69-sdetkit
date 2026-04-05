@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-integration-expansion2-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day65_summary": "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json",
-    "day65_delivery_board": "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md",
+    "weekly_review_summary": "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json",
+    "weekly_review_delivery_board": "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md",
     "gitlab_reference": "templates/ci/gitlab/gitlab-advanced-reference.yml"
   },
   "checks": [
@@ -29,34 +29,34 @@
       "evidence": "Day 66 + Day 67 strategy chain"
     },
     {
-      "check_id": "day65_summary_present",
+      "check_id": "weekly_review_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json"
     },
     {
-      "check_id": "day65_delivery_board_present",
+      "check_id": "weekly_review_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md"
     },
     {
-      "check_id": "day65_quality_floor",
+      "check_id": "weekly_review_quality_floor",
       "weight": 13,
       "passed": false,
       "evidence": {
-        "day65_score": 55,
+        "weekly_review_score": 55,
         "strict_pass": false,
-        "day65_checks": 14
+        "weekly_review_checks": 14
       }
     },
     {
-      "check_id": "day65_board_integrity",
+      "check_id": "weekly_review_board_integrity",
       "weight": 5,
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_day65": false
+        "contains_weekly_review": false
       }
     },
     {
@@ -116,16 +116,16 @@
     }
   ],
   "rollup": {
-    "day65_activation_score": 55,
-    "day65_checks": 14,
-    "day65_delivery_board_items": 5
+    "weekly_review_activation_score": 55,
+    "weekly_review_checks": 14,
+    "weekly_review_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 37,
     "passed_checks": 5,
     "failed_checks": 9,
     "critical_failures": [
-      "day65_strict_baseline"
+      "weekly_review_strict_baseline"
     ],
     "strict_pass": false
   },

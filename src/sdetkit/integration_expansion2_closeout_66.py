@@ -10,10 +10,10 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-integration-expansion2-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY65_SUMMARY_PATH = (
+_WEEKLY_REVIEW_SUMMARY_PATH = (
     "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json"
 )
-_DAY65_BOARD_PATH = (
+_WEEKLY_REVIEW_BOARD_PATH = (
     "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-delivery-board-2.md"
 )
 _GITLAB_PATH = "templates/ci/gitlab/gitlab-advanced-reference.yml"
@@ -140,7 +140,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day65(path: Path) -> tuple[int, bool, int]:
+def _load_weekly_review(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -168,10 +168,10 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     gitlab_path = root / _GITLAB_PATH
     gitlab_text = _read(gitlab_path)
 
-    day65_summary = root / _DAY65_SUMMARY_PATH
-    day65_board = root / _DAY65_BOARD_PATH
-    day65_score, day65_strict, day65_check_count = _load_day65(day65_summary)
-    board_count, board_has_day65 = _count_board_items(day65_board, "Day 65")
+    weekly_review_summary = root / _WEEKLY_REVIEW_SUMMARY_PATH
+    weekly_review_board = root / _WEEKLY_REVIEW_BOARD_PATH
+    weekly_review_score, weekly_review_strict, weekly_review_check_count = _load_weekly_review(weekly_review_summary)
+    board_count, board_has_weekly_review = _count_board_items(weekly_review_board, "Day 65")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -203,32 +203,32 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 66 + Day 67 strategy chain",
         },
         {
-            "check_id": "day65_summary_present",
+            "check_id": "weekly_review_summary_present",
             "weight": 10,
-            "passed": day65_summary.exists(),
-            "evidence": str(day65_summary),
+            "passed": weekly_review_summary.exists(),
+            "evidence": str(weekly_review_summary),
         },
         {
-            "check_id": "day65_delivery_board_present",
+            "check_id": "weekly_review_delivery_board_present",
             "weight": 7,
-            "passed": day65_board.exists(),
-            "evidence": str(day65_board),
+            "passed": weekly_review_board.exists(),
+            "evidence": str(weekly_review_board),
         },
         {
-            "check_id": "day65_quality_floor",
+            "check_id": "weekly_review_quality_floor",
             "weight": 13,
-            "passed": day65_strict and day65_score >= 95,
+            "passed": weekly_review_strict and weekly_review_score >= 95,
             "evidence": {
-                "day65_score": day65_score,
-                "strict_pass": day65_strict,
-                "day65_checks": day65_check_count,
+                "weekly_review_score": weekly_review_score,
+                "strict_pass": weekly_review_strict,
+                "weekly_review_checks": weekly_review_check_count,
             },
         },
         {
-            "check_id": "day65_board_integrity",
+            "check_id": "weekly_review_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day65,
-            "evidence": {"board_items": board_count, "contains_day65": board_has_day65},
+            "passed": board_count >= 5 and board_has_weekly_review,
+            "evidence": {"board_items": board_count, "contains_weekly_review": board_has_weekly_review},
         },
         {
             "check_id": "page_header",
@@ -276,24 +276,24 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day65_summary.exists() or not day65_board.exists():
-        critical_failures.append("day65_handoff_inputs")
-    if not day65_strict:
-        critical_failures.append("day65_strict_baseline")
+    if not weekly_review_summary.exists() or not weekly_review_board.exists():
+        critical_failures.append("weekly_review_handoff_inputs")
+    if not weekly_review_strict:
+        critical_failures.append("weekly_review_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day65_strict:
-        wins.append(f"Day 65 continuity is strict-pass with activation score={day65_score}.")
+    if weekly_review_strict:
+        wins.append(f"Day 65 continuity is strict-pass with activation score={weekly_review_score}.")
     else:
         misses.append("Day 65 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 65 closeout command and restore strict baseline before Day 66 lock."
         )
 
-    if board_count >= 5 and board_has_day65:
+    if board_count >= 5 and board_has_weekly_review:
         wins.append(
             f"Day 65 delivery board integrity validated with {board_count} checklist items."
         )
@@ -326,21 +326,21 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day65_summary": str(day65_summary.relative_to(root))
-            if day65_summary.exists()
-            else str(day65_summary),
-            "day65_delivery_board": str(day65_board.relative_to(root))
-            if day65_board.exists()
-            else str(day65_board),
+            "weekly_review_summary": str(weekly_review_summary.relative_to(root))
+            if weekly_review_summary.exists()
+            else str(weekly_review_summary),
+            "weekly_review_delivery_board": str(weekly_review_board.relative_to(root))
+            if weekly_review_board.exists()
+            else str(weekly_review_board),
             "gitlab_reference": str(gitlab_path.relative_to(root))
             if gitlab_path.exists()
             else _GITLAB_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day65_activation_score": day65_score,
-            "day65_checks": day65_check_count,
-            "day65_delivery_board_items": board_count,
+            "weekly_review_activation_score": weekly_review_score,
+            "weekly_review_checks": weekly_review_check_count,
+            "weekly_review_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

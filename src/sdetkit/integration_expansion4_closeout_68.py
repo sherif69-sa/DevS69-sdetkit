@@ -10,8 +10,8 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-integration-expansion4-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY67_SUMMARY_PATH = "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json"
-_DAY67_BOARD_PATH = (
+_INTEGRATION_EXPANSION3_SUMMARY_PATH = "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json"
+_INTEGRATION_EXPANSION3_BOARD_PATH = (
     "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md"
 )
 _REFERENCE_PATH = "templates/ci/tekton/tekton-self-hosted-reference.yaml"
@@ -138,7 +138,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day67(path: Path) -> tuple[int, bool, int]:
+def _load_integration_expansion3(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -166,10 +166,10 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
     reference_path = root / _REFERENCE_PATH
     reference_text = _read(reference_path)
 
-    day67_summary = root / _DAY67_SUMMARY_PATH
-    day67_board = root / _DAY67_BOARD_PATH
-    day67_score, day67_strict, day67_check_count = _load_day67(day67_summary)
-    board_count, board_has_day67 = _count_board_items(day67_board, "Day 67")
+    integration_expansion3_summary = root / _INTEGRATION_EXPANSION3_SUMMARY_PATH
+    integration_expansion3_board = root / _INTEGRATION_EXPANSION3_BOARD_PATH
+    integration_expansion3_score, integration_expansion3_strict, integration_expansion3_check_count = _load_integration_expansion3(integration_expansion3_summary)
+    board_count, board_has_integration_expansion3 = _count_board_items(integration_expansion3_board, "Day 67")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -201,32 +201,32 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 68 + Day 69 strategy chain",
         },
         {
-            "check_id": "day67_summary_present",
+            "check_id": "integration_expansion3_summary_present",
             "weight": 10,
-            "passed": day67_summary.exists(),
-            "evidence": str(day67_summary),
+            "passed": integration_expansion3_summary.exists(),
+            "evidence": str(integration_expansion3_summary),
         },
         {
-            "check_id": "day67_delivery_board_present",
+            "check_id": "integration_expansion3_delivery_board_present",
             "weight": 7,
-            "passed": day67_board.exists(),
-            "evidence": str(day67_board),
+            "passed": integration_expansion3_board.exists(),
+            "evidence": str(integration_expansion3_board),
         },
         {
-            "check_id": "day67_quality_floor",
+            "check_id": "integration_expansion3_quality_floor",
             "weight": 13,
-            "passed": day67_strict and day67_score >= 95,
+            "passed": integration_expansion3_strict and integration_expansion3_score >= 95,
             "evidence": {
-                "day67_score": day67_score,
-                "strict_pass": day67_strict,
-                "day67_checks": day67_check_count,
+                "integration_expansion3_score": integration_expansion3_score,
+                "strict_pass": integration_expansion3_strict,
+                "integration_expansion3_checks": integration_expansion3_check_count,
             },
         },
         {
-            "check_id": "day67_board_integrity",
+            "check_id": "integration_expansion3_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day67,
-            "evidence": {"board_items": board_count, "contains_day67": board_has_day67},
+            "passed": board_count >= 5 and board_has_integration_expansion3,
+            "evidence": {"board_items": board_count, "contains_integration_expansion3": board_has_integration_expansion3},
         },
         {
             "check_id": "page_header",
@@ -274,24 +274,24 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day67_summary.exists() or not day67_board.exists():
-        critical_failures.append("day67_handoff_inputs")
-    if not day67_strict:
-        critical_failures.append("day67_strict_baseline")
+    if not integration_expansion3_summary.exists() or not integration_expansion3_board.exists():
+        critical_failures.append("integration_expansion3_handoff_inputs")
+    if not integration_expansion3_strict:
+        critical_failures.append("integration_expansion3_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day67_strict:
-        wins.append(f"Day 67 continuity is strict-pass with activation score={day67_score}.")
+    if integration_expansion3_strict:
+        wins.append(f"Day 67 continuity is strict-pass with activation score={integration_expansion3_score}.")
     else:
         misses.append("Day 67 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 67 closeout command and restore strict baseline before Day 68 lock."
         )
 
-    if board_count >= 5 and board_has_day67:
+    if board_count >= 5 and board_has_integration_expansion3:
         wins.append(
             f"Day 67 delivery board integrity validated with {board_count} checklist items."
         )
@@ -324,21 +324,21 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day67_summary": str(day67_summary.relative_to(root))
-            if day67_summary.exists()
-            else str(day67_summary),
-            "day67_delivery_board": str(day67_board.relative_to(root))
-            if day67_board.exists()
-            else str(day67_board),
+            "integration_expansion3_summary": str(integration_expansion3_summary.relative_to(root))
+            if integration_expansion3_summary.exists()
+            else str(integration_expansion3_summary),
+            "integration_expansion3_delivery_board": str(integration_expansion3_board.relative_to(root))
+            if integration_expansion3_board.exists()
+            else str(integration_expansion3_board),
             "self_hosted_reference": str(reference_path.relative_to(root))
             if reference_path.exists()
             else _REFERENCE_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day67_activation_score": day67_score,
-            "day67_checks": day67_check_count,
-            "day67_delivery_board_items": board_count,
+            "integration_expansion3_activation_score": integration_expansion3_score,
+            "integration_expansion3_checks": integration_expansion3_check_count,
+            "integration_expansion3_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
