@@ -196,18 +196,6 @@ def _hide_help_subcommands(sub) -> None:
     sub._choices_actions = filtered
 
 
-def _print_playbooks(sub) -> None:
-    mp = getattr(sub, "_name_parser_map", {})
-    if not isinstance(mp, dict):
-        return
-    names = sorted([k for k in mp.keys() if isinstance(k, str) and _is_hidden_cmd(k)])
-    print("Playbooks (hidden from main --help):")
-    for n in names:
-        print(f"  {n}")
-    print("")
-    print("Tip: these commands still run directly, e.g. sdetkit <name> --help")
-
-
 def _resolve_non_day_playbook_alias(cmd: str) -> str:
     """Resolve product/legacy playbook names to a parser-backed command."""
     try:
@@ -243,7 +231,9 @@ def _add_passthrough_subcommand(
     return parser
 
 
-def _build_root_parser() -> tuple[argparse.ArgumentParser, object]:
+def _build_root_parser(
+    *, show_hidden_commands: bool = False
+) -> tuple[argparse.ArgumentParser, object]:
     help_description = """\
 DevS69 SDETKit is an operator-grade SDET platform with four umbrella kits:
 release confidence, test intelligence, integration assurance, and failure forensics.
@@ -267,6 +257,11 @@ Start here:
         epilog=help_epilog,
     )
     p.add_argument("--version", action="version", version=_tool_version())
+    p.add_argument(
+        "--show-hidden",
+        action="store_true",
+        help="Include hidden/legacy playbook commands in `sdetkit --help` output.",
+    )
     sub = p.add_subparsers(
         dest="cmd",
         required=True,
@@ -275,9 +270,10 @@ Start here:
         description="Run `sdetkit <command> --help` for command-specific guidance.",
     )
     _add_passthrough_subcommand(sub, "baseline")
-    sub.add_parser(
+    _add_passthrough_subcommand(
+        sub,
         "playbooks",
-        help="Discover and run adoption/rollout playbooks",
+        help_text="Discover and run adoption/rollout playbooks",
     )
     _add_passthrough_subcommand(
         sub, "kits", help_text="[Stable/Core] Umbrella kit catalog and kit details"
@@ -745,7 +741,8 @@ Start here:
 
     tsa = sub.add_parser("trust-assets", help="Trust assets playbook")
     tsa.add_argument("args", nargs=argparse.REMAINDER)
-    _filter_hidden_subcommands(p)
+    if not show_hidden_commands:
+        _filter_hidden_subcommands(p)
     return p, sub
 
 
@@ -762,11 +759,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             "day50-execution-prioritization-closeout": "execution-prioritization-closeout",
         }
         argv[0] = legacy_aliases.get(str(argv[0]), str(argv[0]))
-
-    if argv and argv[0] == "playbooks":
-        from .playbooks_cli import main as _playbooks_main
-
-        return _playbooks_main(list(argv[1:]))
 
     if argv and argv[0] == "cassette-get":
         from .__main__ import _cassette_get
@@ -1149,9 +1141,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "trust-assets":
         return trust_assets.main(list(argv[1:]))
 
-    p, sub = _build_root_parser()
+    show_hidden_commands = "--show-hidden" in argv
+    p, sub = _build_root_parser(show_hidden_commands=show_hidden_commands)
 
-    _hide_help_subcommands(sub)
+    if not show_hidden_commands:
+        _hide_help_subcommands(sub)
 
     ns = p.parse_args(argv)
 
@@ -1217,9 +1211,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if ok else 2
 
     if ns.cmd == "playbooks":
-        _print_playbooks(sub)
+        from .playbooks_cli import main as _playbooks_main
 
-        return 0
+        return _playbooks_main(list(ns.args))
 
     if ns.cmd == "kits":
         return kits.main(ns.args)
