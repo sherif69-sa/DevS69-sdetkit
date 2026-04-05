@@ -29,7 +29,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-closeout-2.md").write_text(
-        c2._DAY92_DEFAULT_PAGE, encoding="utf-8"
+        c2._CYCLE2_DEFAULT_PAGE, encoding="utf-8"
     )
     (root / "docs/continuous-upgrade-big-upgrade-report-2.md").write_text(
         "# Cycle 2 report\n", encoding="utf-8"

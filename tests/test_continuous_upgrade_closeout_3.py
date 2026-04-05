@@ -29,7 +29,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-continuous-upgrade-closeout-3.md").write_text(
-        (getattr(c3, "_CYCLE3_DEFAULT_PAGE", None) or c3._DAY93_DEFAULT_PAGE), encoding="utf-8"
+        c3._CYCLE3_DEFAULT_PAGE, encoding="utf-8"
     )
     (root / "docs/continuous-upgrade-cycle3-report.md").write_text(
         "# Cycle 3 report\n", encoding="utf-8"
@@ -194,7 +194,7 @@ def test_cycle3_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert execution_data["strict_pass"] is False
 
 
-def test_cycle3_strict_fails_without_day92(tmp_path: Path) -> None:
+def test_cycle3_strict_fails_without_cycle2_inputs(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
