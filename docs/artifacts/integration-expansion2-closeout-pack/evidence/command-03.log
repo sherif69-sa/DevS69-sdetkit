@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_integration_expansion2_closeout_contract_66.py --skip-evidence",
   "returncode": 0,
-  "stdout": "day66-integration-expansion2-closeout contract check passed\n",
+  "stdout": "integration-expansion2-closeout contract check passed\n",
   "stderr": ""
 }

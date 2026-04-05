@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_community_program_closeout_contract_62.py --skip-evidence",
   "returncode": 0,
-  "stdout": "day62-community-program-closeout contract check passed\n",
+  "stdout": "community-program-closeout contract check passed\n",
   "stderr": ""
 }

@@ -44,7 +44,7 @@
       "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
-      "evidence": "day52-narrative-closeout"
+      "evidence": "narrative-closeout"
     },
     {
       "check_id": "docs_index_links",
