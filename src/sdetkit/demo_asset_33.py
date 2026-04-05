@@ -107,7 +107,7 @@ Day 33 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 32 continuity and strict baseline carryover: 35 points.
+- Release-cadence continuity and strict baseline carryover: 35 points.
 - Demo contract lock + delivery board readiness: 15 points.
 """
 
@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day32(path: Path) -> tuple[float, bool, int]:
+def _load_release_cadence_summary(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -143,13 +143,13 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day33 = any(
+    has_demo_asset_day33 = any(
         any(token in line for token in ("impact 33", "day 33", "name 33")) for line in lines
     )
-    has_day34 = any(
+    has_demo_asset_day34 = any(
         any(token in line for token in ("impact 34", "day 34", "name 34")) for line in lines
     )
-    return item_count, has_day33, has_day34
+    return item_count, has_demo_asset_day33, has_demo_asset_day34
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -178,12 +178,12 @@ def build_demo_asset_summary_impl(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day32_summary_primary = root / _DAY32_SUMMARY_PATH
-    day32_board_primary = root / _DAY32_BOARD_PATH
-    day32_summary = day32_summary_primary
-    day32_board = day32_board_primary
-    day32_score, day32_strict, day32_check_count = _load_day32(day32_summary)
-    board_count, board_has_day33, board_has_day34 = _board_stats(day32_board)
+    release_cadence_summary_primary = root / _DAY32_SUMMARY_PATH
+    release_cadence_board_primary = root / _DAY32_BOARD_PATH
+    release_cadence_summary = release_cadence_summary_primary
+    release_cadence_board = release_cadence_board_primary
+    release_cadence_score, release_cadence_strict, release_cadence_check_count = _load_release_cadence_summary(release_cadence_summary)
+    board_count, board_has_demo_asset_day33, board_has_demo_asset_day34 = _board_stats(release_cadence_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -235,35 +235,35 @@ def build_demo_asset_summary_impl(
             "evidence": "Day 33 + Day 34 strategy chain",
         },
         {
-            "check_id": "day32_summary_present",
+            "check_id": "release_cadence_summary_present",
             "weight": 10,
-            "passed": day32_summary.exists(),
-            "evidence": {"resolved": str(day32_summary), "primary": str(day32_summary_primary)},
+            "passed": release_cadence_summary.exists(),
+            "evidence": {"resolved": str(release_cadence_summary), "primary": str(release_cadence_summary_primary)},
         },
         {
-            "check_id": "day32_delivery_board_present",
+            "check_id": "release_cadence_delivery_board_present",
             "weight": 8,
-            "passed": day32_board.exists(),
-            "evidence": {"resolved": str(day32_board), "primary": str(day32_board_primary)},
+            "passed": release_cadence_board.exists(),
+            "evidence": {"resolved": str(release_cadence_board), "primary": str(release_cadence_board_primary)},
         },
         {
-            "check_id": "day32_quality_floor",
+            "check_id": "release_cadence_quality_floor",
             "weight": 10,
-            "passed": day32_strict and day32_score >= 95,
+            "passed": release_cadence_strict and release_cadence_score >= 95,
             "evidence": {
-                "day32_score": day32_score,
-                "strict_pass": day32_strict,
-                "day32_checks": day32_check_count,
+                "release_cadence_score": release_cadence_score,
+                "strict_pass": release_cadence_strict,
+                "release_cadence_checks": release_cadence_check_count,
             },
         },
         {
-            "check_id": "day32_board_integrity",
+            "check_id": "release_cadence_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day33 and board_has_day34,
+            "passed": board_count >= 5 and board_has_demo_asset_day33 and board_has_demo_asset_day34,
             "evidence": {
                 "board_items": board_count,
-                "contains_day33": board_has_day33,
-                "contains_day34": board_has_day34,
+                "contains_demo_asset_day33": board_has_demo_asset_day33,
+                "contains_demo_asset_day34": board_has_demo_asset_day34,
             },
         },
         {
@@ -289,24 +289,24 @@ def build_demo_asset_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day32_summary.exists() or not day32_board.exists():
-        critical_failures.append("day32_handoff_inputs")
-    if not day32_strict:
-        critical_failures.append("day32_strict_baseline")
+    if not release_cadence_summary.exists() or not release_cadence_board.exists():
+        critical_failures.append("release_cadence_handoff_inputs")
+    if not release_cadence_strict:
+        critical_failures.append("release_cadence_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day32_strict:
-        wins.append(f"Day 32 continuity is strict-pass with activation score={day32_score}.")
+    if release_cadence_strict:
+        wins.append(f"Release-cadence continuity is strict-pass with activation score={release_cadence_score}.")
     else:
         misses.append("Day 32 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 32 cadence command and restore strict pass baseline before demo lock."
         )
 
-    if board_count >= 5 and board_has_day33 and board_has_day34:
+    if board_count >= 5 and board_has_demo_asset_day33 and board_has_demo_asset_day34:
         wins.append(
             f"Day 32 delivery board integrity validated with {board_count} checklist items."
         )
@@ -338,18 +338,18 @@ def build_demo_asset_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day32_summary": str(day32_summary.relative_to(root))
-            if day32_summary.exists()
-            else str(day32_summary),
-            "day32_delivery_board": str(day32_board.relative_to(root))
-            if day32_board.exists()
-            else str(day32_board),
+            "release_cadence_summary": str(release_cadence_summary.relative_to(root))
+            if release_cadence_summary.exists()
+            else str(release_cadence_summary),
+            "release_cadence_delivery_board": str(release_cadence_board.relative_to(root))
+            if release_cadence_board.exists()
+            else str(release_cadence_board),
         },
         "checks": checks,
         "rollup": {
-            "day32_activation_score": day32_score,
-            "day32_checks": day32_check_count,
-            "day32_delivery_board_items": board_count,
+            "release_cadence_activation_score": release_cadence_score,
+            "release_cadence_checks": release_cadence_check_count,
+            "release_cadence_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -385,11 +385,11 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 32 continuity",
+        "## Release-cadence continuity",
         "",
-        f"- Day 32 activation score: `{payload['rollup']['day32_activation_score']}`",
-        f"- Day 32 checks evaluated: `{payload['rollup']['day32_checks']}`",
-        f"- Day 32 delivery board checklist items: `{payload['rollup']['day32_delivery_board_items']}`",
+        f"- Day 32 activation score: `{payload['rollup']['release_cadence_activation_score']}`",
+        f"- Day 32 checks evaluated: `{payload['rollup']['release_cadence_checks']}`",
+        f"- Day 32 delivery board checklist items: `{payload['rollup']['release_cadence_delivery_board_items']}`",
         "",
         "## Wins",
     ]

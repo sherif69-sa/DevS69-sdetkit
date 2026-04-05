@@ -107,7 +107,7 @@ Day 53 weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 52 continuity and strict baseline carryover: 35 points.
+- Narrative-closeout continuity and strict baseline carryover: 35 points.
 - Docs-loop contract lock + delivery board readiness: 15 points.
 """
 
@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day52(path: Path) -> tuple[float, bool, int]:
+def _load_narrative_closeout_summary(path: Path) -> tuple[float, bool, int]:
     data_obj = _load_json(path)
     if not isinstance(data_obj, dict):
         return 0.0, False, 0
@@ -172,12 +172,12 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day52_summary_primary = root / _DAY52_SUMMARY_PATH
-    day52_summary = day52_summary_primary
-    day52_board_primary = root / _DAY52_BOARD_PATH
-    day52_board = day52_board_primary
-    day52_score, day52_strict, day52_check_count = _load_day52(day52_summary)
-    board_count, board_has_day52, board_has_day53 = _board_stats(day52_board)
+    narrative_closeout_summary_primary = root / _DAY52_SUMMARY_PATH
+    narrative_closeout_summary = narrative_closeout_summary_primary
+    narrative_closeout_board_primary = root / _DAY52_BOARD_PATH
+    narrative_closeout_board = narrative_closeout_board_primary
+    narrative_closeout_score, narrative_closeout_strict, narrative_closeout_check_count = _load_narrative_closeout_summary(narrative_closeout_summary)
+    board_count, board_has_narrative_closeout_day52, board_has_docs_loop_day53 = _board_stats(narrative_closeout_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -226,35 +226,35 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 52 + Day 53 strategy chain",
         },
         {
-            "check_id": "day52_summary_present",
+            "check_id": "narrative_closeout_summary_present",
             "weight": 10,
-            "passed": day52_summary.exists(),
-            "evidence": {"resolved": str(day52_summary), "primary": str(day52_summary_primary)},
+            "passed": narrative_closeout_summary.exists(),
+            "evidence": {"resolved": str(narrative_closeout_summary), "primary": str(narrative_closeout_summary_primary)},
         },
         {
-            "check_id": "day52_delivery_board_present",
+            "check_id": "narrative_closeout_delivery_board_present",
             "weight": 8,
-            "passed": day52_board.exists(),
-            "evidence": {"resolved": str(day52_board), "primary": str(day52_board_primary)},
+            "passed": narrative_closeout_board.exists(),
+            "evidence": {"resolved": str(narrative_closeout_board), "primary": str(narrative_closeout_board_primary)},
         },
         {
-            "check_id": "day52_quality_floor",
+            "check_id": "narrative_closeout_quality_floor",
             "weight": 10,
-            "passed": day52_strict and day52_score >= 95,
+            "passed": narrative_closeout_strict and narrative_closeout_score >= 95,
             "evidence": {
-                "day52_score": day52_score,
-                "strict_pass": day52_strict,
-                "day52_checks": day52_check_count,
+                "narrative_closeout_score": narrative_closeout_score,
+                "strict_pass": narrative_closeout_strict,
+                "narrative_closeout_checks": narrative_closeout_check_count,
             },
         },
         {
-            "check_id": "day52_board_integrity",
+            "check_id": "narrative_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day52 and board_has_day53,
+            "passed": board_count >= 5 and board_has_narrative_closeout_day52 and board_has_docs_loop_day53,
             "evidence": {
                 "board_items": board_count,
-                "contains_day52": board_has_day52,
-                "contains_day53": board_has_day53,
+                "contains_narrative_closeout_day52": board_has_narrative_closeout_day52,
+                "contains_docs_loop_day53": board_has_docs_loop_day53,
             },
         },
         {
@@ -280,24 +280,24 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     critical_failures: list[str] = []
-    if not day52_summary.exists() or not day52_board.exists():
-        critical_failures.append("day52_handoff_inputs")
-    if not day52_strict:
-        critical_failures.append("day52_strict_baseline")
+    if not narrative_closeout_summary.exists() or not narrative_closeout_board.exists():
+        critical_failures.append("narrative_closeout_handoff_inputs")
+    if not narrative_closeout_strict:
+        critical_failures.append("narrative_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day52_strict:
-        wins.append(f"Day 52 continuity is strict-pass with activation score={day52_score}.")
+    if narrative_closeout_strict:
+        wins.append(f"Narrative-closeout continuity is strict-pass with activation score={narrative_closeout_score}.")
     else:
         misses.append("Day 52 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 52 narrative closeout command and restore strict pass baseline before Day 53 lock."
         )
 
-    if board_count >= 5 and board_has_day52 and board_has_day53:
+    if board_count >= 5 and board_has_narrative_closeout_day52 and board_has_docs_loop_day53:
         wins.append(
             f"Day 52 delivery board integrity validated with {board_count} checklist items."
         )
@@ -331,20 +331,20 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day52_summary": str(day52_summary.relative_to(root))
-            if day52_summary.exists()
-            else str(day52_summary),
-            "day52_summary_primary": str(day52_summary_primary.relative_to(root)),
-            "day52_delivery_board": str(day52_board.relative_to(root))
-            if day52_board.exists()
-            else str(day52_board),
-            "day52_delivery_board_primary": str(day52_board_primary.relative_to(root)),
+            "narrative_closeout_summary": str(narrative_closeout_summary.relative_to(root))
+            if narrative_closeout_summary.exists()
+            else str(narrative_closeout_summary),
+            "narrative_closeout_summary_primary": str(narrative_closeout_summary_primary.relative_to(root)),
+            "narrative_closeout_delivery_board": str(narrative_closeout_board.relative_to(root))
+            if narrative_closeout_board.exists()
+            else str(narrative_closeout_board),
+            "narrative_closeout_delivery_board_primary": str(narrative_closeout_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
-            "day52_activation_score": day52_score,
-            "day52_checks": day52_check_count,
-            "day52_delivery_board_items": board_count,
+            "narrative_closeout_activation_score": narrative_closeout_score,
+            "narrative_closeout_checks": narrative_closeout_check_count,
+            "narrative_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -366,9 +366,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 52 activation score: `{payload['rollup']['day52_activation_score']}`",
-        f"- Day 52 checks evaluated: `{payload['rollup']['day52_checks']}`",
-        f"- Day 52 delivery board checklist items: `{payload['rollup']['day52_delivery_board_items']}`",
+        f"- Day 52 activation score: `{payload['rollup']['narrative_closeout_activation_score']}`",
+        f"- Day 52 checks evaluated: `{payload['rollup']['narrative_closeout_checks']}`",
+        f"- Day 52 delivery board checklist items: `{payload['rollup']['narrative_closeout_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")

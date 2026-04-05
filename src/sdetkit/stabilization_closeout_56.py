@@ -109,7 +109,7 @@ Day 56 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 55 continuity and strict baseline carryover: 35 points.
+- Contributor-activation continuity and strict baseline carryover: 35 points.
 - Stabilization contract lock + delivery board readiness: 15 points.
 """
 
@@ -128,7 +128,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day55(path: Path) -> tuple[int, bool, int]:
+def _load_contributor_activation_summary(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -170,10 +170,10 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day55_summary = root / _DAY55_SUMMARY_PATH
-    day55_board = root / _DAY55_BOARD_PATH
-    day55_score, day55_strict, day55_check_count = _load_day55(day55_summary)
-    board_count, board_has_day55 = _board_stats(day55_board)
+    contributor_activation_summary = root / _DAY55_SUMMARY_PATH
+    contributor_activation_board = root / _DAY55_BOARD_PATH
+    contributor_activation_score, contributor_activation_strict, contributor_activation_check_count = _load_contributor_activation_summary(contributor_activation_summary)
+    board_count, board_has_contributor_activation_day55 = _board_stats(contributor_activation_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -222,32 +222,32 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 56 + Day 57 strategy chain",
         },
         {
-            "check_id": "day55_summary_present",
+            "check_id": "contributor_activation_summary_present",
             "weight": 10,
-            "passed": day55_summary.exists(),
-            "evidence": str(day55_summary),
+            "passed": contributor_activation_summary.exists(),
+            "evidence": str(contributor_activation_summary),
         },
         {
-            "check_id": "day55_delivery_board_present",
+            "check_id": "contributor_activation_delivery_board_present",
             "weight": 8,
-            "passed": day55_board.exists(),
-            "evidence": str(day55_board),
+            "passed": contributor_activation_board.exists(),
+            "evidence": str(contributor_activation_board),
         },
         {
-            "check_id": "day55_quality_floor",
+            "check_id": "contributor_activation_quality_floor",
             "weight": 10,
-            "passed": day55_strict and day55_score >= 95,
+            "passed": contributor_activation_strict and contributor_activation_score >= 95,
             "evidence": {
-                "day55_score": day55_score,
-                "strict_pass": day55_strict,
-                "day55_checks": day55_check_count,
+                "contributor_activation_score": contributor_activation_score,
+                "strict_pass": contributor_activation_strict,
+                "contributor_activation_checks": contributor_activation_check_count,
             },
         },
         {
-            "check_id": "day55_board_integrity",
+            "check_id": "contributor_activation_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day55,
-            "evidence": {"board_items": board_count, "contains_day55": board_has_day55},
+            "passed": board_count >= 5 and board_has_contributor_activation_day55,
+            "evidence": {"board_items": board_count, "contains_contributor_activation_day55": board_has_contributor_activation_day55},
         },
         {
             "check_id": "stabilization_contract_locked",
@@ -271,24 +271,24 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day55_summary.exists() or not day55_board.exists():
-        critical_failures.append("day55_handoff_inputs")
-    if not day55_strict:
-        critical_failures.append("day55_strict_baseline")
+    if not contributor_activation_summary.exists() or not contributor_activation_board.exists():
+        critical_failures.append("contributor_activation_handoff_inputs")
+    if not contributor_activation_strict:
+        critical_failures.append("contributor_activation_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day55_strict:
-        wins.append(f"Day 55 continuity is strict-pass with activation score={day55_score}.")
+    if contributor_activation_strict:
+        wins.append(f"Contributor-activation continuity is strict-pass with activation score={contributor_activation_score}.")
     else:
         misses.append("Day 55 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 55 contributor activation closeout command and restore strict baseline before Day 56 lock."
         )
 
-    if board_count >= 5 and board_has_day55:
+    if board_count >= 5 and board_has_contributor_activation_day55:
         wins.append(
             f"Day 55 delivery board integrity validated with {board_count} checklist items."
         )
@@ -321,18 +321,18 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day55_summary": str(day55_summary.relative_to(root))
-            if day55_summary.exists()
-            else str(day55_summary),
-            "day55_delivery_board": str(day55_board.relative_to(root))
-            if day55_board.exists()
-            else str(day55_board),
+            "contributor_activation_summary": str(contributor_activation_summary.relative_to(root))
+            if contributor_activation_summary.exists()
+            else str(contributor_activation_summary),
+            "contributor_activation_delivery_board": str(contributor_activation_board.relative_to(root))
+            if contributor_activation_board.exists()
+            else str(contributor_activation_board),
         },
         "checks": checks,
         "rollup": {
-            "day55_activation_score": day55_score,
-            "day55_checks": day55_check_count,
-            "day55_delivery_board_items": board_count,
+            "contributor_activation_activation_score": contributor_activation_score,
+            "contributor_activation_checks": contributor_activation_check_count,
+            "contributor_activation_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

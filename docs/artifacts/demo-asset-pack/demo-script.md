@@ -1,4 +1,4 @@
-# Cycle 33 demo script
+# Day 33 demo script
 
 ## Hook (0-10s)
 - Pain point + why this matters now
