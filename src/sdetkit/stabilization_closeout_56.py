@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 57 deep-audit priorities drafted from Day 56 learnings",
 ]
 
-_DAY56_DEFAULT_PAGE = """# Day 56 \u2014 Stabilization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 56 \u2014 Stabilization closeout lane
 
 Day 56 closes with a major stabilization upgrade that turns Day 55 contributor-activation outcomes into deterministic KPI recovery and follow-through.
 
@@ -172,7 +172,11 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
 
     contributor_activation_summary = root / _DAY55_SUMMARY_PATH
     contributor_activation_board = root / _DAY55_BOARD_PATH
-    contributor_activation_score, contributor_activation_strict, contributor_activation_check_count = _load_contributor_activation_summary(contributor_activation_summary)
+    (
+        contributor_activation_score,
+        contributor_activation_strict,
+        contributor_activation_check_count,
+    ) = _load_contributor_activation_summary(contributor_activation_summary)
     board_count, board_has_contributor_activation_day55 = _board_stats(contributor_activation_board)
 
     checks: list[dict[str, Any]] = [
@@ -247,7 +251,10 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "contributor_activation_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_contributor_activation_day55,
-            "evidence": {"board_items": board_count, "contains_contributor_activation_day55": board_has_contributor_activation_day55},
+            "evidence": {
+                "board_items": board_count,
+                "contains_contributor_activation_day55": board_has_contributor_activation_day55,
+            },
         },
         {
             "check_id": "stabilization_contract_locked",
@@ -281,7 +288,9 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if contributor_activation_strict:
-        wins.append(f"Contributor-activation continuity is strict-pass with activation score={contributor_activation_score}.")
+        wins.append(
+            f"Contributor-activation continuity is strict-pass with activation score={contributor_activation_score}."
+        )
     else:
         misses.append("Day 55 strict continuity signal is missing.")
         handoff_actions.append(
@@ -324,7 +333,9 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "contributor_activation_summary": str(contributor_activation_summary.relative_to(root))
             if contributor_activation_summary.exists()
             else str(contributor_activation_summary),
-            "contributor_activation_delivery_board": str(contributor_activation_board.relative_to(root))
+            "contributor_activation_delivery_board": str(
+                contributor_activation_board.relative_to(root)
+            )
             if contributor_activation_board.exists()
             else str(contributor_activation_board),
         },
@@ -410,9 +421,7 @@ def build_stabilization_closeout_summary_impl(root: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Stabilization Closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="Stabilization Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -424,7 +433,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY56_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_stabilization_closeout_summary(root)
 

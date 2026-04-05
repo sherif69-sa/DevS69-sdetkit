@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 63 onboarding priorities drafted from Day 62 learnings",
 ]
 
-_DAY62_DEFAULT_PAGE = """# Day 62 \u2014 Community program setup closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 62 \u2014 Community program setup closeout lane
 
 Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a deterministic community operations lane.
 
@@ -418,7 +418,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY62_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_community_program_closeout_summary(root)
 

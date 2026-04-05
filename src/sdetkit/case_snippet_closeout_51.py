@@ -58,7 +58,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 52 narrative priorities drafted from Cycle 51 learnings",
 ]
 
-_DAY51_DEFAULT_PAGE = """# Cycle 51 \u2014 Case snippet closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Cycle 51 \u2014 Case snippet closeout lane
 
 Cycle 51 closes with a major case-snippet upgrade that converts Day 50 execution-prioritization evidence into a deterministic release-storytelling lane.
 
@@ -490,7 +490,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY51_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_case_snippet_closeout_summary(root)
 

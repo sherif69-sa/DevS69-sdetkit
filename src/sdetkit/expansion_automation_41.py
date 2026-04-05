@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 42 optimization priorities drafted from Day 41 learnings",
 ]
 
-_DAY41_DEFAULT_PAGE = """# Day 41 \u2014 Expansion automation lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 41 \u2014 Expansion automation lane
 
 This lane closes with a major expansion automation upgrade that converts prior scale-lane evidence into repeatable workflows.
 
@@ -527,7 +527,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY41_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_expansion_automation_summary(root)
 

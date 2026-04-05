@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 35 weekly review KPI frame locked",
 ]
 
-_DAY32_DEFAULT_PAGE = """# Day 32 \u2014 Release cadence setup
+_DEFAULT_PAGE_TEMPLATE = """# Day 32 \u2014 Release cadence setup
 
 Day 32 converts Day 31 baseline goals into a repeatable release operating cadence with a strict changelog quality gate.
 
@@ -509,7 +509,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY32_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_release_cadence_summary_impl(root)
 

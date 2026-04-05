@@ -26,7 +26,7 @@ def _write_fixture(root: Path) -> None:
         "release-communications\n",
         encoding="utf-8",
     )
-    (root / "docs/objection-handling.md").write_text(fqo._DAY23_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/objection-handling.md").write_text(fqo._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
 
 def test_faq_json(tmp_path: Path, capsys) -> None:

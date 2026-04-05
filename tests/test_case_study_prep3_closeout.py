@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-case-study-prep3-closeout.md").write_text(
-        d71._DAY71_DEFAULT_PAGE, encoding="utf-8"
+        d71._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/big-upgrade-report-71.md").write_text("# Day 71 report\n", encoding="utf-8")
 

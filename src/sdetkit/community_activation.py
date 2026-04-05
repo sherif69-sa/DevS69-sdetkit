@@ -30,7 +30,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_community_activation_contract.py --skip-evidence",
 ]
 
-_DAY25_DEFAULT_PAGE = """# Community activation (Day 25)
+_DEFAULT_PAGE_TEMPLATE = """# Community activation (Day 25)
 
 Day 25 converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.
 
@@ -415,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.write_defaults:
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(_DAY25_DEFAULT_PAGE, encoding="utf-8")
+        page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     payload = build_community_activation_summary(
         root,

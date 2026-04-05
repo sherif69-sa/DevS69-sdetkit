@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 37 summary owner confirmed",
 ]
 
-_DAY36_DEFAULT_PAGE = """# Day 36 \u2014 Community distribution closeout
+_DEFAULT_PAGE_TEMPLATE = """# Day 36 \u2014 Community distribution closeout
 
 Day 36 closes the distribution lane by converting the Day 35 KPI story into channel-ready messaging, schedule commitments, and Day 37 experiments.
 
@@ -497,7 +497,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY36_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_distribution_closeout_summary_impl(root)
 

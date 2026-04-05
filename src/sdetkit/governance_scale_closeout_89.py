@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY89_DEFAULT_PAGE = """# Day 89 \u2014 Governance scale closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 89 \u2014 Governance scale closeout lane
 
 Day 89 closes with a major upgrade that converts Day 88 governance handoff outcomes into a deterministic governance scale operating lane.
 
@@ -150,12 +150,20 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
 
     governance_priorities_data = _load_json(governance_priorities_summary)
     governance_priorities_summary_data = (
-        governance_priorities_data.get("summary", {}) if isinstance(governance_priorities_data.get("summary"), dict) else {}
+        governance_priorities_data.get("summary", {})
+        if isinstance(governance_priorities_data.get("summary"), dict)
+        else {}
     )
-    governance_priorities_score = int(governance_priorities_summary_data.get("activation_score", 0) or 0)
-    governance_priorities_strict = bool(governance_priorities_summary_data.get("strict_pass", False))
+    governance_priorities_score = int(
+        governance_priorities_summary_data.get("activation_score", 0) or 0
+    )
+    governance_priorities_strict = bool(
+        governance_priorities_summary_data.get("strict_pass", False)
+    )
     governance_priorities_check_count = (
-        len(governance_priorities_data.get("checks", [])) if isinstance(governance_priorities_data.get("checks"), list) else 0
+        len(governance_priorities_data.get("checks", []))
+        if isinstance(governance_priorities_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(governance_priorities_board)
@@ -219,7 +227,10 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "governance_priorities_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_governance_priorities,
-            "evidence": {"board_items": board_count, "contains_governance_priorities": board_has_governance_priorities},
+            "evidence": {
+                "board_items": board_count,
+                "contains_governance_priorities": board_has_governance_priorities,
+            },
         },
         {
             "check_id": "page_header",
@@ -275,7 +286,9 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if governance_priorities_score >= 85 and governance_priorities_strict:
-        wins.append(f"Governance priorities continuity baseline is stable with activation score={governance_priorities_score}.")
+        wins.append(
+            f"Governance priorities continuity baseline is stable with activation score={governance_priorities_score}."
+        )
     else:
         misses.append("Day 88 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -316,7 +329,9 @@ def build_governance_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "governance_priorities_summary": str(governance_priorities_summary.relative_to(root))
             if governance_priorities_summary.exists()
             else str(governance_priorities_summary),
-            "governance_priorities_delivery_board": str(governance_priorities_board.relative_to(root))
+            "governance_priorities_delivery_board": str(
+                governance_priorities_board.relative_to(root)
+            )
             if governance_priorities_board.exists()
             else str(governance_priorities_board),
             "governance_scale_plan": _PLAN_PATH,
@@ -429,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY89_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_governance_scale_closeout_summary(root)
 

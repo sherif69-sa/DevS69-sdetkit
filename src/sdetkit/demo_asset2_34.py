@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 36 community distribution plan updated",
 ]
 
-_DAY34_DEFAULT_PAGE = """# Day 34 \u2014 Demo asset #2 production (repo audit)
+_DEFAULT_PAGE_TEMPLATE = """# Day 34 \u2014 Demo asset #2 production (repo audit)
 
 Day 34 closes the second demo-asset production lane, translating repository-audit value into distributable proof.
 
@@ -494,7 +494,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY34_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_demo_asset2_summary_impl(root)
 

@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY75_DEFAULT_PAGE = """# Day 75 \u2014 Trust assets refresh closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 75 \u2014 Trust assets refresh closeout lane
 
 Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into a governance-grade trust refresh execution pack.
 
@@ -161,8 +161,12 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
 
     distribution_scaling_summary = root / _DAY74_SUMMARY_PATH
     distribution_scaling_board = root / _DAY74_BOARD_PATH
-    distribution_scaling_score, distribution_scaling_strict, distribution_scaling_check_count = _load_distribution_scaling(distribution_scaling_summary)
-    board_count, board_has_distribution_scaling = _count_board_items(distribution_scaling_board, "Day 74")
+    distribution_scaling_score, distribution_scaling_strict, distribution_scaling_check_count = (
+        _load_distribution_scaling(distribution_scaling_summary)
+    )
+    board_count, board_has_distribution_scaling = _count_board_items(
+        distribution_scaling_board, "Day 74"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -222,7 +226,10 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "distribution_scaling_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_distribution_scaling,
-            "evidence": {"board_items": board_count, "contains_distribution_scaling": board_has_distribution_scaling},
+            "evidence": {
+                "board_items": board_count,
+                "contains_distribution_scaling": board_has_distribution_scaling,
+            },
         },
         {
             "check_id": "page_header",
@@ -280,7 +287,9 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if distribution_scaling_strict:
-        wins.append(f"Day 74 continuity is strict-pass with activation score={distribution_scaling_score}.")
+        wins.append(
+            f"Day 74 continuity is strict-pass with activation score={distribution_scaling_score}."
+        )
     else:
         misses.append("Day 74 strict continuity signal is missing.")
         handoff_actions.append(
@@ -430,7 +439,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY75_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_trust_assets_refresh_closeout_summary(root)
 

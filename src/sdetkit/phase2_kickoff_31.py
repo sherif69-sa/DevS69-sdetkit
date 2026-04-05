@@ -48,7 +48,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 35 weekly review preparation checklist ready",
 ]
 
-_DAY31_DEFAULT_PAGE = """# Day 31 \u2014 Phase-2 kickoff baseline
+_DEFAULT_PAGE_TEMPLATE = """# Day 31 \u2014 Phase-2 kickoff baseline
 
 Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a fixed weekly growth target set.
 
@@ -491,7 +491,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY31_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase2_kickoff_summary_impl(root)
 

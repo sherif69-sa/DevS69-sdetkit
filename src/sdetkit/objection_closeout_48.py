@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 49 weekly-review priorities drafted from Day 48 learnings",
 ]
 
-_DAY48_DEFAULT_PAGE = """# Day 48 \u2014 Objection closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 48 \u2014 Objection closeout lane
 
 Day 48 closes with a major objection-handling upgrade that converts Day 47 reliability evidence into deterministic documentation hardening loops.
 
@@ -477,7 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY48_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_objection_closeout_summary(root)
 

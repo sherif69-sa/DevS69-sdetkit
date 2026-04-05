@@ -124,7 +124,7 @@ Cycle 2 weights continuity + execution contract + governance artifact readiness 
 """
 
 # Backward-compatible alias retained for transition-era imports.
-_DAY92_DEFAULT_PAGE = _CYCLE2_DEFAULT_PAGE
+_DEFAULT_PAGE_TEMPLATE = _CYCLE2_DEFAULT_PAGE
 
 
 def _read_text(path: Path) -> str:

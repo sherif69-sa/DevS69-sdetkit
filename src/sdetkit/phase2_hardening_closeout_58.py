@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 59 pre-plan priorities drafted from Day 58 learnings",
 ]
 
-_DAY58_DEFAULT_PAGE = """# Day 58 \u2014 Phase-2 hardening closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 58 \u2014 Phase-2 hardening closeout lane
 
 Day 58 closes with a major Phase-2 hardening upgrade that turns Day 57 KPI deep-audit outcomes into deterministic execution hardening governance.
 
@@ -159,7 +159,9 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
     kpi_deep_audit_summary = root / _DAY57_SUMMARY_PATH
     kpi_deep_audit_board = root / _DAY57_BOARD_PATH
 
-    kpi_deep_audit_score, kpi_deep_audit_strict, kpi_deep_audit_check_count = _load_kpi_deep_audit(kpi_deep_audit_summary)
+    kpi_deep_audit_score, kpi_deep_audit_strict, kpi_deep_audit_check_count = _load_kpi_deep_audit(
+        kpi_deep_audit_summary
+    )
     board_count, board_has_kpi_deep_audit = _load_board(kpi_deep_audit_board)
 
     missing_sections = [s for s in _REQUIRED_SECTIONS if s not in page_text]
@@ -222,7 +224,10 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "kpi_deep_audit_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_kpi_deep_audit,
-            "evidence": {"board_items": board_count, "contains_kpi_deep_audit": board_has_kpi_deep_audit},
+            "evidence": {
+                "board_items": board_count,
+                "contains_kpi_deep_audit": board_has_kpi_deep_audit,
+            },
         },
         {
             "check_id": "page_header",
@@ -274,7 +279,9 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if kpi_deep_audit_strict:
-        wins.append(f"Day 57 continuity is strict-pass with activation score={kpi_deep_audit_score}.")
+        wins.append(
+            f"Day 57 continuity is strict-pass with activation score={kpi_deep_audit_score}."
+        )
     else:
         misses.append("Day 57 strict continuity signal is missing.")
         handoff_actions.append(
@@ -406,9 +413,7 @@ def build_phase2_hardening_closeout_summary_impl(root: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Phase 2 Hardening Closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="Phase 2 Hardening Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -420,7 +425,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY58_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase2_hardening_closeout_summary(root)
 

@@ -96,7 +96,7 @@ def test_enterprise_readiness_emit_pack(tmp_path, capsys):
 def test_enterprise_readiness_execute_writes_evidence(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/use-cases-enterprise-regulated.md").write_text(
-        enterprise_readiness._DAY13_DEFAULT_PAGE, encoding="utf-8"
+        enterprise_readiness._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
 
     class _Proc:
@@ -128,7 +128,7 @@ def test_enterprise_readiness_execute_writes_evidence(monkeypatch, tmp_path, cap
 def test_enterprise_readiness_execute_strict_fails_on_command_error(monkeypatch, tmp_path, capsys):
     (tmp_path / "docs").mkdir(parents=True)
     (tmp_path / "docs/use-cases-enterprise-regulated.md").write_text(
-        enterprise_readiness._DAY13_DEFAULT_PAGE, encoding="utf-8"
+        enterprise_readiness._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
 
     class _Proc:

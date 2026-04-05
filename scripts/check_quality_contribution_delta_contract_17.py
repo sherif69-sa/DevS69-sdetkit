@@ -11,9 +11,12 @@ def main() -> int:
     required = [
         ROOT / "docs/contribution-quality-report.md",
         ROOT / "docs/artifacts/contribution-quality-report-sample.md",
-        ROOT / "docs/artifacts/contribution-quality-report-pack/contribution-quality-report-summary.json",
-        ROOT / "docs/artifacts/contribution-quality-report-pack/contribution-quality-report-action-plan.md",
-        ROOT / "docs/artifacts/contribution-quality-report-pack/contribution-quality-report-remediation-checklist.md",
+        ROOT
+        / "docs/artifacts/contribution-quality-report-pack/contribution-quality-report-summary.json",
+        ROOT
+        / "docs/artifacts/contribution-quality-report-pack/contribution-quality-report-action-plan.md",
+        ROOT
+        / "docs/artifacts/contribution-quality-report-pack/contribution-quality-report-remediation-checklist.md",
         ROOT / "docs/artifacts/contribution-quality-growth-signals.json",
         ROOT / "src/sdetkit/quality_contribution_delta.py",
     ]

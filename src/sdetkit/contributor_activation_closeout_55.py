@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 56 priorities drafted from Day 55 learnings",
 ]
 
-_DAY55_DEFAULT_PAGE = """# Day 55 \u2014 Contributor activation closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 55 \u2014 Contributor activation closeout lane
 
 Day 55 closes with a major contributor activation upgrade that turns Day 53 docs-loop evidence into a deterministic contributor follow-through lane.
 
@@ -170,7 +170,9 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     docs_loop_closeout_summary = docs_loop_closeout_summary_primary
     docs_loop_closeout_board_primary = root / _DAY53_BOARD_PATH
     docs_loop_closeout_board = docs_loop_closeout_board_primary
-    docs_loop_closeout_score, docs_loop_closeout_strict, docs_loop_closeout_check_count = _load_docs_loop_closeout_summary(docs_loop_closeout_summary)
+    docs_loop_closeout_score, docs_loop_closeout_strict, docs_loop_closeout_check_count = (
+        _load_docs_loop_closeout_summary(docs_loop_closeout_summary)
+    )
     board_count, board_has_docs_loop_day53 = _board_stats(docs_loop_closeout_board)
 
     checks: list[dict[str, Any]] = [
@@ -223,13 +225,19 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_loop_closeout_summary_present",
             "weight": 10,
             "passed": docs_loop_closeout_summary.exists(),
-            "evidence": {"resolved": str(docs_loop_closeout_summary), "primary": str(docs_loop_closeout_summary_primary)},
+            "evidence": {
+                "resolved": str(docs_loop_closeout_summary),
+                "primary": str(docs_loop_closeout_summary_primary),
+            },
         },
         {
             "check_id": "docs_loop_closeout_delivery_board_present",
             "weight": 8,
             "passed": docs_loop_closeout_board.exists(),
-            "evidence": {"resolved": str(docs_loop_closeout_board), "primary": str(docs_loop_closeout_board_primary)},
+            "evidence": {
+                "resolved": str(docs_loop_closeout_board),
+                "primary": str(docs_loop_closeout_board_primary),
+            },
         },
         {
             "check_id": "docs_loop_closeout_quality_floor",
@@ -245,7 +253,10 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "docs_loop_closeout_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_docs_loop_day53,
-            "evidence": {"board_items": board_count, "contains_docs_loop_day53": board_has_docs_loop_day53},
+            "evidence": {
+                "board_items": board_count,
+                "contains_docs_loop_day53": board_has_docs_loop_day53,
+            },
         },
         {
             "check_id": "activation_contract_locked",
@@ -279,7 +290,9 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if docs_loop_closeout_strict:
-        wins.append(f"Docs-loop continuity is strict-pass with activation score={docs_loop_closeout_score}.")
+        wins.append(
+            f"Docs-loop continuity is strict-pass with activation score={docs_loop_closeout_score}."
+        )
     else:
         misses.append("Day 53 strict continuity signal is missing.")
         handoff_actions.append(
@@ -324,11 +337,15 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_loop_closeout_summary": str(docs_loop_closeout_summary.relative_to(root))
             if docs_loop_closeout_summary.exists()
             else str(docs_loop_closeout_summary),
-            "docs_loop_closeout_summary_primary": str(docs_loop_closeout_summary_primary.relative_to(root)),
+            "docs_loop_closeout_summary_primary": str(
+                docs_loop_closeout_summary_primary.relative_to(root)
+            ),
             "docs_loop_closeout_delivery_board": str(docs_loop_closeout_board.relative_to(root))
             if docs_loop_closeout_board.exists()
             else str(docs_loop_closeout_board),
-            "docs_loop_closeout_delivery_board_primary": str(docs_loop_closeout_board_primary.relative_to(root)),
+            "docs_loop_closeout_delivery_board_primary": str(
+                docs_loop_closeout_board_primary.relative_to(root)
+            ),
         },
         "checks": checks,
         "rollup": {
@@ -418,9 +435,7 @@ def build_contributor_activation_closeout_summary_impl(root: Path) -> dict[str, 
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Contributor Activation Closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="Contributor Activation Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -432,7 +447,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY55_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_contributor_activation_closeout_summary(root)
 

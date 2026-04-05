@@ -65,7 +65,7 @@ _REQUIRED_JENKINS_LINES = [
     "parallel",
 ]
 
-_DAY67_DEFAULT_PAGE = """# Day 67 \u2014 Integration expansion #3 closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 67 \u2014 Integration expansion #3 closeout lane
 
 Day 67 closes with a major integration upgrade that converts Day 66 integration outputs into an advanced Jenkins reference pipeline.
 
@@ -168,8 +168,14 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
 
     integration_expansion2_summary = root / _INTEGRATION_EXPANSION2_SUMMARY_PATH
     integration_expansion2_board = root / _INTEGRATION_EXPANSION2_BOARD_PATH
-    integration_expansion2_score, integration_expansion2_strict, integration_expansion2_check_count = _load_integration_expansion2(integration_expansion2_summary)
-    board_count, board_has_integration_expansion2 = _count_board_items(integration_expansion2_board, "Day 66")
+    (
+        integration_expansion2_score,
+        integration_expansion2_strict,
+        integration_expansion2_check_count,
+    ) = _load_integration_expansion2(integration_expansion2_summary)
+    board_count, board_has_integration_expansion2 = _count_board_items(
+        integration_expansion2_board, "Day 66"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -226,7 +232,10 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "integration_expansion2_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_integration_expansion2,
-            "evidence": {"board_items": board_count, "contains_integration_expansion2": board_has_integration_expansion2},
+            "evidence": {
+                "board_items": board_count,
+                "contains_integration_expansion2": board_has_integration_expansion2,
+            },
         },
         {
             "check_id": "page_header",
@@ -284,7 +293,9 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if integration_expansion2_strict:
-        wins.append(f"Day 66 continuity is strict-pass with activation score={integration_expansion2_score}.")
+        wins.append(
+            f"Day 66 continuity is strict-pass with activation score={integration_expansion2_score}."
+        )
     else:
         misses.append("Day 66 strict continuity signal is missing.")
         handoff_actions.append(
@@ -327,7 +338,9 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
             "integration_expansion2_summary": str(integration_expansion2_summary.relative_to(root))
             if integration_expansion2_summary.exists()
             else str(integration_expansion2_summary),
-            "integration_expansion2_delivery_board": str(integration_expansion2_board.relative_to(root))
+            "integration_expansion2_delivery_board": str(
+                integration_expansion2_board.relative_to(root)
+            )
             if integration_expansion2_board.exists()
             else str(integration_expansion2_board),
             "jenkins_reference": str(jenkins_path.relative_to(root))
@@ -438,7 +451,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY67_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_integration_expansion3_closeout_summary(root)
 

@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-release-cadence.md").write_text(
-        d32._DAY32_DEFAULT_PAGE, encoding="utf-8"
+        d32._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-32-ultra-upgrade-report.md").write_text(
         "# Day 32 report\n", encoding="utf-8"

@@ -58,7 +58,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings",
 ]
 
-_DAY63_DEFAULT_PAGE = """# Cycle 63 \u2014 Contributor onboarding activation closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Cycle 63 \u2014 Contributor onboarding activation closeout lane
 
 Cycle 63 ships a major onboarding-activation upgrade that converts Day 62 community program evidence into deterministic onboarding ownership and roadmap-voting loops.
 
@@ -415,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY63_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_onboarding_activation_closeout_summary(root)
 

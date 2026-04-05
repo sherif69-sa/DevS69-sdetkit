@@ -50,7 +50,7 @@ jobs:
       - run: python scripts/check_enterprise_readiness_contract.py
 """
 
-_DAY13_DEFAULT_PAGE = f"""# Enterprise + regulated workflow
+_DEFAULT_PAGE_TEMPLATE = f"""# Enterprise + regulated workflow
 
 A governance-first landing page for organizations that need deterministic quality, policy evidence, and compliance-safe release controls.
 
@@ -194,7 +194,7 @@ def _write_defaults(base: Path) -> list[str]:
         return []
 
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(_DAY13_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
     return [_PAGE_PATH]
 
 

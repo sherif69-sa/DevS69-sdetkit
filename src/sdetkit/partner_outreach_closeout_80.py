@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY80_DEFAULT_PAGE = """# Partner outreach closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Partner outreach closeout lane
 
 Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a partner-outreach execution pack.
 
@@ -148,7 +148,9 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     scale_upgrade_summary = root / _DAY79_SUMMARY_PATH
     scale_upgrade_board = root / _DAY79_BOARD_PATH
     scale_upgrade_payload = _load_json(scale_upgrade_summary)
-    scale_upgrade_score = int(scale_upgrade_payload.get("summary", {}).get("activation_score", 0) or 0)
+    scale_upgrade_score = int(
+        scale_upgrade_payload.get("summary", {}).get("activation_score", 0) or 0
+    )
     scale_upgrade_strict = bool(scale_upgrade_payload.get("summary", {}).get("strict_pass", False))
     scale_upgrade_check_count = (
         len(scale_upgrade_payload.get("checks", []))
@@ -221,7 +223,10 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "scale_upgrade_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_scale_upgrade,
-            "evidence": {"board_items": board_count, "contains_scale_upgrade": board_has_scale_upgrade},
+            "evidence": {
+                "board_items": board_count,
+                "contains_scale_upgrade": board_has_scale_upgrade,
+            },
         },
         {
             "check_id": "page_header",
@@ -277,7 +282,9 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if scale_upgrade_score >= 85:
-        wins.append(f"Scale Upgrade continuity baseline is stable with activation score={scale_upgrade_score}.")
+        wins.append(
+            f"Scale Upgrade continuity baseline is stable with activation score={scale_upgrade_score}."
+        )
     else:
         misses.append("Day 79 continuity baseline is below the floor (<85).")
         handoff_actions.append(
@@ -427,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY80_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_partner_outreach_closeout_summary(root)
 

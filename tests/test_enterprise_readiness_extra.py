@@ -10,7 +10,7 @@ from sdetkit import enterprise_readiness as euc
 def test_write_defaults_noop_when_page_is_already_valid(tmp_path: Path) -> None:
     page = tmp_path / "docs/use-cases-enterprise-regulated.md"
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(euc._DAY13_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(euc._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     touched = euc._write_defaults(tmp_path)
 
@@ -20,7 +20,7 @@ def test_write_defaults_noop_when_page_is_already_valid(tmp_path: Path) -> None:
 def test_execute_commands_timeout_and_markdown_output(monkeypatch, tmp_path: Path, capsys) -> None:
     page = tmp_path / "docs/use-cases-enterprise-regulated.md"
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(euc._DAY13_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(euc._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     def _raise_timeout(*args, **kwargs):
         raise subprocess.TimeoutExpired(cmd=args[0], timeout=1, output="", stderr="late")

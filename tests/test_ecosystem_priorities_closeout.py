@@ -23,7 +23,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-ecosystem-priorities-closeout.md").write_text(
-        d78._DAY78_DEFAULT_PAGE, encoding="utf-8"
+        d78._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
 
     summary = (

@@ -19,7 +19,9 @@ def _write_fixture(root: Path) -> None:
         "Onboarding optimization\ndocs/onboarding-optimization.md\nonboarding-optimization\n",
         encoding="utf-8",
     )
-    (root / "docs/onboarding-optimization.md").write_text(otu._DAY24_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/onboarding-optimization.md").write_text(
+        otu._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
     (root / "src/sdetkit").mkdir(parents=True, exist_ok=True)
     (root / "src/sdetkit/onboarding.py").write_text(
         "--role\n--platform\npython -m sdetkit doctor --format text\n", encoding="utf-8"

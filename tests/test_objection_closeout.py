@@ -30,7 +30,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-objection-closeout.md").write_text(
-        d48._DAY48_DEFAULT_PAGE, encoding="utf-8"
+        d48._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-48-big-upgrade-report.md").write_text(
         "# Day 48 report\n", encoding="utf-8"

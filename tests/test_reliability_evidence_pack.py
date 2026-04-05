@@ -40,7 +40,7 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
 def _write_page(root: Path) -> None:
     page = root / "docs/reliability-evidence-pack.md"
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(rep._DAY18_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(rep._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
 
 def test_pack_builds_json(tmp_path: Path, capsys) -> None:

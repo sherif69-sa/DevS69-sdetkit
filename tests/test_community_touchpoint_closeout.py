@@ -34,7 +34,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-community-touchpoint-closeout.md").write_text(
-        d77._DAY77_DEFAULT_PAGE, encoding="utf-8"
+        d77._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-77-big-upgrade-report.md").write_text(
         "# Day 77 report\n", encoding="utf-8"

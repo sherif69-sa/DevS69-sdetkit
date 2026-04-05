@@ -29,7 +29,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_weekly_review_contract.py --skip-evidence",
 ]
 
-_DAY28_DEFAULT_PAGE = """# Weekly review #4 (Day 28)
+_DEFAULT_PAGE_TEMPLATE = """# Weekly review #4 (Day 28)
 
 Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wins, misses, and corrective actions.
 
@@ -396,7 +396,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY28_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_weekly_review_summary_impl(root)
 

@@ -33,7 +33,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_release_communications_contract.py --skip-evidence",
 ]
 
-_DAY20_DEFAULT_PAGE = """# Release communications
+_DEFAULT_PAGE_TEMPLATE = """# Release communications
 
 Release communications translates release-readiness evidence into non-maintainer changelog storytelling.
 
@@ -434,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
     page = root / _PAGE_PATH
     if ns.write_defaults:
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(_DAY20_DEFAULT_PAGE, encoding="utf-8")
+        page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     page_text = _read(page)
     missing_sections = [

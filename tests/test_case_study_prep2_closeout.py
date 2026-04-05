@@ -20,7 +20,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text("Day 70\nDay 71\n", encoding="utf-8")
     (root / "docs/integrations-case-study-prep2-closeout.md").write_text(
-        d70._DAY70_DEFAULT_PAGE, encoding="utf-8"
+        d70._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
 
     summary = (

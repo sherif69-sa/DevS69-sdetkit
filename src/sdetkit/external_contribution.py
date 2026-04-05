@@ -30,7 +30,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_external_contribution_contract.py --skip-evidence",
 ]
 
-_DAY26_DEFAULT_PAGE = """# External contribution
+_DEFAULT_PAGE_TEMPLATE = """# External contribution
 
 External contribution upgrades public contribution pull by spotlighting starter tasks with clear owners, response SLAs, and evidence-ready follow-up.
 
@@ -425,7 +425,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.write_defaults:
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(_DAY26_DEFAULT_PAGE, encoding="utf-8")
+        page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     payload = build_external_contribution_summary(
         root,

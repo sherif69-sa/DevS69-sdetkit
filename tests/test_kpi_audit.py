@@ -30,7 +30,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 27 — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-kpi-audit.md").write_text(kpa._DAY27_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-kpi-audit.md").write_text(
+        kpa._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
     pack = root / "docs/artifacts/kpi-audit-pack"
     pack.mkdir(parents=True, exist_ok=True)
     (pack / "kpi-baseline.json").write_text(

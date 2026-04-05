@@ -28,7 +28,7 @@ _REQUIRED_COMMANDS = [
 
 _REQUIRED_CONTRIBUTION_QUALITY_KEYS = ("name", "quality", "contributions")
 
-_DAY18_DEFAULT_PAGE = """# Reliability evidence pack
+_DEFAULT_PAGE_TEMPLATE = """# Reliability evidence pack
 
 Operational recipe for rolling GitHub Actions onboarding, GitLab CI onboarding, and contribution-quality-report evidence into one reliability-evidence signal.
 
@@ -356,7 +356,7 @@ def _write_execution_evidence(base: Path, out_dir: str, results: list[dict[str, 
 def _write_defaults(base: Path) -> list[str]:
     path = base / _PAGE_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_DAY18_DEFAULT_PAGE, encoding="utf-8")
+    path.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
     return [str(path.relative_to(base))]
 
 

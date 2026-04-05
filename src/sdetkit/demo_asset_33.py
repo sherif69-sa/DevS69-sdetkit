@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 35 KPI instrumentation plan updated",
 ]
 
-_DAY33_DEFAULT_PAGE = """# Day 33 \u2014 Demo asset #1 production
+_DEFAULT_PAGE_TEMPLATE = """# Day 33 \u2014 Demo asset #1 production
 
 Day 33 closes the first demo-asset production lane so strategy turns into distributable proof.
 
@@ -182,8 +182,12 @@ def build_demo_asset_summary_impl(
     release_cadence_board_primary = root / _DAY32_BOARD_PATH
     release_cadence_summary = release_cadence_summary_primary
     release_cadence_board = release_cadence_board_primary
-    release_cadence_score, release_cadence_strict, release_cadence_check_count = _load_release_cadence_summary(release_cadence_summary)
-    board_count, board_has_demo_asset_day33, board_has_demo_asset_day34 = _board_stats(release_cadence_board)
+    release_cadence_score, release_cadence_strict, release_cadence_check_count = (
+        _load_release_cadence_summary(release_cadence_summary)
+    )
+    board_count, board_has_demo_asset_day33, board_has_demo_asset_day34 = _board_stats(
+        release_cadence_board
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -238,13 +242,19 @@ def build_demo_asset_summary_impl(
             "check_id": "release_cadence_summary_present",
             "weight": 10,
             "passed": release_cadence_summary.exists(),
-            "evidence": {"resolved": str(release_cadence_summary), "primary": str(release_cadence_summary_primary)},
+            "evidence": {
+                "resolved": str(release_cadence_summary),
+                "primary": str(release_cadence_summary_primary),
+            },
         },
         {
             "check_id": "release_cadence_delivery_board_present",
             "weight": 8,
             "passed": release_cadence_board.exists(),
-            "evidence": {"resolved": str(release_cadence_board), "primary": str(release_cadence_board_primary)},
+            "evidence": {
+                "resolved": str(release_cadence_board),
+                "primary": str(release_cadence_board_primary),
+            },
         },
         {
             "check_id": "release_cadence_quality_floor",
@@ -259,7 +269,9 @@ def build_demo_asset_summary_impl(
         {
             "check_id": "release_cadence_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_demo_asset_day33 and board_has_demo_asset_day34,
+            "passed": board_count >= 5
+            and board_has_demo_asset_day33
+            and board_has_demo_asset_day34,
             "evidence": {
                 "board_items": board_count,
                 "contains_demo_asset_day33": board_has_demo_asset_day33,
@@ -299,7 +311,9 @@ def build_demo_asset_summary_impl(
     handoff_actions: list[str] = []
 
     if release_cadence_strict:
-        wins.append(f"Release-cadence continuity is strict-pass with activation score={release_cadence_score}.")
+        wins.append(
+            f"Release-cadence continuity is strict-pass with activation score={release_cadence_score}."
+        )
     else:
         misses.append("Day 32 strict continuity signal is missing.")
         handoff_actions.append(
@@ -493,7 +507,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY33_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_demo_asset_summary_impl(root)
 

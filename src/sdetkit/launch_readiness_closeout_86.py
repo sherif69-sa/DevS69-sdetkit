@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY86_DEFAULT_PAGE = """# Day 86 \u2014 Launch readiness closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 86 \u2014 Launch readiness closeout lane
 
 Day 86 closes with a major upgrade that converts Day 85 release prioritization outcomes into a deterministic launch readiness operating lane.
 
@@ -148,12 +148,20 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
 
     release_prioritization_data = _load_json(release_prioritization_summary)
     release_prioritization_summary_data = (
-        release_prioritization_data.get("summary", {}) if isinstance(release_prioritization_data.get("summary"), dict) else {}
+        release_prioritization_data.get("summary", {})
+        if isinstance(release_prioritization_data.get("summary"), dict)
+        else {}
     )
-    release_prioritization_score = int(release_prioritization_summary_data.get("activation_score", 0) or 0)
-    release_prioritization_strict = bool(release_prioritization_summary_data.get("strict_pass", False))
+    release_prioritization_score = int(
+        release_prioritization_summary_data.get("activation_score", 0) or 0
+    )
+    release_prioritization_strict = bool(
+        release_prioritization_summary_data.get("strict_pass", False)
+    )
     release_prioritization_check_count = (
-        len(release_prioritization_data.get("checks", [])) if isinstance(release_prioritization_data.get("checks"), list) else 0
+        len(release_prioritization_data.get("checks", []))
+        if isinstance(release_prioritization_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(release_prioritization_board)
@@ -217,7 +225,10 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "release_prioritization_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_release_prioritization,
-            "evidence": {"board_items": board_count, "contains_release_prioritization": board_has_release_prioritization},
+            "evidence": {
+                "board_items": board_count,
+                "contains_release_prioritization": board_has_release_prioritization,
+            },
         },
         {
             "check_id": "page_header",
@@ -273,7 +284,9 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if release_prioritization_score >= 85 and release_prioritization_strict:
-        wins.append(f"Release prioritization continuity baseline is stable with activation score={release_prioritization_score}.")
+        wins.append(
+            f"Release prioritization continuity baseline is stable with activation score={release_prioritization_score}."
+        )
     else:
         misses.append("Day 85 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -314,7 +327,9 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             "release_prioritization_summary": str(release_prioritization_summary.relative_to(root))
             if release_prioritization_summary.exists()
             else str(release_prioritization_summary),
-            "release_prioritization_delivery_board": str(release_prioritization_board.relative_to(root))
+            "release_prioritization_delivery_board": str(
+                release_prioritization_board.relative_to(root)
+            )
             if release_prioritization_board.exists()
             else str(release_prioritization_board),
             "launch_readiness_plan": _PLAN_PATH,
@@ -427,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY86_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_launch_readiness_closeout_summary(root)
 

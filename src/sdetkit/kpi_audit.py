@@ -43,7 +43,7 @@ _DEFAULT_CURRENT = {
     "external_prs_per_week": 3,
 }
 
-_DAY27_DEFAULT_PAGE = """# KPI audit (Day 27)
+_DEFAULT_PAGE_TEMPLATE = """# KPI audit (Day 27)
 
 Day 27 closes the conversion sprint by comparing baseline vs current KPI performance and publishing corrective actions.
 
@@ -458,7 +458,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.write_defaults:
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(_DAY27_DEFAULT_PAGE, encoding="utf-8")
+        page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     payload = build_kpi_audit_summary(
         root,

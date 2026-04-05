@@ -10,9 +10,13 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-optimization-closeout-foundation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY41_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json"
+_DAY41_SUMMARY_PATH = (
+    "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json"
+)
 _DAY41_BOARD_PATH = "docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
-_DAY41_LEGACY_SUMMARY_PATH = "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
+_DAY41_LEGACY_SUMMARY_PATH = (
+    "docs/artifacts/expansion-automation-pack/expansion-automation-summary.json"
+)
 _DAY41_LEGACY_BOARD_PATH = "docs/artifacts/expansion-automation-pack/delivery-board.md"
 _SECTION_HEADER = "# Optimization Closeout Foundation \u2014 Optimization closeout lane"
 _REQUIRED_SECTIONS = [
@@ -56,7 +60,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 43 acceleration priorities drafted from Optimization Closeout Foundation learnings",
 ]
 
-_DAY42_DEFAULT_PAGE = """# Optimization Closeout Foundation \u2014 Optimization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Optimization Closeout Foundation \u2014 Optimization closeout lane
 
 Optimization Closeout Foundation closes with a major optimization upgrade that converts Day 41 expansion evidence into deterministic improvement loops.
 
@@ -490,7 +494,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY42_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_optimization_closeout_summary(root)
 

@@ -58,7 +58,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 62 community program priorities drafted from Day 61 learnings",
 ]
 
-_DAY61_DEFAULT_PAGE = """# Day 61 \u2014 Phase-3 kickoff execution closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 61 \u2014 Phase-3 kickoff execution closeout lane
 
 Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence into a strict baseline for ecosystem + trust execution.
 
@@ -158,8 +158,12 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     phase2_wrap_handoff_summary = root / _DAY60_SUMMARY_PATH
     phase2_wrap_handoff_board = root / _DAY60_BOARD_PATH
-    phase2_wrap_handoff_score, phase2_wrap_handoff_strict, phase2_wrap_handoff_check_count = _load_phase2_wrap_handoff_summary(phase2_wrap_handoff_summary)
-    board_count, board_has_phase2_wrap_handoff_day60 = _count_board_items(phase2_wrap_handoff_board, "Day 60")
+    phase2_wrap_handoff_score, phase2_wrap_handoff_strict, phase2_wrap_handoff_check_count = (
+        _load_phase2_wrap_handoff_summary(phase2_wrap_handoff_summary)
+    )
+    board_count, board_has_phase2_wrap_handoff_day60 = _count_board_items(
+        phase2_wrap_handoff_board, "Day 60"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -215,7 +219,10 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "phase2_wrap_handoff_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_phase2_wrap_handoff_day60,
-            "evidence": {"board_items": board_count, "contains_phase2_wrap_handoff_day60": board_has_phase2_wrap_handoff_day60},
+            "evidence": {
+                "board_items": board_count,
+                "contains_phase2_wrap_handoff_day60": board_has_phase2_wrap_handoff_day60,
+            },
         },
         {
             "check_id": "page_header",
@@ -267,7 +274,9 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if phase2_wrap_handoff_strict:
-        wins.append(f"Phase2-wrap-handoff continuity is strict-pass with activation score={phase2_wrap_handoff_score}.")
+        wins.append(
+            f"Phase2-wrap-handoff continuity is strict-pass with activation score={phase2_wrap_handoff_score}."
+        )
     else:
         misses.append("Day 60 strict continuity signal is missing.")
         handoff_actions.append(
@@ -411,7 +420,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY61_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase3_kickoff_closeout_summary(root)
 

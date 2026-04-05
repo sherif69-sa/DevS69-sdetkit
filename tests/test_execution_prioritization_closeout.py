@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-execution-prioritization-closeout.md").write_text(
-        d50._DAY50_DEFAULT_PAGE, encoding="utf-8"
+        d50._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-50-big-upgrade-report.md").write_text(
         "# Day 50 report\n", encoding="utf-8"
@@ -100,19 +100,39 @@ def test_lane50_emit_pack_and_execute(tmp_path: Path) -> None:
     )
     assert rc == 0
     assert (
-        tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-closeout-summary.json"
-    ).exists()
-    assert (tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-closeout-summary.md").exists()
-    assert (tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-brief.md").exists()
-    assert (tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-risk-register.csv").exists()
-    assert (tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-kpi-scorecard.json").exists()
-    assert (tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-execution-log.md").exists()
-    assert (tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-delivery-board.md").exists()
-    assert (
-        tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-validation-commands.md"
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-closeout-summary.json"
     ).exists()
     assert (
-        tmp_path / "artifacts/execution-prioritization-pack/evidence/execution-prioritization-execution-summary.json"
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-closeout-summary.md"
+    ).exists()
+    assert (
+        tmp_path / "artifacts/execution-prioritization-pack/execution-prioritization-brief.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-risk-register.csv"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-kpi-scorecard.json"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-execution-log.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-delivery-board.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/execution-prioritization-pack/execution-prioritization-validation-commands.md"
+    ).exists()
+    assert (
+        tmp_path
+        / "artifacts/execution-prioritization-pack/evidence/execution-prioritization-execution-summary.json"
     ).exists()
 
 

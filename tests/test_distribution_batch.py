@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-distribution-batch.md").write_text(
-        d38._DAY38_DEFAULT_PAGE, encoding="utf-8"
+        d38._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-38-big-upgrade-report.md").write_text(
         "# Day 38 report\n", encoding="utf-8"

@@ -34,7 +34,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-scale-upgrade-closeout.md").write_text(
-        d79._DAY79_DEFAULT_PAGE,
+        d79._DEFAULT_PAGE_TEMPLATE,
         encoding="utf-8",
     )
 

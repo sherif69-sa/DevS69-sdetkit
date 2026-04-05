@@ -57,7 +57,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 51 release priorities drafted from Day 50 learnings",
 ]
 
-_DAY50_DEFAULT_PAGE = """# Day 50 \u2014 Execution prioritization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 50 \u2014 Execution prioritization closeout lane
 
 Day 50 closes with a major execution-prioritization upgrade that converts Day 49 weekly-review evidence into a deterministic execution board and release-storytelling handoff.
 
@@ -490,7 +490,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY50_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_execution_prioritization_closeout_summary(root)
 

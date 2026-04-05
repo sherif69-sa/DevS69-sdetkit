@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 39 playbook post priorities drafted from Day 38 outcomes",
 ]
 
-_DAY38_DEFAULT_PAGE = """# Day 38 \u2014 Distribution batch #1
+_DEFAULT_PAGE_TEMPLATE = """# Day 38 \u2014 Distribution batch #1
 
 Day 38 publishes a coordinated distribution batch that operationalizes Day 37 experiment winners into high-signal channel execution.
 
@@ -530,7 +530,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY38_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_distribution_batch_summary_impl(root)
 

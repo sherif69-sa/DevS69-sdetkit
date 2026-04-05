@@ -8,7 +8,7 @@ from sdetkit import startup_readiness as suc
 def test_write_defaults_noop_when_page_valid(tmp_path: Path) -> None:
     page = tmp_path / "docs/use-cases-startup-small-team.md"
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(suc._DAY12_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(suc._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
     assert suc._write_defaults(tmp_path) == []
 
 

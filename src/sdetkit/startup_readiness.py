@@ -45,7 +45,7 @@ jobs:
       - run: python scripts/check_startup_readiness_contract.py
 """
 
-_DAY12_DEFAULT_PAGE = f"""# Startup + small-team workflow
+_DEFAULT_PAGE_TEMPLATE = f"""# Startup + small-team workflow
 
 A practical landing page for lean engineering teams that need reliable quality gates without heavy process overhead.
 
@@ -165,7 +165,7 @@ def _write_defaults(base: Path) -> list[str]:
         return []
 
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(_DAY12_DEFAULT_PAGE, encoding="utf-8")
+    page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
     return [_PAGE_PATH]
 
 

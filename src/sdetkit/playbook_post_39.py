@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 40 scale priorities drafted from Day 39 learnings",
 ]
 
-_DAY39_DEFAULT_PAGE = """# Day 39 \u2014 Playbook post #1
+_DEFAULT_PAGE_TEMPLATE = """# Day 39 \u2014 Playbook post #1
 
 Day 39 publishes playbook post #1 that converts Day 38 distribution evidence into a reusable operator guide.
 
@@ -522,7 +522,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY39_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_playbook_post_summary_impl(root)
 

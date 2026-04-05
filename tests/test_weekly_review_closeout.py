@@ -32,7 +32,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review-closeout.md").write_text(
-        d49._DAY49_DEFAULT_PAGE, encoding="utf-8"
+        d49._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-49-big-upgrade-report.md").write_text(
         "# Day 49 report\n", encoding="utf-8"
@@ -132,7 +132,13 @@ def test_lane49_advanced_alias_cli_rejected(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     with pytest.raises(SystemExit) as excinfo:
         cli.main(
-            ["day49-advanced-weekly-review-control-tower", "--root", str(tmp_path), "--format", "text"]
+            [
+                "day49-advanced-weekly-review-control-tower",
+                "--root",
+                str(tmp_path),
+                "--format",
+                "text",
+            ]
         )
     assert excinfo.value.code == 2
     assert "invalid choice" in capsys.readouterr().err

@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 38 fallback plan documented for losing variants",
 ]
 
-_DAY37_DEFAULT_PAGE = """# Day 37 \u2014 Experiment lane activation
+_DEFAULT_PAGE_TEMPLATE = """# Day 37 \u2014 Experiment lane activation
 
 Day 37 turns Day 36 distribution misses into controlled experiments with strict scoring, owner accountability, and Day 38 rollout decisions.
 
@@ -528,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY37_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_experiment_lane_summary_impl(root)
 

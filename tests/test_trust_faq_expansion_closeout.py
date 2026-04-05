@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-trust-faq-expansion-closeout.md").write_text(
-        d83._DAY83_DEFAULT_PAGE, encoding="utf-8"
+        d83._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-83-big-upgrade-report.md").write_text(
         "# Day 83 report\n", encoding="utf-8"

@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-governance-handoff-closeout.md").write_text(
-        d87._DAY87_DEFAULT_PAGE, encoding="utf-8"
+        d87._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-87-big-upgrade-report.md").write_text(
         "# Day 87 report\n", encoding="utf-8"

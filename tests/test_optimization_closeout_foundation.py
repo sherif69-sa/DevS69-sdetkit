@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-optimization-closeout-foundation.md").write_text(
-        d42._DAY42_DEFAULT_PAGE, encoding="utf-8"
+        d42._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-42-big-upgrade-report.md").write_text(
         "# Optimization Closeout Foundation report\n", encoding="utf-8"
