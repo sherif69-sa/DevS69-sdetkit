@@ -107,7 +107,7 @@ Day 55 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 53 continuity and strict baseline carryover: 35 points.
+- Docs-loop continuity and strict baseline carryover: 35 points.
 - Activation contract lock + delivery board readiness: 15 points.
 """
 
@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day53(path: Path) -> tuple[float, bool, int]:
+def _load_docs_loop_closeout_summary(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -166,12 +166,12 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day53_summary_primary = root / _DAY53_SUMMARY_PATH
-    day53_summary = day53_summary_primary
-    day53_board_primary = root / _DAY53_BOARD_PATH
-    day53_board = day53_board_primary
-    day53_score, day53_strict, day53_check_count = _load_day53(day53_summary)
-    board_count, board_has_day53 = _board_stats(day53_board)
+    docs_loop_closeout_summary_primary = root / _DAY53_SUMMARY_PATH
+    docs_loop_closeout_summary = docs_loop_closeout_summary_primary
+    docs_loop_closeout_board_primary = root / _DAY53_BOARD_PATH
+    docs_loop_closeout_board = docs_loop_closeout_board_primary
+    docs_loop_closeout_score, docs_loop_closeout_strict, docs_loop_closeout_check_count = _load_docs_loop_closeout_summary(docs_loop_closeout_summary)
+    board_count, board_has_docs_loop_day53 = _board_stats(docs_loop_closeout_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -220,32 +220,32 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 55 + Day 56 strategy chain",
         },
         {
-            "check_id": "day53_summary_present",
+            "check_id": "docs_loop_closeout_summary_present",
             "weight": 10,
-            "passed": day53_summary.exists(),
-            "evidence": {"resolved": str(day53_summary), "primary": str(day53_summary_primary)},
+            "passed": docs_loop_closeout_summary.exists(),
+            "evidence": {"resolved": str(docs_loop_closeout_summary), "primary": str(docs_loop_closeout_summary_primary)},
         },
         {
-            "check_id": "day53_delivery_board_present",
+            "check_id": "docs_loop_closeout_delivery_board_present",
             "weight": 8,
-            "passed": day53_board.exists(),
-            "evidence": {"resolved": str(day53_board), "primary": str(day53_board_primary)},
+            "passed": docs_loop_closeout_board.exists(),
+            "evidence": {"resolved": str(docs_loop_closeout_board), "primary": str(docs_loop_closeout_board_primary)},
         },
         {
-            "check_id": "day53_quality_floor",
+            "check_id": "docs_loop_closeout_quality_floor",
             "weight": 10,
-            "passed": day53_strict and day53_score >= 95,
+            "passed": docs_loop_closeout_strict and docs_loop_closeout_score >= 95,
             "evidence": {
-                "day53_score": day53_score,
-                "strict_pass": day53_strict,
-                "day53_checks": day53_check_count,
+                "docs_loop_closeout_score": docs_loop_closeout_score,
+                "strict_pass": docs_loop_closeout_strict,
+                "docs_loop_closeout_checks": docs_loop_closeout_check_count,
             },
         },
         {
-            "check_id": "day53_board_integrity",
+            "check_id": "docs_loop_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day53,
-            "evidence": {"board_items": board_count, "contains_day53": board_has_day53},
+            "passed": board_count >= 5 and board_has_docs_loop_day53,
+            "evidence": {"board_items": board_count, "contains_docs_loop_day53": board_has_docs_loop_day53},
         },
         {
             "check_id": "activation_contract_locked",
@@ -269,24 +269,24 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day53_summary.exists() or not day53_board.exists():
-        critical_failures.append("day53_handoff_inputs")
-    if not day53_strict:
-        critical_failures.append("day53_strict_baseline")
+    if not docs_loop_closeout_summary.exists() or not docs_loop_closeout_board.exists():
+        critical_failures.append("docs_loop_closeout_handoff_inputs")
+    if not docs_loop_closeout_strict:
+        critical_failures.append("docs_loop_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day53_strict:
-        wins.append(f"Day 53 continuity is strict-pass with activation score={day53_score}.")
+    if docs_loop_closeout_strict:
+        wins.append(f"Docs-loop continuity is strict-pass with activation score={docs_loop_closeout_score}.")
     else:
         misses.append("Day 53 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 53 docs-loop closeout command and restore strict baseline before Day 55 lock."
         )
 
-    if board_count >= 5 and board_has_day53:
+    if board_count >= 5 and board_has_docs_loop_day53:
         wins.append(
             f"Day 53 delivery board integrity validated with {board_count} checklist items."
         )
@@ -321,20 +321,20 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day53_summary": str(day53_summary.relative_to(root))
-            if day53_summary.exists()
-            else str(day53_summary),
-            "day53_summary_primary": str(day53_summary_primary.relative_to(root)),
-            "day53_delivery_board": str(day53_board.relative_to(root))
-            if day53_board.exists()
-            else str(day53_board),
-            "day53_delivery_board_primary": str(day53_board_primary.relative_to(root)),
+            "docs_loop_closeout_summary": str(docs_loop_closeout_summary.relative_to(root))
+            if docs_loop_closeout_summary.exists()
+            else str(docs_loop_closeout_summary),
+            "docs_loop_closeout_summary_primary": str(docs_loop_closeout_summary_primary.relative_to(root)),
+            "docs_loop_closeout_delivery_board": str(docs_loop_closeout_board.relative_to(root))
+            if docs_loop_closeout_board.exists()
+            else str(docs_loop_closeout_board),
+            "docs_loop_closeout_delivery_board_primary": str(docs_loop_closeout_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
-            "day53_activation_score": day53_score,
-            "day53_checks": day53_check_count,
-            "day53_delivery_board_items": board_count,
+            "docs_loop_closeout_activation_score": docs_loop_closeout_score,
+            "docs_loop_closeout_checks": docs_loop_closeout_check_count,
+            "docs_loop_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

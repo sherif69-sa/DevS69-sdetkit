@@ -1,22 +1,24 @@
-# Cycle 33 demo asset summary
+# Day 33 demo asset summary
 
-- Activation score: **65**
-- Passed checks: **9**
-- Failed checks: **5**
-- Critical failures: **day32_strict_baseline**
+- Activation score: **46**
+- Passed checks: **6**
+- Failed checks: **8**
+- Critical failures: **release_cadence_strict_baseline**
 
-## Cycle 32 continuity
+## Release-cadence continuity
 
-- Cycle 32 activation score: `65.0`
-- Cycle 32 checks evaluated: `14`
-- Cycle 32 delivery board checklist items: `5`
+- Day 32 activation score: `65.0`
+- Day 32 checks evaluated: `14`
+- Day 32 delivery board checklist items: `5`
 
 ## Wins
-- Cycle 32 delivery board integrity validated with 5 checklist items.
-- Demo production contract + quality checklist is fully locked for execution.
 
 ## Misses
-- Cycle 32 strict continuity signal is missing.
+- Day 32 strict continuity signal is missing.
+- Day 32 delivery board integrity is incomplete (needs >=5 items and Day 33/34 anchors).
+- Demo contract, quality checklist, or delivery board entries are missing.
 
 ## Handoff actions
-- [ ] Re-run Cycle 32 cadence command and restore strict pass baseline before demo lock.
+- [ ] Re-run Day 32 cadence command and restore strict pass baseline before demo lock.
+- [ ] Repair Day 32 delivery board entries to include Day 33 and Day 34 anchors.
+- [ ] Complete all Day 33 contract lines, quality checklist entries, and delivery board tasks in docs.

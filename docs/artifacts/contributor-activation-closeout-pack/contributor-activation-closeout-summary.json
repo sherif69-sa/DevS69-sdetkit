@@ -5,10 +5,10 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-contributor-activation-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day53_summary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
-    "day53_summary_primary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
-    "day53_delivery_board": "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md",
-    "day53_delivery_board_primary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
+    "docs_loop_closeout_summary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
+    "docs_loop_closeout_summary_primary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json",
+    "docs_loop_closeout_delivery_board": "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md",
+    "docs_loop_closeout_delivery_board_primary": "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
   },
   "checks": [
     {
@@ -24,7 +24,10 @@
       "evidence": {
         "missing_sections": [
           "# Day 55 \u2014 Contributor activation closeout lane",
-          "## Day 55 command lane"
+          "## Why Day 55 matters",
+          "## Required inputs (Day 53)",
+          "## Day 55 command lane",
+          "## Day 55 delivery board"
         ]
       }
     },
@@ -46,7 +49,7 @@
       "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
-      "evidence": "day55-contributor-activation-closeout"
+      "evidence": "README contributor-activation-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -61,7 +64,7 @@
       "evidence": "Day 55 + Day 56 strategy chain"
     },
     {
-      "check_id": "day53_summary_present",
+      "check_id": "docs_loop_closeout_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -70,7 +73,7 @@
       }
     },
     {
-      "check_id": "day53_delivery_board_present",
+      "check_id": "docs_loop_closeout_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -79,30 +82,35 @@
       }
     },
     {
-      "check_id": "day53_quality_floor",
+      "check_id": "docs_loop_closeout_quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day53_score": 55.0,
+        "docs_loop_closeout_score": 41.0,
         "strict_pass": false,
-        "day53_checks": 14
+        "docs_loop_closeout_checks": 14
       }
     },
     {
-      "check_id": "day53_board_integrity",
+      "check_id": "docs_loop_closeout_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day53": true
+        "contains_docs_loop_day53": true
       }
     },
     {
       "check_id": "activation_contract_locked",
       "weight": 5,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "missing_contract_lines": []
+        "missing_contract_lines": [
+          "- Single owner + backup reviewer are assigned for Day 55 contributor-activation execution and KPI follow-up.",
+          "- The Day 55 lane references Day 53 docs-loop wins and misses with deterministic contributor follow-up loops.",
+          "- Every Day 55 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+          "- Day 55 closeout records contributor-activation learnings and Day 56 prioritization inputs."
+        ]
       }
     },
     {
@@ -116,34 +124,41 @@
     {
       "check_id": "delivery_board_locked",
       "weight": 2,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "missing_board_items": []
+        "missing_board_items": [
+          "- [ ] Day 55 contributor brief committed",
+          "- [ ] Day 55 activation plan reviewed with owner + backup",
+          "- [ ] Day 55 contributor ladder exported",
+          "- [ ] Day 55 KPI scorecard snapshot exported",
+          "- [ ] Day 56 priorities drafted from Day 55 learnings"
+        ]
       }
     }
   ],
   "rollup": {
-    "day53_activation_score": 55.0,
-    "day53_checks": 14,
-    "day53_delivery_board_items": 5
+    "docs_loop_closeout_activation_score": 41.0,
+    "docs_loop_closeout_checks": 14,
+    "docs_loop_closeout_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 55,
-    "passed_checks": 8,
-    "failed_checks": 6,
+    "activation_score": 48,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
-      "day53_strict_baseline"
+      "docs_loop_closeout_strict_baseline"
     ],
     "strict_pass": false
   },
   "wins": [
-    "Day 53 delivery board integrity validated with 5 checklist items.",
-    "Contributor activation contract + quality checklist is fully locked for execution."
+    "Day 53 delivery board integrity validated with 5 checklist items."
   ],
   "misses": [
-    "Day 53 strict continuity signal is missing."
+    "Day 53 strict continuity signal is missing.",
+    "Contributor activation contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Re-run Day 53 docs-loop closeout command and restore strict baseline before Day 55 lock."
+    "Re-run Day 53 docs-loop closeout command and restore strict baseline before Day 55 lock.",
+    "Complete all Day 55 contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }

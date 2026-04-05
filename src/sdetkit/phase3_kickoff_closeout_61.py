@@ -111,7 +111,7 @@ Day 61 weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 60 continuity and strict baseline carryover: 35 points.
+- Phase2-wrap-handoff continuity and strict baseline carryover: 35 points.
 - Phase-3 kickoff contract lock + delivery board readiness: 15 points.
 """
 
@@ -130,7 +130,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day60(path: Path) -> tuple[int, bool, int]:
+def _load_phase2_wrap_handoff_summary(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -156,10 +156,10 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
 
-    day60_summary = root / _DAY60_SUMMARY_PATH
-    day60_board = root / _DAY60_BOARD_PATH
-    day60_score, day60_strict, day60_check_count = _load_day60(day60_summary)
-    board_count, board_has_day60 = _count_board_items(day60_board, "Day 60")
+    phase2_wrap_handoff_summary = root / _DAY60_SUMMARY_PATH
+    phase2_wrap_handoff_board = root / _DAY60_BOARD_PATH
+    phase2_wrap_handoff_score, phase2_wrap_handoff_strict, phase2_wrap_handoff_check_count = _load_phase2_wrap_handoff_summary(phase2_wrap_handoff_summary)
+    board_count, board_has_phase2_wrap_handoff_day60 = _count_board_items(phase2_wrap_handoff_board, "Day 60")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -190,32 +190,32 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 61 + Day 62 strategy chain",
         },
         {
-            "check_id": "day60_summary_present",
+            "check_id": "phase2_wrap_handoff_summary_present",
             "weight": 10,
-            "passed": day60_summary.exists(),
-            "evidence": str(day60_summary),
+            "passed": phase2_wrap_handoff_summary.exists(),
+            "evidence": str(phase2_wrap_handoff_summary),
         },
         {
-            "check_id": "day60_delivery_board_present",
+            "check_id": "phase2_wrap_handoff_delivery_board_present",
             "weight": 8,
-            "passed": day60_board.exists(),
-            "evidence": str(day60_board),
+            "passed": phase2_wrap_handoff_board.exists(),
+            "evidence": str(phase2_wrap_handoff_board),
         },
         {
-            "check_id": "day60_quality_floor",
+            "check_id": "phase2_wrap_handoff_quality_floor",
             "weight": 15,
-            "passed": day60_strict and day60_score >= 95,
+            "passed": phase2_wrap_handoff_strict and phase2_wrap_handoff_score >= 95,
             "evidence": {
-                "day60_score": day60_score,
-                "strict_pass": day60_strict,
-                "day60_checks": day60_check_count,
+                "phase2_wrap_handoff_score": phase2_wrap_handoff_score,
+                "strict_pass": phase2_wrap_handoff_strict,
+                "phase2_wrap_handoff_checks": phase2_wrap_handoff_check_count,
             },
         },
         {
-            "check_id": "day60_board_integrity",
+            "check_id": "phase2_wrap_handoff_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day60,
-            "evidence": {"board_items": board_count, "contains_day60": board_has_day60},
+            "passed": board_count >= 5 and board_has_phase2_wrap_handoff_day60,
+            "evidence": {"board_items": board_count, "contains_phase2_wrap_handoff_day60": board_has_phase2_wrap_handoff_day60},
         },
         {
             "check_id": "page_header",
@@ -257,24 +257,24 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day60_summary.exists() or not day60_board.exists():
-        critical_failures.append("day60_handoff_inputs")
-    if not day60_strict:
-        critical_failures.append("day60_strict_baseline")
+    if not phase2_wrap_handoff_summary.exists() or not phase2_wrap_handoff_board.exists():
+        critical_failures.append("phase2_wrap_handoff_handoff_inputs")
+    if not phase2_wrap_handoff_strict:
+        critical_failures.append("phase2_wrap_handoff_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day60_strict:
-        wins.append(f"Day 60 continuity is strict-pass with activation score={day60_score}.")
+    if phase2_wrap_handoff_strict:
+        wins.append(f"Phase2-wrap-handoff continuity is strict-pass with activation score={phase2_wrap_handoff_score}.")
     else:
         misses.append("Day 60 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 60 Phase-2 wrap + handoff closeout command and restore strict baseline before Day 61 lock."
         )
 
-    if board_count >= 5 and board_has_day60:
+    if board_count >= 5 and board_has_phase2_wrap_handoff_day60:
         wins.append(
             f"Day 60 delivery board integrity validated with {board_count} checklist items."
         )
@@ -307,18 +307,18 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day60_summary": str(day60_summary.relative_to(root))
-            if day60_summary.exists()
-            else str(day60_summary),
-            "day60_delivery_board": str(day60_board.relative_to(root))
-            if day60_board.exists()
-            else str(day60_board),
+            "phase2_wrap_handoff_summary": str(phase2_wrap_handoff_summary.relative_to(root))
+            if phase2_wrap_handoff_summary.exists()
+            else str(phase2_wrap_handoff_summary),
+            "phase2_wrap_handoff_delivery_board": str(phase2_wrap_handoff_board.relative_to(root))
+            if phase2_wrap_handoff_board.exists()
+            else str(phase2_wrap_handoff_board),
         },
         "checks": checks,
         "rollup": {
-            "day60_activation_score": day60_score,
-            "day60_checks": day60_check_count,
-            "day60_delivery_board_items": board_count,
+            "phase2_wrap_handoff_activation_score": phase2_wrap_handoff_score,
+            "phase2_wrap_handoff_checks": phase2_wrap_handoff_check_count,
+            "phase2_wrap_handoff_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

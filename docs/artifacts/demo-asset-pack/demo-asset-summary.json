@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-demo-asset.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day32_summary": "docs/artifacts/release-cadence-pack/release-cadence-summary.json",
-    "day32_delivery_board": "docs/artifacts/release-cadence-pack/release-delivery-board.md"
+    "release_cadence_summary": "docs/artifacts/release-cadence-pack/release-cadence-summary.json",
+    "release_cadence_delivery_board": "docs/artifacts/release-cadence-pack/release-delivery-board.md"
   },
   "checks": [
     {
@@ -18,9 +18,15 @@
     {
       "check_id": "required_sections_present",
       "weight": 10,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "missing_sections": []
+        "missing_sections": [
+          "# Day 33 \u2014 Demo asset #1 production",
+          "## Why Day 33 matters",
+          "## Required inputs (Day 32)",
+          "## Day 33 command lane",
+          "## Day 33 delivery board"
+        ]
       }
     },
     {
@@ -32,31 +38,31 @@
       }
     },
     {
-      "check_id": "readme_integration_link",
+      "check_id": "readme_demo_asset_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-demo-asset.md"
     },
     {
-      "check_id": "readme_command_lane",
+      "check_id": "readme_demo_asset_command",
       "weight": 4,
       "passed": false,
       "evidence": "demo-asset"
     },
     {
-      "check_id": "docs_index_links",
+      "check_id": "docs_index_demo_asset_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-33-ultra-upgrade-report.md + integrations-demo-asset.md"
     },
     {
-      "check_id": "top10_strategy_alignment",
+      "check_id": "top10_demo_asset_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Day 33 + Day 34 strategy chain"
     },
     {
-      "check_id": "day32_summary_present",
+      "check_id": "release_cadence_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -65,7 +71,7 @@
       }
     },
     {
-      "check_id": "day32_delivery_board_present",
+      "check_id": "release_cadence_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -74,23 +80,23 @@
       }
     },
     {
-      "check_id": "day32_quality_floor",
+      "check_id": "release_cadence_quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day32_score": 65.0,
+        "release_cadence_score": 65.0,
         "strict_pass": false,
-        "day32_checks": 14
+        "release_cadence_checks": 14
       }
     },
     {
-      "check_id": "day32_board_integrity",
+      "check_id": "release_cadence_board_integrity",
       "weight": 7,
-      "passed": true,
+      "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_day33": true,
-        "contains_day34": true
+        "contains_demo_asset_day33": false,
+        "contains_demo_asset_day34": false
       }
     },
     {
@@ -112,34 +118,41 @@
     {
       "check_id": "delivery_board_locked",
       "weight": 2,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "missing_board_items": []
+        "missing_board_items": [
+          "- [ ] Day 33 script draft committed",
+          "- [ ] Day 33 first cut rendered",
+          "- [ ] Day 33 final cut + caption copy approved",
+          "- [ ] Day 34 demo asset #2 backlog pre-scoped",
+          "- [ ] Day 35 KPI instrumentation plan updated"
+        ]
       }
     }
   ],
   "rollup": {
-    "day32_activation_score": 65.0,
-    "day32_checks": 14,
-    "day32_delivery_board_items": 5
+    "release_cadence_activation_score": 65.0,
+    "release_cadence_checks": 14,
+    "release_cadence_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 65,
-    "passed_checks": 9,
-    "failed_checks": 5,
+    "activation_score": 46,
+    "passed_checks": 6,
+    "failed_checks": 8,
     "critical_failures": [
-      "day32_strict_baseline"
+      "release_cadence_strict_baseline"
     ],
     "strict_pass": false
   },
-  "wins": [
-    "Day 32 delivery board integrity validated with 5 checklist items.",
-    "Demo production contract + quality checklist is fully locked for execution."
-  ],
+  "wins": [],
   "misses": [
-    "Day 32 strict continuity signal is missing."
+    "Day 32 strict continuity signal is missing.",
+    "Day 32 delivery board integrity is incomplete (needs >=5 items and Day 33/34 anchors).",
+    "Demo contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Re-run Day 32 cadence command and restore strict pass baseline before demo lock."
+    "Re-run Day 32 cadence command and restore strict pass baseline before demo lock.",
+    "Repair Day 32 delivery board entries to include Day 33 and Day 34 anchors.",
+    "Complete all Day 33 contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }
