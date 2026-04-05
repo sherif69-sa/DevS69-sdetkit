@@ -10,7 +10,7 @@ from sdetkit import trust_assets as tsu
 def _write_trust_assets_page(root: Path) -> None:
     path = root / "docs/trust-assets.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(tsu._DAY22_DEFAULT_PAGE, encoding="utf-8")
+    path.write_text(tsu._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
 
 def _write_repo_basics(root: Path, *, include_policy_link: bool = True) -> None:

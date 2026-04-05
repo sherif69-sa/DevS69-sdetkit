@@ -33,7 +33,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_objection_handling_contract.py --skip-evidence",
 ]
 
-_DAY23_DEFAULT_PAGE = """# FAQ and objections
+_DEFAULT_PAGE_TEMPLATE = """# FAQ and objections
 
 Objection handling turns recurring adoption blockers into deterministic answers that teams can validate before launches.
 
@@ -411,7 +411,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 
 def _write_default_page(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(_DAY23_DEFAULT_PAGE, encoding="utf-8")
+    path.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
 
 def build_parser() -> argparse.ArgumentParser:

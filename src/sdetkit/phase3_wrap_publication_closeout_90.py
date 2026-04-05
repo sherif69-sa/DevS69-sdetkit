@@ -71,7 +71,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY90_DEFAULT_PAGE = """# Day 90 \u2014 Phase-3 wrap publication closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 90 \u2014 Phase-3 wrap publication closeout lane
 
 Day 90 closes with a major upgrade that converts Day 89 governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.
 
@@ -154,12 +154,16 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
 
     governance_scale_data = _load_json(governance_scale_summary)
     governance_scale_summary_data = (
-        governance_scale_data.get("summary", {}) if isinstance(governance_scale_data.get("summary"), dict) else {}
+        governance_scale_data.get("summary", {})
+        if isinstance(governance_scale_data.get("summary"), dict)
+        else {}
     )
     governance_scale_score = int(governance_scale_summary_data.get("activation_score", 0) or 0)
     governance_scale_strict = bool(governance_scale_summary_data.get("strict_pass", False))
     governance_scale_check_count = (
-        len(governance_scale_data.get("checks", [])) if isinstance(governance_scale_data.get("checks"), list) else 0
+        len(governance_scale_data.get("checks", []))
+        if isinstance(governance_scale_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(governance_scale_board)
@@ -223,7 +227,10 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
             "check_id": "governance_scale_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_governance_scale,
-            "evidence": {"board_items": board_count, "contains_governance_scale": board_has_governance_scale},
+            "evidence": {
+                "board_items": board_count,
+                "contains_governance_scale": board_has_governance_scale,
+            },
         },
         {
             "check_id": "page_header",
@@ -279,7 +286,9 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
     handoff_actions: list[str] = []
 
     if governance_scale_score >= 85 and governance_scale_strict:
-        wins.append(f"Day 89 continuity baseline is stable with activation score={governance_scale_score}.")
+        wins.append(
+            f"Day 89 continuity baseline is stable with activation score={governance_scale_score}."
+        )
     else:
         misses.append("Day 89 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -438,7 +447,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY90_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase3_wrap_publication_closeout_summary(root)
 

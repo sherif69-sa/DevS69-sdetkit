@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 54 re-engagement priorities drafted from Day 53 learnings",
 ]
 
-_DAY53_DEFAULT_PAGE = """# Day 53 \u2014 Docs loop optimization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 53 \u2014 Docs loop optimization closeout lane
 
 Day 53 closes with a major docs loop optimization upgrade that converts Day 52 narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
 
@@ -176,8 +176,12 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     narrative_closeout_summary = narrative_closeout_summary_primary
     narrative_closeout_board_primary = root / _DAY52_BOARD_PATH
     narrative_closeout_board = narrative_closeout_board_primary
-    narrative_closeout_score, narrative_closeout_strict, narrative_closeout_check_count = _load_narrative_closeout_summary(narrative_closeout_summary)
-    board_count, board_has_narrative_closeout_day52, board_has_docs_loop_day53 = _board_stats(narrative_closeout_board)
+    narrative_closeout_score, narrative_closeout_strict, narrative_closeout_check_count = (
+        _load_narrative_closeout_summary(narrative_closeout_summary)
+    )
+    board_count, board_has_narrative_closeout_day52, board_has_docs_loop_day53 = _board_stats(
+        narrative_closeout_board
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -229,13 +233,19 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "narrative_closeout_summary_present",
             "weight": 10,
             "passed": narrative_closeout_summary.exists(),
-            "evidence": {"resolved": str(narrative_closeout_summary), "primary": str(narrative_closeout_summary_primary)},
+            "evidence": {
+                "resolved": str(narrative_closeout_summary),
+                "primary": str(narrative_closeout_summary_primary),
+            },
         },
         {
             "check_id": "narrative_closeout_delivery_board_present",
             "weight": 8,
             "passed": narrative_closeout_board.exists(),
-            "evidence": {"resolved": str(narrative_closeout_board), "primary": str(narrative_closeout_board_primary)},
+            "evidence": {
+                "resolved": str(narrative_closeout_board),
+                "primary": str(narrative_closeout_board_primary),
+            },
         },
         {
             "check_id": "narrative_closeout_quality_floor",
@@ -250,7 +260,9 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "narrative_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_narrative_closeout_day52 and board_has_docs_loop_day53,
+            "passed": board_count >= 5
+            and board_has_narrative_closeout_day52
+            and board_has_docs_loop_day53,
             "evidence": {
                 "board_items": board_count,
                 "contains_narrative_closeout_day52": board_has_narrative_closeout_day52,
@@ -290,7 +302,9 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if narrative_closeout_strict:
-        wins.append(f"Narrative-closeout continuity is strict-pass with activation score={narrative_closeout_score}.")
+        wins.append(
+            f"Narrative-closeout continuity is strict-pass with activation score={narrative_closeout_score}."
+        )
     else:
         misses.append("Day 52 strict continuity signal is missing.")
         handoff_actions.append(
@@ -334,11 +348,15 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "narrative_closeout_summary": str(narrative_closeout_summary.relative_to(root))
             if narrative_closeout_summary.exists()
             else str(narrative_closeout_summary),
-            "narrative_closeout_summary_primary": str(narrative_closeout_summary_primary.relative_to(root)),
+            "narrative_closeout_summary_primary": str(
+                narrative_closeout_summary_primary.relative_to(root)
+            ),
             "narrative_closeout_delivery_board": str(narrative_closeout_board.relative_to(root))
             if narrative_closeout_board.exists()
             else str(narrative_closeout_board),
-            "narrative_closeout_delivery_board_primary": str(narrative_closeout_board_primary.relative_to(root)),
+            "narrative_closeout_delivery_board_primary": str(
+                narrative_closeout_board_primary.relative_to(root)
+            ),
         },
         "checks": checks,
         "rollup": {
@@ -457,9 +475,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Docs Loop Closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="Docs Loop Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -482,7 +498,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY53_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_docs_loop_closeout_summary(root)
 

@@ -34,7 +34,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-partner-outreach-closeout.md").write_text(
-        d80._DAY80_DEFAULT_PAGE,
+        d80._DEFAULT_PAGE_TEMPLATE,
         encoding="utf-8",
     )
     summary = (

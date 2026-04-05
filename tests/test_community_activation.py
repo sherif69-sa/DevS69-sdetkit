@@ -18,7 +18,7 @@ def _seed(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-community-activation.md").write_text(
-        ca._DAY25_DEFAULT_PAGE, encoding="utf-8"
+        ca._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
 
 

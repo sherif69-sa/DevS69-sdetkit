@@ -34,7 +34,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 34 — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-demo-asset.md").write_text(d33._DAY33_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-demo-asset.md").write_text(
+        d33._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
     (root / "docs/impact-33-ultra-upgrade-report.md").write_text(
         "# Day 33 report\n", encoding="utf-8"
     )

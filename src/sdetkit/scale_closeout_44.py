@@ -10,9 +10,13 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-scale-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY43_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json"
+_DAY43_SUMMARY_PATH = (
+    "docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json"
+)
 _DAY43_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md"
-_DAY43_LEGACY_SUMMARY_PATH = "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
+_DAY43_LEGACY_SUMMARY_PATH = (
+    "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
+)
 _DAY43_LEGACY_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/delivery-board.md"
 _SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
 _REQUIRED_SECTIONS = [
@@ -56,7 +60,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 45 expansion priorities drafted from Day 44 learnings",
 ]
 
-_DAY44_DEFAULT_PAGE = """# Day 44 \u2014 Scale closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 44 \u2014 Scale closeout lane
 
 This lane closes with a major scale upgrade that converts acceleration evidence into deterministic improvement loops.
 
@@ -477,7 +481,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY44_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_scale_closeout_summary(root)
 

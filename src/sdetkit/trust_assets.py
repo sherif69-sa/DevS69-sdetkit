@@ -33,7 +33,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_trust_assets_contract.py --skip-evidence",
 ]
 
-_DAY22_DEFAULT_PAGE = """# Trust assets
+_DEFAULT_PAGE_TEMPLATE = """# Trust assets
 
 Trust assets tightens trust posture visibility by keeping reliability badges and policy docs obvious for new adopters.
 
@@ -474,7 +474,7 @@ def main(argv: list[str] | None = None) -> int:
     page = root / _PAGE_PATH
     if ns.write_defaults:
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(_DAY22_DEFAULT_PAGE, encoding="utf-8")
+        page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     page_text = _read(page)
     missing_sections = [

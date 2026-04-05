@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY74_DEFAULT_PAGE = """# Day 74 \u2014 Distribution scaling closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 74 \u2014 Distribution scaling closeout lane
 
 Day 74 closes with a major upgrade that turns Day 73 published case-study outcomes into a scalable distribution execution pack with governance safeguards.
 
@@ -164,7 +164,9 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
 
     prior_closeout_summary = root / _DAY73_SUMMARY_PATH
     prior_closeout_board = root / _DAY73_BOARD_PATH
-    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(prior_closeout_summary)
+    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
+        prior_closeout_summary
+    )
     board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 73")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -225,7 +227,10 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "prior_closeout_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_prior_closeout,
-            "evidence": {"board_items": board_count, "contains_prior_closeout": board_has_prior_closeout},
+            "evidence": {
+                "board_items": board_count,
+                "contains_prior_closeout": board_has_prior_closeout,
+            },
         },
         {
             "check_id": "page_header",
@@ -283,7 +288,9 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if prior_closeout_strict:
-        wins.append(f"Day 73 continuity is strict-pass with activation score={prior_closeout_score}.")
+        wins.append(
+            f"Day 73 continuity is strict-pass with activation score={prior_closeout_score}."
+        )
     else:
         misses.append("Day 73 strict continuity signal is missing.")
         handoff_actions.append(
@@ -433,7 +440,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY74_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_distribution_scaling_closeout_summary(root)
 

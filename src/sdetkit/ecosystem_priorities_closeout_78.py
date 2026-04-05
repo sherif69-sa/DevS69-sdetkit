@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY78_DEFAULT_PAGE = """# Ecosystem priorities closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Ecosystem priorities closeout lane
 
 Day 78 closes with a major upgrade that converts Day 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
 
@@ -161,8 +161,12 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
 
     community_touchpoint_summary = root / _DAY77_SUMMARY_PATH
     community_touchpoint_board = root / _DAY77_BOARD_PATH
-    community_touchpoint_score, community_touchpoint_strict, community_touchpoint_check_count = _load_community_touchpoint(community_touchpoint_summary)
-    board_count, board_has_community_touchpoint = _count_board_items(community_touchpoint_board, "Day 77")
+    community_touchpoint_score, community_touchpoint_strict, community_touchpoint_check_count = (
+        _load_community_touchpoint(community_touchpoint_summary)
+    )
+    board_count, board_has_community_touchpoint = _count_board_items(
+        community_touchpoint_board, "Day 77"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -219,7 +223,10 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "community_touchpoint_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_community_touchpoint,
-            "evidence": {"board_items": board_count, "contains_community_touchpoint": board_has_community_touchpoint},
+            "evidence": {
+                "board_items": board_count,
+                "contains_community_touchpoint": board_has_community_touchpoint,
+            },
         },
         {
             "check_id": "page_header",
@@ -435,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY78_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_ecosystem_priorities_closeout_summary(root)
 

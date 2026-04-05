@@ -34,7 +34,9 @@ def _seed_repo(root: Path) -> None:
         "- **Day 41 — Expansion lane kickoff:** convert Day 40 outcomes into repeatable automation.\n",
         encoding="utf-8",
     )
-    (root / "docs/integrations-scale-lane.md").write_text(d40._DAY40_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/integrations-scale-lane.md").write_text(
+        d40._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
     (root / "docs/impact-40-big-upgrade-report.md").write_text(
         "# Day 40 report\n", encoding="utf-8"
     )

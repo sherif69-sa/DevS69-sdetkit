@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY72_DEFAULT_PAGE = """# Day 72 \u2014 Case-study prep #4 closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 72 \u2014 Case-study prep #4 closeout lane
 
 Day 72 closes with a major upgrade that turns Day 71 escalation-quality outputs into a measurable publication-quality case-study launch pack.
 
@@ -164,7 +164,9 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
 
     prior_closeout_summary = root / _DAY71_SUMMARY_PATH
     prior_closeout_board = root / _DAY71_BOARD_PATH
-    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(prior_closeout_summary)
+    prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
+        prior_closeout_summary
+    )
     board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 71")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -233,7 +235,10 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "prior_closeout_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_prior_closeout,
-            "evidence": {"board_items": board_count, "contains_prior_closeout": board_has_prior_closeout},
+            "evidence": {
+                "board_items": board_count,
+                "contains_prior_closeout": board_has_prior_closeout,
+            },
         },
         {
             "check_id": "page_header",
@@ -299,7 +304,9 @@ def build_case_study_prep4_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if prior_closeout_strict:
-        wins.append(f"Day 71 continuity is strict-pass with activation score={prior_closeout_score}.")
+        wins.append(
+            f"Day 71 continuity is strict-pass with activation score={prior_closeout_score}."
+        )
     else:
         misses.append("Day 71 strict continuity signal is missing.")
         handoff_actions.append(
@@ -449,7 +456,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY72_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_case_study_prep4_closeout_summary(root)
 

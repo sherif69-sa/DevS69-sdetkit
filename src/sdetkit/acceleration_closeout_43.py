@@ -10,7 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-acceleration-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_DAY42_SUMMARY_PATH = "docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json"
+_DAY42_SUMMARY_PATH = (
+    "docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json"
+)
 _DAY42_BOARD_PATH = "docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md"
 _DAY42_LEGACY_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
 _DAY42_LEGACY_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
@@ -56,7 +58,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 44 scale priorities drafted from Day 43 learnings",
 ]
 
-_DAY43_DEFAULT_PAGE = """# Day 43 \u2014 Acceleration closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 43 \u2014 Acceleration closeout lane
 
 This lane closes with a major acceleration upgrade that converts optimization evidence into deterministic improvement loops.
 
@@ -483,7 +485,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY43_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_acceleration_closeout_summary(root)
 

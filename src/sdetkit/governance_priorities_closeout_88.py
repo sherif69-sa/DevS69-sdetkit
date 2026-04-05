@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY88_DEFAULT_PAGE = """# Day 88 \u2014 Governance priorities closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 88 \u2014 Governance priorities closeout lane
 
 Day 88 closes with a major upgrade that converts Day 87 governance handoff outcomes into a deterministic governance priorities operating lane.
 
@@ -150,12 +150,16 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
 
     governance_handoff_data = _load_json(governance_handoff_summary)
     governance_handoff_summary_data = (
-        governance_handoff_data.get("summary", {}) if isinstance(governance_handoff_data.get("summary"), dict) else {}
+        governance_handoff_data.get("summary", {})
+        if isinstance(governance_handoff_data.get("summary"), dict)
+        else {}
     )
     governance_handoff_score = int(governance_handoff_summary_data.get("activation_score", 0) or 0)
     governance_handoff_strict = bool(governance_handoff_summary_data.get("strict_pass", False))
     governance_handoff_check_count = (
-        len(governance_handoff_data.get("checks", [])) if isinstance(governance_handoff_data.get("checks"), list) else 0
+        len(governance_handoff_data.get("checks", []))
+        if isinstance(governance_handoff_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(governance_handoff_board)
@@ -219,7 +223,10 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "governance_handoff_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_governance_handoff,
-            "evidence": {"board_items": board_count, "contains_governance_handoff": board_has_governance_handoff},
+            "evidence": {
+                "board_items": board_count,
+                "contains_governance_handoff": board_has_governance_handoff,
+            },
         },
         {
             "check_id": "page_header",
@@ -275,7 +282,9 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if governance_handoff_score >= 85 and governance_handoff_strict:
-        wins.append(f"Governance handoff continuity baseline is stable with activation score={governance_handoff_score}.")
+        wins.append(
+            f"Governance handoff continuity baseline is stable with activation score={governance_handoff_score}."
+        )
     else:
         misses.append("Day 87 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -431,7 +440,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY88_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_governance_priorities_closeout_summary(root)
 

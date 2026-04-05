@@ -20,7 +20,9 @@ def main() -> int:
     ]
     missing = [str(path.relative_to(ROOT)) for path in required if not path.exists()]
     if missing:
-        print(f"Missing Cycle 14 weekly-review contract files: {', '.join(missing)}", file=sys.stderr)
+        print(
+            f"Missing Cycle 14 weekly-review contract files: {', '.join(missing)}", file=sys.stderr
+        )
         return 1
 
     weekly = (ROOT / "src/sdetkit/weekly_review.py").read_text(encoding="utf-8")

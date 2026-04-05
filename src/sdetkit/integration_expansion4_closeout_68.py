@@ -65,7 +65,7 @@ _REQUIRED_REFERENCE_LINES = [
     "when:",
 ]
 
-_DAY68_DEFAULT_PAGE = """# Day 68 \u2014 Integration expansion #4 closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 68 \u2014 Integration expansion #4 closeout lane
 
 Day 68 closes with a major integration upgrade that converts Day 67 outputs into a self-hosted enterprise Tekton reference.
 
@@ -168,8 +168,14 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
 
     integration_expansion3_summary = root / _INTEGRATION_EXPANSION3_SUMMARY_PATH
     integration_expansion3_board = root / _INTEGRATION_EXPANSION3_BOARD_PATH
-    integration_expansion3_score, integration_expansion3_strict, integration_expansion3_check_count = _load_integration_expansion3(integration_expansion3_summary)
-    board_count, board_has_integration_expansion3 = _count_board_items(integration_expansion3_board, "Day 67")
+    (
+        integration_expansion3_score,
+        integration_expansion3_strict,
+        integration_expansion3_check_count,
+    ) = _load_integration_expansion3(integration_expansion3_summary)
+    board_count, board_has_integration_expansion3 = _count_board_items(
+        integration_expansion3_board, "Day 67"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -226,7 +232,10 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "integration_expansion3_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_integration_expansion3,
-            "evidence": {"board_items": board_count, "contains_integration_expansion3": board_has_integration_expansion3},
+            "evidence": {
+                "board_items": board_count,
+                "contains_integration_expansion3": board_has_integration_expansion3,
+            },
         },
         {
             "check_id": "page_header",
@@ -284,7 +293,9 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if integration_expansion3_strict:
-        wins.append(f"Day 67 continuity is strict-pass with activation score={integration_expansion3_score}.")
+        wins.append(
+            f"Day 67 continuity is strict-pass with activation score={integration_expansion3_score}."
+        )
     else:
         misses.append("Day 67 strict continuity signal is missing.")
         handoff_actions.append(
@@ -327,7 +338,9 @@ def build_integration_expansion4_closeout_summary(root: Path) -> dict[str, Any]:
             "integration_expansion3_summary": str(integration_expansion3_summary.relative_to(root))
             if integration_expansion3_summary.exists()
             else str(integration_expansion3_summary),
-            "integration_expansion3_delivery_board": str(integration_expansion3_board.relative_to(root))
+            "integration_expansion3_delivery_board": str(
+                integration_expansion3_board.relative_to(root)
+            )
             if integration_expansion3_board.exists()
             else str(integration_expansion3_board),
             "self_hosted_reference": str(reference_path.relative_to(root))
@@ -441,7 +454,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY68_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_integration_expansion4_closeout_summary(root)
 

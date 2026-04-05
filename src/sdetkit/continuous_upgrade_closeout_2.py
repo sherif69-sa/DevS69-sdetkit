@@ -13,6 +13,8 @@ _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CYCLE1_SUMMARY_PATH = (
     "docs/artifacts/continuous-upgrade-closeout-pack-1/continuous-upgrade-closeout-summary-1.json"
 )
+
+__all__ = ["_DEFAULT_PAGE_TEMPLATE"]
 _CYCLE1_BOARD_PATH = (
     "docs/artifacts/continuous-upgrade-closeout-pack-1/continuous-upgrade-delivery-board-1.md"
 )
@@ -124,7 +126,8 @@ Cycle 2 weights continuity + execution contract + governance artifact readiness 
 """
 
 # Backward-compatible alias retained for transition-era imports.
-_DAY92_DEFAULT_PAGE = _CYCLE2_DEFAULT_PAGE
+_unused_default_page_template_alias = _CYCLE2_DEFAULT_PAGE
+_DEFAULT_PAGE_TEMPLATE = _unused_default_page_template_alias
 
 
 def _read_text(path: Path) -> str:

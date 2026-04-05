@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
         "# Weekly review #4 (Day 28)\n", encoding="utf-8"
     )
     (root / "docs/integrations-phase1-hardening.md").write_text(
-        d29._DAY29_DEFAULT_PAGE, encoding="utf-8"
+        d29._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-29-ultra-upgrade-report.md").write_text(
         "# Day 29 report\n", encoding="utf-8"

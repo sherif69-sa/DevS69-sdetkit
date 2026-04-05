@@ -27,7 +27,7 @@ def _write_release_summary(path: Path, gate_status: str = "pass", score: float =
 def _write_release_communications_page(root: Path) -> None:
     path = root / "docs/release-communications.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(rn._DAY20_DEFAULT_PAGE, encoding="utf-8")
+    path.write_text(rn._DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
 
 def test_release_communications_json(tmp_path: Path, capsys) -> None:

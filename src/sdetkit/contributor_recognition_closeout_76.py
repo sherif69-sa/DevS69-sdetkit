@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY76_DEFAULT_PAGE = """# Day 76 \u2014 Contributor recognition closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 76 \u2014 Contributor recognition closeout lane
 
 Day 76 closes with a major upgrade that converts Day 75 trust refresh outcomes into a contributor-recognition execution pack.
 
@@ -161,8 +161,12 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
 
     trust_assets_refresh_summary = root / _DAY75_SUMMARY_PATH
     trust_assets_refresh_board = root / _DAY75_BOARD_PATH
-    trust_assets_refresh_score, trust_assets_refresh_strict, trust_assets_refresh_check_count = _load_trust_assets_refresh(trust_assets_refresh_summary)
-    board_count, board_has_trust_assets_refresh = _count_board_items(trust_assets_refresh_board, "Day 75")
+    trust_assets_refresh_score, trust_assets_refresh_strict, trust_assets_refresh_check_count = (
+        _load_trust_assets_refresh(trust_assets_refresh_summary)
+    )
+    board_count, board_has_trust_assets_refresh = _count_board_items(
+        trust_assets_refresh_board, "Day 75"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -222,7 +226,10 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
             "check_id": "trust_assets_refresh_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_trust_assets_refresh,
-            "evidence": {"board_items": board_count, "contains_trust_assets_refresh": board_has_trust_assets_refresh},
+            "evidence": {
+                "board_items": board_count,
+                "contains_trust_assets_refresh": board_has_trust_assets_refresh,
+            },
         },
         {
             "check_id": "page_header",
@@ -280,7 +287,9 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
     handoff_actions: list[str] = []
 
     if trust_assets_refresh_strict:
-        wins.append(f"Day 75 continuity is strict-pass with activation score={trust_assets_refresh_score}.")
+        wins.append(
+            f"Day 75 continuity is strict-pass with activation score={trust_assets_refresh_score}."
+        )
     else:
         misses.append("Day 75 strict continuity signal is missing.")
         handoff_actions.append(
@@ -430,7 +439,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY76_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_contributor_recognition_closeout_summary(root)
 

@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY81_DEFAULT_PAGE = """# Day 81 \u2014 Growth campaign closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 81 \u2014 Growth campaign closeout lane
 
 Day 81 closes with a major upgrade that converts Day 80 partner outreach outcomes into a growth-campaign execution pack.
 
@@ -155,13 +155,17 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
     partner_outreach_board = root / _DAY80_BOARD_PATH
 
     partner_outreach_payload = _load_json(partner_outreach_summary)
-    partner_outreach_score = int(partner_outreach_payload.get("summary", {}).get("activation_score", 0) or 0)
-    partner_outreach_strict = bool(partner_outreach_payload.get("summary", {}).get("strict_pass", False))
+    partner_outreach_score = int(
+        partner_outreach_payload.get("summary", {}).get("activation_score", 0) or 0
+    )
+    partner_outreach_strict = bool(
+        partner_outreach_payload.get("summary", {}).get("strict_pass", False)
+    )
     partner_outreach_check_count = len(partner_outreach_payload.get("checks", []))
 
     board_text = _read_text(partner_outreach_board)
     board_count = _checklist_count(board_text)
-    board_has_partner_outreach = ("partner outreach" in board_text.lower() or "Day 80" in board_text)
+    board_has_partner_outreach = "partner outreach" in board_text.lower() or "Day 80" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -220,7 +224,10 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "partner_outreach_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_partner_outreach,
-            "evidence": {"board_items": board_count, "contains_partner_outreach": board_has_partner_outreach},
+            "evidence": {
+                "board_items": board_count,
+                "contains_partner_outreach": board_has_partner_outreach,
+            },
         },
         {
             "check_id": "page_header",
@@ -276,7 +283,9 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if partner_outreach_score >= 85:
-        wins.append(f"Partner Outreach continuity baseline is stable with activation score={partner_outreach_score}.")
+        wins.append(
+            f"Partner Outreach continuity baseline is stable with activation score={partner_outreach_score}."
+        )
     else:
         misses.append("Day 80 continuity baseline is below the floor (<85).")
         handoff_actions.append(
@@ -423,7 +432,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY81_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_growth_campaign_closeout_summary(root)
 

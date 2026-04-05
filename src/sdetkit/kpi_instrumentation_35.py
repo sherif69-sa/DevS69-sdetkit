@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 37 experiment backlog seeded from KPI misses",
 ]
 
-_DAY35_DEFAULT_PAGE = """# Day 35 \u2014 KPI instrumentation closeout
+_DEFAULT_PAGE_TEMPLATE = """# Day 35 \u2014 KPI instrumentation closeout
 
 Day 35 closes the instrumentation lane by converting demo activity into measurable weekly signals and next-week actions.
 
@@ -490,7 +490,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY35_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_kpi_instrumentation_summary_impl(root)
 

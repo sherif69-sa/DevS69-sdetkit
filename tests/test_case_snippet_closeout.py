@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-case-snippet-closeout.md").write_text(
-        d51._DAY51_DEFAULT_PAGE, encoding="utf-8"
+        d51._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-51-big-upgrade-report.md").write_text(
         "# Cycle 51 report\n", encoding="utf-8"

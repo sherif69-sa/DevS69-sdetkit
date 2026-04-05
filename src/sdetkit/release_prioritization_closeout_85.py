@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY85_DEFAULT_PAGE = """# Day 85 \u2014 Release prioritization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 85 \u2014 Release prioritization closeout lane
 
 Day 85 closes with a major upgrade that converts Day 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
 
@@ -150,17 +150,23 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
 
     evidence_narrative_data = _load_json(evidence_narrative_summary)
     evidence_narrative_summary_data = (
-        evidence_narrative_data.get("summary", {}) if isinstance(evidence_narrative_data.get("summary"), dict) else {}
+        evidence_narrative_data.get("summary", {})
+        if isinstance(evidence_narrative_data.get("summary"), dict)
+        else {}
     )
     evidence_narrative_score = int(evidence_narrative_summary_data.get("activation_score", 0) or 0)
     evidence_narrative_strict = bool(evidence_narrative_summary_data.get("strict_pass", False))
     evidence_narrative_check_count = (
-        len(evidence_narrative_data.get("checks", [])) if isinstance(evidence_narrative_data.get("checks"), list) else 0
+        len(evidence_narrative_data.get("checks", []))
+        if isinstance(evidence_narrative_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(evidence_narrative_board)
     board_count = _checklist_count(board_text)
-    board_has_evidence_narrative = ("evidence narrative" in board_text.lower() or "Day 84" in board_text)
+    board_has_evidence_narrative = (
+        "evidence narrative" in board_text.lower() or "Day 84" in board_text
+    )
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -219,7 +225,10 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "evidence_narrative_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_evidence_narrative,
-            "evidence": {"board_items": board_count, "contains_evidence_narrative": board_has_evidence_narrative},
+            "evidence": {
+                "board_items": board_count,
+                "contains_evidence_narrative": board_has_evidence_narrative,
+            },
         },
         {
             "check_id": "page_header",
@@ -275,7 +284,9 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if evidence_narrative_score >= 85 and evidence_narrative_strict:
-        wins.append(f"Evidence Narrative continuity baseline is stable with activation score={evidence_narrative_score}.")
+        wins.append(
+            f"Evidence Narrative continuity baseline is stable with activation score={evidence_narrative_score}."
+        )
     else:
         misses.append("Day 84 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -432,7 +443,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY85_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_release_prioritization_closeout_summary(root)
 

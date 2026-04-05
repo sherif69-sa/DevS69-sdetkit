@@ -33,7 +33,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase1_wrap_contract.py --skip-evidence",
 ]
 
-_DAY30_DEFAULT_PAGE = """# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff
+_DEFAULT_PAGE_TEMPLATE = """# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff
 
 Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 execution backlog.
 
@@ -415,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY30_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase1_wrap_summary_impl(root)
 

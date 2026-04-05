@@ -39,7 +39,7 @@ _EXECUTION_COMMANDS = [
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
-_DAY29_DEFAULT_PAGE = """# Day 29 \u2014 Phase-1 hardening
+_DEFAULT_PAGE_TEMPLATE = """# Day 29 \u2014 Phase-1 hardening
 
 Day 29 closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.
 
@@ -321,7 +321,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY29_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase1_hardening_summary_impl(root)
 

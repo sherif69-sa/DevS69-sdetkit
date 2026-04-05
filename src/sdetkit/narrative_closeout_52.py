@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 53 expansion priorities drafted from Cycle 52 learnings",
 ]
 
-_DAY52_DEFAULT_PAGE = """# Cycle 52 \u2014 Narrative closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Cycle 52 \u2014 Narrative closeout lane
 
 Cycle 52 closes with a major narrative upgrade that converts Cycle 51 case-snippet evidence into a deterministic release-storytelling lane.
 
@@ -478,7 +478,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY52_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_narrative_closeout_summary(root)
 

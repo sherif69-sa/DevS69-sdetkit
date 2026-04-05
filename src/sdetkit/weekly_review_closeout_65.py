@@ -59,7 +59,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 66 integration expansion priorities drafted from Day 65 review",
 ]
 
-_DAY65_DEFAULT_PAGE = """# Day 65 \u2014 Weekly review #9 closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 65 \u2014 Weekly review #9 closeout lane
 
 Day 65 closes with a major weekly review upgrade that converts Day 64 integration execution evidence into strict KPI governance and a deterministic Day 66 handoff.
 
@@ -161,8 +161,12 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
     integration_expansion_summary = root / _INTEGRATION_EXPANSION_SUMMARY_PATH
     integration_expansion_board = root / _INTEGRATION_EXPANSION_BOARD_PATH
-    integration_expansion_score, integration_expansion_strict, integration_expansion_check_count = _load_integration_expansion(integration_expansion_summary)
-    board_count, board_has_integration_expansion = _count_board_items(integration_expansion_board, "Day 64")
+    integration_expansion_score, integration_expansion_strict, integration_expansion_check_count = (
+        _load_integration_expansion(integration_expansion_summary)
+    )
+    board_count, board_has_integration_expansion = _count_board_items(
+        integration_expansion_board, "Day 64"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -218,7 +222,10 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "integration_expansion_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_integration_expansion,
-            "evidence": {"board_items": board_count, "contains_integration_expansion": board_has_integration_expansion},
+            "evidence": {
+                "board_items": board_count,
+                "contains_integration_expansion": board_has_integration_expansion,
+            },
         },
         {
             "check_id": "page_header",
@@ -259,7 +266,8 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "integration_expansion_workflow_reference_present",
             "weight": 10,
-            "passed": "Day64 Advanced GitHub Actions Reference" in integration_expansion_workflow_text,
+            "passed": "Day64 Advanced GitHub Actions Reference"
+            in integration_expansion_workflow_text,
             "evidence": ".github/workflows/advanced-github-actions-reference-64.yml",
         },
     ]
@@ -276,7 +284,9 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if integration_expansion_strict:
-        wins.append(f"Day 64 continuity is strict-pass with activation score={integration_expansion_score}.")
+        wins.append(
+            f"Day 64 continuity is strict-pass with activation score={integration_expansion_score}."
+        )
     else:
         misses.append("Day 64 strict continuity signal is missing.")
         handoff_actions.append(
@@ -317,7 +327,9 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "integration_expansion_summary": str(integration_expansion_summary.relative_to(root))
             if integration_expansion_summary.exists()
             else str(integration_expansion_summary),
-            "integration_expansion_delivery_board": str(integration_expansion_board.relative_to(root))
+            "integration_expansion_delivery_board": str(
+                integration_expansion_board.relative_to(root)
+            )
             if integration_expansion_board.exists()
             else str(integration_expansion_board),
             "integration_expansion_workflow": _INTEGRATION_EXPANSION_WORKFLOW_PATH,
@@ -432,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY65_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_weekly_review_closeout_summary(root)
 

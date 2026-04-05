@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 58 execution priorities drafted from Day 57 learnings",
 ]
 
-_DAY57_DEFAULT_PAGE = """# Day 57 \u2014 KPI deep audit closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 57 \u2014 KPI deep audit closeout lane
 
 Day 57 closes with a major KPI deep-audit upgrade that turns Day 56 stabilization outcomes into deterministic trendline governance.
 
@@ -403,9 +403,7 @@ def build_kpi_deep_audit_closeout_summary_impl(root: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="KPI Deep Audit Closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="KPI Deep Audit Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -417,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY57_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_kpi_deep_audit_closeout_summary(root)
 

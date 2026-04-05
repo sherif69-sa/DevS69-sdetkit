@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-phase2-hardening-closeout.md").write_text(
-        d58._DAY58_DEFAULT_PAGE, encoding="utf-8"
+        d58._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-58-big-upgrade-report.md").write_text(
         "# Day 58 report\n", encoding="utf-8"

@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY84_DEFAULT_PAGE = """# Day 84 \u2014 Evidence narrative closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 84 \u2014 Evidence narrative closeout lane
 
 Day 84 closes with a major upgrade that converts Day 83 trust FAQ outcomes into a deterministic evidence narrative operating lane.
 
@@ -150,17 +150,25 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
 
     trust_faq_expansion_data = _load_json(trust_faq_expansion_summary)
     trust_faq_expansion_summary_data = (
-        trust_faq_expansion_data.get("summary", {}) if isinstance(trust_faq_expansion_data.get("summary"), dict) else {}
+        trust_faq_expansion_data.get("summary", {})
+        if isinstance(trust_faq_expansion_data.get("summary"), dict)
+        else {}
     )
-    trust_faq_expansion_score = int(trust_faq_expansion_summary_data.get("activation_score", 0) or 0)
+    trust_faq_expansion_score = int(
+        trust_faq_expansion_summary_data.get("activation_score", 0) or 0
+    )
     trust_faq_expansion_strict = bool(trust_faq_expansion_summary_data.get("strict_pass", False))
     trust_faq_expansion_check_count = (
-        len(trust_faq_expansion_data.get("checks", [])) if isinstance(trust_faq_expansion_data.get("checks"), list) else 0
+        len(trust_faq_expansion_data.get("checks", []))
+        if isinstance(trust_faq_expansion_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(trust_faq_expansion_board)
     board_count = _checklist_count(board_text)
-    board_has_trust_faq_expansion = ("trust faq expansion" in board_text.lower() or "Day 83" in board_text)
+    board_has_trust_faq_expansion = (
+        "trust faq expansion" in board_text.lower() or "Day 83" in board_text
+    )
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -219,7 +227,10 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "trust_faq_expansion_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_trust_faq_expansion,
-            "evidence": {"board_items": board_count, "contains_trust_faq_expansion": board_has_trust_faq_expansion},
+            "evidence": {
+                "board_items": board_count,
+                "contains_trust_faq_expansion": board_has_trust_faq_expansion,
+            },
         },
         {
             "check_id": "page_header",
@@ -275,7 +286,9 @@ def build_evidence_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if trust_faq_expansion_score >= 85 and trust_faq_expansion_strict:
-        wins.append(f"Trust Faq Expansion continuity baseline is stable with activation score={trust_faq_expansion_score}.")
+        wins.append(
+            f"Trust Faq Expansion continuity baseline is stable with activation score={trust_faq_expansion_score}."
+        )
     else:
         misses.append("Day 83 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -429,7 +442,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY84_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_evidence_narrative_closeout_summary(root)
 

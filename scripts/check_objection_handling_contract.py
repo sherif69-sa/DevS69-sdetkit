@@ -11,9 +11,7 @@ LANE_PAGE = Path("docs/objection-handling.md")
 LANE_REPORT = Path("docs/objection-handling-report.md")
 LANE_ARTIFACT = Path("docs/objection-handling.md")
 LANE_PACK_SUMMARY = Path("docs/artifacts/objection-handling-pack/objection-handling-summary.json")
-LANE_PACK_SCORECARD = Path(
-    "docs/artifacts/objection-handling-pack/objection-handling-scorecard.md"
-)
+LANE_PACK_SCORECARD = Path("docs/artifacts/objection-handling-pack/objection-handling-scorecard.md")
 LANE_PACK_MATRIX = Path(
     "docs/artifacts/objection-handling-pack/objection-handling-response-matrix.md"
 )

@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY87_DEFAULT_PAGE = """# Day 87 \u2014 Governance handoff closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 87 \u2014 Governance handoff closeout lane
 
 Day 87 closes with a major upgrade that converts Day 86 launch readiness outcomes into a deterministic governance handoff operating lane.
 
@@ -150,12 +150,16 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     launch_readiness_data = _load_json(launch_readiness_summary)
     launch_readiness_summary_data = (
-        launch_readiness_data.get("summary", {}) if isinstance(launch_readiness_data.get("summary"), dict) else {}
+        launch_readiness_data.get("summary", {})
+        if isinstance(launch_readiness_data.get("summary"), dict)
+        else {}
     )
     launch_readiness_score = int(launch_readiness_summary_data.get("activation_score", 0) or 0)
     launch_readiness_strict = bool(launch_readiness_summary_data.get("strict_pass", False))
     launch_readiness_check_count = (
-        len(launch_readiness_data.get("checks", [])) if isinstance(launch_readiness_data.get("checks"), list) else 0
+        len(launch_readiness_data.get("checks", []))
+        if isinstance(launch_readiness_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(launch_readiness_board)
@@ -219,7 +223,10 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "launch_readiness_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_launch_readiness,
-            "evidence": {"board_items": board_count, "contains_launch_readiness": board_has_launch_readiness},
+            "evidence": {
+                "board_items": board_count,
+                "contains_launch_readiness": board_has_launch_readiness,
+            },
         },
         {
             "check_id": "page_header",
@@ -275,7 +282,9 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if launch_readiness_score >= 85 and launch_readiness_strict:
-        wins.append(f"Launch readiness continuity baseline is stable with activation score={launch_readiness_score}.")
+        wins.append(
+            f"Launch readiness continuity baseline is stable with activation score={launch_readiness_score}."
+        )
     else:
         misses.append("Day 86 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -429,7 +438,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY87_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_governance_handoff_closeout_summary(root)
 

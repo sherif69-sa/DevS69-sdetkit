@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY82_DEFAULT_PAGE = """# Day 82 \u2014 Integration feedback loop closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 82 \u2014 Integration feedback loop closeout lane
 
 Day 82 closes with a major upgrade that folds Day 81 growth campaign outcomes into docs/template upgrades and community touchpoint execution.
 
@@ -156,17 +156,21 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
 
     growth_campaign_data = _load_json(growth_campaign_summary)
     growth_campaign_summary_data = (
-        growth_campaign_data.get("summary", {}) if isinstance(growth_campaign_data.get("summary"), dict) else {}
+        growth_campaign_data.get("summary", {})
+        if isinstance(growth_campaign_data.get("summary"), dict)
+        else {}
     )
     growth_campaign_score = int(growth_campaign_summary_data.get("activation_score", 0) or 0)
     growth_campaign_strict = bool(growth_campaign_summary_data.get("strict_pass", False))
     growth_campaign_check_count = (
-        len(growth_campaign_data.get("checks", [])) if isinstance(growth_campaign_data.get("checks"), list) else 0
+        len(growth_campaign_data.get("checks", []))
+        if isinstance(growth_campaign_data.get("checks"), list)
+        else 0
     )
 
     board_text = _read_text(growth_campaign_board)
     board_count = _checklist_count(board_text)
-    board_has_growth_campaign = ("growth campaign" in board_text.lower() or "Day 81" in board_text)
+    board_has_growth_campaign = "growth campaign" in board_text.lower() or "Day 81" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -225,7 +229,10 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "growth_campaign_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_growth_campaign,
-            "evidence": {"board_items": board_count, "contains_growth_campaign": board_has_growth_campaign},
+            "evidence": {
+                "board_items": board_count,
+                "contains_growth_campaign": board_has_growth_campaign,
+            },
         },
         {
             "check_id": "page_header",
@@ -281,7 +288,9 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if growth_campaign_score >= 85 and growth_campaign_strict:
-        wins.append(f"Growth Campaign continuity baseline is stable with activation score={growth_campaign_score}.")
+        wins.append(
+            f"Growth Campaign continuity baseline is stable with activation score={growth_campaign_score}."
+        )
     else:
         misses.append("Day 81 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -435,7 +444,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY82_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_integration_feedback_closeout_summary(root)
 

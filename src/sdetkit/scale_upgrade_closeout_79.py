@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY79_DEFAULT_PAGE = """# Scale upgrade closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Scale upgrade closeout lane
 
 Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
 
@@ -152,13 +152,19 @@ def build_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     plan_path = root / _PLAN_PATH
 
     ecosystem_priorities_payload = _load_json(ecosystem_priorities_summary)
-    ecosystem_priorities_score = int(ecosystem_priorities_payload.get("summary", {}).get("activation_score", 0) or 0)
-    ecosystem_priorities_strict = bool(ecosystem_priorities_payload.get("summary", {}).get("strict_pass", False))
+    ecosystem_priorities_score = int(
+        ecosystem_priorities_payload.get("summary", {}).get("activation_score", 0) or 0
+    )
+    ecosystem_priorities_strict = bool(
+        ecosystem_priorities_payload.get("summary", {}).get("strict_pass", False)
+    )
     ecosystem_priorities_check_count = len(ecosystem_priorities_payload.get("checks", []))
 
     board_text = _read_text(ecosystem_priorities_board)
     board_count = sum(1 for line in board_text.splitlines() if line.strip().startswith("- [ ]"))
-    board_has_ecosystem_priorities = ("ecosystem priorities" in board_text.lower() or "Day 78" in board_text)
+    board_has_ecosystem_priorities = (
+        "ecosystem priorities" in board_text.lower() or "Day 78" in board_text
+    )
 
     plan_text = _read_text(plan_path)
 
@@ -217,7 +223,10 @@ def build_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "ecosystem_priorities_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_ecosystem_priorities,
-            "evidence": {"board_items": board_count, "contains_ecosystem_priorities": board_has_ecosystem_priorities},
+            "evidence": {
+                "board_items": board_count,
+                "contains_ecosystem_priorities": board_has_ecosystem_priorities,
+            },
         },
         {
             "check_id": "page_header",
@@ -273,7 +282,9 @@ def build_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if ecosystem_priorities_score >= 85:
-        wins.append(f"Ecosystem Priorities continuity baseline is stable with activation score={ecosystem_priorities_score}.")
+        wins.append(
+            f"Ecosystem Priorities continuity baseline is stable with activation score={ecosystem_priorities_score}."
+        )
     else:
         misses.append("Day 78 continuity baseline is below the floor (<85).")
         handoff_actions.append(
@@ -422,7 +433,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY79_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_scale_upgrade_closeout_summary(root)
 

@@ -66,7 +66,7 @@ _REQUIRED_WORKFLOW_LINES = [
     "actions/cache@v4",
 ]
 
-_DAY64_DEFAULT_PAGE = """# Cycle 64 \u2014 Integration expansion #1 closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Cycle 64 \u2014 Integration expansion #1 closeout lane
 
 Cycle 64 closes with a major integration upgrade that turns Cycle 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
 
@@ -434,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY64_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_integration_expansion_closeout_summary(root)
 

@@ -35,7 +35,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-onboarding-activation-closeout.md").write_text(
-        d63._DAY63_DEFAULT_PAGE, encoding="utf-8"
+        d63._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-63-big-upgrade-report.md").write_text(
         "# Cycle 63 report\n", encoding="utf-8"

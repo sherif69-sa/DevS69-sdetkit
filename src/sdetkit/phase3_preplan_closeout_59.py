@@ -58,7 +58,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 60 execution priorities drafted from Day 59 learnings",
 ]
 
-_DAY59_DEFAULT_PAGE = """# Day 59 \u2014 Phase-3 pre-plan closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 59 \u2014 Phase-3 pre-plan closeout lane
 
 Day 59 closes with a major Phase-3 pre-plan upgrade that turns Day 58 hardening outcomes into deterministic Day 60 execution priorities.
 
@@ -158,7 +158,9 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
 
     phase2_hardening_summary = root / _DAY58_SUMMARY_PATH
     phase2_hardening_board = root / _DAY58_BOARD_PATH
-    phase2_hardening_score, phase2_hardening_strict, phase2_hardening_check_count = _load_phase2_hardening(phase2_hardening_summary)
+    phase2_hardening_score, phase2_hardening_strict, phase2_hardening_check_count = (
+        _load_phase2_hardening(phase2_hardening_summary)
+    )
     board_count, board_has_phase2_hardening = _count_board_items(phase2_hardening_board, "Day 58")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -215,7 +217,10 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "phase2_hardening_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_phase2_hardening,
-            "evidence": {"board_items": board_count, "contains_phase2_hardening": board_has_phase2_hardening},
+            "evidence": {
+                "board_items": board_count,
+                "contains_phase2_hardening": board_has_phase2_hardening,
+            },
         },
         {
             "check_id": "page_header",
@@ -267,7 +272,9 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if phase2_hardening_strict:
-        wins.append(f"Day 58 continuity is strict-pass with activation score={phase2_hardening_score}.")
+        wins.append(
+            f"Day 58 continuity is strict-pass with activation score={phase2_hardening_score}."
+        )
     else:
         misses.append("Day 58 strict continuity signal is missing.")
         handoff_actions.append(
@@ -396,9 +403,7 @@ def build_phase3_preplan_closeout_summary_impl(root: Path) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Phase3 Preplan Closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="Phase3 Preplan Closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -410,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY59_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_phase3_preplan_closeout_summary(root)
 

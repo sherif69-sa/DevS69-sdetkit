@@ -31,7 +31,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review.md").write_text(
-        d28._DAY28_DEFAULT_PAGE, encoding="utf-8"
+        d28._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
 
     d25 = root / "docs/artifacts/community-activation-pack"

@@ -21,7 +21,9 @@ def _seed(root: Path) -> None:
         "- **External contribution:** spotlight open starter tasks publicly.\n",
         encoding="utf-8",
     )
-    (root / "docs/external-contribution.md").write_text(ecp._DAY26_DEFAULT_PAGE, encoding="utf-8")
+    (root / "docs/external-contribution.md").write_text(
+        ecp._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
+    )
 
 
 def test_external_contribution_json(tmp_path: Path, capsys) -> None:

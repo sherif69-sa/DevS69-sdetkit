@@ -24,7 +24,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-expansion4-closeout.md").write_text(
-        d68._DAY68_DEFAULT_PAGE,
+        d68._DEFAULT_PAGE_TEMPLATE,
         encoding="utf-8",
     )
     (root / "templates/ci/tekton/tekton-self-hosted-reference.yaml").write_text(

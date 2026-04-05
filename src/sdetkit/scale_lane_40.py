@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 41 expansion priorities drafted from Day 40 learnings",
 ]
 
-_DAY40_DEFAULT_PAGE = """# Day 40 \u2014 Scale lane #1
+_DEFAULT_PAGE_TEMPLATE = """# Day 40 \u2014 Scale lane #1
 
 Day 40 publishes scale lane #1 that converts Day 39 publication evidence into a reusable operator guide.
 
@@ -520,7 +520,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_defaults:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY40_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_scale_lane_summary_impl(root)
 

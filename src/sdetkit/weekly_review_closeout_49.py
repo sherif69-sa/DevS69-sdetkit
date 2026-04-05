@@ -12,7 +12,9 @@ _PAGE_PATH = "docs/integrations-weekly-review-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY48_SUMMARY_PATH = "docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json"
 _DAY48_BOARD_PATH = "docs/artifacts/objection-closeout-pack-48/delivery-board-48.md"
-_DAY48_LEGACY_SUMMARY_PATH = "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
+_DAY48_LEGACY_SUMMARY_PATH = (
+    "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
+)
 _DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/objection-delivery-board.md"
 _SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
 _REQUIRED_SECTIONS = [
@@ -56,7 +58,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 50 execution priorities drafted from Day 49 learnings",
 ]
 
-_DAY49_DEFAULT_PAGE = """# Day 49 \u2014 Weekly review closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 49 \u2014 Weekly review closeout lane
 
 Day 49 closes with a major weekly-review upgrade that converts Day 48 objection evidence into deterministic prioritization and handoff loops.
 
@@ -486,9 +488,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Weekly review closeout checks"
-    )
+    parser = argparse.ArgumentParser(description="Weekly review closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -511,7 +511,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY49_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_weekly_review_closeout_summary(root)
 

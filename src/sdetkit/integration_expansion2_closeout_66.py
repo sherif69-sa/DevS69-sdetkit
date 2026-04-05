@@ -67,7 +67,7 @@ _REQUIRED_GITLAB_LINES = [
     "cache:",
 ]
 
-_DAY66_DEFAULT_PAGE = """# Day 66 \u2014 Integration expansion #2 closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 66 \u2014 Integration expansion #2 closeout lane
 
 Day 66 closes with a major integration upgrade that converts Day 65 weekly review outcomes into an advanced GitLab CI reference pipeline.
 
@@ -170,7 +170,9 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
 
     weekly_review_summary = root / _WEEKLY_REVIEW_SUMMARY_PATH
     weekly_review_board = root / _WEEKLY_REVIEW_BOARD_PATH
-    weekly_review_score, weekly_review_strict, weekly_review_check_count = _load_weekly_review(weekly_review_summary)
+    weekly_review_score, weekly_review_strict, weekly_review_check_count = _load_weekly_review(
+        weekly_review_summary
+    )
     board_count, board_has_weekly_review = _count_board_items(weekly_review_board, "Day 65")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -228,7 +230,10 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "weekly_review_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_weekly_review,
-            "evidence": {"board_items": board_count, "contains_weekly_review": board_has_weekly_review},
+            "evidence": {
+                "board_items": board_count,
+                "contains_weekly_review": board_has_weekly_review,
+            },
         },
         {
             "check_id": "page_header",
@@ -286,7 +291,9 @@ def build_integration_expansion2_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if weekly_review_strict:
-        wins.append(f"Day 65 continuity is strict-pass with activation score={weekly_review_score}.")
+        wins.append(
+            f"Day 65 continuity is strict-pass with activation score={weekly_review_score}."
+        )
     else:
         misses.append("Day 65 strict continuity signal is missing.")
         handoff_actions.append(
@@ -440,7 +447,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY66_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_integration_expansion2_closeout_summary(root)
 

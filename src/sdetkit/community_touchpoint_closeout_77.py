@@ -65,7 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DAY77_DEFAULT_PAGE = """# Community touchpoint closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Community touchpoint closeout lane
 
 Day 77 closes with a major upgrade that converts Day 76 contributor-recognition outcomes into a community-touchpoint execution pack.
 
@@ -159,8 +159,14 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
 
     contributor_recognition_summary = root / _DAY76_SUMMARY_PATH
     contributor_recognition_board = root / _DAY76_BOARD_PATH
-    contributor_recognition_score, contributor_recognition_strict, contributor_recognition_check_count = _load_contributor_recognition(contributor_recognition_summary)
-    board_count, board_has_contributor_recognition = _count_board_items(contributor_recognition_board, "Day 76")
+    (
+        contributor_recognition_score,
+        contributor_recognition_strict,
+        contributor_recognition_check_count,
+    ) = _load_contributor_recognition(contributor_recognition_summary)
+    board_count, board_has_contributor_recognition = _count_board_items(
+        contributor_recognition_board, "Day 76"
+    )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -219,7 +225,10 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "contributor_recognition_board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_contributor_recognition,
-            "evidence": {"board_items": board_count, "contains_contributor_recognition": board_has_contributor_recognition},
+            "evidence": {
+                "board_items": board_count,
+                "contains_contributor_recognition": board_has_contributor_recognition,
+            },
         },
         {
             "check_id": "page_header",
@@ -277,7 +286,9 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if contributor_recognition_strict:
-        wins.append(f"Day 76 continuity is strict-pass with activation score={contributor_recognition_score}.")
+        wins.append(
+            f"Day 76 continuity is strict-pass with activation score={contributor_recognition_score}."
+        )
     else:
         misses.append("Day 76 strict continuity signal is missing.")
         handoff_actions.append(
@@ -315,10 +326,14 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "contributor_recognition_summary": str(contributor_recognition_summary.relative_to(root))
+            "contributor_recognition_summary": str(
+                contributor_recognition_summary.relative_to(root)
+            )
             if contributor_recognition_summary.exists()
             else str(contributor_recognition_summary),
-            "contributor_recognition_delivery_board": str(contributor_recognition_board.relative_to(root))
+            "contributor_recognition_delivery_board": str(
+                contributor_recognition_board.relative_to(root)
+            )
             if contributor_recognition_board.exists()
             else str(contributor_recognition_board),
             "touchpoint_plan": _PLAN_PATH,
@@ -435,7 +450,7 @@ def main(argv: list[str] | None = None) -> int:
 
     root = Path(ns.root).resolve()
     if ns.write_default_doc:
-        _write(root / _PAGE_PATH, _DAY77_DEFAULT_PAGE)
+        _write(root / _PAGE_PATH, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_community_touchpoint_closeout_summary(root)
 

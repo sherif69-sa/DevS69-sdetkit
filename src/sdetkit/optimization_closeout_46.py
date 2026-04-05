@@ -54,7 +54,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Day 47 reliability priorities drafted from Day 46 learnings",
 ]
 
-_DAY46_DEFAULT_PAGE = """# Day 46 \u2014 Optimization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# Day 46 \u2014 Optimization closeout lane
 
 Day 46 closes with a major optimization upgrade that converts Day 45 expansion evidence into deterministic improvement loops.
 
@@ -471,7 +471,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.ensure_doc:
         page = root / _PAGE_PATH
         if not page.exists():
-            _write(page, _DAY46_DEFAULT_PAGE)
+            _write(page, _DEFAULT_PAGE_TEMPLATE)
 
     payload = build_optimization_closeout_summary(root)
 

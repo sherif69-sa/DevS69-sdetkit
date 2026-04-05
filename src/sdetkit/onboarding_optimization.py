@@ -30,7 +30,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_onboarding_optimization_contract.py --skip-evidence",
 ]
 
-_DAY24_DEFAULT_PAGE = """# Onboarding optimization
+_DEFAULT_PAGE_TEMPLATE = """# Onboarding optimization
 
 Onboarding optimization reduces time-to-first-success and standardizes a deterministic three-minute activation path.
 
@@ -423,7 +423,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.write_defaults:
         page.parent.mkdir(parents=True, exist_ok=True)
-        page.write_text(_DAY24_DEFAULT_PAGE, encoding="utf-8")
+        page.write_text(_DEFAULT_PAGE_TEMPLATE, encoding="utf-8")
 
     payload = build_onboarding_time_summary(
         root, readme_path=ns.readme, docs_index_path=ns.docs_index
