@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day44(path: Path) -> tuple[float, bool, int]:
+def _load_scale_closeout(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -169,10 +169,10 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day44_summary = root / _DAY44_SUMMARY_PATH
-    day44_board = root / _DAY44_BOARD_PATH
-    day44_score, day44_strict, day44_check_count = _load_day44(day44_summary)
-    board_count, board_has_day44, board_has_day45 = _board_stats(day44_board)
+    scale_closeout_summary = root / _DAY44_SUMMARY_PATH
+    scale_closeout_board = root / _DAY44_BOARD_PATH
+    scale_closeout_score, scale_closeout_strict, scale_closeout_check_count = _load_scale_closeout(scale_closeout_summary)
+    board_count, board_has_scale_closeout, board_has_expansion_closeout = _board_stats(scale_closeout_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -221,35 +221,35 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 45 + Day 46 strategy chain",
         },
         {
-            "check_id": "day44_summary_present",
+            "check_id": "scale_closeout_summary_present",
             "weight": 10,
-            "passed": day44_summary.exists(),
-            "evidence": str(day44_summary),
+            "passed": scale_closeout_summary.exists(),
+            "evidence": str(scale_closeout_summary),
         },
         {
-            "check_id": "day44_delivery_board_present",
+            "check_id": "scale_closeout_delivery_board_present",
             "weight": 8,
-            "passed": day44_board.exists(),
-            "evidence": str(day44_board),
+            "passed": scale_closeout_board.exists(),
+            "evidence": str(scale_closeout_board),
         },
         {
-            "check_id": "day44_quality_floor",
+            "check_id": "scale_closeout_quality_floor",
             "weight": 10,
-            "passed": day44_strict and day44_score >= 95,
+            "passed": scale_closeout_strict and scale_closeout_score >= 95,
             "evidence": {
-                "day44_score": day44_score,
-                "strict_pass": day44_strict,
-                "day44_checks": day44_check_count,
+                "scale_closeout_score": scale_closeout_score,
+                "strict_pass": scale_closeout_strict,
+                "scale_closeout_checks": scale_closeout_check_count,
             },
         },
         {
-            "check_id": "day44_board_integrity",
+            "check_id": "scale_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day44 and board_has_day45,
+            "passed": board_count >= 5 and board_has_scale_closeout and board_has_expansion_closeout,
             "evidence": {
                 "board_items": board_count,
-                "contains_day44": board_has_day44,
-                "contains_day45": board_has_day45,
+                "contains_scale_closeout": board_has_scale_closeout,
+                "contains_expansion_closeout": board_has_expansion_closeout,
             },
         },
         {
@@ -275,24 +275,24 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day44_summary.exists() or not day44_board.exists():
-        critical_failures.append("day44_handoff_inputs")
-    if not day44_strict:
-        critical_failures.append("day44_strict_baseline")
+    if not scale_closeout_summary.exists() or not scale_closeout_board.exists():
+        critical_failures.append("scale_closeout_handoff_inputs")
+    if not scale_closeout_strict:
+        critical_failures.append("scale_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day44_strict:
-        wins.append(f"Day 44 continuity is strict-pass with activation score={day44_score}.")
+    if scale_closeout_strict:
+        wins.append(f"Day 44 continuity is strict-pass with activation score={scale_closeout_score}.")
     else:
         misses.append("Day 44 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 44 scale closeout command and restore strict pass baseline before Day 45 lock."
         )
 
-    if board_count >= 5 and board_has_day44 and board_has_day45:
+    if board_count >= 5 and board_has_scale_closeout and board_has_expansion_closeout:
         wins.append(
             f"Day 44 delivery board integrity validated with {board_count} checklist items."
         )
@@ -328,18 +328,18 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day44_summary": str(day44_summary.relative_to(root))
-            if day44_summary.exists()
-            else str(day44_summary),
-            "day44_delivery_board": str(day44_board.relative_to(root))
-            if day44_board.exists()
-            else str(day44_board),
+            "scale_closeout_summary": str(scale_closeout_summary.relative_to(root))
+            if scale_closeout_summary.exists()
+            else str(scale_closeout_summary),
+            "scale_closeout_delivery_board": str(scale_closeout_board.relative_to(root))
+            if scale_closeout_board.exists()
+            else str(scale_closeout_board),
         },
         "checks": checks,
         "rollup": {
-            "day44_activation_score": day44_score,
-            "day44_checks": day44_check_count,
-            "day44_delivery_board_items": board_count,
+            "scale_closeout_activation_score": scale_closeout_score,
+            "scale_closeout_checks": scale_closeout_check_count,
+            "scale_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -361,9 +361,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 44 activation score: `{payload['rollup']['day44_activation_score']}`",
-        f"- Day 44 checks evaluated: `{payload['rollup']['day44_checks']}`",
-        f"- Day 44 delivery board checklist items: `{payload['rollup']['day44_delivery_board_items']}`",
+        f"- Day 44 activation score: `{payload['rollup']['scale_closeout_activation_score']}`",
+        f"- Day 44 checks evaluated: `{payload['rollup']['scale_closeout_checks']}`",
+        f"- Day 44 delivery board checklist items: `{payload['rollup']['scale_closeout_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")

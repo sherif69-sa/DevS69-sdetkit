@@ -132,7 +132,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day41(path: Path) -> tuple[float, bool, int]:
+def _load_expansion_automation(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -182,10 +182,10 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day41_summary = _resolve_existing_path(root, _DAY41_SUMMARY_PATH, _DAY41_LEGACY_SUMMARY_PATH)
-    day41_board = _resolve_existing_path(root, _DAY41_BOARD_PATH, _DAY41_LEGACY_BOARD_PATH)
-    day41_score, day41_strict, day41_check_count = _load_day41(day41_summary)
-    board_count, board_has_day41, board_has_day42 = _board_stats(day41_board)
+    expansion_automation_summary = _resolve_existing_path(root, _DAY41_SUMMARY_PATH, _DAY41_LEGACY_SUMMARY_PATH)
+    expansion_automation_board = _resolve_existing_path(root, _DAY41_BOARD_PATH, _DAY41_LEGACY_BOARD_PATH)
+    expansion_automation_score, expansion_automation_strict, expansion_automation_check_count = _load_expansion_automation(expansion_automation_summary)
+    board_count, board_has_expansion_automation, board_has_optimization_closeout_foundation = _board_stats(expansion_automation_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -236,33 +236,33 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "expansion_automation_summary_present",
             "weight": 10,
-            "passed": day41_summary.exists(),
-            "evidence": str(day41_summary),
+            "passed": expansion_automation_summary.exists(),
+            "evidence": str(expansion_automation_summary),
         },
         {
             "check_id": "expansion_automation_delivery_board_present",
             "weight": 8,
-            "passed": day41_board.exists(),
-            "evidence": str(day41_board),
+            "passed": expansion_automation_board.exists(),
+            "evidence": str(expansion_automation_board),
         },
         {
             "check_id": "expansion_automation_quality_floor",
             "weight": 10,
-            "passed": day41_strict and day41_score >= 95,
+            "passed": expansion_automation_strict and expansion_automation_score >= 95,
             "evidence": {
-                "day41_score": day41_score,
-                "strict_pass": day41_strict,
-                "expansion_automation_checks": day41_check_count,
+                "expansion_automation_score": expansion_automation_score,
+                "strict_pass": expansion_automation_strict,
+                "expansion_automation_checks": expansion_automation_check_count,
             },
         },
         {
             "check_id": "expansion_automation_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day41 and board_has_day42,
+            "passed": board_count >= 5 and board_has_expansion_automation and board_has_optimization_closeout_foundation,
             "evidence": {
                 "board_items": board_count,
-                "contains_day41": board_has_day41,
-                "contains_day42": board_has_day42,
+                "contains_expansion_automation": board_has_expansion_automation,
+                "contains_optimization_closeout_foundation": board_has_optimization_closeout_foundation,
             },
         },
         {
@@ -288,24 +288,24 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day41_summary.exists() or not day41_board.exists():
+    if not expansion_automation_summary.exists() or not expansion_automation_board.exists():
         critical_failures.append("expansion_automation_handoff_inputs")
-    if not day41_strict:
+    if not expansion_automation_strict:
         critical_failures.append("expansion_automation_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day41_strict:
-        wins.append(f"Day 41 continuity is strict-pass with activation score={day41_score}.")
+    if expansion_automation_strict:
+        wins.append(f"Day 41 continuity is strict-pass with activation score={expansion_automation_score}.")
     else:
         misses.append("Day 41 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 41 expansion automation command and restore strict pass baseline before Optimization Closeout Foundation lock."
         )
 
-    if board_count >= 5 and board_has_day41 and board_has_day42:
+    if board_count >= 5 and board_has_expansion_automation and board_has_optimization_closeout_foundation:
         wins.append(
             f"Day 41 delivery board integrity validated with {board_count} checklist items."
         )
@@ -341,17 +341,17 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "expansion_automation_summary": str(day41_summary.relative_to(root))
-            if day41_summary.exists()
-            else str(day41_summary),
-            "expansion_automation_delivery_board": str(day41_board.relative_to(root))
-            if day41_board.exists()
-            else str(day41_board),
+            "expansion_automation_summary": str(expansion_automation_summary.relative_to(root))
+            if expansion_automation_summary.exists()
+            else str(expansion_automation_summary),
+            "expansion_automation_delivery_board": str(expansion_automation_board.relative_to(root))
+            if expansion_automation_board.exists()
+            else str(expansion_automation_board),
         },
         "checks": checks,
         "rollup": {
-            "expansion_automation_activation_score": day41_score,
-            "expansion_automation_checks": day41_check_count,
+            "expansion_automation_activation_score": expansion_automation_score,
+            "expansion_automation_checks": expansion_automation_check_count,
             "expansion_automation_delivery_board_items": board_count,
         },
         "summary": {

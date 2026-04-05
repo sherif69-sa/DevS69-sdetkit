@@ -130,7 +130,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day42(path: Path) -> tuple[float, bool, int]:
+def _load_optimization_closeout(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -180,10 +180,10 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day42_summary = _resolve_existing_path(root, _DAY42_SUMMARY_PATH, _DAY42_LEGACY_SUMMARY_PATH)
-    day42_board = _resolve_existing_path(root, _DAY42_BOARD_PATH, _DAY42_LEGACY_BOARD_PATH)
-    day42_score, day42_strict, day42_check_count = _load_day42(day42_summary)
-    board_count, board_has_day42, board_has_day43 = _board_stats(day42_board)
+    optimization_closeout_summary = _resolve_existing_path(root, _DAY42_SUMMARY_PATH, _DAY42_LEGACY_SUMMARY_PATH)
+    optimization_closeout_board = _resolve_existing_path(root, _DAY42_BOARD_PATH, _DAY42_LEGACY_BOARD_PATH)
+    optimization_closeout_score, optimization_closeout_strict, optimization_closeout_check_count = _load_optimization_closeout(optimization_closeout_summary)
+    board_count, board_has_optimization_closeout, board_has_acceleration_closeout = _board_stats(optimization_closeout_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -234,33 +234,33 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "optimization_closeout_summary_present",
             "weight": 10,
-            "passed": day42_summary.exists(),
-            "evidence": str(day42_summary),
+            "passed": optimization_closeout_summary.exists(),
+            "evidence": str(optimization_closeout_summary),
         },
         {
             "check_id": "optimization_closeout_delivery_board_present",
             "weight": 8,
-            "passed": day42_board.exists(),
-            "evidence": str(day42_board),
+            "passed": optimization_closeout_board.exists(),
+            "evidence": str(optimization_closeout_board),
         },
         {
             "check_id": "optimization_closeout_quality_floor",
             "weight": 10,
-            "passed": day42_strict and day42_score >= 95,
+            "passed": optimization_closeout_strict and optimization_closeout_score >= 95,
             "evidence": {
-                "day42_score": day42_score,
-                "strict_pass": day42_strict,
-                "optimization_closeout_checks": day42_check_count,
+                "optimization_closeout_score": optimization_closeout_score,
+                "strict_pass": optimization_closeout_strict,
+                "optimization_closeout_checks": optimization_closeout_check_count,
             },
         },
         {
             "check_id": "optimization_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day42 and board_has_day43,
+            "passed": board_count >= 5 and board_has_optimization_closeout and board_has_acceleration_closeout,
             "evidence": {
                 "board_items": board_count,
-                "contains_day42": board_has_day42,
-                "contains_day43": board_has_day43,
+                "contains_optimization_closeout": board_has_optimization_closeout,
+                "contains_acceleration_closeout": board_has_acceleration_closeout,
             },
         },
         {
@@ -286,24 +286,24 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day42_summary.exists() or not day42_board.exists():
+    if not optimization_closeout_summary.exists() or not optimization_closeout_board.exists():
         critical_failures.append("optimization_closeout_handoff_inputs")
-    if not day42_strict:
+    if not optimization_closeout_strict:
         critical_failures.append("optimization_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day42_strict:
-        wins.append(f"Day 42 continuity is strict-pass with activation score={day42_score}.")
+    if optimization_closeout_strict:
+        wins.append(f"Day 42 continuity is strict-pass with activation score={optimization_closeout_score}.")
     else:
         misses.append("Day 42 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 42 optimization closeout command and restore strict pass baseline before Day 43 lock."
         )
 
-    if board_count >= 5 and board_has_day42 and board_has_day43:
+    if board_count >= 5 and board_has_optimization_closeout and board_has_acceleration_closeout:
         wins.append(
             f"Day 42 delivery board integrity validated with {board_count} checklist items."
         )
@@ -339,17 +339,17 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "optimization_closeout_summary": str(day42_summary.relative_to(root))
-            if day42_summary.exists()
-            else str(day42_summary),
-            "optimization_closeout_delivery_board": str(day42_board.relative_to(root))
-            if day42_board.exists()
-            else str(day42_board),
+            "optimization_closeout_summary": str(optimization_closeout_summary.relative_to(root))
+            if optimization_closeout_summary.exists()
+            else str(optimization_closeout_summary),
+            "optimization_closeout_delivery_board": str(optimization_closeout_board.relative_to(root))
+            if optimization_closeout_board.exists()
+            else str(optimization_closeout_board),
         },
         "checks": checks,
         "rollup": {
-            "optimization_closeout_activation_score": day42_score,
-            "optimization_closeout_checks": day42_check_count,
+            "optimization_closeout_activation_score": optimization_closeout_score,
+            "optimization_closeout_checks": optimization_closeout_check_count,
             "optimization_closeout_delivery_board_items": board_count,
         },
         "summary": {
