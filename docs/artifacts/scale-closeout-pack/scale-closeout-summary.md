@@ -1,13 +1,13 @@
-Cycle 44 scale closeout summary
-- Activation score: 40
+Scale closeout summary
+- Activation score: 51
 - Passed checks: 6
 - Failed checks: 8
-- Critical failures: ['day43_handoff_inputs', 'day43_strict_baseline']
-- Cycle 43 activation score: `0.0`
-- Cycle 43 checks evaluated: `0`
-- Cycle 43 delivery board checklist items: `0`
+- Critical failures: []
+- Day 43 activation score: `98.0`
+- Day 43 checks evaluated: `1`
+- Day 43 delivery board checklist items: `5`
 - Wins:
-  - Scale execution contract + quality checklist is fully locked for execution.
+  - Day 43 continuity is strict-pass with activation score=98.0.
 - Misses:
-  - Cycle 43 strict continuity signal is missing.
-  - Cycle 43 delivery board integrity is incomplete (needs >=5 items and Cycle 43/44 anchors).
+  - Day 43 delivery board integrity is incomplete (needs >=5 items and Day 43/44 anchors).
+  - Scale contract, quality checklist, or delivery board entries are missing.

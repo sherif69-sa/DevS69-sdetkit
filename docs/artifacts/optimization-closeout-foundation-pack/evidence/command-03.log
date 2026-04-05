@@ -1,0 +1,6 @@
+{
+  "command": "python scripts/check_optimization_closeout_contract.py --skip-evidence",
+  "returncode": 1,
+  "stdout": "{\n  \"errors\": [\n    \"missing docs contract entries: ['## Required inputs (expansion automation)', 'The Optimization Closeout Foundation optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.', 'Optimization Closeout Foundation closeout records optimization learnings and Day 43 acceleration priorities.', '- [ ] Day 43 acceleration priorities drafted from Optimization Closeout Foundation learnings']\"\n  ],\n  \"score\": 51\n}\n",
+  "stderr": ""
+}

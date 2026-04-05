@@ -1,3 +1,3 @@
-# Cycle 44 Scale Plan
+# Scale plan
 
-- Objective: close Cycle 44 with measurable quality and throughput gains.
+- Objective: close Day 44 with measurable quality and throughput gains.

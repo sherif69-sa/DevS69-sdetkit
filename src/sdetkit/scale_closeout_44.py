@@ -230,29 +230,29 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Scale closeout + expansion closeout strategy chain",
         },
         {
-            "check_id": "day43_summary_present",
+            "check_id": "acceleration_closeout_summary_present",
             "weight": 10,
             "passed": day43_summary.exists(),
             "evidence": str(day43_summary),
         },
         {
-            "check_id": "day43_delivery_board_present",
+            "check_id": "acceleration_closeout_delivery_board_present",
             "weight": 8,
             "passed": day43_board.exists(),
             "evidence": str(day43_board),
         },
         {
-            "check_id": "day43_quality_floor",
+            "check_id": "acceleration_closeout_quality_floor",
             "weight": 10,
             "passed": day43_strict and day43_score >= 95,
             "evidence": {
                 "day43_score": day43_score,
                 "strict_pass": day43_strict,
-                "day43_checks": day43_check_count,
+                "acceleration_closeout_checks": day43_check_count,
             },
         },
         {
-            "check_id": "day43_board_integrity",
+            "check_id": "acceleration_closeout_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day43 and board_has_day44,
             "evidence": {
@@ -285,9 +285,9 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
     if not day43_summary.exists() or not day43_board.exists():
-        critical_failures.append("day43_handoff_inputs")
+        critical_failures.append("acceleration_closeout_handoff_inputs")
     if not day43_strict:
-        critical_failures.append("day43_strict_baseline")
+        critical_failures.append("acceleration_closeout_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
@@ -333,18 +333,18 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day43_summary": str(day43_summary.relative_to(root))
+            "acceleration_closeout_summary": str(day43_summary.relative_to(root))
             if day43_summary.exists()
             else str(day43_summary),
-            "day43_delivery_board": str(day43_board.relative_to(root))
+            "acceleration_closeout_delivery_board": str(day43_board.relative_to(root))
             if day43_board.exists()
             else str(day43_board),
         },
         "checks": checks,
         "rollup": {
-            "day43_activation_score": day43_score,
-            "day43_checks": day43_check_count,
-            "day43_delivery_board_items": board_count,
+            "acceleration_closeout_activation_score": day43_score,
+            "acceleration_closeout_checks": day43_check_count,
+            "acceleration_closeout_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -366,9 +366,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 43 activation score: `{payload['rollup']['day43_activation_score']}`",
-        f"- Day 43 checks evaluated: `{payload['rollup']['day43_checks']}`",
-        f"- Day 43 delivery board checklist items: `{payload['rollup']['day43_delivery_board_items']}`",
+        f"- Day 43 activation score: `{payload['rollup']['acceleration_closeout_activation_score']}`",
+        f"- Day 43 checks evaluated: `{payload['rollup']['acceleration_closeout_checks']}`",
+        f"- Day 43 delivery board checklist items: `{payload['rollup']['acceleration_closeout_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")

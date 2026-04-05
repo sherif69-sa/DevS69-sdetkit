@@ -230,29 +230,29 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Optimization Closeout Foundation + acceleration strategy chain",
         },
         {
-            "check_id": "day41_summary_present",
+            "check_id": "expansion_automation_summary_present",
             "weight": 10,
             "passed": day41_summary.exists(),
             "evidence": str(day41_summary),
         },
         {
-            "check_id": "day41_delivery_board_present",
+            "check_id": "expansion_automation_delivery_board_present",
             "weight": 8,
             "passed": day41_board.exists(),
             "evidence": str(day41_board),
         },
         {
-            "check_id": "day41_quality_floor",
+            "check_id": "expansion_automation_quality_floor",
             "weight": 10,
             "passed": day41_strict and day41_score >= 95,
             "evidence": {
                 "day41_score": day41_score,
                 "strict_pass": day41_strict,
-                "day41_checks": day41_check_count,
+                "expansion_automation_checks": day41_check_count,
             },
         },
         {
-            "check_id": "day41_board_integrity",
+            "check_id": "expansion_automation_board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_day41 and board_has_day42,
             "evidence": {
@@ -285,9 +285,9 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
     if not day41_summary.exists() or not day41_board.exists():
-        critical_failures.append("day41_handoff_inputs")
+        critical_failures.append("expansion_automation_handoff_inputs")
     if not day41_strict:
-        critical_failures.append("day41_strict_baseline")
+        critical_failures.append("expansion_automation_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
@@ -337,18 +337,18 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day41_summary": str(day41_summary.relative_to(root))
+            "expansion_automation_summary": str(day41_summary.relative_to(root))
             if day41_summary.exists()
             else str(day41_summary),
-            "day41_delivery_board": str(day41_board.relative_to(root))
+            "expansion_automation_delivery_board": str(day41_board.relative_to(root))
             if day41_board.exists()
             else str(day41_board),
         },
         "checks": checks,
         "rollup": {
-            "day41_activation_score": day41_score,
-            "day41_checks": day41_check_count,
-            "day41_delivery_board_items": board_count,
+            "expansion_automation_activation_score": day41_score,
+            "expansion_automation_checks": day41_check_count,
+            "expansion_automation_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -370,9 +370,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Expansion automation activation score: `{payload['rollup']['day41_activation_score']}`",
-        f"- Expansion automation checks evaluated: `{payload['rollup']['day41_checks']}`",
-        f"- Expansion automation delivery board checklist items: `{payload['rollup']['day41_delivery_board_items']}`",
+        f"- Expansion automation activation score: `{payload['rollup']['expansion_automation_activation_score']}`",
+        f"- Expansion automation checks evaluated: `{payload['rollup']['expansion_automation_checks']}`",
+        f"- Expansion automation delivery board checklist items: `{payload['rollup']['expansion_automation_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
