@@ -182,10 +182,18 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    expansion_automation_summary = _resolve_existing_path(root, _DAY41_SUMMARY_PATH, _DAY41_LEGACY_SUMMARY_PATH)
-    expansion_automation_board = _resolve_existing_path(root, _DAY41_BOARD_PATH, _DAY41_LEGACY_BOARD_PATH)
-    expansion_automation_score, expansion_automation_strict, expansion_automation_check_count = _load_expansion_automation(expansion_automation_summary)
-    board_count, board_has_expansion_automation, board_has_optimization_closeout_foundation = _board_stats(expansion_automation_board)
+    expansion_automation_summary = _resolve_existing_path(
+        root, _DAY41_SUMMARY_PATH, _DAY41_LEGACY_SUMMARY_PATH
+    )
+    expansion_automation_board = _resolve_existing_path(
+        root, _DAY41_BOARD_PATH, _DAY41_LEGACY_BOARD_PATH
+    )
+    expansion_automation_score, expansion_automation_strict, expansion_automation_check_count = (
+        _load_expansion_automation(expansion_automation_summary)
+    )
+    board_count, board_has_expansion_automation, board_has_optimization_closeout_foundation = (
+        _board_stats(expansion_automation_board)
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -258,7 +266,9 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "expansion_automation_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_expansion_automation and board_has_optimization_closeout_foundation,
+            "passed": board_count >= 5
+            and board_has_expansion_automation
+            and board_has_optimization_closeout_foundation,
             "evidence": {
                 "board_items": board_count,
                 "contains_expansion_automation": board_has_expansion_automation,
@@ -298,14 +308,20 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if expansion_automation_strict:
-        wins.append(f"Day 41 continuity is strict-pass with activation score={expansion_automation_score}.")
+        wins.append(
+            f"Day 41 continuity is strict-pass with activation score={expansion_automation_score}."
+        )
     else:
         misses.append("Day 41 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 41 expansion automation command and restore strict pass baseline before Optimization Closeout Foundation lock."
         )
 
-    if board_count >= 5 and board_has_expansion_automation and board_has_optimization_closeout_foundation:
+    if (
+        board_count >= 5
+        and board_has_expansion_automation
+        and board_has_optimization_closeout_foundation
+    ):
         wins.append(
             f"Day 41 delivery board integrity validated with {board_count} checklist items."
         )

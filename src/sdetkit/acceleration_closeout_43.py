@@ -180,10 +180,18 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    optimization_closeout_summary = _resolve_existing_path(root, _DAY42_SUMMARY_PATH, _DAY42_LEGACY_SUMMARY_PATH)
-    optimization_closeout_board = _resolve_existing_path(root, _DAY42_BOARD_PATH, _DAY42_LEGACY_BOARD_PATH)
-    optimization_closeout_score, optimization_closeout_strict, optimization_closeout_check_count = _load_optimization_closeout(optimization_closeout_summary)
-    board_count, board_has_optimization_closeout, board_has_acceleration_closeout = _board_stats(optimization_closeout_board)
+    optimization_closeout_summary = _resolve_existing_path(
+        root, _DAY42_SUMMARY_PATH, _DAY42_LEGACY_SUMMARY_PATH
+    )
+    optimization_closeout_board = _resolve_existing_path(
+        root, _DAY42_BOARD_PATH, _DAY42_LEGACY_BOARD_PATH
+    )
+    optimization_closeout_score, optimization_closeout_strict, optimization_closeout_check_count = (
+        _load_optimization_closeout(optimization_closeout_summary)
+    )
+    board_count, board_has_optimization_closeout, board_has_acceleration_closeout = _board_stats(
+        optimization_closeout_board
+    )
 
     checks: list[dict[str, Any]] = [
         {
@@ -256,7 +264,9 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "optimization_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_optimization_closeout and board_has_acceleration_closeout,
+            "passed": board_count >= 5
+            and board_has_optimization_closeout
+            and board_has_acceleration_closeout,
             "evidence": {
                 "board_items": board_count,
                 "contains_optimization_closeout": board_has_optimization_closeout,
@@ -296,7 +306,9 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if optimization_closeout_strict:
-        wins.append(f"Day 42 continuity is strict-pass with activation score={optimization_closeout_score}.")
+        wins.append(
+            f"Day 42 continuity is strict-pass with activation score={optimization_closeout_score}."
+        )
     else:
         misses.append("Day 42 strict continuity signal is missing.")
         handoff_actions.append(
@@ -342,7 +354,9 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             "optimization_closeout_summary": str(optimization_closeout_summary.relative_to(root))
             if optimization_closeout_summary.exists()
             else str(optimization_closeout_summary),
-            "optimization_closeout_delivery_board": str(optimization_closeout_board.relative_to(root))
+            "optimization_closeout_delivery_board": str(
+                optimization_closeout_board.relative_to(root)
+            )
             if optimization_closeout_board.exists()
             else str(optimization_closeout_board),
         },
