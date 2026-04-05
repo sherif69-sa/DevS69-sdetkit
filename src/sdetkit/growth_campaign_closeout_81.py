@@ -151,17 +151,17 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day80_summary = root / _DAY80_SUMMARY_PATH
-    day80_board = root / _DAY80_BOARD_PATH
+    partner_outreach_summary = root / _DAY80_SUMMARY_PATH
+    partner_outreach_board = root / _DAY80_BOARD_PATH
 
-    day80_payload = _load_json(day80_summary)
-    day80_score = int(day80_payload.get("summary", {}).get("activation_score", 0) or 0)
-    day80_strict = bool(day80_payload.get("summary", {}).get("strict_pass", False))
-    day80_check_count = len(day80_payload.get("checks", []))
+    partner_outreach_payload = _load_json(partner_outreach_summary)
+    partner_outreach_score = int(partner_outreach_payload.get("summary", {}).get("activation_score", 0) or 0)
+    partner_outreach_strict = bool(partner_outreach_payload.get("summary", {}).get("strict_pass", False))
+    partner_outreach_check_count = len(partner_outreach_payload.get("checks", []))
 
-    board_text = _read_text(day80_board)
+    board_text = _read_text(partner_outreach_board)
     board_count = _checklist_count(board_text)
-    board_has_day80 = "Day 80" in board_text
+    board_has_partner_outreach = ("partner outreach" in board_text.lower() or "Day 80" in board_text)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -177,7 +177,7 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("growth-campaign-closeout" in readme_text),
-            "evidence": "README day81 command lane",
+            "evidence": "README growth-campaign-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -195,32 +195,32 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 80 + Day 81 strategy chain",
         },
         {
-            "check_id": "day80_summary_present",
+            "check_id": "partner_outreach_summary_present",
             "weight": 10,
-            "passed": day80_summary.exists(),
-            "evidence": str(day80_summary),
+            "passed": partner_outreach_summary.exists(),
+            "evidence": str(partner_outreach_summary),
         },
         {
-            "check_id": "day80_delivery_board_present",
+            "check_id": "partner_outreach_delivery_board_present",
             "weight": 7,
-            "passed": day80_board.exists(),
-            "evidence": str(day80_board),
+            "passed": partner_outreach_board.exists(),
+            "evidence": str(partner_outreach_board),
         },
         {
-            "check_id": "day80_quality_floor",
+            "check_id": "partner_outreach_quality_floor",
             "weight": 13,
-            "passed": day80_score >= 85,
+            "passed": partner_outreach_score >= 85,
             "evidence": {
-                "day80_score": day80_score,
-                "strict_pass": day80_strict,
-                "day80_checks": day80_check_count,
+                "partner_outreach_score": partner_outreach_score,
+                "strict_pass": partner_outreach_strict,
+                "partner_outreach_checks": partner_outreach_check_count,
             },
         },
         {
-            "check_id": "day80_board_integrity",
+            "check_id": "partner_outreach_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day80,
-            "evidence": {"board_items": board_count, "contains_day80": board_has_day80},
+            "passed": board_count >= 5 and board_has_partner_outreach,
+            "evidence": {"board_items": board_count, "contains_partner_outreach": board_has_partner_outreach},
         },
         {
             "check_id": "page_header",
@@ -268,22 +268,22 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day80_summary.exists() or not day80_board.exists():
-        critical_failures.append("day80_handoff_inputs")
+    if not partner_outreach_summary.exists() or not partner_outreach_board.exists():
+        critical_failures.append("partner_outreach_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day80_score >= 85:
-        wins.append(f"Day 80 continuity baseline is stable with activation score={day80_score}.")
+    if partner_outreach_score >= 85:
+        wins.append(f"Partner Outreach continuity baseline is stable with activation score={partner_outreach_score}.")
     else:
         misses.append("Day 80 continuity baseline is below the floor (<85).")
         handoff_actions.append(
             "Re-run Day 80 closeout command and raise baseline quality above 85 before Day 81 lock."
         )
 
-    if board_count >= 5 and board_has_day80:
+    if board_count >= 5 and board_has_partner_outreach:
         wins.append(
             f"Day 80 delivery board integrity validated with {board_count} checklist items."
         )
@@ -314,19 +314,19 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day80_summary": str(day80_summary.relative_to(root))
-            if day80_summary.exists()
-            else str(day80_summary),
-            "day80_delivery_board": str(day80_board.relative_to(root))
-            if day80_board.exists()
-            else str(day80_board),
+            "partner_outreach_summary": str(partner_outreach_summary.relative_to(root))
+            if partner_outreach_summary.exists()
+            else str(partner_outreach_summary),
+            "partner_outreach_delivery_board": str(partner_outreach_board.relative_to(root))
+            if partner_outreach_board.exists()
+            else str(partner_outreach_board),
             "growth_campaign_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day80_activation_score": day80_score,
-            "day80_checks": day80_check_count,
-            "day80_delivery_board_items": board_count,
+            "partner_outreach_activation_score": partner_outreach_score,
+            "partner_outreach_checks": partner_outreach_check_count,
+            "partner_outreach_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

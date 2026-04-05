@@ -129,7 +129,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day76(summary_path: Path) -> tuple[int, bool, int]:
+def _load_contributor_recognition(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     data = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -157,10 +157,10 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     plan_text = _read(root / _PLAN_PATH)
 
-    day76_summary = root / _DAY76_SUMMARY_PATH
-    day76_board = root / _DAY76_BOARD_PATH
-    day76_score, day76_strict, day76_check_count = _load_day76(day76_summary)
-    board_count, board_has_day76 = _count_board_items(day76_board, "Day 76")
+    contributor_recognition_summary = root / _DAY76_SUMMARY_PATH
+    contributor_recognition_board = root / _DAY76_BOARD_PATH
+    contributor_recognition_score, contributor_recognition_strict, contributor_recognition_check_count = _load_contributor_recognition(contributor_recognition_summary)
+    board_count, board_has_contributor_recognition = _count_board_items(contributor_recognition_board, "Day 76")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -194,32 +194,32 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Contributor recognition + community touchpoint strategy chain",
         },
         {
-            "check_id": "day76_summary_present",
+            "check_id": "contributor_recognition_summary_present",
             "weight": 10,
-            "passed": day76_summary.exists(),
-            "evidence": str(day76_summary),
+            "passed": contributor_recognition_summary.exists(),
+            "evidence": str(contributor_recognition_summary),
         },
         {
-            "check_id": "day76_delivery_board_present",
+            "check_id": "contributor_recognition_delivery_board_present",
             "weight": 7,
-            "passed": day76_board.exists(),
-            "evidence": str(day76_board),
+            "passed": contributor_recognition_board.exists(),
+            "evidence": str(contributor_recognition_board),
         },
         {
-            "check_id": "day76_quality_floor",
+            "check_id": "contributor_recognition_quality_floor",
             "weight": 13,
-            "passed": day76_strict and day76_score >= 95,
+            "passed": contributor_recognition_strict and contributor_recognition_score >= 95,
             "evidence": {
-                "day76_score": day76_score,
-                "strict_pass": day76_strict,
-                "day76_checks": day76_check_count,
+                "contributor_recognition_score": contributor_recognition_score,
+                "strict_pass": contributor_recognition_strict,
+                "contributor_recognition_checks": contributor_recognition_check_count,
             },
         },
         {
-            "check_id": "day76_board_integrity",
+            "check_id": "contributor_recognition_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day76,
-            "evidence": {"board_items": board_count, "contains_day76": board_has_day76},
+            "passed": board_count >= 5 and board_has_contributor_recognition,
+            "evidence": {"board_items": board_count, "contains_contributor_recognition": board_has_contributor_recognition},
         },
         {
             "check_id": "page_header",
@@ -267,24 +267,24 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day76_summary.exists() or not day76_board.exists():
-        critical_failures.append("day76_handoff_inputs")
-    if not day76_strict:
-        critical_failures.append("day76_strict_baseline")
+    if not contributor_recognition_summary.exists() or not contributor_recognition_board.exists():
+        critical_failures.append("contributor_recognition_handoff_inputs")
+    if not contributor_recognition_strict:
+        critical_failures.append("contributor_recognition_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day76_strict:
-        wins.append(f"Day 76 continuity is strict-pass with activation score={day76_score}.")
+    if contributor_recognition_strict:
+        wins.append(f"Day 76 continuity is strict-pass with activation score={contributor_recognition_score}.")
     else:
         misses.append("Day 76 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 76 closeout command and restore strict baseline before Day 77 lock."
         )
 
-    if board_count >= 5 and board_has_day76:
+    if board_count >= 5 and board_has_contributor_recognition:
         wins.append(
             f"Day 76 delivery board integrity validated with {board_count} checklist items."
         )
@@ -315,19 +315,19 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day76_summary": str(day76_summary.relative_to(root))
-            if day76_summary.exists()
-            else str(day76_summary),
-            "day76_delivery_board": str(day76_board.relative_to(root))
-            if day76_board.exists()
-            else str(day76_board),
+            "contributor_recognition_summary": str(contributor_recognition_summary.relative_to(root))
+            if contributor_recognition_summary.exists()
+            else str(contributor_recognition_summary),
+            "contributor_recognition_delivery_board": str(contributor_recognition_board.relative_to(root))
+            if contributor_recognition_board.exists()
+            else str(contributor_recognition_board),
             "touchpoint_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day76_activation_score": day76_score,
-            "day76_checks": day76_check_count,
-            "day76_delivery_board_items": board_count,
+            "contributor_recognition_activation_score": contributor_recognition_score,
+            "contributor_recognition_checks": contributor_recognition_check_count,
+            "contributor_recognition_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

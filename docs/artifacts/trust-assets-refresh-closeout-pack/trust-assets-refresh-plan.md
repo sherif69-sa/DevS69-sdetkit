@@ -1,1 +1,1 @@
-# Cycle 75 trust assets refresh plan
+# Day 75 trust assets refresh plan

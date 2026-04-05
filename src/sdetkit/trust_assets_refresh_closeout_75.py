@@ -131,7 +131,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day74(summary_path: Path) -> tuple[int, bool, int]:
+def _load_distribution_scaling(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     data = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -159,10 +159,10 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     trust_plan_text = _read(root / _TRUST_PLAN_PATH)
 
-    day74_summary = root / _DAY74_SUMMARY_PATH
-    day74_board = root / _DAY74_BOARD_PATH
-    day74_score, day74_strict, day74_check_count = _load_day74(day74_summary)
-    board_count, board_has_day74 = _count_board_items(day74_board, "Day 74")
+    distribution_scaling_summary = root / _DAY74_SUMMARY_PATH
+    distribution_scaling_board = root / _DAY74_BOARD_PATH
+    distribution_scaling_score, distribution_scaling_strict, distribution_scaling_check_count = _load_distribution_scaling(distribution_scaling_summary)
+    board_count, board_has_distribution_scaling = _count_board_items(distribution_scaling_board, "Day 74")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -179,7 +179,7 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
                 "trust-assets-refresh-closeout" in readme_text
                 or "trust-assets-refresh-closeout" in readme_text
             ),
-            "evidence": "README day75 command lane",
+            "evidence": "README trust-assets-refresh-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -197,32 +197,32 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 75 + Day 76 strategy chain",
         },
         {
-            "check_id": "day74_summary_present",
+            "check_id": "distribution_scaling_summary_present",
             "weight": 10,
-            "passed": day74_summary.exists(),
-            "evidence": str(day74_summary),
+            "passed": distribution_scaling_summary.exists(),
+            "evidence": str(distribution_scaling_summary),
         },
         {
-            "check_id": "day74_delivery_board_present",
+            "check_id": "distribution_scaling_delivery_board_present",
             "weight": 7,
-            "passed": day74_board.exists(),
-            "evidence": str(day74_board),
+            "passed": distribution_scaling_board.exists(),
+            "evidence": str(distribution_scaling_board),
         },
         {
-            "check_id": "day74_quality_floor",
+            "check_id": "distribution_scaling_quality_floor",
             "weight": 13,
-            "passed": day74_strict and day74_score >= 95,
+            "passed": distribution_scaling_strict and distribution_scaling_score >= 95,
             "evidence": {
-                "day74_score": day74_score,
-                "strict_pass": day74_strict,
-                "day74_checks": day74_check_count,
+                "distribution_scaling_score": distribution_scaling_score,
+                "strict_pass": distribution_scaling_strict,
+                "distribution_scaling_checks": distribution_scaling_check_count,
             },
         },
         {
-            "check_id": "day74_board_integrity",
+            "check_id": "distribution_scaling_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day74,
-            "evidence": {"board_items": board_count, "contains_day74": board_has_day74},
+            "passed": board_count >= 5 and board_has_distribution_scaling,
+            "evidence": {"board_items": board_count, "contains_distribution_scaling": board_has_distribution_scaling},
         },
         {
             "check_id": "page_header",
@@ -270,24 +270,24 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day74_summary.exists() or not day74_board.exists():
-        critical_failures.append("day74_handoff_inputs")
-    if not day74_strict:
-        critical_failures.append("day74_strict_baseline")
+    if not distribution_scaling_summary.exists() or not distribution_scaling_board.exists():
+        critical_failures.append("distribution_scaling_handoff_inputs")
+    if not distribution_scaling_strict:
+        critical_failures.append("distribution_scaling_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day74_strict:
-        wins.append(f"Day 74 continuity is strict-pass with activation score={day74_score}.")
+    if distribution_scaling_strict:
+        wins.append(f"Day 74 continuity is strict-pass with activation score={distribution_scaling_score}.")
     else:
         misses.append("Day 74 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 74 closeout command and restore strict baseline before Day 75 lock."
         )
 
-    if board_count >= 5 and board_has_day74:
+    if board_count >= 5 and board_has_distribution_scaling:
         wins.append(
             f"Day 74 delivery board integrity validated with {board_count} checklist items."
         )
@@ -318,19 +318,19 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day74_summary": str(day74_summary.relative_to(root))
-            if day74_summary.exists()
-            else str(day74_summary),
-            "day74_delivery_board": str(day74_board.relative_to(root))
-            if day74_board.exists()
-            else str(day74_board),
+            "distribution_scaling_summary": str(distribution_scaling_summary.relative_to(root))
+            if distribution_scaling_summary.exists()
+            else str(distribution_scaling_summary),
+            "distribution_scaling_delivery_board": str(distribution_scaling_board.relative_to(root))
+            if distribution_scaling_board.exists()
+            else str(distribution_scaling_board),
             "trust_refresh_plan": _TRUST_PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day74_activation_score": day74_score,
-            "day74_checks": day74_check_count,
-            "day74_delivery_board_items": board_count,
+            "distribution_scaling_activation_score": distribution_scaling_score,
+            "distribution_scaling_checks": distribution_scaling_check_count,
+            "distribution_scaling_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

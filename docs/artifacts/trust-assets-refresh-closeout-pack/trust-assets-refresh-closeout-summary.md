@@ -1,5 +1,5 @@
 Trust Assets Refresh Closeout summary
-- Activation score: 67
-- Passed checks: 10
-- Failed checks: 4
-- Critical failures: ['day74_strict_baseline']
+- Activation score: 42
+- Passed checks: 6
+- Failed checks: 8
+- Critical failures: ['distribution_scaling_strict_baseline']

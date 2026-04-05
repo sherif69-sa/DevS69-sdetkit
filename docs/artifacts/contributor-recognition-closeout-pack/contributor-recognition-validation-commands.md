@@ -1,4 +1,4 @@
-# Cycle 76 validation commands
+# Day 76 validation commands
 
 ```bash
 python -m sdetkit contributor-recognition-closeout --format json --strict

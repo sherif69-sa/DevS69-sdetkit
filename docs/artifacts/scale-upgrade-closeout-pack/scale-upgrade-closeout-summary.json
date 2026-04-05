@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-scale-upgrade-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day78_summary": "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json",
-    "day78_delivery_board": "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md",
+    "ecosystem_priorities_summary": "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json",
+    "ecosystem_priorities_delivery_board": "docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md",
     "scale_upgrade_plan": "docs/roadmap/plans/scale-upgrade-plan.json"
   },
   "checks": [
@@ -29,34 +29,34 @@
       "evidence": "Ecosystem priorities + scale upgrade strategy chain"
     },
     {
-      "check_id": "day78_summary_present",
+      "check_id": "ecosystem_priorities_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json"
     },
     {
-      "check_id": "day78_delivery_board_present",
+      "check_id": "ecosystem_priorities_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md"
     },
     {
-      "check_id": "day78_quality_floor",
+      "check_id": "ecosystem_priorities_quality_floor",
       "weight": 13,
-      "passed": true,
+      "passed": false,
       "evidence": {
-        "day78_score": 100,
-        "strict_pass": true,
-        "day78_checks": 14
+        "ecosystem_priorities_score": 69,
+        "strict_pass": false,
+        "ecosystem_priorities_checks": 14
       }
     },
     {
-      "check_id": "day78_board_integrity",
+      "check_id": "ecosystem_priorities_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day78": true
+        "contains_ecosystem_priorities": true
       }
     },
     {
@@ -68,8 +68,10 @@
     {
       "check_id": "required_sections",
       "weight": 8,
-      "passed": true,
-      "evidence": "all sections present"
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 78)"
+      ]
     },
     {
       "check_id": "required_commands",
@@ -80,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 79 scale upgrade execution and signoff.",
+        "The Day 79 lane references Day 78 outcomes, controls, and KPI continuity signals.",
+        "Every Day 79 section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 79 closeout records enterprise onboarding outcomes, confidence notes, and Day 80 partner outreach priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -92,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 79 integration brief committed",
+        "- [ ] Day 79 scale upgrade plan committed",
+        "- [ ] Day 79 enterprise execution ledger exported",
+        "- [ ] Day 79 enterprise KPI scorecard snapshot exported",
+        "- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings"
+      ]
     },
     {
       "check_id": "scale_plan_data_present",
@@ -103,22 +116,25 @@
     }
   ],
   "rollup": {
-    "day78_activation_score": 100,
-    "day78_checks": 14,
-    "day78_delivery_board_items": 5
+    "ecosystem_priorities_activation_score": 69,
+    "ecosystem_priorities_checks": 14,
+    "ecosystem_priorities_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 92,
-    "passed_checks": 13,
-    "failed_checks": 1,
+    "activation_score": 61,
+    "passed_checks": 9,
+    "failed_checks": 5,
     "critical_failures": [],
     "strict_pass": false
   },
   "wins": [
-    "Day 78 continuity baseline is stable with activation score=100.",
     "Day 78 delivery board integrity validated with 5 checklist items.",
     "Day 79 scale upgrade dataset is available for launch execution."
   ],
-  "misses": [],
-  "handoff_actions": []
+  "misses": [
+    "Day 78 continuity baseline is below the floor (<85)."
+  ],
+  "handoff_actions": [
+    "Re-run Day 78 closeout command and raise baseline quality above 85 before Day 79 lock."
+  ]
 }

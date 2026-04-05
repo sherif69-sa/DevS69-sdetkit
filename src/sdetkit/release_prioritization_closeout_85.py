@@ -145,22 +145,22 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day84_summary = root / _DAY84_SUMMARY_PATH
-    day84_board = root / _DAY84_BOARD_PATH
+    evidence_narrative_summary = root / _DAY84_SUMMARY_PATH
+    evidence_narrative_board = root / _DAY84_BOARD_PATH
 
-    day84_data = _load_json(day84_summary)
-    day84_summary_data = (
-        day84_data.get("summary", {}) if isinstance(day84_data.get("summary"), dict) else {}
+    evidence_narrative_data = _load_json(evidence_narrative_summary)
+    evidence_narrative_summary_data = (
+        evidence_narrative_data.get("summary", {}) if isinstance(evidence_narrative_data.get("summary"), dict) else {}
     )
-    day84_score = int(day84_summary_data.get("activation_score", 0) or 0)
-    day84_strict = bool(day84_summary_data.get("strict_pass", False))
-    day84_check_count = (
-        len(day84_data.get("checks", [])) if isinstance(day84_data.get("checks"), list) else 0
+    evidence_narrative_score = int(evidence_narrative_summary_data.get("activation_score", 0) or 0)
+    evidence_narrative_strict = bool(evidence_narrative_summary_data.get("strict_pass", False))
+    evidence_narrative_check_count = (
+        len(evidence_narrative_data.get("checks", [])) if isinstance(evidence_narrative_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day84_board)
+    board_text = _read_text(evidence_narrative_board)
     board_count = _checklist_count(board_text)
-    board_has_day84 = "Day 84" in board_text
+    board_has_evidence_narrative = ("evidence narrative" in board_text.lower() or "Day 84" in board_text)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -176,7 +176,7 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("release-prioritization-closeout" in readme_text),
-            "evidence": "README day85 command lane",
+            "evidence": "README release-prioritization-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -194,32 +194,32 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 84 + Day 85 strategy chain",
         },
         {
-            "check_id": "day84_summary_present",
+            "check_id": "evidence_narrative_summary_present",
             "weight": 10,
-            "passed": day84_summary.exists(),
-            "evidence": str(day84_summary),
+            "passed": evidence_narrative_summary.exists(),
+            "evidence": str(evidence_narrative_summary),
         },
         {
-            "check_id": "day84_delivery_board_present",
+            "check_id": "evidence_narrative_delivery_board_present",
             "weight": 7,
-            "passed": day84_board.exists(),
-            "evidence": str(day84_board),
+            "passed": evidence_narrative_board.exists(),
+            "evidence": str(evidence_narrative_board),
         },
         {
-            "check_id": "day84_quality_floor",
+            "check_id": "evidence_narrative_quality_floor",
             "weight": 13,
-            "passed": day84_score >= 85 and day84_strict,
+            "passed": evidence_narrative_score >= 85 and evidence_narrative_strict,
             "evidence": {
-                "day84_score": day84_score,
-                "strict_pass": day84_strict,
-                "day84_checks": day84_check_count,
+                "evidence_narrative_score": evidence_narrative_score,
+                "strict_pass": evidence_narrative_strict,
+                "evidence_narrative_checks": evidence_narrative_check_count,
             },
         },
         {
-            "check_id": "day84_board_integrity",
+            "check_id": "evidence_narrative_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day84,
-            "evidence": {"board_items": board_count, "contains_day84": board_has_day84},
+            "passed": board_count >= 5 and board_has_evidence_narrative,
+            "evidence": {"board_items": board_count, "contains_evidence_narrative": board_has_evidence_narrative},
         },
         {
             "check_id": "page_header",
@@ -267,22 +267,22 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day84_summary.exists() or not day84_board.exists():
-        critical_failures.append("day84_handoff_inputs")
+    if not evidence_narrative_summary.exists() or not evidence_narrative_board.exists():
+        critical_failures.append("evidence_narrative_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day84_score >= 85 and day84_strict:
-        wins.append(f"Day 84 continuity baseline is stable with activation score={day84_score}.")
+    if evidence_narrative_score >= 85 and evidence_narrative_strict:
+        wins.append(f"Evidence Narrative continuity baseline is stable with activation score={evidence_narrative_score}.")
     else:
         misses.append("Day 84 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 84 closeout command and raise baseline quality above 85 with strict pass before Day 85 lock."
         )
 
-    if board_count >= 5 and board_has_day84:
+    if board_count >= 5 and board_has_evidence_narrative:
         wins.append(
             f"Day 84 delivery board integrity validated with {board_count} checklist items."
         )
@@ -313,19 +313,19 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day84_summary": str(day84_summary.relative_to(root))
-            if day84_summary.exists()
-            else str(day84_summary),
-            "day84_delivery_board": str(day84_board.relative_to(root))
-            if day84_board.exists()
-            else str(day84_board),
+            "evidence_narrative_summary": str(evidence_narrative_summary.relative_to(root))
+            if evidence_narrative_summary.exists()
+            else str(evidence_narrative_summary),
+            "evidence_narrative_delivery_board": str(evidence_narrative_board.relative_to(root))
+            if evidence_narrative_board.exists()
+            else str(evidence_narrative_board),
             "release_prioritization_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day84_activation_score": day84_score,
-            "day84_checks": day84_check_count,
-            "day84_delivery_board_items": board_count,
+            "evidence_narrative_activation_score": evidence_narrative_score,
+            "evidence_narrative_checks": evidence_narrative_check_count,
+            "evidence_narrative_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

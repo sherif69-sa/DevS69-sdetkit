@@ -153,22 +153,22 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day82_summary = root / _DAY82_SUMMARY_PATH
-    day82_board = root / _DAY82_BOARD_PATH
+    integration_feedback_summary = root / _DAY82_SUMMARY_PATH
+    integration_feedback_board = root / _DAY82_BOARD_PATH
 
-    day82_data = _load_json(day82_summary)
-    day82_summary_data = (
-        day82_data.get("summary", {}) if isinstance(day82_data.get("summary"), dict) else {}
+    integration_feedback_data = _load_json(integration_feedback_summary)
+    integration_feedback_summary_data = (
+        integration_feedback_data.get("summary", {}) if isinstance(integration_feedback_data.get("summary"), dict) else {}
     )
-    day82_score = int(day82_summary_data.get("activation_score", 0) or 0)
-    day82_strict = bool(day82_summary_data.get("strict_pass", False))
-    day82_check_count = (
-        len(day82_data.get("checks", [])) if isinstance(day82_data.get("checks"), list) else 0
+    integration_feedback_score = int(integration_feedback_summary_data.get("activation_score", 0) or 0)
+    integration_feedback_strict = bool(integration_feedback_summary_data.get("strict_pass", False))
+    integration_feedback_check_count = (
+        len(integration_feedback_data.get("checks", [])) if isinstance(integration_feedback_data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(day82_board)
+    board_text = _read_text(integration_feedback_board)
     board_count = _checklist_count(board_text)
-    board_has_day82 = "Day 82" in board_text
+    board_has_integration_feedback = ("integration feedback" in board_text.lower() or "Day 82" in board_text)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -184,7 +184,7 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 7,
             "passed": ("trust-faq-expansion-closeout" in readme_text),
-            "evidence": "README day83 command lane",
+            "evidence": "README trust-faq-expansion-closeout command lane",
         },
         {
             "check_id": "docs_index_links",
@@ -202,32 +202,32 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 82 + Day 83 strategy chain",
         },
         {
-            "check_id": "day82_summary_present",
+            "check_id": "integration_feedback_summary_present",
             "weight": 10,
-            "passed": day82_summary.exists(),
-            "evidence": str(day82_summary),
+            "passed": integration_feedback_summary.exists(),
+            "evidence": str(integration_feedback_summary),
         },
         {
-            "check_id": "day82_delivery_board_present",
+            "check_id": "integration_feedback_delivery_board_present",
             "weight": 7,
-            "passed": day82_board.exists(),
-            "evidence": str(day82_board),
+            "passed": integration_feedback_board.exists(),
+            "evidence": str(integration_feedback_board),
         },
         {
-            "check_id": "day82_quality_floor",
+            "check_id": "integration_feedback_quality_floor",
             "weight": 13,
-            "passed": day82_score >= 85 and day82_strict,
+            "passed": integration_feedback_score >= 85 and integration_feedback_strict,
             "evidence": {
-                "day82_score": day82_score,
-                "strict_pass": day82_strict,
-                "day82_checks": day82_check_count,
+                "integration_feedback_score": integration_feedback_score,
+                "strict_pass": integration_feedback_strict,
+                "integration_feedback_checks": integration_feedback_check_count,
             },
         },
         {
-            "check_id": "day82_board_integrity",
+            "check_id": "integration_feedback_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day82,
-            "evidence": {"board_items": board_count, "contains_day82": board_has_day82},
+            "passed": board_count >= 5 and board_has_integration_feedback,
+            "evidence": {"board_items": board_count, "contains_integration_feedback": board_has_integration_feedback},
         },
         {
             "check_id": "page_header",
@@ -275,22 +275,22 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day82_summary.exists() or not day82_board.exists():
-        critical_failures.append("day82_handoff_inputs")
+    if not integration_feedback_summary.exists() or not integration_feedback_board.exists():
+        critical_failures.append("integration_feedback_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day82_score >= 85 and day82_strict:
-        wins.append(f"Day 82 continuity baseline is stable with activation score={day82_score}.")
+    if integration_feedback_score >= 85 and integration_feedback_strict:
+        wins.append(f"Integration Feedback continuity baseline is stable with activation score={integration_feedback_score}.")
     else:
         misses.append("Day 82 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
             "Re-run Day 82 closeout command and raise baseline quality above 85 with strict pass before Day 83 lock."
         )
 
-    if board_count >= 5 and board_has_day82:
+    if board_count >= 5 and board_has_integration_feedback:
         wins.append(
             f"Day 82 delivery board integrity validated with {board_count} checklist items."
         )
@@ -321,19 +321,19 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day82_summary": str(day82_summary.relative_to(root))
-            if day82_summary.exists()
-            else str(day82_summary),
-            "day82_delivery_board": str(day82_board.relative_to(root))
-            if day82_board.exists()
-            else str(day82_board),
+            "integration_feedback_summary": str(integration_feedback_summary.relative_to(root))
+            if integration_feedback_summary.exists()
+            else str(integration_feedback_summary),
+            "integration_feedback_delivery_board": str(integration_feedback_board.relative_to(root))
+            if integration_feedback_board.exists()
+            else str(integration_feedback_board),
             "trust_faq_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day82_activation_score": day82_score,
-            "day82_checks": day82_check_count,
-            "day82_delivery_board_items": board_count,
+            "integration_feedback_activation_score": integration_feedback_score,
+            "integration_feedback_checks": integration_feedback_check_count,
+            "integration_feedback_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

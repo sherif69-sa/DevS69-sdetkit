@@ -131,7 +131,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _load_day77(summary_path: Path) -> tuple[int, bool, int]:
+def _load_community_touchpoint(summary_path: Path) -> tuple[int, bool, int]:
     if not summary_path.exists():
         return 0, False, 0
     data = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -159,10 +159,10 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     plan_text = _read(root / _PLAN_PATH)
 
-    day77_summary = root / _DAY77_SUMMARY_PATH
-    day77_board = root / _DAY77_BOARD_PATH
-    day77_score, day77_strict, day77_check_count = _load_day77(day77_summary)
-    board_count, board_has_day77 = _count_board_items(day77_board, "Day 77")
+    community_touchpoint_summary = root / _DAY77_SUMMARY_PATH
+    community_touchpoint_board = root / _DAY77_BOARD_PATH
+    community_touchpoint_score, community_touchpoint_strict, community_touchpoint_check_count = _load_community_touchpoint(community_touchpoint_summary)
+    board_count, board_has_community_touchpoint = _count_board_items(community_touchpoint_board, "Day 77")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -196,30 +196,30 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "community_touchpoint_summary_present",
             "weight": 10,
-            "passed": day77_summary.exists(),
-            "evidence": str(day77_summary),
+            "passed": community_touchpoint_summary.exists(),
+            "evidence": str(community_touchpoint_summary),
         },
         {
             "check_id": "community_touchpoint_delivery_board_present",
             "weight": 7,
-            "passed": day77_board.exists(),
-            "evidence": str(day77_board),
+            "passed": community_touchpoint_board.exists(),
+            "evidence": str(community_touchpoint_board),
         },
         {
             "check_id": "community_touchpoint_quality_floor",
             "weight": 13,
-            "passed": day77_score >= 85,
+            "passed": community_touchpoint_score >= 85,
             "evidence": {
-                "day77_score": day77_score,
-                "strict_pass": day77_strict,
-                "community_touchpoint_checks": day77_check_count,
+                "community_touchpoint_score": community_touchpoint_score,
+                "strict_pass": community_touchpoint_strict,
+                "community_touchpoint_checks": community_touchpoint_check_count,
             },
         },
         {
             "check_id": "community_touchpoint_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day77,
-            "evidence": {"board_items": board_count, "contains_day77": board_has_day77},
+            "passed": board_count >= 5 and board_has_community_touchpoint,
+            "evidence": {"board_items": board_count, "contains_community_touchpoint": board_has_community_touchpoint},
         },
         {
             "check_id": "page_header",
@@ -267,16 +267,16 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day77_summary.exists() or not day77_board.exists():
-        critical_failures.append("day77_handoff_inputs")
+    if not community_touchpoint_summary.exists() or not community_touchpoint_board.exists():
+        critical_failures.append("community_touchpoint_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day77_score >= 85:
+    if community_touchpoint_score >= 85:
         wins.append(
-            f"Community touchpoint continuity baseline is stable with activation score={day77_score}."
+            f"Community touchpoint continuity baseline is stable with activation score={community_touchpoint_score}."
         )
     else:
         misses.append("Community touchpoint continuity baseline is below the floor (<85).")
@@ -284,7 +284,7 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
             "Re-run Day 77 closeout command and raise baseline quality above 85 before Day 78 lock."
         )
 
-    if board_count >= 5 and board_has_day77:
+    if board_count >= 5 and board_has_community_touchpoint:
         wins.append(
             f"Community touchpoint delivery board integrity validated with {board_count} checklist items."
         )
@@ -315,18 +315,18 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day77_summary": str(day77_summary.relative_to(root))
-            if day77_summary.exists()
-            else str(day77_summary),
-            "day77_delivery_board": str(day77_board.relative_to(root))
-            if day77_board.exists()
-            else str(day77_board),
+            "community_touchpoint_summary": str(community_touchpoint_summary.relative_to(root))
+            if community_touchpoint_summary.exists()
+            else str(community_touchpoint_summary),
+            "community_touchpoint_delivery_board": str(community_touchpoint_board.relative_to(root))
+            if community_touchpoint_board.exists()
+            else str(community_touchpoint_board),
             "ecosystem_priorities_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "community_touchpoint_activation_score": day77_score,
-            "community_touchpoint_checks": day77_check_count,
+            "community_touchpoint_activation_score": community_touchpoint_score,
+            "community_touchpoint_checks": community_touchpoint_check_count,
             "community_touchpoint_delivery_board_items": board_count,
         },
         "summary": {

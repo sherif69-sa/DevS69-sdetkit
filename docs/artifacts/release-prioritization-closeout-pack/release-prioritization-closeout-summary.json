@@ -1,23 +1,140 @@
 {
-  "summary": {
-    "activation_score": 100,
-    "strict_pass": true
+  "name": "release-prioritization-closeout",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-release-prioritization-closeout.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "evidence_narrative_summary": "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json",
+    "evidence_narrative_delivery_board": "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md",
+    "release_prioritization_plan": "docs/roadmap/plans/release-prioritization-plan.json"
   },
   "checks": [
     {
-      "passed": true
+      "check_id": "readme_command_lane",
+      "weight": 7,
+      "passed": false,
+      "evidence": "README release-prioritization-closeout command lane"
     },
     {
-      "passed": true
+      "check_id": "docs_index_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-85-big-upgrade-report.md + integrations-release-prioritization-closeout.md"
     },
     {
-      "passed": true
+      "check_id": "top10_strategy_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Day 84 + Day 85 strategy chain"
     },
     {
-      "passed": true
+      "check_id": "evidence_narrative_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json"
     },
     {
-      "passed": true
+      "check_id": "evidence_narrative_delivery_board_present",
+      "weight": 7,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
+    },
+    {
+      "check_id": "evidence_narrative_quality_floor",
+      "weight": 13,
+      "passed": false,
+      "evidence": {
+        "evidence_narrative_score": 37,
+        "strict_pass": false,
+        "evidence_narrative_checks": 14
+      }
+    },
+    {
+      "check_id": "evidence_narrative_board_integrity",
+      "weight": 5,
+      "passed": true,
+      "evidence": {
+        "board_items": 5,
+        "contains_evidence_narrative": true
+      }
+    },
+    {
+      "check_id": "page_header",
+      "weight": 7,
+      "passed": false,
+      "evidence": "# Day 85 \u2014 Release prioritization closeout lane"
+    },
+    {
+      "check_id": "required_sections",
+      "weight": 8,
+      "passed": false,
+      "evidence": [
+        "## Required inputs (Day 84)"
+      ]
+    },
+    {
+      "check_id": "required_commands",
+      "weight": 5,
+      "passed": true,
+      "evidence": "all commands present"
+    },
+    {
+      "check_id": "contract_lock",
+      "weight": 5,
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 85 release prioritization execution and signoff.",
+        "The Day 85 lane references Day 84 outcomes, controls, and trust continuity signals.",
+        "Every Day 85 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 85 closeout records release prioritization pack upgrades, storyline outcomes, and Day 86 launch priorities."
+      ]
+    },
+    {
+      "check_id": "quality_checklist_lock",
+      "weight": 5,
+      "passed": true,
+      "evidence": "quality checklist locked"
+    },
+    {
+      "check_id": "delivery_board_lock",
+      "weight": 5,
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 85 evidence brief committed",
+        "- [ ] Day 85 release prioritization plan committed",
+        "- [ ] Day 85 narrative template upgrade ledger exported",
+        "- [ ] Day 85 storyline outcomes ledger exported",
+        "- [ ] Day 86 launch priorities drafted from Day 85 outcomes"
+      ]
+    },
+    {
+      "check_id": "evidence_plan_data_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "docs/roadmap/plans/release-prioritization-plan.json"
     }
+  ],
+  "rollup": {
+    "evidence_narrative_activation_score": 37,
+    "evidence_narrative_checks": 14,
+    "evidence_narrative_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 42,
+    "passed_checks": 6,
+    "failed_checks": 8,
+    "critical_failures": [],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 84 delivery board integrity validated with 5 checklist items.",
+    "Day 85 release prioritization dataset is available for launch execution."
+  ],
+  "misses": [
+    "Day 84 continuity baseline is below the floor (<85) or not strict-pass."
+  ],
+  "handoff_actions": [
+    "Re-run Day 84 closeout command and raise baseline quality above 85 with strict pass before Day 85 lock."
   ]
 }

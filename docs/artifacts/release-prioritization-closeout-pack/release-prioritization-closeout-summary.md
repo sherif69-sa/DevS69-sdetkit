@@ -1,5 +1,5 @@
-Cycle 85 release prioritization closeout summary
-- Activation score: 65
-- Passed checks: 10
-- Failed checks: 4
-- Critical failures: ['day84_handoff_inputs']
+Day 85 release prioritization closeout summary
+- Activation score: 42
+- Passed checks: 6
+- Failed checks: 8
+- Critical failures: []

@@ -145,24 +145,24 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
 
-    day79_summary = root / _DAY79_SUMMARY_PATH
-    day79_board = root / _DAY79_BOARD_PATH
-    day79_payload = _load_json(day79_summary)
-    day79_score = int(day79_payload.get("summary", {}).get("activation_score", 0) or 0)
-    day79_strict = bool(day79_payload.get("summary", {}).get("strict_pass", False))
-    day79_check_count = (
-        len(day79_payload.get("checks", []))
-        if isinstance(day79_payload.get("checks", []), list)
+    scale_upgrade_summary = root / _DAY79_SUMMARY_PATH
+    scale_upgrade_board = root / _DAY79_BOARD_PATH
+    scale_upgrade_payload = _load_json(scale_upgrade_summary)
+    scale_upgrade_score = int(scale_upgrade_payload.get("summary", {}).get("activation_score", 0) or 0)
+    scale_upgrade_strict = bool(scale_upgrade_payload.get("summary", {}).get("strict_pass", False))
+    scale_upgrade_check_count = (
+        len(scale_upgrade_payload.get("checks", []))
+        if isinstance(scale_upgrade_payload.get("checks", []), list)
         else 0
     )
 
     board_lines = [
         line.strip()
-        for line in _read_text(day79_board).splitlines()
+        for line in _read_text(scale_upgrade_board).splitlines()
         if line.strip().startswith("- [")
     ]
     board_count = len(board_lines)
-    board_has_day79 = any("Day 79" in line for line in board_lines)
+    board_has_scale_upgrade = any("Day 79" in line for line in board_lines)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -196,32 +196,32 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Scale upgrade + partner outreach strategy chain",
         },
         {
-            "check_id": "day79_summary_present",
+            "check_id": "scale_upgrade_summary_present",
             "weight": 10,
-            "passed": day79_summary.exists(),
-            "evidence": str(day79_summary),
+            "passed": scale_upgrade_summary.exists(),
+            "evidence": str(scale_upgrade_summary),
         },
         {
-            "check_id": "day79_delivery_board_present",
+            "check_id": "scale_upgrade_delivery_board_present",
             "weight": 7,
-            "passed": day79_board.exists(),
-            "evidence": str(day79_board),
+            "passed": scale_upgrade_board.exists(),
+            "evidence": str(scale_upgrade_board),
         },
         {
-            "check_id": "day79_quality_floor",
+            "check_id": "scale_upgrade_quality_floor",
             "weight": 13,
-            "passed": day79_score >= 85,
+            "passed": scale_upgrade_score >= 85,
             "evidence": {
-                "day79_score": day79_score,
-                "strict_pass": day79_strict,
-                "day79_checks": day79_check_count,
+                "scale_upgrade_score": scale_upgrade_score,
+                "strict_pass": scale_upgrade_strict,
+                "scale_upgrade_checks": scale_upgrade_check_count,
             },
         },
         {
-            "check_id": "day79_board_integrity",
+            "check_id": "scale_upgrade_board_integrity",
             "weight": 5,
-            "passed": board_count >= 5 and board_has_day79,
-            "evidence": {"board_items": board_count, "contains_day79": board_has_day79},
+            "passed": board_count >= 5 and board_has_scale_upgrade,
+            "evidence": {"board_items": board_count, "contains_scale_upgrade": board_has_scale_upgrade},
         },
         {
             "check_id": "page_header",
@@ -269,22 +269,22 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day79_summary.exists() or not day79_board.exists():
-        critical_failures.append("day79_handoff_inputs")
+    if not scale_upgrade_summary.exists() or not scale_upgrade_board.exists():
+        critical_failures.append("scale_upgrade_handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day79_score >= 85:
-        wins.append(f"Day 79 continuity baseline is stable with activation score={day79_score}.")
+    if scale_upgrade_score >= 85:
+        wins.append(f"Scale Upgrade continuity baseline is stable with activation score={scale_upgrade_score}.")
     else:
         misses.append("Day 79 continuity baseline is below the floor (<85).")
         handoff_actions.append(
             "Re-run Day 79 closeout command and raise baseline quality above 85 before Day 80 lock."
         )
 
-    if board_count >= 5 and board_has_day79:
+    if board_count >= 5 and board_has_scale_upgrade:
         wins.append(
             f"Day 79 delivery board integrity validated with {board_count} checklist items."
         )
@@ -315,19 +315,19 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day79_summary": str(day79_summary.relative_to(root))
-            if day79_summary.exists()
-            else str(day79_summary),
-            "day79_delivery_board": str(day79_board.relative_to(root))
-            if day79_board.exists()
-            else str(day79_board),
+            "scale_upgrade_summary": str(scale_upgrade_summary.relative_to(root))
+            if scale_upgrade_summary.exists()
+            else str(scale_upgrade_summary),
+            "scale_upgrade_delivery_board": str(scale_upgrade_board.relative_to(root))
+            if scale_upgrade_board.exists()
+            else str(scale_upgrade_board),
             "partner_outreach_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "day79_activation_score": day79_score,
-            "day79_checks": day79_check_count,
-            "day79_delivery_board_items": board_count,
+            "scale_upgrade_activation_score": scale_upgrade_score,
+            "scale_upgrade_checks": scale_upgrade_check_count,
+            "scale_upgrade_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
