@@ -1,1 +1,1 @@
-# Cycle 67 Jenkins blueprint
+# Day 67 Jenkins blueprint

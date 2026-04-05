@@ -14,7 +14,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day66 command lane"
+      "evidence": "README integration-expansion2-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -53,10 +53,10 @@
     {
       "check_id": "day65_board_integrity",
       "weight": 5,
-      "passed": true,
+      "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_day65": true
+        "contains_day65": false
       }
     },
     {
@@ -70,8 +70,7 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Integration Expansion 2 Closeout command lane (Legacy Day 66)",
-        "## Integration Expansion 2 Closeout delivery board (Legacy Day 66)"
+        "## Required inputs (Day 65)"
       ]
     },
     {
@@ -83,8 +82,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 66 advanced GitLab CI rollout and signoff.",
+        "The Day 66 lane references Day 65 weekly review outputs, governance decisions, and KPI continuity signals.",
+        "Every Day 66 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 66 closeout records GitLab pipeline stages, parallel matrix controls, cache strategy, and Day 67 integration priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -95,8 +99,14 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 66 integration brief committed",
+        "- [ ] Day 66 advanced GitLab pipeline blueprint published",
+        "- [ ] Day 66 matrix and cache strategy exported",
+        "- [ ] Day 66 KPI scorecard snapshot exported",
+        "- [ ] Day 67 integration expansion priorities drafted from Day 66 learnings"
+      ]
     },
     {
       "check_id": "gitlab_reference_present",
@@ -111,22 +121,23 @@
     "day65_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 52,
-    "passed_checks": 8,
-    "failed_checks": 6,
+    "activation_score": 37,
+    "passed_checks": 5,
+    "failed_checks": 9,
     "critical_failures": [
       "day65_strict_baseline"
     ],
     "strict_pass": false
   },
   "wins": [
-    "Day 65 delivery board integrity validated with 5 checklist items.",
     "Day 66 GitLab reference pipeline is available for integration expansion execution."
   ],
   "misses": [
-    "Day 65 strict continuity signal is missing."
+    "Day 65 strict continuity signal is missing.",
+    "Day 65 delivery board integrity is incomplete (needs >=5 items and Day 65 anchors)."
   ],
   "handoff_actions": [
-    "Re-run Day 65 closeout command and restore strict baseline before Day 66 lock."
+    "Re-run Day 65 closeout command and restore strict baseline before Day 66 lock.",
+    "Repair Day 65 delivery board entries to include Day 65 anchors."
   ]
 }

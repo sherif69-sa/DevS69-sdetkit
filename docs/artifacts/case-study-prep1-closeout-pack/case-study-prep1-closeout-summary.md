@@ -1,5 +1,5 @@
 Case Study Prep1 Closeout summary
-- Activation score: 37
-- Passed checks: 5
-- Failed checks: 9
+- Activation score: 42
+- Passed checks: 6
+- Failed checks: 8
 - Critical failures: ['prior_closeout_strict_baseline']

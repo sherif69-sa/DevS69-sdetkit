@@ -1,4 +1,4 @@
-# Cycle 61 validation commands
+# Day 61 validation commands
 
 ```bash
 python -m sdetkit phase3-kickoff-closeout --format json --strict

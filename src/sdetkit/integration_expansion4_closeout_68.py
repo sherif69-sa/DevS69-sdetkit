@@ -19,10 +19,10 @@ _SECTION_HEADER = "# Day 68 \u2014 Integration expansion #4 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion4 Closeout matters",
     "## Required inputs (Day 67)",
-    "## Integration Expansion4 Closeout command lane (Legacy Day 68)",
+    "## Integration Expansion4 Closeout command lane",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Integration Expansion4 Closeout delivery board (Legacy Day 68)",
+    "## Integration Expansion4 Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -81,7 +81,7 @@ Day 68 closes with a major integration upgrade that converts Day 67 outputs into
 - `docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-delivery-board.md`
 - `templates/ci/tekton/tekton-self-hosted-reference.yaml`
 
-## Integration Expansion4 Closeout command lane (Legacy Day 68)
+## Integration Expansion4 Closeout command lane
 
 ```bash
 python -m sdetkit integration-expansion4-closeout --format json --strict
@@ -105,7 +105,7 @@ python scripts/check_integration_expansion4_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, queue saturation, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, self-hosted blueprint, policy plan, KPI scorecard, and execution log
 
-## Integration Expansion4 Closeout delivery board (Legacy Day 68)
+## Integration Expansion4 Closeout delivery board
 
 - [ ] Day 68 integration brief committed
 - [ ] Day 68 self-hosted enterprise pipeline blueprint published

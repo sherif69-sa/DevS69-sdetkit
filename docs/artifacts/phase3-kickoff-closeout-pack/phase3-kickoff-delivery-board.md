@@ -1,6 +1,6 @@
-# Cycle 61 delivery board
-- [ ] Cycle 61 Phase-3 kickoff brief committed
-- [ ] Cycle 61 kickoff reviewed with owner + backup
-- [ ] Cycle 61 trust ledger exported
-- [ ] Cycle 61 KPI scorecard snapshot exported
-- [ ] Cycle 62 community program priorities drafted from Cycle 61 learnings
+# Day 61 delivery board
+- [ ] Day 61 Phase-3 kickoff brief committed
+- [ ] Day 61 kickoff reviewed with owner + backup
+- [ ] Day 61 trust ledger exported
+- [ ] Day 61 KPI scorecard snapshot exported
+- [ ] Day 62 community program priorities drafted from Day 61 learnings

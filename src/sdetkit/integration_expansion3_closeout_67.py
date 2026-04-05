@@ -19,10 +19,10 @@ _SECTION_HEADER = "# Day 67 \u2014 Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion3 Closeout matters",
     "## Required inputs (Day 66)",
-    "## Integration Expansion3 Closeout command lane (Legacy Day 67)",
+    "## Integration Expansion3 Closeout command lane",
     "## Integration expansion contract",
     "## Integration quality checklist",
-    "## Integration Expansion3 Closeout delivery board (Legacy Day 67)",
+    "## Integration Expansion3 Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -81,7 +81,7 @@ Day 67 closes with a major integration upgrade that converts Day 66 integration 
 - `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`
 - `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`
 
-## Integration Expansion3 Closeout command lane (Legacy Day 67)
+## Integration Expansion3 Closeout command lane
 
 ```bash
 python -m sdetkit integration-expansion3-closeout --format json --strict
@@ -105,7 +105,7 @@ python scripts/check_integration_expansion3_closeout_contract.py
 - [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner
 - [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log
 
-## Integration Expansion3 Closeout delivery board (Legacy Day 67)
+## Integration Expansion3 Closeout delivery board
 
 - [ ] Day 67 integration brief committed
 - [ ] Day 67 advanced Jenkins pipeline blueprint published

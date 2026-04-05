@@ -1,1 +1,1 @@
-# Cycle 67 integration brief
+# Day 67 integration brief

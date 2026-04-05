@@ -3,4 +3,4 @@
 - [ ] Cycle 64 advanced workflow blueprint published
 - [ ] Cycle 64 matrix and concurrency plan exported
 - [ ] Cycle 64 KPI scorecard snapshot exported
-- [ ] Cycle 65 weekly review priorities drafted from Cycle 64 learnings
+- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings

@@ -13,7 +13,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day62 command lane"
+      "evidence": "README community-program-closeout command lane"
     },
     {
       "check_id": "docs_index_links",
@@ -44,7 +44,7 @@
       "weight": 15,
       "passed": false,
       "evidence": {
-        "day61_score": 43,
+        "day61_score": 29,
         "strict_pass": false,
         "day61_checks": 13
       }
@@ -69,8 +69,7 @@
       "weight": 10,
       "passed": false,
       "evidence": [
-        "## Community Program Closeout command lane (Legacy Day 62)",
-        "## Community Program Closeout delivery board (Legacy Day 62)"
+        "## Required inputs (Day 61)"
       ]
     },
     {
@@ -82,8 +81,13 @@
     {
       "check_id": "contract_lock",
       "weight": 5,
-      "passed": true,
-      "evidence": "contract locked"
+      "passed": false,
+      "evidence": [
+        "Single owner + backup reviewer are assigned for Day 62 community office-hours execution and moderation safety.",
+        "The Day 62 lane references Day 61 Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.",
+        "Every Day 62 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "Day 62 closeout records office-hours cadence, participation rules, moderation SOPs, and Day 63 onboarding priorities."
+      ]
     },
     {
       "check_id": "quality_checklist_lock",
@@ -94,32 +98,39 @@
     {
       "check_id": "delivery_board_lock",
       "weight": 2,
-      "passed": true,
-      "evidence": "delivery board locked"
+      "passed": false,
+      "evidence": [
+        "- [ ] Day 62 community launch brief committed",
+        "- [ ] Day 62 office-hours cadence published",
+        "- [ ] Day 62 participation policy + moderation SOP exported",
+        "- [ ] Day 62 KPI scorecard snapshot exported",
+        "- [ ] Day 63 onboarding priorities drafted from Day 62 learnings"
+      ]
     }
   ],
   "rollup": {
-    "day61_activation_score": 43,
+    "day61_activation_score": 29,
     "day61_checks": 13,
     "day61_delivery_board_items": 5
   },
   "summary": {
-    "activation_score": 43,
-    "passed_checks": 7,
-    "failed_checks": 6,
+    "activation_score": 36,
+    "passed_checks": 5,
+    "failed_checks": 8,
     "critical_failures": [
       "day61_strict_baseline"
     ],
     "strict_pass": false
   },
   "wins": [
-    "Day 61 delivery board integrity validated with 5 checklist items.",
-    "Community program contract + quality checklist is fully locked for execution."
+    "Day 61 delivery board integrity validated with 5 checklist items."
   ],
   "misses": [
-    "Day 61 strict continuity signal is missing."
+    "Day 61 strict continuity signal is missing.",
+    "Community program contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Re-run Day 61 Phase-3 kickoff closeout command and restore strict baseline before Day 62 lock."
+    "Re-run Day 61 Phase-3 kickoff closeout command and restore strict baseline before Day 62 lock.",
+    "Complete all Day 62 contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }

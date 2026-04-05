@@ -45,7 +45,7 @@
       "weight": 13,
       "passed": false,
       "evidence": {
-        "prior_closeout_score": 37,
+        "prior_closeout_score": 42,
         "strict_pass": false,
         "prior_closeout_checks": 14
       }
@@ -70,9 +70,7 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 69)",
-        "## Case Study Prep 2 Closeout command lane (Legacy Day 70)",
-        "## Case Study Prep 2 Closeout delivery board (Legacy Day 70)"
+        "## Required inputs (Day 69)"
       ]
     },
     {
@@ -118,7 +116,7 @@
     }
   ],
   "rollup": {
-    "prior_closeout_activation_score": 37,
+    "prior_closeout_activation_score": 42,
     "prior_closeout_checks": 14,
     "prior_closeout_delivery_board_items": 5
   },

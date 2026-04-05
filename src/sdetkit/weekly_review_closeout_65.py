@@ -21,10 +21,10 @@ _SECTION_HEADER = "# Day 65 \u2014 Weekly review #9 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Weekly Review Closeout matters",
     "## Required inputs (Day 64)",
-    "## Weekly Review Closeout command lane (Legacy Day 65)",
+    "## Weekly Review Closeout command lane",
     "## Weekly review contract",
     "## Weekly review quality checklist",
-    "## Weekly Review Closeout delivery board (Legacy Day 65)",
+    "## Weekly Review Closeout delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -75,7 +75,7 @@ Day 65 closes with a major weekly review upgrade that converts Day 64 integratio
 - `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md`
 - `.github/workflows/advanced-github-actions-reference-64.yml`
 
-## Weekly Review Closeout command lane (Legacy Day 65)
+## Weekly Review Closeout command lane
 
 ```bash
 python -m sdetkit weekly-review-closeout --format json --strict
@@ -99,7 +99,7 @@ python scripts/check_weekly_review_closeout_contract_2.py
 - [ ] Scorecard captures pass-rate trend, reliability incidents, contributor signal quality, and recovery owner
 - [ ] Artifact pack includes weekly brief, KPI dashboard, decision register, risk ledger, and execution log
 
-## Weekly Review Closeout delivery board (Legacy Day 65)
+## Weekly Review Closeout delivery board
 
 - [ ] Day 65 weekly brief committed
 - [ ] Day 65 KPI dashboard snapshot exported
