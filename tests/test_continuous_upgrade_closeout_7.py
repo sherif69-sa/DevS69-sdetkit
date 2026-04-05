@@ -191,68 +191,57 @@ def test_cycle7_emit_pack_and_execute(tmp_path: Path) -> None:
     _find_existing(
         [
             pack / "continuous-upgrade-closeout-7-summary.json",
-            pack / "continuous-upgrade-closeout-7-summary.json",
         ]
     )
     _find_existing(
         [
-            pack / "continuous-upgrade-closeout-7-summary.md",
             pack / "continuous-upgrade-closeout-7-summary.md",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-evidence-brief.md",
-            pack / "day97-evidence-brief.md",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-plan.md",
-            pack / "day97-continuous-upgrade-plan.md",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-template-ledger.json",
-            pack / "day97-upgrade-template-upgrade-ledger.json",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-storyline-outcomes-ledger.json",
-            pack / "day97-storyline-outcomes-ledger.json",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-kpi-scorecard.json",
-            pack / "day97-upgrade-kpi-scorecard.json",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-execution-log.md",
-            pack / "day97-execution-log.md",
         ]
     )
     _find_existing(
         [
-            pack / "continuous-upgrade-cycle7-delivery-board.md",
             pack / "continuous-upgrade-cycle7-delivery-board.md",
         ]
     )
     _find_existing(
         [
             pack / "continuous-upgrade-cycle7-validation-commands.md",
-            pack / "day97-validation-commands.md",
         ]
     )
 
     execution_summary = _find_existing(
         [
             pack / "evidence/continuous-upgrade-cycle7-execution-summary.json",
-            pack / "evidence/day97-execution-summary.json",
         ]
     )
     execution_data = json.loads(execution_summary.read_text(encoding="utf-8"))
@@ -278,8 +267,6 @@ def test_cycle7_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert rc == 1
     execution_summary = _find_existing(
         [
-            tmp_path
-            / "artifacts/continuous-upgrade-cycle7-pack/evidence/continuous-upgrade-cycle7-execution-summary.json",
             tmp_path
             / "artifacts/continuous-upgrade-cycle7-pack/evidence/continuous-upgrade-cycle7-execution-summary.json",
         ]
