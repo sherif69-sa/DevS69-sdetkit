@@ -11,7 +11,7 @@ from typing import Any
 _PAGE_PATH = "docs/integrations-phase2-kickoff.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CANONICAL_LANE_NAME = "phase2-kickoff"
-_LEGACY_LANE_NAME = "day31-phase2-kickoff"
+_LEGACY_LANE_NAME = "legacy-phase2-kickoff"
 _DAY30_SUMMARY_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json"
 _DAY30_BACKLOG_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
 _SECTION_HEADER = "# Day 31 \u2014 Phase-2 kickoff baseline"
@@ -201,7 +201,7 @@ def build_phase2_kickoff_summary_impl(
             "check_id": "readme_command_lane",
             "weight": 4,
             "passed": ("phase2-kickoff" in readme_text) or ("day31-phase2-kickoff" in readme_text),
-            "evidence": "phase2-kickoff (legacy: day31-phase2-kickoff)",
+            "evidence": "phase2-kickoff (legacy: legacy-phase2-kickoff; historical: day31-phase2-kickoff)",
         },
         {
             "check_id": "docs_index_links",
@@ -461,7 +461,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
         )
     summary = {
         "name": "phase2-kickoff-execution",
-        "legacy_name": "day31-phase2-kickoff-execution",
+        "legacy_name": "legacy-phase2-kickoff-execution",
         "total_commands": len(logs),
         "failed_commands": [log["command"] for log in logs if log["returncode"] != 0],
         "commands": logs,
