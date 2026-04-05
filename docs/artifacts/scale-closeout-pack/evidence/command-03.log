@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_scale_closeout_contract.py --skip-evidence",
   "returncode": 1,
-  "stdout": "{\n  \"errors\": [\n    \"critical failures: ['day43_handoff_inputs', 'day43_strict_baseline']\"\n  ],\n  \"score\": 40\n}\n",
+  "stdout": "{\n  \"errors\": [\n    \"missing docs contract entries: ['# Day 44 \\u2014 Scale closeout lane', '## Why this lane matters', '## Required inputs (acceleration closeout)', '## Command lane', '## Delivery board', 'Single owner + backup reviewer are assigned for Day 44 scale lane execution and KPI follow-up.', 'The Day 44 scale lane references Day 43 acceleration winners and misses with deterministic growth loops.', 'Every Day 44 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.', 'Day 44 closeout records scale learnings and Day 45 expansion priorities.', '- [ ] Day 44 scale plan draft committed', '- [ ] Day 44 review notes captured with owner + backup', '- [ ] Day 44 growth matrix exported', '- [ ] Day 44 KPI scorecard snapshot exported', '- [ ] Day 45 expansion priorities drafted from Day 44 learnings']\"\n  ],\n  \"score\": 51\n}\n",
   "stderr": ""
 }

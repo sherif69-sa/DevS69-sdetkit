@@ -1,0 +1,13 @@
+Acceleration closeout summary
+- Activation score: 51
+- Passed checks: 6
+- Failed checks: 8
+- Critical failures: []
+- Day 42 activation score: `100.0`
+- Day 42 checks evaluated: `14`
+- Day 42 delivery board checklist items: `5`
+- Wins:
+  - Day 42 continuity is strict-pass with activation score=100.0.
+- Misses:
+  - Day 42 delivery board integrity is incomplete (needs >=5 items and Day 42/43 anchors).
+  - Acceleration contract, quality checklist, or delivery board entries are missing.

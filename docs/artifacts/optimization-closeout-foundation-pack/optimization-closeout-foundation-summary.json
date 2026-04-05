@@ -1,0 +1,145 @@
+{
+  "name": "optimization-closeout-foundation",
+  "inputs": {
+    "readme": "README.md",
+    "docs_index": "docs/index.md",
+    "docs_page": "docs/integrations-optimization-closeout-foundation.md",
+    "top10": "docs/top-10-github-strategy.md",
+    "expansion_automation_summary": "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json",
+    "expansion_automation_delivery_board": "docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
+  },
+  "checks": [
+    {
+      "check_id": "docs_page_exists",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/integrations-optimization-closeout-foundation.md"
+    },
+    {
+      "check_id": "required_sections_present",
+      "weight": 10,
+      "passed": false,
+      "evidence": {
+        "missing_sections": [
+          "## Required inputs (expansion automation)"
+        ]
+      }
+    },
+    {
+      "check_id": "required_commands_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "missing_commands": []
+      }
+    },
+    {
+      "check_id": "readme_optimization_closeout_foundation_link",
+      "weight": 8,
+      "passed": false,
+      "evidence": "docs/integrations-optimization-closeout-foundation.md"
+    },
+    {
+      "check_id": "readme_optimization_closeout_foundation_command",
+      "weight": 4,
+      "passed": false,
+      "evidence": "optimization-closeout-foundation"
+    },
+    {
+      "check_id": "docs_index_optimization_closeout_foundation_links",
+      "weight": 8,
+      "passed": false,
+      "evidence": "impact-42-big-upgrade-report.md + integrations-optimization-closeout-foundation.md"
+    },
+    {
+      "check_id": "top10_optimization_closeout_foundation_alignment",
+      "weight": 5,
+      "passed": false,
+      "evidence": "Optimization Closeout Foundation + acceleration strategy chain"
+    },
+    {
+      "check_id": "expansion_automation_summary_present",
+      "weight": 10,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json"
+    },
+    {
+      "check_id": "expansion_automation_delivery_board_present",
+      "weight": 8,
+      "passed": true,
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
+    },
+    {
+      "check_id": "expansion_automation_quality_floor",
+      "weight": 10,
+      "passed": true,
+      "evidence": {
+        "day41_score": 100.0,
+        "strict_pass": true,
+        "expansion_automation_checks": 14
+      }
+    },
+    {
+      "check_id": "expansion_automation_board_integrity",
+      "weight": 7,
+      "passed": false,
+      "evidence": {
+        "board_items": 5,
+        "contains_day41": false,
+        "contains_day42": false
+      }
+    },
+    {
+      "check_id": "optimization_contract_locked",
+      "weight": 5,
+      "passed": false,
+      "evidence": {
+        "missing_contract_lines": [
+          "- The Optimization Closeout Foundation optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.",
+          "- Optimization Closeout Foundation closeout records optimization learnings and Day 43 acceleration priorities."
+        ]
+      }
+    },
+    {
+      "check_id": "optimization_quality_checklist_locked",
+      "weight": 3,
+      "passed": true,
+      "evidence": {
+        "missing_quality_items": []
+      }
+    },
+    {
+      "check_id": "delivery_board_locked",
+      "weight": 2,
+      "passed": false,
+      "evidence": {
+        "missing_board_items": [
+          "- [ ] Day 43 acceleration priorities drafted from Optimization Closeout Foundation learnings"
+        ]
+      }
+    }
+  ],
+  "rollup": {
+    "expansion_automation_activation_score": 100.0,
+    "expansion_automation_checks": 14,
+    "expansion_automation_delivery_board_items": 5
+  },
+  "summary": {
+    "activation_score": 51,
+    "passed_checks": 6,
+    "failed_checks": 8,
+    "critical_failures": [],
+    "strict_pass": false
+  },
+  "wins": [
+    "Day 41 continuity is strict-pass with activation score=100.0."
+  ],
+  "misses": [
+    "Day 41 delivery board integrity is incomplete (needs >=5 items and Day 41/42 anchors).",
+    "Optimization contract, quality checklist, or delivery board entries are missing."
+  ],
+  "handoff_actions": [
+    "Repair Day 41 delivery board entries to include Day 41 and Optimization Closeout Foundation anchors.",
+    "Complete all Optimization Closeout Foundation optimization contract lines, quality checklist entries, and delivery board tasks in docs."
+  ]
+}
