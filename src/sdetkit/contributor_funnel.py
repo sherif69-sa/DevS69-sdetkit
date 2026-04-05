@@ -21,11 +21,11 @@ _DAY8_ISSUES = [
     },
     {
         "id": "GFI-02",
-        "title": "Add docs index quick link for day6 conversion QA sample",
+        "title": "Add docs index quick link for onboarding conversion QA sample",
         "area": "docs",
         "estimate": "S",
         "acceptance": [
-            "docs/index.md quick-jump section contains an anchor to Day 6 artifact guidance.",
+            "docs/index.md quick-jump section contains an anchor to onboarding artifact guidance.",
             "Anchor resolves in rendered markdown.",
             "docs-qa command output remains clean for modified files.",
         ],
@@ -58,7 +58,7 @@ _DAY8_ISSUES = [
         "area": "tests",
         "estimate": "M",
         "acceptance": [
-            "Test verifies markdown output starts with expected Day 6 heading.",
+            "Test verifies markdown output starts with expected onboarding heading.",
             "Test includes at least one failing-link fixture and checks report summary counts.",
             "Test suite stays deterministic (no network calls).",
         ],
@@ -69,7 +69,7 @@ _DAY8_ISSUES = [
         "area": "docs",
         "estimate": "S",
         "acceptance": [
-            "Contributing docs include explicit docs/artifacts/dayX-* naming guidance.",
+            "Contributing docs include explicit docs/artifacts/<capability>-* naming guidance.",
             "Examples include at least one markdown artifact path.",
             "Language remains beginner-friendly and concise.",
         ],
@@ -114,7 +114,7 @@ _DAY8_ISSUES = [
         "estimate": "S",
         "acceptance": [
             "Contributing or docs index includes a command block for impact contract scripts.",
-            "Snippet references at least day6 and day7 script examples.",
+            "Snippet references at least docs-qa and first-contribution script examples.",
             "Instructions remain compatible with bash on Linux/macOS.",
         ],
     },
