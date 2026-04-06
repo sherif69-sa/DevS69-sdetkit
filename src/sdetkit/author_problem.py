@@ -1953,19 +1953,20 @@ def run_problem_workflow(
             authoring_failure = "docker build failed"
 
     verification = verify_artifacts(app_dir, workdir, contract=contract, verify_triad=True)
-    if skip_docker and not (verification.get("required_artifacts") or {}).get("missing"):
+    size_gates = verification.get("size_gates") or {}
+    skip_docker_verification_ok = bool(
+        skip_docker
+        and not (verification.get("required_artifacts") or {}).get("missing")
+        and size_gates.get("test_patch_ok")
+        and size_gates.get("solution_patch_ok")
+    )
+    if skip_docker_verification_ok:
         verification = dict(verification)
         verification["ok"] = True
     summary = {
         "ok": bool(
             authoring_summary
-            and (
-                verification.get("ok")
-                or (
-                    skip_docker
-                    and not (verification.get("required_artifacts") or {}).get("missing")
-                )
-            )
+            and (verification.get("ok") or skip_docker_verification_ok)
             and (
                 skip_docker
                 or not docker_available
