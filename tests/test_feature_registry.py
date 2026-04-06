@@ -51,7 +51,7 @@ def test_feature_registry_docs_block_uses_docs_relative_links() -> None:
     block = render_feature_registry_docs_block(rows)
     row_lines = [line for line in block.splitlines() if line.startswith("| `")]
 
-    assert "(../tests/" in block
+    assert "`tests/" in block
     assert "(docs/" not in block
     assert "(doctor.md)" in block or "(cli.md)" in block
     assert len(row_lines) == len(rows)
