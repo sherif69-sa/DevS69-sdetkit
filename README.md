@@ -2,19 +2,45 @@
 
 SDETKit helps teams turn test + CI signals into clear release decisions, deterministic checks, and actionable failure insights.
 
-## 60-second start
+## Golden path (first 10 minutes)
+
+Use this flow when you are new to the repo and want a fast confidence check.
 
 ```bash
 make bootstrap
 bash quality.sh ci
 python -m sdetkit kits list
+python -m sdetkit release --help
 ```
+
+Expected result:
+- local environment is bootstrapped
+- quality checks run without unexpected errors
+- kit catalog is discoverable
+- release lane commands are visible and ready to use
 
 Need the deepest whole-repo improvement lane? Run:
 
 ```bash
 make max
 ```
+
+## Repo health snapshot (how to track progress)
+
+Use these checks weekly and capture outputs in a PR note:
+
+```bash
+PYTHONPATH=src pytest -q
+bash quality.sh cov
+ruff check .
+mutmut results
+```
+
+Suggested metrics to track:
+- test pass rate
+- branch coverage
+- lint violations
+- mutation survivors
 
 ## What this repo contains
 
@@ -60,6 +86,7 @@ python -m sdetkit kits discover --query "release integration forensics"
 
 - Docs hub: [`docs/index.md`](docs/index.md)
 - Project structure: [`docs/project-structure.md`](docs/project-structure.md)
+- Repo health dashboard guide: [`docs/repo-health-dashboard.md`](docs/repo-health-dashboard.md)
 - Cleanup policy: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Release process: [`RELEASE.md`](RELEASE.md)
@@ -74,8 +101,7 @@ python -m sdetkit kits discover --query "release integration forensics"
 
 For full rules, use [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md).
 
-
-## 🧭  ultra: docs navigation tune-up
+## 🧭 ultra: docs navigation tune-up
 
 ```bash
 python -m sdetkit docs-nav --format text --strict
