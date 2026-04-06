@@ -19,6 +19,7 @@ SDETKit is a release-confidence command path for engineering teams that need cle
 3. [Release confidence explainer](release-confidence.md)
 
 If you want a guided run instead of the ultra-fast proof lane, use [First run quickstart](ready-to-use.md).
+For CLI-first orientation, run `python -m sdetkit --help` to see canonical path plus stability-tier grouping.
 
 ## What artifacts appear
 

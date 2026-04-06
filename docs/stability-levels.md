@@ -58,6 +58,8 @@ Opt-in surfaces for incubator and transition-era workflows. Useful for advanced 
 
 When lower-level CLI/help labels are more granular, this page should be read as the higher-level product policy, not a command-contract rewrite.
 
+Root CLI help maps to these tiers as display guidance: canonical `gate fast` -> `gate release` -> `doctor` is shown as **Public / stable**, broader kits/operations/playbooks as **Advanced but supported**, and transition-era lanes as **Experimental / incubator**.
+
 ## What this page does NOT mean
 
 - Not a deprecation wave.
