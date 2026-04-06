@@ -36,6 +36,7 @@ What failure means:
 ## Canonical local-to-CI journey
 
 - Canonical first proof: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
+- Canonical real-repo fixture proof: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 - Canonical CI rollout path: [`docs/recommended-ci-flow.md`](docs/recommended-ci-flow.md)
 - Canonical artifact decoder: [`docs/ci-artifact-walkthrough.md`](docs/ci-artifact-walkthrough.md)
 

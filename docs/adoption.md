@@ -67,5 +67,6 @@ Use these in order:
 
 - [Team rollout scenario](team-rollout-scenario.md)
 - [Example adoption flow](example-adoption-flow.md)
+- [Real repo adoption proof](real-repo-adoption.md)
 - [Adoption examples](adoption-examples.md)
 - [Choose your path](choose-your-path.md)
