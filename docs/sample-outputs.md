@@ -1,107 +1,51 @@
-# Sample outputs (representative first-run evidence)
+# Sample outputs (exploratory, non-canonical examples)
 
-Need a compact “what this artifact means and what to do next” map? See [CI artifact walkthrough](ci-artifact-walkthrough.md).
+This page is exploratory and non-canonical.
 
-Use this page to quickly see what a **realistic first run** can look like on the Stable/Core path.
+For canonical first-proof and CI evidence interpretation, use:
+- [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
+- [CI artifact walkthrough](ci-artifact-walkthrough.md)
+- [Evidence showcase](evidence-showcase.md)
 
-These snippets are **representative/illustrative** and based on documented outputs already used in this repository (not customer production screenshots).
+## Scope note
 
-## 1) Quick confidence run: `gate fast` succeeds
+- These examples are shape-oriented and explanatory.
+- Do not treat this page as the source of truth for go/no-go decisions.
+- Use real run artifacts (`build/*.json`) from your local run or CI upload for decision-making.
 
-**Command**
+## Example 1: `gate fast` shape
 
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 ```
 
-**Illustrative output snippet (pass shape)**
+Look for:
+- `ok`
+- `failed_steps`
+- `profile`
 
-```json
-{
-  "failed_steps": [],
-  "ok": true,
-  "profile": "fast"
-}
-```
-
-**What to notice**
-
-- `ok: true` and empty `failed_steps` means the fast gate is green.
-- `profile: "fast"` confirms this is the quick-confidence lane artifact.
-
-**What to do next**
-
-- Keep `gate fast` on PRs.
-- Add strict security enforcement next on release branches:
+## Example 2: `security enforce` shape
 
 ```bash
 python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0 --out build/security-enforce.json
 ```
 
-## 2) First strict security run: budget fails
+Look for:
+- `ok`
+- `counts`
+- `exceeded`
 
-**Command**
-
-```bash
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0
-```
-
-**Representative output snippet**
-
-```json
-{"counts":{"error":0,"info":131,"total":131,"warn":0},"ok":false,"exceeded":[{"metric":"info","count":131,"limit":0}]}
-```
-
-**What to notice**
-
-- `ok: false` with `exceeded` tells you exactly which budget blocked the gate.
-- In first adoption, this is common and expected when `--max-info 0` is too strict for current baseline.
-
-**What to do next**
-
-- Keep `--max-error 0 --max-warn 0` strict.
-- Set a temporary realistic `--max-info` baseline and ratchet down:
+## Example 3: `gate release` shape
 
 ```bash
-python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 200
+python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
 ```
 
-## 3) Release-confidence evidence artifact: release readiness summary
+Look for:
+- `ok`
+- `failed_steps`
+- `profile`
 
-**Command path**
+## Decision reminder
 
-```bash
-python -m sdetkit gate release --format json --out build/release-preflight.json
-```
-
-**Representative evidence snippet**
-
-```json
-{
-  "name": "release-readiness",
-  "summary": {
-    "gate_status": "pass",
-    "release_score": 96.56,
-    "strict_all_green": true
-  },
-  "strict_failures": []
-}
-```
-
-**What to notice**
-
-- A compact summary can be used as release-review evidence (`gate_status`, score, strict-failure list).
-- `strict_failures: []` indicates no strict blockers in this sample.
-
-**What to do next**
-
-- Upload release JSON artifacts in CI and link them in release decisions.
-- If release fails, triage in order: `failed_steps` -> `doctor --release` -> rerun `gate release`.
-
-## Related guides
-
-- [Ready-to-use setup](ready-to-use.md)
-- [Adopt SDETKit in your repository](adoption.md)
-- [Release confidence with SDETKit](release-confidence.md)
-- [First-failure triage](first-failure-triage.md)
-- [Evidence showcase](evidence-showcase.md)
+For PR and release decisions, cite fields from your real artifacts and link the uploaded files.

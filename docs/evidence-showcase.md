@@ -1,19 +1,23 @@
-# Evidence showcase: representative artifacts from this repository
+# Evidence showcase: real-output proof anchor from this repository
 
-Use this page to see real output shapes from a representative SDETKit run in this repository.
+Use this page as the canonical real-output anchor for artifact shape and interpretation language.
 
-For first-time adoption, start with [Start here](index.md), [Install](install.md), and [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md).
+For first-time adoption, start with [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md). For decode order, use [CI artifact walkthrough](ci-artifact-walkthrough.md).
 
-Canonical artifact interpretation is in [CI artifact walkthrough](ci-artifact-walkthrough.md).
+## Source-of-truth context
 
-## Representative scenario
+- These excerpts come from actual generated outputs captured in this repository's documented workflow.
+- They are not customer data, synthetic benchmarks, or fabricated screenshots.
+- Values (counts, failing steps) are context-dependent and can differ by branch, time, and repo state.
+
+## Evidence scenario (context)
 
 Scenario used for this evidence set:
+- Run `gate fast`
+- Run strict `security enforce`
+- Run `gate release`
 
-- Operator runs a fast quality gate, strict security budget enforcement, then release preflight.
-- The run intentionally produces actionable failures to show triage behavior.
-
-Commands actually run:
+Commands used:
 
 ```bash
 mkdir -p build
@@ -22,8 +26,7 @@ python -m sdetkit security enforce --format json --out build/security-enforce.js
 python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
-Observed exit codes in this run:
-
+Observed exit codes in this captured run:
 - `gate fast`: `2`
 - `security enforce`: `1`
 - `gate release`: `2`
@@ -37,16 +40,9 @@ build/
 └── release-preflight.json
 ```
 
-## What each artifact means
+## Artifact excerpts and reviewer decision sentence
 
 ### `build/gate-fast.json`
-
-Purpose:
-
-- Structured result of the fast confidence lane.
-- Shows which sub-steps passed/failed (`doctor`, `ci_templates`, `ruff`, `ruff_format`, `mypy`, targeted `pytest`).
-
-Real excerpt from this run:
 
 ```json
 {
@@ -59,18 +55,10 @@ Real excerpt from this run:
 }
 ```
 
-Operator value:
-
-- Deterministic failed step IDs without scanning long logs.
-- Direct handoff to remediation lanes.
+Reviewer decision sentence:
+- "Fast gate is not ready to merge: `ok=false`; first remediation target is `ruff`."
 
 ### `build/security-enforce.json`
-
-Purpose:
-
-- Security budget decision object with explicit counts, limits, and exceeded metrics.
-
-Real excerpt from this run:
 
 ```json
 {
@@ -91,18 +79,10 @@ Real excerpt from this run:
 }
 ```
 
-Operator value:
-
-- Gate reason is machine-readable (`info` budget exceeded), so policy decisions are auditable.
+Reviewer decision sentence:
+- "Security budget failed on `info` (`131 > 0`); release stays blocked until threshold or findings are addressed."
 
 ### `build/release-preflight.json`
-
-Purpose:
-
-- Release lane aggregation that records preflight step outcomes.
-- Shows whether `doctor --release`, playbook validation, and nested `gate fast` passed.
-
-Real excerpt from this run:
 
 ```json
 {
@@ -114,37 +94,33 @@ Real excerpt from this run:
 }
 ```
 
-Operator value:
+Reviewer decision sentence:
+- "Release preflight is not ready: `ok=false`; blocker is nested `gate_fast`."
 
-- Explains why release preflight failed without replaying the full workflow manually.
+## Canonical inspect order
 
-## What to inspect first when a gate fails
-
-1. Open `build/release-preflight.json` for the top-level release decision.
-2. If `gate_fast` failed, inspect `build/gate-fast.json` and read `failed_steps`.
-3. For policy/budget failures, inspect `build/security-enforce.json` (`counts`, `limits`, `exceeded`).
+1. Open `build/release-preflight.json` first.
+2. If `gate_fast` failed, open `build/gate-fast.json`.
+3. If policy is relevant, open `build/security-enforce.json` (`counts`, `exceeded`).
 4. Use raw logs only after artifact-level triage.
 
-## How teams can reference these artifacts in PRs/releases
+## How teams should reference these artifacts
 
 - Upload JSON files as CI artifacts.
-- In PR summaries, cite `ok`, `failed_steps`, and any exceeded security metric.
-- Keep the artifact links with release notes so decision inputs remain auditable.
+- In PR summaries and release discussions, cite fields (`ok`, `failed_steps`, `counts`, `exceeded`) rather than long log excerpts.
+- Keep artifact links in decision threads so go/no-go reasoning stays auditable.
 
-## Why this is better than raw terminal logs alone
+## Caution on context and time
 
-- JSON artifacts preserve structure (`ok`, `failed_steps`, `counts`, `limits`) for automation.
-- They are easier to diff between runs than free-form logs.
-- Reviewers confirm decision inputs quickly instead of parsing mixed stdout/stderr.
-
-## Limitations / representative-example note
-
-- This is a representative run from this repository state and branch, not a universal baseline for all repositories.
-- Counts and failing step IDs vary by project content, policy thresholds, and tooling state.
-- Snippets here come from actual generated outputs in this run (no fabricated artifacts).
+This is a repository-specific captured run. Treat the structure as canonical and the values as situational.
 
 ## Related pages
 
 - Behavior comparison: [Before/after evidence example](before-after-evidence-example.md)
 - Product model: [Release confidence](release-confidence.md)
-- Fit decision: [Decision guide](decision-guide.md)
+- Canonical decoder: [CI artifact walkthrough](ci-artifact-walkthrough.md)
+
+Secondary references (after core proof path):
+- [SDETKit vs ad hoc](sdetkit-vs-ad-hoc.md)
+- [Repo cleanup plan](repo-cleanup-plan.md)
+- [Repo health dashboard](repo-health-dashboard.md)

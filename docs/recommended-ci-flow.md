@@ -1,30 +1,24 @@
-# Recommended CI flow for team adoption
+# Recommended CI flow for team adoption (canonical)
 
-This page is the **canonical CI rollout guide** for operationalizing SDETKit in GitHub Actions with minimal friction.
+This page defines one canonical baseline CI path for deterministic release confidence.
 
-**Not this page:** first-time local users should start with [First run quickstart](ready-to-use.md); team onboarding should start with [Adoption](adoption.md).
+First-time local users should start with [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md) and [First run quickstart](ready-to-use.md).
 
-For a compact reviewer/operator read path over CI artifacts, see [CI artifact walkthrough](ci-artifact-walkthrough.md).
+Canonical artifact decoding is in [CI artifact walkthrough](ci-artifact-walkthrough.md).
 
-It is intentionally small and derived from this repository's current CI/release patterns in:
-
-- `.github/workflows/ci.yml`
-- `.github/workflows/release.yml`
-- `docs/adoption.md`
-
-For tier and scope boundaries, use [integrations-and-extension-boundary.md](integrations-and-extension-boundary.md).
-
-## Recommended shape
+## Canonical baseline shape
 
 Use three stages:
 
-1. **Pull requests (fast feedback):** block on `gate fast`; always upload fast diagnostics.
-2. **`main` branch (stricter confidence):** keep fast gate, then run security thresholds + full quality/docs checks.
-3. **Release tags (release-oriented):** run release preflight + build validation + wheel smoke before publish.
+1. **Pull requests:** run fast gate; always upload diagnostics.
+2. **`main` branch:** keep fast gate + security diagnostics; add stricter quality/docs checks.
+3. **Release tags:** run release preflight + package validation + install smoke.
 
-This gives teams quick PR signal, stronger merge confidence, and explicit release controls without forcing strict release checks on every feature branch.
+This is derived from current workflows:
+- `.github/workflows/ci.yml`
+- `.github/workflows/release.yml`
 
-## Minimal baseline workflow (GitHub Actions)
+## Canonical baseline workflow (GitHub Actions)
 
 ```yaml
 name: sdetkit-recommended-baseline
@@ -47,17 +41,14 @@ jobs:
       - name: Install project + CI extras
         run: python -m pip install -e .[dev,test,docs]
 
-      # Fast PR-safe gate (also emits JSON when artifact-dir is set)
       - name: Fast gate
         run: bash ci.sh quick --skip-docs --artifact-dir build
 
-      # Keep threshold evidence even when gate fails
       - name: Security diagnostics (non-blocking)
         if: always()
         continue-on-error: true
         run: python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0 --out build/security-enforce.json
 
-      # Tighten only on main
       - name: Main branch stricter checks
         if: github.ref == 'refs/heads/main'
         env:
@@ -72,7 +63,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-gate-diagnostics
+          name: ci-gate-diagnostics-py3.12
           path: |
             build/gate-fast.json
             build/security-enforce.json
@@ -107,96 +98,24 @@ jobs:
           if-no-files-found: warn
 ```
 
-## Stage-by-stage command recommendations
-
-### Pull requests (fast feedback)
-
-- `bash ci.sh quick --skip-docs --artifact-dir build`
-- `python -m sdetkit security enforce --format json --max-error 0 --max-warn 0 --max-info 0 --out build/security-enforce.json` (non-blocking diagnostics)
-
-Why: fast and deterministic contributor signal, with triage-ready JSON artifacts.
-
-### `main` branch (stricter checks)
-
-Keep PR commands, then add:
-
-- `python -m pre_commit run -a`
-- `bash quality.sh registry`
-- `bash quality.sh cov`
-- `NO_MKDOCS_2_WARNING=1 python -m mkdocs build`
-
-Why: stronger confidence on integrated code without slowing every PR.
-
-### Release-oriented workflow (tags)
-
-- `python scripts/release_preflight.py --tag "${GITHUB_REF_NAME}" --format json --out build/release-preflight.json`
-- `python scripts/check_release_tag_version.py "${GITHUB_REF_NAME}"`
-- `python -m build`
-- `python -m twine check dist/*`
-- `python -m check_wheel_contents --ignore W009 dist/*.whl`
-- `python -m pip install --force-reinstall dist/*.whl && sdetkit --help`
-
-Why: explicit release metadata validation + package integrity + installability proof.
-
 ## Artifacts to preserve
 
-For CI failure triage and release reviews, keep:
+- `build/release-preflight.json`
+- `build/gate-fast.json`
+- `build/security-enforce.json`
 
-- `build/gate-fast.json` (fast lane failed step details)
-- `build/security-enforce.json` (threshold counts/exceeded budgets)
-- `build/release-preflight.json` (release metadata status)
-
-Recommended upload names:
-
-- `ci-gate-diagnostics`
+Current workflow upload names in this repo:
+- `ci-gate-diagnostics-py3.11`
+- `ci-gate-diagnostics-py3.12`
 - `release-diagnostics`
-
-## Progressive adoption path
-
-1. **Week 1:** PR-only `gate fast` with diagnostics upload.
-2. **Week 2:** Add security threshold diagnostics, then enforce stricter thresholds once noise is reduced.
-3. **Week 3+:** Apply stricter `main` checks (coverage/docs/pre-commit).
-4. **Release maturity:** Add tag-triggered release preflight + package validation.
-
-This sequencing avoids "all-at-once" CI pain while still moving toward deterministic release confidence.
 
 ## When checks fail
 
-- **Fast gate failed:** open `build/gate-fast.json`; fix the first failing step before broad refactors.
-- **Security threshold exceeded:** open `build/security-enforce.json`; either remediate findings or temporarily tune thresholds with an explicit follow-up issue.
-- **Release preflight failed:** open `build/release-preflight.json`; fix tag/version metadata mismatch first.
+- Fast gate failed: open `build/gate-fast.json`; fix first failed step.
+- Security threshold exceeded: open `build/security-enforce.json`; remediate or tune thresholds with follow-up.
+- Release preflight failed: open `build/release-preflight.json`; fix tag/version/changelog mismatch first.
 
-For remediation playbooks, use:
+## Secondary appendix: optional maintenance automation
 
-- `docs/adoption-troubleshooting.md`
-- `docs/remediation-cookbook.md`
-
-## Optional maintenance-bot layer
-
-If you want the hosted repo to keep surfacing upgrade and security work between manual reviews, add these companion automations from this repo as-is or adapt them to your org:
-
-- `.github/workflows/ghas-review-bot.yml` for a weekly GitHub Advanced Security digest issue.
-- `.github/workflows/ghas-campaign-bot.yml` for a weekly GHAS campaign planner with Copilot Autofix-aware alert grouping.
-- `.github/workflows/ghas-alert-sla-bot.yml` for a weekly GHAS SLA tracker covering 7/14/30- alert backlog slices.
-- `.github/workflows/ghas-metrics-export-bot.yml` for a weekly GHAS metrics artifact and snapshot issue.
-- `.github/workflows/security-configuration-audit-bot.yml` for a monthly GHAS configuration audit and coverage report.
-- `.github/workflows/secret-protection-review-bot.yml` for a weekly secret protection posture and backlog review.
-- `.github/workflows/dependency-review.yml` for a pull-request dependency guardrail before merge.
-- `.github/workflows/dependency-radar-bot.yml` for a weekly dependency radar and runtime fast-follow watchlist.
-- `.github/workflows/adapter-smoke-bot.yml` for a weekly adapter smoke pack over optional notification adapters and integration-adapter route-map coverage.
-- `.github/workflows/repo-optimization-bot.yml` for a weekly optimize/expand-driven feature and automation backlog.
-- `.github/workflows/docs-experience-bot.yml` for a weekly docs experience radar over nav coverage, search posture, and flagship entrypoints.
-- `.github/workflows/runtime-watchlist-bot.yml` for a weekly runtime fast-follow watchlist over hot-path runtime-core packages.
-- `.github/workflows/release-readiness-radar-bot.yml` for a weekly release readiness radar over doctor output, release assets, and publish workflows.
-- `.github/workflows/security-maintenance-bot.yml` for the broader weekly security checklist and weak-spot report.
-
-These do not replace the CI merge bar; they make the maintenance backlog visible so the team can act before the merge bar starts failing.
-
-## Keep it lighter for smaller repositories
-
-If your repo is small or early-stage, keep only:
-
-- PR: `python -m sdetkit gate fast`
-- Optional JSON artifact: `python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json`
-
-Delay coverage/doc/release packaging jobs until the fast lane is stable and trusted by the team.
+This repo also has optional maintenance workflows (GHAS, dependency radar, docs experience, runtime watchlist, etc.).
+These are secondary and should not replace the canonical CI merge/release evidence path above.

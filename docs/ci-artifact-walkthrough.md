@@ -1,29 +1,38 @@
-# CI artifact walkthrough (core release-confidence path)
+# CI artifact walkthrough (canonical evidence decoder)
 
-Use this page when a CI run is finished and you need the fastest **artifact-first** review path.
+Use this page when a CI run is finished and you need the fastest artifact-first review.
 
-This is the **canonical page for evidence/artifact interpretation**.
+This is the canonical decoder for release-confidence evidence.
 
-Grounded in this repository's documented workflow/artifacts:
-
-- `ci-gate-diagnostics` upload bundle (`build/gate-fast.json`, `build/security-enforce.json`)
-- `release-diagnostics` upload bundle (`build/release-preflight.json`)
-
-For full troubleshooting depth, continue to [adoption-troubleshooting.md](adoption-troubleshooting.md).
+Grounded in current workflow artifact uploads:
+- CI fast lane diagnostics: `ci-gate-diagnostics-py3.11` / `ci-gate-diagnostics-py3.12`
+- Release diagnostics: `release-diagnostics`
 
 ## Artifact-to-action map
 
 | Artifact/file | What it represents | Look here first | If healthy, do this next | If failure/risk, do this next |
 | --- | --- | --- | --- | --- |
-| `build/gate-fast.json` | Fast PR-safe gate result (`gate fast`) and first failing step list | `ok`, then `failed_steps` (first item), then matching `steps[]` entry (`id`, `rc`) | Keep PR flow unchanged; move to `build/security-enforce.json` for threshold posture. | Fix the first failed step category (lint/type/tests/doctor/templates), rerun fast gate, then re-check artifact. |
-| `build/security-enforce.json` | Security budget enforcement result (`security enforce`) with current counts vs limits | `ok`, `counts`, `exceeded`, `limits` | Keep current thresholds; proceed with stricter `main`/release checks. | Remediate findings or temporarily tune budget with explicit follow-up to ratchet down. |
-| `build/release-preflight.json` | Release metadata preflight state used in tag/release workflows | `ok`, `version`, `tag`, `pyproject`, `changelog` (and summary fields when present) | Continue to package validation/publish flow for the same tag. | Fix tag/version/changelog mismatch first, rerun preflight, then continue release checks. |
+| `build/release-preflight.json` | Release preflight decision | `ok`, then `failed_steps`, then `profile` | Continue release/package validation flow. | If `gate_fast` appears in `failed_steps`, open `build/gate-fast.json` next. |
+| `build/gate-fast.json` | Fast gate decision and failing step IDs | `ok`, then first item in `failed_steps`, then `profile` | Continue normal PR flow. | Fix first failing step category, rerun, and re-check artifact. |
+| `build/security-enforce.json` | Security threshold posture | `ok`, `counts`, `exceeded` | Keep current threshold posture. | Remediate findings or adjust thresholds with explicit follow-up. |
 
-## Recommended review order
+## Canonical review order
 
-1. Download artifacts from the workflow run: `ci-gate-diagnostics` and (for tag builds) `release-diagnostics`.
-2. Open `build/gate-fast.json` first for fastest actionable failure.
-3. Open `build/security-enforce.json` second for policy/budget posture.
-4. On release/tag runs, open `build/release-preflight.json` before checking later packaging logs.
+1. Download CI artifacts (`ci-gate-diagnostics-py*`; for tags also `release-diagnostics`).
+2. Open `build/release-preflight.json` first.
+3. If needed, open `build/gate-fast.json` second.
+4. Open `build/security-enforce.json` for policy/budget context.
+5. Only then deep-dive into raw logs.
 
-This order keeps review focused on deterministic go/no-go evidence before log-deep-dives.
+## Copy-paste evidence snippet (PR or release discussion)
+
+```md
+### Evidence (artifact-first)
+- `build/release-preflight.json`: `ok=<value>`, `failed_steps=<value>`, `profile=<value>`
+- `build/gate-fast.json`: `ok=<value>`, `failed_steps=<value>`, `profile=<value>`
+- `build/security-enforce.json`: `ok=<value>`, `counts=<value>`, `exceeded=<value>`
+
+Decision: <go / no-go / conditional> based on artifact fields above.
+```
+
+For full troubleshooting depth, continue to [adoption-troubleshooting.md](adoption-troubleshooting.md).

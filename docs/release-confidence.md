@@ -9,12 +9,34 @@ Release confidence means a repository can answer **"Is this ready to ship?"** wi
 ## Canonical command path (primary)
 
 ```bash
-python -m sdetkit gate fast
-python -m sdetkit gate release
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
 python -m sdetkit doctor
 ```
 
-These are the primary commands for first-time adoption and ongoing release checks.
+## Canonical proof contract (local and CI)
+
+Invariant path:
+- Local run uses the same gate path as CI evidence review: `gate fast` -> `gate release` -> `doctor`.
+- CI preserves the same JSON decision objects as artifacts.
+
+Invariant artifacts:
+
+```text
+build/
+├── gate-fast.json
+└── release-preflight.json
+```
+
+Invariant fields for first triage:
+- `ok`
+- `failed_steps`
+- `profile`
+
+Go/no-go support model:
+- `ok` gives deterministic pass/fail.
+- `failed_steps` gives first remediation targets.
+- `profile` confirms which lane produced the result.
 
 ## Primary vs optional
 
@@ -23,37 +45,20 @@ These are the primary commands for first-time adoption and ongoing release check
 - `gate release`
 - `doctor`
 - JSON artifacts in `build/` for review decisions
+- CI artifact decoder: [CI artifact walkthrough](ci-artifact-walkthrough.md)
 
-### Optional (use when needed)
-- Team rollout documents and CI policy layers
+### Optional (use later)
+- Team rollout documents and stricter CI layers
 - Broader command families (intelligence/integration/forensics)
 - Advanced references and integrations
 
-## Why artifacts matter
-
-Artifact files provide machine-readable decision objects that reviewers can inspect consistently.
-
-Typical first artifacts:
-
-```text
-build/
-├── gate-fast.json
-└── release-preflight.json
-```
-
-Inspect `ok`, `failed_steps`, and `profile` first.
-
-For concrete representative artifacts in this repo, use [Evidence showcase](evidence-showcase.md).
-
 ## Local and CI stay aligned
 
-The same command path is used locally and in CI, so teams avoid one-off script behavior drift:
-
 - Local developer run: execute canonical commands directly.
-- CI run: execute same commands, upload JSON outputs as artifacts.
-- Review: use artifact fields as source-of-truth for go/no-go decisions.
+- CI run: execute same core commands and upload JSON outputs.
+- Review: use artifact fields as source-of-truth before log deep-dives.
 
-For implementation details, continue with [Recommended CI flow](recommended-ci-flow.md).
+Canonical CI rollout details: [Recommended CI flow](recommended-ci-flow.md).
 
 ## What this does not try to be
 

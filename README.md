@@ -2,9 +2,9 @@
 
 DevS69 SDETKit gives engineering teams deterministic release go/no-go decisions with machine-readable evidence, using one repeatable command path from local to CI.
 
-Use the same three commands everywhere (`gate fast`, `gate release`, `doctor`) so release decisions are consistent across developer machines and CI.
+## Canonical first proof lane (start here)
 
-## 60-second first run
+Run this exact command path first:
 
 ```bash
 python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
@@ -13,7 +13,7 @@ python -m sdetkit gate release --format json --stable-json --out build/release-p
 python -m sdetkit doctor
 ```
 
-## Expected artifacts and what to inspect first
+Expected first artifacts:
 
 ```text
 build/
@@ -21,10 +21,23 @@ build/
 └── release-preflight.json
 ```
 
-Check these keys first:
-- `ok` → pass/fail decision
-- `failed_steps` → first triage targets
-- `profile` → gate profile used
+Inspect order:
+1. `build/release-preflight.json` (`ok`, `failed_steps`, `profile`)
+2. If `failed_steps` includes `gate_fast`, open `build/gate-fast.json` (`ok`, `failed_steps`, `profile`)
+3. Use raw logs only after artifact triage
+
+What success means:
+- `release-preflight.json` has `ok: true`
+- `gate-fast.json` has `ok: true`
+
+What failure means:
+- `ok: false` and/or non-empty `failed_steps` gives the first deterministic remediation target.
+
+## Canonical local-to-CI journey
+
+- Canonical first proof: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
+- Canonical CI rollout path: [`docs/recommended-ci-flow.md`](docs/recommended-ci-flow.md)
+- Canonical artifact decoder: [`docs/ci-artifact-walkthrough.md`](docs/ci-artifact-walkthrough.md)
 
 ## Who this is for / not for
 
@@ -41,31 +54,14 @@ Check these keys first:
 
 - Install (canonical): [`docs/install.md`](docs/install.md)
 - Blank repo proof in 60 seconds: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
+- Guided run (same path): [`docs/ready-to-use.md`](docs/ready-to-use.md)
 - Release-confidence model (canonical): [`docs/release-confidence.md`](docs/release-confidence.md)
 - Before/after evidence behavior: [`docs/before-after-evidence-example.md`](docs/before-after-evidence-example.md)
 - Real evidence artifacts from this repo: [`docs/evidence-showcase.md`](docs/evidence-showcase.md)
 
-## Guided onboarding path (first 10 minutes)
-
-```bash
-python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
-python -m sdetkit doctor
-```
-
-Then continue with:
-- [Choose your path](docs/choose-your-path.md)
-- [Decision guide](docs/decision-guide.md)
-- [Recommended CI flow](docs/recommended-ci-flow.md)
-
 ## Secondary: broader surfaces and advanced lanes
 
-These remain available when you already have the core release-confidence lane working.
-
-### Additional command families (only after core lane is stable)
-
-- Release confidence is the primary lane.
-- Other command families remain available through the CLI reference and kits docs.
+These remain available after the core release-confidence lane is trusted.
 
 ### Extended repo lanes
 
@@ -104,11 +100,8 @@ artifacts/     # generated evidence packs
 - Release process: [`RELEASE.md`](RELEASE.md)
 - Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)
 
-## Root-level rules (short version)
+### See also (secondary, after core lane is stable)
 
-- Keep root files project-wide only.
-- Put implementation in `src/sdetkit/` and coverage in `tests/`.
-- Put deep docs in `docs/`.
-- Put generated outputs in `.sdetkit/` or `artifacts/`.
-
-For full rules, use [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md).
+- Compare against ad hoc workflows: [`docs/sdetkit-vs-ad-hoc.md`](docs/sdetkit-vs-ad-hoc.md)
+- Repo hygiene boundaries: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
+- Ongoing repo status view: [`docs/repo-health-dashboard.md`](docs/repo-health-dashboard.md)

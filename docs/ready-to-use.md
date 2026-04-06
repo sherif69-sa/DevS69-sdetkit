@@ -1,10 +1,10 @@
-# First run quickstart (canonical guided run)
+# First run quickstart (guided canonical path)
 
-Use this page if you already installed SDETKit and want a guided first run with interpretation steps.
+Use this page for a guided run of the same canonical first-proof lane.
 
-If you only want the fastest proof first, use [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md).
+If you only want the fastest proof with minimal text, use [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md).
 
-## Guided first run (5 minutes)
+## Guided run (5 minutes)
 
 1. (Optional) Verify CLI wiring:
 
@@ -31,18 +31,13 @@ python -m sdetkit gate release --format json --stable-json --out build/release-p
 python -m sdetkit doctor
 ```
 
-## How to read the first artifacts
+## Canonical artifact interpretation order
 
-Start with these files:
-- `build/release-preflight.json`
-- `build/gate-fast.json`
+1. Open `build/release-preflight.json` first (`ok`, `failed_steps`, `profile`).
+2. If `failed_steps` includes `gate_fast`, open `build/gate-fast.json` (`ok`, `failed_steps`, `profile`).
+3. Only then move to raw logs for deep debugging.
 
-Check these keys first:
-- `ok`
-- `failed_steps`
-- `profile`
-
-For deeper decode rules, use [CI artifact walkthrough (canonical)](ci-artifact-walkthrough.md).
+This order matches the canonical decoder: [CI artifact walkthrough](ci-artifact-walkthrough.md).
 
 ## Optional wrappers (this repository only)
 
@@ -59,5 +54,5 @@ External repositories should use direct `python -m sdetkit ...` commands.
 
 - Release-confidence model: [Release confidence](release-confidence.md)
 - Team rollout: [Adopt SDETKit in your repository](adoption.md)
-- CI policy stages: [Recommended CI flow](recommended-ci-flow.md)
+- Canonical CI flow: [Recommended CI flow](recommended-ci-flow.md)
 - Evidence behavior: [Before/after example](before-after-evidence-example.md), [Evidence showcase](evidence-showcase.md)

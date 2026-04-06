@@ -67,3 +67,9 @@ After confirming fit, choose exactly one lane:
 - **Advanced/reference** (only when needed): [cli.md](cli.md), [api.md](api.md), [plugins.md](plugins.md), [tool-server.md](tool-server.md)
 
 Historical transition-era docs remain available under [Archive and history](archive/index.md).
+
+## Next if you need more context (secondary)
+
+- Compare value proposition vs scattered tooling: [sdetkit-vs-ad-hoc.md](sdetkit-vs-ad-hoc.md)
+- Keep repo layout/rules clean during adoption: [repo-cleanup-plan.md](repo-cleanup-plan.md)
+- Track longer-term repository posture: [repo-health-dashboard.md](repo-health-dashboard.md)
