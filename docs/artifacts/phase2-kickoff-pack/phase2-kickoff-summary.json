@@ -6,8 +6,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase2-kickoff.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle30_summary": "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
-    "cycle30_backlog": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
+    "summary": "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
+    "backlog": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
   },
   "checks": [
     {
@@ -57,7 +57,7 @@
       "evidence": "Day 31 + Day 32 strategy chain"
     },
     {
-      "check_id": "cycle30_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -66,7 +66,7 @@
       }
     },
     {
-      "check_id": "cycle30_backlog_present",
+      "check_id": "backlog_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -75,12 +75,12 @@
       }
     },
     {
-      "check_id": "cycle30_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "cycle30_score": 69.0,
-        "cycle30_average": 85.0,
+        "score": 69.0,
+        "average": 85.0,
         "strict_pass": false
       }
     },
@@ -90,8 +90,8 @@
       "passed": true,
       "evidence": {
         "backlog_items": 8,
-        "contains_cycle31": true,
-        "contains_cycle32": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -112,16 +112,16 @@
     }
   ],
   "rollup": {
-    "cycle30_activation_score": 69.0,
-    "cycle30_average_activation_score": 85.0,
-    "cycle30_backlog_items": 8
+    "activation_score": 69.0,
+    "average_activation_score": 85.0,
+    "backlog_items": 8
   },
   "summary": {
     "activation_score": 65,
     "passed_checks": 8,
     "failed_checks": 5,
     "critical_failures": [
-      "cycle30_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

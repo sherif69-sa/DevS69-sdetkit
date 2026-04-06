@@ -2,5 +2,5 @@
   "command": "python scripts/check_community_touchpoint_closeout_contract.py --skip-evidence",
   "returncode": 1,
   "stdout": "",
-  "stderr": "community-touchpoint-closeout contract check failed:\n- activation_score too low: 87\n- strict_pass is false\n- failed checks: ['cycle76_quality_floor']\n"
+  "stderr": "community-touchpoint-closeout contract check failed:\n- activation_score too low: 87\n- strict_pass is false\n- failed checks: ['quality_floor']\n"
 }

@@ -5,10 +5,10 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-docs-loop-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle52_summary": "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json",
-    "cycle52_summary_primary": "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json",
-    "cycle52_delivery_board": "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md",
-    "cycle52_delivery_board_primary": "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md"
+    "summary": "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json",
+    "summary_primary": "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json",
+    "delivery_board": "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md",
+    "delivery_board_primary": "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md"
   },
   "checks": [
     {
@@ -64,7 +64,7 @@
       "evidence": "Day 52 + Day 53 strategy chain"
     },
     {
-      "check_id": "cycle52_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -73,7 +73,7 @@
       }
     },
     {
-      "check_id": "cycle52_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -82,23 +82,23 @@
       }
     },
     {
-      "check_id": "cycle52_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "cycle52_score": 55.0,
+        "score": 55.0,
         "strict_pass": false,
-        "cycle52_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "cycle52_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_cycle52": false,
-        "contains_cycle53": false
+        "contains": false,
+        "contains": false
       }
     },
     {
@@ -138,16 +138,16 @@
     }
   ],
   "rollup": {
-    "cycle52_activation_score": 55.0,
-    "cycle52_checks": 14,
-    "cycle52_delivery_board_items": 5
+    "activation_score": 55.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 41,
     "passed_checks": 5,
     "failed_checks": 9,
     "critical_failures": [
-      "cycle52_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

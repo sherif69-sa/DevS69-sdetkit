@@ -178,10 +178,10 @@ def build_experiment_lane_summary_impl(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    cycle36_summary = root / _DAY36_SUMMARY_PATH
-    cycle36_board = root / _DAY36_BOARD_PATH
-    cycle36_score, cycle36_strict, cycle36_check_count = _load_cycle36(cycle36_summary)
-    board_count, board_has_cycle36, board_has_cycle37 = _board_stats(cycle36_board)
+    summary = root / _DAY36_SUMMARY_PATH
+    board = root / _DAY36_BOARD_PATH
+    score, strict, check_count = _load_cycle36(summary)
+    board_count, board_has_cycle36, board_has_cycle37 = _board_stats(board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -230,35 +230,35 @@ def build_experiment_lane_summary_impl(
             "evidence": "Day 37 + Day 38 strategy chain",
         },
         {
-            "check_id": "cycle36_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle36_summary.exists(),
-            "evidence": str(cycle36_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle36_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": cycle36_board.exists(),
-            "evidence": str(cycle36_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle36_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": cycle36_strict and cycle36_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle36_score": cycle36_score,
-                "strict_pass": cycle36_strict,
-                "cycle36_checks": cycle36_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle36_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle36 and board_has_cycle37,
             "evidence": {
                 "board_items": board_count,
-                "contains_cycle36": board_has_cycle36,
-                "contains_cycle37": board_has_cycle37,
+                "contains": board_has_cycle36,
+                "contains": board_has_cycle37,
             },
         },
         {
@@ -284,17 +284,17 @@ def build_experiment_lane_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not cycle36_summary.exists() or not cycle36_board.exists():
-        critical_failures.append("cycle36_handoff_inputs")
-    if not cycle36_strict:
-        critical_failures.append("cycle36_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle36_strict:
-        wins.append(f"Day 36 continuity is strict-pass with activation score={cycle36_score}.")
+    if strict:
+        wins.append(f"Day 36 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 36 strict continuity signal is missing.")
         handoff_actions.append(
@@ -335,18 +335,18 @@ def build_experiment_lane_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "cycle36_summary": str(cycle36_summary.relative_to(root))
-            if cycle36_summary.exists()
-            else str(cycle36_summary),
-            "cycle36_delivery_board": str(cycle36_board.relative_to(root))
-            if cycle36_board.exists()
-            else str(cycle36_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle36_activation_score": cycle36_score,
-            "cycle36_checks": cycle36_check_count,
-            "cycle36_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -384,9 +384,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 36 continuity",
         "",
-        f"- Day 36 activation score: `{payload['rollup']['cycle36_activation_score']}`",
-        f"- Day 36 checks evaluated: `{payload['rollup']['cycle36_checks']}`",
-        f"- Day 36 delivery board checklist items: `{payload['rollup']['cycle36_delivery_board_items']}`",
+        f"- Day 36 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Day 36 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- Day 36 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]

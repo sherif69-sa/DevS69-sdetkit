@@ -94,7 +94,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_cycle6_json(tmp_path: Path, capsys) -> None:
+def test_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = c6.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -103,7 +103,7 @@ def test_cycle6_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_cycle6_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = c6.main(
         [
@@ -169,7 +169,7 @@ def test_cycle6_emit_pack_and_execute(tmp_path: Path) -> None:
     assert execution_data["strict_pass"] is True
 
 
-def test_cycle6_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
+def test_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
     _seed_repo(tmp_path)
     monkeypatch.setattr(c6, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
     rc = c6.main(
@@ -194,7 +194,7 @@ def test_cycle6_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert execution_data["strict_pass"] is False
 
 
-def test_cycle6_strict_fails_without_prereq_baseline(tmp_path: Path) -> None:
+def test_strict_fails_without_prereq_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -203,7 +203,7 @@ def test_cycle6_strict_fails_without_prereq_baseline(tmp_path: Path) -> None:
     assert c6.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_cycle6_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["continuous-upgrade-closeout-6", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

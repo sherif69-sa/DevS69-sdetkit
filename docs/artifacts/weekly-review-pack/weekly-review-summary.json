@@ -5,9 +5,9 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle25_summary": "docs/artifacts/community-activation-pack/community-activation-summary.json",
+    "summary": "docs/artifacts/community-activation-pack/community-activation-summary.json",
     "external_contribution_summary": "docs/artifacts/external-contribution-pack/external-contribution-summary.json",
-    "cycle27_summary": "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
+    "summary": "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
   },
   "checks": [
     {
@@ -71,7 +71,7 @@
       "evidence": "wins/misses/corrective"
     },
     {
-      "check_id": "cycle25_input_present",
+      "check_id": "input_present",
       "category": "data",
       "weight": 8,
       "passed": true,
@@ -85,7 +85,7 @@
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     },
     {
-      "check_id": "cycle27_input_present",
+      "check_id": "input_present",
       "category": "data",
       "weight": 9,
       "passed": true,
@@ -93,9 +93,9 @@
     }
   ],
   "rollup": {
-    "cycle25_activation_score": 35.0,
+    "activation_score": 35.0,
     "external_contribution_activation_score": 100.0,
-    "cycle27_activation_score": 52.0,
+    "activation_score": 52.0,
     "average_activation_score": 62.33
   },
   "summary": {

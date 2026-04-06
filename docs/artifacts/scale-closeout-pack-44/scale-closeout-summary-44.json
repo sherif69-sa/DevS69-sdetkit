@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-scale-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle43_summary": "docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json",
-    "cycle43_delivery_board": "docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md"
+    "summary": "docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json",
+    "delivery_board": "docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md"
   },
   "checks": [
     {
@@ -56,35 +56,35 @@
       "evidence": "Day 44 + Day 45 strategy chain"
     },
     {
-      "check_id": "cycle43_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json"
     },
     {
-      "check_id": "cycle43_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md"
     },
     {
-      "check_id": "cycle43_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "cycle43_score": 98.0,
+        "score": 98.0,
         "strict_pass": true,
-        "cycle43_checks": 1
+        "checks": 1
       }
     },
     {
-      "check_id": "cycle43_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle43": true,
-        "contains_cycle44": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -113,9 +113,9 @@
     }
   ],
   "rollup": {
-    "cycle43_activation_score": 98.0,
-    "cycle43_checks": 1,
-    "cycle43_delivery_board_items": 5
+    "activation_score": 98.0,
+    "checks": 1,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

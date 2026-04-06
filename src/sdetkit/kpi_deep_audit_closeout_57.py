@@ -158,11 +158,11 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
     page_path = root / _PAGE_PATH
     page_text = _read(page_path)
     top10_text = _read(root / _TOP10_PATH)
-    cycle56_summary = root / _DAY56_SUMMARY_PATH
-    cycle56_board = root / _DAY56_BOARD_PATH
+    summary = root / _DAY56_SUMMARY_PATH
+    board = root / _DAY56_BOARD_PATH
 
-    cycle56_score, cycle56_strict, cycle56_check_count = _load_cycle56(cycle56_summary)
-    board_count, board_has_cycle56 = _load_board(cycle56_board)
+    score, strict, check_count = _load_cycle56(summary)
+    board_count, board_has_cycle56 = _load_board(board)
 
     missing_sections = [s for s in _REQUIRED_SECTIONS if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
@@ -217,32 +217,32 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 57 + Day 58 strategy chain",
         },
         {
-            "check_id": "cycle56_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle56_summary.exists(),
-            "evidence": str(cycle56_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle56_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": cycle56_board.exists(),
-            "evidence": str(cycle56_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle56_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": cycle56_strict and cycle56_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle56_score": cycle56_score,
-                "strict_pass": cycle56_strict,
-                "cycle56_checks": cycle56_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle56_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle56,
-            "evidence": {"board_items": board_count, "contains_cycle56": board_has_cycle56},
+            "evidence": {"board_items": board_count, "contains": board_has_cycle56},
         },
         {
             "check_id": "kpi_deep_audit_contract_locked",
@@ -266,17 +266,17 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle56_summary.exists() or not cycle56_board.exists():
-        critical_failures.append("cycle56_handoff_inputs")
-    if not cycle56_strict:
-        critical_failures.append("cycle56_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle56_strict:
-        wins.append(f"Day 56 continuity is strict-pass with activation score={cycle56_score}.")
+    if strict:
+        wins.append(f"Day 56 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 56 strict continuity signal is missing.")
         handoff_actions.append(
@@ -316,18 +316,18 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "cycle56_summary": str(cycle56_summary.relative_to(root))
-            if cycle56_summary.exists()
-            else str(cycle56_summary),
-            "cycle56_delivery_board": str(cycle56_board.relative_to(root))
-            if cycle56_board.exists()
-            else str(cycle56_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle56_activation_score": cycle56_score,
-            "cycle56_checks": cycle56_check_count,
-            "cycle56_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

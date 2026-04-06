@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-case-snippet-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle50_summary": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json",
-    "cycle50_delivery_board": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
+    "summary": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json",
+    "delivery_board": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
   },
   "checks": [
     {
@@ -59,35 +59,35 @@
       "evidence": "Day 51 + Day 52 strategy chain"
     },
     {
-      "check_id": "cycle50_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
     },
     {
-      "check_id": "cycle50_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
     },
     {
-      "check_id": "cycle50_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "cycle50_score": 75.0,
+        "score": 75.0,
         "strict_pass": false,
-        "cycle50_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "cycle50_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle50": true,
-        "contains_cycle51": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -116,16 +116,16 @@
     }
   ],
   "rollup": {
-    "cycle50_activation_score": 75.0,
-    "cycle50_checks": 14,
-    "cycle50_delivery_board_items": 5
+    "activation_score": 75.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 55,
     "passed_checks": 8,
     "failed_checks": 6,
     "critical_failures": [
-      "cycle50_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

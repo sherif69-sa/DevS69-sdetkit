@@ -5,9 +5,9 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review-closeout-2.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle64_summary": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json",
-    "cycle64_delivery_board": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md",
-    "cycle64_workflow": ".github/workflows/advanced-github-actions-reference-64.yml"
+    "summary": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json",
+    "delivery_board": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md",
+    "workflow": ".github/workflows/advanced-github-actions-reference-64.yml"
   },
   "checks": [
     {
@@ -29,34 +29,34 @@
       "evidence": "Day 65 + Day 66 strategy chain"
     },
     {
-      "check_id": "cycle64_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     },
     {
-      "check_id": "cycle64_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
     },
     {
-      "check_id": "cycle64_quality_floor",
+      "check_id": "quality_floor",
       "weight": 13,
       "passed": true,
       "evidence": {
-        "cycle64_score": 100,
+        "score": 100,
         "strict_pass": true,
-        "cycle64_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "cycle64_board_integrity",
+      "check_id": "board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle64": true
+        "contains": true
       }
     },
     {
@@ -96,16 +96,16 @@
       "evidence": "delivery board locked"
     },
     {
-      "check_id": "cycle64_workflow_reference_present",
+      "check_id": "workflow_reference_present",
       "weight": 10,
       "passed": true,
       "evidence": ".github/workflows/advanced-github-actions-reference-64.yml"
     }
   ],
   "rollup": {
-    "cycle64_activation_score": 100,
-    "cycle64_checks": 14,
-    "cycle64_delivery_board_items": 5
+    "activation_score": 100,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

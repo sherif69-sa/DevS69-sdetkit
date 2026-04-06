@@ -12,5 +12,5 @@
 python -m sdetkit continuous-upgrade-closeout-8 --format json --strict
 python -m sdetkit continuous-upgrade-closeout-8 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-8-pack --format json --strict
 python -m sdetkit continuous-upgrade-closeout-8 --execute --evidence-dir docs/artifacts/continuous-upgrade-closeout-8-pack/evidence --format json --strict
-python scripts/check_continuous_upgrade_cycle8_closeout_contract.py
+python scripts/check_continuous_upgrade_closeout_contract.py
 ```

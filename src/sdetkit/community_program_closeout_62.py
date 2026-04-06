@@ -156,10 +156,10 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
 
-    cycle61_summary = root / _DAY61_SUMMARY_PATH
-    cycle61_board = root / _DAY61_BOARD_PATH
-    cycle61_score, cycle61_strict, cycle61_check_count = _load_cycle61(cycle61_summary)
-    board_count, board_has_cycle61 = _count_board_items(cycle61_board, "Day 61")
+    summary = root / _DAY61_SUMMARY_PATH
+    board = root / _DAY61_BOARD_PATH
+    score, strict, check_count = _load_cycle61(summary)
+    board_count, board_has_cycle61 = _count_board_items(board, "Day 61")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -190,32 +190,32 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 62 + Day 63 strategy chain",
         },
         {
-            "check_id": "cycle61_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle61_summary.exists(),
-            "evidence": str(cycle61_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle61_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": cycle61_board.exists(),
-            "evidence": str(cycle61_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle61_quality_floor",
+            "check_id": "quality_floor",
             "weight": 15,
-            "passed": cycle61_strict and cycle61_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle61_score": cycle61_score,
-                "strict_pass": cycle61_strict,
-                "cycle61_checks": cycle61_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle61_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle61,
-            "evidence": {"board_items": board_count, "contains_cycle61": board_has_cycle61},
+            "evidence": {"board_items": board_count, "contains": board_has_cycle61},
         },
         {
             "check_id": "page_header",
@@ -257,17 +257,17 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle61_summary.exists() or not cycle61_board.exists():
-        critical_failures.append("cycle61_handoff_inputs")
-    if not cycle61_strict:
-        critical_failures.append("cycle61_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle61_strict:
-        wins.append(f"Day 61 continuity is strict-pass with activation score={cycle61_score}.")
+    if strict:
+        wins.append(f"Day 61 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 61 strict continuity signal is missing.")
         handoff_actions.append(
@@ -307,18 +307,18 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "cycle61_summary": str(cycle61_summary.relative_to(root))
-            if cycle61_summary.exists()
-            else str(cycle61_summary),
-            "cycle61_delivery_board": str(cycle61_board.relative_to(root))
-            if cycle61_board.exists()
-            else str(cycle61_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle61_activation_score": cycle61_score,
-            "cycle61_checks": cycle61_check_count,
-            "cycle61_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

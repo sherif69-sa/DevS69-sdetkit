@@ -158,10 +158,10 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
 
-    cycle62_summary = root / _DAY62_SUMMARY_PATH
-    cycle62_board = root / _DAY62_BOARD_PATH
-    cycle62_score, cycle62_strict, cycle62_check_count = _load_cycle62(cycle62_summary)
-    board_count, board_has_cycle62 = _count_board_items(cycle62_board, "Day 62")
+    summary = root / _DAY62_SUMMARY_PATH
+    board = root / _DAY62_BOARD_PATH
+    score, strict, check_count = _load_cycle62(summary)
+    board_count, board_has_cycle62 = _count_board_items(board, "Day 62")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -171,13 +171,13 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_cycle63_command",
+            "check_id": "readme_command",
             "weight": 7,
             "passed": ("onboarding-activation-closeout" in readme_text),
             "evidence": "README onboarding-activation-closeout command lane",
         },
         {
-            "check_id": "docs_index_cycle63_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-63-big-upgrade-report.md" in docs_index_text
@@ -186,38 +186,38 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-63-big-upgrade-report.md + integrations-onboarding-activation-closeout.md",
         },
         {
-            "check_id": "top10_cycle63_alignment",
+            "check_id": "top10_alignment",
             "weight": 5,
             "passed": ("Cycle 63" in top10_text and "Cycle 64" in top10_text),
             "evidence": "Cycle 63 + Cycle 64 strategy chain",
         },
         {
-            "check_id": "cycle62_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle62_summary.exists(),
-            "evidence": str(cycle62_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle62_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": cycle62_board.exists(),
-            "evidence": str(cycle62_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle62_quality_floor",
+            "check_id": "quality_floor",
             "weight": 15,
-            "passed": cycle62_strict and cycle62_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle62_score": cycle62_score,
-                "strict_pass": cycle62_strict,
-                "cycle62_checks": cycle62_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle62_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle62,
-            "evidence": {"board_items": board_count, "contains_cycle62": board_has_cycle62},
+            "evidence": {"board_items": board_count, "contains": board_has_cycle62},
         },
         {
             "check_id": "page_header",
@@ -259,17 +259,17 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle62_summary.exists() or not cycle62_board.exists():
-        critical_failures.append("cycle62_handoff_inputs")
-    if not cycle62_strict:
-        critical_failures.append("cycle62_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle62_strict:
-        wins.append(f"Day 62 continuity is strict-pass with activation score={cycle62_score}.")
+    if strict:
+        wins.append(f"Day 62 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 62 strict continuity signal is missing.")
         handoff_actions.append(
@@ -311,18 +311,18 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "cycle62_summary": str(cycle62_summary.relative_to(root))
-            if cycle62_summary.exists()
-            else str(cycle62_summary),
-            "cycle62_delivery_board": str(cycle62_board.relative_to(root))
-            if cycle62_board.exists()
-            else str(cycle62_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle62_activation_score": cycle62_score,
-            "cycle62_checks": cycle62_check_count,
-            "cycle62_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -399,7 +399,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_cycle63_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
+def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_onboarding_activation_closeout_summary(root)
 

@@ -2,5 +2,5 @@
   "command": "python scripts/check_phase3_preplan_closeout_contract_59.py --skip-evidence",
   "returncode": 1,
   "stdout": "",
-  "stderr": "phase3-preplan-closeout contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['cycle58_summary_present', 'cycle58_delivery_board_present', 'cycle58_quality_floor', 'cycle58_board_integrity']\n"
+  "stderr": "phase3-preplan-closeout contract check failed:\n- activation_score too low: 55\n- strict_pass is false\n- failed checks: ['summary_present', 'delivery_board_present', 'quality_floor', 'board_integrity']\n"
 }

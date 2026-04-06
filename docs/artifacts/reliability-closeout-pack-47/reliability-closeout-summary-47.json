@@ -5,10 +5,10 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-reliability-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle46_summary": "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json",
-    "cycle46_summary_primary": "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json",
-    "cycle46_delivery_board": "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md",
-    "cycle46_delivery_board_primary": "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md"
+    "summary": "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json",
+    "summary_primary": "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json",
+    "delivery_board": "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md",
+    "delivery_board_primary": "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md"
   },
   "checks": [
     {
@@ -58,35 +58,35 @@
       "evidence": "Day 46 + Day 47 strategy chain"
     },
     {
-      "check_id": "cycle46_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
     },
     {
-      "check_id": "cycle46_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md"
     },
     {
-      "check_id": "cycle46_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "cycle46_score": 65.0,
+        "score": 65.0,
         "strict_pass": false,
-        "cycle46_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "cycle46_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle46": true,
-        "contains_cycle47": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -115,16 +115,16 @@
     }
   ],
   "rollup": {
-    "cycle46_activation_score": 65.0,
-    "cycle46_checks": 14,
-    "cycle46_delivery_board_items": 5
+    "activation_score": 65.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 65,
     "passed_checks": 9,
     "failed_checks": 5,
     "critical_failures": [
-      "cycle46_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

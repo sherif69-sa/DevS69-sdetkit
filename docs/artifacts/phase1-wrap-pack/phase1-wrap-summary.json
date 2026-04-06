@@ -6,10 +6,10 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase1-wrap.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle27_summary": "docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json",
-    "cycle28_summary": "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
-    "cycle29_summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-    "cycle29_summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
+    "summary": "docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json",
+    "summary": "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
+    "summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
+    "summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
   },
   "checks": [
     {
@@ -59,19 +59,19 @@
       "evidence": "Day 30 + Day 31 strategy chain"
     },
     {
-      "check_id": "cycle27_input_present",
+      "check_id": "input_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json"
     },
     {
-      "check_id": "cycle28_input_present",
+      "check_id": "input_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-pack/weekly-review-summary.json"
     },
     {
-      "check_id": "cycle29_input_present",
+      "check_id": "input_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -89,9 +89,9 @@
     }
   ],
   "rollup": {
-    "cycle27_activation_score": 100.0,
-    "cycle28_activation_score": 100.0,
-    "cycle29_activation_score": 55.0,
+    "activation_score": 100.0,
+    "activation_score": 100.0,
+    "activation_score": 55.0,
     "average_activation_score": 85.0
   },
   "summary": {

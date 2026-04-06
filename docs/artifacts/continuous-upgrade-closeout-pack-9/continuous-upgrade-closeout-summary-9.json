@@ -5,58 +5,58 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-continuous-upgrade-closeout-9.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle8_summary": "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-closeout-summary-8.json",
-    "cycle8_delivery_board": "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-delivery-board-8.md",
+    "summary": "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-closeout-summary-8.json",
+    "delivery_board": "docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-delivery-board-8.md",
     "continuous_upgrade_plan": "docs/roadmap/plans/continuous-upgrade-plan-9.json"
   },
   "checks": [
     {
-      "check_id": "readme_cycle9_command",
+      "check_id": "readme_command",
       "weight": 5,
       "passed": true,
       "evidence": "README cycle9 command lane"
     },
     {
-      "check_id": "docs_index_cycle9_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": true,
       "evidence": "continuous-upgrade-cycle9-big-upgrade-report.md + integrations-continuous-upgrade-closeout-9.md"
     },
     {
-      "check_id": "top10_cycle9_align",
+      "check_id": "top10_align",
       "weight": 5,
       "passed": true,
       "evidence": "Cycle 8 + Cycle 9 strategy chain"
     },
     {
-      "check_id": "cycle8_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-closeout-summary-8.json"
     },
     {
-      "check_id": "cycle8_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/home/sherif/DevS69-sdetkit/docs/artifacts/continuous-upgrade-closeout-pack-8/continuous-upgrade-delivery-board-8.md"
     },
     {
-      "check_id": "cycle8_quality_floor",
+      "check_id": "quality_floor",
       "weight": 13,
       "passed": true,
       "evidence": {
-        "cycle8_score": 100,
+        "score": 100,
         "strict_pass": true,
-        "cycle8_checks": 17
+        "checks": 17
       }
     },
     {
-      "check_id": "cycle8_board_integrity",
+      "check_id": "board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle8": true
+        "contains": true
       }
     },
     {
@@ -121,9 +121,9 @@
     }
   ],
   "rollup": {
-    "cycle8_activation_score": 100,
-    "cycle8_checks": 17,
-    "cycle8_delivery_board_items": 5
+    "activation_score": 100,
+    "checks": 17,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

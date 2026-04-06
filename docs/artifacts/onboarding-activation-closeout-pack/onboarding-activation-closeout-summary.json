@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-cycle63-onboarding-activation-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle62_summary": "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json",
-    "cycle62_delivery_board": "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
+    "summary": "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json",
+    "delivery_board": "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
   },
   "checks": [
     {
@@ -28,34 +28,34 @@
       "evidence": "Day 63 + Day 64 strategy chain"
     },
     {
-      "check_id": "cycle62_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
     },
     {
-      "check_id": "cycle62_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
     },
     {
-      "check_id": "cycle62_quality_floor",
+      "check_id": "quality_floor",
       "weight": 15,
       "passed": true,
       "evidence": {
-        "cycle62_score": 95,
+        "score": 95,
         "strict_pass": true,
-        "cycle62_checks": 13
+        "checks": 13
       }
     },
     {
-      "check_id": "cycle62_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle62": true
+        "contains": true
       }
     },
     {
@@ -96,9 +96,9 @@
     }
   ],
   "rollup": {
-    "cycle62_activation_score": 95,
-    "cycle62_checks": 13,
-    "cycle62_delivery_board_items": 5
+    "activation_score": 95,
+    "checks": 13,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 95,

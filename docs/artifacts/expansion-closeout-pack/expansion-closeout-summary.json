@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-expansion-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle44_summary": "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json",
-    "cycle44_delivery_board": "docs/artifacts/scale-closeout-pack/scale-delivery-board.md"
+    "summary": "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json",
+    "delivery_board": "docs/artifacts/scale-closeout-pack/scale-delivery-board.md"
   },
   "checks": [
     {
@@ -56,35 +56,35 @@
       "evidence": "Day 45 + Day 46 strategy chain"
     },
     {
-      "check_id": "cycle44_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
     },
     {
-      "check_id": "cycle44_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-closeout-pack/scale-delivery-board.md"
     },
     {
-      "check_id": "cycle44_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "cycle44_score": 40.0,
+        "score": 40.0,
         "strict_pass": false,
-        "cycle44_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "cycle44_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle44": true,
-        "contains_cycle45": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -113,16 +113,16 @@
     }
   ],
   "rollup": {
-    "cycle44_activation_score": 40.0,
-    "cycle44_checks": 14,
-    "cycle44_delivery_board_items": 5
+    "activation_score": 40.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 65,
     "passed_checks": 9,
     "failed_checks": 5,
     "critical_failures": [
-      "cycle44_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

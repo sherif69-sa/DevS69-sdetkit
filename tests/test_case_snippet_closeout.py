@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_cycle51_case_snippet_closeout_json(tmp_path: Path, capsys) -> None:
+def test_case_snippet_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d51.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -85,7 +85,7 @@ def test_cycle51_case_snippet_closeout_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_cycle51_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d51.main(
         [
@@ -121,7 +121,7 @@ def test_cycle51_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_cycle51_strict_fails_when_lane50_inputs_missing(tmp_path: Path) -> None:
+def test_strict_fails_when_lane50_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path
@@ -131,7 +131,7 @@ def test_cycle51_strict_fails_when_lane50_inputs_missing(tmp_path: Path) -> None
     assert rc == 1
 
 
-def test_cycle51_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["case-snippet-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

@@ -200,25 +200,25 @@ def _validate_plan_contract(
     return missing_keys, trajectory_issues, owner_issues, hygiene_issues
 
 
-def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, Any]:
+def build_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    cycle8_summary = root / _PREV_CYCLE_SUMMARY_PATH
-    cycle8_board = root / _PREV_CYCLE_BOARD_PATH
+    summary = root / _PREV_CYCLE_SUMMARY_PATH
+    board = root / _PREV_CYCLE_BOARD_PATH
 
-    cycle8_data = _load_json(cycle8_summary)
-    cycle8_summary_data = (
-        cycle8_data.get("summary", {}) if isinstance(cycle8_data.get("summary"), dict) else {}
+    data = _load_json(summary)
+    summary_data = (
+        data.get("summary", {}) if isinstance(data.get("summary"), dict) else {}
     )
-    cycle8_score = int(cycle8_summary_data.get("activation_score", 0) or 0)
-    cycle8_strict = coerce_bool(cycle8_summary_data.get("strict_pass", False), default=False)
-    cycle8_check_count = (
-        len(cycle8_data.get("checks", [])) if isinstance(cycle8_data.get("checks"), list) else 0
+    score = int(summary_data.get("activation_score", 0) or 0)
+    strict = coerce_bool(summary_data.get("strict_pass", False), default=False)
+    check_count = (
+        len(data.get("checks", [])) if isinstance(data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(cycle8_board)
+    board_text = _read_text(board)
     board_count = _checklist_count(board_text)
     board_has_cycle8 = "cycle 8" in board_text.lower()
 
@@ -235,13 +235,13 @@ def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, An
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_cycle9_command",
+            "check_id": "readme_command",
             "weight": 5,
             "passed": ("continuous-upgrade-closeout-9" in readme_text),
             "evidence": "README cycle9 command lane",
         },
         {
-            "check_id": "docs_index_cycle9_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "continuous-upgrade-cycle9-big-upgrade-report.md" in docs_index_text
@@ -250,38 +250,38 @@ def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, An
             "evidence": "continuous-upgrade-cycle9-big-upgrade-report.md + integrations-continuous-upgrade-closeout-9.md",
         },
         {
-            "check_id": "top10_cycle9_align",
+            "check_id": "top10_align",
             "weight": 5,
             "passed": ("cycle 8" in top10_text.lower() and "cycle 9" in top10_text.lower()),
             "evidence": "Cycle 8 + Cycle 9 strategy chain",
         },
         {
-            "check_id": "cycle8_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle8_summary.exists(),
-            "evidence": str(cycle8_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle8_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 7,
-            "passed": cycle8_board.exists(),
-            "evidence": str(cycle8_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle8_quality_floor",
+            "check_id": "quality_floor",
             "weight": 13,
-            "passed": cycle8_score >= 85 and cycle8_strict,
+            "passed": score >= 85 and strict,
             "evidence": {
-                "cycle8_score": cycle8_score,
-                "strict_pass": cycle8_strict,
-                "cycle8_checks": cycle8_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle8_board_integrity",
+            "check_id": "board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_cycle8,
-            "evidence": {"board_items": board_count, "contains_cycle8": board_has_cycle8},
+            "evidence": {"board_items": board_count, "contains": board_has_cycle8},
         },
         {
             "check_id": "page_header",
@@ -347,16 +347,16 @@ def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, An
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle8_summary.exists() or not cycle8_board.exists():
+    if not summary.exists() or not board.exists():
         # sdetkit: allow-security SEC_HIGH_ENTROPY_STRING
-        critical_failures.append("cycle8_handoff_inputs")
+        critical_failures.append("handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle8_score >= 85 and cycle8_strict:
-        wins.append(f"Cycle 9 continuity baseline is stable with activation score={cycle8_score}.")
+    if score >= 85 and strict:
+        wins.append(f"Cycle 9 continuity baseline is stable with activation score={score}.")
     else:
         misses.append("Cycle 9 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -424,19 +424,19 @@ def build_continuous_upgrade_cycle9_closeout_summary(root: Path) -> dict[str, An
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "cycle8_summary": str(cycle8_summary.relative_to(root))
-            if cycle8_summary.exists()
-            else str(cycle8_summary),
-            "cycle8_delivery_board": str(cycle8_board.relative_to(root))
-            if cycle8_board.exists()
-            else str(cycle8_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
             "continuous_upgrade_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "cycle8_activation_score": cycle8_score,
-            "cycle8_checks": cycle8_check_count,
-            "cycle8_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -548,7 +548,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _CYCLE9_DEFAULT_PAGE)
 
-    payload = build_continuous_upgrade_cycle9_closeout_summary(root)
+    payload = build_continuous_upgrade_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

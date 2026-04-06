@@ -178,12 +178,12 @@ def build_kpi_instrumentation_summary_impl(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    cycle34_summary_primary = root / _DAY34_SUMMARY_PATH
-    cycle34_board_primary = root / _DAY34_BOARD_PATH
-    cycle34_summary = cycle34_summary_primary
-    cycle34_board = cycle34_board_primary
-    cycle34_score, cycle34_strict, cycle34_check_count = _load_cycle34(cycle34_summary)
-    board_count, board_has_cycle35, board_has_cycle36 = _board_stats(cycle34_board)
+    summary_primary = root / _DAY34_SUMMARY_PATH
+    board_primary = root / _DAY34_BOARD_PATH
+    summary = summary_primary
+    board = board_primary
+    score, strict, check_count = _load_cycle34(summary)
+    board_count, board_has_cycle35, board_has_cycle36 = _board_stats(board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -232,35 +232,35 @@ def build_kpi_instrumentation_summary_impl(
             "evidence": "Day 35 + Day 36 strategy chain",
         },
         {
-            "check_id": "cycle34_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle34_summary.exists(),
-            "evidence": {"resolved": str(cycle34_summary), "primary": str(cycle34_summary_primary)},
+            "passed": summary.exists(),
+            "evidence": {"resolved": str(summary), "primary": str(summary_primary)},
         },
         {
-            "check_id": "cycle34_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": cycle34_board.exists(),
-            "evidence": {"resolved": str(cycle34_board), "primary": str(cycle34_board_primary)},
+            "passed": board.exists(),
+            "evidence": {"resolved": str(board), "primary": str(board_primary)},
         },
         {
-            "check_id": "cycle34_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": cycle34_strict and cycle34_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle34_score": cycle34_score,
-                "strict_pass": cycle34_strict,
-                "cycle34_checks": cycle34_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle34_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle35 and board_has_cycle36,
             "evidence": {
                 "board_items": board_count,
-                "contains_cycle35": board_has_cycle35,
-                "contains_cycle36": board_has_cycle36,
+                "contains": board_has_cycle35,
+                "contains": board_has_cycle36,
             },
         },
         {
@@ -286,17 +286,17 @@ def build_kpi_instrumentation_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not cycle34_summary.exists() or not cycle34_board.exists():
-        critical_failures.append("cycle34_handoff_inputs")
-    if not cycle34_strict:
-        critical_failures.append("cycle34_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle34_strict:
-        wins.append(f"Day 34 continuity is strict-pass with activation score={cycle34_score}.")
+    if strict:
+        wins.append(f"Day 34 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 34 strict continuity signal is missing.")
         handoff_actions.append(
@@ -337,18 +337,18 @@ def build_kpi_instrumentation_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "cycle34_summary": str(cycle34_summary.relative_to(root))
-            if cycle34_summary.exists()
-            else str(cycle34_summary),
-            "cycle34_delivery_board": str(cycle34_board.relative_to(root))
-            if cycle34_board.exists()
-            else str(cycle34_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle34_activation_score": cycle34_score,
-            "cycle34_checks": cycle34_check_count,
-            "cycle34_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -386,9 +386,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 34 continuity",
         "",
-        f"- Day 34 activation score: `{payload['rollup']['cycle34_activation_score']}`",
-        f"- Day 34 checks evaluated: `{payload['rollup']['cycle34_checks']}`",
-        f"- Day 34 delivery board checklist items: `{payload['rollup']['cycle34_delivery_board_items']}`",
+        f"- Day 34 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Day 34 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- Day 34 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
