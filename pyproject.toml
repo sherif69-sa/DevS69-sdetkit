@@ -67,7 +67,7 @@ telegram = [
   "python-telegram-bot>=22.7,<23"
 ]
 whatsapp = [
-  "twilio>=9.10.3,<10"
+  "twilio>=9.10.4,<10"
 ]
 
 [tool.setuptools]
