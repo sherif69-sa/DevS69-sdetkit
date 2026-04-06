@@ -40,42 +40,55 @@ build/
 └── release-preflight.json
 ```
 
-Representative real shapes documented in this repository:
-
-- `gate-fast.json` includes `ok`, `profile`, `failed_steps`.
-- `security-enforce.json` includes `ok`, `counts`, `exceeded`.
-- `release-preflight.json` includes `ok`, `profile`, `failed_steps`.
-
-See exact examples in [Evidence showcase](evidence-showcase.md).
+Representative real shapes are documented in [Evidence showcase](evidence-showcase.md).
 
 ## What this changes in practice
 
 | Decision step | Before (log-only) | After (SDETKit evidence) |
 | --- | --- | --- |
-| First triage move | Read mixed console output | Open JSON artifact and check `ok` + first failed key |
-| Policy traceability | Often implicit in scripts | Explicit thresholds in `security enforce` output |
+| First triage move | Read mixed console output | Open JSON artifact and check `ok` + `failed_steps` |
+| Policy traceability | Often implicit in scripts | Explicit thresholds in `security enforce` (`counts`, `exceeded`) |
 | CI review speed | Depends on who wrote scripts | Consistent artifact structure across runs |
-| Release handoff | Human summary in chat | Attach `build/*.json` as decision evidence |
+| Release handoff | Human summary in chat | Attach artifact links + machine-readable fields |
 
 ## Minimal review playbook
 
 1. Open `build/release-preflight.json`.
 2. If it references `gate_fast`, open `build/gate-fast.json`.
-3. If policy is failing, open `build/security-enforce.json` and inspect `exceeded`.
+3. If policy is relevant, open `build/security-enforce.json` and inspect `counts` + `exceeded`.
 4. Only then deep-dive into raw logs.
 
-## How to reference artifacts in PRs or release discussions
+## Canonical PR comment template (copy/paste)
 
-Use artifact fields directly instead of long raw log excerpts:
+```md
+### Release-confidence evidence
+- Artifact: `build/release-preflight.json`
+  - `ok`: <value>
+  - `failed_steps`: <value>
+- Artifact: `build/gate-fast.json`
+  - `ok`: <value>
+  - `failed_steps`: <value>
+- Artifact: `build/security-enforce.json` (if used in this run)
+  - `ok`: <value>
+  - `counts`: <value>
+  - `exceeded`: <value>
 
-- Link to uploaded `build/release-preflight.json`.
-- Include `ok` and `failed_steps` values in the PR summary.
-- If security policy is relevant, include `counts`/`exceeded` from `build/security-enforce.json`.
+Decision: <go / no-go / conditional> based on the fields above.
+```
 
-This keeps decisions auditable without inventing claims or hiding failing context.
+## Canonical release discussion template (copy/paste)
+
+```md
+## Release evidence summary
+- `build/release-preflight.json` -> `ok`: <value>, `failed_steps`: <value>
+- `build/gate-fast.json` -> `ok`: <value>, `failed_steps`: <value>
+- `build/security-enforce.json` -> `ok`: <value>, `counts`: <value>, `exceeded`: <value>
+
+Release recommendation: <ready / not ready / ready with follow-up>.
+```
 
 ## Where to go next
 
 - Canonical release-confidence model: [Release confidence](release-confidence.md)
-- Artifact decode rules: [CI artifact walkthrough](ci-artifact-walkthrough.md)
+- Canonical artifact decode: [CI artifact walkthrough](ci-artifact-walkthrough.md)
 - Fit check: [Decision guide](decision-guide.md)

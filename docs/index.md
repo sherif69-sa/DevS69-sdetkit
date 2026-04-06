@@ -53,3 +53,8 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 ## Secondary and advanced references
 
 Deep references, advanced integrations, and historical material remain available in navigation and are intentionally secondary to first-time adoption.
+
+If you need context after the canonical first-proof path is working:
+- [SDETKit vs ad hoc tooling](sdetkit-vs-ad-hoc.md)
+- [Repo cleanup plan](repo-cleanup-plan.md)
+- [Repo health dashboard](repo-health-dashboard.md)

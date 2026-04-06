@@ -86,7 +86,7 @@ nav:
   - First-time release-confidence path:
       - Install (canonical): install.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
-      - First run quickstart (canonical guided run): ready-to-use.md
+      - First run quickstart (guided canonical path): ready-to-use.md
       - Release confidence (canonical explainer): release-confidence.md
       - Before/after evidence example: before-after-evidence-example.md
       - Evidence showcase: evidence-showcase.md
@@ -103,7 +103,7 @@ nav:
       - CI artifact walkthrough (canonical evidence decode): ci-artifact-walkthrough.md
       - CI contract (reference): ci-contract.md
       - Reporting and trends: reporting-and-trends.md
-      - Sample outputs (first-run evidence): sample-outputs.md
+      - Sample outputs (exploratory, non-canonical): sample-outputs.md
       - Remediation cookbook: remediation-cookbook.md
   - Contributing and maintenance:
       - Repo tour: repo-tour.md

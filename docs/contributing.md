@@ -14,6 +14,11 @@ If this is your first external PR, start with [First contribution quickstart](fi
 3. Do not invent proof (no synthetic benchmarks, customer claims, or fake outputs).
 4. Prefer clarification, consolidation, and cross-linking over adding new surfaces.
 
+Secondary references for contributor context (do not replace canonical first-proof docs):
+- [SDETKit vs ad hoc](sdetkit-vs-ad-hoc.md)
+- [Repo cleanup plan](repo-cleanup-plan.md)
+- [Repo health dashboard](repo-health-dashboard.md)
+
 ## What not to change in this docs sprint
 
 - Do not add new product surfaces, kits, bots, workers, or integrations.
