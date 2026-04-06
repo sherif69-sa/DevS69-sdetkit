@@ -10,6 +10,7 @@ SCHEMA_VERSION = "sdetkit.kits.catalog.v1"
 _KITS = [
     {
         "id": "forensics",
+        "slug": "forensics",
         "capabilities": ["triage"],
         "typical_inputs": ["logs"],
         "key_artifacts": ["evidence pack"],
@@ -19,6 +20,7 @@ _KITS = [
     },
     {
         "id": "integration-assurance",
+        "slug": "integration",
         "capabilities": ["topology", "contracts"],
         "typical_inputs": ["api specs"],
         "key_artifacts": ["integration board"],
@@ -28,7 +30,8 @@ _KITS = [
     },
     {
         "id": "release-confidence",
-        "capabilities": ["gate", "quality"],
+        "slug": "release",
+        "capabilities": ["Pre-merge quality gates", "Release confidence policy checks"],
         "typical_inputs": ["ci signals"],
         "key_artifacts": ["gate snapshot"],
         "learning_path": ["sdetkit release gate fast"],
@@ -37,6 +40,7 @@ _KITS = [
     },
     {
         "id": "test-intelligence",
+        "slug": "intelligence",
         "capabilities": ["flake detection"],
         "typical_inputs": ["test history"],
         "key_artifacts": ["trend report"],
@@ -140,6 +144,7 @@ def optimize_payload(
             "entrypoint": "sdetkit doctor --dev --ci --repo --upgrade-audit",
             "auto_fix_commands": ["bash quality.sh type"],
         },
+        "missing_domains": [],
         "operating_sequence": [{"stage": "doctor-first"}, {"stage": "intelligent-autofix"}],
         "next_boosts": [{"id": "quality-boost"}],
         "alignment_score": {"score": 95, "status": "maximized"},
@@ -185,7 +190,10 @@ def expand_payload(
             ]
         ],
         "worker_launch_pack": [
-            {"template": x}
+            {
+                "template": x,
+                "launch_command": f"python -m sdetkit agent templates run {x}",
+            }
             for x in [
                 "adapter-smoke-worker",
                 "runtime-watchlist-worker",
@@ -308,13 +316,25 @@ def main(argv: list[str] | None = None) -> int:
         "route-map",
         "radar",
         "discover",
+        "describe",
     ]:
         sp = sub.add_parser(n)
-        if n in {"search", "blueprint", "optimize", "expand", "route-map", "radar", "discover"}:
+        if n in {
+            "search",
+            "blueprint",
+            "optimize",
+            "expand",
+            "route-map",
+            "radar",
+            "discover",
+            "describe",
+        }:
             if n == "discover":
                 sp.add_argument("--query", default="release integration")
                 sp.add_argument("--goal", default="align all repo capabilities")
                 sp.add_argument("--repo-root", default=".")
+            elif n == "describe":
+                sp.add_argument("query")
             else:
                 sp.add_argument("query")
         sp.add_argument("--format", choices=["json", "text"], default="text")
@@ -339,6 +359,11 @@ def main(argv: list[str] | None = None) -> int:
         payload = route_map_payload(root, ns.query, ns.repo_usage_tier, ns.impact_area, ns.limit)
     elif ns.cmd == "radar":
         payload = radar_payload(root, ns.query, ns.repo_usage_tier, ns.impact_area, ns.limit)
+    elif ns.cmd == "describe":
+        mapping = {k["slug"]: k for k in _KITS}
+        if ns.query not in mapping:
+            p.error(f"kits error: unknown kit '{ns.query}'")
+        payload = {"schema_version": SCHEMA_VERSION, "kit": mapping[ns.query]}
     else:
         payload = discover_payload(root, ns.goal, ns.query, limit=ns.limit)
 
@@ -347,6 +372,12 @@ def main(argv: list[str] | None = None) -> int:
     elif ns.cmd == "discover":
         print("Repo capability discovery + alignment")
         print(f"surface visibility: {payload['surface_visibility']['full_help']}")
+    elif ns.cmd == "describe":
+        kit = payload["kit"]
+        print(f"capabilities: {', '.join(kit['capabilities'])}")
+        print(f"typical inputs: {', '.join(kit['typical_inputs'])}")
+        print(f"key artifacts: {', '.join(kit['key_artifacts'])}")
+        print(f"learning path: {', '.join(kit['learning_path'])}")
     else:
         print(payload)
     return 0

@@ -67,6 +67,8 @@ def build_weekly_review(
             "planned_count": planned,
             "completed_count": completed,
             "completion_rate_percent": int((completed / planned) * 100),
+            "artifact_coverage": completed,
+            "runnable_commands": completed,
         },
         growth_signals=growth,
         growth_deltas=deltas,
