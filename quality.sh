@@ -39,11 +39,11 @@ need_cmd() {
   exit 127
 }
 
-valid_modes=(all ci verify fmt lint type doctor test full-test cov mut muthtml boost help)
+valid_modes=(all ci verify fmt lint type doctor test full-test cov mut muthtml boost registry help)
 
 usage() {
   cat <<'USAGE' >&2
-Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost}
+Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}
 
 Profiles:
   quick     Fast local confidence / smoke profile.
@@ -65,6 +65,7 @@ Modes:
   mut        Run mutation testing.
   muthtml    Build mutation HTML output.
   boost      Chain doctor, fast gate, premium fast gate, and optimization summary.
+  registry   Validate and smoke-test feature-registry docs/contracts surface.
 USAGE
 }
 
@@ -157,6 +158,22 @@ run_cov() {
 }
 run_mut() { need_cmd mutmut; mutmut run; }
 run_muthtml() { need_cmd mutmut; mutmut html; }
+run_registry_contract() {
+  python scripts/sync_feature_registry_docs.py --check
+  python scripts/check_feature_registry_contract.py
+  python -m sdetkit feature-registry \
+    --only-core \
+    --expect-command kits \
+    --expect-command release \
+    --expect-command intelligence \
+    --expect-command integration \
+    --expect-command forensics \
+    --expect-total 8 \
+    --expect-tier-count A=8 \
+    --expect-status-count stable=8 \
+    --fail-on-empty \
+    --format summary-json >/dev/null
+}
 
 SDETKIT_OUT_DIR="${SDETKIT_OUT_DIR:-.sdetkit/out}"
 mkdir -p "$SDETKIT_OUT_DIR"
@@ -349,6 +366,11 @@ case "$mode" in
     profile_used="adaptive"
     profile_notes="Planner-oriented boost lane that chains multiple platform surfaces."
     run_required "boost" "Boost orchestration" 0 "run_boost"
+    ;;
+  registry)
+    profile_used="standard"
+    profile_notes="Feature registry maintenance lane for docs/contract/CLI consistency."
+    run_required "feature_registry_contract" "Feature registry maintenance lane" 1 "run_registry_contract"
     ;;
   ci)
     profile_used="quick"

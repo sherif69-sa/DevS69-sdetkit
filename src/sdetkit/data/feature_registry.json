@@ -1,0 +1,82 @@
+[
+  {
+    "command": "kits",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Discovers the curated umbrella surfaces for fast adoption.",
+    "example": "python -m sdetkit kits list",
+    "expected_output": "Lists available kits with short purpose descriptions.",
+    "test_file": "tests/test_cli_sdetkit.py",
+    "docs_page": "docs/cli.md"
+  },
+  {
+    "command": "release",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Runs release-confidence checks and gate workflows.",
+    "example": "python -m sdetkit release gate fast",
+    "expected_output": "Returns a gate verdict with actionable recommendations.",
+    "test_file": "tests/test_release_readiness.py",
+    "docs_page": "docs/release-readiness.md"
+  },
+  {
+    "command": "intelligence",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Analyzes failure trends and flaky behavior for triage.",
+    "example": "python -m sdetkit intelligence --help",
+    "expected_output": "Shows intelligence subcommands and usage help.",
+    "test_file": "tests/test_cli_sdetkit.py",
+    "docs_page": "docs/cli.md"
+  },
+  {
+    "command": "integration",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Validates integration topologies and runtime compatibility.",
+    "example": "python -m sdetkit integration check --profile examples/kits/integration/profile.json",
+    "expected_output": "Prints an integration validation summary.",
+    "test_file": "tests/test_integration_feedback_closeout.py",
+    "docs_page": "docs/cli.md"
+  },
+  {
+    "command": "forensics",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Compares runs and pinpoints failure deltas for root-cause analysis.",
+    "example": "python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json",
+    "expected_output": "Produces a structured delta report.",
+    "test_file": "tests/test_cli_sdetkit.py",
+    "docs_page": "docs/cli.md"
+  },
+  {
+    "command": "doctor",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Provides deterministic repo diagnostics and readiness scoring.",
+    "example": "python -m sdetkit doctor --format md",
+    "expected_output": "Outputs a diagnosis summary with remediation actions.",
+    "test_file": "tests/test_cli_doctor.py",
+    "docs_page": "docs/doctor.md"
+  },
+  {
+    "command": "gate",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Runs fast and strict confidence checks for release control.",
+    "example": "python -m sdetkit gate fast",
+    "expected_output": "Returns pass/warn/fail style gate output.",
+    "test_file": "tests/test_gate_fast.py",
+    "docs_page": "docs/cli.md"
+  },
+  {
+    "command": "repo",
+    "tier": "A",
+    "status": "stable",
+    "problem_solved": "Performs repo policy and automation audits.",
+    "example": "python -m sdetkit repo --help",
+    "expected_output": "Shows repository automation command surface.",
+    "test_file": "tests/test_repo_check_cli.py",
+    "docs_page": "docs/repo-audit.md"
+  }
+]

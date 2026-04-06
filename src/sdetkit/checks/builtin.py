@@ -194,6 +194,12 @@ def _tests_full_command(ctx: CheckContext) -> tuple[str, ...]:
     return (ctx.python_executable, "-m", "pytest", "-q", "-o", "addopts=")
 
 
+
+
+def _feature_registry_contract_command(ctx: CheckContext) -> tuple[str, ...]:
+    return (ctx.python_executable, "scripts/check_feature_registry_contract.py")
+
+
 def _doctor_core_command(ctx: CheckContext) -> tuple[str, ...]:
     return (
         ctx.python_executable,
@@ -253,6 +259,20 @@ BUILTIN_CHECKS: tuple[CheckDefinition, ...] = (
             notes="Protects baseline repo structure before deeper checks run.",
         ),
         _make_command_runner(_repo_layout_command),
+    ),
+    _bind(
+        CheckDefinition(
+            id="feature_registry_contract",
+            title="Feature registry contract",
+            category="repo",
+            cost="cheap",
+            truth_level="smoke",
+            required_tools=("python",),
+            required_paths=("scripts/check_feature_registry_contract.py", "src/sdetkit/data/feature_registry.json"),
+            command=("python", "scripts/check_feature_registry_contract.py"),
+            notes="Ensures Tier-mapped commands keep valid docs/tests linkage and contract fields.",
+        ),
+        _make_command_runner(_feature_registry_contract_command),
     ),
     _bind(
         CheckDefinition(
