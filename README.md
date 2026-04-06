@@ -10,6 +10,12 @@ bash quality.sh ci
 python -m sdetkit kits list
 ```
 
+Need the deepest whole-repo improvement lane? Run:
+
+```bash
+make max
+```
+
 ## What this repo contains
 
 ```text
