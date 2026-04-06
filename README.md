@@ -33,12 +33,21 @@ artifacts/     # generated evidence packs
 
 ```bash
 python -m sdetkit kits list
+python -m sdetkit kits discover --goal "align all repo capabilities"
 python -m sdetkit release gate release
 python -m sdetkit intelligence failure-fingerprint --failures examples/kits/intelligence/failures.json
 python -m sdetkit integration check --profile examples/kits/integration/profile.json
 python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
 bash quality.sh verify
 bash premium-gate.sh --mode full
+```
+
+## Discover hidden/advanced surfaces
+
+```bash
+python -m sdetkit --help
+python -m sdetkit --help --show-hidden
+python -m sdetkit kits discover --query "release integration forensics"
 ```
 
 ## Documentation
