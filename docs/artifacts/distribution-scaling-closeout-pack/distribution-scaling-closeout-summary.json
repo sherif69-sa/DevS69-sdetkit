@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 74 + Day 75 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "prior_closeout_summary_present",
@@ -63,17 +63,17 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 74 \u2014 Distribution scaling closeout lane"
+      "evidence": "#  \u2014 Distribution scaling closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Why Day 74 matters",
-        "## Required inputs (Day 73)",
-        "## Day 74 command lane",
-        "## Day 74 delivery board"
+        "## Why  matters",
+        "## Required inputs ()",
+        "##  command lane",
+        "##  delivery board"
       ]
     },
     {
@@ -87,10 +87,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 74 distribution scaling execution and signoff.",
-        "The Day 74 lane references Day 73 publication outcomes, controls, and KPI continuity signals.",
-        "Every Day 74 section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 74 closeout records distribution outcomes, confidence notes, and Day 75 trust refresh priorities."
+        "Single owner + backup reviewer are assigned for  distribution scaling execution and signoff.",
+        "The  lane references  publication outcomes, controls, and KPI continuity signals.",
+        "Every  section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records distribution outcomes, confidence notes, and  trust refresh priorities."
       ]
     },
     {
@@ -104,11 +104,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 74 integration brief committed",
-        "- [ ] Day 74 distribution scaling plan committed",
-        "- [ ] Day 74 channel controls and assumptions log exported",
-        "- [ ] Day 74 KPI scorecard snapshot exported",
-        "- [ ] Day 75 trust refresh priorities drafted from Day 74 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  distribution scaling plan committed",
+        "- [ ]  channel controls and assumptions log exported",
+        "- [ ]  KPI scorecard snapshot exported",
+        "- [ ]  trust refresh priorities drafted from  learnings"
       ]
     },
     {
@@ -133,13 +133,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 73 delivery board integrity validated with 5 checklist items.",
-    "Day 74 distribution scaling dataset is available for launch execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " distribution scaling dataset is available for launch execution."
   ],
   "misses": [
-    "Day 73 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 73 closeout command and restore strict baseline before Day 74 lock."
+    "Re-run  closeout command and restore strict baseline before  lock."
   ]
 }

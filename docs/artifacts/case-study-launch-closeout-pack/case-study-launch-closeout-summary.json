@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 73 + Day 74 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "prior_closeout_summary_present",
@@ -63,17 +63,17 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 73 \u2014 Case-study launch closeout lane"
+      "evidence": "#  \u2014 Case-study launch closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Why Day 73 matters",
-        "## Required inputs (Day 72)",
-        "## Day 73 command lane",
-        "## Day 73 delivery board"
+        "## Why  matters",
+        "## Required inputs ()",
+        "##  command lane",
+        "##  delivery board"
       ]
     },
     {
@@ -87,10 +87,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 73 published case-study launch execution and signoff.",
-        "The Day 73 lane references Day 72 prep outputs, governance decisions, and KPI continuity signals.",
-        "Every Day 73 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 73 closeout records publication outcomes, evidence confidence notes, and Day 74 scaling priorities."
+        "Single owner + backup reviewer are assigned for  published case-study launch execution and signoff.",
+        "The  lane references  prep outputs, governance decisions, and KPI continuity signals.",
+        "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records publication outcomes, evidence confidence notes, and  scaling priorities."
       ]
     },
     {
@@ -104,11 +104,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 73 integration brief committed",
-        "- [ ] Day 73 published case-study narrative committed",
-        "- [ ] Day 73 controls and assumptions log exported",
-        "- [ ] Day 73 KPI scorecard snapshot exported",
-        "- [ ] Day 74 distribution scaling priorities drafted from Day 73 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  published case-study narrative committed",
+        "- [ ]  controls and assumptions log exported",
+        "- [ ]  KPI scorecard snapshot exported",
+        "- [ ]  distribution scaling priorities drafted from  learnings"
       ]
     },
     {
@@ -133,13 +133,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 72 delivery board integrity validated with 5 checklist items.",
-    "Day 73 published case-study dataset is available for launch execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " published case-study dataset is available for launch execution."
   ],
   "misses": [
-    "Day 72 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 72 closeout command and restore strict baseline before Day 73 lock."
+    "Re-run  closeout command and restore strict baseline before  lock."
   ]
 }

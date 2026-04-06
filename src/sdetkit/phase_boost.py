@@ -131,7 +131,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--start-date",
         default=date.today().isoformat(),
-        help="Program start date label (defaults to today in ISO format).",
+        help="Program start date label (defaults to toin ISO format).",
     )
     parser.add_argument(
         "--output",

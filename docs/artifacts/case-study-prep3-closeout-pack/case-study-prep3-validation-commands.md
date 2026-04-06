@@ -1,4 +1,4 @@
-# Day 71 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit case-study-prep3-closeout --format json --strict

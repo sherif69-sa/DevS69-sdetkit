@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-experiment-lane.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY36_SUMMARY_PATH = "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
 _DAY36_BOARD_PATH = "docs/artifacts/distribution-closeout-pack/delivery-board.md"
-_SECTION_HEADER = "# Day 37 \u2014 Experiment lane activation"
+_SECTION_HEADER = '#  — Experiment lane activation'
 _REQUIRED_SECTIONS = [
-    "## Why Day 37 matters",
-    "## Required inputs (Day 36)",
-    "## Day 37 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Experiment contract",
     "## Experiment quality checklist",
-    "## Day 37 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -36,8 +36,8 @@ _EXECUTION_COMMANDS = [
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for experiment execution and decision logging.",
     "At least three experiments include hypothesis, KPI target delta, and stop/continue threshold.",
-    "Every experiment is linked to one Day 36 distribution miss with explicit remediation intent.",
-    "Day 37 report commits Day 38 distribution batch actions based on experiment outcomes.",
+    'Every experiment is linked to one  distribution miss with explicit remediation intent.',
+    ' report commits  distribution batch actions based on experiment outcomes.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes at least three experiments with control vs variant definitions",
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes matrix, hypothesis brief, scorecard, and decision log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 37 experiment matrix committed",
-    "- [ ] Day 37 hypothesis brief reviewed with owner + backup",
-    "- [ ] Day 37 scorecard snapshot exported",
-    "- [ ] Day 38 distribution batch actions selected from winners",
-    "- [ ] Day 38 fallback plan documented for losing variants",
+    '- [ ]  experiment matrix committed',
+    '- [ ]  hypothesis brief reviewed with owner + backup',
+    '- [ ]  scorecard snapshot exported',
+    '- [ ]  distribution batch actions selected from winners',
+    '- [ ]  fallback plan documented for losing variants',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 37 \u2014 Experiment lane activation
-
-Day 37 turns Day 36 distribution misses into controlled experiments with strict scoring, owner accountability, and Day 38 rollout decisions.
-
-## Why Day 37 matters
-
-- Converts distribution misses into measurable learnings instead of ad-hoc retries.
-- Protects quality by coupling growth experiments to reliability and contribution guardrails.
-- Creates a deterministic handoff from experiment outcomes into Day 38 distribution actions.
-
-## Required inputs (Day 36)
-
-- `docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json`
-- `docs/artifacts/distribution-closeout-pack/delivery-board.md`
-
-## Day 37 command lane
-
-```bash
-python -m sdetkit experiment-lane --format json --strict
-python -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json --strict
-python -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/experiment-lane-pack/evidence --format json --strict
-python scripts/check_experiment_lane_contract.py
-```
-
-## Experiment contract
-
-- Single owner + backup reviewer are assigned for experiment execution and decision logging.
-- At least three experiments include hypothesis, KPI target delta, and stop/continue threshold.
-- Every experiment is linked to one Day 36 distribution miss with explicit remediation intent.
-- Day 37 report commits Day 38 distribution batch actions based on experiment outcomes.
-
-## Experiment quality checklist
-
-- [ ] Includes at least three experiments with control vs variant definitions
-- [ ] Every experiment has KPI target, owner, and decision deadline
-- [ ] Guardrail metrics include reliability and contribution-quality checks
-- [ ] Experiment scorecard records baseline, current, and delta fields
-- [ ] Artifact pack includes matrix, hypothesis brief, scorecard, and decision log
-
-## Day 37 delivery board
-
-- [ ] Day 37 experiment matrix committed
-- [ ] Day 37 hypothesis brief reviewed with owner + backup
-- [ ] Day 37 scorecard snapshot exported
-- [ ] Day 38 distribution batch actions selected from winners
-- [ ] Day 38 fallback plan documented for losing variants
-
-## Scoring model
-
-Day 37 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 36 continuity and strict baseline carryover: 35 points.
-- Experiment contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Experiment lane activation\n\n turns  distribution misses into controlled experiments with strict scoring, owner accountability, and  rollout decisions.\n\n## Why  matters\n\n- Converts distribution misses into measurable learnings instead of ad-hoc retries.\n- Protects quality by coupling growth experiments to reliability and contribution guardrails.\n- Creates a deterministic handoff from experiment outcomes into  distribution actions.\n\n## Required inputs ()\n\n- `docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json`\n- `docs/artifacts/distribution-closeout-pack/delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit experiment-lane --format json --strict\npython -m sdetkit experiment-lane --emit-pack-dir docs/artifacts/experiment-lane-pack --format json --strict\npython -m sdetkit experiment-lane --execute --evidence-dir docs/artifacts/experiment-lane-pack/evidence --format json --strict\npython scripts/check_experiment_lane_contract.py\n```\n\n## Experiment contract\n\n- Single owner + backup reviewer are assigned for experiment execution and decision logging.\n- At least three experiments include hypothesis, KPI target delta, and stop/continue threshold.\n- Every experiment is linked to one  distribution miss with explicit remediation intent.\n-  report commits  distribution batch actions based on experiment outcomes.\n\n## Experiment quality checklist\n\n- [ ] Includes at least three experiments with control vs variant definitions\n- [ ] Every experiment has KPI target, owner, and decision deadline\n- [ ] Guardrail metrics include reliability and contribution-quality checks\n- [ ] Experiment scorecard records baseline, current, and delta fields\n- [ ] Artifact pack includes matrix, hypothesis brief, scorecard, and decision log\n\n##  delivery board\n\n- [ ]  experiment matrix committed\n- [ ]  hypothesis brief reviewed with owner + backup\n- [ ]  scorecard snapshot exported\n- [ ]  distribution batch actions selected from winners\n- [ ]  fallback plan documented for losing variants\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Experiment contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -144,10 +89,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle36 = any(
-        any(token in line for token in ("impact 36", "day 36", "name 36")) for line in lines
+        any(token in line for token in ("impact 36", '', "name 36")) for line in lines
     )
     has_cycle37 = any(
-        any(token in line for token in ("impact 37", "day 37", "name 37")) for line in lines
+        any(token in line for token in ("impact 37", '', "name 37")) for line in lines
     )
     return item_count, has_cycle36, has_cycle37
 
@@ -226,8 +171,8 @@ def build_experiment_lane_summary_impl(
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 37" in top10_text and "Day 38" in top10_text),
-            "evidence": "Day 37 + Day 38 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -294,23 +239,23 @@ def build_experiment_lane_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 36 continuity is strict-pass with activation score={score}.")
+        wins.append(f"36 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 36 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 36 distribution closeout command and restore strict pass baseline before Day 37 lock."
+            'Re-run  distribution closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle36 and board_has_cycle37:
         wins.append(
-            f"Day 36 delivery board integrity validated with {board_count} checklist items."
+            f"36 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 36 delivery board integrity is incomplete (needs >=5 items and Day 36/37 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /37 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 36 delivery board entries to include Day 36 and Day 37 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -320,12 +265,12 @@ def build_experiment_lane_summary_impl(
             "Experiment contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 37 experiment contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  experiment contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 37 experiment lane activation is fully complete and ready for Day 38 distribution batch #1."
+            ' experiment lane activation is fully complete and ready for  distribution batch #1.'
         )
 
     return {
@@ -364,7 +309,7 @@ def build_experiment_lane_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 37 experiment lane summary\n"
+        ' experiment lane summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -375,18 +320,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 37 experiment lane summary",
+        '#  experiment lane summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 36 continuity",
+        '##  continuity',
         "",
-        f"- Day 36 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 36 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 36 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 36 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 36 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 36 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -419,7 +364,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "hypothesis-brief.md",
-        "# Day 37 experiment hypothesis brief\n\n"
+        '#  experiment hypothesis brief\n\n'
         "## Experiment hypotheses\n"
         "- `exp-01`: Command-first headline improves contributor command CTR by at least 2%.\n"
         "- `exp-02`: Morning posting window improves docs unique visitors by at least 8%.\n"
@@ -466,18 +411,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "decision-log.md",
-        "# Day 37 decision log\n\n"
-        "- [ ] 2026-03-01: Promote winning variant(s) into Day 38 distribution batch #1.\n"
+        '#  decision log\n\n'
+        '- [ ] 2026-03-01: Promote winning variant(s) into  distribution batch #1.\n'
         "- [ ] 2026-03-01: Pause losing variant(s) and record fallback plan.\n"
-        "- [ ] 2026-03-02: Publish cycle37 closeout summary with Day 38 rollout checklist.\n",
+        '- [ ] 2026-03-02: Publish cycle37 closeout summary with  rollout checklist.\n',
     )
     _write(
         target / "delivery-board.md",
-        "# Day 37 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands.md",
-        "# Day 37 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -508,7 +453,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 37 experiment lane activation scorer.")
+    parser = argparse.ArgumentParser(description=' experiment lane activation scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -572,7 +517,7 @@ def build_experiment_lane_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_experiment_lane_summary_impl(
         root,
         readme_path=readme_path,

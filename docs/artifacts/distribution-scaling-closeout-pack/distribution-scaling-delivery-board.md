@@ -1,6 +1,6 @@
-# Day 74 delivery board
-- [ ] Day 74 integration brief committed
-- [ ] Day 74 distribution scaling plan committed
-- [ ] Day 74 channel controls and assumptions log exported
-- [ ] Day 74 KPI scorecard snapshot exported
-- [ ] Day 75 trust refresh priorities drafted from Day 74 learnings
+#  delivery board
+- [ ]  integration brief committed
+- [ ]  distribution scaling plan committed
+- [ ]  channel controls and assumptions log exported
+- [ ]  KPI scorecard snapshot exported
+- [ ]  trust refresh priorities drafted from  learnings

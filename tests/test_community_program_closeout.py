@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 62 — Community program setup:** publish office-hours cadence and participation rules.\n"
-        "- **Day 63 — Contributor onboarding activation:** launch orientation flow and ownership handoff loops.\n",
+        '- ** — Community program setup:** publish office-hours cadence and participation rules.\n'
+        '- ** — Contributor onboarding activation:** launch orientation flow and ownership handoff loops.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-community-program-closeout.md").write_text(
         d62._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-62-big-upgrade-report.md").write_text(
-        "# Day 62 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -59,12 +59,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 61 delivery board",
-                "- [ ] Day 61 Phase-3 kickoff brief committed",
-                "- [ ] Day 61 kickoff reviewed with owner + backup",
-                "- [ ] Day 61 trust ledger exported",
-                "- [ ] Day 61 KPI scorecard snapshot exported",
-                "- [ ] Day 62 community program priorities drafted from Day 61 learnings",
+                '#  delivery board',
+                '- [ ]  Phase-3 kickoff brief committed',
+                '- [ ]  kickoff reviewed with owner + backup',
+                '- [ ]  trust ledger exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  community program priorities drafted from  learnings',
             ]
         )
         + "\n",

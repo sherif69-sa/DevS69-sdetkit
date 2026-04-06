@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 89 — Governance priorities closeout lane:** convert governance handoff outcomes into governance scale.\n"
-        "- **Day 90 — Phase-3 wrap publication closeout lane:** scale governance scale into deterministic execution lanes.\n",
+        '- ** — Governance priorities closeout lane:** convert governance handoff outcomes into governance scale.\n'
+        '- ** — Phase-3 wrap publication closeout lane:** scale governance scale into deterministic execution lanes.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-phase3-wrap-publication-closeout.md").write_text(
         d90._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-90-big-upgrade-report.md").write_text(
-        "# Day 90 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -62,12 +62,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 89 delivery board",
-                "- [ ] Day 89 evidence brief committed",
-                "- [ ] Day 89 governance scale plan committed",
-                "- [ ] Day 89 narrative template upgrade ledger exported",
-                "- [ ] Day 89 storyline outcomes ledger exported",
-                "- [ ] Day 90 governance scale drafted from Day 89 outcomes",
+                '#  delivery board',
+                '- [ ]  evidence brief committed',
+                '- [ ]  governance scale plan committed',
+                '- [ ]  narrative template upgrade ledger exported',
+                '- [ ]  storyline outcomes ledger exported',
+                '- [ ]  governance scale drafted from  outcomes',
             ]
         )
         + "\n",
@@ -174,4 +174,4 @@ def test_lane90_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase3-wrap-publication-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 90 phase-3 wrap publication closeout summary" in capsys.readouterr().out
+    assert ' phase-3 wrap publication closeout summary' in capsys.readouterr().out

@@ -12,20 +12,20 @@ ISSUE_PACK = Path("docs/artifacts/contributor-issue-pack")
 LANE_MODULE = Path("src/sdetkit/contributor_funnel.py")
 
 REQUIRED_README_SNIPPETS = [
-    "## 🧲 Day 8 ultra: contributor funnel backlog",
+    '## 🧲  ultra: contributor funnel backlog',
     "python -m sdetkit contributor-funnel --format text --strict",
     "python -m sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/contributor-issue-pack",
     "docs/impact-8-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [
-    "Day 8 ultra upgrade report",
+    ' ultra upgrade report',
     "sdetkit contributor-funnel --format text --strict",
     "sdetkit contributor-funnel --area docs --issue-pack-dir docs/artifacts/contributor-issue-pack",
 ]
 
 REQUIRED_REPORT_SNIPPETS = [
-    "Day 8 big upgrade",
+    ' big upgrade',
     "src/sdetkit/contributor_funnel.py",
     "tests/test_contributor_funnel.py",
     "python scripts/check_contributor_funnel_contract_8.py",
@@ -55,7 +55,7 @@ def main() -> int:
 
     for s in REQUIRED_REPORT_SNIPPETS:
         if s not in report:
-            errors.append(f"missing Day 8 report snippet: {s}")
+            errors.append(f"missing 8 report snippet: {s}")
 
     for p in [LANE_REPORT, LANE_ARTIFACT, LANE_MODULE]:
         if not p.exists():

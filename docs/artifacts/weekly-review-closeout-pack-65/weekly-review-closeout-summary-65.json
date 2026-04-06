@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 65 + Day 66 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -63,7 +63,7 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": true,
-      "evidence": "# Day 65 \u2014 Weekly review #9 closeout lane"
+      "evidence": "#  \u2014 Weekly review #9 closeout lane"
     },
     {
       "check_id": "required_sections",
@@ -115,10 +115,10 @@
     "strict_pass": true
   },
   "wins": [
-    "Day 64 continuity is strict-pass with activation score=100.",
-    "Day 64 delivery board integrity validated with 5 checklist items.",
-    "Day 64 workflow reference remains available for weekly KPI baseline review.",
-    "Day 65 weekly review closeout lane is fully complete and ready for Day 66 integration expansion #2."
+    " continuity is strict-pass with activation score=100.",
+    " delivery board integrity validated with 5 checklist items.",
+    " workflow reference remains available for weekly KPI baseline review.",
+    " weekly review closeout lane is fully complete and ready for  integration expansion #2."
   ],
   "misses": [],
   "handoff_actions": []

@@ -16,14 +16,14 @@ _DAY56_SUMMARY_PATH = (
     "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
 )
 _DAY56_BOARD_PATH = "docs/artifacts/stabilization-closeout-pack/stabilization-delivery-board.md"
-_unused_SECTION_HEADER = "# Day 57 \u2014 KPI deep audit closeout lane"
+_unused_SECTION_HEADER = '#  — KPI deep audit closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 57 matters",
-    "## Required inputs (Day 56)",
-    "## Day 57 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## KPI deep audit contract",
     "## KPI deep audit quality checklist",
-    "## Day 57 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_kpi_deep_audit_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 57 KPI deep-audit execution and signal triage.",
-    "The Day 57 lane references Day 56 stabilization outcomes and unresolved risks.",
-    "Every Day 57 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 57 closeout records deep-audit outcomes and Day 58 execution priorities.",
+    'Single owner + backup reviewer are assigned for  KPI deep-audit execution and signal triage.',
+    'The  lane references  stabilization outcomes and unresolved risks.',
+    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records deep-audit outcomes and  execution priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes KPI trendline digest, anomaly triage, and rollback strategy",
@@ -51,69 +51,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes audit brief, risk ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 57 KPI deep audit brief committed",
-    "- [ ] Day 57 deep-audit plan reviewed with owner + backup",
-    "- [ ] Day 57 risk ledger exported",
-    "- [ ] Day 57 KPI scorecard snapshot exported",
-    "- [ ] Day 58 execution priorities drafted from Day 57 learnings",
+    '- [ ]  KPI deep audit brief committed',
+    '- [ ]  deep-audit plan reviewed with owner + backup',
+    '- [ ]  risk ledger exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  execution priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 57 \u2014 KPI deep audit closeout lane
-
-Day 57 closes with a major KPI deep-audit upgrade that turns Day 56 stabilization outcomes into deterministic trendline governance.
-
-## Why Day 57 matters
-
-- Converts Day 56 stabilization evidence into repeatable KPI anomaly triage loops.
-- Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 57 closeout into Day 58 execution planning.
-
-## Required inputs (Day 56)
-
-- `docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json`
-- `docs/artifacts/stabilization-closeout-pack/stabilization-delivery-board.md`
-
-## Day 57 command lane
-
-```bash
-python -m sdetkit kpi-deep-audit-closeout --format json --strict
-python -m sdetkit kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/kpi-deep-audit-closeout-pack --format json --strict
-python -m sdetkit kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/kpi-deep-audit-closeout-pack/evidence --format json --strict
-python scripts/check_kpi_deep_audit_closeout_contract.py
-```
-
-## KPI deep audit contract
-
-- Single owner + backup reviewer are assigned for Day 57 KPI deep-audit execution and signal triage.
-- The Day 57 lane references Day 56 stabilization outcomes and unresolved risks.
-- Every Day 57 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 57 closeout records deep-audit outcomes and Day 58 execution priorities.
-
-## KPI deep audit quality checklist
-
-- [ ] Includes KPI trendline digest, anomaly triage, and rollback strategy
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
-- [ ] Artifact pack includes audit brief, risk ledger, KPI scorecard, and execution log
-
-## Day 57 delivery board
-
-- [ ] Day 57 KPI deep audit brief committed
-- [ ] Day 57 deep-audit plan reviewed with owner + backup
-- [ ] Day 57 risk ledger exported
-- [ ] Day 57 KPI scorecard snapshot exported
-- [ ] Day 58 execution priorities drafted from Day 57 learnings
-
-## Scoring model
-
-Day 57 weighted score (0-100):
-
-- Contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 56 continuity and strict baseline carryover: 35 points.
-- KPI deep-audit contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — KPI deep audit closeout lane\n\n closes with a major KPI deep-audit upgrade that turns  stabilization outcomes into deterministic trendline governance.\n\n## Why  matters\n\n- Converts  stabilization evidence into repeatable KPI anomaly triage loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  execution planning.\n\n## Required inputs ()\n\n- `docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json`\n- `docs/artifacts/stabilization-closeout-pack/stabilization-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit kpi-deep-audit-closeout --format json --strict\npython -m sdetkit kpi-deep-audit-closeout --emit-pack-dir docs/artifacts/kpi-deep-audit-closeout-pack --format json --strict\npython -m sdetkit kpi-deep-audit-closeout --execute --evidence-dir docs/artifacts/kpi-deep-audit-closeout-pack/evidence --format json --strict\npython scripts/check_kpi_deep_audit_closeout_contract.py\n```\n\n## KPI deep audit contract\n\n- Single owner + backup reviewer are assigned for  KPI deep-audit execution and signal triage.\n- The  lane references  stabilization outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records deep-audit outcomes and  execution priorities.\n\n## KPI deep audit quality checklist\n\n- [ ] Includes KPI trendline digest, anomaly triage, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes audit brief, risk ledger, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  KPI deep audit brief committed\n- [ ]  deep-audit plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- KPI deep-audit contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -148,7 +93,7 @@ def _load_board(path: Path) -> tuple[int, bool]:
         return 0, False
     lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines()]
     items = [line for line in lines if line.startswith("- [")]
-    has_cycle56 = any("Day 56" in line for line in lines)
+    has_cycle56 = any('' in line for line in lines)
     return len(items), has_cycle56
 
 
@@ -213,8 +158,8 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 57" in top10_text and "Day 58" in top10_text),
-            "evidence": "Day 57 + Day 58 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -276,22 +221,22 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 56 continuity is strict-pass with activation score={score}.")
+        wins.append(f"56 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 56 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 56 stabilization closeout command and restore strict baseline before Day 57 lock."
+            'Re-run  stabilization closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle56:
         wins.append(
-            f"Day 56 delivery board integrity validated with {board_count} checklist items."
+            f"56 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 56 delivery board integrity is incomplete (needs >=5 items and Day 56 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 56 delivery board entries to include Day 56 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("KPI deep-audit contract + quality checklist is fully locked for execution.")
@@ -300,12 +245,12 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "KPI deep-audit contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 57 contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 57 KPI deep-audit closeout lane is fully complete and ready for Day 58 execution lane."
+            ' KPI deep-audit closeout lane is fully complete and ready for  execution lane.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
@@ -344,7 +289,7 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "KPI Deep Audit Closeout summary (legacy: Day 57)",
+        'KPI Deep Audit Closeout summary (legacy: )',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -362,17 +307,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(target / "kpi-deep-audit-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "kpi-deep-audit-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "kpi-deep-audit-brief.md", "# Day 57 KPI deep-audit brief\n")
+    _write(target / "kpi-deep-audit-brief.md", '#  KPI deep-audit brief\n')
     _write(target / "kpi-deep-audit-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "kpi-deep-audit-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "kpi-deep-audit-execution-log.md", "# Day 57 execution log\n")
+    _write(target / "kpi-deep-audit-execution-log.md", '#  execution log\n')
     _write(
         target / "kpi-deep-audit-delivery-board.md",
-        "\n".join(["# Day 57 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "kpi-deep-audit-validation-commands.md",
-        "# Day 57 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -400,7 +345,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_kpi_deep_audit_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_kpi_deep_audit_closeout_summary(root)
 
 

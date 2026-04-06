@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 89 + Day 90 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "governance_scale_summary_present",
@@ -63,14 +63,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 90 \u2014 Phase-3 wrap publication closeout lane"
+      "evidence": "#  \u2014 Phase-3 wrap publication closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 89)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -84,10 +84,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 90 phase-3 wrap publication execution and signoff.",
-        "The Day 90 lane references Day 89 outcomes, controls, and trust continuity signals.",
-        "Every Day 90 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 90 closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs."
+        "Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.",
+        "The  lane references  outcomes, controls, and trust continuity signals.",
+        "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs."
       ]
     },
     {
@@ -101,11 +101,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 90 evidence brief committed",
-        "- [ ] Day 90 phase-3 wrap publication plan committed",
-        "- [ ] Day 90 narrative template upgrade ledger exported",
-        "- [ ] Day 90 storyline outcomes ledger exported",
-        "- [ ] Next-impact roadmap draft captured from Day 90 outcomes"
+        "- [ ]  evidence brief committed",
+        "- [ ]  phase-3 wrap publication plan committed",
+        "- [ ]  narrative template upgrade ledger exported",
+        "- [ ]  storyline outcomes ledger exported",
+        "- [ ] Next-impact roadmap draft captured from  outcomes"
       ]
     },
     {
@@ -129,12 +129,12 @@
   },
   "wins": [
     "Governance scale delivery board integrity validated with 5 checklist items.",
-    "Day 90 phase-3 wrap publication dataset is available for governance execution."
+    " phase-3 wrap publication dataset is available for governance execution."
   ],
   "misses": [
-    "Day 89 continuity baseline is below the floor (<85) or not strict-pass."
+    " continuity baseline is below the floor (<85) or not strict-pass."
   ],
   "handoff_actions": [
-    "Re-run Day 89 closeout command and raise baseline quality above 85 with strict pass before Day 90 lock."
+    "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
   ]
 }

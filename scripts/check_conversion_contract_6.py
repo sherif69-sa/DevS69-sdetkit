@@ -11,19 +11,19 @@ LANE_ARTIFACT = Path("docs/artifacts/conversion-qa-sample-6.md")
 DOCS_QA_MODULE = Path("src/sdetkit/docs_qa.py")
 
 REQUIRED_README_SNIPPETS = [
-    "## 🔗 Day 6 ultra: conversion QA hardening",
+    '## 🔗  ultra: conversion QA hardening',
     "python -m sdetkit docs-qa --format text",
     "python -m sdetkit docs-qa --format markdown --output docs/artifacts/conversion-qa-sample-6.md",
     "docs/impact-6-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [
-    "Day 6 ultra upgrade report",
+    ' ultra upgrade report',
     "sdetkit docs-qa --format text",
 ]
 
 REQUIRED_REPORT_SNIPPETS = [
-    "Day 6 big upgrade",
+    ' big upgrade',
     "src/sdetkit/docs_qa.py",
     "tests/test_docs_qa.py",
     "python scripts/check_conversion_contract_6.py",
@@ -53,7 +53,7 @@ def main() -> int:
 
     for s in REQUIRED_REPORT_SNIPPETS:
         if s not in report:
-            errors.append(f"missing Day 6 report snippet: {s}")
+            errors.append(f"missing 6 report snippet: {s}")
 
     for p in [LANE_REPORT, LANE_ARTIFACT, DOCS_QA_MODULE]:
         if not p.exists():

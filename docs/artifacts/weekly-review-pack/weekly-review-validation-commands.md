@@ -1,4 +1,4 @@
-# Day 28 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit weekly-review-lane --format json --strict

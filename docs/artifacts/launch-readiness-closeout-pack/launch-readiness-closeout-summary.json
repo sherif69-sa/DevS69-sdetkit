@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 85 + Day 86 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "release_prioritization_summary_present",
@@ -63,14 +63,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 86 \u2014 Launch readiness closeout lane"
+      "evidence": "#  \u2014 Launch readiness closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 85)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -84,10 +84,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 86 launch readiness execution and signoff.",
-        "The Day 86 lane references Day 85 outcomes, controls, and trust continuity signals.",
-        "Every Day 86 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 86 closeout records launch readiness pack upgrades, storyline outcomes, and Day 87 launch priorities."
+        "Single owner + backup reviewer are assigned for  launch readiness execution and signoff.",
+        "The  lane references  outcomes, controls, and trust continuity signals.",
+        "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records launch readiness pack upgrades, storyline outcomes, and  launch priorities."
       ]
     },
     {
@@ -101,11 +101,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 86 evidence brief committed",
-        "- [ ] Day 86 launch readiness plan committed",
-        "- [ ] Day 86 narrative template upgrade ledger exported",
-        "- [ ] Day 86 storyline outcomes ledger exported",
-        "- [ ] Day 87 launch priorities drafted from Day 86 outcomes"
+        "- [ ]  evidence brief committed",
+        "- [ ]  launch readiness plan committed",
+        "- [ ]  narrative template upgrade ledger exported",
+        "- [ ]  storyline outcomes ledger exported",
+        "- [ ]  launch priorities drafted from  outcomes"
       ]
     },
     {
@@ -129,12 +129,12 @@
   },
   "wins": [
     "Release prioritization continuity baseline is stable with activation score=100.",
-    "Day 86 launch readiness dataset is available for launch execution."
+    " launch readiness dataset is available for launch execution."
   ],
   "misses": [
-    "Day 85 delivery board integrity is incomplete (needs >=5 items and Day 85 anchors)."
+    " delivery board integrity is incomplete (needs >=5 items and  anchors)."
   ],
   "handoff_actions": [
-    "Repair Day 85 delivery board entries to include Day 85 anchors."
+    "Repair  delivery board entries to include  anchors."
   ]
 }

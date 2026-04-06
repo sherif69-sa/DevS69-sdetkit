@@ -30,8 +30,8 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Optimization Closeout Foundation — Optimization closeout lane:** convert Day 41 evidence into deterministic remediation loops.\n"
-        "- **Day 43 — Acceleration lane kickoff:** scale Optimization Closeout Foundation optimizations into repeatable growth plays.\n",
+        '- **Optimization Closeout Foundation — Optimization closeout lane:** convert  evidence into deterministic remediation loops.\n'
+        '- ** — Acceleration lane kickoff:** scale Optimization Closeout Foundation optimizations into repeatable growth plays.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-optimization-closeout-foundation.md").write_text(
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 41 delivery board",
-                "- [ ] Day 41 expansion plan draft committed",
-                "- [ ] Day 41 review notes captured with owner + backup",
-                "- [ ] Day 41 automation matrix exported",
-                "- [ ] Day 41 KPI scorecard snapshot exported",
-                "- [ ] Optimization Closeout Foundation optimization priorities drafted from Day 41 learnings",
+                '#  delivery board',
+                '- [ ]  expansion plan draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  automation matrix exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ] Optimization Closeout Foundation optimization priorities drafted from  learnings',
             ]
         )
         + "\n",

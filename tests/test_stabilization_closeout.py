@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 56 — Stabilization closeout:** enforce deterministic follow-through and recovery loops.\n"
-        "- **Day 57 — KPI deep audit:** validate strict trendlines and blockers.\n",
+        '- ** — Stabilization closeout:** enforce deterministic follow-through and recovery loops.\n'
+        '- ** — KPI deep audit:** validate strict trendlines and blockers.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-stabilization-closeout.md").write_text(
         d56._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-56-big-upgrade-report.md").write_text(
-        "# Day 56 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -63,12 +63,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 55 delivery board",
-                "- [ ] Day 55 contributor brief committed",
-                "- [ ] Day 55 activation plan reviewed with owner + backup",
-                "- [ ] Day 55 contributor ladder exported",
-                "- [ ] Day 55 KPI scorecard snapshot exported",
-                "- [ ] Day 56 priorities drafted from Day 55 learnings",
+                '#  delivery board',
+                '- [ ]  contributor brief committed',
+                '- [ ]  activation plan reviewed with owner + backup',
+                '- [ ]  contributor ladder exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  priorities drafted from  learnings',
             ]
         )
         + "\n",

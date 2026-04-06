@@ -26,11 +26,11 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day32-release-cadence-pack/day32-release-cadence-summary.json"
+      "path": "docs/artifacts/-release-cadence-pack/-release-cadence-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day34-demo-asset2-pack/day34-demo-asset2-summary.json"
+      "path": "docs/artifacts/-demo-asset2-pack/-demo-asset2-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
@@ -38,19 +38,19 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day36-distribution-closeout-pack/day36-distribution-closeout-summary.json"
+      "path": "docs/artifacts/-distribution-closeout-pack/-distribution-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day37-experiment-lane-pack/day37-experiment-lane-summary.json"
+      "path": "docs/artifacts/-experiment-lane-pack/-experiment-lane-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day38-distribution-batch-pack/day38-distribution-batch-summary.json"
+      "path": "docs/artifacts/-distribution-batch-pack/-distribution-batch-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day39-playbook-post-pack/day39-playbook-post-summary.json"
+      "path": "docs/artifacts/-playbook-post-pack/-playbook-post-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
@@ -226,7 +226,7 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day62-community-program-closeout-pack/day62-community-program-closeout-summary.json"
+      "path": "docs/artifacts/-community-program-closeout-pack/-community-program-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
@@ -234,7 +234,7 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day64-integration-expansion-closeout-pack/day64-integration-expansion-closeout-summary.json"
+      "path": "docs/artifacts/-integration-expansion-closeout-pack/-integration-expansion-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
@@ -242,35 +242,35 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day67-integration-expansion3-closeout-pack/day67-integration-expansion3-closeout-summary.json"
+      "path": "docs/artifacts/-integration-expansion3-closeout-pack/-integration-expansion3-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day68-integration-expansion4-closeout-pack/day68-integration-expansion4-closeout-summary.json"
+      "path": "docs/artifacts/-integration-expansion4-closeout-pack/-integration-expansion4-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day69-case-study-prep1-closeout-pack/day69-case-study-prep1-closeout-summary.json"
+      "path": "docs/artifacts/-case-study-prep1-closeout-pack/-case-study-prep1-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day76-contributor-recognition-closeout-pack/day76-contributor-recognition-closeout-summary.json"
+      "path": "docs/artifacts/-contributor-recognition-closeout-pack/-contributor-recognition-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day78-ecosystem-priorities-closeout-pack/day78-ecosystem-priorities-closeout-summary.json"
+      "path": "docs/artifacts/-ecosystem-priorities-closeout-pack/-ecosystem-priorities-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day86-launch-readiness-closeout-pack/day86-launch-readiness-closeout-summary.json"
+      "path": "docs/artifacts/-launch-readiness-closeout-pack/-launch-readiness-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day87-governance-handoff-closeout-pack/day87-governance-handoff-closeout-summary.json"
+      "path": "docs/artifacts/-governance-handoff-closeout-pack/-governance-handoff-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day89-governance-scale-closeout-pack/day89-governance-scale-closeout-summary.json"
+      "path": "docs/artifacts/-governance-scale-closeout-pack/-governance-scale-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
@@ -358,19 +358,19 @@
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day72-case-study-prep4-closeout-pack/day72-case-study-prep4-closeout-summary.json"
+      "path": "docs/artifacts/-case-study-prep4-closeout-pack/-case-study-prep4-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day73-case-study-launch-closeout-pack/day73-case-study-launch-closeout-summary.json"
+      "path": "docs/artifacts/-case-study-launch-closeout-pack/-case-study-launch-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day74-distribution-scaling-closeout-pack/day74-distribution-scaling-closeout-summary.json"
+      "path": "docs/artifacts/-distribution-scaling-closeout-pack/-distribution-scaling-closeout-summary.json"
     },
     {
       "rule_id": "SEC_HIGH_ENTROPY_STRING",
-      "path": "docs/artifacts/day75-trust-assets-refresh-closeout-pack/day75-trust-assets-refresh-closeout-summary.json"
+      "path": "docs/artifacts/-trust-assets-refresh-closeout-pack/-trust-assets-refresh-closeout-summary.json"
     }
   ],
   "version": 1

@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 67 — Integration expansion #3:** publish advanced Jenkins implementation path.\n"
-        "- **Day 68 — Integration expansion #4:** publish self-hosted enterprise implementation path.\n",
+        '- ** — Integration expansion #3:** publish advanced Jenkins implementation path.\n'
+        '- ** — Integration expansion #4:** publish self-hosted enterprise implementation path.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-expansion3-closeout.md").write_text(
         d67._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-67-big-upgrade-report.md").write_text(
-        "# Day 67 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -63,12 +63,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 66 delivery board",
-                "- [ ] Day 66 integration brief committed",
-                "- [ ] Day 66 advanced GitLab pipeline blueprint published",
-                "- [ ] Day 66 matrix and cache strategy exported",
-                "- [ ] Day 66 KPI scorecard snapshot exported",
-                "- [ ] Day 67 integration expansion priorities drafted from Day 66 learnings",
+                '#  delivery board',
+                '- [ ]  integration brief committed',
+                '- [ ]  advanced GitLab pipeline blueprint published',
+                '- [ ]  matrix and cache strategy exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  integration expansion priorities drafted from  learnings',
             ]
         )
         + "\n",

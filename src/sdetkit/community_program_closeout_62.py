@@ -16,10 +16,10 @@ _DAY61_SUMMARY_PATH = (
     "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
 )
 _DAY61_BOARD_PATH = "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
-_SECTION_HEADER = "# Day 62 \u2014 Community program setup closeout lane"
+_SECTION_HEADER = '#  — Community program setup closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Community Program Closeout matters",
-    "## Required inputs (Day 61)",
+    '## Required inputs ()',
     "## Community Program Closeout command lane",
     "## Community program execution contract",
     "## Community program quality checklist",
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_community_program_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 62 community office-hours execution and moderation safety.",
-    "The Day 62 lane references Day 61 Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.",
-    "Every Day 62 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 62 closeout records office-hours cadence, participation rules, moderation SOPs, and Day 63 onboarding priorities.",
+    'Single owner + backup reviewer are assigned for  community office-hours execution and moderation safety.',
+    'The  lane references  Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.',
+    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records office-hours cadence, participation rules, moderation SOPs, and  onboarding priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes office-hours calendar, participation policy, escalation flow, and rollback trigger",
@@ -51,69 +51,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 62 community launch brief committed",
-    "- [ ] Day 62 office-hours cadence published",
-    "- [ ] Day 62 participation policy + moderation SOP exported",
-    "- [ ] Day 62 KPI scorecard snapshot exported",
-    "- [ ] Day 63 onboarding priorities drafted from Day 62 learnings",
+    '- [ ]  community launch brief committed',
+    '- [ ]  office-hours cadence published',
+    '- [ ]  participation policy + moderation SOP exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  onboarding priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 62 \u2014 Community program setup closeout lane
-
-Day 62 ships a major community-program upgrade that converts Day 61 kickoff evidence into a deterministic community operations lane.
-
-## Why Community Program Closeout matters
-
-- Converts Day 61 trust baseline into repeatable office-hours and participation loops.
-- Protects community trust outcomes with ownership, command proof, and moderation rollback guardrails.
-- Produces a deterministic handoff from Day 62 community setup into Day 63 contributor onboarding activation.
-
-## Required inputs (Day 61)
-
-- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`
-- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`
-
-## Community Program Closeout command lane
-
-```bash
-python -m sdetkit community-program-closeout --format json --strict
-python -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict
-python -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/community-program-closeout-pack/evidence --format json --strict
-python scripts/check_community_program_closeout_contract.py
-```
-
-## Community program execution contract
-
-- Single owner + backup reviewer are assigned for Day 62 community office-hours execution and moderation safety.
-- The Day 62 lane references Day 61 Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.
-- Every Day 62 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 62 closeout records office-hours cadence, participation rules, moderation SOPs, and Day 63 onboarding priorities.
-
-## Community program quality checklist
-
-- [ ] Includes office-hours calendar, participation policy, escalation flow, and rollback trigger
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner
-- [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log
-
-## Community Program Closeout delivery board
-
-- [ ] Day 62 community launch brief committed
-- [ ] Day 62 office-hours cadence published
-- [ ] Day 62 participation policy + moderation SOP exported
-- [ ] Day 62 KPI scorecard snapshot exported
-- [ ] Day 63 onboarding priorities drafted from Day 62 learnings
-
-## Scoring model
-
-Day 62 weighted score (0-100):
-
-- Contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 61 continuity and strict baseline carryover: 35 points.
-- Community program contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Community program setup closeout lane\n\n ships a major community-program upgrade that converts  kickoff evidence into a deterministic community operations lane.\n\n## Why Community Program Closeout matters\n\n- Converts  trust baseline into repeatable office-hours and participation loops.\n- Protects community trust outcomes with ownership, command proof, and moderation rollback guardrails.\n- Produces a deterministic handoff from  community setup into  contributor onboarding activation.\n\n## Required inputs ()\n\n- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json`\n- `docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md`\n\n## Community Program Closeout command lane\n\n```bash\npython -m sdetkit community-program-closeout --format json --strict\npython -m sdetkit community-program-closeout --emit-pack-dir docs/artifacts/community-program-closeout-pack --format json --strict\npython -m sdetkit community-program-closeout --execute --evidence-dir docs/artifacts/community-program-closeout-pack/evidence --format json --strict\npython scripts/check_community_program_closeout_contract.py\n```\n\n## Community program execution contract\n\n- Single owner + backup reviewer are assigned for  community office-hours execution and moderation safety.\n- The  lane references  Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records office-hours cadence, participation rules, moderation SOPs, and  onboarding priorities.\n\n## Community program quality checklist\n\n- [ ] Includes office-hours calendar, participation policy, escalation flow, and rollback trigger\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures attendance target, response SLA, trust incidents, confidence, and recovery owner\n- [ ] Artifact pack includes launch brief, participation policy, moderation runbook, and execution log\n\n## Community Program Closeout delivery board\n\n- [ ]  community launch brief committed\n- [ ]  office-hours cadence published\n- [ ]  participation policy + moderation SOP exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  onboarding priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Community program contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -159,7 +104,7 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
     summary = root / _DAY61_SUMMARY_PATH
     board = root / _DAY61_BOARD_PATH
     score, strict, check_count = _load_cycle61(summary)
-    board_count, board_has_cycle61 = _count_board_items(board, "Day 61")
+    board_count, board_has_cycle61 = _count_board_items(board, '')
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -186,8 +131,8 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 62" in top10_text and "Day 63" in top10_text),
-            "evidence": "Day 62 + Day 63 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -267,22 +212,22 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 61 continuity is strict-pass with activation score={score}.")
+        wins.append(f"61 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 61 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 61 Phase-3 kickoff closeout command and restore strict baseline before Day 62 lock."
+            'Re-run  Phase-3 kickoff closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle61:
         wins.append(
-            f"Day 61 delivery board integrity validated with {board_count} checklist items."
+            f"61 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 61 delivery board integrity is incomplete (needs >=5 items and Day 61 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 61 delivery board entries to include Day 61 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Community program contract + quality checklist is fully locked for execution.")
@@ -291,12 +236,12 @@ def build_community_program_closeout_summary(root: Path) -> dict[str, Any]:
             "Community program contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 62 contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 62 community program closeout lane is fully complete and ready for Day 63 onboarding execution lane."
+            ' community program closeout lane is fully complete and ready for  onboarding execution lane.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -357,25 +302,25 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     )
     _write(target / "community-program-closeout-summary.md", _render_text(payload) + "\n")
     _write(
-        target / "community-program-community-launch-brief.md", "# Day 62 community launch brief\n"
+        target / "community-program-community-launch-brief.md", '#  community launch brief\n'
     )
     _write(
         target / "community-program-office-hours-cadence.md",
-        "# Day 62 office-hours cadence\n\n- Weekly office hours\n",
+        '#  office-hours cadence\n\n- Weekly office hours\n',
     )
-    _write(target / "community-program-participation-policy.md", "# Day 62 participation policy\n")
-    _write(target / "community-program-moderation-runbook.md", "# Day 62 moderation runbook\n")
+    _write(target / "community-program-participation-policy.md", '#  participation policy\n')
+    _write(target / "community-program-moderation-runbook.md", '#  moderation runbook\n')
     _write(
         target / "community-program-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "community-program-execution-log.md", "# Day 62 execution log\n")
+    _write(target / "community-program-execution-log.md", '#  execution log\n')
     _write(
         target / "community-program-delivery-board.md",
-        "\n".join(["# Day 62 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "community-program-validation-commands.md",
-        "# Day 62 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -403,12 +348,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_community_program_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_community_program_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 62 community program closeout checks")
+    parser = argparse.ArgumentParser(description=' community program closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

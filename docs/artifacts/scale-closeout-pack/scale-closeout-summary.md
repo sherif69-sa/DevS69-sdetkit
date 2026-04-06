@@ -3,11 +3,11 @@ Scale closeout summary
 - Passed checks: 6
 - Failed checks: 8
 - Critical failures: []
-- Day 43 activation score: `98.0`
-- Day 43 checks evaluated: `1`
-- Day 43 delivery board checklist items: `5`
+-  activation score: `98.0`
+-  checks evaluated: `1`
+-  delivery board checklist items: `5`
 - Wins:
-  - Day 43 continuity is strict-pass with activation score=98.0.
+  -  continuity is strict-pass with activation score=98.0.
 - Misses:
-  - Day 43 delivery board integrity is incomplete (needs >=5 items and Day 43/44 anchors).
+  -  delivery board integrity is incomplete (needs >=5 items and /44 anchors).
   - Scale contract, quality checklist, or delivery board entries are missing.

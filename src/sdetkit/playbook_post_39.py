@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-playbook-post.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY38_SUMMARY_PATH = "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
 _DAY38_BOARD_PATH = "docs/artifacts/distribution-batch-pack/delivery-board.md"
-_SECTION_HEADER = "# Day 39 \u2014 Playbook post #1"
+_SECTION_HEADER = '#  — Playbook post #1'
 _REQUIRED_SECTIONS = [
-    "## Why Day 39 matters",
-    "## Required inputs (Day 38)",
-    "## Day 39 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Playbook publication contract",
     "## Playbook quality checklist",
-    "## Day 39 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -34,10 +34,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_playbook_post_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 39 playbook publication and metric follow-up.",
-    "The Day 39 playbook post references Day 38 distribution winners and explicit misses.",
-    "Every Day 39 playbook section includes docs CTA, runnable command CTA, and one KPI target.",
-    "Day 39 closeout records publication learnings and Day 40 scale priorities.",
+    'Single owner + backup reviewer are assigned for  playbook publication and metric follow-up.',
+    'The  playbook post references  distribution winners and explicit misses.',
+    'Every  playbook section includes docs CTA, runnable command CTA, and one KPI target.',
+    ' closeout records publication learnings and  scale priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes executive summary, tactical checklist, and rollout timeline",
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes playbook draft, rollout plan, scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 39 playbook draft committed",
-    "- [ ] Day 39 review notes captured with owner + backup",
-    "- [ ] Day 39 rollout timeline exported",
-    "- [ ] Day 39 KPI scorecard snapshot exported",
-    "- [ ] Day 40 scale priorities drafted from Day 39 learnings",
+    '- [ ]  playbook draft committed',
+    '- [ ]  review notes captured with owner + backup',
+    '- [ ]  rollout timeline exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  scale priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 39 \u2014 Playbook post #1
-
-Day 39 publishes playbook post #1 that converts Day 38 distribution evidence into a reusable operator guide.
-
-## Why Day 39 matters
-
-- Converts Day 38 distribution evidence into a reusable post + playbook operating pattern.
-- Preserves quality by enforcing owner accountability, CTA integrity, and KPI targets.
-- Creates a deterministic handoff from publication outcomes into Day 40 scale priorities.
-
-## Required inputs (Day 38)
-
-- `docs/artifacts/distribution-batch-pack/distribution-batch-summary.json`
-- `docs/artifacts/distribution-batch-pack/delivery-board.md`
-
-## Day 39 command lane
-
-```bash
-python -m sdetkit playbook-post --format json --strict
-python -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict
-python -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/playbook-post-pack/evidence --format json --strict
-python scripts/check_playbook_post_contract.py
-```
-
-## Playbook publication contract
-
-- Single owner + backup reviewer are assigned for Day 39 playbook publication and metric follow-up.
-- The Day 39 playbook post references Day 38 distribution winners and explicit misses.
-- Every Day 39 playbook section includes docs CTA, runnable command CTA, and one KPI target.
-- Day 39 closeout records publication learnings and Day 40 scale priorities.
-
-## Playbook quality checklist
-
-- [ ] Includes executive summary, tactical checklist, and rollout timeline
-- [ ] Every section has owner, publish window, and KPI target
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, and delta for each playbook KPI
-- [ ] Artifact pack includes playbook draft, rollout plan, scorecard, and execution log
-
-## Day 39 delivery board
-
-- [ ] Day 39 playbook draft committed
-- [ ] Day 39 review notes captured with owner + backup
-- [ ] Day 39 rollout timeline exported
-- [ ] Day 39 KPI scorecard snapshot exported
-- [ ] Day 40 scale priorities drafted from Day 39 learnings
-
-## Scoring model
-
-Day 39 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 38 continuity and strict baseline carryover: 35 points.
-- Publication contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Playbook post #1\n\n publishes playbook post #1 that converts  distribution evidence into a reusable operator guide.\n\n## Why  matters\n\n- Converts  distribution evidence into a reusable post + playbook operating pattern.\n- Preserves quality by enforcing owner accountability, CTA integrity, and KPI targets.\n- Creates a deterministic handoff from publication outcomes into  scale priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/distribution-batch-pack/distribution-batch-summary.json`\n- `docs/artifacts/distribution-batch-pack/delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit playbook-post --format json --strict\npython -m sdetkit playbook-post --emit-pack-dir docs/artifacts/playbook-post-pack --format json --strict\npython -m sdetkit playbook-post --execute --evidence-dir docs/artifacts/playbook-post-pack/evidence --format json --strict\npython scripts/check_playbook_post_contract.py\n```\n\n## Playbook publication contract\n\n- Single owner + backup reviewer are assigned for  playbook publication and metric follow-up.\n- The  playbook post references  distribution winners and explicit misses.\n- Every  playbook section includes docs CTA, runnable command CTA, and one KPI target.\n-  closeout records publication learnings and  scale priorities.\n\n## Playbook quality checklist\n\n- [ ] Includes executive summary, tactical checklist, and rollout timeline\n- [ ] Every section has owner, publish window, and KPI target\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, and delta for each playbook KPI\n- [ ] Artifact pack includes playbook draft, rollout plan, scorecard, and execution log\n\n##  delivery board\n\n- [ ]  playbook draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  rollout timeline exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Publication contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -144,10 +89,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle38 = any(
-        any(token in line for token in ("impact 38", "day 38", "name 38")) for line in lines
+        any(token in line for token in ("impact 38", '', "name 38")) for line in lines
     )
     has_cycle39 = any(
-        any(token in line for token in ("impact 39", "day 39", "name 39")) for line in lines
+        any(token in line for token in ("impact 39", '', "name 39")) for line in lines
     )
     return item_count, has_cycle38, has_cycle39
 
@@ -226,8 +171,8 @@ def build_playbook_post_summary_impl(
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 39" in top10_text and "Day 40" in top10_text),
-            "evidence": "Day 39 + Day 40 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -294,23 +239,23 @@ def build_playbook_post_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 38 continuity is strict-pass with activation score={score}.")
+        wins.append(f"38 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 38 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 38 distribution batch command and restore strict pass baseline before Day 39 lock."
+            'Re-run  distribution batch command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle38 and board_has_cycle39:
         wins.append(
-            f"Day 38 delivery board integrity validated with {board_count} checklist items."
+            f"38 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 38 delivery board integrity is incomplete (needs >=5 items and Day 38/39 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /39 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 38 delivery board entries to include Day 38 and Day 39 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -322,11 +267,11 @@ def build_playbook_post_summary_impl(
             "Playbook contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 39 playbook contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  playbook contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
-        wins.append("Day 39 playbook post #1 is fully complete and ready for Day 40 scale lane.")
+        wins.append(' playbook post #1 is fully complete and ready for  scale lane.')
 
     return {
         "name": "playbook-post",
@@ -364,7 +309,7 @@ def build_playbook_post_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 39 playbook post summary\n"
+        ' playbook post summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -375,18 +320,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 39 playbook post summary",
+        '#  playbook post summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 38 continuity",
+        '##  continuity',
         "",
-        f"- Day 38 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 38 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 38 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 38 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 38 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 38 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -412,9 +357,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "playbook-post-summary.md", _to_markdown(payload))
     _write(
         target / "playbook-draft.md",
-        "# Day 39 playbook post #1\n\n"
+        '#  playbook post #1\n\n'
         "## Executive summary\n"
-        "- Day 38 winners were converted into a repeatable publishing pattern.\n"
+        '-  winners were converted into a repeatable publishing pattern.\n'
         "- Misses were mapped to actionable guardrails for next wave execution.\n\n"
         "## Tactical checklist\n"
         "- [ ] Validate owner + backup approvals\n"
@@ -460,18 +405,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log.md",
-        "# Day 39 execution log\n\n"
+        '#  execution log\n\n'
         "- [ ] 2026-03-06: Publish playbook draft and collect internal review notes.\n"
         "- [ ] 2026-03-07: Execute rollout timeline and capture first KPI pulse.\n"
-        "- [ ] 2026-03-08: Record misses, wins, and Day 40 scale priorities.\n",
+        '- [ ] 2026-03-08: Record misses, wins, and  scale priorities.\n',
     )
     _write(
         target / "delivery-board.md",
-        "# Day 39 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands.md",
-        "# Day 39 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -502,7 +447,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 39 playbook post scorer.")
+    parser = argparse.ArgumentParser(description=' playbook post scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -566,7 +511,7 @@ def build_playbook_post_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_playbook_post_summary_impl(
         root,
         readme_path=readme_path,

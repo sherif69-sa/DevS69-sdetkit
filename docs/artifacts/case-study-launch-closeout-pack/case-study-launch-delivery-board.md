@@ -1,6 +1,6 @@
-# Day 73 delivery board
-- [ ] Day 73 integration brief committed
-- [ ] Day 73 published case-study narrative committed
-- [ ] Day 73 controls and assumptions log exported
-- [ ] Day 73 KPI scorecard snapshot exported
-- [ ] Day 74 distribution scaling priorities drafted from Day 73 learnings
+#  delivery board
+- [ ]  integration brief committed
+- [ ]  published case-study narrative committed
+- [ ]  controls and assumptions log exported
+- [ ]  KPI scorecard snapshot exported
+- [ ]  distribution scaling priorities drafted from  learnings

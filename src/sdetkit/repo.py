@@ -1083,7 +1083,7 @@ def _apply_baseline(findings: list[Finding], baseline: list[dict[str, Any]]) -> 
     if not baseline:
         return findings
     active: list[dict[str, Any]] = []
-    today = dt.date.today()
+    to= dt.date.today()
     for item in baseline:
         exp = item.get("expires")
         if isinstance(exp, str):
@@ -2847,7 +2847,7 @@ def _effective_packs(policy: RepoAuditPolicy, pack_csv: str | None) -> tuple[str
 
 def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[int, str]:
     known_rule_ids = {item.meta.id for item in load_rule_catalog().rules}
-    today = _today_date()
+    to= _today_date()
     warnings: list[dict[str, str]] = []
     errors: list[dict[str, str]] = []
     seen: set[tuple[str, str, str]] = set()
@@ -2926,7 +2926,7 @@ def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[in
 
 
 def _policy_export(policy: RepoAuditPolicy, *, include_expired: bool) -> dict[str, Any]:
-    today = _today_date()
+    to= _today_date()
     entries = [_normalized_allowlist_entry(item, today) for item in policy.allowlist]
     if not include_expired:
         entries = [item for item in entries if item["status"] == "active"]
@@ -3107,7 +3107,7 @@ def _apply_repo_audit_policy(
     actionable: list[dict[str, Any]] = []
     suppressed: list[dict[str, str]] = []
     expired: list[dict[str, str]] = []
-    today = _today_date()
+    to= _today_date()
     for finding in findings:
         item = dict(finding)
         rule_id = _repo_rule_id(item)

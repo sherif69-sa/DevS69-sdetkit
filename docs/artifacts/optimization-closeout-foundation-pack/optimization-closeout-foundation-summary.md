@@ -7,7 +7,7 @@ Optimization Closeout Foundation optimization closeout summary
 - Expansion automation checks evaluated: `14`
 - Expansion automation delivery board checklist items: `5`
 - Wins:
-  - Day 41 continuity is strict-pass with activation score=100.0.
+  -  continuity is strict-pass with activation score=100.0.
 - Misses:
-  - Day 41 delivery board integrity is incomplete (needs >=5 items and Day 41/42 anchors).
+  -  delivery board integrity is incomplete (needs >=5 items and /42 anchors).
   - Optimization contract, quality checklist, or delivery board entries are missing.

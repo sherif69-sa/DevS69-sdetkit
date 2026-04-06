@@ -1,5 +1,5 @@
 {
-  "case_id": "day69-reliability-prep-001",
+  "case_id": "-reliability-prep-001",
   "metric": "ci_failure_rate",
   "baseline": {
     "window": "2026-02-week1",

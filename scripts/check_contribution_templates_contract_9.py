@@ -11,14 +11,14 @@ LANE_ARTIFACT = Path("docs/artifacts/triage-templates-sample-9.md")
 ISSUE_CONFIG = Path(".github/ISSUE_TEMPLATE/config.yml")
 
 README_EXPECTED = [
-    "## 🧩 Day 9 ultra: contribution templates",
+    '## 🧩  ultra: contribution templates',
     "python -m sdetkit triage-templates --format text --strict",
     "python -m sdetkit triage-templates --write-defaults --format json --strict",
     "docs/impact-9-ultra-upgrade-report.md",
 ]
 
 DOCS_INDEX_EXPECTED = [
-    "## Day 9 ultra upgrades (contribution templates)",
+    '##  ultra upgrades (contribution templates)',
     "sdetkit triage-templates --format text --strict",
     "sdetkit triage-templates --write-defaults --format json --strict",
     "artifacts/triage-templates-sample-9.md",
@@ -32,7 +32,7 @@ DOCS_CLI_EXPECTED = [
 ]
 
 REPORT_EXPECTED = [
-    "Day 9 big upgrade",
+    ' big upgrade',
     "python -m sdetkit triage-templates --format json --strict",
     "python -m sdetkit triage-templates --write-defaults --format json --strict",
     "scripts/check_contribution_templates_contract_9.py",

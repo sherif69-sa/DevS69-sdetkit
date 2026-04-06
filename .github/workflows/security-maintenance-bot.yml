@@ -109,7 +109,7 @@ jobs:
               '- [ ] Review GitHub code scanning, Dependabot, and secret-scanning alerts and close/resolution as needed.',
               '- [ ] Review the weekly GHAS digest issue and assign owners to any open high-severity findings.',
               '- [ ] Review the GHAS campaign planner issue for Copilot Autofix opportunities, alert-age slices, and push-protection bypass follow-up.',
-              '- [ ] Review the GHAS alert SLA tracker and convert every 14+ day breach into an owned issue or PR.',
+              '- [ ] Review the GHAS alert SLA tracker and convert every 14+  breach into an owned issue or PR.',
               '- [ ] Review the GHAS metrics snapshot artifact before weekly reporting or roadmap updates.',
               '- [ ] Review the GHAS CodeQL hotspots issue and batch the top rule or file into one remediation lane.',
               '- [ ] Review the latest workflow governance audit for permissions/pinning drift.',

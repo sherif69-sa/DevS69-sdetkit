@@ -41,11 +41,11 @@ package-evidence:
   script:
     - bash scripts/bootstrap.sh
     - . .venv/bin/activate
-    - python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/day66-integration-expansion2-closeout-pack --format json --strict
+    - python -m sdetkit integration-expansion2-closeout --emit-pack-dir docs/artifacts/-integration-expansion2-closeout-pack --format json --strict
     - python scripts/check_integration_expansion2_closeout_contract_66.py --skip-evidence
     - bash security.sh
   artifacts:
     when: always
     paths:
-      - docs/artifacts/day66-integration-expansion2-closeout-pack/
+      - docs/artifacts/-integration-expansion2-closeout-pack/
       - build/security.sarif

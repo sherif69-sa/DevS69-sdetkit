@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 35 — KPI instrumentation:** close attribution gaps and lock weekly review metrics.\n"
-        "- **Day 36 — Demo asset #3:** produce/publish `security gate` workflow short video or GIF.\n",
+        '- ** — KPI instrumentation:** close attribution gaps and lock weekly review metrics.\n'
+        '- ** — Demo asset #3:** produce/publish `security gate` workflow short video or GIF.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-kpi-instrumentation.md").write_text(
         d35._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-35-big-upgrade-report.md").write_text(
-        "# Day 35 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 34 delivery board",
-                "- [ ] Day 34 script draft committed",
-                "- [ ] Day 34 first cut rendered",
-                "- [ ] Day 34 final cut + caption copy approved",
-                "- [ ] Day 35 KPI instrumentation backlog pre-scoped",
-                "- [ ] Day 36 community distribution plan updated",
+                '#  delivery board',
+                '- [ ]  script draft committed',
+                '- [ ]  first cut rendered',
+                '- [ ]  final cut + caption copy approved',
+                '- [ ]  KPI instrumentation backlog pre-scoped',
+                '- [ ]  community distribution plan updated',
             ]
         )
         + "\n",
@@ -122,7 +122,7 @@ def test_kpi_instrumentation_strict_fails_when_lane34_inputs_missing(tmp_path: P
 def test_kpi_instrumentation_strict_fails_when_lane34_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md").write_text(
-        "- [ ] Day 35 KPI instrumentation backlog pre-scoped\n", encoding="utf-8"
+        '- [ ]  KPI instrumentation backlog pre-scoped\n', encoding="utf-8"
     )
     rc = d35.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -132,4 +132,4 @@ def test_kpi_instrumentation_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["kpi-instrumentation", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 35 KPI instrumentation summary" in capsys.readouterr().out
+    assert ' KPI instrumentation summary' in capsys.readouterr().out

@@ -42,7 +42,7 @@ _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.",
     "The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.",
     "Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.",
+    'Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and  review priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes reusable workflow + workflow_call path, matrix coverage, and rollback trigger",
@@ -56,7 +56,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 64 advanced workflow blueprint published",
     "- [ ] Cycle 64 matrix and concurrency plan exported",
     "- [ ] Cycle 64 KPI scorecard snapshot exported",
-    "- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings",
+    '- [ ]  weekly review priorities drafted from Cycle 64 learnings',
 ]
 _REQUIRED_WORKFLOW_LINES = [
     "name: Cycle64 Advanced GitHub Actions Reference",
@@ -68,62 +68,7 @@ _REQUIRED_WORKFLOW_LINES = [
     "actions/cache@v4",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Cycle 64 \u2014 Integration expansion #1 closeout lane
-
-Cycle 64 closes with a major integration upgrade that turns Cycle 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.
-
-## Why Integration Expansion Closeout matters
-
-- Converts Cycle 63 contributor activation into reusable CI automation patterns.
-- Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Cycle 64 integration expansion to Day 65 weekly review.
-
-## Required inputs (Cycle 63)
-
-- `docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json`
-- `docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md`
-
-## Integration Expansion Closeout command lane (Legacy Cycle 64)
-
-```bash
-python -m sdetkit integration-expansion-closeout --format json --strict
-python -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict
-python -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_integration_expansion_closeout_contract.py
-```
-
-## Integration expansion contract
-
-- Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.
-- The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.
-- Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities.
-
-## Integration quality checklist
-
-- [ ] Includes reusable workflow + workflow_call path, matrix coverage, and rollback trigger
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures workflow pass-rate, median runtime, cache hit-rate, confidence, and recovery owner
-- [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log
-
-## Integration Expansion Closeout delivery board (Legacy Cycle 64)
-
-- [ ] Cycle 64 integration brief committed
-- [ ] Cycle 64 advanced workflow blueprint published
-- [ ] Cycle 64 matrix and concurrency plan exported
-- [ ] Cycle 64 KPI scorecard snapshot exported
-- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings
-
-## Scoring model
-
-Cycle 64 weighted score (0-100):
-
-- Contract + command lane completeness: 25 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 63 continuity and strict baseline carryover: 30 points.
-- Workflow reference quality + guardrails: 25 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Cycle 64 — Integration expansion #1 closeout lane\n\nCycle 64 closes with a major integration upgrade that turns Cycle 63 onboarding momentum into an advanced GitHub Actions reference workflow with deterministic CI controls.\n\n## Why Integration Expansion Closeout matters\n\n- Converts Cycle 63 contributor activation into reusable CI automation patterns.\n- Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.\n- Creates a deterministic handoff from Cycle 64 integration expansion to  weekly review.\n\n## Required inputs (Cycle 63)\n\n- `docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json`\n- `docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md`\n\n## Integration Expansion Closeout command lane (Legacy Cycle 64)\n\n```bash\npython -m sdetkit integration-expansion-closeout --format json --strict\npython -m sdetkit integration-expansion-closeout --emit-pack-dir docs/artifacts/integration-expansion-closeout-pack --format json --strict\npython -m sdetkit integration-expansion-closeout --execute --evidence-dir docs/artifacts/integration-expansion-closeout-pack/evidence --format json --strict\npython scripts/check_integration_expansion_closeout_contract.py\n```\n\n## Integration expansion contract\n\n- Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.\n- The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.\n- Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n- Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and  review priorities.\n\n## Integration quality checklist\n\n- [ ] Includes reusable workflow + workflow_call path, matrix coverage, and rollback trigger\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures workflow pass-rate, median runtime, cache hit-rate, confidence, and recovery owner\n- [ ] Artifact pack includes integration brief, workflow blueprint, matrix plan, KPI scorecard, and execution log\n\n## Integration Expansion Closeout delivery board (Legacy Cycle 64)\n\n- [ ] Cycle 64 integration brief committed\n- [ ] Cycle 64 advanced workflow blueprint published\n- [ ] Cycle 64 matrix and concurrency plan exported\n- [ ] Cycle 64 KPI scorecard snapshot exported\n- [ ]  weekly review priorities drafted from Cycle 64 learnings\n\n## Scoring model\n\nCycle 64 weighted score (0-100):\n\n- Contract + command lane completeness: 25 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n- Cycle 63 continuity and strict baseline carryover: 30 points.\n- Workflow reference quality + guardrails: 25 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -198,8 +143,8 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_alignment",
             "weight": 5,
-            "passed": ("Cycle 64" in top10_text and "Day 65" in top10_text),
-            "evidence": "Cycle 64 + Day 65 strategy chain",
+            "passed": ("Cycle 64" in top10_text and '' in top10_text),
+            "evidence": 'Cycle 64 +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -314,7 +259,7 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            "Cycle 64 integration expansion closeout lane is fully complete and ready for Day 65 weekly review."
+            'Cycle 64 integration expansion closeout lane is fully complete and ready for  weekly review.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))

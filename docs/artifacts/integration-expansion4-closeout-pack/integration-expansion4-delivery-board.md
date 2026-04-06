@@ -1,6 +1,6 @@
-# Day 68 delivery board
-- [ ] Day 68 integration brief committed
-- [ ] Day 68 self-hosted enterprise pipeline blueprint published
-- [ ] Day 68 identity and runner policy strategy exported
-- [ ] Day 68 KPI scorecard snapshot exported
-- [ ] Day 69 case-study prep priorities drafted from Day 68 learnings
+#  delivery board
+- [ ]  integration brief committed
+- [ ]  self-hosted enterprise pipeline blueprint published
+- [ ]  identity and runner policy strategy exported
+- [ ]  KPI scorecard snapshot exported
+- [ ]  case-study prep priorities drafted from  learnings

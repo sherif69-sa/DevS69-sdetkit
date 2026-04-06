@@ -1,5 +1,5 @@
 {
-  "plan_id": "day89-governance-scale-001",
+  "plan_id": "-governance-scale-001",
   "contributors": ["release-ops", "maintainers", "community-moderation"],
   "narrative_channels": ["governance-brief", "maintainer-update", "release-notes"],
   "baseline": {

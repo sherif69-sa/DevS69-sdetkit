@@ -30,17 +30,17 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 29 — Phase-1 hardening:** close stale docs gaps and polish top entry pages.\n",
+        '- ** — Phase-1 hardening:** close stale docs gaps and polish top entry pages.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review.md").write_text(
-        "# Weekly review #4 (Day 28)\n", encoding="utf-8"
+        '# Weekly review #4 ()\n', encoding="utf-8"
     )
     (root / "docs/integrations-phase1-hardening.md").write_text(
         d29._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-29-ultra-upgrade-report.md").write_text(
-        "# Day 29 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
 
@@ -85,7 +85,7 @@ def test_phase1_hardening_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_phase1_hardening_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/integrations-phase1-hardening.md").write_text(
-        "# Day 29 — Phase-1 hardening\n", encoding="utf-8"
+        '#  — Phase-1 hardening\n', encoding="utf-8"
     )
     rc = d29.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -95,4 +95,4 @@ def test_phase1_hardening_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase1-hardening", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 29 phase-1 hardening summary" in capsys.readouterr().out
+    assert ' phase-1 hardening summary' in capsys.readouterr().out

@@ -1,4 +1,4 @@
-# Day 53 Validation Commands
+#  Validation Commands
 
 ```bash
 python -m sdetkit docs-loop-closeout --format json --strict

@@ -21,7 +21,7 @@ _DAY50_LEGACY_BOARD_PATH = (
 _SECTION_HEADER = "# Cycle 51 \u2014 Case snippet closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Cycle 51 matters",
-    "## Required inputs (Day 50)",
+    '## Required inputs ()',
     "## Cycle 51 command lane",
     "## Case snippet closeout contract",
     "## Case snippet quality checklist",
@@ -41,7 +41,7 @@ _EXECUTION_COMMANDS = [
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 51 case snippet execution and KPI follow-up.",
-    "The Cycle 51 case snippet lane references Day 50 execution-prioritization winners and misses with deterministic release-storytelling loops.",
+    'The Cycle 51 case snippet lane references  execution-prioritization winners and misses with deterministic release-storytelling loops.',
     "Every Cycle 51 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
     "Cycle 51 closeout records case-snippet learnings and Cycle 52 narrative priorities.",
 ]
@@ -60,62 +60,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 52 narrative priorities drafted from Cycle 51 learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Cycle 51 \u2014 Case snippet closeout lane
-
-Cycle 51 closes with a major case-snippet upgrade that converts Day 50 execution-prioritization evidence into a deterministic release-storytelling lane.
-
-## Why Cycle 51 matters
-
-- Converts Day 50 execution-prioritization proof into release-storytelling discipline.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Cycle 51 case snippets into Cycle 52 narrative execution.
-
-## Required inputs (Day 50)
-
-- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`
-- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`
-
-## Cycle 51 command lane
-
-```bash
-python -m sdetkit case-snippet-closeout --format json --strict
-python -m sdetkit case-snippet-closeout --emit-pack-dir docs/artifacts/case-snippet-closeout-pack --format json --strict
-python -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/case-snippet-closeout-pack/evidence --format json --strict
-python scripts/check_case_snippet_closeout_contract_51.py
-```
-
-## Case snippet closeout contract
-
-- Single owner + backup reviewer are assigned for Cycle 51 case snippet execution and KPI follow-up.
-- The Cycle 51 case snippet lane references Day 50 execution-prioritization winners and misses with deterministic release-storytelling loops.
-- Every Cycle 51 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 51 closeout records case-snippet learnings and Cycle 52 narrative priorities.
-
-## Case snippet quality checklist
-
-- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy
-- [ ] Every section has owner, review window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes case brief, proof map, KPI scorecard, and execution log
-
-## Cycle 51 delivery board
-
-- [ ] Cycle 51 case snippet brief committed
-- [ ] Cycle 51 snippet reviewed with owner + backup
-- [ ] Cycle 51 proof map exported
-- [ ] Cycle 51 KPI scorecard snapshot exported
-- [ ] Cycle 52 narrative priorities drafted from Cycle 51 learnings
-
-## Scoring model
-
-Cycle 51 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 50 continuity and strict baseline carryover: 35 points.
-- Case snippet contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Cycle 51 — Case snippet closeout lane\n\nCycle 51 closes with a major case-snippet upgrade that converts  execution-prioritization evidence into a deterministic release-storytelling lane.\n\n## Why Cycle 51 matters\n\n- Converts  execution-prioritization proof into release-storytelling discipline.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from Cycle 51 case snippets into Cycle 52 narrative execution.\n\n## Required inputs ()\n\n- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json`\n- `docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md`\n\n## Cycle 51 command lane\n\n```bash\npython -m sdetkit case-snippet-closeout --format json --strict\npython -m sdetkit case-snippet-closeout --emit-pack-dir docs/artifacts/case-snippet-closeout-pack --format json --strict\npython -m sdetkit case-snippet-closeout --execute --evidence-dir docs/artifacts/case-snippet-closeout-pack/evidence --format json --strict\npython scripts/check_case_snippet_closeout_contract_51.py\n```\n\n## Case snippet closeout contract\n\n- Single owner + backup reviewer are assigned for Cycle 51 case snippet execution and KPI follow-up.\n- The Cycle 51 case snippet lane references  execution-prioritization winners and misses with deterministic release-storytelling loops.\n- Every Cycle 51 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n- Cycle 51 closeout records case-snippet learnings and Cycle 52 narrative priorities.\n\n## Case snippet quality checklist\n\n- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy\n- [ ] Every section has owner, review window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes case brief, proof map, KPI scorecard, and execution log\n\n## Cycle 51 delivery board\n\n- [ ] Cycle 51 case snippet brief committed\n- [ ] Cycle 51 snippet reviewed with owner + backup\n- [ ] Cycle 51 proof map exported\n- [ ] Cycle 51 KPI scorecard snapshot exported\n- [ ] Cycle 52 narrative priorities drafted from Cycle 51 learnings\n\n## Scoring model\n\nCycle 51 weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Case snippet contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -165,7 +110,7 @@ def _contains_all_lines(text: str, required_lines: list[str]) -> list[str]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(lines), ("Day 50" in text), ("Cycle 51" in text)
+    return len(lines), ('' in text), ("Cycle 51" in text)
 
 
 def build_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
@@ -305,23 +250,23 @@ def build_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 50 continuity is strict-pass with activation score={score}.")
+        wins.append(f"50 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 50 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 50 execution prioritization closeout command and restore strict pass baseline before Cycle 51 lock."
+            'Re-run  execution prioritization closeout command and restore strict pass baseline before Cycle 51 lock.'
         )
 
     if board_count >= 5 and board_has_cycle50 and board_has_cycle51:
         wins.append(
-            f"Day 50 delivery board integrity validated with {board_count} checklist items."
+            f"50 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 50 delivery board integrity is incomplete (needs >=5 items and Day 50/51 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /51 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 50 delivery board entries to include Day 50 and Cycle 51 anchors."
+            'Repair  delivery board entries to include  and Cycle 51 anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -379,9 +324,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 50 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 50 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 50 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 50 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 50 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 50 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")

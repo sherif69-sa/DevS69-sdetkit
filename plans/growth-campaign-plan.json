@@ -1,5 +1,5 @@
 {
-  "plan_id": "day81-growth-campaign-main",
+  "plan_id": "-growth-campaign-main",
   "contributors": ["maintainers", "growth-ops", "field-enablement"],
   "campaign_tracks": ["activation-sprint", "retention-loop", "partner-amplification"],
   "baseline": {"qualified_pipelines": 18, "activation_rate": 0.21},

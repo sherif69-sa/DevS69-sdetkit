@@ -84,7 +84,7 @@ When a change can affect compatibility expectations (command behavior, output sh
 2. State whether the change is backward-compatible or transitionary.
 3. Keep `CHANGELOG.md` wording aligned with this page and [stability-levels.md](stability-levels.md).
 
-This keeps trust policy operational in everyday review and release decisions without adding heavy process overhead.
+This keeps trust policy operational in everyreview and release decisions without adding heavy process overhead.
 
 ## Related references
 

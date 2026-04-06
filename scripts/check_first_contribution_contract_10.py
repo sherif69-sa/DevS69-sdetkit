@@ -12,7 +12,7 @@ LANE_REPORT = Path("docs/impact-10-ultra-upgrade-report.md")
 FIRST_CONTRIBUTION_ARTIFACT = Path("docs/artifacts/first-contribution-checklist-sample.md")
 
 README_EXPECTED = [
-    "## ✅ Day 10 ultra: first-contribution checklist",
+    '## ✅  ultra: first-contribution checklist',
     "python -m sdetkit first-contribution --format text --strict",
     "python -m sdetkit first-contribution --write-defaults --format json --strict",
     "python scripts/check_first_contribution_contract_10.py",
@@ -20,14 +20,14 @@ README_EXPECTED = [
 ]
 
 CONTRIBUTING_EXPECTED = [
-    "## 0) Day 10 first-contribution checklist",
+    '## 0)  first-contribution checklist',
     "Fork the repository and clone your fork locally.",
     "Create a branch named `feat/<topic>` or `fix/<topic>`.",
     "Run full quality gates (`pre-commit`, `quality.sh`, docs build) before opening a PR.",
 ]
 
 DOCS_INDEX_EXPECTED = [
-    "## Day 10 ultra upgrades (first-contribution checklist)",
+    '##  ultra upgrades (first-contribution checklist)',
     "sdetkit first-contribution --format text --strict",
     "sdetkit first-contribution --write-defaults --format json --strict",
     "artifacts/first-contribution-checklist-sample.md",
@@ -41,20 +41,20 @@ DOCS_CLI_EXPECTED = [
 ]
 
 DOCS_CONTRIBUTING_EXPECTED = [
-    "## Day 10 first-contribution checklist",
+    '##  first-contribution checklist',
     "sdetkit first-contribution --format text --strict",
     "sdetkit first-contribution --write-defaults --format json --strict",
 ]
 
 REPORT_EXPECTED = [
-    "Day 10 big upgrade",
+    ' big upgrade',
     "python -m sdetkit first-contribution --format json --strict",
     "python -m sdetkit first-contribution --write-defaults --format json --strict",
     "scripts/check_first_contribution_contract_10.py",
 ]
 
 ARTIFACT_EXPECTED = [
-    "# Day 10 first-contribution checklist",
+    '#  first-contribution checklist',
     "- Score: **100.0** (14/14)",
 ]
 

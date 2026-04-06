@@ -39,7 +39,7 @@ _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 52 narrative execution and KPI follow-up.",
     "The Cycle 52 narrative lane references Cycle 51 case-snippet winners and misses with deterministic release-storytelling loops.",
     "Every Cycle 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Cycle 52 closeout records narrative learnings and Day 53 expansion priorities.",
+    'Cycle 52 closeout records narrative learnings and  expansion priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy",
@@ -53,65 +53,10 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 52 narrative reviewed with owner + backup",
     "- [ ] Cycle 52 proof map exported",
     "- [ ] Cycle 52 KPI scorecard snapshot exported",
-    "- [ ] Day 53 expansion priorities drafted from Cycle 52 learnings",
+    '- [ ]  expansion priorities drafted from Cycle 52 learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Cycle 52 \u2014 Narrative closeout lane
-
-Cycle 52 closes with a major narrative upgrade that converts Cycle 51 case-snippet evidence into a deterministic release-storytelling lane.
-
-## Why Cycle 52 matters
-
-- Converts Cycle 51 case-snippet proof into release-storytelling discipline.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Cycle 52 narratives into Cycle 52 narrative execution.
-
-## Required inputs (Cycle 51)
-
-- `docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json`
-- `docs/artifacts/case-snippet-closeout-pack/delivery-board.md`
-
-## Cycle 52 command lane
-
-```bash
-python -m sdetkit narrative-closeout --format json --strict
-python -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict
-python -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict
-python scripts/check_narrative_closeout_contract.py
-```
-
-## Narrative closeout contract
-
-- Single owner + backup reviewer are assigned for Cycle 52 narrative execution and KPI follow-up.
-- The Cycle 52 narrative lane references Cycle 51 case-snippet winners and misses with deterministic release-storytelling loops.
-- Every Cycle 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Cycle 52 closeout records narrative learnings and Day 53 expansion priorities.
-
-## Narrative quality checklist
-
-- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy
-- [ ] Every section has owner, review window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes narrative brief, proof map, KPI scorecard, and execution log
-
-## Cycle 52 delivery board
-
-- [ ] Cycle 52 narrative brief committed
-- [ ] Cycle 52 narrative reviewed with owner + backup
-- [ ] Cycle 52 proof map exported
-- [ ] Cycle 52 KPI scorecard snapshot exported
-- [ ] Day 53 expansion priorities drafted from Cycle 52 learnings
-
-## Scoring model
-
-Cycle 52 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Cycle 51 continuity and strict baseline carryover: 35 points.
-- Narrative contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Cycle 52 — Narrative closeout lane\n\nCycle 52 closes with a major narrative upgrade that converts Cycle 51 case-snippet evidence into a deterministic release-storytelling lane.\n\n## Why Cycle 52 matters\n\n- Converts Cycle 51 case-snippet proof into release-storytelling discipline.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from Cycle 52 narratives into Cycle 52 narrative execution.\n\n## Required inputs (Cycle 51)\n\n- `docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json`\n- `docs/artifacts/case-snippet-closeout-pack/delivery-board.md`\n\n## Cycle 52 command lane\n\n```bash\npython -m sdetkit narrative-closeout --format json --strict\npython -m sdetkit narrative-closeout --emit-pack-dir docs/artifacts/narrative-closeout-pack --format json --strict\npython -m sdetkit narrative-closeout --execute --evidence-dir docs/artifacts/narrative-closeout-pack/evidence --format json --strict\npython scripts/check_narrative_closeout_contract.py\n```\n\n## Narrative closeout contract\n\n- Single owner + backup reviewer are assigned for Cycle 52 narrative execution and KPI follow-up.\n- The Cycle 52 narrative lane references Cycle 51 case-snippet winners and misses with deterministic release-storytelling loops.\n- Every Cycle 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n- Cycle 52 closeout records narrative learnings and  expansion priorities.\n\n## Narrative quality checklist\n\n- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy\n- [ ] Every section has owner, review window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes narrative brief, proof map, KPI scorecard, and execution log\n\n## Cycle 52 delivery board\n\n- [ ] Cycle 52 narrative brief committed\n- [ ] Cycle 52 narrative reviewed with owner + backup\n- [ ] Cycle 52 proof map exported\n- [ ] Cycle 52 KPI scorecard snapshot exported\n- [ ]  expansion priorities drafted from Cycle 52 learnings\n\n## Scoring model\n\nCycle 52 weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n- Cycle 51 continuity and strict baseline carryover: 35 points.\n- Narrative contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -222,8 +167,8 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_alignment",
             "weight": 5,
-            "passed": ("Cycle 52" in top10_text and "Day 53" in top10_text),
-            "evidence": "Cycle 52 + Day 53 strategy chain",
+            "passed": ("Cycle 52" in top10_text and '' in top10_text),
+            "evidence": 'Cycle 52 +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -321,7 +266,7 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            "Cycle 52 narrative closeout lane is fully complete and ready for Day 53 execution lane."
+            'Cycle 52 narrative closeout lane is fully complete and ready for  execution lane.'
         )
 
     return {
@@ -419,7 +364,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "narrative-execution-log.md",
-        "# Cycle 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and Day 53 expansion priorities.\n",
+        '# Cycle 52 Execution Log\n\n- [ ] 2026-03-19: Record misses, wins, and  expansion priorities.\n',
     )
     _write(
         target / "narrative-delivery-board.md",

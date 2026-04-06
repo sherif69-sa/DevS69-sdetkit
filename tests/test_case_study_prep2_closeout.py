@@ -18,7 +18,7 @@ def _seed_repo(root: Path) -> None:
         "impact-70-big-upgrade-report.md\nintegrations-case-study-prep2-closeout.md\n",
         encoding="utf-8",
     )
-    (root / "docs/top-10-github-strategy.md").write_text("Day 70\nDay 71\n", encoding="utf-8")
+    (root / "docs/top-10-github-strategy.md").write_text('\n\n', encoding="utf-8")
     (root / "docs/integrations-case-study-prep2-closeout.md").write_text(
         d70._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
@@ -42,7 +42,7 @@ def _seed_repo(root: Path) -> None:
         root / "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
     )
     board.write_text(
-        "\n".join(["# Day 69 delivery board", *["- [ ] Day 69 item" for _ in range(5)]]) + "\n",
+        "\n".join(['#  delivery board', *['- [ ]  item' for _ in range(5)]]) + "\n",
         encoding="utf-8",
     )
     (root / "docs/roadmap/plans/triage-speed-case-study.json").write_text(

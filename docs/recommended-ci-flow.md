@@ -177,7 +177,7 @@ If you want the hosted repo to keep surfacing upgrade and security work between 
 
 - `.github/workflows/ghas-review-bot.yml` for a weekly GitHub Advanced Security digest issue.
 - `.github/workflows/ghas-campaign-bot.yml` for a weekly GHAS campaign planner with Copilot Autofix-aware alert grouping.
-- `.github/workflows/ghas-alert-sla-bot.yml` for a weekly GHAS SLA tracker covering 7/14/30-day alert backlog slices.
+- `.github/workflows/ghas-alert-sla-bot.yml` for a weekly GHAS SLA tracker covering 7/14/30- alert backlog slices.
 - `.github/workflows/ghas-metrics-export-bot.yml` for a weekly GHAS metrics artifact and snapshot issue.
 - `.github/workflows/security-configuration-audit-bot.yml` for a monthly GHAS configuration audit and coverage report.
 - `.github/workflows/secret-protection-review-bot.yml` for a weekly secret protection posture and backlog review.

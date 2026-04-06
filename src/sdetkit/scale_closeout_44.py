@@ -18,7 +18,7 @@ _DAY43_LEGACY_SUMMARY_PATH = (
     "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
 )
 _DAY43_LEGACY_BOARD_PATH = "docs/artifacts/acceleration-closeout-pack/delivery-board.md"
-_SECTION_HEADER = "# Day 44 \u2014 Scale closeout lane"
+_SECTION_HEADER = '#  — Scale closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why this lane matters",
     "## Required inputs (acceleration closeout)",
@@ -40,10 +40,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_scale_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 44 scale lane execution and KPI follow-up.",
-    "The Day 44 scale lane references Day 43 acceleration winners and misses with deterministic growth loops.",
-    "Every Day 44 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 44 closeout records scale learnings and Day 45 expansion priorities.",
+    'Single owner + backup reviewer are assigned for  scale lane execution and KPI follow-up.',
+    'The  scale lane references  acceleration winners and misses with deterministic growth loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records scale learnings and  expansion priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes scale summary, growth matrix, and rollback strategy",
@@ -53,69 +53,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes scale plan, growth matrix, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 44 scale plan draft committed",
-    "- [ ] Day 44 review notes captured with owner + backup",
-    "- [ ] Day 44 growth matrix exported",
-    "- [ ] Day 44 KPI scorecard snapshot exported",
-    "- [ ] Day 45 expansion priorities drafted from Day 44 learnings",
+    '- [ ]  scale plan draft committed',
+    '- [ ]  review notes captured with owner + backup',
+    '- [ ]  growth matrix exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  expansion priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 44 \u2014 Scale closeout lane
-
-This lane closes with a major scale upgrade that converts acceleration evidence into deterministic improvement loops.
-
-## Why this lane matters
-
-- Converts Day 43 acceleration proof into growth-first operating motion.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from scale outcomes into Day 45 expansion priorities.
-
-## Required inputs (acceleration closeout)
-
-- `docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json`
-- `docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md`
-
-## Command lane
-
-```bash
-python -m sdetkit scale-closeout --format json --strict
-python -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict
-python -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict
-python scripts/check_scale_closeout_contract.py
-```
-
-## Scale closeout contract
-
-- Single owner + backup reviewer are assigned for Day 44 scale lane execution and KPI follow-up.
-- The Day 44 scale lane references Day 43 acceleration winners and misses with deterministic growth loops.
-- Every Day 44 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 44 closeout records scale learnings and Day 45 expansion priorities.
-
-## Scale quality checklist
-
-- [ ] Includes scale summary, growth matrix, and rollback strategy
-- [ ] Every section has owner, publish window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes scale plan, growth matrix, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 44 scale plan draft committed
-- [ ] Day 44 review notes captured with owner + backup
-- [ ] Day 44 growth matrix exported
-- [ ] Day 44 KPI scorecard snapshot exported
-- [ ] Day 45 expansion priorities drafted from Day 44 learnings
-
-## Scoring model
-
-Weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 43 continuity and strict baseline carryover: 35 points.
-- Scale contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Scale closeout lane\n\nThis lane closes with a major scale upgrade that converts acceleration evidence into deterministic improvement loops.\n\n## Why this lane matters\n\n- Converts  acceleration proof into growth-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from scale outcomes into  expansion priorities.\n\n## Required inputs (acceleration closeout)\n\n- `docs/artifacts/acceleration-closeout-pack-43/acceleration-closeout-summary-43.json`\n- `docs/artifacts/acceleration-closeout-pack-43/delivery-board-43.md`\n\n## Command lane\n\n```bash\npython -m sdetkit scale-closeout --format json --strict\npython -m sdetkit scale-closeout --emit-pack-dir docs/artifacts/scale-closeout-pack --format json --strict\npython -m sdetkit scale-closeout --execute --evidence-dir docs/artifacts/scale-closeout-pack/evidence --format json --strict\npython scripts/check_scale_closeout_contract.py\n```\n\n## Scale closeout contract\n\n- Single owner + backup reviewer are assigned for  scale lane execution and KPI follow-up.\n- The  scale lane references  acceleration winners and misses with deterministic growth loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records scale learnings and  expansion priorities.\n\n## Scale quality checklist\n\n- [ ] Includes scale summary, growth matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes scale plan, growth matrix, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  scale plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  growth matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  expansion priorities drafted from  learnings\n\n## Scoring model\n\nWeighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Scale contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -155,7 +100,7 @@ def _load_acceleration_closeout(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 43" in text, "Day 44" in text
+    return len(items), '' in text, '' in text
 
 
 def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
@@ -238,7 +183,7 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_scale_closeout_alignment",
             "weight": 5,
-            "passed": ("Day 44" in top10_text and "Day 45" in top10_text),
+            "passed": ('' in top10_text and '' in top10_text),
             "evidence": "Scale closeout + expansion closeout strategy chain",
         },
         {
@@ -309,24 +254,24 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
 
     if acceleration_closeout_strict:
         wins.append(
-            f"Day 43 continuity is strict-pass with activation score={acceleration_closeout_score}."
+            f"43 continuity is strict-pass with activation score={acceleration_closeout_score}."
         )
     else:
-        misses.append("Day 43 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 43 acceleration closeout command and restore strict pass baseline before Day 44 lock."
+            'Re-run  acceleration closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_acceleration_closeout and board_has_scale_closeout:
         wins.append(
-            f"Day 43 delivery board integrity validated with {board_count} checklist items."
+            f"43 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 43 delivery board integrity is incomplete (needs >=5 items and Day 43/44 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /44 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 43 delivery board entries to include Day 43 and Day 44 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -334,12 +279,12 @@ def build_scale_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Scale contract, quality checklist, or delivery board entries are missing.")
         handoff_actions.append(
-            "Complete all Day 44 scale contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  scale contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 44 scale closeout lane is fully complete and ready for Day 45 expansion lane."
+            ' scale closeout lane is fully complete and ready for  expansion lane.'
         )
 
     return {
@@ -384,9 +329,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 43 activation score: `{payload['rollup']['acceleration_closeout_activation_score']}`",
-        f"- Day 43 checks evaluated: `{payload['rollup']['acceleration_closeout_checks']}`",
-        f"- Day 43 delivery board checklist items: `{payload['rollup']['acceleration_closeout_delivery_board_items']}`",
+        f"- 43 activation score: `{payload['rollup']['acceleration_closeout_activation_score']}`",
+        f"- 43 checks evaluated: `{payload['rollup']['acceleration_closeout_checks']}`",
+        f"- 43 delivery board checklist items: `{payload['rollup']['acceleration_closeout_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -409,7 +354,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "scale-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "scale-plan.md",
-        "# Scale plan\n\n- Objective: close Day 44 with measurable quality and throughput gains.\n",
+        '# Scale plan\n\n- Objective: close  with measurable quality and throughput gains.\n',
     )
     _write(
         target / "scale-growth-matrix.csv",
@@ -436,7 +381,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "scale-execution-log.md",
-        "# Scale execution log\n\n- [ ] 2026-03-12: Record misses, wins, and Day 45 expansion priorities.\n",
+        '# Scale execution log\n\n- [ ] 2026-03-12: Record misses, wins, and  expansion priorities.\n',
     )
     _write(
         target / "scale-delivery-board.md",
@@ -484,7 +429,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_scale_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_scale_closeout_summary(root)
 
 

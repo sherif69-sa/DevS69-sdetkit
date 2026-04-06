@@ -89,7 +89,7 @@ Guides exist, but contributors still need explicit expectations:
 
 ---
 
-## 30/60/90 day roadmap (practical and measurable)
+## 30/60/90  roadmap (practical and measurable)
 
 ## P0 (0-30 days): clarity + trust packaging
 

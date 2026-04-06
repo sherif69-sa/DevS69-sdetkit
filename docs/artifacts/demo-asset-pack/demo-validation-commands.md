@@ -1,4 +1,4 @@
-# Day 33 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit demo-asset --format json --strict

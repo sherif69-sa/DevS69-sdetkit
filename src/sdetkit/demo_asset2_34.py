@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-demo-asset2.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY33_SUMMARY_PATH = "docs/artifacts/demo-asset-pack/demo-asset-summary.json"
 _DAY33_BOARD_PATH = "docs/artifacts/demo-asset-pack/demo-delivery-board.md"
-_SECTION_HEADER = "# Day 34 \u2014 Demo asset #2 production (repo audit)"
+_SECTION_HEADER = '#  — Demo asset #2 production (repo audit)'
 _REQUIRED_SECTIONS = [
-    "## Why Day 34 matters",
-    "## Required inputs (Day 33)",
-    "## Day 34 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Repo-audit production contract",
     "## Repo-audit quality checklist",
-    "## Day 34 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Raw source file and final export are both stored in artifact pack",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 34 script draft committed",
-    "- [ ] Day 34 first cut rendered",
-    "- [ ] Day 34 final cut + caption copy approved",
-    "- [ ] Day 35 KPI instrumentation backlog pre-scoped",
-    "- [ ] Day 36 community distribution plan updated",
+    '- [ ]  script draft committed',
+    '- [ ]  first cut rendered',
+    '- [ ]  final cut + caption copy approved',
+    '- [ ]  KPI instrumentation backlog pre-scoped',
+    '- [ ]  community distribution plan updated',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 34 \u2014 Demo asset #2 production (repo audit)
-
-Day 34 closes the second demo-asset production lane, translating repository-audit value into distributable proof.
-
-## Why Day 34 matters
-
-- Demonstrates a concrete trust workflow using `repo audit` signals.
-- Extends the media pipeline so release stories remain continuous across cycles.
-- Forces remediation-oriented framing so viewers can act immediately after watching.
-
-## Required inputs (Day 33)
-
-- `docs/artifacts/demo-asset-pack/demo-asset-summary.json`
-- `docs/artifacts/demo-asset-pack/demo-delivery-board.md`
-
-## Day 34 command lane
-
-```bash
-python -m sdetkit demo-asset2 --format json --strict
-python -m sdetkit demo-asset2 --emit-pack-dir docs/artifacts/demo-asset2-pack --format json --strict
-python -m sdetkit demo-asset2 --execute --evidence-dir docs/artifacts/demo-asset2-pack/evidence --format json --strict
-python scripts/check_demo_asset2_contract.py
-```
-
-## Repo-audit production contract
-
-- Demo owner: one accountable editor and one backup reviewer are assigned.
-- Target format: publish both MP4 clip and GIF teaser for social/docs embedding.
-- Runtime SLA: main demo duration stays between 60 and 120 seconds.
-- Narrative shape: repo risk -> audit command -> findings -> remediation CTA must appear in order.
-
-## Repo-audit quality checklist
-
-- [ ] Shows `python -m sdetkit repo audit --json` execution with readable terminal output
-- [ ] Highlights at least two findings with one remediation recommendation
-- [ ] Mentions one measurable trust signal (time saved, failures prevented, or coverage)
-- [ ] Includes docs link and CLI command in caption or description
-- [ ] Raw source file and final export are both stored in artifact pack
-
-## Day 34 delivery board
-
-- [ ] Day 34 script draft committed
-- [ ] Day 34 first cut rendered
-- [ ] Day 34 final cut + caption copy approved
-- [ ] Day 35 KPI instrumentation backlog pre-scoped
-- [ ] Day 36 community distribution plan updated
-
-## Scoring model
-
-Day 34 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 33 continuity and strict baseline carryover: 35 points.
-- Repo-audit contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Demo asset #2 production (repo audit)\n\n closes the second demo-asset production lane, translating repository-audit value into distributable proof.\n\n## Why  matters\n\n- Demonstrates a concrete trust workflow using `repo audit` signals.\n- Extends the media pipeline so release stories remain continuous across cycles.\n- Forces remediation-oriented framing so viewers can act immediately after watching.\n\n## Required inputs ()\n\n- `docs/artifacts/demo-asset-pack/demo-asset-summary.json`\n- `docs/artifacts/demo-asset-pack/demo-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit demo-asset2 --format json --strict\npython -m sdetkit demo-asset2 --emit-pack-dir docs/artifacts/demo-asset2-pack --format json --strict\npython -m sdetkit demo-asset2 --execute --evidence-dir docs/artifacts/demo-asset2-pack/evidence --format json --strict\npython scripts/check_demo_asset2_contract.py\n```\n\n## Repo-audit production contract\n\n- Demo owner: one accountable editor and one backup reviewer are assigned.\n- Target format: publish both MP4 clip and GIF teaser for social/docs embedding.\n- Runtime SLA: main demo duration stays between 60 and 120 seconds.\n- Narrative shape: repo risk -> audit command -> findings -> remediation CTA must appear in order.\n\n## Repo-audit quality checklist\n\n- [ ] Shows `python -m sdetkit repo audit --json` execution with readable terminal output\n- [ ] Highlights at least two findings with one remediation recommendation\n- [ ] Mentions one measurable trust signal (time saved, failures prevented, or coverage)\n- [ ] Includes docs link and CLI command in caption or description\n- [ ] Raw source file and final export are both stored in artifact pack\n\n##  delivery board\n\n- [ ]  script draft committed\n- [ ]  first cut rendered\n- [ ]  final cut + caption copy approved\n- [ ]  KPI instrumentation backlog pre-scoped\n- [ ]  community distribution plan updated\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Repo-audit contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -144,10 +89,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle34 = any(
-        any(token in line for token in ("impact 34", "day 34", "name 34")) for line in lines
+        any(token in line for token in ("impact 34", '', "name 34")) for line in lines
     )
     has_cycle35 = any(
-        any(token in line for token in ("impact 35", "day 35", "name 35")) for line in lines
+        any(token in line for token in ("impact 35", '', "name 35")) for line in lines
     )
     return item_count, has_cycle34, has_cycle35
 
@@ -228,8 +173,8 @@ def build_demo_asset2_summary_impl(
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 34 \u2014 Demo asset #2" in top10_text and "Day 35" in top10_text),
-            "evidence": "Day 34 + Day 35 strategy chain",
+            "passed": (' — Demo asset #2' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -296,23 +241,23 @@ def build_demo_asset2_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 33 continuity is strict-pass with activation score={score}.")
+        wins.append(f"33 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 33 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 33 demo asset command and restore strict pass baseline before Day 34 lock."
+            'Re-run  demo asset command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle34 and board_has_cycle35:
         wins.append(
-            f"Day 33 delivery board integrity validated with {board_count} checklist items."
+            f"33 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 33 delivery board integrity is incomplete (needs >=5 items and Day 34/35 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /35 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 33 delivery board entries to include Day 34 and Day 35 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -324,12 +269,12 @@ def build_demo_asset2_summary_impl(
             "Repo-audit contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 34 contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 34 demo asset #2 production is fully closed and ready for Day 35 instrumentation sequencing."
+            ' demo asset #2 production is fully closed and ready for  instrumentation sequencing.'
         )
 
     return {
@@ -368,7 +313,7 @@ def build_demo_asset2_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 34 demo asset #2 summary\n"
+        ' demo asset #2 summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -379,18 +324,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 34 demo asset #2 summary",
+        '#  demo asset #2 summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 33 continuity",
+        '##  continuity',
         "",
-        f"- Day 33 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 33 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 33 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 33 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 33 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 33 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -432,18 +377,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "demo-asset2-script.md",
-        "# Day 34 demo script\n\n"
+        '#  demo script\n\n'
         "## Hook (0-15s)\n- Repo risk + why this matters now\n\n"
         "## Command lane (15-60s)\n- Run: `python -m sdetkit repo audit --json`\n- Highlight key findings + impact\n\n"
         "## Remediation + CTA (60-120s)\n- Show one remediation recommendation + docs link + next step\n",
     )
     _write(
         target / "demo-asset2-delivery-board.md",
-        "# Day 34 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "demo-asset2-validation-commands.md",
-        "# Day 34 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -474,7 +419,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 34 demo asset #2 production scorer.")
+    parser = argparse.ArgumentParser(description=' demo asset #2 production scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -538,7 +483,7 @@ def build_demo_asset2_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_demo_asset2_summary_impl(
         root,
         readme_path=readme_path,

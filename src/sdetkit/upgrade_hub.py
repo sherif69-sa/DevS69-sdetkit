@@ -94,7 +94,7 @@ def _discover_playbook_coverage() -> dict[str, Any]:
     promoted = sorted(
         cmd
         for cmd in cmd_to_mod
-        if not cmd.startswith("day")
+        if not cmd.startswith('')
         and not cmd.startswith("impact")
         and "_closeout" not in cmd
         and "-closeout-" not in cmd

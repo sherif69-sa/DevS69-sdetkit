@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-distribution-batch.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY37_SUMMARY_PATH = "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"
 _DAY37_BOARD_PATH = "docs/artifacts/experiment-lane-pack/delivery-board.md"
-_SECTION_HEADER = "# Day 38 \u2014 Distribution batch #1"
+_SECTION_HEADER = '#  — Distribution batch #1'
 _REQUIRED_SECTIONS = [
-    "## Why Day 38 matters",
-    "## Required inputs (Day 37)",
-    "## Day 38 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Distribution contract",
     "## Distribution quality checklist",
-    "## Day 38 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -34,10 +34,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_distribution_batch_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 38 posting execution and outcome logging.",
-    "At least three coordinated channel posts are linked to Day 37 winners and mapped to audience segments.",
-    "Every Day 38 post includes docs CTA, command CTA, and one measurable KPI target.",
-    "Day 38 closeout records winners, misses, and Day 39 playbook-post priorities.",
+    'Single owner + backup reviewer are assigned for  posting execution and outcome logging.',
+    'At least three coordinated channel posts are linked to  winners and mapped to audience segments.',
+    'Every  post includes docs CTA, command CTA, and one measurable KPI target.',
+    ' closeout records winners, misses, and  playbook-post priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes at least three coordinated posts across distinct channels",
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes channel plan, post copy, scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 38 channel plan committed",
-    "- [ ] Day 38 post copy reviewed with owner + backup",
-    "- [ ] Day 38 scheduling matrix exported",
-    "- [ ] Day 38 KPI scorecard snapshot exported",
-    "- [ ] Day 39 playbook post priorities drafted from Day 38 outcomes",
+    '- [ ]  channel plan committed',
+    '- [ ]  post copy reviewed with owner + backup',
+    '- [ ]  scheduling matrix exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  playbook post priorities drafted from  outcomes',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 38 \u2014 Distribution batch #1
-
-Day 38 publishes a coordinated distribution batch that operationalizes Day 37 experiment winners into high-signal channel execution.
-
-## Why Day 38 matters
-
-- Converts Day 37 learning into external distribution outcomes across multiple channels.
-- Preserves quality by enforcing owner accountability, CTA integrity, and KPI targets.
-- Creates a deterministic handoff from distribution outcomes into Day 39 playbook content priorities.
-
-## Required inputs (Day 37)
-
-- `docs/artifacts/experiment-lane-pack/experiment-lane-summary.json`
-- `docs/artifacts/experiment-lane-pack/delivery-board.md`
-
-## Day 38 command lane
-
-```bash
-python -m sdetkit distribution-batch --format json --strict
-python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict
-python -m sdetkit distribution-batch --execute --evidence-dir docs/artifacts/distribution-batch-pack/evidence --format json --strict
-python scripts/check_distribution_batch_contract.py
-```
-
-## Distribution contract
-
-- Single owner + backup reviewer are assigned for Day 38 posting execution and outcome logging.
-- At least three coordinated channel posts are linked to Day 37 winners and mapped to audience segments.
-- Every Day 38 post includes docs CTA, command CTA, and one measurable KPI target.
-- Day 38 closeout records winners, misses, and Day 39 playbook-post priorities.
-
-## Distribution quality checklist
-
-- [ ] Includes at least three coordinated posts across distinct channels
-- [ ] Every post has owner, scheduled window, and KPI target
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, and delta for each channel KPI
-- [ ] Artifact pack includes channel plan, post copy, scorecard, and execution log
-
-## Day 38 delivery board
-
-- [ ] Day 38 channel plan committed
-- [ ] Day 38 post copy reviewed with owner + backup
-- [ ] Day 38 scheduling matrix exported
-- [ ] Day 38 KPI scorecard snapshot exported
-- [ ] Day 39 playbook post priorities drafted from Day 38 outcomes
-
-## Scoring model
-
-Day 38 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 37 continuity and strict baseline carryover: 35 points.
-- Distribution contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Distribution batch #1\n\n publishes a coordinated distribution batch that operationalizes  experiment winners into high-signal channel execution.\n\n## Why  matters\n\n- Converts  learning into external distribution outcomes across multiple channels.\n- Preserves quality by enforcing owner accountability, CTA integrity, and KPI targets.\n- Creates a deterministic handoff from distribution outcomes into  playbook content priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/experiment-lane-pack/experiment-lane-summary.json`\n- `docs/artifacts/experiment-lane-pack/delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit distribution-batch --format json --strict\npython -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict\npython -m sdetkit distribution-batch --execute --evidence-dir docs/artifacts/distribution-batch-pack/evidence --format json --strict\npython scripts/check_distribution_batch_contract.py\n```\n\n## Distribution contract\n\n- Single owner + backup reviewer are assigned for  posting execution and outcome logging.\n- At least three coordinated channel posts are linked to  winners and mapped to audience segments.\n- Every  post includes docs CTA, command CTA, and one measurable KPI target.\n-  closeout records winners, misses, and  playbook-post priorities.\n\n## Distribution quality checklist\n\n- [ ] Includes at least three coordinated posts across distinct channels\n- [ ] Every post has owner, scheduled window, and KPI target\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, and delta for each channel KPI\n- [ ] Artifact pack includes channel plan, post copy, scorecard, and execution log\n\n##  delivery board\n\n- [ ]  channel plan committed\n- [ ]  post copy reviewed with owner + backup\n- [ ]  scheduling matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  playbook post priorities drafted from  outcomes\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Distribution contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -144,10 +89,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle37 = any(
-        any(token in line for token in ("impact 37", "day 37", "name 37")) for line in lines
+        any(token in line for token in ("impact 37", '', "name 37")) for line in lines
     )
     has_cycle38 = any(
-        any(token in line for token in ("impact 38", "day 38", "name 38")) for line in lines
+        any(token in line for token in ("impact 38", '', "name 38")) for line in lines
     )
     return item_count, has_cycle37, has_cycle38
 
@@ -226,8 +171,8 @@ def build_distribution_batch_summary_impl(
         {
             "check_id": "top10_distribution_batch_alignment",
             "weight": 5,
-            "passed": ("Day 38" in top10_text and "Day 39" in top10_text),
-            "evidence": "Day 38 + Day 39 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -294,23 +239,23 @@ def build_distribution_batch_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 37 continuity is strict-pass with activation score={score}.")
+        wins.append(f"37 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 37 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 37 experiment lane command and restore strict pass baseline before Day 38 lock."
+            'Re-run  experiment lane command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle37 and board_has_cycle38:
         wins.append(
-            f"Day 37 delivery board integrity validated with {board_count} checklist items."
+            f"37 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 37 delivery board integrity is incomplete (needs >=5 items and Day 37/38 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /38 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 37 delivery board entries to include Day 37 and Day 38 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -320,12 +265,12 @@ def build_distribution_batch_summary_impl(
             "Distribution contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 38 distribution contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  distribution contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 38 distribution batch #1 is fully complete and ready for Day 39 playbook post #1."
+            ' distribution batch #1 is fully complete and ready for  playbook post #1.'
         )
 
     return {
@@ -364,7 +309,7 @@ def build_distribution_batch_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 38 distribution batch summary\n"
+        ' distribution batch summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -375,18 +320,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 38 distribution batch summary",
+        '#  distribution batch summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 37 continuity",
+        '##  continuity',
         "",
-        f"- Day 37 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 37 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 37 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 37 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 37 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 37 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -419,17 +364,17 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "post-copy.md",
-        "# Day 38 post copy pack\n\n"
+        '#  post copy pack\n\n'
         "## GitHub post\n"
-        "- Hook: Day 37 experiment winners are now live as a repeatable distribution flow.\n"
+        '- Hook:  experiment winners are now live as a repeatable distribution flow.\n'
         "- CTA docs: `docs/integrations-experiment-lane.md`\n"
         "- CTA command: `python -m sdetkit experiment-lane --format json --strict`\n\n"
         "## LinkedIn post\n"
         "- Hook: We translated controlled growth learnings into a deterministic posting batch.\n"
-        "- CTA docs: `docs/index.md` (Day 37 + Day 38 sections)\n"
+        '- CTA docs: `docs/index.md` ( +  sections)\n'
         "- CTA command: `python -m sdetkit distribution-batch --format json --strict`\n\n"
         "## Newsletter blurb\n"
-        "- Hook: Day 38 moves from experiments to coordinated execution with quality guardrails.\n"
+        '- Hook:  moves from experiments to coordinated execution with quality guardrails.\n'
         "- CTA docs: `docs/integrations-distribution-batch.md`\n"
         "- CTA command: `python -m sdetkit distribution-batch --emit-pack-dir docs/artifacts/distribution-batch-pack --format json --strict`\n",
     )
@@ -468,18 +413,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log.md",
-        "# Day 38 execution log\n\n"
+        '#  execution log\n\n'
         "- [ ] 2026-03-03: Publish GitHub + LinkedIn posts with docs + command CTAs.\n"
         "- [ ] 2026-03-04: Publish newsletter segment and capture first 24h KPI pulse.\n"
-        "- [ ] 2026-03-05: Record winners/misses and map Day 39 playbook priorities.\n",
+        '- [ ] 2026-03-05: Record winners/misses and map  playbook priorities.\n',
     )
     _write(
         target / "delivery-board.md",
-        "# Day 38 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands.md",
-        "# Day 38 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -510,7 +455,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 38 distribution batch scorer.")
+    parser = argparse.ArgumentParser(description=' distribution batch scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -574,7 +519,7 @@ def build_distribution_batch_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_distribution_batch_summary_impl(
         root,
         readme_path=readme_path,

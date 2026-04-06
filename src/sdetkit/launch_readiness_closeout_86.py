@@ -15,10 +15,10 @@ _DAY85_BOARD_PATH = (
     "docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/launch-readiness-plan.json"
-_SECTION_HEADER = "# Day 86 \u2014 Launch readiness closeout lane"
+_SECTION_HEADER = '#  — Launch readiness closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Launch Readiness Closeout matters",
-    "## Required inputs (Day 85)",
+    '## Required inputs ()',
     "## Command lane",
     "## Launch readiness contract",
     "## Launch readiness quality checklist",
@@ -37,10 +37,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_launch_readiness_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 86 launch readiness execution and signoff.",
-    "The Day 86 lane references Day 85 outcomes, controls, and trust continuity signals.",
-    "Every Day 86 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 86 closeout records launch readiness pack upgrades, storyline outcomes, and Day 87 launch priorities.",
+    'Single owner + backup reviewer are assigned for  launch readiness execution and signoff.',
+    'The  lane references  outcomes, controls, and trust continuity signals.',
+    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records launch readiness pack upgrades, storyline outcomes, and  launch priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -50,11 +50,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 86 evidence brief committed",
-    "- [ ] Day 86 launch readiness plan committed",
-    "- [ ] Day 86 narrative template upgrade ledger exported",
-    "- [ ] Day 86 storyline outcomes ledger exported",
-    "- [ ] Day 87 launch priorities drafted from Day 86 outcomes",
+    '- [ ]  evidence brief committed',
+    '- [ ]  launch readiness plan committed',
+    '- [ ]  narrative template upgrade ledger exported',
+    '- [ ]  storyline outcomes ledger exported',
+    '- [ ]  launch priorities drafted from  outcomes',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -65,58 +65,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 86 \u2014 Launch readiness closeout lane
-
-Day 86 closes with a major upgrade that converts Day 85 release prioritization outcomes into a deterministic launch readiness operating lane.
-
-## Why Launch Readiness Closeout matters
-
-- Converts Day 85 release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.
-- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 86 closeout into Day 87 launch priorities.
-
-## Required inputs (Day 85)
-
-- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json`
-- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md`
-- `docs/roadmap/plans/launch-readiness-plan.json`
-
-## Command lane
-
-```bash
-python -m sdetkit launch-readiness-closeout --format json --strict
-python -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/launch-readiness-closeout-pack --format json --strict
-python -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/launch-readiness-closeout-pack/evidence --format json --strict
-python scripts/check_launch_readiness_closeout_contract.py
-```
-
-## Launch readiness contract
-
-- Single owner + backup reviewer are assigned for Day 86 launch readiness execution and signoff.
-- The Day 86 lane references Day 85 outcomes, controls, and trust continuity signals.
-- Every Day 86 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 86 closeout records launch readiness pack upgrades, storyline outcomes, and Day 87 launch priorities.
-
-## Launch readiness quality checklist
-
-- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets
-- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag
-- [ ] CTA links point to narrative docs/templates + runnable command evidence
-- [ ] Scorecard captures launch readiness adoption delta, objection deflection delta, confidence, and rollback owner
-- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 86 evidence brief committed
-- [ ] Day 86 launch readiness plan committed
-- [ ] Day 86 narrative template upgrade ledger exported
-- [ ] Day 86 storyline outcomes ledger exported
-- [ ] Day 87 launch priorities drafted from Day 86 outcomes
-
-## Scoring model
-
-Day 86 weights continuity + execution contract + launch artifact readiness for a 100-point activation score.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Launch readiness closeout lane\n\n closes with a major upgrade that converts  release prioritization outcomes into a deterministic launch readiness operating lane.\n\n## Why Launch Readiness Closeout matters\n\n- Converts  release prioritization outcomes into reusable launch readiness decisions across launch briefs, release notes, and escalation playbooks.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  launch priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-closeout-summary.json`\n- `docs/artifacts/release-prioritization-closeout-pack/release-prioritization-delivery-board.md`\n- `docs/roadmap/plans/launch-readiness-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit launch-readiness-closeout --format json --strict\npython -m sdetkit launch-readiness-closeout --emit-pack-dir docs/artifacts/launch-readiness-closeout-pack --format json --strict\npython -m sdetkit launch-readiness-closeout --execute --evidence-dir docs/artifacts/launch-readiness-closeout-pack/evidence --format json --strict\npython scripts/check_launch_readiness_closeout_contract.py\n```\n\n## Launch readiness contract\n\n- Single owner + backup reviewer are assigned for  launch readiness execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records launch readiness pack upgrades, storyline outcomes, and  launch priorities.\n\n## Launch readiness quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures launch readiness adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  launch readiness plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ]  launch priorities drafted from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + launch artifact readiness for a 100-point activation score.\n'
 
 
 def _read_text(path: Path) -> str:
@@ -166,7 +115,7 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(release_prioritization_board)
     board_count = _checklist_count(board_text)
-    board_has_release_prioritization = "Day 85" in board_text
+    board_has_release_prioritization = '' in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -196,8 +145,8 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 85" in top10_text and "Day 86" in top10_text),
-            "evidence": "Day 85 + Day 86 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "release_prioritization_summary_present",
@@ -288,32 +237,32 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
             f"Release prioritization continuity baseline is stable with activation score={release_prioritization_score}."
         )
     else:
-        misses.append("Day 85 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
         handoff_actions.append(
-            "Re-run Day 85 closeout command and raise baseline quality above 85 with strict pass before Day 86 lock."
+            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
         )
 
     if board_count >= 5 and board_has_release_prioritization:
         wins.append(
-            f"Day 85 delivery board integrity validated with {board_count} checklist items."
+            f"85 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 85 delivery board integrity is incomplete (needs >=5 items and Day 85 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 85 delivery board entries to include Day 85 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 86 launch readiness dataset is available for launch execution.")
+        wins.append(' launch readiness dataset is available for launch execution.')
     else:
-        misses.append("Day 86 launch readiness dataset is missing required keys.")
+        misses.append(' launch readiness dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/launch-readiness-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 86 launch readiness closeout lane is fully complete and ready for Day 87 launch planning."
+            ' launch readiness closeout lane is fully complete and ready for  launch planning.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -355,7 +304,7 @@ def build_launch_readiness_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 86 launch readiness closeout summary",
+        ' launch readiness closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -376,8 +325,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "launch-readiness-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "launch-readiness-evidence-brief.md", "# Day 86 launch readiness brief\n")
-    _write(target / "launch-readiness-plan.md", "# Day 86 launch readiness plan\n")
+    _write(target / "launch-readiness-evidence-brief.md", '#  launch readiness brief\n')
+    _write(target / "launch-readiness-plan.md", '#  launch readiness plan\n')
     _write(
         target / "launch-readiness-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -390,14 +339,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "launch-readiness-narrative-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "launch-readiness-execution-log.md", "# Day 86 execution log\n")
+    _write(target / "launch-readiness-execution-log.md", '#  execution log\n')
     _write(
         target / "launch-readiness-delivery-board.md",
-        "\n".join(["# Day 86 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "launch-readiness-validation-commands.md",
-        "# Day 86 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -425,12 +374,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_launch_readiness_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_launch_readiness_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 86 launch readiness closeout checks")
+    parser = argparse.ArgumentParser(description=' launch readiness closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

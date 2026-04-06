@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-kpi-instrumentation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY34_SUMMARY_PATH = "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json"
 _DAY34_BOARD_PATH = "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md"
-_SECTION_HEADER = "# Day 35 \u2014 KPI instrumentation closeout"
+_SECTION_HEADER = '#  — KPI instrumentation closeout'
 _REQUIRED_SECTIONS = [
-    "## Why Day 35 matters",
-    "## Required inputs (Day 34)",
-    "## Day 35 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## KPI instrumentation contract",
     "## KPI quality checklist",
-    "## Day 35 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -37,7 +37,7 @@ _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for KPI instrumentation maintenance.",
     "Metric taxonomy includes acquisition, activation, retention, and reliability slices.",
     "Every KPI has source command, cadence, owner, and threshold fields documented.",
-    "Day 35 report links KPI drift to at least three concrete next-week actions.",
+    ' report links KPI drift to at least three concrete next-week actions.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes at least eight KPIs split across acquisition/activation/retention/reliability",
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes dashboard, alert policy, and narrative summary",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 35 KPI dictionary committed",
-    "- [ ] Day 35 dashboard snapshot exported",
-    "- [ ] Day 35 alert policy reviewed with owner + backup",
-    "- [ ] Day 36 distribution message references KPI shifts",
-    "- [ ] Day 37 experiment backlog seeded from KPI misses",
+    '- [ ]  KPI dictionary committed',
+    '- [ ]  dashboard snapshot exported',
+    '- [ ]  alert policy reviewed with owner + backup',
+    '- [ ]  distribution message references KPI shifts',
+    '- [ ]  experiment backlog seeded from KPI misses',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 35 \u2014 KPI instrumentation closeout
-
-Day 35 closes the instrumentation lane by converting demo activity into measurable weekly signals and next-week actions.
-
-## Why Day 35 matters
-
-- Turns demo outputs into a durable KPI operating loop.
-- Reduces attribution gaps by forcing explicit metric sources and cadence.
-- Upgrades weekly review quality from narrative-only updates to threshold-backed decisions.
-
-## Required inputs (Day 34)
-
-- `docs/artifacts/demo-asset2-pack/demo-asset2-summary.json`
-- `docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md`
-
-## Day 35 command lane
-
-```bash
-python -m sdetkit kpi-instrumentation --format json --strict
-python -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict
-python -m sdetkit kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict
-python scripts/check_kpi_instrumentation_contract.py
-```
-
-## KPI instrumentation contract
-
-- Single owner + backup reviewer are assigned for KPI instrumentation maintenance.
-- Metric taxonomy includes acquisition, activation, retention, and reliability slices.
-- Every KPI has source command, cadence, owner, and threshold fields documented.
-- Day 35 report links KPI drift to at least three concrete next-week actions.
-
-## KPI quality checklist
-
-- [ ] Includes at least eight KPIs split across acquisition/activation/retention/reliability
-- [ ] Every KPI row has source command and refresh cadence
-- [ ] At least three threshold alerts are documented with owner + escalation action
-- [ ] Weekly review delta compares current week vs prior week in percentages
-- [ ] Artifact pack includes dashboard, alert policy, and narrative summary
-
-## Day 35 delivery board
-
-- [ ] Day 35 KPI dictionary committed
-- [ ] Day 35 dashboard snapshot exported
-- [ ] Day 35 alert policy reviewed with owner + backup
-- [ ] Day 36 distribution message references KPI shifts
-- [ ] Day 37 experiment backlog seeded from KPI misses
-
-## Scoring model
-
-Day 35 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 34 continuity and strict baseline carryover: 35 points.
-- KPI contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — KPI instrumentation closeout\n\n closes the instrumentation lane by converting demo activity into measurable weekly signals and next-week actions.\n\n## Why  matters\n\n- Turns demo outputs into a durable KPI operating loop.\n- Reduces attribution gaps by forcing explicit metric sources and cadence.\n- Upgrades weekly review quality from narrative-only updates to threshold-backed decisions.\n\n## Required inputs ()\n\n- `docs/artifacts/demo-asset2-pack/demo-asset2-summary.json`\n- `docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit kpi-instrumentation --format json --strict\npython -m sdetkit kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict\npython -m sdetkit kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict\npython scripts/check_kpi_instrumentation_contract.py\n```\n\n## KPI instrumentation contract\n\n- Single owner + backup reviewer are assigned for KPI instrumentation maintenance.\n- Metric taxonomy includes acquisition, activation, retention, and reliability slices.\n- Every KPI has source command, cadence, owner, and threshold fields documented.\n-  report links KPI drift to at least three concrete next-week actions.\n\n## KPI quality checklist\n\n- [ ] Includes at least eight KPIs split across acquisition/activation/retention/reliability\n- [ ] Every KPI row has source command and refresh cadence\n- [ ] At least three threshold alerts are documented with owner + escalation action\n- [ ] Weekly review delta compares current week vs prior week in percentages\n- [ ] Artifact pack includes dashboard, alert policy, and narrative summary\n\n##  delivery board\n\n- [ ]  KPI dictionary committed\n- [ ]  dashboard snapshot exported\n- [ ]  alert policy reviewed with owner + backup\n- [ ]  distribution message references KPI shifts\n- [ ]  experiment backlog seeded from KPI misses\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- KPI contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -144,10 +89,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle35 = any(
-        any(token in line for token in ("impact 35", "day 35", "name 35")) for line in lines
+        any(token in line for token in ("impact 35", '', "name 35")) for line in lines
     )
     has_cycle36 = any(
-        any(token in line for token in ("impact 36", "day 36", "name 36")) for line in lines
+        any(token in line for token in ("impact 36", '', "name 36")) for line in lines
     )
     return item_count, has_cycle35, has_cycle36
 
@@ -228,8 +173,8 @@ def build_kpi_instrumentation_summary_impl(
         {
             "check_id": "top10_kpi_instrumentation_alignment",
             "weight": 5,
-            "passed": ("Day 35" in top10_text and "Day 36" in top10_text),
-            "evidence": "Day 35 + Day 36 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -296,23 +241,23 @@ def build_kpi_instrumentation_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 34 continuity is strict-pass with activation score={score}.")
+        wins.append(f"34 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 34 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 34 demo asset #2 command and restore strict pass baseline before Day 35 lock."
+            'Re-run  demo asset #2 command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle35 and board_has_cycle36:
         wins.append(
-            f"Day 34 delivery board integrity validated with {board_count} checklist items."
+            f"34 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 34 delivery board integrity is incomplete (needs >=5 items and Day 35/36 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /36 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 34 delivery board entries to include Day 35 and Day 36 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -322,12 +267,12 @@ def build_kpi_instrumentation_summary_impl(
     else:
         misses.append("KPI contract, quality checklist, or delivery board entries are missing.")
         handoff_actions.append(
-            "Complete all Day 35 KPI contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  KPI contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 35 KPI instrumentation closeout is fully complete and ready for Day 36 distribution execution."
+            ' KPI instrumentation closeout is fully complete and ready for  distribution execution.'
         )
 
     return {
@@ -366,7 +311,7 @@ def build_kpi_instrumentation_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 35 KPI instrumentation summary\n"
+        ' KPI instrumentation summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -377,18 +322,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 35 KPI instrumentation summary",
+        '#  KPI instrumentation summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 34 continuity",
+        '##  continuity',
         "",
-        f"- Day 34 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 34 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 34 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 34 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 34 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 34 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -426,18 +371,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "alert-policy.md",
-        "# Day 35 alert policy\n\n"
+        '#  alert policy\n\n'
         "- `readme_to_command_ctr < 10%` for two consecutive cycles -> owner opens remediation issue within 24h.\n"
         "- `ci_flake_rate > 3%` on daily sweep -> block release tagging until flaky tests triaged.\n"
         "- `discussion_reply_time_hours > 24` for 3+ threads -> trigger backup reviewer support shift.\n",
     )
     _write(
         target / "delivery-board.md",
-        "# Day 35 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "kpi-instrumentation-validation-commands.md",
-        "# Day 35 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -470,7 +415,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 35 KPI instrumentation closeout scorer.")
+    parser = argparse.ArgumentParser(description=' KPI instrumentation closeout scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -534,7 +479,7 @@ def build_kpi_instrumentation_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_kpi_instrumentation_summary_impl(
         root,
         readme_path=readme_path,

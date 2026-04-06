@@ -17,10 +17,10 @@ _DAY68_BOARD_PATH = (
     "docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md"
 )
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/reliability-case-study.json"
-_SECTION_HEADER = "# Day 69 \u2014 Case-study prep #1 closeout lane"
+_SECTION_HEADER = '#  — Case-study prep #1 closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Case Study Prep1 Closeout matters",
-    "## Required inputs (Day 68)",
+    '## Required inputs ()',
     "## Case Study Prep1 Closeout command lane",
     "## Case-study prep contract",
     "## Case-study quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_case_study_prep1_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 69 reliability case-study prep and signoff.",
-    "The Day 69 lane references Day 68 integration expansion outputs, governance decisions, and KPI continuity signals.",
-    "Every Day 69 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 69 closeout records before/after reliability deltas, evidence confidence notes, and Day 70 prep priorities.",
+    'Single owner + backup reviewer are assigned for  reliability case-study prep and signoff.',
+    'The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.',
+    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records before/after reliability deltas, evidence confidence notes, and  prep priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline window, treatment window, and outlier handling notes",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 69 integration brief committed",
-    "- [ ] Day 69 reliability case-study narrative published",
-    "- [ ] Day 69 controls and assumptions log exported",
-    "- [ ] Day 69 KPI scorecard snapshot exported",
-    "- [ ] Day 70 case-study prep priorities drafted from Day 69 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  reliability case-study narrative published',
+    '- [ ]  controls and assumptions log exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  case-study prep priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"case_id"',
@@ -67,64 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 69 \u2014 Case-study prep #1 closeout lane
-
-Day 69 closes with a major upgrade that turns Day 68 integration outputs into a measurable reliability case-study prep pack.
-
-## Why Case Study Prep1 Closeout matters
-
-- Converts Day 68 implementation signals into before/after reliability evidence.
-- Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.
-- Creates a deterministic handoff from Day 69 case-study prep #1 to Day 70 case-study prep #2.
-
-## Required inputs (Day 68)
-
-- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json`
-- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md`
-- `docs/roadmap/plans/reliability-case-study.json`
-
-## Case Study Prep1 Closeout command lane
-
-```bash
-python -m sdetkit case-study-prep1-closeout --format json --strict
-python -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict
-python -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/case-study-prep1-closeout-pack/evidence --format json --strict
-python scripts/check_case_study_prep1_closeout_contract.py
-```
-
-## Case-study prep contract
-
-- Single owner + backup reviewer are assigned for Day 69 reliability case-study prep and signoff.
-- The Day 69 lane references Day 68 integration expansion outputs, governance decisions, and KPI continuity signals.
-- Every Day 69 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 69 closeout records before/after reliability deltas, evidence confidence notes, and Day 70 prep priorities.
-
-## Case-study quality checklist
-
-- [ ] Includes baseline window, treatment window, and outlier handling notes
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log
-
-## Case Study Prep1 Closeout delivery board
-
-- [ ] Day 69 integration brief committed
-- [ ] Day 69 reliability case-study narrative published
-- [ ] Day 69 controls and assumptions log exported
-- [ ] Day 69 KPI scorecard snapshot exported
-- [ ] Day 70 case-study prep priorities drafted from Day 69 learnings
-
-## Scoring model
-
-Day 69 weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 68 continuity baseline quality (35)
-- Reliability evidence data + delivery board completeness (30)
-
-Strict pass requires score >= 95 and zero critical failures.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Case-study prep #1 closeout lane\n\n closes with a major upgrade that turns  integration outputs into a measurable reliability case-study prep pack.\n\n## Why Case Study Prep1 Closeout matters\n\n- Converts  implementation signals into before/after reliability evidence.\n- Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.\n- Creates a deterministic handoff from  case-study prep #1 to  case-study prep #2.\n\n## Required inputs ()\n\n- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json`\n- `docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-delivery-board.md`\n- `docs/roadmap/plans/reliability-case-study.json`\n\n## Case Study Prep1 Closeout command lane\n\n```bash\npython -m sdetkit case-study-prep1-closeout --format json --strict\npython -m sdetkit case-study-prep1-closeout --emit-pack-dir docs/artifacts/case-study-prep1-closeout-pack --format json --strict\npython -m sdetkit case-study-prep1-closeout --execute --evidence-dir docs/artifacts/case-study-prep1-closeout-pack/evidence --format json --strict\npython scripts/check_case_study_prep1_closeout_contract.py\n```\n\n## Case-study prep contract\n\n- Single owner + backup reviewer are assigned for  reliability case-study prep and signoff.\n- The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records before/after reliability deltas, evidence confidence notes, and  prep priorities.\n\n## Case-study quality checklist\n\n- [ ] Includes baseline window, treatment window, and outlier handling notes\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log\n\n## Case Study Prep1 Closeout delivery board\n\n- [ ]  integration brief committed\n- [ ]  reliability case-study narrative published\n- [ ]  controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  case-study prep priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Reliability evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
 
 
 def _read(path: Path) -> str:
@@ -167,7 +110,7 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
     prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
         prior_closeout_summary
     )
-    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 68")
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, '')
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -195,8 +138,8 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 69" in top10_text and "Day 70" in top10_text),
-            "evidence": "Day 69 + Day 70 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "prior_closeout_summary_present",
@@ -286,37 +229,37 @@ def build_case_study_prep1_closeout_summary(root: Path) -> dict[str, Any]:
 
     if prior_closeout_strict:
         wins.append(
-            f"Day 68 continuity is strict-pass with activation score={prior_closeout_score}."
+            f"68 continuity is strict-pass with activation score={prior_closeout_score}."
         )
     else:
-        misses.append("Day 68 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 68 closeout command and restore strict baseline before Day 69 lock."
+            'Re-run  closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_prior_closeout:
         wins.append(
-            f"Day 68 delivery board integrity validated with {board_count} checklist items."
+            f"68 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 68 delivery board integrity is incomplete (needs >=5 items and Day 68 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 68 delivery board entries to include Day 68 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_case_data_keys:
         wins.append(
-            "Day 69 reliability case-study dataset is available for case-study prep execution."
+            ' reliability case-study dataset is available for case-study prep execution.'
         )
     else:
-        misses.append("Day 69 reliability case-study dataset is missing required keys.")
+        misses.append(' reliability case-study dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/reliability-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 69 case-study prep #1 closeout lane is fully complete and ready for Day 70 case-study prep #2."
+            ' case-study prep #1 closeout lane is fully complete and ready for  case-study prep #2.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -377,22 +320,22 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "case-study-prep1-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "case-study-prep1-integration-brief.md", "# Day 69 integration brief\n")
-    _write(target / "case-study-prep1-case-study-narrative.md", "# Day 69 case-study narrative\n")
+    _write(target / "case-study-prep1-integration-brief.md", '#  integration brief\n')
+    _write(target / "case-study-prep1-case-study-narrative.md", '#  case-study narrative\n')
     _write(
         target / "case-study-prep1-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
     )
     _write(
         target / "case-study-prep1-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "case-study-prep1-execution-log.md", "# Day 69 execution log\n")
+    _write(target / "case-study-prep1-execution-log.md", '#  execution log\n')
     _write(
         target / "case-study-prep1-delivery-board.md",
-        "\n".join(["# Day 69 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "case-study-prep1-validation-commands.md",
-        "# Day 69 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -420,12 +363,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_case_study_prep1_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_case_study_prep1_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 69 case-study prep #1 closeout checks")
+    parser = argparse.ArgumentParser(description=' case-study prep #1 closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

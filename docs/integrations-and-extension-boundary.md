@@ -19,7 +19,7 @@ For formal tier definitions, see [stability-levels.md](stability-levels.md) and 
 
 ## What belongs in Stable/Core
 
-Put something in **Stable/Core** when it is broadly applicable to everyday shipping-readiness decisions:
+Put something in **Stable/Core** when it is broadly applicable to everyshipping-readiness decisions:
 
 - Core gate/security/doctor/evidence workflows used across repository types.
 - Deterministic pass/fail or policy outputs relied on for go/no-go decisions.

@@ -70,7 +70,7 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 78)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -84,10 +84,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 79 scale upgrade execution and signoff.",
-        "The Day 79 lane references Day 78 outcomes, controls, and KPI continuity signals.",
-        "Every Day 79 section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 79 closeout records enterprise onboarding outcomes, confidence notes, and Day 80 partner outreach priorities."
+        "Single owner + backup reviewer are assigned for  scale upgrade execution and signoff.",
+        "The  lane references  outcomes, controls, and KPI continuity signals.",
+        "Every  section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records enterprise onboarding outcomes, confidence notes, and  partner outreach priorities."
       ]
     },
     {
@@ -101,11 +101,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 79 integration brief committed",
-        "- [ ] Day 79 scale upgrade plan committed",
-        "- [ ] Day 79 enterprise execution ledger exported",
-        "- [ ] Day 79 enterprise KPI scorecard snapshot exported",
-        "- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  scale upgrade plan committed",
+        "- [ ]  enterprise execution ledger exported",
+        "- [ ]  enterprise KPI scorecard snapshot exported",
+        "- [ ]  partner outreach priorities drafted from  learnings"
       ]
     },
     {
@@ -128,13 +128,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 78 delivery board integrity validated with 5 checklist items.",
-    "Day 79 scale upgrade dataset is available for launch execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " scale upgrade dataset is available for launch execution."
   ],
   "misses": [
-    "Day 78 continuity baseline is below the floor (<85)."
+    " continuity baseline is below the floor (<85)."
   ],
   "handoff_actions": [
-    "Re-run Day 78 closeout command and raise baseline quality above 85 before Day 79 lock."
+    "Re-run  closeout command and raise baseline quality above 85 before  lock."
   ]
 }

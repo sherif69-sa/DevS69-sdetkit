@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 33 — Demo asset #1:** produce/publish `doctor` workflow short video or GIF.\n"
-        "- **Day 34 — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n",
+        '- ** — Demo asset #1:** produce/publish `doctor` workflow short video or GIF.\n'
+        '- ** — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-demo-asset.md").write_text(
         d33._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-33-ultra-upgrade-report.md").write_text(
-        "# Day 33 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 32 delivery board",
-                "- [ ] Day 32 cadence calendar committed",
-                "- [ ] Day 32 changelog template committed",
-                "- [ ] Day 33 demo asset #1 scope frozen",
-                "- [ ] Day 34 demo asset #2 scope frozen",
-                "- [ ] Day 35 weekly review KPI frame locked",
+                '#  delivery board',
+                '- [ ]  cadence calendar committed',
+                '- [ ]  changelog template committed',
+                '- [ ]  demo asset #1 scope frozen',
+                '- [ ]  demo asset #2 scope frozen',
+                '- [ ]  weekly review KPI frame locked',
             ]
         )
         + "\n",
@@ -115,7 +115,7 @@ def test_demo_asset_strict_fails_when_lane32_inputs_missing(tmp_path: Path) -> N
 def test_demo_asset_strict_fails_when_lane32_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/release-cadence-pack/release-delivery-board.md").write_text(
-        "- [ ] Day 33 demo asset #1 scope frozen\n", encoding="utf-8"
+        '- [ ]  demo asset #1 scope frozen\n', encoding="utf-8"
     )
     rc = d33.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -125,4 +125,4 @@ def test_demo_asset_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["demo-asset", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 33 demo asset summary" in capsys.readouterr().out
+    assert ' demo asset summary' in capsys.readouterr().out

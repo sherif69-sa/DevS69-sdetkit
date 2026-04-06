@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 50 — Execution prioritization lock:** convert weekly-review wins into a deterministic execution board.\n"
-        "- **Day 51 — Case snippet #1:** publish mini-case on reliability or quality gate value.\n",
+        '- ** — Execution prioritization lock:** convert weekly-review wins into a deterministic execution board.\n'
+        '- ** — Case snippet #1:** publish mini-case on reliability or quality gate value.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-execution-prioritization-closeout.md").write_text(
         d50._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-50-big-upgrade-report.md").write_text(
-        "# Day 50 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -60,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 49 delivery board",
-                "- [ ] Day 49 weekly review brief committed",
-                "- [ ] Day 49 priorities reviewed with owner + backup",
-                "- [ ] Day 49 risk register exported",
-                "- [ ] Day 49 KPI scorecard snapshot exported",
-                "- [ ] Day 50 execution priorities drafted from Day 49 learnings",
+                '#  delivery board',
+                '- [ ]  weekly review brief committed',
+                '- [ ]  priorities reviewed with owner + backup',
+                '- [ ]  risk register exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  execution priorities drafted from  learnings',
             ]
         )
         + "\n",
@@ -152,4 +152,4 @@ def test_lane50_cli_dispatch(tmp_path: Path, capsys) -> None:
         ["execution-prioritization-closeout", "--root", str(tmp_path), "--format", "text"]
     )
     assert rc == 0
-    assert "Day 50 execution prioritization closeout summary" in capsys.readouterr().out
+    assert ' execution prioritization closeout summary' in capsys.readouterr().out

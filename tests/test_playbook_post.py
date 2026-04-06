@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 39 — Playbook post #1:** publish the first reliability playbook post from Day 38 data.\n"
-        "- **Day 40 — Scale lane kickoff:** expand publication motion across additional channels.\n",
+        '- ** — Playbook post #1:** publish the first reliability playbook post from  data.\n'
+        '- ** — Scale lane kickoff:** expand publication motion across additional channels.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-playbook-post.md").write_text(
         d39._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-39-big-upgrade-report.md").write_text(
-        "# Day 39 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/distribution-batch-pack/distribution-batch-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 38 delivery board",
-                "- [ ] Day 38 channel plan committed",
-                "- [ ] Day 38 post copy reviewed with owner + backup",
-                "- [ ] Day 38 scheduling matrix exported",
-                "- [ ] Day 38 KPI scorecard snapshot exported",
-                "- [ ] Day 39 playbook post priorities drafted from Day 38 outcomes",
+                '#  delivery board',
+                '- [ ]  channel plan committed',
+                '- [ ]  post copy reviewed with owner + backup',
+                '- [ ]  scheduling matrix exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  playbook post priorities drafted from  outcomes',
             ]
         )
         + "\n",
@@ -118,4 +118,4 @@ def test_lane39_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["playbook-post", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 39 playbook post summary" in capsys.readouterr().out
+    assert ' playbook post summary' in capsys.readouterr().out

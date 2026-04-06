@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-kpi-audit.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_SECTION_HEADER = "# KPI audit (Day 27)"
+_SECTION_HEADER = '# KPI audit ()'
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 27",
+    '## Who should run ',
     "## KPI contract",
     "## Metric baseline and current snapshot",
     "## Launch checklist",
@@ -43,53 +43,7 @@ _DEFAULT_CURRENT = {
     "external_prs_per_week": 3,
 }
 
-_DEFAULT_PAGE_TEMPLATE = """# KPI audit (Day 27)
-
-Day 27 closes the conversion sprint by comparing baseline vs current KPI performance and publishing corrective actions.
-
-## Who should run Day 27
-
-- Maintainers validating weekly growth outcomes from Cycles 22-26.
-- DevRel/community operators tracking traffic-to-contribution conversion.
-- Engineering managers proving roadmap execution impact.
-
-## KPI contract
-
-A Day 27 pass requires side-by-side baseline and current snapshots for:
-
-- `stars_per_week`
-- `readme_ctr_percent`
-- `discussions_per_week`
-- `external_prs_per_week`
-
-## Metric baseline and current snapshot
-
-- Baseline path: `docs/artifacts/kpi-audit-pack/kpi-baseline.json`
-- Current path: `docs/artifacts/kpi-audit-pack/kpi-current.json`
-- Every metric must be numeric and non-negative.
-
-## Launch checklist
-
-```bash
-python -m sdetkit kpi-audit --format json --strict
-python -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/kpi-audit-pack --format json --strict
-python -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/kpi-audit-pack/evidence --format json --strict
-python scripts/check_kpi_audit_contract.py
-```
-
-## KPI scoring model
-
-Day 27 computes weighted readiness score (0-100):
-
-- Docs contract + command lane completeness: 45 points.
-- Discoverability links in README/docs index: 20 points.
-- Top-10 roadmap and KPI vocabulary alignment: 15 points.
-- Baseline/current metric data validity: 20 points.
-
-## Execution evidence mode
-
-`--execute` runs deterministic Day 27 checks and writes logs to `--evidence-dir` for final closeout review.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# KPI audit ()\n\n closes the conversion sprint by comparing baseline vs current KPI performance and publishing corrective actions.\n\n## Who should run \n\n- Maintainers validating weekly growth outcomes from Cycles 22-26.\n- DevRel/community operators tracking traffic-to-contribution conversion.\n- Engineering managers proving roadmap execution impact.\n\n## KPI contract\n\nA  pass requires side-by-side baseline and current snapshots for:\n\n- `stars_per_week`\n- `readme_ctr_percent`\n- `discussions_per_week`\n- `external_prs_per_week`\n\n## Metric baseline and current snapshot\n\n- Baseline path: `docs/artifacts/kpi-audit-pack/kpi-baseline.json`\n- Current path: `docs/artifacts/kpi-audit-pack/kpi-current.json`\n- Every metric must be numeric and non-negative.\n\n## Launch checklist\n\n```bash\npython -m sdetkit kpi-audit --format json --strict\npython -m sdetkit kpi-audit --emit-pack-dir docs/artifacts/kpi-audit-pack --format json --strict\npython -m sdetkit kpi-audit --execute --evidence-dir docs/artifacts/kpi-audit-pack/evidence --format json --strict\npython scripts/check_kpi_audit_contract.py\n```\n\n## KPI scoring model\n\n computes weighted readiness score (0-100):\n\n- Docs contract + command lane completeness: 45 points.\n- Discoverability links in README/docs index: 20 points.\n- Top-10 roadmap and KPI vocabulary alignment: 15 points.\n- Baseline/current metric data validity: 20 points.\n\n## Execution evidence mode\n\n`--execute` runs deterministic  checks and writes logs to `--evidence-dir` for final closeout review.\n'
 
 
 def _read(path: Path) -> str:
@@ -204,8 +158,8 @@ def build_kpi_audit_summary(
             "check_id": "top10_strategy_alignment",
             "category": "strategy",
             "weight": 8,
-            "passed": "Day 27 \u2014 KPI audit" in top10_text,
-            "evidence": "Day 27 \u2014 KPI audit",
+            "passed": ' — KPI audit' in top10_text,
+            "evidence": ' — KPI audit',
         },
         {
             "check_id": "docs_mentions_core_kpis",
@@ -255,10 +209,10 @@ def build_kpi_audit_summary(
 
     recommendations: list[str] = []
     if missing_sections or missing_commands:
-        recommendations.append("Restore Day 27 KPI docs contract and command lane before closeout.")
+        recommendations.append('Restore  KPI docs contract and command lane before closeout.')
     if any(item["category"] == "discoverability" for item in failed):
         recommendations.append(
-            "Add Day 27 KPI links and command examples in README/docs index for operator visibility."
+            'Add  KPI links and command examples in README/docs index for operator visibility.'
         )
     if not baseline_ok or not current_ok:
         recommendations.append(
@@ -266,7 +220,7 @@ def build_kpi_audit_summary(
         )
     if not recommendations:
         recommendations.append(
-            "Day 27 KPI audit lane is healthy; publish weekly KPI deltas and corrective actions."
+            ' KPI audit lane is healthy; publish weekly KPI deltas and corrective actions.'
         )
 
     return {
@@ -297,7 +251,7 @@ def build_kpi_audit_summary(
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 27 KPI audit summary",
+        ' KPI audit summary',
         f"score={payload['summary']['activation_score']}",
         f"failed={','.join(payload['summary']['failed_checks']) or 'none'}",
         f"critical={','.join(payload['summary']['critical_failures']) or 'none'}",
@@ -325,7 +279,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     scorecard.write_text(_render_text(payload) + "\n", encoding="utf-8")
 
     rows = [
-        "# Day 27 KPI delta table",
+        '#  KPI delta table',
         "",
         "| KPI | Baseline | Current | Delta | Delta % | Trend |",
         "| --- | --- | --- | --- | --- | --- |",
@@ -339,10 +293,10 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     action_plan.write_text(
         "\n".join(
             [
-                "# Day 27 KPI corrective action plan",
+                '#  KPI corrective action plan',
                 "",
                 "## Priority lane",
-                "- [ ] Keep positive KPI deltas stable through Day 28 weekly review.",
+                '- [ ] Keep positive KPI deltas stable through  weekly review.',
                 "- [ ] Escalate any KPI with flat/down trend to an owner and due date.",
                 "- [ ] Publish weekly KPI narrative (what changed, why, next action).",
                 "",
@@ -356,7 +310,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(["# Day 27 validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"])
+        "\n".join(['#  validation commands', "", "```bash", *_REQUIRED_COMMANDS, "```"])
         + "\n",
         encoding="utf-8",
     )
@@ -404,7 +358,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="sdetkit kpi-audit", description="Day 27 KPI audit closeout lane."
+        prog="sdetkit kpi-audit", description=' KPI audit closeout lane.'
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
     parser.add_argument(
@@ -425,13 +379,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="Current KPI snapshot JSON.",
     )
     parser.add_argument(
-        "--write-defaults", action="store_true", help="Create default Day 27 integration page."
+        "--write-defaults", action="store_true", help='Create default  integration page.'
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help="Optional output directory for generated Day 27 files."
+        "--emit-pack-dir", default="", help='Optional output directory for generated  files.'
     )
     parser.add_argument(
-        "--execute", action="store_true", help="Run Day 27 command chain and emit evidence logs."
+        "--execute", action="store_true", help='Run  command chain and emit evidence logs.'
     )
     parser.add_argument(
         "--evidence-dir",

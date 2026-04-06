@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 34 — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n"
-        "- **Day 35 — KPI instrumentation:** tighten signal loops and close attribution gaps.\n",
+        '- ** — Demo asset #2:** produce/publish `repo audit` workflow short video or GIF.\n'
+        '- ** — KPI instrumentation:** tighten signal loops and close attribution gaps.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-demo-asset2.md").write_text(
         d34._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-34-ultra-upgrade-report.md").write_text(
-        "# Day 34 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/demo-asset-pack/demo-asset-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 33 delivery board",
-                "- [ ] Day 33 script draft committed",
-                "- [ ] Day 33 first cut rendered",
-                "- [ ] Day 33 final cut + caption copy approved",
-                "- [ ] Day 34 demo asset #2 backlog pre-scoped",
-                "- [ ] Day 35 KPI instrumentation plan updated",
+                '#  delivery board',
+                '- [ ]  script draft committed',
+                '- [ ]  first cut rendered',
+                '- [ ]  final cut + caption copy approved',
+                '- [ ]  demo asset #2 backlog pre-scoped',
+                '- [ ]  KPI instrumentation plan updated',
             ]
         )
         + "\n",
@@ -117,7 +117,7 @@ def test_lane34_strict_fails_when_lane33_inputs_missing(tmp_path: Path) -> None:
 def test_lane34_strict_fails_when_lane33_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/demo-asset-pack/demo-delivery-board.md").write_text(
-        "- [ ] Day 34 demo asset #2 backlog pre-scoped\n", encoding="utf-8"
+        '- [ ]  demo asset #2 backlog pre-scoped\n', encoding="utf-8"
     )
     rc = d34.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -127,4 +127,4 @@ def test_lane34_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["demo-asset2", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 34 demo asset #2 summary" in capsys.readouterr().out
+    assert ' demo asset #2 summary' in capsys.readouterr().out

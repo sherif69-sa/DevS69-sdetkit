@@ -24,7 +24,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 90 — Phase-3 wrap publication closeout lane:** close Day 90 publication quality loop.\n"
+        '- ** — Phase-3 wrap publication closeout lane:** close  publication quality loop.\n'
         "- **Cycle 1 — Continuous upgrade closeout lane:** start next-impact continuous upgrade execution.\n",
         encoding="utf-8",
     )
@@ -62,12 +62,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 90 delivery board",
-                "- [ ] Day 90 evidence brief committed",
-                "- [ ] Day 90 phase-3 wrap publication plan committed",
-                "- [ ] Day 90 narrative template upgrade ledger exported",
-                "- [ ] Day 90 storyline outcomes ledger exported",
-                "- [ ] Next-impact roadmap draft captured from Day 90 outcomes",
+                '#  delivery board',
+                '- [ ]  evidence brief committed',
+                '- [ ]  phase-3 wrap publication plan committed',
+                '- [ ]  narrative template upgrade ledger exported',
+                '- [ ]  storyline outcomes ledger exported',
+                '- [ ] Next-impact roadmap draft captured from  outcomes',
             ]
         )
         + "\n",

@@ -1,4 +1,4 @@
-# Day 11 docs navigation tune-up
+#  docs navigation tune-up
 
 - Score: **100.0** (12/12)
 - Docs home: `docs/index.md`
@@ -19,8 +19,8 @@
 - `[🛠 CLI commands](../cli.md)`
 - `[🩺 Doctor checks](../doctor.md)`
 - `[🤝 Contribute](../contributing.md)`
-- `[✅ Day 10 ultra report](../day-10-ultra-upgrade-report.md)`
-- `[🧭 Day 11 ultra report](../impact-11-ultra-upgrade-report.md)`
+- `[✅  ultra report](../-10-ultra-upgrade-report.md)`
+- `[🧭  ultra report](../impact-11-ultra-upgrade-report.md)`
 
 ## Missing docs navigation content
 

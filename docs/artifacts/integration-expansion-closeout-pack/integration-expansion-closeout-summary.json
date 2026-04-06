@@ -26,7 +26,7 @@
       "check_id": "top10_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Cycle 64 + Day 65 strategy chain"
+      "evidence": "Cycle 64 +  strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -89,7 +89,7 @@
         "Single owner + backup reviewer are assigned for Cycle 64 advanced GitHub Actions workflow execution and rollout signoff.",
         "The Cycle 64 lane references Cycle 63 onboarding outcomes, ownership handoff evidence, and KPI continuity signals.",
         "Every Cycle 64 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and Day 65 review priorities."
+        "Cycle 64 closeout records reusable workflow design, matrix strategy, caching/concurrency controls, and  review priorities."
       ]
     },
     {
@@ -107,7 +107,7 @@
         "- [ ] Cycle 64 advanced workflow blueprint published",
         "- [ ] Cycle 64 matrix and concurrency plan exported",
         "- [ ] Cycle 64 KPI scorecard snapshot exported",
-        "- [ ] Day 65 weekly review priorities drafted from Cycle 64 learnings"
+        "- [ ]  weekly review priorities drafted from Cycle 64 learnings"
       ]
     },
     {

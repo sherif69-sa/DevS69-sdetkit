@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 61 — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n"
-        "- **Day 62 — Community program setup:** publish office-hours cadence and participation rules.\n",
+        '- ** — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n'
+        '- ** — Community program setup:** publish office-hours cadence and participation rules.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-phase3-kickoff-closeout.md").write_text(
         d61._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-61-big-upgrade-report.md").write_text(
-        "# Day 61 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -63,12 +63,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 60 delivery board",
-                "- [ ] Day 60 Phase-2 wrap + handoff brief committed",
-                "- [ ] Day 60 wrap reviewed with owner + backup",
-                "- [ ] Day 60 risk ledger exported",
-                "- [ ] Day 60 KPI scorecard snapshot exported",
-                "- [ ] Day 61 execution priorities drafted from Day 60 learnings",
+                '#  delivery board',
+                '- [ ]  Phase-2 wrap + handoff brief committed',
+                '- [ ]  wrap reviewed with owner + backup',
+                '- [ ]  risk ledger exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  execution priorities drafted from  learnings',
             ]
         )
         + "\n",

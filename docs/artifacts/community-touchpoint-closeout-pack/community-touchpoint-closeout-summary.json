@@ -70,8 +70,8 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Why Day 77 matters",
-        "## Required inputs (Day 76)"
+        "## Why  matters",
+        "## Required inputs ()"
       ]
     },
     {
@@ -85,10 +85,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 77 community touchpoint execution and signoff.",
-        "The Day 77 lane references Day 76 outcomes, controls, and KPI continuity signals.",
-        "Every Day 77 section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 77 closeout records touchpoint outcomes, confidence notes, and Day 78 ecosystem priorities."
+        "Single owner + backup reviewer are assigned for  community touchpoint execution and signoff.",
+        "The  lane references  outcomes, controls, and KPI continuity signals.",
+        "Every  section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records touchpoint outcomes, confidence notes, and  ecosystem priorities."
       ]
     },
     {
@@ -102,11 +102,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 77 integration brief committed",
-        "- [ ] Day 77 community touchpoint plan committed",
-        "- [ ] Day 77 touchpoint session ledger exported",
-        "- [ ] Day 77 touchpoint KPI scorecard snapshot exported",
-        "- [ ] Day 78 ecosystem priorities drafted from Day 77 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  community touchpoint plan committed",
+        "- [ ]  touchpoint session ledger exported",
+        "- [ ]  touchpoint KPI scorecard snapshot exported",
+        "- [ ]  ecosystem priorities drafted from  learnings"
       ]
     },
     {
@@ -131,13 +131,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 76 delivery board integrity validated with 5 checklist items.",
-    "Day 77 community touchpoint dataset is available for launch execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " community touchpoint dataset is available for launch execution."
   ],
   "misses": [
-    "Day 76 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 76 closeout command and restore strict baseline before Day 77 lock."
+    "Re-run  closeout command and restore strict baseline before  lock."
   ]
 }

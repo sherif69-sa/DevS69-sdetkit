@@ -53,7 +53,7 @@ def _build_recommendations(
     notes: list[str] = []
     if quality_deltas["completion_rate_percent"] < 0:
         notes.append(
-            "Recover week-two completion rate by rerunning missing Day 8-13 closeout checks."
+            'Recover week-two completion rate by rerunning missing -13 closeout checks.'
         )
     if quality_deltas["artifact_coverage"] < 0:
         notes.append(
@@ -297,7 +297,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     quality_md.write_text(
         "\n".join(
             [
-                "# Day 17 quality scorecard",
+                '#  quality scorecard',
                 "",
                 f"- Completion rate delta: {payload['quality']['deltas']['completion_rate_percent']:+d}",
                 f"- Artifact coverage delta: {payload['quality']['deltas']['artifact_coverage']:+d}",
@@ -313,7 +313,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     action_plan.write_text(
         "\n".join(
             [
-                "# Day 17 contribution action plan",
+                '#  contribution action plan',
                 "",
                 "| Signal | Delta | Delta % | Action |",
                 "| --- | --- | --- | --- |",
@@ -331,7 +331,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     checklist.write_text(
         "\n".join(
             [
-                "# Day 17 remediation checklist",
+                '#  remediation checklist',
                 "",
                 "- [ ] Review quality stability score and confirm no downward regression.",
                 "- [ ] Review contribution velocity score and assign owner for any negative signal.",

@@ -164,7 +164,7 @@ jobs:
                 : '- Secret protection status: unavailable from API response.',
               '',
               '## Suggested weekly execution lane',
-              '- [ ] Create or refresh a security campaign for any 14+ day code scanning backlog.',
+              '- [ ] Create or refresh a security campaign for any 14+  code scanning backlog.',
               '- [ ] Use Copilot Autofix suggestions where available, then validate fixes in CI before merge.',
               '- [ ] Group push-protection bypass secret alerts into a focused follow-up campaign and record owner/disposition.',
               '- [ ] Link the resulting issue or PR back to this planner for traceability.',

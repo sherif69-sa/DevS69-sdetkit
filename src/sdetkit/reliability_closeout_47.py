@@ -16,14 +16,14 @@ _DAY46_SUMMARY_LEGACY_PATH = (
 )
 _DAY46_BOARD_PATH = "docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md"
 _DAY46_BOARD_LEGACY_PATH = "docs/artifacts/optimization-closeout-pack-46/delivery-board-46.md"
-_SECTION_HEADER = "# Day 47 \u2014 Reliability closeout lane"
+_SECTION_HEADER = '#  — Reliability closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 47 matters",
-    "## Required inputs (Day 46)",
-    "## Day 47 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Reliability closeout contract",
     "## Reliability quality checklist",
-    "## Day 47 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_reliability_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 47 reliability lane execution and KPI follow-up.",
-    "The Day 47 reliability lane references Day 46 optimization winners and misses with deterministic reliability loops.",
-    "Every Day 47 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 47 closeout records reliability learnings and Day 48 execution priorities.",
+    'Single owner + backup reviewer are assigned for  reliability lane execution and KPI follow-up.',
+    'The  reliability lane references  optimization winners and misses with deterministic reliability loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records reliability learnings and  execution priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes reliability summary, incident map, and rollback strategy",
@@ -51,69 +51,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes reliability plan, incident map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 47 reliability plan draft committed",
-    "- [ ] Day 47 review notes captured with owner + backup",
-    "- [ ] Day 47 incident map exported",
-    "- [ ] Day 47 KPI scorecard snapshot exported",
-    "- [ ] Day 48 execution priorities drafted from Day 47 learnings",
+    '- [ ]  reliability plan draft committed',
+    '- [ ]  review notes captured with owner + backup',
+    '- [ ]  incident map exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  execution priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 47 \u2014 Reliability closeout lane
-
-Day 47 closes with a major reliability upgrade that converts Day 46 optimization evidence into deterministic hardening loops.
-
-## Why Day 47 matters
-
-- Converts Day 46 optimization proof into reliability-first operating motion.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from reliability outcomes into Day 48 execution priorities.
-
-## Required inputs (Day 46)
-
-- `docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json`
-- `docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md`
-
-## Day 47 command lane
-
-```bash
-python -m sdetkit reliability-closeout --format json --strict
-python -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/reliability-closeout-pack-47 --format json --strict
-python -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/reliability-closeout-pack-47/evidence --format json --strict
-python scripts/check_reliability_closeout_contract.py
-```
-
-## Reliability closeout contract
-
-- Single owner + backup reviewer are assigned for Day 47 reliability lane execution and KPI follow-up.
-- The Day 47 reliability lane references Day 46 optimization winners and misses with deterministic reliability loops.
-- Every Day 47 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 47 closeout records reliability learnings and Day 48 execution priorities.
-
-## Reliability quality checklist
-
-- [ ] Includes reliability summary, incident map, and rollback strategy
-- [ ] Every section has owner, publish window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes reliability plan, incident map, KPI scorecard, and execution log
-
-## Day 47 delivery board
-
-- [ ] Day 47 reliability plan draft committed
-- [ ] Day 47 review notes captured with owner + backup
-- [ ] Day 47 incident map exported
-- [ ] Day 47 KPI scorecard snapshot exported
-- [ ] Day 48 execution priorities drafted from Day 47 learnings
-
-## Scoring model
-
-Day 47 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 46 continuity and strict baseline carryover: 35 points.
-- Reliability contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Reliability closeout lane\n\n closes with a major reliability upgrade that converts  optimization evidence into deterministic hardening loops.\n\n## Why  matters\n\n- Converts  optimization proof into reliability-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from reliability outcomes into  execution priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json`\n- `docs/artifacts/optimization-closeout-pack/optimization-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit reliability-closeout --format json --strict\npython -m sdetkit reliability-closeout --emit-pack-dir docs/artifacts/reliability-closeout-pack-47 --format json --strict\npython -m sdetkit reliability-closeout --execute --evidence-dir docs/artifacts/reliability-closeout-pack-47/evidence --format json --strict\npython scripts/check_reliability_closeout_contract.py\n```\n\n## Reliability closeout contract\n\n- Single owner + backup reviewer are assigned for  reliability lane execution and KPI follow-up.\n- The  reliability lane references  optimization winners and misses with deterministic reliability loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records reliability learnings and  execution priorities.\n\n## Reliability quality checklist\n\n- [ ] Includes reliability summary, incident map, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes reliability plan, incident map, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  reliability plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  incident map exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Reliability contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -145,7 +90,7 @@ def _load_cycle46(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 46" in text, "Day 47" in text
+    return len(items), '' in text, '' in text
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -233,8 +178,8 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 46" in top10_text and "Day 47" in top10_text),
-            "evidence": "Day 46 + Day 47 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -301,23 +246,23 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 46 continuity is strict-pass with activation score={score}.")
+        wins.append(f"46 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 46 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 46 optimization closeout command and restore strict pass baseline before Day 47 lock."
+            'Re-run  optimization closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle46 and board_has_cycle47:
         wins.append(
-            f"Day 46 delivery board integrity validated with {board_count} checklist items."
+            f"46 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 46 delivery board integrity is incomplete (needs >=5 items and Day 46/47 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /47 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 46 delivery board entries to include Day 46 and Day 47 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -329,12 +274,12 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "Reliability contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 47 reliability contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  reliability contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 47 reliability closeout lane is fully complete and ready for Day 48 execution lane."
+            ' reliability closeout lane is fully complete and ready for  execution lane.'
         )
 
     return {
@@ -374,14 +319,14 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 47 reliability closeout summary",
+        ' reliability closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 46 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 46 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 46 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 46 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 46 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 46 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -404,7 +349,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "reliability-closeout-summary-47.md", _render_text(payload) + "\n")
     _write(
         target / "reliability-plan-47.md",
-        "# Day 47 Reliability Plan\n\n- Objective: close Day 47 with measurable reliability and quality gains.\n",
+        '#  Reliability Plan\n\n- Objective: close  with measurable reliability and quality gains.\n',
     )
     _write(
         target / "incident-map-47.csv",
@@ -431,15 +376,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log-47.md",
-        "# Day 47 Execution Log\n\n- [ ] 2026-03-15: Record misses, wins, and Day 48 execution priorities.\n",
+        '#  Execution Log\n\n- [ ] 2026-03-15: Record misses, wins, and  execution priorities.\n',
     )
     _write(
         target / "delivery-board-47.md",
-        "# Day 47 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands-47.md",
-        "# Day 47 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  Validation Commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -479,7 +424,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_reliability_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_reliability_closeout_summary(root)
 
 

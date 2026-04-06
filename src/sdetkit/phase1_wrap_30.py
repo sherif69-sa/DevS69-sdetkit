@@ -14,11 +14,11 @@ _CANONICAL_LANE_NAME = "phase1-wrap"
 _LEGACY_LANE_NAME = "legacy-phase1-wrap"
 _DAY29_CANONICAL_SUMMARY_PATH = "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
 _CANONICAL_EXECUTION_SUMMARY = "phase1-wrap-execution-summary.json"
-_SECTION_HEADER = "# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff"
+_SECTION_HEADER = '#  — Phase-1 wrap and Phase-2 handoff'
 _REQUIRED_SECTIONS = [
-    "## Why Day 30 matters",
+    '## Why  matters',
     "## Required inputs (Cycles 27-29)",
-    "## Day 30 command lane",
+    '##  command lane',
     "## Scoring model",
     "## Locked Phase-2 backlog",
 ]
@@ -33,51 +33,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase1_wrap_contract.py --skip-evidence",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 30 \u2014 Phase-1 wrap and Phase-2 handoff
-
-Day 30 closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 execution backlog.
-
-## Why Day 30 matters
-
-- Consolidates readiness results from Cycles 27-29 into a single handoff packet.
-- Prevents ambiguous next steps by publishing a deterministic Phase-2 backlog contract.
-- Produces an auditable launch artifact for maintainers and collaborators.
-
-## Required inputs (Cycles 27-29)
-
-- `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
-- `docs/artifacts/weekly-review-pack/weekly-review-summary.json`
-- `docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json` (primary)
-
-## Day 30 command lane
-
-```bash
-python -m sdetkit phase1-wrap --format json --strict
-python -m sdetkit phase1-wrap --emit-pack-dir docs/artifacts/phase1-wrap-pack --format json --strict
-python -m sdetkit phase1-wrap --execute --evidence-dir docs/artifacts/phase1-wrap-pack/evidence --format json --strict
-python scripts/check_phase1_wrap_contract.py
-```
-
-## Scoring model
-
-Day 30 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability and strategy alignment (README/docs index/top-10): 25 points.
-- Input artifact availability (Cycles 27-29): 25 points.
-- Locked Phase-2 backlog quality: 20 points.
-
-## Locked Phase-2 backlog
-
-- [ ] Day 31 baseline metrics + weekly targets
-- [ ] Day 32 release cadence + changelog checklist
-- [ ] Day 33 demo asset #1 (doctor)
-- [ ] Day 34 demo asset #2 (repo audit)
-- [ ] Day 35 weekly review #5
-- [ ] Day 36 demo asset #3 (security gate)
-- [ ] Day 37 demo asset #4 (cassette replay)
-- [ ] Day 38 distribution batch #1
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Phase-1 wrap and Phase-2 handoff\n\n closes Phase-1 with a hard evidence wrap-up and locks the first Phase-2 execution backlog.\n\n## Why  matters\n\n- Consolidates readiness results from Cycles 27-29 into a single handoff packet.\n- Prevents ambiguous next steps by publishing a deterministic Phase-2 backlog contract.\n- Produces an auditable launch artifact for maintainers and collaborators.\n\n## Required inputs (Cycles 27-29)\n\n- `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`\n- `docs/artifacts/weekly-review-pack/weekly-review-summary.json`\n- `docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json` (primary)\n\n##  command lane\n\n```bash\npython -m sdetkit phase1-wrap --format json --strict\npython -m sdetkit phase1-wrap --emit-pack-dir docs/artifacts/phase1-wrap-pack --format json --strict\npython -m sdetkit phase1-wrap --execute --evidence-dir docs/artifacts/phase1-wrap-pack/evidence --format json --strict\npython scripts/check_phase1_wrap_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability and strategy alignment (README/docs index/top-10): 25 points.\n- Input artifact availability (Cycles 27-29): 25 points.\n- Locked Phase-2 backlog quality: 20 points.\n\n## Locked Phase-2 backlog\n\n- [ ]  baseline metrics + weekly targets\n- [ ]  release cadence + changelog checklist\n- [ ]  demo asset #1 (doctor)\n- [ ]  demo asset #2 (repo audit)\n- [ ]  weekly review #5\n- [ ]  demo asset #3 (security gate)\n- [ ]  demo asset #4 (cassette replay)\n- [ ]  distribution batch #1\n'
 
 
 def _read(path: Path) -> str:
@@ -175,10 +131,10 @@ def build_phase1_wrap_summary_impl(
             "check_id": "top10_phase1_wrap_alignment",
             "weight": 5,
             "passed": (
-                "Day 30 \u2014 Phase-1 wrap + handoff" in top10_text
-                and "Day 31 \u2014 Phase-2 kickoff" in top10_text
+                ' — Phase-1 wrap + handoff' in top10_text
+                and ' — Phase-2 kickoff' in top10_text
             ),
-            "evidence": "Day 30 + Day 31 strategy chain",
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "input_present",
@@ -227,9 +183,9 @@ def build_phase1_wrap_summary_impl(
     if ok and ok and ok:
         wins.append(f"Cycles 27-29 closeout artifacts loaded successfully (avg={closeout_avg}).")
     else:
-        misses.append("One or more Day 27-29 artifacts are missing or malformed.")
+        misses.append('One or more -29 artifacts are missing or malformed.')
         handoff_actions.append(
-            "Regenerate Day 27-29 artifact summaries before publishing Day 30 handoff pack."
+            'Regenerate -29 artifact summaries before publishing  handoff pack.'
         )
 
     if backlog_count >= 8:
@@ -241,10 +197,10 @@ def build_phase1_wrap_summary_impl(
         )
 
     if score >= 90 and not critical_failures:
-        wins.append("Day 30 wrap is release-ready and can hand off into Phase-2 kickoff.")
+        wins.append(' wrap is release-ready and can hand off into Phase-2 kickoff.')
     else:
         handoff_actions.append(
-            "Fix Day 30 docs/discoverability contract gaps and rerun strict validation."
+            'Fix  docs/discoverability contract gaps and rerun strict validation.'
         )
 
     return {
@@ -283,7 +239,7 @@ def build_phase1_wrap_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 30 phase-1 wrap summary\n"
+        ' phase-1 wrap summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -294,18 +250,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 30 phase-1 wrap summary",
+        '#  phase-1 wrap summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Closeout rollup (Day 27-29)",
+        '## Closeout rollup (-29)',
         "",
-        f"- Day 27 score: `{payload['rollup']['activation_score']}`",
-        f"- Day 28 score: `{payload['rollup']['activation_score']}`",
-        f"- Day 29 score: `{payload['rollup']['activation_score']}`",
+        f"- 27 score: `{payload['rollup']['activation_score']}`",
+        f"- 28 score: `{payload['rollup']['activation_score']}`",
+        f"- 29 score: `{payload['rollup']['activation_score']}`",
         f"- Average score: `{payload['rollup']['average_activation_score']}`",
         "",
         "## Wins",
@@ -338,14 +294,14 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
             [
                 "- [ ] " + item
                 for item in [
-                    "Day 31 baseline metrics + weekly targets",
-                    "Day 32 release cadence + changelog checklist",
-                    "Day 33 demo asset #1 (doctor)",
-                    "Day 34 demo asset #2 (repo audit)",
-                    "Day 35 weekly review #5",
-                    "Day 36 demo asset #3 (security gate)",
-                    "Day 37 demo asset #4 (cassette replay)",
-                    "Day 38 distribution batch #1",
+                    ' baseline metrics + weekly targets',
+                    ' release cadence + changelog checklist',
+                    ' demo asset #1 (doctor)',
+                    ' demo asset #2 (repo audit)',
+                    ' weekly review #5',
+                    ' demo asset #3 (security gate)',
+                    ' demo asset #4 (cassette replay)',
+                    ' distribution batch #1',
                 ]
             ]
         )
@@ -353,7 +309,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(target / "phase1-wrap-phase2-backlog.md", backlog_md)
     handoff_md = (
-        "# Day 30 handoff actions\n\n"
+        '#  handoff actions\n\n'
         + "\n".join(
             [f"- [ ] {x}" for x in payload["handoff_actions"] or ["No handoff actions required."]]
         )
@@ -361,7 +317,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(target / "phase1-wrap-handoff-actions.md", handoff_md)
     validation_md = (
-        "# Day 30 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
     )
     _write(target / "phase1-wrap-validation-commands.md", validation_md)
 
@@ -395,7 +351,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 30 phase-1 wrap and phase-2 handoff scorer.")
+    parser = argparse.ArgumentParser(description=' phase-1 wrap and phase-2 handoff scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -459,7 +415,7 @@ def build_phase1_wrap_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_phase1_wrap_summary_impl(
         root,
         readme_path=readme_path,

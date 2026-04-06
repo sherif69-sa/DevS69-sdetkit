@@ -35,7 +35,7 @@ _EXECUTION_COMMANDS = [
 ]
 _REQUIRED_CADENCE_LINES = [
     "Cadence owner: release captain rotates weekly and is published in advance.",
-    "Cadence rhythm: every Friday publish changelog, release narrative, and proof links.",
+    "Cadence rhythm: every Fripublish changelog, release narrative, and proof links.",
     "Cadence SLA: release artifact pack emitted within 60 minutes of merge cutoff.",
     "Rollback gate: if quality score < 95, postpone release and publish corrective actions.",
 ]
@@ -81,7 +81,7 @@ python scripts/check_release_cadence_contract.py
 ## Weekly cadence contract
 
 - Cadence owner: release captain rotates weekly and is published in advance.
-- Cadence rhythm: every Friday publish changelog, release narrative, and proof links.
+- Cadence rhythm: every Fripublish changelog, release narrative, and proof links.
 - Cadence SLA: release artifact pack emitted within 60 minutes of merge cutoff.
 - Rollback gate: if quality score < 95, postpone release and publish corrective actions.
 

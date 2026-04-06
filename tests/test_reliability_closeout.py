@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 46 — Optimization lane continuation:** convert Day 45 expansion wins into optimization plays.\n"
-        "- **Day 47 — Reliability lane continuation:** convert Day 46 optimization wins into reliability plays.\n",
+        '- ** — Optimization lane continuation:** convert  expansion wins into optimization plays.\n'
+        '- ** — Reliability lane continuation:** convert  optimization wins into reliability plays.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-reliability-closeout.md").write_text(
         d47._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-47-big-upgrade-report.md").write_text(
-        "# Day 47 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/optimization-closeout-pack/optimization-closeout-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 46 delivery board",
-                "- [ ] Day 46 optimization plan draft committed",
-                "- [ ] Day 46 review notes captured with owner + backup",
-                "- [ ] Day 46 bottleneck map exported",
-                "- [ ] Day 46 KPI scorecard snapshot exported",
-                "- [ ] Day 47 reliability priorities drafted from Day 46 learnings",
+                '#  delivery board',
+                '- [ ]  optimization plan draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  bottleneck map exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  reliability priorities drafted from  learnings',
             ]
         )
         + "\n",
@@ -124,4 +124,4 @@ def test_lane47_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["reliability-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 47 reliability closeout summary" in capsys.readouterr().out
+    assert ' reliability closeout summary' in capsys.readouterr().out

@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 58 — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.\n"
-        "- **Day 59 — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n",
+        '- ** — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.\n'
+        '- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-phase2-hardening-closeout.md").write_text(
         d58._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-58-big-upgrade-report.md").write_text(
-        "# Day 58 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -59,12 +59,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 57 delivery board",
-                "- [ ] Day 57 KPI deep audit brief committed",
-                "- [ ] Day 57 deep-audit plan reviewed with owner + backup",
-                "- [ ] Day 57 risk ledger exported",
-                "- [ ] Day 57 KPI scorecard snapshot exported",
-                "- [ ] Day 58 execution priorities drafted from Day 57 learnings",
+                '#  delivery board',
+                '- [ ]  KPI deep audit brief committed',
+                '- [ ]  deep-audit plan reviewed with owner + backup',
+                '- [ ]  risk ledger exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  execution priorities drafted from  learnings',
             ]
         )
         + "\n",

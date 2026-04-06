@@ -25,7 +25,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 62 + Day 63 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -62,14 +62,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 62 \u2014 Community program setup closeout lane"
+      "evidence": "#  \u2014 Community program setup closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 10,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 61)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -83,10 +83,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 62 community office-hours execution and moderation safety.",
-        "The Day 62 lane references Day 61 Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.",
-        "Every Day 62 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 62 closeout records office-hours cadence, participation rules, moderation SOPs, and Day 63 onboarding priorities."
+        "Single owner + backup reviewer are assigned for  community office-hours execution and moderation safety.",
+        "The  lane references  Phase-3 kickoff outcomes, trust guardrails, and KPI continuity evidence.",
+        "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records office-hours cadence, participation rules, moderation SOPs, and  onboarding priorities."
       ]
     },
     {
@@ -100,11 +100,11 @@
       "weight": 2,
       "passed": false,
       "evidence": [
-        "- [ ] Day 62 community launch brief committed",
-        "- [ ] Day 62 office-hours cadence published",
-        "- [ ] Day 62 participation policy + moderation SOP exported",
-        "- [ ] Day 62 KPI scorecard snapshot exported",
-        "- [ ] Day 63 onboarding priorities drafted from Day 62 learnings"
+        "- [ ]  community launch brief committed",
+        "- [ ]  office-hours cadence published",
+        "- [ ]  participation policy + moderation SOP exported",
+        "- [ ]  KPI scorecard snapshot exported",
+        "- [ ]  onboarding priorities drafted from  learnings"
       ]
     }
   ],
@@ -123,14 +123,14 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 61 delivery board integrity validated with 5 checklist items."
+    " delivery board integrity validated with 5 checklist items."
   ],
   "misses": [
-    "Day 61 strict continuity signal is missing.",
+    " strict continuity signal is missing.",
     "Community program contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Re-run Day 61 Phase-3 kickoff closeout command and restore strict baseline before Day 62 lock.",
-    "Complete all Day 62 contract lines, quality checklist entries, and delivery board tasks in docs."
+    "Re-run  Phase-3 kickoff closeout command and restore strict baseline before  lock.",
+    "Complete all  contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }

@@ -43,9 +43,9 @@ Use this page as the primary navigation for repository documentation.
 </div>
 
 
-## Day 11 ultra upgrades (docs navigation tune-up)
+##  ultra upgrades (docs navigation tune-up)
 
-- [🧭 Day 11 ultra report](impact-11-ultra-upgrade-report.md)
+- [🧭  ultra report](impact-11-ultra-upgrade-report.md)
 - `sdetkit docs-nav --format text --strict`
 - `sdetkit docs-nav --write-defaults --format json --strict`
 

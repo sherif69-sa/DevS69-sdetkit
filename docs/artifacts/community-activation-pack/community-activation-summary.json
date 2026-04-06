@@ -12,8 +12,8 @@
       "check_id": "required_sections_present",
       "evidence": {
         "missing_sections": [
-          "# Community activation (Day 25)",
-          "## Who should run Day 25"
+          "# Community activation ()",
+          "## Who should run "
         ]
       },
       "passed": false,
@@ -52,7 +52,7 @@
     {
       "category": "strategy",
       "check_id": "top10_strategy_alignment",
-      "evidence": "Day 25 \u2014 Community activation",
+      "evidence": " \u2014 Community activation",
       "passed": false,
       "weight": 20
     },
@@ -72,8 +72,8 @@
   },
   "name": "community-activation",
   "strict_failures": [
-    "# Community activation (Day 25)",
-    "## Who should run Day 25"
+    "# Community activation ()",
+    "## Who should run "
   ],
   "summary": {
     "activation_score": 35.0,
@@ -89,9 +89,9 @@
       "top10_strategy_alignment"
     ],
     "recommendations": [
-      "Restore Day 25 docs contract sections and required command lane before launch.",
-      "Add Day 25 links and command snippets to README/docs index for contributor visibility.",
-      "Align Day 25 outputs with top-10 roadmap activation objective and roadmap-voting messaging."
+      "Restore  docs contract sections and required command lane before launch.",
+      "Add  links and command snippets to README/docs index for contributor visibility.",
+      "Align  outputs with top-10 roadmap activation objective and roadmap-voting messaging."
     ],
     "total_checks": 8
   }

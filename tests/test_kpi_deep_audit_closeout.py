@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 57 — KPI deep audit:** validate strict trendlines and blockers.\n"
-        "- **Day 58 — Execution sprint:** convert audit outcomes into shipped changes.\n",
+        '- ** — KPI deep audit:** validate strict trendlines and blockers.\n'
+        '- ** — Execution sprint:** convert audit outcomes into shipped changes.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-kpi-deep-audit-closeout.md").write_text(
         d57._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-57-big-upgrade-report.md").write_text(
-        "# Day 57 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -59,12 +59,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 56 delivery board",
-                "- [ ] Day 56 stabilization brief committed",
-                "- [ ] Day 56 stabilization plan reviewed with owner + backup",
-                "- [ ] Day 56 risk ledger exported",
-                "- [ ] Day 56 KPI scorecard snapshot exported",
-                "- [ ] Day 57 deep-audit priorities drafted from Day 56 learnings",
+                '#  delivery board',
+                '- [ ]  stabilization brief committed',
+                '- [ ]  stabilization plan reviewed with owner + backup',
+                '- [ ]  risk ledger exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  deep-audit priorities drafted from  learnings',
             ]
         )
         + "\n",

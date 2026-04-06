@@ -16,14 +16,14 @@ _DAY48_LEGACY_SUMMARY_PATH = (
     "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
 )
 _DAY48_LEGACY_BOARD_PATH = "docs/artifacts/objection-closeout-pack/objection-delivery-board.md"
-_SECTION_HEADER = "# Day 49 \u2014 Weekly review closeout lane"
+_SECTION_HEADER = '#  — Weekly review closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 49 matters",
-    "## Required inputs (Day 48)",
-    "## Day 49 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Weekly review closeout contract",
     "## Weekly review quality checklist",
-    "## Day 49 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_weekly_review_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 49 weekly review execution and KPI follow-up.",
-    "The Day 49 weekly review lane references Day 48 objection winners and misses with deterministic prioritization loops.",
-    "Every Day 49 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 49 closeout records weekly-review learnings and Day 50 execution priorities.",
+    'Single owner + backup reviewer are assigned for  weekly review execution and KPI follow-up.',
+    'The  weekly review lane references  objection winners and misses with deterministic prioritization loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records weekly-review learnings and  execution priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes wins/misses digest, risk register, and rollback strategy",
@@ -51,69 +51,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes review brief, risk map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 49 weekly review brief committed",
-    "- [ ] Day 49 priorities reviewed with owner + backup",
-    "- [ ] Day 49 risk register exported",
-    "- [ ] Day 49 KPI scorecard snapshot exported",
-    "- [ ] Day 50 execution priorities drafted from Day 49 learnings",
+    '- [ ]  weekly review brief committed',
+    '- [ ]  priorities reviewed with owner + backup',
+    '- [ ]  risk register exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  execution priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 49 \u2014 Weekly review closeout lane
-
-Day 49 closes with a major weekly-review upgrade that converts Day 48 objection evidence into deterministic prioritization and handoff loops.
-
-## Why Day 49 matters
-
-- Converts Day 48 objection proof into weekly review execution discipline.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from weekly-review outcomes into Day 50 execution priorities.
-
-## Required inputs (Day 48)
-
-- `docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json`
-- `docs/artifacts/objection-closeout-pack-48/delivery-board-48.md`
-
-## Day 49 command lane
-
-```bash
-python -m sdetkit weekly-review-closeout --format json --strict
-python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-pack --format json --strict
-python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-pack/evidence --format json --strict
-python scripts/check_weekly_review_closeout_contract.py
-```
-
-## Weekly review closeout contract
-
-- Single owner + backup reviewer are assigned for Day 49 weekly review execution and KPI follow-up.
-- The Day 49 weekly review lane references Day 48 objection winners and misses with deterministic prioritization loops.
-- Every Day 49 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 49 closeout records weekly-review learnings and Day 50 execution priorities.
-
-## Weekly review quality checklist
-
-- [ ] Includes wins/misses digest, risk register, and rollback strategy
-- [ ] Every section has owner, review window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes review brief, risk map, KPI scorecard, and execution log
-
-## Day 49 delivery board
-
-- [ ] Day 49 weekly review brief committed
-- [ ] Day 49 priorities reviewed with owner + backup
-- [ ] Day 49 risk register exported
-- [ ] Day 49 KPI scorecard snapshot exported
-- [ ] Day 50 execution priorities drafted from Day 49 learnings
-
-## Scoring model
-
-Day 49 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 48 continuity and strict baseline carryover: 35 points.
-- Weekly review contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Weekly review closeout lane\n\n closes with a major weekly-review upgrade that converts  objection evidence into deterministic prioritization and handoff loops.\n\n## Why  matters\n\n- Converts  objection proof into weekly review execution discipline.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from weekly-review outcomes into  execution priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json`\n- `docs/artifacts/objection-closeout-pack-48/delivery-board-48.md`\n\n##  command lane\n\n```bash\npython -m sdetkit weekly-review-closeout --format json --strict\npython -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-pack --format json --strict\npython -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-pack/evidence --format json --strict\npython scripts/check_weekly_review_closeout_contract.py\n```\n\n## Weekly review closeout contract\n\n- Single owner + backup reviewer are assigned for  weekly review execution and KPI follow-up.\n- The  weekly review lane references  objection winners and misses with deterministic prioritization loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records weekly-review learnings and  execution priorities.\n\n## Weekly review quality checklist\n\n- [ ] Includes wins/misses digest, risk register, and rollback strategy\n- [ ] Every section has owner, review window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes review brief, risk map, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  weekly review brief committed\n- [ ]  priorities reviewed with owner + backup\n- [ ]  risk register exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Weekly review contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -145,7 +90,7 @@ def _load_cycle48(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 48" in text, "Day 49" in text
+    return len(items), '' in text, '' in text
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -227,8 +172,8 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 49" in top10_text and "Day 50" in top10_text),
-            "evidence": "Day 49 + Day 50 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -295,23 +240,23 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 48 continuity is strict-pass with activation score={score}.")
+        wins.append(f"48 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 48 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 48 objection closeout command and restore strict pass baseline before Day 49 lock."
+            'Re-run  objection closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle48 and board_has_cycle49:
         wins.append(
-            f"Day 48 delivery board integrity validated with {board_count} checklist items."
+            f"48 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 48 delivery board integrity is incomplete (needs >=5 items and Day 48/49 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /49 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 48 delivery board entries to include Day 48 and Day 49 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -323,12 +268,12 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
             "Weekly review contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 49 weekly review contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  weekly review contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 49 advanced weekly review control tower is fully complete and ready for Day 50 execution lane."
+            ' advanced weekly review control tower is fully complete and ready for  execution lane.'
         )
 
     return {
@@ -366,14 +311,14 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 49 advanced weekly review control tower summary",
+        ' advanced weekly review control tower summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 48 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 48 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 48 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 48 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 48 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 48 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -396,7 +341,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "weekly-review-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "weekly-review-brief-49.md",
-        "# Day 49 Weekly Review Brief\n\n- Objective: close Day 49 with measurable weekly-review discipline and prioritized execution gains.\n",
+        '#  Weekly Review Brief\n\n- Objective: close  with measurable weekly-review discipline and prioritized execution gains.\n',
     )
     _write(
         target / "weekly-review-risk-register-49.csv",
@@ -448,19 +393,19 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log-49.md",
-        "# Day 49 Execution Log\n\n- [ ] 2026-03-17: Record misses, wins, and Day 50 execution priorities.\n",
+        '#  Execution Log\n\n- [ ] 2026-03-17: Record misses, wins, and  execution priorities.\n',
     )
     _write(
         target / "weekly-review-delivery-board.md",
-        "# Day 49 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "delivery-board-49.md",
-        "# Day 49 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands-49.md",
-        "# Day 49 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  Validation Commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -500,7 +445,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_weekly_review_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_weekly_review_closeout_summary(root)
 
 

@@ -1,5 +1,5 @@
 {
-  "plan_id": "day85-release-prioritization-001",
+  "plan_id": "-release-prioritization-001",
   "contributors": ["maintainers", "release-ops", "docs-ops"],
   "narrative_channels": ["release-report", "runbook", "incident-review"],
   "baseline": {

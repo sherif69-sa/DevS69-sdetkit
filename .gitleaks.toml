@@ -5,7 +5,7 @@ description = "Allow known test fixtures and documentation placeholders"
 paths = [
   '''^tests/''',
   '''^docs/artifacts/''',
-  '''^docs/day-[0-9]+-ultra-upgrade-report\.md$''',
+  '''^docs/-[0-9]+-ultra-upgrade-report\.md$''',
   '''^docs/contributor-funnel\.md$''',
 ]
 regexes = [

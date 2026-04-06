@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 69 + Day 70 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "prior_closeout_summary_present",
@@ -63,14 +63,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 69 \u2014 Case-study prep #1 closeout lane"
+      "evidence": "#  \u2014 Case-study prep #1 closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 68)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -84,10 +84,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 69 reliability case-study prep and signoff.",
-        "The Day 69 lane references Day 68 integration expansion outputs, governance decisions, and KPI continuity signals.",
-        "Every Day 69 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 69 closeout records before/after reliability deltas, evidence confidence notes, and Day 70 prep priorities."
+        "Single owner + backup reviewer are assigned for  reliability case-study prep and signoff.",
+        "The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.",
+        "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records before/after reliability deltas, evidence confidence notes, and  prep priorities."
       ]
     },
     {
@@ -101,11 +101,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 69 integration brief committed",
-        "- [ ] Day 69 reliability case-study narrative published",
-        "- [ ] Day 69 controls and assumptions log exported",
-        "- [ ] Day 69 KPI scorecard snapshot exported",
-        "- [ ] Day 70 case-study prep priorities drafted from Day 69 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  reliability case-study narrative published",
+        "- [ ]  controls and assumptions log exported",
+        "- [ ]  KPI scorecard snapshot exported",
+        "- [ ]  case-study prep priorities drafted from  learnings"
       ]
     },
     {
@@ -130,13 +130,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 68 delivery board integrity validated with 5 checklist items.",
-    "Day 69 reliability case-study dataset is available for case-study prep execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " reliability case-study dataset is available for case-study prep execution."
   ],
   "misses": [
-    "Day 68 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 68 closeout command and restore strict baseline before Day 69 lock."
+    "Re-run  closeout command and restore strict baseline before  lock."
   ]
 }

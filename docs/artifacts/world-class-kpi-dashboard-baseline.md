@@ -31,7 +31,7 @@ Machine-readable baseline: `docs/artifacts/world-class-kpi-dashboard-baseline.js
 
 ## Data collection contract (v1)
 
-1. Collect weekly snapshots every Monday before quality review.
+1. Collect weekly snapshots every Monbefore quality review.
 2. Publish a markdown summary in `docs/artifacts/` for auditability.
 3. Store and update baseline metadata in `docs/artifacts/world-class-kpi-dashboard-baseline.json`.
 4. Keep raw exports (JSON/CSV) attached to CI artifacts for 90 cycles.
