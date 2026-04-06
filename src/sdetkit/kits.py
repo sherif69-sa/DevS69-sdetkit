@@ -335,6 +335,11 @@ def main(argv: list[str] | None = None) -> int:
                 sp.add_argument("--repo-root", default=".")
             elif n == "describe":
                 sp.add_argument("query")
+            elif n in {"optimize", "expand", "blueprint"}:
+                sp.add_argument("query", nargs="?", default=None)
+                sp.add_argument("--goal", default=None)
+            elif n in {"radar", "route-map"}:
+                sp.add_argument("query", nargs="?", default="httpx")
             else:
                 sp.add_argument("query")
         sp.add_argument("--format", choices=["json", "text"], default="text")
@@ -350,11 +355,14 @@ def main(argv: list[str] | None = None) -> int:
     elif ns.cmd == "search":
         payload = search_payload(ns.query)
     elif ns.cmd == "blueprint":
-        payload = blueprint_payload(ns.query, limit=ns.limit)
+        goal = ns.goal or ns.query or "align all repo capabilities"
+        payload = blueprint_payload(goal, limit=ns.limit)
     elif ns.cmd == "optimize":
-        payload = optimize_payload(root, ns.query, limit=ns.limit)
+        goal = ns.goal or ns.query or "align all repo capabilities"
+        payload = optimize_payload(root, goal, limit=ns.limit)
     elif ns.cmd == "expand":
-        payload = expand_payload(root, ns.query, limit=ns.limit)
+        goal = ns.goal or ns.query or "align all repo capabilities"
+        payload = expand_payload(root, goal, limit=ns.limit)
     elif ns.cmd == "route-map":
         payload = route_map_payload(root, ns.query, ns.repo_usage_tier, ns.impact_area, ns.limit)
     elif ns.cmd == "radar":

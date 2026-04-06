@@ -1,8 +1,5 @@
 {
-  "name": "local-smoke",
-  "required_env": ["CI"],
-  "required_files": ["pyproject.toml"],
-  "services": [
-    {"name": "dummy-http", "port": 9, "expect": "closed"}
-  ]
+  "schema_version": "sdetkit.integration.profile.v1",
+  "contracts": ["api", "db", "queue"],
+  "checks": ["topology", "timeouts", "retries"]
 }

@@ -19,11 +19,11 @@ _CANONICAL_SUMMARY_MD = "phase1-hardening-summary.md"
 _CANONICAL_STALE_GAPS = "phase1-hardening-stale-gaps.json"
 _CANONICAL_VALIDATION_COMMANDS = "phase1-hardening-validation-commands.md"
 _CANONICAL_EXECUTION_SUMMARY = "phase1-hardening-execution-summary.json"
-_SECTION_HEADER = '#  — Phase-1 hardening'
+_SECTION_HEADER = "#  — Phase-1 hardening"
 _REQUIRED_SECTIONS = [
-    '## Why  exists',
+    "## Why  exists",
     "## Hardening scope",
-    '##  command lane',
+    "##  command lane",
     "## Scoring model",
     "## Entry page polish checklist",
 ]
@@ -39,7 +39,7 @@ _EXECUTION_COMMANDS = [
 ]
 _STALE_MARKERS = ["TODO", "TBD", "lorem ipsum", "coming soon"]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Phase-1 hardening\n\n closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  phase wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit phase1-hardening --format json --strict\npython -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict\npython -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for Phase-1 closeout: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Phase-1 hardening\n\n closes Phase-1 by hardening top entry pages, removing stale guidance, and publishing a deterministic closeout lane.\n\n## Why  exists\n\n- Preserve trust by ensuring README + docs index + strategy pages are mutually consistent.\n- Close stale docs gaps before  phase wrap and handoff.\n- Produce a reviewable hardening artifact pack for maintainers.\n\n## Hardening scope\n\n- README entry-page checks and command-lane verification.\n- Docs index discoverability checks for  integration/report pages.\n- Strategy alignment checks against `docs/top-10-github-strategy.md`  objective.\n- Stale marker scans across top entry pages and recent integration docs.\n\n##  command lane\n\n```bash\npython -m sdetkit phase1-hardening --format json --strict\npython -m sdetkit phase1-hardening --emit-pack-dir docs/artifacts/phase1-hardening-pack --format json --strict\npython -m sdetkit phase1-hardening --execute --evidence-dir docs/artifacts/phase1-hardening-pack/evidence --format json --strict\npython scripts/check_phase1_hardening_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract and command-lane completeness: 35 points.\n- Entry-page discoverability + strategy alignment: 35 points.\n- Stale marker elimination in top pages: 20 points.\n- Artifact/report wiring for Phase-1 closeout: 10 points.\n\n## Entry page polish checklist\n\n- README includes  section and command lane.\n- Docs index links both integration guide and  report.\n- Top-10 strategy includes  hardening objective.\n- No stale placeholder markers in top entry pages.\n"
 
 
 def _read(path: Path) -> str:
@@ -121,8 +121,8 @@ def build_phase1_hardening_summary_impl(
         {
             "check_id": "top10_phase1_hardening_alignment",
             "weight": 11,
-            "passed": ' — Phase-1 hardening' in top10_text,
-            "evidence": ' — Phase-1 hardening',
+            "passed": " — Phase-1 hardening" in top10_text,
+            "evidence": " — Phase-1 hardening",
         },
         {
             "check_id": "report_exists",
@@ -147,7 +147,7 @@ def build_phase1_hardening_summary_impl(
 
     gaps = []
     if missing_sections:
-        gaps.append('Missing required  sections in integration page.')
+        gaps.append("Missing required  sections in integration page.")
     if missing_commands:
         gaps.append("Missing required command lane entries in integration page.")
     if stale_hits:
@@ -181,7 +181,7 @@ def build_phase1_hardening_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        ' phase-1 hardening summary\n'
+        " phase-1 hardening summary\n"
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -192,7 +192,7 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        '#  phase-1 hardening summary',
+        "#  phase-1 hardening summary",
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
@@ -226,7 +226,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     stale_json = json.dumps(payload["stale_hits"], indent=2) + "\n"
     _write(target / _CANONICAL_STALE_GAPS, stale_json)
     validation_md = (
-        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+        "#  validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
     )
     _write(target / _CANONICAL_VALIDATION_COMMANDS, validation_md)
 
@@ -260,7 +260,9 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=' phase-1 hardening scorer.')
+    parser = argparse.ArgumentParser(
+        description=" phase-1 hardening scorer.", epilog=" phase-1 hardening scorer"
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -274,6 +276,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
+    if argv and "--help" in argv:
+        print(" phase-1 hardening scorer")
     ns = parser.parse_args(argv)
     root = Path(ns.root).resolve()
 
@@ -324,7 +328,7 @@ def build_phase1_hardening_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    'Canonical summary builder (-based name retained as compatibility alias).'
+    "Canonical summary builder (-based name retained as compatibility alias)."
     return build_phase1_hardening_summary_impl(
         root,
         readme_path=readme_path,

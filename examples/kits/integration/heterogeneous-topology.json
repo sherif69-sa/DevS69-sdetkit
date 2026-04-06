@@ -1,0 +1,106 @@
+{
+  "name": "heterogeneous-enterprise",
+  "topology": {
+    "application_services": [
+      {
+        "name": "edge-gateway",
+        "role": "api-gateway",
+        "language": "go",
+        "logging_format": "json",
+        "error_handling": "typed-errors",
+        "owner": "platform-gateway",
+        "telemetry": {"logs": true, "metrics": true, "traces": true},
+        "deployments": [
+          {"environment": "staging", "region": "us-east-1", "replicas": 2},
+          {"environment": "prod", "region": "us-east-1", "replicas": 3}
+        ],
+        "interfaces": [
+          {"name": "public-rest", "protocol": "rest", "audience": "external"},
+          {"name": "dashboard-graphql", "protocol": "graphql", "audience": "dashboard"}
+        ],
+        "dependencies": [
+          {"kind": "application", "target": "model-service"},
+          {"kind": "mock", "target": "stripe-like-payments"}
+        ]
+      },
+      {
+        "name": "model-service",
+        "role": "ml-serving",
+        "language": "python",
+        "logging_format": "json",
+        "error_handling": "exceptions",
+        "owner": "ml-platform",
+        "telemetry": {"logs": true, "metrics": true, "traces": true},
+        "deployments": [
+          {"environment": "staging", "region": "us-east-1", "replicas": 2},
+          {"environment": "prod", "region": "us-east-1", "replicas": 4}
+        ],
+        "interfaces": [
+          {"name": "internal-grpc", "protocol": "grpc", "audience": "internal"}
+        ],
+        "dependencies": [
+          {"kind": "data", "target": "orders-db"},
+          {"kind": "data", "target": "cache-cluster"}
+        ]
+      },
+      {
+        "name": "search-indexer",
+        "role": "data-pipeline",
+        "language": "rust",
+        "logging_format": "json",
+        "error_handling": "result",
+        "owner": "search-platform",
+        "telemetry": {"logs": true, "metrics": true, "traces": true},
+        "deployments": [
+          {"environment": "staging", "region": "us-west-2", "replicas": 2},
+          {"environment": "production", "region": "us-west-2", "replicas": 3}
+        ],
+        "interfaces": [],
+        "dependencies": [
+          {"kind": "data", "target": "orders-db"},
+          {"kind": "data", "target": "blob-store"},
+          {"kind": "mock", "target": "segment-like-events"}
+        ]
+      }
+    ],
+    "data_services": [
+      {
+        "name": "orders-db",
+        "role": "transactional",
+        "technology": "postgresql",
+        "backup_strategy": "point-in-time-recovery",
+        "multi_az": true
+      },
+      {
+        "name": "cache-cluster",
+        "role": "cache",
+        "technology": "redis",
+        "backup_strategy": "snapshot-hourly",
+        "multi_az": true
+      },
+      {
+        "name": "blob-store",
+        "role": "blob",
+        "technology": "s3",
+        "backup_strategy": "versioned",
+        "multi_az": true
+      }
+    ],
+    "mocked_platforms": [
+      {
+        "name": "segment-like-events",
+        "api_style": "event",
+        "protocol": "https",
+        "fidelity": ["shape", "error-codes"],
+        "operations": ["track", "identify"]
+      },
+      {
+        "name": "stripe-like-payments",
+        "api_style": "rest",
+        "protocol": "https",
+        "fidelity": ["shape", "idempotency"],
+        "operations": ["charge", "refund"]
+      }
+    ]
+  }
+}
