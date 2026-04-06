@@ -1,10 +1,8 @@
 # Before/after evidence example
 
-**Use this page if:** you need a side-by-side comparison of review behavior before vs after SDETKit adoption.
+Use this page to compare release review behavior before and after adopting deterministic evidence artifacts.
 
-This page shows what changes when a team moves from ad hoc terminal checks to SDETKit evidence artifacts.
-
-No fabricated customer claims, no synthetic benchmark numbers—just command output shape and review behavior.
+For first-time onboarding, start with [Start here](index.md) and [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md).
 
 ## Before: ad hoc checks and log-only evidence
 
@@ -44,7 +42,7 @@ build/
 
 Representative real shapes documented in this repository:
 
-- `gate-fast.json` includes fields like `ok`, `profile`, `failed_steps`.
+- `gate-fast.json` includes `ok`, `profile`, `failed_steps`.
 - `security-enforce.json` includes `ok`, `counts`, `exceeded`.
 - `release-preflight.json` includes `ok`, `profile`, `failed_steps`.
 
@@ -66,10 +64,18 @@ See exact examples in [Evidence showcase](evidence-showcase.md).
 3. If policy is failing, open `build/security-enforce.json` and inspect `exceeded`.
 4. Only then deep-dive into raw logs.
 
-This keeps release decisions deterministic and auditable without claiming perfect green runs.
+## How to reference artifacts in PRs or release discussions
 
+Use artifact fields directly instead of long raw log excerpts:
+
+- Link to uploaded `build/release-preflight.json`.
+- Include `ok` and `failed_steps` values in the PR summary.
+- If security policy is relevant, include `counts`/`exceeded` from `build/security-enforce.json`.
+
+This keeps decisions auditable without inventing claims or hiding failing context.
 
 ## Where to go next
 
-- For rollout steps: [Adoption](adoption.md) and [Recommended CI flow](recommended-ci-flow.md).
-- For artifact interpretation rules: [CI artifact walkthrough](ci-artifact-walkthrough.md).
+- Canonical release-confidence model: [Release confidence](release-confidence.md)
+- Artifact decode rules: [CI artifact walkthrough](ci-artifact-walkthrough.md)
+- Fit check: [Decision guide](decision-guide.md)
