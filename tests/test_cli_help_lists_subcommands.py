@@ -38,6 +38,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "docs-governance" in out
     assert "docs-nav" not in out
     assert "startup-readiness" in out
+    assert "upgrade-hub" in out
     assert "startup-use-case" not in out
     assert "enterprise-readiness" in out
     assert "enterprise-use-case" not in out

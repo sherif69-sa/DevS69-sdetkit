@@ -118,6 +118,7 @@ from . import (
     trust_assets,
     trust_assets_refresh_closeout_75,
     trust_faq_expansion_closeout_83,
+    upgrade_hub,
     weekly_review,
     weekly_review_28,
     weekly_review_closeout_49,
@@ -702,6 +703,9 @@ Start here:
     suc = sub.add_parser("startup-readiness", help="Startup readiness playbook")
     suc.add_argument("args", nargs=argparse.REMAINDER)
 
+    ugh = sub.add_parser("upgrade-hub", help="Deep-dig hidden upgrade lanes and contracts")
+    ugh.add_argument("args", nargs=argparse.REMAINDER)
+
     spk = sub.add_parser("sdet-package")
     spk.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -1118,6 +1122,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if argv and argv[0] == "startup-readiness":
         return startup_readiness.main(list(argv[1:]))
+
+    if argv and argv[0] == "upgrade-hub":
+        return upgrade_hub.main(list(argv[1:]))
 
     if argv and argv[0] == "sdet-package":
         return sdet_package.main(list(argv[1:]))
@@ -1555,6 +1562,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "startup-readiness":
         return startup_readiness.main(ns.args)
+
+    if ns.cmd == "upgrade-hub":
+        return upgrade_hub.main(ns.args)
 
     if ns.cmd == "sdet-package":
         return sdet_package.main(ns.args)
