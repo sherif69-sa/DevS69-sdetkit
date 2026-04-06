@@ -64,6 +64,7 @@ jobs:
           COV_FAIL_UNDER: "95"
         run: |
           python -m pre_commit run -a
+          bash quality.sh registry
           bash quality.sh cov
           NO_MKDOCS_2_WARNING=1 python -m mkdocs build
 
@@ -120,6 +121,7 @@ Why: fast and deterministic contributor signal, with triage-ready JSON artifacts
 Keep PR commands, then add:
 
 - `python -m pre_commit run -a`
+- `bash quality.sh registry`
 - `bash quality.sh cov`
 - `NO_MKDOCS_2_WARNING=1 python -m mkdocs build`
 

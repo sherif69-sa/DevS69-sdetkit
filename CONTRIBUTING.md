@@ -115,6 +115,16 @@ Reference: [docs/premium-quality-gate.md](docs/premium-quality-gate.md)
 - [ ] `mkdocs build` passes for docs changes.
 - [ ] `CHANGELOG.md` updated if behavior changed.
 
+### Feature registry governance checklist
+
+If your PR changes top-level commands, tier/stability, command examples, or command docs/test links, update the feature registry in one pass:
+
+- [ ] Update `src/sdetkit/data/feature_registry.json`.
+- [ ] Sync docs table: `python scripts/sync_feature_registry_docs.py`.
+- [ ] Verify contract: `python scripts/check_feature_registry_contract.py`.
+- [ ] Run maintenance lane: `bash quality.sh registry`.
+- [ ] Confirm CLI inspector output remains stable: `python -m sdetkit feature-registry --only-core --format table`.
+
 ## Commit guidance
 
 - Keep commits focused and easy to review.

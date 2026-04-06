@@ -14,6 +14,7 @@ def test_registry_exposes_initial_real_checks_and_profiles() -> None:
 
     assert registry.profile_names() == ("quick", "standard", "strict", "adaptive")
     assert {
+        "feature_registry_contract",
         "format_check",
         "lint",
         "typing",
@@ -24,6 +25,7 @@ def test_registry_exposes_initial_real_checks_and_profiles() -> None:
     }.issubset(set(registry.check_ids()))
     assert registry.profile_check_ids("quick") == (
         "repo_layout",
+        "feature_registry_contract",
         "format_check",
         "lint",
         "typing",
@@ -47,6 +49,7 @@ def test_planner_selects_expected_checks_by_profile() -> None:
 
     assert quick.selected_ids == (
         "repo_layout",
+        "feature_registry_contract",
         "format_check",
         "lint",
         "typing",
@@ -54,6 +57,7 @@ def test_planner_selects_expected_checks_by_profile() -> None:
     )
     assert standard.selected_ids == (
         "repo_layout",
+        "feature_registry_contract",
         "doctor_core",
         "format_check",
         "lint",
@@ -63,6 +67,7 @@ def test_planner_selects_expected_checks_by_profile() -> None:
     )
     assert strict.selected_ids == (
         "repo_layout",
+        "feature_registry_contract",
         "doctor_core",
         "format_check",
         "lint",

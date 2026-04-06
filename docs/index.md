@@ -21,6 +21,7 @@ Use this page as the primary navigation for repository documentation.
 - [Repository cleanup plan](repo-cleanup-plan.md)
 - [Repo audit guide](repo-audit.md)
 - [Policy and baselines](policy-and-baselines.md)
+- [Feature registry](feature-registry.md)
 
 ## Adoption and rollout
 

@@ -20,7 +20,7 @@ def test_quality_script_unknown_mode_suggests_closest_match() -> None:
 def test_quality_script_help_documents_fast_and_full_lanes() -> None:
     text = Path("quality.sh").read_text(encoding="utf-8")
     assert (
-        "Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost}"
+        "Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}"
         in text
     )
     assert "quick     Fast local confidence / smoke profile." in text
@@ -35,6 +35,7 @@ def test_quality_script_help_documents_fast_and_full_lanes() -> None:
         "Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."
         in text
     )
+    assert "registry   Validate and smoke-test feature-registry docs/contracts surface." in text
 
 
 def test_quality_script_verify_delegates_to_planner_runner() -> None:
@@ -68,3 +69,17 @@ def test_quality_script_writes_final_verdict_contract() -> None:
     assert "profile used" in text
     assert "checks skipped" in text
     assert "merge/release recommendation" in text
+
+
+def test_quality_script_registry_mode_runs_contract_chain() -> None:
+    text = Path("quality.sh").read_text(encoding="utf-8")
+    match = re.search(r"  registry\)\n(?P<body>.*?    ;;)", text, re.DOTALL)
+    assert match is not None
+    body = match.group("body")
+    assert "run_required \"feature_registry_contract\"" in body
+    assert "run_registry_contract" in body
+    assert "--expect-command kits" in text
+    assert "--expect-total 8" in text
+    assert "--expect-tier-count A=8" in text
+    assert "--expect-status-count stable=8" in text
+    assert "--fail-on-empty" in text

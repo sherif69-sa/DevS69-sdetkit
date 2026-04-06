@@ -21,3 +21,16 @@ python -m pre_commit run -a
 bash quality.sh cov
 mkdocs build
 ```
+
+## Feature registry governance (for command-surface changes)
+
+If your PR changes top-level commands, tier/stability metadata, examples, or docs/test links, keep registry updates in the same PR.
+
+See: [Feature registry](feature-registry.md).
+
+```bash
+python scripts/sync_feature_registry_docs.py
+python scripts/check_feature_registry_contract.py
+bash quality.sh registry
+python -m sdetkit feature-registry --only-core --format table
+```

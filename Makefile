@@ -1,6 +1,6 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: bootstrap max venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci
+.PHONY: bootstrap max venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
@@ -28,6 +28,9 @@ fmt: install
 
 type: install
 	@bash -lc '. .venv/bin/activate && bash quality.sh type'
+
+registry: install
+	@bash -lc '. .venv/bin/activate && bash quality.sh registry'
 
 docs-serve: install
 	@bash -lc '. .venv/bin/activate && mkdocs serve'

@@ -51,6 +51,7 @@ from . import (
     expansion_closeout_45,
     experiment_lane_37,
     external_contribution,
+    feature_registry_cli,
     first_contribution,
     forensics,
     github_actions_quickstart,
@@ -344,6 +345,10 @@ Start here:
     )
 
     _add_passthrough_subcommand(sub, "dev", help_text="Shortcut to `repo dev` workflows")
+
+    _add_passthrough_subcommand(
+        sub, "feature-registry", help_text="Inspect feature-registry entries and filters"
+    )
 
     rpt = sub.add_parser("report", help="Reporting workflows and output packs")
     rpt.add_argument("args", nargs=argparse.REMAINDER)
@@ -1141,6 +1146,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv and argv[0] == "trust-assets":
         return trust_assets.main(list(argv[1:]))
 
+    if argv and argv[0] == "feature-registry":
+        return feature_registry_cli.main(list(argv[1:]))
+
     show_hidden_commands = "--show-hidden" in argv
     p, sub = _build_root_parser(show_hidden_commands=show_hidden_commands)
 
@@ -1286,6 +1294,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "dev":
         return repo.main(["dev", *ns.args])
+
+    if ns.cmd == "feature-registry":
+        return feature_registry_cli.main(ns.args)
 
     if ns.cmd == "report":
         return report.main(ns.args)

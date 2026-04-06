@@ -13,7 +13,7 @@ DEFAULT_PROFILES: tuple[CheckProfile, ...] = (
         description="Fast local confidence / smoke profile.",
         default_truth_level="smoke",
         merge_truth=False,
-        check_ids=("repo_layout", "format_check", "lint", "typing", "tests_smoke"),
+        check_ids=("repo_layout", "feature_registry_contract", "format_check", "lint", "typing", "tests_smoke"),
         notes="Honest smoke lane for developers; passing does not imply merge readiness.",
     ),
     CheckProfile(
@@ -23,6 +23,7 @@ DEFAULT_PROFILES: tuple[CheckProfile, ...] = (
         merge_truth=False,
         check_ids=(
             "repo_layout",
+            "feature_registry_contract",
             "doctor_core",
             "format_check",
             "lint",
@@ -39,6 +40,7 @@ DEFAULT_PROFILES: tuple[CheckProfile, ...] = (
         merge_truth=True,
         check_ids=(
             "repo_layout",
+            "feature_registry_contract",
             "doctor_core",
             "format_check",
             "lint",
@@ -55,6 +57,7 @@ DEFAULT_PROFILES: tuple[CheckProfile, ...] = (
         merge_truth=False,
         check_ids=(
             "repo_layout",
+            "feature_registry_contract",
             "doctor_core",
             "format_check",
             "lint",

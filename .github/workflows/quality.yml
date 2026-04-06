@@ -37,6 +37,10 @@ jobs:
         run: |
           python -m pre_commit run -a
 
+      - name: Feature registry maintenance lane
+        run: |
+          bash quality.sh registry
+
       - name: Tests
         env:
           COV_FAIL_UNDER: "95"
