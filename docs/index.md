@@ -49,6 +49,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need team rollout: [Adopt in your repository](adoption.md)
 - Need CI rollout: [Recommended CI flow](recommended-ci-flow.md)
 - Need contributor workflow: [Contributing](contributing.md)
+- Need boundary guidance: [Stability levels](stability-levels.md) for adopters and contributors
 
 ## Secondary and advanced references
 

@@ -74,3 +74,4 @@ SDETKit focuses first on deterministic release-confidence decisions and evidence
 - Ultra-fast proof: [blank-repo-to-value-60-seconds.md](blank-repo-to-value-60-seconds.md)
 - Evidence and comparison: [before-after-evidence-example.md](before-after-evidence-example.md), [evidence-showcase.md](evidence-showcase.md)
 - Fit decision: [decision-guide.md](decision-guide.md)
+- Boundary policy: [stability-levels.md](stability-levels.md)
