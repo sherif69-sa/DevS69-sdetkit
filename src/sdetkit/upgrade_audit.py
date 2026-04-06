@@ -14,6 +14,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from .bools import coerce_bool
+
 REQ_NAME_RE = re.compile(r"^\s*([A-Za-z0-9_.-]+)")
 PINNED_VERSION_RE = re.compile(r"==\s*([A-Za-z0-9_.!+-]+)")
 CONSTRAINT_RE = re.compile(r"(==|~=|>=|<=|>|<)\s*([A-Za-z0-9_.!+-]+)")
@@ -639,7 +641,7 @@ def _release_is_python_compatible(
 
     compatibility_observed = False
     for release_file in release_files:
-        if not isinstance(release_file, dict) or bool(release_file.get("yanked")):
+        if not isinstance(release_file, dict) or coerce_bool(release_file.get("yanked"), default=False):
             continue
         requires_python = release_file.get("requires_python")
         if requires_python is not None and not isinstance(requires_python, str):

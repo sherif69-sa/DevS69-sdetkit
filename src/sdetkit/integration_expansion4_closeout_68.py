@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-integration-expansion4-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _INTEGRATION_EXPANSION3_SUMMARY_PATH = "docs/artifacts/integration-expansion3-closeout-pack/integration-expansion3-closeout-summary.json"
@@ -145,7 +147,7 @@ def _load_integration_expansion3(path: Path) -> tuple[int, bool, int]:
     summary_obj = payload_obj.get("summary")
     summary = summary_obj if isinstance(summary_obj, dict) else {}
     score = int(summary.get("activation_score", 0))
-    strict = bool(summary.get("strict_pass", False))
+    strict = coerce_bool(summary.get("strict_pass", False), default=False)
     checks_obj = payload_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     return score, strict, len(checks)

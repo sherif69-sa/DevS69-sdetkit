@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from .atomicio import atomic_write_text, canonical_json_bytes, canonical_json_dumps
+from .bools import coerce_bool
 from .security import SecurityError, safe_path
 
 _UTC = getattr(dt, "UTC", dt.timezone.utc)  # noqa: UP017
@@ -146,7 +147,7 @@ def build_run_record(
                 "line": int(item.get("line", 1)) if item.get("line") is not None else None,
                 "tags": sorted(set(str(x) for x in (item.get("tags") or []))),
                 "pack": str(item.get("pack", "core")),
-                "fixable": bool(item.get("fixable", False)),
+                "fixable": coerce_bool(item.get("fixable", False), default=False),
                 "suppressed": fp in suppressed_map,
                 "suppression_reason": suppressed_map.get(fp),
             }

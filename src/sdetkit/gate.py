@@ -10,6 +10,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 AVAILABLE_STEPS = [
     "ruff_fix",
     "ruff_format_apply",
@@ -107,7 +109,7 @@ def _parse_step_filter(raw: str | None) -> set[str]:
 
 
 def _format_text(payload: dict[str, Any]) -> str:
-    ok = bool(payload.get("ok"))
+    ok = coerce_bool(payload.get("ok"), default=False)
     lines: list[str] = []
     lines.append(f"gate fast: {'OK' if ok else 'FAIL'}")
     for step in payload.get("steps", []):
@@ -123,7 +125,7 @@ def _format_text(payload: dict[str, Any]) -> str:
 
 
 def _format_md(payload: dict[str, Any]) -> str:
-    ok = bool(payload.get("ok"))
+    ok = coerce_bool(payload.get("ok"), default=False)
     lines: list[str] = []
     lines.append("### SDET Gate Fast")
     lines.append("")

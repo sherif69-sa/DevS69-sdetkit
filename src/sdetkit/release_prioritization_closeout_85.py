@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-release-prioritization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY84_SUMMARY_PATH = (
@@ -155,7 +157,7 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
         else {}
     )
     evidence_narrative_score = int(evidence_narrative_summary_data.get("activation_score", 0) or 0)
-    evidence_narrative_strict = bool(evidence_narrative_summary_data.get("strict_pass", False))
+    evidence_narrative_strict = coerce_bool(evidence_narrative_summary_data.get("strict_pass", False), default=False)
     evidence_narrative_check_count = (
         len(evidence_narrative_data.get("checks", []))
         if isinstance(evidence_narrative_data.get("checks"), list)

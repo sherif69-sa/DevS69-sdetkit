@@ -16,6 +16,7 @@ from typing import Any
 
 from . import _toml
 from .atomicio import atomic_write_text, canonical_json_dumps
+from .bools import coerce_bool
 
 _BASE_IMAGE = "public.ecr.aws/x8v8d7g8/mars-base:latest"
 _DEFAULT_WORKFLOW_PATH = Path(".sdetkit/workflows/platform_problem.yaml")
@@ -1652,7 +1653,7 @@ def _write_demo_fixture_artifacts(
             "        state.update(\n"
             "            {\n"
             '                "history": history,\n'
-            '                "rotated": bool(snapshot.get("rotated", False)),\n'
+            '                "rotated": coerce_bool(snapshot.get("rotated", False), default=False),\n'
             '                "source": snapshot.get("source", "direct"),\n'
             '                "checkpoint": f"seq:{snapshot[\'sequence\']}",\n'
             "            }\n"
@@ -1767,7 +1768,7 @@ def run_container_authoring(
         repo_root, workdir, contract=contract, verify_triad=bool(successful_attempt)
     )
     summary = {
-        "ok": bool(successful_attempt) and verification.get("ok", False),
+        "ok": bool(successful_attempt) and coerce_bool(verification.get("ok", False), default=False),
         "repo_root": repo_root.as_posix(),
         "workdir": workdir.as_posix(),
         "workflow_contract": contract.path.as_posix(),

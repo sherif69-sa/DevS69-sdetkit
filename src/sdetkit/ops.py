@@ -21,6 +21,7 @@ from typing import Any
 
 from . import _toml
 from .atomicio import atomic_write_text
+from .bools import coerce_bool
 from .doctor import _scan_non_ascii
 from .repo import run_repo_audit
 from .report import build_run_record
@@ -318,10 +319,12 @@ def _load_workflow_resolved(resolved_path: Path) -> WorkflowDef:
         )
     policy_obj = w.get("policy", {})
     policy = Policy(
-        allow_shell=bool(policy_obj.get("allow_shell", False))
+        allow_shell=coerce_bool(policy_obj.get("allow_shell", False), default=False)
         if isinstance(policy_obj, dict)
         else False,
-        allow_artifact_escape=bool(policy_obj.get("allow_artifact_escape", False))
+        allow_artifact_escape=coerce_bool(
+            policy_obj.get("allow_artifact_escape", False), default=False
+        )
         if isinstance(policy_obj, dict)
         else False,
     )
@@ -446,7 +449,7 @@ def _step_execute(
         cmd = resolved_inputs.get("cmd", [])
         if not isinstance(cmd, list):
             raise ValueError("command.cmd must be list")
-        shell = bool(resolved_inputs.get("shell", False))
+        shell = coerce_bool(resolved_inputs.get("shell", False), default=False)
         if shell and not policy.allow_shell:
             raise ValueError("policy blocks shell=true")
         if shell:

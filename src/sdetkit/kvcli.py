@@ -3,6 +3,7 @@ import sys
 from collections.abc import Callable
 from typing import NoReturn
 
+from .bools import coerce_bool
 from .textutil import parse_kv_line
 
 
@@ -120,7 +121,7 @@ def _parse_fast(argv: list[str]) -> dict[str, object]:
 def _run_with_options(options: dict[str, object]) -> int:
     text = options.get("text")
     path = options.get("path")
-    strict = bool(options.get("strict", False))
+    strict = coerce_bool(options.get("strict", False), default=False)
     duplicates = str(options.get("duplicates", "last"))
 
     if text is not None and path is not None:

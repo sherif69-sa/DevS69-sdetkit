@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-kpi-deep-audit-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY56_SUMMARY_PATH = (
@@ -137,7 +139,7 @@ def _load_day56(path: Path) -> tuple[int, bool, int]:
     checks_obj = payload_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     score = int(summary.get("activation_score", 0) or 0)
-    strict = bool(summary.get("strict_pass", False))
+    strict = coerce_bool(summary.get("strict_pass", False), default=False)
     return score, strict, len(checks)
 
 

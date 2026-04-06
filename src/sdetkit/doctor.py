@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from . import _toml, upgrade_audit
+from .bools import coerce_bool
 from .import_hazards import find_stdlib_shadowing
 from .security import SecurityError, safe_path
 
@@ -640,7 +641,7 @@ def _apply_plan(plan: dict[str, Any], root: Path) -> tuple[list[dict[str, Any]],
                 "stderr": stderr_text,
             }
         )
-    ok = all(bool(s.get("ok")) for s in steps)
+    ok = all(coerce_bool(s.get("ok"), default=False) for s in steps)
     return steps, ok
 
 
@@ -1896,7 +1897,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.treat or getattr(ns, "treat_only", False):
         treat_steps = _treatments(root)
-        data_treat_ok = all(bool(s.get("ok")) for s in treat_steps)
+        data_treat_ok = all(coerce_bool(s.get("ok"), default=False) for s in treat_steps)
         if getattr(ns, "treat_only", False):
             payload = {
                 "ok": data_treat_ok,
@@ -2266,7 +2267,7 @@ def main(argv: list[str] | None = None) -> int:
     if failed_checks:
         data["failed_checks"] = failed_checks
     if isinstance(getattr(ns, "apply_plan", None), str) and ns.apply_plan:
-        data["post_plan_ok"] = bool(data.get("ok")) and bool(data.get("plan_ok"))
+        data["post_plan_ok"] = coerce_bool(data.get("ok"), default=False) and coerce_bool(data.get("plan_ok"), default=False)
 
     if ns.format == "json" or ns.json:
         output = json.dumps(data, sort_keys=True) + "\n"

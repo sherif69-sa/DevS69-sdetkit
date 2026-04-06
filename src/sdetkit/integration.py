@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .atomicio import canonical_json_dumps
+from .bools import coerce_bool
 from .cassette import Cassette
 from .security import SecurityError, safe_path
 
@@ -141,7 +142,7 @@ def _evaluate(profile: dict[str, Any]) -> dict[str, Any]:
     checks: list[dict[str, Any]] = []
 
     for env_name in sorted(str(x) for x in profile.get("required_env", [])):
-        present = bool(os.environ.get(env_name, ""))
+        present = coerce_bool(os.environ.get(env_name, ""), default=False)
         checks.append({"kind": "env", "name": env_name, "passed": present})
 
     for rel_file in sorted(str(x) for x in profile.get("required_files", [])):
@@ -175,7 +176,7 @@ def _evaluate(profile: dict[str, Any]) -> dict[str, Any]:
             )
 
     checks.sort(key=lambda x: (str(x.get("kind", "")), str(x.get("name", ""))))
-    failed = [item for item in checks if not bool(item.get("passed"))]
+    failed = [item for item in checks if not coerce_bool(item.get("passed"), default=False)]
     return {
         "schema_version": "sdetkit.integration.profile-check.v1",
         "profile_name": str(profile.get("name", "default")),
@@ -429,7 +430,7 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
         name = str(svc.get("name", svc.get("role", "data-service")))
         role = _normalize(svc.get("role"))
         backup_strategy = _normalize(svc.get("backup_strategy"))
-        multi_az = bool(svc.get("multi_az"))
+        multi_az = coerce_bool(svc.get("multi_az"), default=False)
         checks.append(
             {
                 "kind": "data-resilience",
@@ -505,7 +506,7 @@ def _evaluate_topology(profile: dict[str, Any]) -> dict[str, Any]:
         )
 
     checks.sort(key=lambda item: (str(item.get("kind", "")), str(item.get("name", ""))))
-    failed = [item for item in checks if not bool(item.get("passed"))]
+    failed = [item for item in checks if not coerce_bool(item.get("passed"), default=False)]
     total = len(checks)
     passed_count = total - len(failed)
     return {

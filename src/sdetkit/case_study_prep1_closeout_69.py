@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-case-study-prep1-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY68_SUMMARY_PATH = "docs/artifacts/integration-expansion4-closeout-pack/integration-expansion4-closeout-summary.json"
@@ -140,7 +142,7 @@ def _load_prior_closeout(summary_path: Path) -> tuple[int, bool, int]:
     checks = payload.get("checks", [])
     return (
         int(summary.get("activation_score", 0)),
-        bool(summary.get("strict_pass", False)),
+        coerce_bool(summary.get("strict_pass", False), default=False),
         len(checks),
     )
 

@@ -6,6 +6,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _TEMPLATE_SPECS: dict[str, dict[str, Any]] = {
     "gitlab": {
         "path": "templates/ci/gitlab/gitlab-advanced-reference.yml",
@@ -106,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.cmd == "validate-templates":
         root = Path(ns.root).resolve()
         data = _validate_templates(root)
-        ok = bool(data.get("ok"))
+        ok = coerce_bool(data.get("ok"), default=False)
 
         if ns.format == "json":
             output = json.dumps(data, sort_keys=True) + "\n"

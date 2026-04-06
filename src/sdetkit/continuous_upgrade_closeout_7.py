@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-continuous-upgrade-closeout-7.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _CYCLE6_SUMMARY_PATH = (
@@ -211,7 +213,7 @@ def build_continuous_upgrade_cycle7_closeout_summary(root: Path) -> dict[str, An
         cycle6_data.get("summary", {}) if isinstance(cycle6_data.get("summary"), dict) else {}
     )
     cycle6_score = int(cycle6_summary_data.get("activation_score", 0) or 0)
-    cycle6_strict = bool(cycle6_summary_data.get("strict_pass", False))
+    cycle6_strict = coerce_bool(cycle6_summary_data.get("strict_pass", False), default=False)
     cycle6_check_count = (
         len(cycle6_data.get("checks", [])) if isinstance(cycle6_data.get("checks"), list) else 0
     )

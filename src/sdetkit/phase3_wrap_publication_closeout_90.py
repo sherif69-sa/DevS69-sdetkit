@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-phase3-wrap-publication-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _GOVERNANCE_SCALE_SUMMARY_PATH = (
@@ -159,7 +161,7 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
         else {}
     )
     governance_scale_score = int(governance_scale_summary_data.get("activation_score", 0) or 0)
-    governance_scale_strict = bool(governance_scale_summary_data.get("strict_pass", False))
+    governance_scale_strict = coerce_bool(governance_scale_summary_data.get("strict_pass", False), default=False)
     governance_scale_check_count = (
         len(governance_scale_data.get("checks", []))
         if isinstance(governance_scale_data.get("checks"), list)

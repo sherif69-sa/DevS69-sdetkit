@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import cast
 
+from ..bools import coerce_bool
 from .artifacts import (
     ArtifactPaths,
     artifact_paths_for,
@@ -152,7 +153,7 @@ def _load_records_from_ledger(path: Path) -> tuple[CheckRecord, ...]:
                 id=str(item["id"]),
                 title=str(item["title"]),
                 status=status,
-                blocking=bool(item.get("blocking", True)),
+                blocking=coerce_bool(item.get("blocking", True), default=True),
                 reason=str(item.get("reason", "")),
                 command=str(item.get("command") or item.get("cmd") or ""),
                 advisory=tuple(str(entry) for entry in item.get("advisory", []) if str(entry)),

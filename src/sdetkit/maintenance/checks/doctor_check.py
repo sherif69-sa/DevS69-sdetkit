@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 
 from sdetkit import doctor
 
+from ...bools import coerce_bool
 from ..types import CheckAction, CheckResult, MaintenanceContext
 
 CHECK_NAME = "doctor_check"
@@ -83,7 +84,7 @@ def run(ctx: MaintenanceContext) -> CheckResult:
                 )
 
     return CheckResult(
-        ok=bool(parsed.get("ok", False)),
+        ok=coerce_bool(parsed.get("ok", False), default=False),
         summary=summary,
         details={
             "doctor": parsed,

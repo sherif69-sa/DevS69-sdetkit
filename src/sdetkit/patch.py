@@ -14,6 +14,7 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from .atomicio import atomic_write_text
+from .bools import coerce_bool
 from .security import SecurityError, safe_path
 
 INDENT_TOKEN = "<<INDENT>>"
@@ -217,7 +218,7 @@ def _op_replace_block(text: str, op: dict[str, Any]) -> str:
     if not m1:
         raise PatchSpecError("replace_block.end: no match after start")
 
-    include_end = bool(op.get("include_end", False))
+    include_end = coerce_bool(op.get("include_end", False), default=False)
     cut_end = m0.end() + (m1.end() if include_end else m1.start())
 
     new_block = _apply_indent(op["text"], indent)
@@ -238,7 +239,7 @@ def _op_replace_or_insert_block(text: str, op: dict[str, Any]) -> str:
         tail = text[m0.end() :]
         m1 = rx_end.search(tail)
         if m1:
-            include_end = bool(op.get("include_end", False))
+            include_end = coerce_bool(op.get("include_end", False), default=False)
             indent = _indent_from_match(m0)
             cut_end = m0.end() + (m1.end() if include_end else m1.start())
             new_block = _apply_indent(op["text"], indent)

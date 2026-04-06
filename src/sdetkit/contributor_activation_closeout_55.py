@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-contributor-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY53_SUMMARY_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
@@ -135,7 +137,7 @@ def _load_docs_loop_closeout_summary(path: Path) -> tuple[float, bool, int]:
     if not isinstance(summary, dict) or not isinstance(checks, list):
         return 0.0, False, 0
     score = float(summary.get("activation_score", 0.0))
-    strict = bool(summary.get("strict_pass", False))
+    strict = coerce_bool(summary.get("strict_pass", False), default=False)
     return score, strict, len(checks)
 
 
