@@ -233,7 +233,7 @@ def test_security_scan_ignores_uuid_and_hex_digests(tmp_path: Path, capsys) -> N
     h = hashlib.sha256(b"sdetkit").hexdigest()[:24]
 
     (src / "a.py").write_text(
-        f'X = "{u}"\nY = "{h}"\nZ = "day15-github-pack-example"\n',
+        f'X = "{u}"\nY = "{h}"\nZ = "github-pack-example"\n',
         encoding="utf-8",
     )
 

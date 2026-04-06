@@ -74,7 +74,7 @@
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day41_score": 100.0,
+        "cycle41_score": 100.0,
         "strict_pass": true,
         "expansion_automation_checks": 14
       }
@@ -85,8 +85,8 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_day41": false,
-        "contains_day42": false
+        "contains_cycle41": false,
+        "contains_cycle42": false
       }
     },
     {

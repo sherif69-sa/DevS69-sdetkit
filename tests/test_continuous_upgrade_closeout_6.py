@@ -194,7 +194,7 @@ def test_cycle6_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert execution_data["strict_pass"] is False
 
 
-def test_cycle6_strict_fails_without_day95(tmp_path: Path) -> None:
+def test_cycle6_strict_fails_without_prereq_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

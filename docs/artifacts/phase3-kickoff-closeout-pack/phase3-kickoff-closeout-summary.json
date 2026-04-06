@@ -55,7 +55,7 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_phase2_wrap_handoff_day60": false
+        "contains_phase2_wrap_handoff_cycle60": false
       }
     },
     {

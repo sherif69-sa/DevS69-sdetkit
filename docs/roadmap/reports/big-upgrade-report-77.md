@@ -17,7 +17,7 @@ Close Cycle 77 with a high-signal community-touchpoint lane that upgrades Cycle 
 python -m sdetkit cycle77-community-touchpoint-closeout --format json --strict
 python -m sdetkit cycle77-community-touchpoint-closeout --emit-pack-dir docs/artifacts/cycle77-community-touchpoint-closeout-pack --format json --strict
 python -m sdetkit cycle77-community-touchpoint-closeout --execute --evidence-dir docs/artifacts/cycle77-community-touchpoint-closeout-pack/evidence --format json --strict
-python scripts/check_day77_community_touchpoint_closeout_contract.py
+python scripts/check_community_touchpoint_closeout_contract.py
 ```
 
 ### Outcome

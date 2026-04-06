@@ -382,21 +382,6 @@ def _build_parser() -> argparse.ArgumentParser:
         "--contribution-quality-summary",
         default="docs/artifacts/contribution-quality-report-pack/contribution-quality-report-summary.json",
     )
-    parser.add_argument(
-        "--day15-summary",
-        dest="github_actions_summary",
-        help=argparse.SUPPRESS,
-    )
-    parser.add_argument(
-        "--day16-summary",
-        dest="gitlab_ci_summary",
-        help=argparse.SUPPRESS,
-    )
-    parser.add_argument(
-        "--day17-summary",
-        dest="contribution_quality_summary",
-        help=argparse.SUPPRESS,
-    )
     parser.add_argument("--min-reliability-score", type=float, default=90.0)
     parser.add_argument("--strict", action="store_true")
     parser.add_argument(

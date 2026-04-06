@@ -49,25 +49,10 @@ case "$mode" in
   cycle4-skills)
     python scripts/check_skills_contract_4.py
     ;;
-  # Legacy aliases retained for compatibility with transition-era lanes.
-  day3)
-    python scripts/check_proof_contract_3.py
-    ;;
-  day4)
-    python scripts/check_skills_contract_4.py
-    ;;
   github-actions-onboarding)
     python scripts/check_github_actions_onboarding_contract.py
     ;;
   gitlab-ci-onboarding)
-    python scripts/check_gitlab_ci_onboarding_contract.py
-    python scripts/check_reliability_evidence_pack_contract.py
-    ;;
-  # Legacy aliases retained for compatibility with transition-era lanes.
-  day15)
-    python scripts/check_github_actions_onboarding_contract.py
-    ;;
-  day16)
     python scripts/check_gitlab_ci_onboarding_contract.py
     python scripts/check_reliability_evidence_pack_contract.py
     ;;

@@ -1,6 +1,6 @@
 {
   "command": "python scripts/check_optimization_closeout_contract.py --skip-evidence",
   "returncode": 1,
-  "stdout": "{\n  \"errors\": [\n    \"critical failures: ['day41_handoff_inputs', 'day41_strict_baseline']\"\n  ],\n  \"score\": 40\n}\n",
+  "stdout": "{\n  \"errors\": [\n    \"critical failures: ['cycle41_handoff_inputs', 'cycle41_strict_baseline']\"\n  ],\n  \"score\": 40\n}\n",
   "stderr": ""
 }

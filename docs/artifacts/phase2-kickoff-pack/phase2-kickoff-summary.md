@@ -3,7 +3,7 @@
 - Activation score: **65**
 - Passed checks: **8**
 - Failed checks: **5**
-- Critical failures: **day30_strict_baseline**
+- Critical failures: **cycle30_strict_baseline**
 
 ## Cycle 30 continuity
 

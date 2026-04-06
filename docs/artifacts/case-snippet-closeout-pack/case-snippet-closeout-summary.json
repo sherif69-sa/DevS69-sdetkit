@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-case-snippet-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day50_summary": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json",
-    "day50_delivery_board": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
+    "cycle50_summary": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json",
+    "cycle50_delivery_board": "docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
   },
   "checks": [
     {
@@ -44,7 +44,7 @@
       "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
-      "evidence": "day51-case-snippet-closeout"
+      "evidence": "cycle51-case-snippet-closeout"
     },
     {
       "check_id": "docs_index_links",
@@ -59,35 +59,35 @@
       "evidence": "Day 51 + Day 52 strategy chain"
     },
     {
-      "check_id": "day50_summary_present",
+      "check_id": "cycle50_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-closeout-summary.json"
     },
     {
-      "check_id": "day50_delivery_board_present",
+      "check_id": "cycle50_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/execution-prioritization-closeout-pack/execution-prioritization-delivery-board.md"
     },
     {
-      "check_id": "day50_quality_floor",
+      "check_id": "cycle50_quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day50_score": 75.0,
+        "cycle50_score": 75.0,
         "strict_pass": false,
-        "day50_checks": 14
+        "cycle50_checks": 14
       }
     },
     {
-      "check_id": "day50_board_integrity",
+      "check_id": "cycle50_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day50": true,
-        "contains_day51": true
+        "contains_cycle50": true,
+        "contains_cycle51": true
       }
     },
     {
@@ -116,16 +116,16 @@
     }
   ],
   "rollup": {
-    "day50_activation_score": 75.0,
-    "day50_checks": 14,
-    "day50_delivery_board_items": 5
+    "cycle50_activation_score": 75.0,
+    "cycle50_checks": 14,
+    "cycle50_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 55,
     "passed_checks": 8,
     "failed_checks": 6,
     "critical_failures": [
-      "day50_strict_baseline"
+      "cycle50_strict_baseline"
     ],
     "strict_pass": false
   },

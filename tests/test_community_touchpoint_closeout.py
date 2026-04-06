@@ -78,7 +78,7 @@ def _seed_repo(root: Path) -> None:
     touchpoint_plan.write_text(
         json.dumps(
             {
-                "plan_id": "day77-community-touchpoint-001",
+                "plan_id": "community-touchpoint-001",
                 "contributors": ["maintainers", "community-team"],
                 "touchpoint_tracks": ["office-hours", "release-highlights"],
                 "baseline": {"sessions": 1, "participants": 15},
@@ -148,7 +148,7 @@ def test_lane77_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane77_strict_fails_without_day76(tmp_path: Path) -> None:
+def test_lane77_strict_fails_without_contributor_recognition_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

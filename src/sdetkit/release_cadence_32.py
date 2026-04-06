@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day31(path: Path) -> tuple[float, bool, int]:
+def _load_cycle31(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -143,13 +143,13 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day32 = any(
+    has_cycle32 = any(
         any(token in line for token in ("impact 32", "day 32", "name 32")) for line in lines
     )
-    has_day33 = any(
+    has_cycle33 = any(
         any(token in line for token in ("impact 33", "day 33", "name 33")) for line in lines
     )
-    return item_count, has_day32, has_day33
+    return item_count, has_cycle32, has_cycle33
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -178,12 +178,12 @@ def build_release_cadence_summary_impl(
     missing_changelog_lines = _contains_all_lines(page_text, _REQUIRED_CHANGELOG_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day31_summary_primary = root / _DAY31_SUMMARY_PATH
-    day31_board_primary = root / _DAY31_BOARD_PATH
-    day31_summary = day31_summary_primary
-    day31_board = day31_board_primary
-    day31_score, day31_strict, day31_check_count = _load_day31(day31_summary)
-    board_count, board_has_day32, board_has_day33 = _board_stats(day31_board)
+    cycle31_summary_primary = root / _DAY31_SUMMARY_PATH
+    cycle31_board_primary = root / _DAY31_BOARD_PATH
+    cycle31_summary = cycle31_summary_primary
+    cycle31_board = cycle31_board_primary
+    cycle31_score, cycle31_strict, cycle31_check_count = _load_cycle31(cycle31_summary)
+    board_count, board_has_cycle32, board_has_cycle33 = _board_stats(cycle31_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -235,41 +235,41 @@ def build_release_cadence_summary_impl(
             "evidence": "Day 32 + Day 33 strategy chain",
         },
         {
-            "check_id": "day31_summary_present",
+            "check_id": "cycle31_summary_present",
             "weight": 10,
-            "passed": day31_summary.exists(),
+            "passed": cycle31_summary.exists(),
             "evidence": {
-                "resolved": str(day31_summary),
-                "primary": str(day31_summary_primary),
+                "resolved": str(cycle31_summary),
+                "primary": str(cycle31_summary_primary),
             },
         },
         {
-            "check_id": "day31_delivery_board_present",
+            "check_id": "cycle31_delivery_board_present",
             "weight": 8,
-            "passed": day31_board.exists(),
+            "passed": cycle31_board.exists(),
             "evidence": {
-                "resolved": str(day31_board),
-                "primary": str(day31_board_primary),
+                "resolved": str(cycle31_board),
+                "primary": str(cycle31_board_primary),
             },
         },
         {
-            "check_id": "day31_quality_floor",
+            "check_id": "cycle31_quality_floor",
             "weight": 10,
-            "passed": day31_strict and day31_score >= 95,
+            "passed": cycle31_strict and cycle31_score >= 95,
             "evidence": {
-                "day31_score": day31_score,
-                "strict_pass": day31_strict,
-                "day31_checks": day31_check_count,
+                "cycle31_score": cycle31_score,
+                "strict_pass": cycle31_strict,
+                "cycle31_checks": cycle31_check_count,
             },
         },
         {
-            "check_id": "day31_board_integrity",
+            "check_id": "cycle31_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day32 and board_has_day33,
+            "passed": board_count >= 5 and board_has_cycle32 and board_has_cycle33,
             "evidence": {
                 "board_items": board_count,
-                "contains_day32": board_has_day32,
-                "contains_day33": board_has_day33,
+                "contains_cycle32": board_has_cycle32,
+                "contains_cycle33": board_has_cycle33,
             },
         },
         {
@@ -295,24 +295,24 @@ def build_release_cadence_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day31_summary.exists() or not day31_board.exists():
-        critical_failures.append("day31_handoff_inputs")
-    if not day31_strict:
-        critical_failures.append("day31_strict_baseline")
+    if not cycle31_summary.exists() or not cycle31_board.exists():
+        critical_failures.append("cycle31_handoff_inputs")
+    if not cycle31_strict:
+        critical_failures.append("cycle31_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day31_strict:
-        wins.append(f"Day 31 continuity is strict-pass with activation score={day31_score}.")
+    if cycle31_strict:
+        wins.append(f"Day 31 continuity is strict-pass with activation score={cycle31_score}.")
     else:
         misses.append("Day 31 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 31 kickoff command and restore strict pass baseline before release cadence lock."
         )
 
-    if board_count >= 5 and board_has_day32 and board_has_day33:
+    if board_count >= 5 and board_has_cycle32 and board_has_cycle33:
         wins.append(
             f"Day 31 delivery board integrity validated with {board_count} checklist items."
         )
@@ -346,20 +346,20 @@ def build_release_cadence_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day31_summary": str(day31_summary.relative_to(root))
-            if day31_summary.exists()
-            else str(day31_summary),
-            "day31_summary_primary": str(day31_summary_primary.relative_to(root)),
-            "day31_delivery_board": str(day31_board.relative_to(root))
-            if day31_board.exists()
-            else str(day31_board),
-            "day31_delivery_board_primary": str(day31_board_primary.relative_to(root)),
+            "cycle31_summary": str(cycle31_summary.relative_to(root))
+            if cycle31_summary.exists()
+            else str(cycle31_summary),
+            "cycle31_summary_primary": str(cycle31_summary_primary.relative_to(root)),
+            "cycle31_delivery_board": str(cycle31_board.relative_to(root))
+            if cycle31_board.exists()
+            else str(cycle31_board),
+            "cycle31_delivery_board_primary": str(cycle31_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
-            "day31_activation_score": day31_score,
-            "day31_checks": day31_check_count,
-            "day31_delivery_board_items": board_count,
+            "cycle31_activation_score": cycle31_score,
+            "cycle31_checks": cycle31_check_count,
+            "cycle31_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -397,9 +397,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 31 continuity",
         "",
-        f"- Day 31 activation score: `{payload['rollup']['day31_activation_score']}`",
-        f"- Day 31 checks evaluated: `{payload['rollup']['day31_checks']}`",
-        f"- Day 31 delivery board checklist items: `{payload['rollup']['day31_delivery_board_items']}`",
+        f"- Day 31 activation score: `{payload['rollup']['cycle31_activation_score']}`",
+        f"- Day 31 checks evaluated: `{payload['rollup']['cycle31_checks']}`",
+        f"- Day 31 delivery board checklist items: `{payload['rollup']['cycle31_delivery_board_items']}`",
         "",
         "## Wins",
     ]

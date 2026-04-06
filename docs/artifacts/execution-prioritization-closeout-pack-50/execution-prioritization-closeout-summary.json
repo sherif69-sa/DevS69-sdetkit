@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-execution-prioritization-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day49_summary": "docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json",
-    "day49_delivery_board": "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
+    "cycle49_summary": "docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json",
+    "cycle49_delivery_board": "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
   },
   "checks": [
     {
@@ -62,35 +62,35 @@
       "evidence": "Day 50 + Day 51 strategy chain"
     },
     {
-      "check_id": "day49_summary_present",
+      "check_id": "cycle49_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json"
     },
     {
-      "check_id": "day49_delivery_board_present",
+      "check_id": "cycle49_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
     },
     {
-      "check_id": "day49_quality_floor",
+      "check_id": "cycle49_quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day49_score": 100.0,
+        "cycle49_score": 100.0,
         "strict_pass": true,
-        "day49_checks": 14
+        "cycle49_checks": 14
       }
     },
     {
-      "check_id": "day49_board_integrity",
+      "check_id": "cycle49_board_integrity",
       "weight": 7,
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_day49": false,
-        "contains_day50": false
+        "contains_cycle49": false,
+        "contains_cycle50": false
       }
     },
     {
@@ -130,9 +130,9 @@
     }
   ],
   "rollup": {
-    "day49_activation_score": 100.0,
-    "day49_checks": 14,
-    "day49_delivery_board_items": 5
+    "cycle49_activation_score": 100.0,
+    "cycle49_checks": 14,
+    "cycle49_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 51,

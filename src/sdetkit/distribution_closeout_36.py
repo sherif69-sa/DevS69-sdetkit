@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day35(path: Path) -> tuple[float, bool, int]:
+def _load_cycle35(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -143,13 +143,13 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day36 = any(
+    has_cycle36 = any(
         any(token in line for token in ("impact 36", "day 36", "name 36")) for line in lines
     )
-    has_day37 = any(
+    has_cycle37 = any(
         any(token in line for token in ("impact 37", "day 37", "name 37")) for line in lines
     )
-    return item_count, has_day36, has_day37
+    return item_count, has_cycle36, has_cycle37
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -178,10 +178,10 @@ def build_distribution_closeout_summary_impl(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day35_summary = root / _DAY35_SUMMARY_PATH
-    day35_board = root / _DAY35_BOARD_PATH
-    day35_score, day35_strict, day35_check_count = _load_day35(day35_summary)
-    board_count, board_has_day36, board_has_day37 = _board_stats(day35_board)
+    cycle35_summary = root / _DAY35_SUMMARY_PATH
+    cycle35_board = root / _DAY35_BOARD_PATH
+    cycle35_score, cycle35_strict, cycle35_check_count = _load_cycle35(cycle35_summary)
+    board_count, board_has_cycle36, board_has_cycle37 = _board_stats(cycle35_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -230,35 +230,35 @@ def build_distribution_closeout_summary_impl(
             "evidence": "Day 36 + Day 37 strategy chain",
         },
         {
-            "check_id": "day35_summary_present",
+            "check_id": "cycle35_summary_present",
             "weight": 10,
-            "passed": day35_summary.exists(),
-            "evidence": str(day35_summary),
+            "passed": cycle35_summary.exists(),
+            "evidence": str(cycle35_summary),
         },
         {
-            "check_id": "day35_delivery_board_present",
+            "check_id": "cycle35_delivery_board_present",
             "weight": 8,
-            "passed": day35_board.exists(),
-            "evidence": str(day35_board),
+            "passed": cycle35_board.exists(),
+            "evidence": str(cycle35_board),
         },
         {
-            "check_id": "day35_quality_floor",
+            "check_id": "cycle35_quality_floor",
             "weight": 10,
-            "passed": day35_strict and day35_score >= 95,
+            "passed": cycle35_strict and cycle35_score >= 95,
             "evidence": {
-                "day35_score": day35_score,
-                "strict_pass": day35_strict,
-                "day35_checks": day35_check_count,
+                "cycle35_score": cycle35_score,
+                "strict_pass": cycle35_strict,
+                "cycle35_checks": cycle35_check_count,
             },
         },
         {
-            "check_id": "day35_board_integrity",
+            "check_id": "cycle35_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day36 and board_has_day37,
+            "passed": board_count >= 5 and board_has_cycle36 and board_has_cycle37,
             "evidence": {
                 "board_items": board_count,
-                "contains_day36": board_has_day36,
-                "contains_day37": board_has_day37,
+                "contains_cycle36": board_has_cycle36,
+                "contains_cycle37": board_has_cycle37,
             },
         },
         {
@@ -284,24 +284,24 @@ def build_distribution_closeout_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day35_summary.exists() or not day35_board.exists():
-        critical_failures.append("day35_handoff_inputs")
-    if not day35_strict:
-        critical_failures.append("day35_strict_baseline")
+    if not cycle35_summary.exists() or not cycle35_board.exists():
+        critical_failures.append("cycle35_handoff_inputs")
+    if not cycle35_strict:
+        critical_failures.append("cycle35_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day35_strict:
-        wins.append(f"Day 35 continuity is strict-pass with activation score={day35_score}.")
+    if cycle35_strict:
+        wins.append(f"Day 35 continuity is strict-pass with activation score={cycle35_score}.")
     else:
         misses.append("Day 35 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 35 KPI instrumentation command and restore strict pass baseline before Day 36 lock."
         )
 
-    if board_count >= 5 and board_has_day36 and board_has_day37:
+    if board_count >= 5 and board_has_cycle36 and board_has_cycle37:
         wins.append(
             f"Day 35 delivery board integrity validated with {board_count} checklist items."
         )
@@ -335,18 +335,18 @@ def build_distribution_closeout_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day35_summary": str(day35_summary.relative_to(root))
-            if day35_summary.exists()
-            else str(day35_summary),
-            "day35_delivery_board": str(day35_board.relative_to(root))
-            if day35_board.exists()
-            else str(day35_board),
+            "cycle35_summary": str(cycle35_summary.relative_to(root))
+            if cycle35_summary.exists()
+            else str(cycle35_summary),
+            "cycle35_delivery_board": str(cycle35_board.relative_to(root))
+            if cycle35_board.exists()
+            else str(cycle35_board),
         },
         "checks": checks,
         "rollup": {
-            "day35_activation_score": day35_score,
-            "day35_checks": day35_check_count,
-            "day35_delivery_board_items": board_count,
+            "cycle35_activation_score": cycle35_score,
+            "cycle35_checks": cycle35_check_count,
+            "cycle35_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -384,9 +384,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 35 continuity",
         "",
-        f"- Day 35 activation score: `{payload['rollup']['day35_activation_score']}`",
-        f"- Day 35 checks evaluated: `{payload['rollup']['day35_checks']}`",
-        f"- Day 35 delivery board checklist items: `{payload['rollup']['day35_delivery_board_items']}`",
+        f"- Day 35 activation score: `{payload['rollup']['cycle35_activation_score']}`",
+        f"- Day 35 checks evaluated: `{payload['rollup']['cycle35_checks']}`",
+        f"- Day 35 delivery board checklist items: `{payload['rollup']['cycle35_delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -429,7 +429,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(
         target / "launch-plan.csv",
         "channel,publish_at_utc,owner,backup,cta,kpi_target\n"
-        "github_discussion,2026-02-26T15:00:00Z,community-owner,backup-reviewer,Run day36 command and share score,readme_to_command_ctr:+2%\n"
+        "github_discussion,2026-02-26T15:00:00Z,community-owner,backup-reviewer,Run cycle36 command and share score,readme_to_command_ctr:+2%\n"
         "linkedin,2026-02-26T17:30:00Z,growth-owner,backup-reviewer,Comment your bottleneck,docs_unique_visitors:+10%\n"
         "newsletter,2026-02-27T09:00:00Z,pm-owner,backup-reviewer,Forward to one maintainer,external_pr_conversion:+1.5%\n",
     )

@@ -79,7 +79,7 @@ def _seed_repo(root: Path) -> None:
     trust_plan.write_text(
         json.dumps(
             {
-                "plan_id": "day75-trust-assets-refresh-001",
+                "plan_id": "trust-assets-refresh-001",
                 "trust_surfaces": ["README", "SECURITY", "governance"],
                 "baseline": {"proof_links": 8, "policy_coverage": 0.67},
                 "target": {"proof_links": 14, "policy_coverage": 0.9},
@@ -159,7 +159,7 @@ def test_lane75_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane75_strict_fails_without_day74(tmp_path: Path) -> None:
+def test_lane75_strict_fails_without_distribution_scaling_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

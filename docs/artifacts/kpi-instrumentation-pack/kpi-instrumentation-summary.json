@@ -1,12 +1,12 @@
 {
-  "name": "day35-kpi-instrumentation",
+  "name": "cycle35-kpi-instrumentation",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-kpi-instrumentation.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day34_summary": "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json",
-    "day34_delivery_board": "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md"
+    "cycle34_summary": "docs/artifacts/demo-asset2-pack/demo-asset2-summary.json",
+    "cycle34_delivery_board": "docs/artifacts/demo-asset2-pack/demo-asset2-delivery-board.md"
   },
   "checks": [
     {
@@ -29,9 +29,9 @@
       "passed": false,
       "evidence": {
         "missing_commands": [
-          "python -m sdetkit day35-kpi-instrumentation --format json --strict",
-          "python -m sdetkit day35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
-          "python -m sdetkit day35-kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict"
+          "python -m sdetkit cycle35-kpi-instrumentation --format json --strict",
+          "python -m sdetkit cycle35-kpi-instrumentation --emit-pack-dir docs/artifacts/kpi-instrumentation-pack --format json --strict",
+          "python -m sdetkit cycle35-kpi-instrumentation --execute --evidence-dir docs/artifacts/kpi-instrumentation-pack/evidence --format json --strict"
         ]
       }
     },
@@ -45,7 +45,7 @@
       "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
-      "evidence": "day35-kpi-instrumentation"
+      "evidence": "cycle35-kpi-instrumentation"
     },
     {
       "check_id": "docs_index_links",
@@ -60,7 +60,7 @@
       "evidence": "Day 35 + Day 36 strategy chain"
     },
     {
-      "check_id": "day34_summary_present",
+      "check_id": "cycle34_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -69,7 +69,7 @@
       }
     },
     {
-      "check_id": "day34_delivery_board_present",
+      "check_id": "cycle34_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -78,23 +78,23 @@
       }
     },
     {
-      "check_id": "day34_quality_floor",
+      "check_id": "cycle34_quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day34_score": 65.0,
+        "cycle34_score": 65.0,
         "strict_pass": false,
-        "day34_checks": 14
+        "cycle34_checks": 14
       }
     },
     {
-      "check_id": "day34_board_integrity",
+      "check_id": "cycle34_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day35": true,
-        "contains_day36": true
+        "contains_cycle35": true,
+        "contains_cycle36": true
       }
     },
     {
@@ -123,16 +123,16 @@
     }
   ],
   "rollup": {
-    "day34_activation_score": 65.0,
-    "day34_checks": 14,
-    "day34_delivery_board_items": 5
+    "cycle34_activation_score": 65.0,
+    "cycle34_checks": 14,
+    "cycle34_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 55,
     "passed_checks": 8,
     "failed_checks": 6,
     "critical_failures": [
-      "day34_strict_baseline"
+      "cycle34_strict_baseline"
     ],
     "strict_pass": false
   },

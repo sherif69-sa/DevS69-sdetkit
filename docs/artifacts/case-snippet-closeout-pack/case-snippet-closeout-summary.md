@@ -2,7 +2,7 @@ Case Snippet Closeout summary (legacy: Cycle 51)
 - Activation score: 55
 - Passed checks: 8
 - Failed checks: 6
-- Critical failures: ['day50_strict_baseline']
+- Critical failures: ['cycle50_strict_baseline']
 - Cycle 50 activation score: `75.0`
 - Cycle 50 checks evaluated: `14`
 - Cycle 50 delivery board checklist items: `5`

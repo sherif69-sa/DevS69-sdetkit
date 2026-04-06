@@ -169,7 +169,7 @@ def test_lane67_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane67_strict_fails_without_day66(tmp_path: Path) -> None:
+def test_lane67_strict_fails_without_prereq_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

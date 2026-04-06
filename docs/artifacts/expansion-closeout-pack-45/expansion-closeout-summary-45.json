@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-expansion-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day44_summary": "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json",
-    "day44_delivery_board": "docs/artifacts/scale-closeout-pack/day44-delivery-board.md"
+    "cycle44_summary": "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json",
+    "cycle44_delivery_board": "docs/artifacts/scale-closeout-pack/cycle44-delivery-board.md"
   },
   "checks": [
     {
@@ -56,35 +56,35 @@
       "evidence": "Day 45 + Day 46 strategy chain"
     },
     {
-      "check_id": "day44_summary_present",
+      "check_id": "cycle44_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
     },
     {
-      "check_id": "day44_delivery_board_present",
+      "check_id": "cycle44_delivery_board_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-closeout-pack/day44-delivery-board.md"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/scale-closeout-pack/cycle44-delivery-board.md"
     },
     {
-      "check_id": "day44_quality_floor",
+      "check_id": "cycle44_quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day44_score": 100.0,
+        "cycle44_score": 100.0,
         "strict_pass": true,
-        "day44_checks": 14
+        "cycle44_checks": 14
       }
     },
     {
-      "check_id": "day44_board_integrity",
+      "check_id": "cycle44_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day44": true,
-        "contains_day45": true
+        "contains_cycle44": true,
+        "contains_cycle45": true
       }
     },
     {
@@ -113,9 +113,9 @@
     }
   ],
   "rollup": {
-    "day44_activation_score": 100.0,
-    "day44_checks": 14,
-    "day44_delivery_board_items": 5
+    "cycle44_activation_score": 100.0,
+    "cycle44_checks": 14,
+    "cycle44_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

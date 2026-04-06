@@ -9,7 +9,7 @@ from sdetkit import playbooks_cli as pc
 
 def test_alias_helpers_and_discovery(tmp_path: Path) -> None:
     (tmp_path / "community_touchpoint_closeout_77.py").write_text("x", encoding="utf-8")
-    (tmp_path / "day99_custom.py").write_text("x", encoding="utf-8")
+    (tmp_path / "impact99_custom.py").write_text("x", encoding="utf-8")
     (tmp_path / "not_legacy.py").write_text("x", encoding="utf-8")
 
     mods = pc._discover_legacy_modules(tmp_path)
@@ -18,7 +18,7 @@ def test_alias_helpers_and_discovery(tmp_path: Path) -> None:
         pc._alias_for_series_closeout("community_touchpoint_closeout_77")
         == "community-touchpoint-closeout"
     )
-    assert pc._alias_for_series_module("day99_custom") == "custom"
+    assert pc._alias_for_series_module("impact99_custom") == "custom"
 
 
 def test_search_filters_day_tokens() -> None:

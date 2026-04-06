@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day38(path: Path) -> tuple[float, bool, int]:
+def _load_cycle38(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -143,13 +143,13 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day38 = any(
+    has_cycle38 = any(
         any(token in line for token in ("impact 38", "day 38", "name 38")) for line in lines
     )
-    has_day39 = any(
+    has_cycle39 = any(
         any(token in line for token in ("impact 39", "day 39", "name 39")) for line in lines
     )
-    return item_count, has_day38, has_day39
+    return item_count, has_cycle38, has_cycle39
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -178,10 +178,10 @@ def build_playbook_post_summary_impl(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day38_summary = root / _DAY38_SUMMARY_PATH
-    day38_board = root / _DAY38_BOARD_PATH
-    day38_score, day38_strict, day38_check_count = _load_day38(day38_summary)
-    board_count, board_has_day38, board_has_day39 = _board_stats(day38_board)
+    cycle38_summary = root / _DAY38_SUMMARY_PATH
+    cycle38_board = root / _DAY38_BOARD_PATH
+    cycle38_score, cycle38_strict, cycle38_check_count = _load_cycle38(cycle38_summary)
+    board_count, board_has_cycle38, board_has_cycle39 = _board_stats(cycle38_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -230,35 +230,35 @@ def build_playbook_post_summary_impl(
             "evidence": "Day 39 + Day 40 strategy chain",
         },
         {
-            "check_id": "day38_summary_present",
+            "check_id": "cycle38_summary_present",
             "weight": 10,
-            "passed": day38_summary.exists(),
-            "evidence": str(day38_summary),
+            "passed": cycle38_summary.exists(),
+            "evidence": str(cycle38_summary),
         },
         {
-            "check_id": "day38_delivery_board_present",
+            "check_id": "cycle38_delivery_board_present",
             "weight": 8,
-            "passed": day38_board.exists(),
-            "evidence": str(day38_board),
+            "passed": cycle38_board.exists(),
+            "evidence": str(cycle38_board),
         },
         {
-            "check_id": "day38_quality_floor",
+            "check_id": "cycle38_quality_floor",
             "weight": 10,
-            "passed": day38_strict and day38_score >= 95,
+            "passed": cycle38_strict and cycle38_score >= 95,
             "evidence": {
-                "day38_score": day38_score,
-                "strict_pass": day38_strict,
-                "day38_checks": day38_check_count,
+                "cycle38_score": cycle38_score,
+                "strict_pass": cycle38_strict,
+                "cycle38_checks": cycle38_check_count,
             },
         },
         {
-            "check_id": "day38_board_integrity",
+            "check_id": "cycle38_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day38 and board_has_day39,
+            "passed": board_count >= 5 and board_has_cycle38 and board_has_cycle39,
             "evidence": {
                 "board_items": board_count,
-                "contains_day38": board_has_day38,
-                "contains_day39": board_has_day39,
+                "contains_cycle38": board_has_cycle38,
+                "contains_cycle39": board_has_cycle39,
             },
         },
         {
@@ -284,24 +284,24 @@ def build_playbook_post_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day38_summary.exists() or not day38_board.exists():
-        critical_failures.append("day38_handoff_inputs")
-    if not day38_strict:
-        critical_failures.append("day38_strict_baseline")
+    if not cycle38_summary.exists() or not cycle38_board.exists():
+        critical_failures.append("cycle38_handoff_inputs")
+    if not cycle38_strict:
+        critical_failures.append("cycle38_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day38_strict:
-        wins.append(f"Day 38 continuity is strict-pass with activation score={day38_score}.")
+    if cycle38_strict:
+        wins.append(f"Day 38 continuity is strict-pass with activation score={cycle38_score}.")
     else:
         misses.append("Day 38 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 38 distribution batch command and restore strict pass baseline before Day 39 lock."
         )
 
-    if board_count >= 5 and board_has_day38 and board_has_day39:
+    if board_count >= 5 and board_has_cycle38 and board_has_cycle39:
         wins.append(
             f"Day 38 delivery board integrity validated with {board_count} checklist items."
         )
@@ -335,18 +335,18 @@ def build_playbook_post_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day38_summary": str(day38_summary.relative_to(root))
-            if day38_summary.exists()
-            else str(day38_summary),
-            "day38_delivery_board": str(day38_board.relative_to(root))
-            if day38_board.exists()
-            else str(day38_board),
+            "cycle38_summary": str(cycle38_summary.relative_to(root))
+            if cycle38_summary.exists()
+            else str(cycle38_summary),
+            "cycle38_delivery_board": str(cycle38_board.relative_to(root))
+            if cycle38_board.exists()
+            else str(cycle38_board),
         },
         "checks": checks,
         "rollup": {
-            "day38_activation_score": day38_score,
-            "day38_checks": day38_check_count,
-            "day38_delivery_board_items": board_count,
+            "cycle38_activation_score": cycle38_score,
+            "cycle38_checks": cycle38_check_count,
+            "cycle38_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -384,9 +384,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 38 continuity",
         "",
-        f"- Day 38 activation score: `{payload['rollup']['day38_activation_score']}`",
-        f"- Day 38 checks evaluated: `{payload['rollup']['day38_checks']}`",
-        f"- Day 38 delivery board checklist items: `{payload['rollup']['day38_delivery_board_items']}`",
+        f"- Day 38 activation score: `{payload['rollup']['cycle38_activation_score']}`",
+        f"- Day 38 checks evaluated: `{payload['rollup']['cycle38_checks']}`",
+        f"- Day 38 delivery board checklist items: `{payload['rollup']['cycle38_delivery_board_items']}`",
         "",
         "## Wins",
     ]

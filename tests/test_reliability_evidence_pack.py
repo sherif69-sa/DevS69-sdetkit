@@ -11,18 +11,18 @@ from sdetkit import reliability_evidence_pack as rep
 
 
 def _write_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
-    day15 = tmp_path / "day15.json"
-    day16 = tmp_path / "day16.json"
-    day17 = tmp_path / "day17.json"
-    day15.write_text(
+    gha_summary = tmp_path / "gha_summary.json"
+    gl_summary = tmp_path / "gl_summary.json"
+    cq_summary = tmp_path / "cq_summary.json"
+    gha_summary.write_text(
         '{"score": 100.0, "strict": true, "checks_passed": 19, "checks_total": 19}\n',
         encoding="utf-8",
     )
-    day16.write_text(
+    gl_summary.write_text(
         '{"score": 100.0, "strict": true, "checks_passed": 19, "checks_total": 19}\n',
         encoding="utf-8",
     )
-    day17.write_text(
+    cq_summary.write_text(
         json.dumps(
             {
                 "name": "contribution-quality-report",
@@ -34,7 +34,7 @@ def _write_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
         + "\n",
         encoding="utf-8",
     )
-    return day15, day16, day17
+    return gha_summary, gl_summary, cq_summary
 
 
 def _write_page(root: Path) -> None:
@@ -44,7 +44,7 @@ def _write_page(root: Path) -> None:
 
 
 def test_pack_builds_json(tmp_path: Path, capsys) -> None:
-    day15, day16, day17 = _write_inputs(tmp_path)
+    gha_summary, gl_summary, cq_summary = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     rc = rep.main(
@@ -52,11 +52,11 @@ def test_pack_builds_json(tmp_path: Path, capsys) -> None:
             "--root",
             str(tmp_path),
             "--github-actions-summary",
-            str(day15.relative_to(tmp_path)),
+            str(gha_summary.relative_to(tmp_path)),
             "--gitlab-ci-summary",
-            str(day16.relative_to(tmp_path)),
+            str(gl_summary.relative_to(tmp_path)),
             "--contribution-quality-summary",
-            str(day17.relative_to(tmp_path)),
+            str(cq_summary.relative_to(tmp_path)),
             "--format",
             "json",
             "--strict",
@@ -71,7 +71,7 @@ def test_pack_builds_json(tmp_path: Path, capsys) -> None:
 
 
 def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
-    day15, day16, day17 = _write_inputs(tmp_path)
+    gha_summary, gl_summary, cq_summary = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     rc = rep.main(
@@ -79,11 +79,11 @@ def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
             "--root",
             str(tmp_path),
             "--github-actions-summary",
-            str(day15.relative_to(tmp_path)),
+            str(gha_summary.relative_to(tmp_path)),
             "--gitlab-ci-summary",
-            str(day16.relative_to(tmp_path)),
+            str(gl_summary.relative_to(tmp_path)),
             "--contribution-quality-summary",
-            str(day17.relative_to(tmp_path)),
+            str(cq_summary.relative_to(tmp_path)),
             "--emit-pack-dir",
             "artifacts/reliability-evidence-pack",
             "--execute",
@@ -113,18 +113,18 @@ def test_pack_emits_bundle_and_evidence(tmp_path: Path) -> None:
 
 
 def test_write_defaults(tmp_path: Path) -> None:
-    day15, day16, day17 = _write_inputs(tmp_path)
+    gha_summary, gl_summary, cq_summary = _write_inputs(tmp_path)
     rc = rep.main(
         [
             "--root",
             str(tmp_path),
             "--write-defaults",
             "--github-actions-summary",
-            str(day15.relative_to(tmp_path)),
+            str(gha_summary.relative_to(tmp_path)),
             "--gitlab-ci-summary",
-            str(day16.relative_to(tmp_path)),
+            str(gl_summary.relative_to(tmp_path)),
             "--contribution-quality-summary",
-            str(day17.relative_to(tmp_path)),
+            str(cq_summary.relative_to(tmp_path)),
             "--format",
             "json",
         ]
@@ -134,7 +134,7 @@ def test_write_defaults(tmp_path: Path) -> None:
 
 
 def test_cli_dispatch(tmp_path: Path, capsys) -> None:
-    day15, day16, day17 = _write_inputs(tmp_path)
+    gha_summary, gl_summary, cq_summary = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     rc = cli.main(
@@ -143,11 +143,11 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
             "--root",
             str(tmp_path),
             "--github-actions-summary",
-            str(day15.relative_to(tmp_path)),
+            str(gha_summary.relative_to(tmp_path)),
             "--gitlab-ci-summary",
-            str(day16.relative_to(tmp_path)),
+            str(gl_summary.relative_to(tmp_path)),
             "--contribution-quality-summary",
-            str(day17.relative_to(tmp_path)),
+            str(cq_summary.relative_to(tmp_path)),
             "--format",
             "text",
         ]
@@ -162,33 +162,10 @@ def test_reliability_pack_help_prefers_canonical_summary_flags() -> None:
     assert "--github-actions-summary" in help_text
     assert "--gitlab-ci-summary" in help_text
     assert "--contribution-quality-summary" in help_text
-    assert "--day15-summary" not in help_text
-    assert "--day16-summary" not in help_text
-    assert "--day17-summary" not in help_text
+    assert "--gha_summary-summary" not in help_text
+    assert "--gl_summary-summary" not in help_text
+    assert "--cq_summary-summary" not in help_text
 
-
-def test_reliability_pack_accepts_legacy_day_aliases(tmp_path: Path, capsys) -> None:
-    day15, day16, day17 = _write_inputs(tmp_path)
-    _write_page(tmp_path)
-
-    rc = rep.main(
-        [
-            "--root",
-            str(tmp_path),
-            "--day15-summary",
-            str(day15.relative_to(tmp_path)),
-            "--day16-summary",
-            str(day16.relative_to(tmp_path)),
-            "--day17-summary",
-            str(day17.relative_to(tmp_path)),
-            "--format",
-            "json",
-            "--strict",
-        ]
-    )
-    assert rc == 0
-    out = json.loads(capsys.readouterr().out)
-    assert out["summary"]["strict_all_green"] is True
 
 
 def test_reliability_pack_load_json_requires_object(tmp_path: Path) -> None:
@@ -254,7 +231,7 @@ def test_reliability_pack_main_returns_2_on_missing_inputs(tmp_path: Path, capsy
 
 
 def test_reliability_pack_main_markdown_writes_output_file(tmp_path: Path) -> None:
-    day15, day16, day17 = _write_inputs(tmp_path)
+    gha_summary, gl_summary, cq_summary = _write_inputs(tmp_path)
     _write_page(tmp_path)
 
     out_path = tmp_path / "pack.md"
@@ -263,11 +240,11 @@ def test_reliability_pack_main_markdown_writes_output_file(tmp_path: Path) -> No
             "--root",
             str(tmp_path),
             "--github-actions-summary",
-            str(day15.relative_to(tmp_path)),
+            str(gha_summary.relative_to(tmp_path)),
             "--gitlab-ci-summary",
-            str(day16.relative_to(tmp_path)),
+            str(gl_summary.relative_to(tmp_path)),
             "--contribution-quality-summary",
-            str(day17.relative_to(tmp_path)),
+            str(cq_summary.relative_to(tmp_path)),
             "--format",
             "markdown",
             "--output",
@@ -283,16 +260,16 @@ def test_reliability_pack_strict_fails_when_page_missing_and_score_low(
     tmp_path: Path, capsys
 ) -> None:
     # Create inputs that produce a very low reliability_score and a page missing required content.
-    day15 = tmp_path / "day15.json"
-    day16 = tmp_path / "day16.json"
-    day17 = tmp_path / "day17.json"
-    day15.write_text(
+    gha_summary = tmp_path / "gha_summary.json"
+    gl_summary = tmp_path / "gl_summary.json"
+    cq_summary = tmp_path / "cq_summary.json"
+    gha_summary.write_text(
         '{"score": 0.0, "strict": true, "checks_passed": 0, "checks_total": 10}\n', encoding="utf-8"
     )
-    day16.write_text(
+    gl_summary.write_text(
         '{"score": 0.0, "strict": true, "checks_passed": 0, "checks_total": 10}\n', encoding="utf-8"
     )
-    day17.write_text(
+    cq_summary.write_text(
         '{"name":"contribution-quality-report","quality":{"stability_score":0.0},"contributions":{"velocity_score":0.0},"strict_failures":[]}\n',
         encoding="utf-8",
     )
@@ -305,11 +282,11 @@ def test_reliability_pack_strict_fails_when_page_missing_and_score_low(
             "--root",
             str(tmp_path),
             "--github-actions-summary",
-            str(day15.relative_to(tmp_path)),
+            str(gha_summary.relative_to(tmp_path)),
             "--gitlab-ci-summary",
-            str(day16.relative_to(tmp_path)),
+            str(gl_summary.relative_to(tmp_path)),
             "--contribution-quality-summary",
-            str(day17.relative_to(tmp_path)),
+            str(cq_summary.relative_to(tmp_path)),
             "--format",
             "json",
             "--strict",

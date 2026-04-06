@@ -5,9 +5,9 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review-closeout-2.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day64_summary": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json",
-    "day64_delivery_board": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md",
-    "day64_workflow": ".github/workflows/advanced-github-actions-reference-64.yml"
+    "cycle64_summary": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json",
+    "cycle64_delivery_board": "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md",
+    "cycle64_workflow": ".github/workflows/advanced-github-actions-reference-64.yml"
   },
   "checks": [
     {
@@ -29,34 +29,34 @@
       "evidence": "Day 65 + Day 66 strategy chain"
     },
     {
-      "check_id": "day64_summary_present",
+      "check_id": "cycle64_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json"
     },
     {
-      "check_id": "day64_delivery_board_present",
+      "check_id": "cycle64_delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
     },
     {
-      "check_id": "day64_quality_floor",
+      "check_id": "cycle64_quality_floor",
       "weight": 13,
       "passed": true,
       "evidence": {
-        "day64_score": 100,
+        "cycle64_score": 100,
         "strict_pass": true,
-        "day64_checks": 14
+        "cycle64_checks": 14
       }
     },
     {
-      "check_id": "day64_board_integrity",
+      "check_id": "cycle64_board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day64": true
+        "contains_cycle64": true
       }
     },
     {
@@ -99,16 +99,16 @@
       "evidence": "delivery board locked"
     },
     {
-      "check_id": "day64_workflow_reference_present",
+      "check_id": "cycle64_workflow_reference_present",
       "weight": 10,
       "passed": false,
       "evidence": ".github/workflows/advanced-github-actions-reference-64.yml"
     }
   ],
   "rollup": {
-    "day64_activation_score": 100,
-    "day64_checks": 14,
-    "day64_delivery_board_items": 5
+    "cycle64_activation_score": 100,
+    "cycle64_checks": 14,
+    "cycle64_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 55,
@@ -125,6 +125,6 @@
     "Day 64 workflow reference is missing for weekly review context."
   ],
   "handoff_actions": [
-    "Restore day64 workflow reference before publishing Day 65 outcomes."
+    "Restore cycle64 workflow reference before publishing Day 65 outcomes."
   ]
 }

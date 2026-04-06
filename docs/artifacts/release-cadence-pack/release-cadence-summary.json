@@ -5,10 +5,10 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-release-cadence.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day31_summary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
-    "day31_summary_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
-    "day31_delivery_board": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
-    "day31_delivery_board_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
+    "cycle31_summary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+    "cycle31_summary_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json",
+    "cycle31_delivery_board": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md",
+    "cycle31_delivery_board_primary": "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
   },
   "checks": [
     {
@@ -58,7 +58,7 @@
       "evidence": "Day 32 + Day 33 strategy chain"
     },
     {
-      "check_id": "day31_summary_present",
+      "check_id": "cycle31_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -67,7 +67,7 @@
       }
     },
     {
-      "check_id": "day31_delivery_board_present",
+      "check_id": "cycle31_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -76,23 +76,23 @@
       }
     },
     {
-      "check_id": "day31_quality_floor",
+      "check_id": "cycle31_quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day31_score": 65.0,
+        "cycle31_score": 65.0,
         "strict_pass": false,
-        "day31_checks": 13
+        "cycle31_checks": 13
       }
     },
     {
-      "check_id": "day31_board_integrity",
+      "check_id": "cycle31_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day32": true,
-        "contains_day33": true
+        "contains_cycle32": true,
+        "contains_cycle33": true
       }
     },
     {
@@ -121,16 +121,16 @@
     }
   ],
   "rollup": {
-    "day31_activation_score": 65.0,
-    "day31_checks": 13,
-    "day31_delivery_board_items": 5
+    "cycle31_activation_score": 65.0,
+    "cycle31_checks": 13,
+    "cycle31_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 65,
     "passed_checks": 9,
     "failed_checks": 5,
     "critical_failures": [
-      "day31_strict_baseline"
+      "cycle31_strict_baseline"
     ],
     "strict_pass": false
   },

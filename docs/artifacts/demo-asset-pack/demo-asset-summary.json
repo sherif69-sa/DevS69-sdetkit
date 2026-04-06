@@ -95,8 +95,8 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_demo_asset_day33": false,
-        "contains_demo_asset_day34": false
+        "contains_demo_asset_cycle33": false,
+        "contains_demo_asset_cycle34": false
       }
     },
     {

@@ -13,7 +13,7 @@
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": false,
-      "evidence": "README day60 command lane"
+      "evidence": "README cycle60 command lane"
     },
     {
       "check_id": "docs_index_links",

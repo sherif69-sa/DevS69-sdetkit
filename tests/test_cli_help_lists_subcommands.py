@@ -62,18 +62,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "external-contribution" in out
     assert "external-contribution-push" not in out
     assert "kpi-audit" in out
-    assert "day29-phase1-hardening" not in out
-    assert "day30-phase1-wrap" not in out
-    assert "day31-phase2-kickoff" not in out
-    assert "day32-release-cadence" not in out
-    assert "day33-demo-asset" not in out
-    assert "day34-demo-asset2" not in out
-    assert "day35-kpi-instrumentation" not in out
-    assert "day36-distribution-closeout" not in out
-    assert "day37-experiment-lane" not in out
-    assert "day38-distribution-batch" not in out
-    assert "day39-playbook-post" not in out
-    assert "day40-scale-lane" not in out
+    assert "day" not in out.lower()
     assert "expansion-automation" not in out
     assert "optimization-closeout-foundation" not in out
     assert "acceleration-closeout" not in out
@@ -99,7 +88,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "faq-objections" not in j["aliases"]
     assert "onboarding-time-upgrade" not in j["aliases"]
     assert "phase1-hardening" in j["playbooks"]
-    assert "day29-phase1-hardening" not in j["playbooks"]
+    assert all("day" not in name.lower() for name in j["playbooks"])
     r2 = subprocess.run(
         [sys.executable, "-m", "sdetkit", "playbooks"],
         text=True,
@@ -110,7 +99,7 @@ def test_help_lists_doctor_patch_cassette_get_repo_dev_report_maintenance_agent_
     assert "phase1-hardening" in out2
     assert "phase1-wrap" in out2
     assert "scale-closeout" in out2
-    assert "day29-phase1-hardening -> phase1-hardening" not in out2
+    assert "day" not in out2.lower()
     assert "Run: sdetkit playbooks run <name>" in out2
 
 

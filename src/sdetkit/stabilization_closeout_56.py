@@ -179,7 +179,7 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         contributor_activation_strict,
         contributor_activation_check_count,
     ) = _load_contributor_activation_summary(contributor_activation_summary)
-    board_count, board_has_contributor_activation_day55 = _board_stats(contributor_activation_board)
+    board_count, board_has_contributor_activation_cycle55 = _board_stats(contributor_activation_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -252,10 +252,10 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "contributor_activation_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_contributor_activation_day55,
+            "passed": board_count >= 5 and board_has_contributor_activation_cycle55,
             "evidence": {
                 "board_items": board_count,
-                "contains_contributor_activation_day55": board_has_contributor_activation_day55,
+                "contains_contributor_activation_cycle55": board_has_contributor_activation_cycle55,
             },
         },
         {
@@ -299,7 +299,7 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "Re-run Day 55 contributor activation closeout command and restore strict baseline before Day 56 lock."
         )
 
-    if board_count >= 5 and board_has_contributor_activation_day55:
+    if board_count >= 5 and board_has_contributor_activation_cycle55:
         wins.append(
             f"Day 55 delivery board integrity validated with {board_count} checklist items."
         )

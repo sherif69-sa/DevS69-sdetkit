@@ -132,7 +132,7 @@ def test_lane55_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane55_strict_fails_without_day53(tmp_path: Path) -> None:
+def test_lane55_strict_fails_without_prereq_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json").unlink()
     assert d55.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1

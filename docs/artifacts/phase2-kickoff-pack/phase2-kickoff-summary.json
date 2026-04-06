@@ -6,8 +6,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase2-kickoff.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day30_summary": "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
-    "day30_backlog": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
+    "cycle30_summary": "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json",
+    "cycle30_backlog": "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
   },
   "checks": [
     {
@@ -42,7 +42,7 @@
       "check_id": "readme_command_lane",
       "weight": 4,
       "passed": false,
-      "evidence": "phase2-kickoff (legacy: legacy-phase2-kickoff; historical: day31-phase2-kickoff)"
+      "evidence": "phase2-kickoff (legacy: legacy-phase2-kickoff; historical: cycle31-phase2-kickoff)"
     },
     {
       "check_id": "docs_index_links",
@@ -57,7 +57,7 @@
       "evidence": "Day 31 + Day 32 strategy chain"
     },
     {
-      "check_id": "day30_summary_present",
+      "check_id": "cycle30_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -66,7 +66,7 @@
       }
     },
     {
-      "check_id": "day30_backlog_present",
+      "check_id": "cycle30_backlog_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -75,12 +75,12 @@
       }
     },
     {
-      "check_id": "day30_quality_floor",
+      "check_id": "cycle30_quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day30_score": 69.0,
-        "day30_average": 85.0,
+        "cycle30_score": 69.0,
+        "cycle30_average": 85.0,
         "strict_pass": false
       }
     },
@@ -90,8 +90,8 @@
       "passed": true,
       "evidence": {
         "backlog_items": 8,
-        "contains_day31": true,
-        "contains_day32": true
+        "contains_cycle31": true,
+        "contains_cycle32": true
       }
     },
     {
@@ -112,16 +112,16 @@
     }
   ],
   "rollup": {
-    "day30_activation_score": 69.0,
-    "day30_average_activation_score": 85.0,
-    "day30_backlog_items": 8
+    "cycle30_activation_score": 69.0,
+    "cycle30_average_activation_score": 85.0,
+    "cycle30_backlog_items": 8
   },
   "summary": {
     "activation_score": 65,
     "passed_checks": 8,
     "failed_checks": 5,
     "critical_failures": [
-      "day30_strict_baseline"
+      "cycle30_strict_baseline"
     ],
     "strict_pass": false
   },

@@ -130,7 +130,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day46(path: Path) -> tuple[float, bool, int]:
+def _load_cycle46(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -182,12 +182,12 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day46_summary_primary = root / _DAY46_SUMMARY_PATH
-    day46_board_primary = root / _DAY46_BOARD_PATH
-    day46_summary = _resolve_existing_path(root, _DAY46_SUMMARY_PATH, _DAY46_SUMMARY_LEGACY_PATH)
-    day46_board = _resolve_existing_path(root, _DAY46_BOARD_PATH, _DAY46_BOARD_LEGACY_PATH)
-    day46_score, day46_strict, day46_check_count = _load_day46(day46_summary)
-    board_count, board_has_day46, board_has_day47 = _board_stats(day46_board)
+    cycle46_summary_primary = root / _DAY46_SUMMARY_PATH
+    cycle46_board_primary = root / _DAY46_BOARD_PATH
+    cycle46_summary = _resolve_existing_path(root, _DAY46_SUMMARY_PATH, _DAY46_SUMMARY_LEGACY_PATH)
+    cycle46_board = _resolve_existing_path(root, _DAY46_BOARD_PATH, _DAY46_BOARD_LEGACY_PATH)
+    cycle46_score, cycle46_strict, cycle46_check_count = _load_cycle46(cycle46_summary)
+    board_count, board_has_cycle46, board_has_cycle47 = _board_stats(cycle46_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -218,8 +218,8 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "readme_command_lane",
             "weight": 4,
             "passed": ("reliability-closeout" in readme_text)
-            or ("day47-reliability-closeout" in readme_text),
-            "evidence": "reliability-closeout (legacy: day47-reliability-closeout)",
+            or ("cycle47-reliability-closeout" in readme_text),
+            "evidence": "reliability-closeout (legacy: cycle47-reliability-closeout)",
         },
         {
             "check_id": "docs_index_links",
@@ -237,35 +237,35 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 46 + Day 47 strategy chain",
         },
         {
-            "check_id": "day46_summary_present",
+            "check_id": "cycle46_summary_present",
             "weight": 10,
-            "passed": day46_summary.exists(),
-            "evidence": str(day46_summary),
+            "passed": cycle46_summary.exists(),
+            "evidence": str(cycle46_summary),
         },
         {
-            "check_id": "day46_delivery_board_present",
+            "check_id": "cycle46_delivery_board_present",
             "weight": 8,
-            "passed": day46_board.exists(),
-            "evidence": str(day46_board),
+            "passed": cycle46_board.exists(),
+            "evidence": str(cycle46_board),
         },
         {
-            "check_id": "day46_quality_floor",
+            "check_id": "cycle46_quality_floor",
             "weight": 10,
-            "passed": day46_strict and day46_score >= 95,
+            "passed": cycle46_strict and cycle46_score >= 95,
             "evidence": {
-                "day46_score": day46_score,
-                "strict_pass": day46_strict,
-                "day46_checks": day46_check_count,
+                "cycle46_score": cycle46_score,
+                "strict_pass": cycle46_strict,
+                "cycle46_checks": cycle46_check_count,
             },
         },
         {
-            "check_id": "day46_board_integrity",
+            "check_id": "cycle46_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day46 and board_has_day47,
+            "passed": board_count >= 5 and board_has_cycle46 and board_has_cycle47,
             "evidence": {
                 "board_items": board_count,
-                "contains_day46": board_has_day46,
-                "contains_day47": board_has_day47,
+                "contains_cycle46": board_has_cycle46,
+                "contains_cycle47": board_has_cycle47,
             },
         },
         {
@@ -291,24 +291,24 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day46_summary.exists() or not day46_board.exists():
-        critical_failures.append("day46_handoff_inputs")
-    if not day46_strict:
-        critical_failures.append("day46_strict_baseline")
+    if not cycle46_summary.exists() or not cycle46_board.exists():
+        critical_failures.append("cycle46_handoff_inputs")
+    if not cycle46_strict:
+        critical_failures.append("cycle46_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day46_strict:
-        wins.append(f"Day 46 continuity is strict-pass with activation score={day46_score}.")
+    if cycle46_strict:
+        wins.append(f"Day 46 continuity is strict-pass with activation score={cycle46_score}.")
     else:
         misses.append("Day 46 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 46 optimization closeout command and restore strict pass baseline before Day 47 lock."
         )
 
-    if board_count >= 5 and board_has_day46 and board_has_day47:
+    if board_count >= 5 and board_has_cycle46 and board_has_cycle47:
         wins.append(
             f"Day 46 delivery board integrity validated with {board_count} checklist items."
         )
@@ -344,20 +344,20 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day46_summary": str(day46_summary.relative_to(root))
-            if day46_summary.exists()
-            else str(day46_summary),
-            "day46_summary_primary": str(day46_summary_primary.relative_to(root)),
-            "day46_delivery_board": str(day46_board.relative_to(root))
-            if day46_board.exists()
-            else str(day46_board),
-            "day46_delivery_board_primary": str(day46_board_primary.relative_to(root)),
+            "cycle46_summary": str(cycle46_summary.relative_to(root))
+            if cycle46_summary.exists()
+            else str(cycle46_summary),
+            "cycle46_summary_primary": str(cycle46_summary_primary.relative_to(root)),
+            "cycle46_delivery_board": str(cycle46_board.relative_to(root))
+            if cycle46_board.exists()
+            else str(cycle46_board),
+            "cycle46_delivery_board_primary": str(cycle46_board_primary.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
-            "day46_activation_score": day46_score,
-            "day46_checks": day46_check_count,
-            "day46_delivery_board_items": board_count,
+            "cycle46_activation_score": cycle46_score,
+            "cycle46_checks": cycle46_check_count,
+            "cycle46_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -379,9 +379,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 46 activation score: `{payload['rollup']['day46_activation_score']}`",
-        f"- Day 46 checks evaluated: `{payload['rollup']['day46_checks']}`",
-        f"- Day 46 delivery board checklist items: `{payload['rollup']['day46_delivery_board_items']}`",
+        f"- Day 46 activation score: `{payload['rollup']['cycle46_activation_score']}`",
+        f"- Day 46 checks evaluated: `{payload['rollup']['cycle46_checks']}`",
+        f"- Day 46 delivery board checklist items: `{payload['rollup']['cycle46_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")

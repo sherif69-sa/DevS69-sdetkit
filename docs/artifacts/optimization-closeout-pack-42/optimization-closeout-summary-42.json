@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-optimization-closeout-foundation.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day41_summary": "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json",
-    "day41_delivery_board": "docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
+    "cycle41_summary": "docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json",
+    "cycle41_delivery_board": "docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
   },
   "checks": [
     {
@@ -56,35 +56,35 @@
       "evidence": "Day 42 + Day 43 strategy chain"
     },
     {
-      "check_id": "day41_summary_present",
+      "check_id": "cycle41_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json"
     },
     {
-      "check_id": "day41_delivery_board_present",
+      "check_id": "cycle41_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/expansion-automation-pack-41/delivery-board-41.md"
     },
     {
-      "check_id": "day41_quality_floor",
+      "check_id": "cycle41_quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day41_score": 100.0,
+        "cycle41_score": 100.0,
         "strict_pass": true,
-        "day41_checks": 14
+        "cycle41_checks": 14
       }
     },
     {
-      "check_id": "day41_board_integrity",
+      "check_id": "cycle41_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day41": true,
-        "contains_day42": true
+        "contains_cycle41": true,
+        "contains_cycle42": true
       }
     },
     {
@@ -113,9 +113,9 @@
     }
   ],
   "rollup": {
-    "day41_activation_score": 100.0,
-    "day41_checks": 14,
-    "day41_delivery_board_items": 5
+    "cycle41_activation_score": 100.0,
+    "cycle41_checks": 14,
+    "cycle41_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

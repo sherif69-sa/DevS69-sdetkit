@@ -24,7 +24,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Validate execution prioritization closeout contract "
-            "(legacy alias: day50 execution prioritization closeout)."
+            "(legacy alias: cycle50 execution prioritization closeout)."
         )
     )
     parser.add_argument("--root", default=".")

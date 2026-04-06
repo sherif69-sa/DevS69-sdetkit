@@ -470,7 +470,7 @@ Start here:
     d46.set_defaults(cmd="optimization-closeout")
     d46.add_argument("args", nargs=argparse.REMAINDER)
 
-    d47 = sub.add_parser("reliability-closeout", aliases=["day47-reliability-closeout"])
+    d47 = sub.add_parser("reliability-closeout")
     d47.set_defaults(cmd="reliability-closeout")
     d47.add_argument("args", nargs=argparse.REMAINDER)
     d48 = sub.add_parser("objection-closeout")
@@ -479,10 +479,7 @@ Start here:
     d49 = sub.add_parser("weekly-review-closeout")
     d49.set_defaults(cmd="weekly-review-closeout")
     d49.add_argument("args", nargs=argparse.REMAINDER)
-    d50 = sub.add_parser(
-        "execution-prioritization-closeout",
-        aliases=["day50-execution-prioritization-closeout"],
-    )
+    d50 = sub.add_parser("execution-prioritization-closeout")
     d50.set_defaults(cmd="execution-prioritization-closeout")
     d50.add_argument("args", nargs=argparse.REMAINDER)
     d51 = sub.add_parser("case-snippet-closeout")
@@ -763,11 +760,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     if argv:
         argv = list(argv)
         argv[0] = _resolve_non_day_playbook_alias(str(argv[0]))
-        legacy_aliases = {
-            "day47-reliability-closeout": "reliability-closeout",
-            "day50-execution-prioritization-closeout": "execution-prioritization-closeout",
-        }
-        argv[0] = legacy_aliases.get(str(argv[0]), str(argv[0]))
 
     if argv and argv[0] == "cassette-get":
         from .__main__ import _cassette_get

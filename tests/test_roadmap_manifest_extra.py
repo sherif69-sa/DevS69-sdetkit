@@ -34,25 +34,25 @@ def test_build_manifest_merges_reports_and_plans(tmp_path: Path) -> None:
     reports.mkdir(parents=True)
     plans.mkdir(parents=True)
 
-    (reports / "impact-3-alpha-report.md").write_text("# Day 3 report\n", encoding="utf-8")
+    (reports / "impact-3-alpha-report.md").write_text("# Cycle 3 report\n", encoding="utf-8")
     (reports / "impact-4-beta-report.md").write_text("text only\n", encoding="utf-8")
-    (plans / "day3-plan.json").write_text('{"name": "Plan 3"}', encoding="utf-8")
-    (plans / "day4-plan.json").write_text('{"title": " Plan 4 "}', encoding="utf-8")
+    (plans / "impact3-plan.json").write_text('{"name": "Plan 3"}', encoding="utf-8")
+    (plans / "impact4-plan.json").write_text('{"title": " Plan 4 "}', encoding="utf-8")
 
     manifest = rm.build_manifest(repo_root=tmp_path)
     assert manifest["phases"] == [
         {
             "impact": 3,
             "report_path": "docs/roadmap/reports/impact-3-alpha-report.md",
-            "report_title": "Day 3 report",
-            "plan_path": "docs/roadmap/phase3/plans/day3-plan.json",
+            "report_title": "Cycle 3 report",
+            "plan_path": "docs/roadmap/phase3/plans/impact3-plan.json",
             "plan_title": "Plan 3",
         },
         {
             "impact": 4,
             "report_path": "docs/roadmap/reports/impact-4-beta-report.md",
             "report_title": "impact-4-beta-report.md",
-            "plan_path": "docs/roadmap/phase3/plans/day4-plan.json",
+            "plan_path": "docs/roadmap/phase3/plans/impact4-plan.json",
             "plan_title": "Plan 4",
         },
     ]
@@ -71,7 +71,7 @@ def test_closeout_inventory_matches_contract_by_lane_when_id_missing(tmp_path: P
     scripts.mkdir(parents=True)
 
     (src / "community_touchpoint_closeout_77.py").write_text(
-        "def main():\n    return 'day77'\n", encoding="utf-8"
+        "def main():\n    return 'cycle77'\n", encoding="utf-8"
     )
     (tests / "test_community_touchpoint_closeout.py").write_text(
         "from sdetkit import community_touchpoint_closeout_77\n", encoding="utf-8"
@@ -107,8 +107,8 @@ def test_build_manifest_duplicate_report_and_plan_errors(tmp_path: Path) -> None
 
     # Keep one report so plan duplicate path can be reached.
     (reports / "impact-5-b-report.md").unlink()
-    (plans / "day5-a.json").write_text("{}", encoding="utf-8")
-    (plans / "day5-b.json").write_text("{}", encoding="utf-8")
+    (plans / "impact5-a.json").write_text("{}", encoding="utf-8")
+    (plans / "impact5-b.json").write_text("{}", encoding="utf-8")
 
     try:
         rm.build_manifest(repo_root=tmp_path)

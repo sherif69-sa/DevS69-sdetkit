@@ -132,7 +132,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day62(path: Path) -> tuple[int, bool, int]:
+def _load_cycle62(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -158,10 +158,10 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     page_text = _read(root / _PAGE_PATH)
     top10_text = _read(root / _TOP10_PATH)
 
-    day62_summary = root / _DAY62_SUMMARY_PATH
-    day62_board = root / _DAY62_BOARD_PATH
-    day62_score, day62_strict, day62_check_count = _load_day62(day62_summary)
-    board_count, board_has_day62 = _count_board_items(day62_board, "Day 62")
+    cycle62_summary = root / _DAY62_SUMMARY_PATH
+    cycle62_board = root / _DAY62_BOARD_PATH
+    cycle62_score, cycle62_strict, cycle62_check_count = _load_cycle62(cycle62_summary)
+    board_count, board_has_cycle62 = _count_board_items(cycle62_board, "Day 62")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -192,32 +192,32 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Cycle 63 + Cycle 64 strategy chain",
         },
         {
-            "check_id": "day62_summary_present",
+            "check_id": "cycle62_summary_present",
             "weight": 10,
-            "passed": day62_summary.exists(),
-            "evidence": str(day62_summary),
+            "passed": cycle62_summary.exists(),
+            "evidence": str(cycle62_summary),
         },
         {
-            "check_id": "day62_delivery_board_present",
+            "check_id": "cycle62_delivery_board_present",
             "weight": 8,
-            "passed": day62_board.exists(),
-            "evidence": str(day62_board),
+            "passed": cycle62_board.exists(),
+            "evidence": str(cycle62_board),
         },
         {
-            "check_id": "day62_quality_floor",
+            "check_id": "cycle62_quality_floor",
             "weight": 15,
-            "passed": day62_strict and day62_score >= 95,
+            "passed": cycle62_strict and cycle62_score >= 95,
             "evidence": {
-                "day62_score": day62_score,
-                "strict_pass": day62_strict,
-                "day62_checks": day62_check_count,
+                "cycle62_score": cycle62_score,
+                "strict_pass": cycle62_strict,
+                "cycle62_checks": cycle62_check_count,
             },
         },
         {
-            "check_id": "day62_board_integrity",
+            "check_id": "cycle62_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day62,
-            "evidence": {"board_items": board_count, "contains_day62": board_has_day62},
+            "passed": board_count >= 5 and board_has_cycle62,
+            "evidence": {"board_items": board_count, "contains_cycle62": board_has_cycle62},
         },
         {
             "check_id": "page_header",
@@ -259,24 +259,24 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day62_summary.exists() or not day62_board.exists():
-        critical_failures.append("day62_handoff_inputs")
-    if not day62_strict:
-        critical_failures.append("day62_strict_baseline")
+    if not cycle62_summary.exists() or not cycle62_board.exists():
+        critical_failures.append("cycle62_handoff_inputs")
+    if not cycle62_strict:
+        critical_failures.append("cycle62_strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day62_strict:
-        wins.append(f"Day 62 continuity is strict-pass with activation score={day62_score}.")
+    if cycle62_strict:
+        wins.append(f"Day 62 continuity is strict-pass with activation score={cycle62_score}.")
     else:
         misses.append("Day 62 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 62 community-program closeout command and restore strict baseline before Cycle 63 lock."
         )
 
-    if board_count >= 5 and board_has_day62:
+    if board_count >= 5 and board_has_cycle62:
         wins.append(
             f"Day 62 delivery board integrity validated with {board_count} checklist items."
         )
@@ -311,18 +311,18 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day62_summary": str(day62_summary.relative_to(root))
-            if day62_summary.exists()
-            else str(day62_summary),
-            "day62_delivery_board": str(day62_board.relative_to(root))
-            if day62_board.exists()
-            else str(day62_board),
+            "cycle62_summary": str(cycle62_summary.relative_to(root))
+            if cycle62_summary.exists()
+            else str(cycle62_summary),
+            "cycle62_delivery_board": str(cycle62_board.relative_to(root))
+            if cycle62_board.exists()
+            else str(cycle62_board),
         },
         "checks": checks,
         "rollup": {
-            "day62_activation_score": day62_score,
-            "day62_checks": day62_check_count,
-            "day62_delivery_board_items": board_count,
+            "cycle62_activation_score": cycle62_score,
+            "cycle62_checks": cycle62_check_count,
+            "cycle62_delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

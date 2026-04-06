@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-community-program-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day61_summary": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json",
-    "day61_delivery_board": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
+    "cycle61_summary": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json",
+    "cycle61_delivery_board": "docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
   },
   "checks": [
     {
@@ -28,34 +28,34 @@
       "evidence": "Day 62 + Day 63 strategy chain"
     },
     {
-      "check_id": "day61_summary_present",
+      "check_id": "cycle61_summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-closeout-summary.json"
     },
     {
-      "check_id": "day61_delivery_board_present",
+      "check_id": "cycle61_delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/phase3-kickoff-closeout-pack/phase3-kickoff-delivery-board.md"
     },
     {
-      "check_id": "day61_quality_floor",
+      "check_id": "cycle61_quality_floor",
       "weight": 15,
       "passed": false,
       "evidence": {
-        "day61_score": 29,
+        "cycle61_score": 29,
         "strict_pass": false,
-        "day61_checks": 13
+        "cycle61_checks": 13
       }
     },
     {
-      "check_id": "day61_board_integrity",
+      "check_id": "cycle61_board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day61": true
+        "contains_cycle61": true
       }
     },
     {
@@ -109,16 +109,16 @@
     }
   ],
   "rollup": {
-    "day61_activation_score": 29,
-    "day61_checks": 13,
-    "day61_delivery_board_items": 5
+    "cycle61_activation_score": 29,
+    "cycle61_checks": 13,
+    "cycle61_delivery_board_items": 5
   },
   "summary": {
     "activation_score": 36,
     "passed_checks": 5,
     "failed_checks": 8,
     "critical_failures": [
-      "day61_strict_baseline"
+      "cycle61_strict_baseline"
     ],
     "strict_pass": false
   },
