@@ -221,3 +221,58 @@ def test_radar_payload_exposes_dashboard_cards_and_watchlists(tmp_path: Path) ->
     assert payload["hotspots"][0]["package"] == "httpx"
     assert payload["watchlists"]["runtime_core"]
     assert payload["maintenance_lanes"][0]["id"] == "route-hotspots"
+
+
+def test_discover_payload_aligns_catalog_optimize_expand_and_radar(tmp_path: Path) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\n"
+        "name='x'\n"
+        "version='0.1.0'\n"
+        "dependencies=['httpx>=0.28.1,<1']\n",
+        encoding="utf-8",
+    )
+    src_dir = tmp_path / "src" / "demo"
+    src_dir.mkdir(parents=True, exist_ok=True)
+    (src_dir / "api.py").write_text("import httpx\n", encoding="utf-8")
+    (tmp_path / "quality.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / "premium-gate.sh").write_text("#!/usr/bin/env bash\n", encoding="utf-8")
+    (tmp_path / ".sdetkit").mkdir(parents=True, exist_ok=True)
+    (tmp_path / ".sdetkit" / "gate.fast.snapshot.json").write_text("{}", encoding="utf-8")
+
+    payload = kits.discover_payload(
+        root=tmp_path,
+        goal="align all repo capabilities",
+        query="release integration",
+        selected_kits=["release", "integration"],
+        limit=3,
+    )
+
+    assert payload["catalog"]["schema_version"] == kits.SCHEMA_VERSION
+    assert payload["recommended_kits"]["matches"]
+    assert payload["alignment_plan"]["alignment_score"]["score"] >= 0
+    assert payload["expansion_plan"]["feature_candidates"]
+    assert payload["dependency_radar"]["headline_metrics"]["packages_audited"] >= 1
+    assert payload["surface_visibility"]["full_help"] == "sdetkit --help --show-hidden"
+
+
+def test_discover_main_text_output_summarizes_alignment(tmp_path: Path, capsys) -> None:
+    (tmp_path / "pyproject.toml").write_text(
+        "[project]\nname='x'\nversion='0.1.0'\ndependencies=['httpx>=0.28.1,<1']\n",
+        encoding="utf-8",
+    )
+    rc = kits.main(
+        [
+            "discover",
+            "--repo-root",
+            str(tmp_path),
+            "--goal",
+            "align all repo capabilities",
+            "--query",
+            "release integration",
+        ]
+    )
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "Repo capability discovery + alignment" in out
+    assert "surface visibility:" in out
+    assert "sdetkit --help --show-hidden" in out

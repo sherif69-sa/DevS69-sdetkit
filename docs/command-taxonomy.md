@@ -9,11 +9,12 @@ SDETKit is a unified SDET platform with four flagship kits:
 - **Integration assurance** (`sdetkit integration ...`)
 - **Failure forensics** (`sdetkit forensics ...`)
 
-Start with `sdetkit kits list`.
+Start with `sdetkit kits discover --goal "align all repo capabilities"` (or `sdetkit kits list` if you want a compact catalog view).
 
 ## Layer 1: Umbrella kits (primary)
 
 - `sdetkit kits list`
+- `sdetkit kits discover --goal "<goal>" --query "<query>"`
 - `sdetkit kits describe <kit>`
 - `sdetkit release ...`
 - `sdetkit intelligence ...`
@@ -43,3 +44,5 @@ These remain supported for existing automation, but are no longer first-run disc
 - Transition-era compatibility lanes: `dayNN-*`, `*-closeout`, `continuous-upgrade-cycleX-closeout`
 
 Use these intentionally; they are not the flagship product surface.
+
+For a full command inventory (including hidden/legacy lanes), run `sdetkit --help --show-hidden`.

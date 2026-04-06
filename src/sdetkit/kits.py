@@ -2248,6 +2248,53 @@ def blueprint_payload(
     }
 
 
+def discover_payload(
+    *,
+    root: Path,
+    goal: str | None,
+    query: str | None,
+    selected_kits: list[str],
+    limit: int = 4,
+) -> dict[str, object]:
+    chosen = selected_kits or [kit["slug"] for kit in _KITS[:4]]
+    normalized_goal = goal or "align and operate all repo capabilities"
+    normalized_query = query or "release integration forensics intelligence"
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "goal": normalized_goal,
+        "query": normalized_query,
+        "catalog": list_payload(),
+        "recommended_kits": search_payload(normalized_query, limit=limit),
+        "alignment_plan": optimize_payload(
+            root=root, goal=normalized_goal, selected_kits=chosen, limit=limit
+        ),
+        "expansion_plan": expand_payload(
+            root=root, goal=normalized_goal, selected_kits=chosen, limit=limit
+        ),
+        "dependency_radar": radar_payload(
+            root=root,
+            query=normalized_query,
+            repo_usage_tier=None,
+            impact_area=None,
+            limit=limit,
+        ),
+        "quickstart": [
+            "sdetkit kits list",
+            f"sdetkit kits search '{normalized_query}'",
+            f"sdetkit kits optimize --goal '{normalized_goal}'",
+            f"sdetkit kits expand --goal '{normalized_goal}'",
+        ],
+        "surface_visibility": {
+            "public_help": "sdetkit --help",
+            "full_help": "sdetkit --help --show-hidden",
+            "why": (
+                "Use --show-hidden when you need to inventory legacy/closeout commands "
+                "while keeping the default help focused."
+            ),
+        },
+    }
+
+
 def _print_kit_detail(kit: Payload) -> None:
     print(f"{kit['id']} [{kit['stability']}]")
     print(f"route: sdetkit {kit['slug']} ...")
@@ -2289,6 +2336,7 @@ def main(argv: list[str] | None = None) -> int:
             "describe",
             "search",
             "blueprint",
+            "discover",
             "optimize",
             "expand",
             "route-map",
@@ -2398,6 +2446,53 @@ def main(argv: list[str] | None = None) -> int:
         print("upgrade backlog:")
         for item in _payload_list(blueprint_result.get("upgrade_backlog")):
             print(f"- {item['title']}: {item['summary']}")
+        return 0
+
+    if ns.action == "discover":
+        discover_goal = str(ns.goal or ns.target or "").strip() or None
+        discover_query = str(ns.query or "").strip() or None
+        discover_result = discover_payload(
+            root=Path(str(ns.repo_root)).resolve(),
+            goal=discover_goal,
+            query=discover_query,
+            selected_kits=[str(item) for item in ns.selected_kits],
+            limit=ns.limit,
+        )
+        if ns.format == "json":
+            sys.stdout.write(canonical_json_dumps(discover_result))
+            return 0
+        print("Repo capability discovery + alignment")
+        print(f"goal: {discover_result['goal']}")
+        print(f"query: {discover_result['query']}")
+        print("quickstart:")
+        for cmd in _string_list(discover_result.get("quickstart")):
+            print(f"- {cmd}")
+        print("recommended kits:")
+        matches = _payload_list(_payload_dict(discover_result["recommended_kits"]).get("matches"))
+        for item in matches:
+            kit = _payload_dict(item.get("kit"))
+            capabilities = _string_list(kit.get("capabilities"))
+            print(f"- {kit.get('id', 'unknown')}: {capabilities[0] if capabilities else 'n/a'}")
+            print(f"  start with: {item['recommended_start']}")
+        surface = _payload_dict(discover_result.get("surface_visibility"))
+        print("surface visibility:")
+        print(f"- public help: {surface['public_help']}")
+        print(f"- full help: {surface['full_help']}")
+        print(f"- why: {surface['why']}")
+        alignment = _payload_dict(discover_result.get("alignment_plan"))
+        score = _payload_dict(alignment.get("alignment_score"))
+        print(f"alignment score: {score.get('score', 0)}% ({score.get('status', 'unknown')})")
+        print("expansion candidates:")
+        expansion = _payload_dict(discover_result.get("expansion_plan"))
+        for item in _payload_list(expansion.get("feature_candidates"))[:3]:
+            print(f"- {item['title']}: {item['summary']}")
+        print("radar headline:")
+        radar = _payload_dict(discover_result.get("dependency_radar"))
+        headline = _payload_dict(radar.get("headline_metrics"))
+        print(
+            f"- packages={headline.get('packages_audited', 0)} "
+            f"filtered={headline.get('filtered_matches', 0)}"
+        )
         return 0
 
     if ns.action == "optimize":
