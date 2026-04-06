@@ -144,7 +144,7 @@ def _seed_repo(root: Path) -> None:
                 "owner": "maintainers",
                 "rollback_owner": "release-ops",
                 "confidence_floor": 0.8,
-                "cadence_days": 7,
+                "cadence_interval": 7,
             },
             indent=2,
         )

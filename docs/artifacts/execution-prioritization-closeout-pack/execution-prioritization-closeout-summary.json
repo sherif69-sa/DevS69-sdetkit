@@ -53,7 +53,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 50 + Day 51 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -83,7 +83,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -125,8 +124,8 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 49 continuity is strict-pass with activation score=100.0.",
-    "Day 49 delivery board integrity validated with 5 checklist items.",
+    "continuity is strict-pass with activation score=100.0.",
+    "delivery board integrity validated with 5 checklist items.",
     "Execution prioritization contract + quality checklist is fully locked for execution."
   ],
   "misses": [],

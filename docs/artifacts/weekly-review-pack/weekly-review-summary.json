@@ -5,9 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review.md",
     "top10": "docs/top-10-github-strategy.md",
-    "summary": "docs/artifacts/community-activation-pack/community-activation-summary.json",
-    "external_contribution_summary": "docs/artifacts/external-contribution-pack/external-contribution-summary.json",
-    "summary": "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
+    "summary": "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json",
+    "external_contribution_summary": "docs/artifacts/external-contribution-pack/external-contribution-summary.json"
   },
   "checks": [
     {
@@ -24,8 +23,8 @@
       "passed": false,
       "evidence": {
         "missing_sections": [
-          "# Weekly review #4 (Day 28)",
-          "## Who should run Day 28"
+          "# Weekly review #4 ()",
+          "## Who should run "
         ]
       }
     },
@@ -61,7 +60,7 @@
       "category": "strategy",
       "weight": 8,
       "passed": false,
-      "evidence": "Day 28 \u2014 Weekly review #4"
+      "evidence": "\u2014 Weekly review #4"
     },
     {
       "check_id": "docs_mentions_wins_misses_actions",
@@ -71,7 +70,7 @@
       "evidence": "wins/misses/corrective"
     },
     {
-      "check_id": "input_present",
+      "check_id": "prior_input_present",
       "category": "data",
       "weight": 8,
       "passed": true,
@@ -85,7 +84,7 @@
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/external-contribution-pack/external-contribution-summary.json"
     },
     {
-      "check_id": "input_present",
+      "check_id": "current_input_present",
       "category": "data",
       "weight": 9,
       "passed": true,
@@ -93,9 +92,8 @@
     }
   ],
   "rollup": {
-    "activation_score": 35.0,
-    "external_contribution_activation_score": 100.0,
     "activation_score": 52.0,
+    "external_contribution_activation_score": 100.0,
     "average_activation_score": 62.33
   },
   "summary": {
@@ -113,12 +111,12 @@
     "External contribution stayed healthy (100.0)."
   ],
   "misses": [
-    "Day 25 summary missing or below closeout target.",
-    "Day 27 KPI summary missing or below closeout target."
+    "summary missing or below closeout target.",
+    "KPI summary missing or below closeout target."
   ],
   "corrective_actions": [
-    "Re-run Day 25 pack generation and restore summary JSON for traceability.",
-    "Refresh KPI baseline/current snapshots and regenerate Day 27 artifacts.",
-    "Address Day 28 documentation and discoverability gaps before phase closeout."
+    "Re-run pack generation and restore summary JSON for traceability.",
+    "Refresh KPI baseline/current snapshots and regenerate artifacts.",
+    "Address documentation and discoverability gaps before phase closeout."
   ]
 }

@@ -60,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 78 delivery board",
-                "- [ ] Day 78 integration brief committed",
-                "- [ ] Day 78 ecosystem priorities plan committed",
-                "- [ ] Day 78 ecosystem workstream ledger exported",
-                "- [ ] Day 78 ecosystem KPI scorecard snapshot exported",
-                "- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings",
+                "# delivery board",
+                "- [ ] integration brief committed",
+                "- [ ] ecosystem priorities plan committed",
+                "- [ ] ecosystem workstream ledger exported",
+                "- [ ] ecosystem KPI scorecard snapshot exported",
+                "- [ ] partner outreach priorities drafted from learnings",
             ]
         )
         + "\n",
@@ -79,8 +79,8 @@ def _seed_repo(root: Path) -> None:
                 "plan_id": "scale-upgrade-001",
                 "contributors": ["maintainers", "enterprise-success"],
                 "scale_tracks": ["role-based-onboarding", "control-plane-rollout"],
-                "baseline": {"activated_orgs": 3, "setup_time_days": 12},
-                "target": {"activated_orgs": 6, "setup_time_days": 7},
+                "baseline": {"activated_orgs": 3, "setup_duration": 12},
+                "target": {"activated_orgs": 6, "setup_duration": 7},
                 "owner": "enterprise-ops",
             },
             indent=2,

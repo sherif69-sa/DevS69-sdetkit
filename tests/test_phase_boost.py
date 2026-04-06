@@ -8,7 +8,7 @@ def test_build_phase_boost_payload_has_three_phases():
     payload = phase_boost.build_phase_boost_payload("repo-x", "2026-03-01")
 
     assert payload["repository"] == "repo-x"
-    assert payload["duration_days"] == 90
+    assert payload["duration_window"] == 90
     assert len(payload["phases"]) == 3
     assert payload["phases"][0]["phase"].startswith("Phase 1")
 

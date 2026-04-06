@@ -85,7 +85,6 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains": false,
         "contains": false
       }
     },
@@ -95,8 +94,8 @@
       "passed": false,
       "evidence": {
         "missing_contract_lines": [
-          "- The Optimization Closeout Foundation optimization lane references Day 41 expansion winners and misses with deterministic remediation loops.",
-          "- Optimization Closeout Foundation closeout records optimization learnings and Day 43 acceleration priorities."
+          "- The Optimization Closeout Foundation optimization lane references expansion winners and misses with deterministic remediation loops.",
+          "- Optimization Closeout Foundation closeout records optimization learnings and acceleration priorities."
         ]
       }
     },
@@ -114,7 +113,7 @@
       "passed": false,
       "evidence": {
         "missing_board_items": [
-          "- [ ] Day 43 acceleration priorities drafted from Optimization Closeout Foundation learnings"
+          "- [ ] acceleration priorities drafted from Optimization Closeout Foundation learnings"
         ]
       }
     }
@@ -132,14 +131,14 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 41 continuity is strict-pass with activation score=100.0."
+    "continuity is strict-pass with activation score=100.0."
   ],
   "misses": [
-    "Day 41 delivery board integrity is incomplete (needs >=5 items and Day 41/42 anchors).",
+    "delivery board integrity is incomplete (needs >=5 items and /42 anchors).",
     "Optimization contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Repair Day 41 delivery board entries to include Day 41 and Optimization Closeout Foundation anchors.",
+    "Repair delivery board entries to include and Optimization Closeout Foundation anchors.",
     "Complete all Optimization Closeout Foundation optimization contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }

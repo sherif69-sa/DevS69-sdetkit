@@ -21,8 +21,8 @@
       "passed": false,
       "evidence": {
         "missing_sections": [
-          "# Day 51 \u2014 Case snippet closeout lane",
-          "## Day 51 command lane"
+          "# Case snippet closeout lane",
+          "## command lane"
         ]
       }
     },
@@ -56,7 +56,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 51 + Day 52 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -86,7 +86,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -130,13 +129,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 50 delivery board integrity validated with 5 checklist items.",
+    "delivery board integrity validated with 5 checklist items.",
     "Case snippet contract + quality checklist is fully locked for execution."
   ],
   "misses": [
-    "Day 50 strict continuity signal is missing."
+    "strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 50 execution prioritization closeout command and restore strict pass baseline before Day 51 lock."
+    "Re-run execution prioritization closeout command and restore strict pass baseline before lock."
   ]
 }

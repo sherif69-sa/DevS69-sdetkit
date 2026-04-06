@@ -18,10 +18,10 @@ _DAY60_SUMMARY_PATH = (
 _DAY60_BOARD_PATH = (
     "docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md"
 )
-_SECTION_HEADER = "# Day 61 \u2014 Phase-3 kickoff execution closeout lane"
+_SECTION_HEADER = "# \u2014 Phase-3 kickoff execution closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Kickoff Closeout matters",
-    "## Required inputs (Day 60)",
+    "## Required inputs ()",
     "## Phase3 Kickoff Closeout command lane",
     "## Phase-3 kickoff execution contract",
     "## Phase-3 kickoff quality checklist",
@@ -40,10 +40,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase3_kickoff_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 61 Phase-3 kickoff execution and trust-signal triage.",
-    "The Day 61 lane references Day 60 Phase-2 wrap outcomes, risks, and KPI continuity evidence.",
-    "Every Day 61 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 61 closeout records Phase-3 baseline activation, trust KPI owners, and Day 62 community program priorities.",
+    "Single owner + backup reviewer are assigned for Phase-3 kickoff execution and trust-signal triage.",
+    "The lane references Phase-2 wrap outcomes, risks, and KPI continuity evidence.",
+    "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "closeout records Phase-3 baseline activation, trust KPI owners, and community program priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline snapshot, owner map, KPI guardrails, and rollback strategy",
@@ -53,24 +53,24 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes kickoff brief, trust ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 61 Phase-3 kickoff brief committed",
-    "- [ ] Day 61 kickoff reviewed with owner + backup",
-    "- [ ] Day 61 trust ledger exported",
-    "- [ ] Day 61 KPI scorecard snapshot exported",
-    "- [ ] Day 62 community program priorities drafted from Day 61 learnings",
+    "- [ ] Phase-3 kickoff brief committed",
+    "- [ ] kickoff reviewed with owner + backup",
+    "- [ ] trust ledger exported",
+    "- [ ] KPI scorecard snapshot exported",
+    "- [ ] community program priorities drafted from learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 61 \u2014 Phase-3 kickoff execution closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 Phase-3 kickoff execution closeout lane
 
-Day 61 ships a major Phase-3 kickoff upgrade that converts Day 60 wrap evidence into a strict baseline for ecosystem + trust execution.
+ships a major Phase-3 kickoff upgrade that converts wrap evidence into a strict baseline for ecosystem + trust execution.
 
 ## Why Phase3 Kickoff Closeout matters
 
-- Converts Day 60 closeout evidence into repeatable Phase-3 execution loops.
+- Converts closeout evidence into repeatable Phase-3 execution loops.
 - Protects trust outcomes with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 61 kickoff into Day 62 community program setup.
+- Produces a deterministic handoff from kickoff into community program setup.
 
-## Required inputs (Day 60)
+## Required inputs ()
 
 - `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-closeout-summary.json`
 - `docs/artifacts/phase2-wrap-handoff-closeout-pack/phase2-wrap-handoff-delivery-board.md`
@@ -86,10 +86,10 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 
 ## Phase-3 kickoff execution contract
 
-- Single owner + backup reviewer are assigned for Day 61 Phase-3 kickoff execution and trust-signal triage.
-- The Day 61 lane references Day 60 Phase-2 wrap outcomes, risks, and KPI continuity evidence.
-- Every Day 61 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 61 closeout records Phase-3 baseline activation, trust KPI owners, and Day 62 community program priorities.
+- Single owner + backup reviewer are assigned for Phase-3 kickoff execution and trust-signal triage.
+- The lane references Phase-2 wrap outcomes, risks, and KPI continuity evidence.
+- Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- closeout records Phase-3 baseline activation, trust KPI owners, and community program priorities.
 
 ## Phase-3 kickoff quality checklist
 
@@ -101,15 +101,15 @@ python scripts/check_phase3_kickoff_closeout_contract.py
 
 ## Phase3 Kickoff Closeout delivery board
 
-- [ ] Day 61 Phase-3 kickoff brief committed
-- [ ] Day 61 kickoff reviewed with owner + backup
-- [ ] Day 61 trust ledger exported
-- [ ] Day 61 KPI scorecard snapshot exported
-- [ ] Day 62 community program priorities drafted from Day 61 learnings
+- [ ] Phase-3 kickoff brief committed
+- [ ] kickoff reviewed with owner + backup
+- [ ] trust ledger exported
+- [ ] KPI scorecard snapshot exported
+- [ ] community program priorities drafted from learnings
 
 ## Scoring model
 
-Day 61 weighted score (0-100):
+weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -163,8 +163,8 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
     phase2_wrap_handoff_score, phase2_wrap_handoff_strict, phase2_wrap_handoff_check_count = (
         _load_phase2_wrap_handoff_summary(phase2_wrap_handoff_summary)
     )
-    board_count, board_has_phase2_wrap_handoff_cycle60 = _count_board_items(
-        phase2_wrap_handoff_board, "Day 60"
+    board_count, board_has_required = _count_board_items(
+        phase2_wrap_handoff_board, ""
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -192,8 +192,8 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 61" in top10_text and "Day 62" in top10_text),
-            "evidence": "Day 61 + Day 62 strategy chain",
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": "+ strategy chain",
         },
         {
             "check_id": "phase2_wrap_handoff_summary_present",
@@ -220,10 +220,10 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "phase2_wrap_handoff_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_phase2_wrap_handoff_cycle60,
+            "passed": board_count >= 5 and board_has_required,
             "evidence": {
                 "board_items": board_count,
-                "contains_phase2_wrap_handoff_cycle60": board_has_phase2_wrap_handoff_cycle60,
+                "contains_required": board_has_required,
             },
         },
         {
@@ -280,20 +280,20 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             f"Phase2-wrap-handoff continuity is strict-pass with activation score={phase2_wrap_handoff_score}."
         )
     else:
-        misses.append("Day 60 strict continuity signal is missing.")
+        misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 60 Phase-2 wrap + handoff closeout command and restore strict baseline before Day 61 lock."
+            "Re-run Phase-2 wrap + handoff closeout command and restore strict baseline before lock."
         )
 
-    if board_count >= 5 and board_has_phase2_wrap_handoff_cycle60:
+    if board_count >= 5 and board_has_required:
         wins.append(
-            f"Day 60 delivery board integrity validated with {board_count} checklist items."
+            f"delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 60 delivery board integrity is incomplete (needs >=5 items and Day 60 anchors)."
+            "delivery board integrity is incomplete (needs >=5 items and anchors)."
         )
-        handoff_actions.append("Repair Day 60 delivery board entries to include Day 60 anchors.")
+        handoff_actions.append("Repair delivery board entries to include anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Phase-3 kickoff contract + quality checklist is fully locked for execution.")
@@ -302,12 +302,12 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "Phase-3 kickoff contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 61 contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 61 Phase-3 kickoff closeout lane is fully complete and ready for Day 62 community execution lane."
+            "Phase-3 kickoff closeout lane is fully complete and ready for community execution lane."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -367,17 +367,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "phase3-kickoff-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "phase3-kickoff-brief.md", "# Day 61 Phase-3 kickoff brief\n")
+    _write(target / "phase3-kickoff-brief.md", "# Phase-3 kickoff brief\n")
     _write(target / "phase3-kickoff-trust-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "phase3-kickoff-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "phase3-kickoff-execution-log.md", "# Day 61 execution log\n")
+    _write(target / "phase3-kickoff-execution-log.md", "# execution log\n")
     _write(
         target / "phase3-kickoff-delivery-board.md",
-        "\n".join(["# Day 61 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "phase3-kickoff-validation-commands.md",
-        "# Day 61 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -405,12 +405,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_phase3_kickoff_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    """Compatibility alias for legacy builder name."""
     return build_phase3_kickoff_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 61 Phase-3 kickoff closeout checks")
+    parser = argparse.ArgumentParser(description="Phase-3 kickoff closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

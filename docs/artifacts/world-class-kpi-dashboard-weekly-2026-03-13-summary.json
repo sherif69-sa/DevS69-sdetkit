@@ -10,7 +10,7 @@
     "change_failure_rate",
     "release_regression_mttr",
     "first_successful_local_run",
-    "pr_cycle_time",
+    "pr_flow_time",
     "doc_freshness_sla",
     "critical_vulns",
     "security_drift_remediation",
@@ -71,7 +71,7 @@
       "target_eval": "unknown"
     },
     {
-      "id": "pr_cycle_time",
+      "id": "pr_flow_time",
       "lane": "velocity",
       "target": "<24h",
       "current_value": "TODO",

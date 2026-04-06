@@ -55,7 +55,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 32 + Day 33 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -91,7 +91,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -135,13 +134,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 31 delivery board integrity validated with 5 checklist items.",
+    "delivery board integrity validated with 5 checklist items.",
     "Release cadence + changelog contract is fully locked for weekly execution."
   ],
   "misses": [
-    "Day 31 strict continuity signal is missing."
+    "strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 31 kickoff command and restore strict pass baseline before release cadence lock."
+    "Re-run kickoff command and restore strict pass baseline before release cadence lock."
   ]
 }

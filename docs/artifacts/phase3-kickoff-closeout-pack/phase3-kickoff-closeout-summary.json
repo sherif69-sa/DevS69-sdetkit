@@ -25,7 +25,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 61 + Day 62 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "phase2_wrap_handoff_summary_present",
@@ -55,21 +55,21 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_phase2_wrap_handoff_cycle60": false
+        "contains_required": false
       }
     },
     {
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 61 \u2014 Phase-3 kickoff execution closeout lane"
+      "evidence": "# \u2014 Phase-3 kickoff execution closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 10,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 60)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -83,10 +83,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 61 Phase-3 kickoff execution and trust-signal triage.",
-        "The Day 61 lane references Day 60 Phase-2 wrap outcomes, risks, and KPI continuity evidence.",
-        "Every Day 61 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 61 closeout records Phase-3 baseline activation, trust KPI owners, and Day 62 community program priorities."
+        "Single owner + backup reviewer are assigned for Phase-3 kickoff execution and trust-signal triage.",
+        "The lane references Phase-2 wrap outcomes, risks, and KPI continuity evidence.",
+        "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        "closeout records Phase-3 baseline activation, trust KPI owners, and community program priorities."
       ]
     },
     {
@@ -100,11 +100,11 @@
       "weight": 2,
       "passed": false,
       "evidence": [
-        "- [ ] Day 61 Phase-3 kickoff brief committed",
-        "- [ ] Day 61 kickoff reviewed with owner + backup",
-        "- [ ] Day 61 trust ledger exported",
-        "- [ ] Day 61 KPI scorecard snapshot exported",
-        "- [ ] Day 62 community program priorities drafted from Day 61 learnings"
+        "- [ ] Phase-3 kickoff brief committed",
+        "- [ ] kickoff reviewed with owner + backup",
+        "- [ ] trust ledger exported",
+        "- [ ] KPI scorecard snapshot exported",
+        "- [ ] community program priorities drafted from learnings"
       ]
     }
   ],
@@ -124,13 +124,13 @@
   },
   "wins": [],
   "misses": [
-    "Day 60 strict continuity signal is missing.",
-    "Day 60 delivery board integrity is incomplete (needs >=5 items and Day 60 anchors).",
+    "strict continuity signal is missing.",
+    "delivery board integrity is incomplete (needs >=5 items and anchors).",
     "Phase-3 kickoff contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Re-run Day 60 Phase-2 wrap + handoff closeout command and restore strict baseline before Day 61 lock.",
-    "Repair Day 60 delivery board entries to include Day 60 anchors.",
-    "Complete all Day 61 contract lines, quality checklist entries, and delivery board tasks in docs."
+    "Re-run Phase-2 wrap + handoff closeout command and restore strict baseline before lock.",
+    "Repair delivery board entries to include anchors.",
+    "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }

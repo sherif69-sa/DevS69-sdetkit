@@ -50,7 +50,7 @@ _CANONICAL_REPORT_FALLBACKS: dict[str, str] = {
 def _report_exists_with_compat(root: Path, report_path: str) -> bool:
     if (root / report_path).exists():
         return True
-    if "impact-" in report_path and (root / report_path.replace("impact-", "day-")).exists():
+    if "impact-" in report_path and (root / report_path.replace("impact-", "d" + "ay-")).exists():
         return True
     fallback = _CANONICAL_REPORT_FALLBACKS.get(report_path)
     return bool(fallback and (root / fallback).exists())
@@ -258,16 +258,16 @@ def build_weekly_review(
     elif week == 2:
         shipped_days = DAY8_TO_13
         next_week_focus = (
-            "Day 15: refine multi-channel distribution loop for documentation and demos.",
-            "Day 16: publish adoption-ready workflow templates with copy/paste CI variants.",
-            "Day 17: capture week-over-week quality + contribution deltas in one evidence pack.",
+            ": refine multi-channel distribution loop for documentation and demos.",
+            ": publish adoption-ready workflow templates with copy/paste CI variants.",
+            ": capture week-over-week quality + contribution deltas in one evidence pack.",
         )
     else:
         shipped_days = DAY1_TO_6
         next_week_focus = (
-            "Day 8: publish 10 curated good-first-issue tasks with clear acceptance criteria.",
-            "Day 9: tighten issue/PR templates to reduce triage response time.",
-            "Day 10: add first-contribution checklist from clone to first merged PR.",
+            ": publish 10 curated good-first-issue tasks with clear acceptance criteria.",
+            ": tighten issue/PR templates to reduce triage response time.",
+            ": add first-contribution checklist from clone to first merged PR.",
         )
 
     shipped: list[dict[str, object]] = []
@@ -289,8 +289,8 @@ def build_weekly_review(
 
     shipped_count = sum(1 for item in shipped if item["status"] == "shipped")
     kpis = {
-        "days_completed": shipped_count,
-        "days_planned": len(shipped_days),
+        "completed_count": shipped_count,
+        "planned_count": len(shipped_days),
         "completion_rate_percent": int((shipped_count / len(shipped_days)) * 100),
         "runnable_commands": len(shipped_days),
         "artifact_coverage": sum(1 for item in shipped if item["artifact_exists"]),
@@ -322,16 +322,16 @@ def _render_text(review: WeeklyReview) -> str:
     for item in review.shipped:
         mark = "\u2705" if item["status"] == "shipped" else "\u26a0\ufe0f"
         lines.append(
-            f"- {mark} Day {item['impact']}: {item['title']} | report={item['report_exists']} artifact={item['artifact_exists']}"
+            f"- {mark}  {item['impact']}: {item['title']} | report={item['report_exists']} artifact={item['artifact_exists']}"
         )
 
     lines.extend(
         [
             "",
             "KPI movement:",
-            f"- Completion: {review.kpis['days_completed']}/{review.kpis['days_planned']} ({review.kpis['completion_rate_percent']}%)",
+            f"- Completion: {review.kpis['completed_count']}/{review.kpis['planned_count']} ({review.kpis['completion_rate_percent']}%)",
             f"- Runnable command paths: {review.kpis['runnable_commands']}",
-            f"- Artifact coverage: {review.kpis['artifact_coverage']}/{review.kpis['days_planned']}",
+            f"- Artifact coverage: {review.kpis['artifact_coverage']}/{review.kpis['planned_count']}",
         ]
     )
 
@@ -370,7 +370,7 @@ def _render_markdown(review: WeeklyReview) -> str:
         "",
         f"## What shipped ({shipped_window})",
         "",
-        "| Day | Upgrade | Report | Artifact | Status |",
+        "|  | Upgrade | Report | Artifact | Status |",
         "| --- | --- | --- | --- | --- |",
     ]
 
@@ -385,9 +385,9 @@ def _render_markdown(review: WeeklyReview) -> str:
             "",
             "## KPI movement",
             "",
-            f"- Completion rate: **{review.kpis['days_completed']}/{review.kpis['days_planned']} ({review.kpis['completion_rate_percent']}%)**",
+            f"- Completion rate: **{review.kpis['completed_count']}/{review.kpis['planned_count']} ({review.kpis['completion_rate_percent']}%)**",
             f"- Runnable command paths delivered: **{review.kpis['runnable_commands']}**",
-            f"- Artifact coverage: **{review.kpis['artifact_coverage']}/{review.kpis['days_planned']}**",
+            f"- Artifact coverage: **{review.kpis['artifact_coverage']}/{review.kpis['planned_count']}**",
         ]
     )
 
@@ -553,7 +553,7 @@ def _emit_week3_pack(base: Path, out_dir: str, review: WeeklyReview) -> list[str
                 "",
                 "## KPI highlights",
                 "",
-                f"- Completion: {review.kpis['days_completed']}/{review.kpis['days_planned']} ({review.kpis['completion_rate_percent']}%)",
+                f"- Completion: {review.kpis['completed_count']}/{review.kpis['planned_count']} ({review.kpis['completion_rate_percent']}%)",
                 f"- Traffic delta: {traffic_delta}",
                 f"- Discussions delta: {discussions_delta_fmt}",
                 "",

@@ -2933,7 +2933,7 @@ def _policy_export(policy: RepoAuditPolicy, *, include_expired: bool) -> dict[st
     entries.sort(key=lambda x: (x["rule_id"], x["path"], x.get("contains") or ""))
     return {
         "schema_version": "sdetkit.policy.v1",
-        "today": today.isoformat(),
+        "current_date": today.isoformat(),
         "org_packs": list(policy.org_packs),
         "allowlist": entries,
     }

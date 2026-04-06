@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-release-cadence.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY31_SUMMARY_PATH = "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
 _DAY31_BOARD_PATH = "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md"
-_SECTION_HEADER = "# Day 32 \u2014 Release cadence setup"
+_SECTION_HEADER = "# \u2014 Release cadence setup"
 _REQUIRED_SECTIONS = [
-    "## Why Day 32 matters",
-    "## Required inputs (Day 31)",
-    "## Day 32 command lane",
+    "## Why matters",
+    "## Required inputs ()",
+    "## command lane",
     "## Weekly cadence contract",
     "## Changelog quality checklist",
-    "## Day 32 delivery board",
+    "## delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -47,29 +47,29 @@ _REQUIRED_CHANGELOG_LINES = [
     "- [ ] Follow-up backlog items are explicitly listed with owners",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 32 cadence calendar committed",
-    "- [ ] Day 32 changelog template committed",
-    "- [ ] Day 33 demo asset #1 scope frozen",
-    "- [ ] Day 34 demo asset #2 scope frozen",
-    "- [ ] Day 35 weekly review KPI frame locked",
+    "- [ ] cadence calendar committed",
+    "- [ ] changelog template committed",
+    "- [ ] demo asset #1 scope frozen",
+    "- [ ] demo asset #2 scope frozen",
+    "- [ ] weekly review KPI frame locked",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 32 \u2014 Release cadence setup
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 Release cadence setup
 
-Day 32 converts Day 31 baseline goals into a repeatable release operating cadence with a strict changelog quality gate.
+converts baseline goals into a repeatable release operating cadence with a strict changelog quality gate.
 
-## Why Day 32 matters
+## Why matters
 
 - Locks a weekly release rhythm that keeps growth loops predictable.
 - Standardizes changelog quality so every release is user-legible and evidence-backed.
 - Prevents rushed release drops by enforcing rollback and corrective-action rules.
 
-## Required inputs (Day 31)
+## Required inputs ()
 
 - `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json` (primary)
 - `docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md` (primary)
 
-## Day 32 command lane
+## command lane
 
 ```bash
 python -m sdetkit release-cadence --format json --strict
@@ -93,21 +93,21 @@ python scripts/check_release_cadence_contract.py
 - [ ] KPI movement for the week is captured in release notes
 - [ ] Follow-up backlog items are explicitly listed with owners
 
-## Day 32 delivery board
+## delivery board
 
-- [ ] Day 32 cadence calendar committed
-- [ ] Day 32 changelog template committed
-- [ ] Day 33 demo asset #1 scope frozen
-- [ ] Day 34 demo asset #2 scope frozen
-- [ ] Day 35 weekly review KPI frame locked
+- [ ] cadence calendar committed
+- [ ] changelog template committed
+- [ ] demo asset #1 scope frozen
+- [ ] demo asset #2 scope frozen
+- [ ] weekly review KPI frame locked
 
 ## Scoring model
 
-Day 32 weighted score (0-100):
+weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 31 continuity and strict baseline carryover: 35 points.
+- continuity and strict baseline carryover: 35 points.
 - Cadence/changelog contract lock + delivery board readiness: 15 points.
 """
 
@@ -144,10 +144,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle32 = any(
-        any(token in line for token in ("impact 32", "day 32", "name 32")) for line in lines
+        any(token in line for token in ("impact 32", "", "name 32")) for line in lines
     )
     has_cycle33 = any(
-        any(token in line for token in ("impact 33", "day 33", "name 33")) for line in lines
+        any(token in line for token in ("impact 33", "", "name 33")) for line in lines
     )
     return item_count, has_cycle32, has_cycle33
 
@@ -229,10 +229,10 @@ def build_release_cadence_summary_impl(
             "check_id": "top10_release_cadence_alignment",
             "weight": 5,
             "passed": (
-                "Day 32 \u2014 Release cadence setup" in top10_text
-                and "Day 33 \u2014 Demo asset #1" in top10_text
+                "\u2014 Release cadence setup" in top10_text
+                and "\u2014 Demo asset #1" in top10_text
             ),
-            "evidence": "Day 32 + Day 33 strategy chain",
+            "evidence": "+ strategy chain",
         },
         {
             "check_id": "summary_present",
@@ -305,23 +305,23 @@ def build_release_cadence_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 31 continuity is strict-pass with activation score={score}.")
+        wins.append(f"continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 31 strict continuity signal is missing.")
+        misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 31 kickoff command and restore strict pass baseline before release cadence lock."
+            "Re-run kickoff command and restore strict pass baseline before release cadence lock."
         )
 
     if board_count >= 5 and board_has_cycle32 and board_has_cycle33:
         wins.append(
-            f"Day 31 delivery board integrity validated with {board_count} checklist items."
+            f"delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 31 delivery board integrity is incomplete (needs >=5 items and Day 32/33 anchors)."
+            "delivery board integrity is incomplete (needs >=5 items and /33 anchors)."
         )
         handoff_actions.append(
-            "Repair Day 31 delivery board entries to include Day 32 and Day 33 anchors."
+            "Repair delivery board entries to include and anchors."
         )
 
     if not missing_cadence_lines and not missing_changelog_lines and not missing_board_items:
@@ -331,12 +331,12 @@ def build_release_cadence_summary_impl(
             "Cadence contract, changelog checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 32 cadence lines, changelog checklist entries, and delivery board tasks in docs."
+            "Complete all cadence lines, changelog checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 32 release cadence setup is fully closed and ready for Day 33 demo asset execution."
+            "release cadence setup is fully closed and ready for demo asset execution."
         )
 
     return {
@@ -377,7 +377,7 @@ def build_release_cadence_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 32 release cadence summary\n"
+        "release cadence summary\n"
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -388,18 +388,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 32 release cadence summary",
+        "# release cadence summary",
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 31 continuity",
+        "## continuity",
         "",
-        f"- Day 31 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 31 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 31 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- activation score: `{payload['rollup']['activation_score']}`",
+        f"- checks evaluated: `{payload['rollup']['checks']}`",
+        f"- delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -429,7 +429,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
             {
                 "impact": 32,
                 "cadence": {
-                    "publish_day": "Friday",
+                    "publish_slot": "Friday",
                     "merge_cutoff": "16:00 UTC",
                     "artifact_sla_minutes": 60,
                     "owner_rotation": "weekly",
@@ -445,7 +445,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "release-changelog-template.md",
-        "# Day 32 changelog template\n\n"
+        "# changelog template\n\n"
         "## Outcomes\n- What changed for users this week?\n\n"
         "## Evidence links\n- Commands/docs/proof artifacts\n\n"
         "## Risks and mitigations\n- Breaking changes, rollback notes\n\n"
@@ -454,11 +454,11 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "release-delivery-board.md",
-        "# Day 32 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "release-validation-commands.md",
-        "# Day 32 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        "# validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -489,7 +489,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 32 release cadence setup scorer.")
+    parser = argparse.ArgumentParser(description="release cadence setup scorer.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -553,7 +553,7 @@ def build_release_cadence_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    """Canonical summary builder (legacy name retained as compatibility alias)."""
     return build_release_cadence_summary_impl(
         root,
         readme_path=readme_path,

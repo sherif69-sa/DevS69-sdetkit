@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 79 delivery board",
-                "- [ ] Day 79 integration brief committed",
-                "- [ ] Day 79 scale upgrade plan committed",
-                "- [ ] Day 79 enterprise execution ledger exported",
-                "- [ ] Day 79 enterprise KPI scorecard snapshot exported",
-                "- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings",
+                "# delivery board",
+                "- [ ] integration brief committed",
+                "- [ ] scale upgrade plan committed",
+                "- [ ] enterprise execution ledger exported",
+                "- [ ] enterprise KPI scorecard snapshot exported",
+                "- [ ] partner outreach priorities drafted from learnings",
             ]
         )
         + "\n",
@@ -76,8 +76,8 @@ def _seed_repo(root: Path) -> None:
                 "plan_id": "partner-outreach-001",
                 "contributors": ["maintainers", "partner-success"],
                 "partner_tracks": ["partner-onboarding", "joint-go-to-market"],
-                "baseline": {"activated_partners": 4, "sla_days": 9},
-                "target": {"activated_partners": 8, "sla_days": 5},
+                "baseline": {"activated_partners": 4, "sla_window": 9},
+                "target": {"activated_partners": 8, "sla_window": 5},
                 "owner": "partner-ops",
             },
             indent=2,

@@ -75,7 +75,7 @@ def build_phase_boost_payload(repo_name: str, start_date: str) -> dict[str, Any]
         "program": "S-class production readiness boost",
         "repository": repo_name,
         "start_date": start_date,
-        "duration_days": 90,
+        "duration_window": 90,
         "quality_gates": [
             "All phase deliverables mapped to an owner and due date.",
             "Every KPI has a baseline value and weekly trend artifact.",
@@ -91,7 +91,7 @@ def _as_markdown(payload: dict[str, Any]) -> str:
         "",
         f"- **Repository:** {payload['repository']}",
         f"- **Start date:** {payload['start_date']}",
-        f"- **Duration:** {payload['duration_days']} cycles",
+        f"- **Duration:** {payload['duration_window']} cycles",
         "",
         "## Program quality gates",
         "",
