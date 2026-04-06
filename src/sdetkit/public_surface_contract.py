@@ -19,7 +19,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="umbrella-kits",
         role="Primary product surface for release confidence, test intelligence, integration assurance, and failure forensics.",
-        stability_tier="Stable/Core",
+        stability_tier="Advanced but supported",
         first_time_recommended=True,
         transition_legacy_oriented=False,
         top_level_commands=("kits", "release", "intelligence", "integration", "forensics"),
@@ -27,7 +27,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="compatibility-aliases",
         role="Backward-compatible direct lanes preserved for existing automation and muscle memory.",
-        stability_tier="Stable/Compatibility",
+        stability_tier="Public / stable",
         first_time_recommended=False,
         transition_legacy_oriented=False,
         top_level_commands=("gate", "doctor", "security", "repo", "evidence", "report", "policy"),
@@ -35,7 +35,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="supporting-utilities-and-automation",
         role="Supporting utilities and automation lanes; useful but intentionally secondary to flagship kits.",
-        stability_tier="Stable/Supporting",
+        stability_tier="Advanced but supported",
         first_time_recommended=False,
         transition_legacy_oriented=False,
         top_level_commands=(
@@ -56,7 +56,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="playbooks",
         role="Guided adoption and rollout lanes for operational outcomes.",
-        stability_tier="Playbooks",
+        stability_tier="Advanced but supported",
         first_time_recommended=False,
         transition_legacy_oriented=False,
         top_level_commands=(
@@ -70,7 +70,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="experimental-transition-lanes",
         role="Transition-era and legacy-oriented lanes retained for compatibility.",
-        stability_tier="Experimental",
+        stability_tier="Experimental / incubator",
         first_time_recommended=False,
         transition_legacy_oriented=True,
         top_level_commands=("legacy compatibility lanes", "archived transition commands"),
@@ -85,12 +85,12 @@ def render_root_help_groups() -> str:
         name = family.name.replace("-", " ")
         lines.append(
             f"  {name} [{family.stability_tier}]"
-            f" (first-time: {'yes' if family.first_time_recommended else 'no'};"
+            f" (use first: {'yes' if family.first_time_recommended else 'no'};"
             f" transition-era: {'yes' if family.transition_legacy_oriented else 'no'}):"
         )
         lines.append(f"    {family.role}")
         lines.append(f"    {', '.join(family.top_level_commands)}")
         lines.append("")
-    lines.append("Run: sdetkit kits list")
-    lines.append("  to discover umbrella kits first, then use compatibility aliases as needed.")
+    lines.append("Start with: python -m sdetkit gate fast -> gate release -> doctor")
+    lines.append("Then expand: python -m sdetkit kits list")
     return "\n".join(lines)

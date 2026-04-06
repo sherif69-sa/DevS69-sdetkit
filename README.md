@@ -57,6 +57,7 @@ What failure means:
 - Blank repo proof in 60 seconds: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
 - Guided run (same path): [`docs/ready-to-use.md`](docs/ready-to-use.md)
 - Release-confidence model (canonical): [`docs/release-confidence.md`](docs/release-confidence.md)
+- Root CLI grouping and canonical path view: `python -m sdetkit --help`
 - Stability levels (policy boundary): [`docs/stability-levels.md`](docs/stability-levels.md) — understand what is stable vs advanced vs experimental
 - Before/after evidence behavior: [`docs/before-after-evidence-example.md`](docs/before-after-evidence-example.md)
 - Real evidence artifacts from this repo: [`docs/evidence-showcase.md`](docs/evidence-showcase.md)

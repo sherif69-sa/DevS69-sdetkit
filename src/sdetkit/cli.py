@@ -240,13 +240,13 @@ def _build_root_parser(
 DevS69 SDETKit is an operator-grade SDET platform with four umbrella kits:
 release confidence, test intelligence, integration assurance, and failure forensics.
 
-Stability levels: Stable/Core, Stable/Compatibility, Stable/Supporting, Playbooks, Experimental.
+Policy tiers: Public / stable, Advanced but supported, Experimental / incubator.
 
-Start here:
-  1) [Stable/Core] Discover kits: sdetkit kits list
-  2) [Stable/Core] Release lane: sdetkit release gate fast
-  3) [Stable/Core] Test lane: sdetkit intelligence flake classify --history <history.json>
-  4) [Stable/Compatibility] Existing direct commands (gate/doctor/security/...) still work
+Start here (canonical release-confidence path):
+  1) [Public / stable] python -m sdetkit gate fast
+  2) [Public / stable] python -m sdetkit gate release
+  3) [Public / stable] python -m sdetkit doctor
+  4) Then explore umbrella kits: python -m sdetkit kits list
 """
 
     help_epilog = render_root_help_groups()
