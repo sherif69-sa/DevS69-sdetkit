@@ -1,4 +1,4 @@
-# Name 11 docs navigation tune-up
+# Day 11 docs navigation tune-up
 
 - Score: **100.0** (12/12)
 - Docs home: `docs/index.md`
@@ -19,8 +19,8 @@
 - `[🛠 CLI commands](../cli.md)`
 - `[🩺 Doctor checks](../doctor.md)`
 - `[🤝 Contribute](../contributing.md)`
-- `[✅ Name 10 ultra report](../day-10-ultra-upgrade-report.md)`
-- `[🧭 Name 11 ultra report](../day-11-ultra-upgrade-report.md)`
+- `[✅ Day 10 ultra report](../day-10-ultra-upgrade-report.md)`
+- `[🧭 Day 11 ultra report](../impact-11-ultra-upgrade-report.md)`
 
 ## Missing docs navigation content
 
@@ -31,4 +31,4 @@
 - `docs/index.md`
 - `sdetkit docs-nav --format json --strict`
 - `sdetkit docs-nav --write-defaults --format json --strict`
-- `sdetkit docs-nav --format markdown --output docs/artifacts/name11-docs-navigation-sample.md`
+- `sdetkit docs-nav --format markdown --output docs/artifacts/docs-governance-sample.md`
