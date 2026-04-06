@@ -1,5 +1,0 @@
-Phase 2 Wrap Handoff Closeout summary (legacy: Cycle 60)
-- Activation score: 43
-- Passed checks: 7
-- Failed checks: 6
-- Critical failures: ['strict_baseline']
