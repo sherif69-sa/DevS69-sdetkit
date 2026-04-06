@@ -2,17 +2,23 @@
 
 For the complete workflow, use the repository guide: [`CONTRIBUTING.md`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CONTRIBUTING.md).
 
-If this is your first external PR, start here first: [First contribution quickstart](first-contribution-quickstart.md).
-For real starter task categories, use [Starter work inventory](starter-work-inventory.md).
-Maintainers curating newcomer-ready issues can use [Maintainer starter-issue hygiene](maintainer-starter-issue-hygiene.md).
+If this is your first external PR, start with [First contribution quickstart](first-contribution-quickstart.md).
 
-## Generate the first-contribution checklist
+## First trustworthy contribution (docs-first path)
 
-```bash
-python -m sdetkit first-contribution --format text --strict
-python -m sdetkit first-contribution --write-defaults --format json --strict
-python -m sdetkit first-contribution --format markdown --output docs/artifacts/first-contribution-checklist-sample.md
-```
+1. Start from [Start here](index.md) and [Release confidence](release-confidence.md) to align language with the core product story.
+2. Keep canonical command truth stable in docs:
+   - `python -m sdetkit gate fast`
+   - `python -m sdetkit gate release`
+   - `python -m sdetkit doctor`
+3. Do not invent proof (no synthetic benchmarks, customer claims, or fake outputs).
+4. Prefer clarification, consolidation, and cross-linking over adding new surfaces.
+
+## What not to change in this docs sprint
+
+- Do not add new product surfaces, kits, bots, workers, or integrations.
+- Do not change CLI behavior or command semantics.
+- Do not remove deep docs; demote/reorder/reframe instead.
 
 ## Baseline contributor validation commands
 

@@ -1,12 +1,14 @@
 # Install SDETKit
 
-**Use this page if:** you need the canonical installation paths for local use, external repositories, or contributor setup.
+Use this page for canonical installation paths before running release-confidence commands.
 
-**Next step:** after install, go to [First run quickstart (canonical)](ready-to-use.md).
+After install, continue with:
+- Ultra-fast proof: [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
+- Guided run: [First run quickstart (canonical)](ready-to-use.md)
 
 ## Recommended install path (first-time and external users)
 
-Install directly from GitHub, then verify the CLI:
+Install directly from GitHub, then verify CLI wiring:
 
 ```bash
 python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
@@ -52,12 +54,13 @@ From the root of the repository you want to gate:
 ```bash
 python -m sdetkit gate fast
 python -m sdetkit gate release
+python -m sdetkit doctor
 ```
 
 Then continue with:
-
-- [First run quickstart](ready-to-use.md) for the beginner lane.
-- [Adopt SDETKit in your repository](adoption.md) for team rollout and CI rollout.
+- [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
+- [First run quickstart](ready-to-use.md)
+- [Release confidence explainer](release-confidence.md)
 
 ## Development setup (this repository only)
 

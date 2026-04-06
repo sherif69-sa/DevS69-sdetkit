@@ -1,39 +1,82 @@
 # DevS69 SDETKit
 
-SDETKit helps teams turn test + CI signals into clear release decisions, deterministic checks, and actionable failure insights.
+DevS69 SDETKit gives engineering teams deterministic release go/no-go decisions with machine-readable evidence, using one repeatable command path from local to CI.
 
-## Golden path (first 10 minutes)
+Use the same three commands everywhere (`gate fast`, `gate release`, `doctor`) so release decisions are consistent across developer machines and CI.
 
-Use this flow when you are new to the repo and want a fast confidence check.
+## 60-second first run
+
+```bash
+python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit doctor
+```
+
+## Expected artifacts and what to inspect first
+
+```text
+build/
+├── gate-fast.json
+└── release-preflight.json
+```
+
+Check these keys first:
+- `ok` → pass/fail decision
+- `failed_steps` → first triage targets
+- `profile` → gate profile used
+
+## Who this is for / not for
+
+**Best fit**
+- Teams that want deterministic release decisions instead of ad hoc interpretation.
+- Engineers who need machine-readable evidence for PR/release review.
+- Repos standardizing the same release checks in local and CI runs.
+
+**Probably not a fit (yet)**
+- Very low-risk repos that do not need structured release evidence.
+- Teams that only want raw tool invocations with fully custom orchestration.
+
+## Start here
+
+- Install (canonical): [`docs/install.md`](docs/install.md)
+- Blank repo proof in 60 seconds: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
+- Release-confidence model (canonical): [`docs/release-confidence.md`](docs/release-confidence.md)
+- Before/after evidence behavior: [`docs/before-after-evidence-example.md`](docs/before-after-evidence-example.md)
+- Real evidence artifacts from this repo: [`docs/evidence-showcase.md`](docs/evidence-showcase.md)
+
+## Guided onboarding path (first 10 minutes)
+
+```bash
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit doctor
+```
+
+Then continue with:
+- [Choose your path](docs/choose-your-path.md)
+- [Decision guide](docs/decision-guide.md)
+- [Recommended CI flow](docs/recommended-ci-flow.md)
+
+## Secondary: broader surfaces and advanced lanes
+
+These remain available when you already have the core release-confidence lane working.
+
+### Additional command families (only after core lane is stable)
+
+- Release confidence is the primary lane.
+- Other command families remain available through the CLI reference and kits docs.
+
+### Extended repo lanes
 
 ```bash
 make bootstrap
 bash quality.sh ci
 python -m sdetkit kits list
-python -m sdetkit release --help
+python -m sdetkit --help --show-hidden
 ```
 
-Expected result:
-- local environment is bootstrapped
-- quality checks run without unexpected errors
-- kit catalog is discoverable
-- release lane commands are visible and ready to use
-
-Need the deepest whole-repo improvement lane? Run:
-
-```bash
-make max
-```
-
-Want the most aggressive hardening lane ("brutal mode")? Run:
-
-```bash
-make brutal
-```
-
-## Repo health snapshot (how to track progress)
-
-Use these checks weekly and capture outputs in a PR note:
+### Repo health snapshot
 
 ```bash
 PYTHONPATH=src pytest -q
@@ -42,13 +85,7 @@ ruff check .
 mutmut results
 ```
 
-Suggested metrics to track:
-- test pass rate
-- branch coverage
-- lint violations
-- mutation survivors
-
-## What this repo contains
+### Project layout
 
 ```text
 src/sdetkit/   # product code + CLI
@@ -60,40 +97,9 @@ scripts/       # repo helper scripts
 artifacts/     # generated evidence packs
 ```
 
-## Use the right lane
-
-- **Release confidence** → `python -m sdetkit release --help`
-- **Test intelligence** → `python -m sdetkit intelligence --help`
-- **Integration assurance** → `python -m sdetkit integration --help`
-- **Failure forensics** → `python -m sdetkit forensics --help`
-
-## Most-used commands
-
-```bash
-python -m sdetkit kits list
-python -m sdetkit kits discover --goal "align all repo capabilities"
-python -m sdetkit release gate release
-python -m sdetkit intelligence failure-fingerprint --failures examples/kits/intelligence/failures.json
-python -m sdetkit integration check --profile examples/kits/integration/profile.json
-python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json --fail-on error
-bash quality.sh verify
-bash premium-gate.sh --mode full
-```
-
-## Discover hidden/advanced surfaces
-
-```bash
-python -m sdetkit --help
-python -m sdetkit --help --show-hidden
-python -m sdetkit kits discover --query "release integration forensics"
-```
-
-## Documentation
+## Documentation and references
 
 - Docs hub: [`docs/index.md`](docs/index.md)
-- Project structure: [`docs/project-structure.md`](docs/project-structure.md)
-- Repo health dashboard guide: [`docs/repo-health-dashboard.md`](docs/repo-health-dashboard.md)
-- Cleanup policy: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Release process: [`RELEASE.md`](RELEASE.md)
 - Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)
@@ -106,13 +112,3 @@ python -m sdetkit kits discover --query "release integration forensics"
 - Put generated outputs in `.sdetkit/` or `artifacts/`.
 
 For full rules, use [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md).
-
-## 🧭 ultra: docs navigation tune-up
-
-```bash
-python -m sdetkit docs-nav --format text --strict
-python -m sdetkit docs-nav --write-defaults --format json --strict
-python scripts/check_docs_navigation_contract_11.py
-```
-
-- Report: `docs/impact-11-ultra-upgrade-report.md`

@@ -1,24 +1,24 @@
-# Blank repo to value in 60 seconds
+# Blank repo to value in 60 seconds (ultra-fast proof)
 
-**Use this page if:** you want the fastest honest proof-of-value run in a fresh repo.
+Use this page for the fastest honest proof-of-value in a fresh repository.
 
-**Not this page:** for full installation choices use [Install](install.md); for team rollout use [Adoption](adoption.md).
+If you want a guided walkthrough and interpretation flow, use [First run quickstart](ready-to-use.md).
 
-## 60-second command flow
+## 60-second proof command flow
 
 ```bash
 python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
-python -m sdetkit --help
-python -m sdetkit doctor
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit doctor
 ```
 
-## What you get immediately
+## Immediate outcomes
 
-1. Environment confidence (`doctor`)
-2. Deterministic gate results (`gate fast`, `gate release`)
-3. Structured evidence in `build/`
+1. Deterministic fast gate decision
+2. Deterministic release gate decision
+3. Environment/release diagnostics
+4. Machine-readable evidence in `build/`
 
 ```text
 build/
@@ -26,12 +26,12 @@ build/
 └── release-preflight.json
 ```
 
-## How to read artifacts
+Inspect `ok`, `failed_steps`, and `profile` first.
 
-Use [CI artifact walkthrough (canonical)](ci-artifact-walkthrough.md) for the artifact-first review order.
+## Next step after proof
 
-## Next step
-
-- Team rollout: [Adopt SDETKit in your repository](adoption.md)
-- CI rollout: [Recommended CI flow](recommended-ci-flow.md)
-- Comparison framing: [SDETKit vs ad hoc scripts and separate tools](sdetkit-vs-ad-hoc.md)
+- Guided first run: [First run quickstart](ready-to-use.md)
+- Product model: [Release confidence](release-confidence.md)
+- Evidence behavior: [Before/after evidence example](before-after-evidence-example.md)
+- Representative artifacts: [Evidence showcase](evidence-showcase.md)
+- Team/CI rollout: [Adopt SDETKit](adoption.md), [Recommended CI flow](recommended-ci-flow.md)

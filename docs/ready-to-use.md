@@ -1,14 +1,12 @@
-# First run quickstart (canonical)
+# First run quickstart (canonical guided run)
 
-**Use this page if:** you already installed SDETKit and want the shortest first-run path.
+Use this page if you already installed SDETKit and want a guided first run with interpretation steps.
 
-**Not this page:**
-- Need install options? Use [Install (canonical)](install.md).
-- Need team/CI rollout? Use [Adoption (canonical)](adoption.md) or [Recommended CI flow (canonical)](recommended-ci-flow.md).
+If you only want the fastest proof first, use [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md).
 
-## 5-minute first run
+## Guided first run (5 minutes)
 
-1. Verify CLI wiring:
+1. (Optional) Verify CLI wiring:
 
 ```bash
 python -m sdetkit --help
@@ -21,26 +19,32 @@ python -m sdetkit gate --help
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 ```
 
-3. Run stricter release gate:
+3. Run release gate:
 
 ```bash
 python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
 ```
 
-4. Run environment/release diagnostics:
+4. Run diagnostics:
 
 ```bash
 python -m sdetkit doctor
 ```
 
-## How to interpret first artifacts
+## How to read the first artifacts
 
-- `build/gate-fast.json`: check `ok`, then first item in `failed_steps`.
-- `build/release-preflight.json`: check `ok` and `failed_steps`; if `gate_fast` failed, start with `build/gate-fast.json`.
+Start with these files:
+- `build/release-preflight.json`
+- `build/gate-fast.json`
+
+Check these keys first:
+- `ok`
+- `failed_steps`
+- `profile`
 
 For deeper decode rules, use [CI artifact walkthrough (canonical)](ci-artifact-walkthrough.md).
 
-## Optional wrapper lane (this repository only)
+## Optional wrappers (this repository only)
 
 If you are inside this repository and prefer wrappers:
 
@@ -53,6 +57,7 @@ External repositories should use direct `python -m sdetkit ...` commands.
 
 ## Next step routing
 
-- Rolling out to a team repo: [Adopt SDETKit in your repository](adoption.md)
-- Implementing CI policy stages: [Recommended CI flow](recommended-ci-flow.md)
-- Understanding why this model vs ad hoc scripts: [SDETKit vs ad hoc](sdetkit-vs-ad-hoc.md)
+- Release-confidence model: [Release confidence](release-confidence.md)
+- Team rollout: [Adopt SDETKit in your repository](adoption.md)
+- CI policy stages: [Recommended CI flow](recommended-ci-flow.md)
+- Evidence behavior: [Before/after example](before-after-evidence-example.md), [Evidence showcase](evidence-showcase.md)

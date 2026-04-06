@@ -1,8 +1,10 @@
-# Is SDETKit right for your repo? (Decision Guide)
+# Is SDETKit right for your repo? (Decision guide)
 
-Use this page to make a fast decision on fit. Core promise: **deterministic release-confidence checks and evidence-backed shipping decisions**.
+Use this page to make a fast fit decision.
 
-If you already know SDETKit is a fit and only need rollout selection, use [Choose your path](choose-your-path.md).
+Core promise: deterministic release-confidence checks and evidence-backed shipping decisions.
+
+If you already decided to adopt, use [Start here](index.md) or [Choose your path](choose-your-path.md).
 
 ## 1) Good-fit profile
 
@@ -25,16 +27,14 @@ SDETKit may be unnecessary if:
 
 If these apply, run only the lightweight core lane first, then stop unless repeatability or evidence gaps appear.
 
-## 3) First-time core path (recommended)
+## 3) Lightweight core path (recommended)
 
-Start with this core path:
-
-1. **Install** → [Install (canonical)](install.md)
-2. **First run** → [First run quickstart (canonical)](ready-to-use.md)
-3. **Gate fast** → `python -m sdetkit gate fast`
-4. **Gate release** → `python -m sdetkit gate release`
-5. **Doctor** → `python -m sdetkit doctor`
-6. **Evidence/report outputs** → [CI artifact walkthrough](ci-artifact-walkthrough.md), [Reporting and trends](reporting-and-trends.md)
+1. [Install (canonical)](install.md)
+2. [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
+3. `python -m sdetkit gate fast`
+4. `python -m sdetkit gate release`
+5. `python -m sdetkit doctor`
+6. Validate artifact interpretation with [Evidence showcase](evidence-showcase.md)
 
 ## 4) Manual scattered workflow vs SDETKit workflow
 
@@ -47,7 +47,7 @@ Start with this core path:
 
 SDETKit does **not** replace every underlying tool; it standardizes orchestration and interpretation for release-confidence decisions.
 
-## 5) “Stop here” point (lightweight path)
+## 5) “Stop here” point
 
 Stop after the lightweight path if:
 
@@ -55,16 +55,15 @@ Stop after the lightweight path if:
 - doctor checks are healthy,
 - and current evidence outputs satisfy release reviewers.
 
-Then keep using the core commands and return to broader docs only when integration or scale needs increase.
+Then keep using the core commands and expand only if integration needs appear.
 
+## 6) Route into one lane (avoid sprawl)
 
-## 6) Route into a curated lane
+After confirming fit, choose exactly one lane:
 
-After confirming fit, choose exactly one lane to avoid doc sprawl:
+- **Guided first run**: [ready-to-use.md](ready-to-use.md)
+- **Team adoption**: [adoption.md](adoption.md)
+- **CI rollout**: [recommended-ci-flow.md](recommended-ci-flow.md)
+- **Advanced/reference** (only when needed): [cli.md](cli.md), [api.md](api.md), [plugins.md](plugins.md), [tool-server.md](tool-server.md)
 
-- **Beginner/core lane**: [First run quickstart](ready-to-use.md) → [Release confidence](release-confidence.md) → [Doctor](doctor.md)
-- **Team adoption lane**: [Adoption](adoption.md) → [Example adoption flow](example-adoption-flow.md)
-- **CI lane**: [Recommended CI flow](recommended-ci-flow.md) → [CI contract](ci-contract.md)
-- **Advanced/extensions lane**: [CLI reference](cli.md), [API](api.md), [Plugins](plugins.md), [Tool server](tool-server.md)
-
-Historical transition-era documents remain available in [Archive and history](archive/index.md) and are intentionally out of the first-time path.
+Historical transition-era docs remain available under [Archive and history](archive/index.md).
