@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 38 — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n"
-        "- **Day 39 — Playbook post #1:** publish Repo Reliability Playbook article #1.\n",
+        '- ** — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n'
+        '- ** — Playbook post #1:** publish Repo Reliability Playbook article #1.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-distribution-batch.md").write_text(
         d38._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-38-big-upgrade-report.md").write_text(
-        "# Day 38 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/experiment-lane-pack/experiment-lane-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 37 delivery board",
-                "- [ ] Day 37 experiment matrix committed",
-                "- [ ] Day 37 hypothesis brief reviewed with owner + backup",
-                "- [ ] Day 37 scorecard snapshot exported",
-                "- [ ] Day 38 distribution batch actions selected from winners",
-                "- [ ] Day 38 fallback plan documented for losing variants",
+                '#  delivery board',
+                '- [ ]  experiment matrix committed',
+                '- [ ]  hypothesis brief reviewed with owner + backup',
+                '- [ ]  scorecard snapshot exported',
+                '- [ ]  distribution batch actions selected from winners',
+                '- [ ]  fallback plan documented for losing variants',
             ]
         )
         + "\n",
@@ -117,7 +117,7 @@ def test_distribution_batch_strict_fails_when_lane37_inputs_missing(tmp_path: Pa
 def test_distribution_batch_strict_fails_when_lane37_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/experiment-lane-pack/delivery-board.md").write_text(
-        "- [ ] Day 38 distribution batch actions selected from winners\n", encoding="utf-8"
+        '- [ ]  distribution batch actions selected from winners\n', encoding="utf-8"
     )
     rc = d38.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -127,4 +127,4 @@ def test_distribution_batch_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["distribution-batch", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 38 distribution batch summary" in capsys.readouterr().out
+    assert ' distribution batch summary' in capsys.readouterr().out

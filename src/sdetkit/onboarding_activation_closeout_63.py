@@ -21,7 +21,7 @@ _DAY62_BOARD_PATH = (
 _SECTION_HEADER = "# Cycle 63 \u2014 Contributor onboarding activation closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Onboarding Activation Closeout matters",
-    "## Required inputs (Day 62)",
+    '## Required inputs ()',
     "## Onboarding Activation Closeout command lane (Legacy Cycle 63)",
     "## Onboarding activation contract",
     "## Onboarding quality checklist",
@@ -41,7 +41,7 @@ _EXECUTION_COMMANDS = [
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Cycle 63 onboarding activation execution and roadmap-voting facilitation.",
-    "The Cycle 63 lane references Day 62 community-program outcomes, moderation guardrails, and KPI continuity evidence.",
+    'The Cycle 63 lane references  community-program outcomes, moderation guardrails, and KPI continuity evidence.',
     "Every Cycle 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
     "Cycle 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Cycle 64 pipeline priorities.",
 ]
@@ -60,62 +60,7 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Cycle 63 \u2014 Contributor onboarding activation closeout lane
-
-Cycle 63 ships a major onboarding-activation upgrade that converts Day 62 community program evidence into deterministic onboarding ownership and roadmap-voting loops.
-
-## Why Onboarding Activation Closeout matters
-
-- Converts Day 62 community trust baseline into repeatable onboarding activation and mentor ownership loops.
-- Protects contributor onboarding outcomes with ownership, command proof, and rollback guardrails.
-- Produces a deterministic handoff from Cycle 63 onboarding activation into Cycle 64 contributor pipeline acceleration.
-
-## Required inputs (Day 62)
-
-- `docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json`
-- `docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md`
-
-## Onboarding Activation Closeout command lane (Legacy Cycle 63)
-
-```bash
-python -m sdetkit onboarding-activation-closeout --format json --strict
-python -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict
-python -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/onboarding-activation-closeout-pack/evidence --format json --strict
-python scripts/check_onboarding_activation_closeout_contract_63.py
-```
-
-## Onboarding activation contract
-
-- Single owner + backup reviewer are assigned for Cycle 63 onboarding activation execution and roadmap-voting facilitation.
-- The Cycle 63 lane references Day 62 community-program outcomes, moderation guardrails, and KPI continuity evidence.
-- Every Cycle 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Cycle 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Cycle 64 pipeline priorities.
-
-## Onboarding quality checklist
-
-- [ ] Includes onboarding orientation path, mentor ownership model, and rollback trigger
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner
-- [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log
-
-## Onboarding Activation Closeout delivery board (Legacy Cycle 63)
-
-- [ ] Cycle 63 onboarding launch brief committed
-- [ ] Cycle 63 orientation script + ownership matrix published
-- [ ] Cycle 63 roadmap voting brief exported
-- [ ] Cycle 63 KPI scorecard snapshot exported
-- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings
-
-## Scoring model
-
-Cycle 63 weighted score (0-100):
-
-- Contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 62 continuity and strict baseline carryover: 35 points.
-- Onboarding activation contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Cycle 63 — Contributor onboarding activation closeout lane\n\nCycle 63 ships a major onboarding-activation upgrade that converts  community program evidence into deterministic onboarding ownership and roadmap-voting loops.\n\n## Why Onboarding Activation Closeout matters\n\n- Converts  community trust baseline into repeatable onboarding activation and mentor ownership loops.\n- Protects contributor onboarding outcomes with ownership, command proof, and rollback guardrails.\n- Produces a deterministic handoff from Cycle 63 onboarding activation into Cycle 64 contributor pipeline acceleration.\n\n## Required inputs ()\n\n- `docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json`\n- `docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md`\n\n## Onboarding Activation Closeout command lane (Legacy Cycle 63)\n\n```bash\npython -m sdetkit onboarding-activation-closeout --format json --strict\npython -m sdetkit onboarding-activation-closeout --emit-pack-dir docs/artifacts/onboarding-activation-closeout-pack --format json --strict\npython -m sdetkit onboarding-activation-closeout --execute --evidence-dir docs/artifacts/onboarding-activation-closeout-pack/evidence --format json --strict\npython scripts/check_onboarding_activation_closeout_contract_63.py\n```\n\n## Onboarding activation contract\n\n- Single owner + backup reviewer are assigned for Cycle 63 onboarding activation execution and roadmap-voting facilitation.\n- The Cycle 63 lane references  community-program outcomes, moderation guardrails, and KPI continuity evidence.\n- Every Cycle 63 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n- Cycle 63 closeout records onboarding orientation flow, ownership handoff SOP, roadmap voting launch, and Cycle 64 pipeline priorities.\n\n## Onboarding quality checklist\n\n- [ ] Includes onboarding orientation path, mentor ownership model, and rollback trigger\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures activation conversion, mentor SLA, roadmap-vote participation, confidence, and recovery owner\n- [ ] Artifact pack includes onboarding brief, orientation script, ownership matrix, roadmap-vote brief, and execution log\n\n## Onboarding Activation Closeout delivery board (Legacy Cycle 63)\n\n- [ ] Cycle 63 onboarding launch brief committed\n- [ ] Cycle 63 orientation script + ownership matrix published\n- [ ] Cycle 63 roadmap voting brief exported\n- [ ] Cycle 63 KPI scorecard snapshot exported\n- [ ] Cycle 64 contributor pipeline priorities drafted from Cycle 63 learnings\n\n## Scoring model\n\nCycle 63 weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Onboarding activation contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -161,7 +106,7 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     summary = root / _DAY62_SUMMARY_PATH
     board = root / _DAY62_BOARD_PATH
     score, strict, check_count = _load_cycle62(summary)
-    board_count, board_has_cycle62 = _count_board_items(board, "Day 62")
+    board_count, board_has_cycle62 = _count_board_items(board, '')
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -269,22 +214,22 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 62 continuity is strict-pass with activation score={score}.")
+        wins.append(f"62 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 62 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 62 community-program closeout command and restore strict baseline before Cycle 63 lock."
+            'Re-run  community-program closeout command and restore strict baseline before Cycle 63 lock.'
         )
 
     if board_count >= 5 and board_has_cycle62:
         wins.append(
-            f"Day 62 delivery board integrity validated with {board_count} checklist items."
+            f"62 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 62 delivery board integrity is incomplete (needs >=5 items and Day 62 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 62 delivery board entries to include Day 62 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append(

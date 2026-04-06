@@ -229,7 +229,7 @@ Implemented now:
 
 ## Current remaining gap
 
-The workflow engine is real and runnable, but automated problem synthesis is still strategy-based. Today the repo includes a smoke-fixture-backed authoring strategy that proves the full contract end to end for a controlled repository shape. For other cloned target repos, including `Textualize/rich`, the run will still execute the owned workflow and either:
+The workflow engine is real and runnable, but automated problem synthesis is still strategy-based. Tothe repo includes a smoke-fixture-backed authoring strategy that proves the full contract end to end for a controlled repository shape. For other cloned target repos, including `Textualize/rich`, the run will still execute the owned workflow and either:
 
 - produce the stable artifact bundle when a matching strategy exists, or
 - produce a concrete failure report describing why autonomous authoring did not finish yet.

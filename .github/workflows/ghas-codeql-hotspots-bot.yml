@@ -141,7 +141,7 @@ jobs:
               '',
               '## Top rules to batch-fix',
               ...(topRules.length
-                ? topRules.map((item) => `- **${item.rule_name}** (\`${item.key}\`, ${item.tool}) — ${item.count} open alert(s), oldest ${item.oldest_age_days} day(s)`)
+                ? topRules.map((item) => `- **${item.rule_name}** (\`${item.key}\`, ${item.tool}) — ${item.count} open alert(s), oldest ${item.oldest_age_days} (s)`)
                 : ['- No open code scanning alerts were returned.']),
               '',
               '## Top files / paths',
@@ -156,7 +156,7 @@ jobs:
               '',
               '## Suggested follow-up',
               '- [ ] Batch the top rule into one remediation PR or issue cluster.',
-              '- [ ] Start with any 14+ day hotspot that touches a hot-path file.',
+              '- [ ] Start with any 14+  hotspot that touches a hot-path file.',
               '- [ ] Re-run the GHAS campaign planner after closing the top hotspot to verify backlog reduction.',
               '',
               '## Artifact',

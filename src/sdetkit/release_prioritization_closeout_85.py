@@ -19,10 +19,10 @@ _DAY84_BOARD_PATH = (
     "docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/release-prioritization-plan.json"
-_SECTION_HEADER = "# Day 85 \u2014 Release prioritization closeout lane"
+_SECTION_HEADER = '#  — Release prioritization closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Release Prioritization Closeout matters",
-    "## Required inputs (Day 84)",
+    '## Required inputs ()',
     "## Command lane",
     "## Release prioritization contract",
     "## Release prioritization quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_release_prioritization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 85 release prioritization execution and signoff.",
-    "The Day 85 lane references Day 84 outcomes, controls, and trust continuity signals.",
-    "Every Day 85 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 85 closeout records release prioritization pack upgrades, storyline outcomes, and Day 86 launch priorities.",
+    'Single owner + backup reviewer are assigned for  release prioritization execution and signoff.',
+    'The  lane references  outcomes, controls, and trust continuity signals.',
+    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records release prioritization pack upgrades, storyline outcomes, and  launch priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 85 evidence brief committed",
-    "- [ ] Day 85 release prioritization plan committed",
-    "- [ ] Day 85 narrative template upgrade ledger exported",
-    "- [ ] Day 85 storyline outcomes ledger exported",
-    "- [ ] Day 86 launch priorities drafted from Day 85 outcomes",
+    '- [ ]  evidence brief committed',
+    '- [ ]  release prioritization plan committed',
+    '- [ ]  narrative template upgrade ledger exported',
+    '- [ ]  storyline outcomes ledger exported',
+    '- [ ]  launch priorities drafted from  outcomes',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,58 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 85 \u2014 Release prioritization closeout lane
-
-Day 85 closes with a major upgrade that converts Day 84 evidence narrative outcomes into a deterministic release prioritization operating lane.
-
-## Why Release Prioritization Closeout matters
-
-- Converts Day 84 evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.
-- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 85 closeout into Day 86 launch priorities.
-
-## Required inputs (Day 84)
-
-- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`
-- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`
-- `docs/roadmap/plans/release-prioritization-plan.json`
-
-## Command lane
-
-```bash
-python -m sdetkit release-prioritization-closeout --format json --strict
-python -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/release-prioritization-closeout-pack --format json --strict
-python -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/release-prioritization-closeout-pack/evidence --format json --strict
-python scripts/check_release_prioritization_closeout_contract.py
-```
-
-## Release prioritization contract
-
-- Single owner + backup reviewer are assigned for Day 85 release prioritization execution and signoff.
-- The Day 85 lane references Day 84 outcomes, controls, and trust continuity signals.
-- Every Day 85 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 85 closeout records release prioritization pack upgrades, storyline outcomes, and Day 86 launch priorities.
-
-## Release prioritization quality checklist
-
-- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets
-- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag
-- [ ] CTA links point to narrative docs/templates + runnable command evidence
-- [ ] Scorecard captures release prioritization adoption delta, objection deflection delta, confidence, and rollback owner
-- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 85 evidence brief committed
-- [ ] Day 85 release prioritization plan committed
-- [ ] Day 85 narrative template upgrade ledger exported
-- [ ] Day 85 storyline outcomes ledger exported
-- [ ] Day 86 launch priorities drafted from Day 85 outcomes
-
-## Scoring model
-
-Day 85 weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Release prioritization closeout lane\n\n closes with a major upgrade that converts  evidence narrative outcomes into a deterministic release prioritization operating lane.\n\n## Why Release Prioritization Closeout matters\n\n- Converts  evidence narrative outcomes into reusable release prioritization decisions across docs, release notes, and escalation playbooks.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  launch priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-closeout-summary.json`\n- `docs/artifacts/evidence-narrative-closeout-pack/evidence-narrative-delivery-board.md`\n- `docs/roadmap/plans/release-prioritization-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit release-prioritization-closeout --format json --strict\npython -m sdetkit release-prioritization-closeout --emit-pack-dir docs/artifacts/release-prioritization-closeout-pack --format json --strict\npython -m sdetkit release-prioritization-closeout --execute --evidence-dir docs/artifacts/release-prioritization-closeout-pack/evidence --format json --strict\npython scripts/check_release_prioritization_closeout_contract.py\n```\n\n## Release prioritization contract\n\n- Single owner + backup reviewer are assigned for  release prioritization execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records release prioritization pack upgrades, storyline outcomes, and  launch priorities.\n\n## Release prioritization quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures release prioritization adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  release prioritization plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ]  launch priorities drafted from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + release-priority artifact readiness for a 100-point activation score.\n'
 
 
 def _read_text(path: Path) -> str:
@@ -167,7 +116,7 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
     board_text = _read_text(evidence_narrative_board)
     board_count = _checklist_count(board_text)
     board_has_evidence_narrative = (
-        "evidence narrative" in board_text.lower() or "Day 84" in board_text
+        "evidence narrative" in board_text.lower() or '' in board_text
     )
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
@@ -198,8 +147,8 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 84" in top10_text and "Day 85" in top10_text),
-            "evidence": "Day 84 + Day 85 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "evidence_narrative_summary_present",
@@ -290,32 +239,32 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
             f"Evidence Narrative continuity baseline is stable with activation score={evidence_narrative_score}."
         )
     else:
-        misses.append("Day 84 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
         handoff_actions.append(
-            "Re-run Day 84 closeout command and raise baseline quality above 85 with strict pass before Day 85 lock."
+            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
         )
 
     if board_count >= 5 and board_has_evidence_narrative:
         wins.append(
-            f"Day 84 delivery board integrity validated with {board_count} checklist items."
+            f"84 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 84 delivery board integrity is incomplete (needs >=5 items and Day 84 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 84 delivery board entries to include Day 84 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 85 release prioritization dataset is available for launch execution.")
+        wins.append(' release prioritization dataset is available for launch execution.')
     else:
-        misses.append("Day 85 release prioritization dataset is missing required keys.")
+        misses.append(' release prioritization dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/release-prioritization-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 85 release prioritization closeout lane is fully complete and ready for Day 86 launch prioritization."
+            ' release prioritization closeout lane is fully complete and ready for  launch prioritization.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -355,7 +304,7 @@ def build_release_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 85 release prioritization closeout summary",
+        ' release prioritization closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -378,9 +327,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "release-prioritization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "release-prioritization-evidence-brief.md",
-        "# Day 85 release prioritization brief\n",
+        '#  release prioritization brief\n',
     )
-    _write(target / "release-prioritization-plan.md", "# Day 85 release prioritization plan\n")
+    _write(target / "release-prioritization-plan.md", '#  release prioritization plan\n')
     _write(
         target / "release-prioritization-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -393,14 +342,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "release-prioritization-narrative-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "release-prioritization-execution-log.md", "# Day 85 execution log\n")
+    _write(target / "release-prioritization-execution-log.md", '#  execution log\n')
     _write(
         target / "release-prioritization-delivery-board.md",
-        "\n".join(["# Day 85 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "release-prioritization-validation-commands.md",
-        "# Day 85 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -428,12 +377,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_release_prioritization_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_release_prioritization_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 85 release prioritization closeout checks")
+    parser = argparse.ArgumentParser(description=' release prioritization closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

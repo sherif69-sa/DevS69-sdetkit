@@ -1,4 +1,4 @@
-# Day 90 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit phase3-wrap-publication-closeout --format json --strict

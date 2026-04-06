@@ -37,7 +37,7 @@ def _seed_repo(root: Path) -> None:
         d77._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-77-big-upgrade-report.md").write_text(
-        "# Day 77 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -62,12 +62,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 76 delivery board",
-                "- [ ] Day 76 integration brief committed",
-                "- [ ] Day 76 contributor recognition plan committed",
-                "- [ ] Day 76 recognition credits ledger exported",
-                "- [ ] Day 76 recognition KPI scorecard snapshot exported",
-                "- [ ] Day 77 scale priorities drafted from Day 76 learnings",
+                '#  delivery board',
+                '- [ ]  integration brief committed',
+                '- [ ]  contributor recognition plan committed',
+                '- [ ]  recognition credits ledger exported',
+                '- [ ]  recognition KPI scorecard snapshot exported',
+                '- [ ]  scale priorities drafted from  learnings',
             ]
         )
         + "\n",

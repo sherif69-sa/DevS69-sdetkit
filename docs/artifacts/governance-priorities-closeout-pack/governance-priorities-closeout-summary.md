@@ -1,4 +1,4 @@
-Day 88 governance priorities closeout summary
+ governance priorities closeout summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

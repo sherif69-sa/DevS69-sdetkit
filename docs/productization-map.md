@@ -84,7 +84,7 @@ Classification is based on current repository contents and naming patterns.
 **Definition:** incubator/history-heavy surfaces that are useful but should not define first-time product identity.
 
 - Most `dayNN_*` and `*_closeout` modules in `src/sdetkit/`.
-- Day-based contract scripts in `scripts/check_day*.py` and impact-specific closeout checks.
+- -based contract scripts in `scripts/check_day*.py` and impact-specific closeout checks.
 - Large archive of impact-based docs and integration closeout pages in `docs/`.
 - Long-tail command aliases and hidden command behavior currently needed to keep main help usable.
 
@@ -106,7 +106,7 @@ Classification is based on current repository contents and naming patterns.
 
 ## Treat as incubator/legacy lane (explicit opt-in)
 
-- Day/impact/closeout command family and matching impact-report documentation.
+- /impact/closeout command family and matching impact-report documentation.
 - Campaign-style command names where scope is phase-specific rather than evergreen.
 
 ## 4) Proposed target taxonomy (for future productization)
@@ -154,7 +154,7 @@ Recommended top-level docs journeys:
 5. **Playbooks**
    - Outcome-based guided lanes (onboarding, contribution, reliability narratives, etc.).
 6. **Experimental / archive**
-   - Day/impact closeout history and incubator commands, clearly marked as non-primary.
+   - /impact closeout history and incubator commands, clearly marked as non-primary.
 
 Practical IA rule:
 - Keep only journeys 1-4 prominently in README and docs landing pages.

@@ -64,11 +64,11 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: 'docs/artifacts/day67-integration-expansion3-closeout-pack/**', allowEmptyArchive: true
+      archiveArtifacts artifacts: 'docs/artifacts/-integration-expansion3-closeout-pack/**', allowEmptyArchive: true
       archiveArtifacts artifacts: 'build/security.sarif', allowEmptyArchive: true
     }
     unsuccessful {
-      echo 'Trigger rollback runbook for Day 67 integration expansion lane.'
+      echo 'Trigger rollback runbook for  integration expansion lane.'
     }
   }
 }

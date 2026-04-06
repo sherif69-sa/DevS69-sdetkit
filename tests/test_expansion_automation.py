@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 41 — Expansion automation lane:** automate scale winners into repeatable workflows.\n"
-        "- **Day 42 — Optimization lane kickoff:** convert Day 41 execution into optimization loops.\n",
+        '- ** — Expansion automation lane:** automate scale winners into repeatable workflows.\n'
+        '- ** — Optimization lane kickoff:** convert  execution into optimization loops.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-expansion-automation.md").write_text(
         d41._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-41-big-upgrade-report.md").write_text(
-        "# Day 41 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/scale-lane-pack/scale-lane-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 40 delivery board",
-                "- [ ] Day 40 scale plan draft committed",
-                "- [ ] Day 40 review notes captured with owner + backup",
-                "- [ ] Day 40 rollout timeline exported",
-                "- [ ] Day 40 KPI scorecard snapshot exported",
-                "- [ ] Day 41 expansion priorities drafted from Day 40 learnings",
+                '#  delivery board',
+                '- [ ]  scale plan draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  rollout timeline exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  expansion priorities drafted from  learnings',
             ]
         )
         + "\n",

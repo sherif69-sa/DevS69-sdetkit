@@ -1,7 +1,7 @@
 # Acceleration delivery board
 
-- [ ] Day 43 acceleration plan draft committed
-- [ ] Day 43 review notes captured with owner + backup
-- [ ] Day 43 growth matrix exported
-- [ ] Day 43 KPI scorecard snapshot exported
-- [ ] Day 44 scale priorities drafted from Day 43 learnings
+- [ ]  acceleration plan draft committed
+- [ ]  review notes captured with owner + backup
+- [ ]  growth matrix exported
+- [ ]  KPI scorecard snapshot exported
+- [ ]  scale priorities drafted from  learnings

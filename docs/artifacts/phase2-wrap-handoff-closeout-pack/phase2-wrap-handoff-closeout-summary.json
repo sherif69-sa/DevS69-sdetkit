@@ -25,7 +25,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 60 + Day 61 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "phase3_preplan_summary_present",
@@ -62,14 +62,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 60 \u2014 Phase-2 wrap + handoff closeout lane"
+      "evidence": "#  \u2014 Phase-2 wrap + handoff closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 10,
       "passed": false,
       "evidence": [
-        "## Day 60 command lane"
+        "##  command lane"
       ]
     },
     {
@@ -112,13 +112,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 59 delivery board integrity validated with 5 checklist items.",
+    " delivery board integrity validated with 5 checklist items.",
     "Phase-2 wrap + handoff contract + quality checklist is fully locked for execution."
   ],
   "misses": [
-    "Day 59 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 59 Phase-3 pre-plan closeout command and restore strict baseline before Day 60 lock."
+    "Re-run  Phase-3 pre-plan closeout command and restore strict baseline before  lock."
   ]
 }

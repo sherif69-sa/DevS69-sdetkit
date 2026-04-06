@@ -1,4 +1,4 @@
-Day 85 release prioritization closeout summary
+ release prioritization closeout summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

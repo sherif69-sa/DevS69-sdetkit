@@ -16,14 +16,14 @@ _DAY55_SUMMARY_PATH = "docs/artifacts/contributor-activation-closeout-pack/contr
 _DAY55_BOARD_PATH = (
     "docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md"
 )
-_SECTION_HEADER = "# Day 56 \u2014 Stabilization closeout lane"
+_SECTION_HEADER = "# \u2014 Stabilization closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 56 matters",
-    "## Required inputs (Day 55)",
-    "## Day 56 command lane",
+    "## Why matters",
+    "## Required inputs ()",
+    "## command lane",
     "## Stabilization contract",
     "## Stabilization quality checklist",
-    "## Day 56 delivery board",
+    "## delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_stabilization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 56 stabilization execution and KPI recovery.",
-    "The Day 56 lane references Day 55 contributor activation outcomes and unresolved risks.",
-    "Every Day 56 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 56 closeout records stabilization outcomes and Day 57 deep-audit priorities.",
+    "Single owner + backup reviewer are assigned for stabilization execution and KPI recovery.",
+    "The lane references contributor activation outcomes and unresolved risks.",
+    "Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "closeout records stabilization outcomes and deep-audit priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes bottleneck digest, remediation experiments, and rollback strategy",
@@ -51,29 +51,29 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes stabilization brief, risk ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 56 stabilization brief committed",
-    "- [ ] Day 56 stabilization plan reviewed with owner + backup",
-    "- [ ] Day 56 risk ledger exported",
-    "- [ ] Day 56 KPI scorecard snapshot exported",
-    "- [ ] Day 57 deep-audit priorities drafted from Day 56 learnings",
+    "- [ ] stabilization brief committed",
+    "- [ ] stabilization plan reviewed with owner + backup",
+    "- [ ] risk ledger exported",
+    "- [ ] KPI scorecard snapshot exported",
+    "- [ ] deep-audit priorities drafted from learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 56 \u2014 Stabilization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 Stabilization closeout lane
 
-Day 56 closes with a major stabilization upgrade that turns Day 55 contributor-activation outcomes into deterministic KPI recovery and follow-through.
+closes with a major stabilization upgrade that turns contributor-activation outcomes into deterministic KPI recovery and follow-through.
 
-## Why Day 56 matters
+## Why matters
 
-- Converts Day 55 contributor outcomes into repeatable stabilization loops.
+- Converts contributor outcomes into repeatable stabilization loops.
 - Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 56 closeout into Day 57 deep audit planning.
+- Produces a deterministic handoff from closeout into deep audit planning.
 
-## Required inputs (Day 55)
+## Required inputs ()
 
 - `docs/artifacts/contributor-activation-closeout-pack/contributor-activation-closeout-summary.json`
 - `docs/artifacts/contributor-activation-closeout-pack/contributor-activation-delivery-board.md`
 
-## Day 56 command lane
+## command lane
 
 ```bash
 python -m sdetkit stabilization-closeout --format json --strict
@@ -84,10 +84,10 @@ python scripts/check_stabilization_closeout_contract.py
 
 ## Stabilization contract
 
-- Single owner + backup reviewer are assigned for Day 56 stabilization execution and KPI recovery.
-- The Day 56 lane references Day 55 contributor activation outcomes and unresolved risks.
-- Every Day 56 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 56 closeout records stabilization outcomes and Day 57 deep-audit priorities.
+- Single owner + backup reviewer are assigned for stabilization execution and KPI recovery.
+- The lane references contributor activation outcomes and unresolved risks.
+- Every section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- closeout records stabilization outcomes and deep-audit priorities.
 
 ## Stabilization quality checklist
 
@@ -97,17 +97,17 @@ python scripts/check_stabilization_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes stabilization brief, risk ledger, KPI scorecard, and execution log
 
-## Day 56 delivery board
+## delivery board
 
-- [ ] Day 56 stabilization brief committed
-- [ ] Day 56 stabilization plan reviewed with owner + backup
-- [ ] Day 56 risk ledger exported
-- [ ] Day 56 KPI scorecard snapshot exported
-- [ ] Day 57 deep-audit priorities drafted from Day 56 learnings
+- [ ] stabilization brief committed
+- [ ] stabilization plan reviewed with owner + backup
+- [ ] risk ledger exported
+- [ ] KPI scorecard snapshot exported
+- [ ] deep-audit priorities drafted from learnings
 
 ## Scoring model
 
-Day 56 weighted score (0-100):
+weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -152,7 +152,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
 def _board_stats(path: Path) -> tuple[int, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(lines), ("Day 55" in text)
+    return len(lines), ("" in text)
 
 
 def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
@@ -179,7 +179,7 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         contributor_activation_strict,
         contributor_activation_check_count,
     ) = _load_contributor_activation_summary(contributor_activation_summary)
-    board_count, board_has_contributor_activation_cycle55 = _board_stats(contributor_activation_board)
+    board_count, board_has_required = _board_stats(contributor_activation_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -224,8 +224,8 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 56" in top10_text and "Day 57" in top10_text),
-            "evidence": "Day 56 + Day 57 strategy chain",
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": "+ strategy chain",
         },
         {
             "check_id": "contributor_activation_summary_present",
@@ -252,10 +252,10 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "contributor_activation_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_contributor_activation_cycle55,
+            "passed": board_count >= 5 and board_has_required,
             "evidence": {
                 "board_items": board_count,
-                "contains_contributor_activation_cycle55": board_has_contributor_activation_cycle55,
+                "contains_required": board_has_required,
             },
         },
         {
@@ -294,20 +294,20 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             f"Contributor-activation continuity is strict-pass with activation score={contributor_activation_score}."
         )
     else:
-        misses.append("Day 55 strict continuity signal is missing.")
+        misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 55 contributor activation closeout command and restore strict baseline before Day 56 lock."
+            "Re-run contributor activation closeout command and restore strict baseline before lock."
         )
 
-    if board_count >= 5 and board_has_contributor_activation_cycle55:
+    if board_count >= 5 and board_has_required:
         wins.append(
-            f"Day 55 delivery board integrity validated with {board_count} checklist items."
+            f"delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 55 delivery board integrity is incomplete (needs >=5 items and Day 55 anchors)."
+            "delivery board integrity is incomplete (needs >=5 items and anchors)."
         )
-        handoff_actions.append("Repair Day 55 delivery board entries to include Day 55 anchors.")
+        handoff_actions.append("Repair delivery board entries to include anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Stabilization contract + quality checklist is fully locked for execution.")
@@ -316,12 +316,12 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
             "Stabilization contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 56 contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 56 stabilization closeout lane is fully complete and ready for Day 57 deep audit lane."
+            "stabilization closeout lane is fully complete and ready for deep audit lane."
         )
 
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
@@ -362,7 +362,7 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Stabilization Closeout summary (legacy: Day 56)",
+        "Stabilization Closeout summary (legacy: )",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -380,17 +380,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(target / "stabilization-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "stabilization-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "stabilization-brief.md", "# Day 56 stabilization brief\n")
+    _write(target / "stabilization-brief.md", "# stabilization brief\n")
     _write(target / "stabilization-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "stabilization-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "stabilization-execution-log.md", "# Day 56 execution log\n")
+    _write(target / "stabilization-execution-log.md", "# execution log\n")
     _write(
         target / "stabilization-delivery-board.md",
-        "\n".join(["# Day 56 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "stabilization-validation-commands.md",
-        "# Day 56 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -418,7 +418,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_stabilization_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    """Compatibility alias for legacy builder name."""
     return build_stabilization_closeout_summary(root)
 
 

@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-demo-asset.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY32_SUMMARY_PATH = "docs/artifacts/release-cadence-pack/release-cadence-summary.json"
 _DAY32_BOARD_PATH = "docs/artifacts/release-cadence-pack/release-delivery-board.md"
-_SECTION_HEADER = "# Day 33 \u2014 Demo asset #1 production"
+_SECTION_HEADER = "# \u2014 Demo asset #1 production"
 _REQUIRED_SECTIONS = [
-    "## Why Day 33 matters",
-    "## Required inputs (Day 32)",
-    "## Day 33 command lane",
+    "## Why matters",
+    "## Required inputs ()",
+    "## command lane",
     "## Demo production contract",
     "## Demo quality checklist",
-    "## Day 33 delivery board",
+    "## delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -47,29 +47,29 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Raw source file and final export are both stored in artifact pack",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 33 script draft committed",
-    "- [ ] Day 33 first cut rendered",
-    "- [ ] Day 33 final cut + caption copy approved",
-    "- [ ] Day 34 demo asset #2 backlog pre-scoped",
-    "- [ ] Day 35 KPI instrumentation plan updated",
+    "- [ ] script draft committed",
+    "- [ ] first cut rendered",
+    "- [ ] final cut + caption copy approved",
+    "- [ ] demo asset #2 backlog pre-scoped",
+    "- [ ] KPI instrumentation plan updated",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 33 \u2014 Demo asset #1 production
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 Demo asset #1 production
 
-Day 33 closes the first demo-asset production lane so strategy turns into distributable proof.
+closes the first demo-asset production lane so strategy turns into distributable proof.
 
-## Why Day 33 matters
+## Why matters
 
 - Converts release readiness into visible, shareable product storytelling.
 - Creates a repeatable demo workflow for future release and community campaigns.
 - Adds evidence discipline so every demo links back to runnable commands and docs.
 
-## Required inputs (Day 32)
+## Required inputs ()
 
 - `docs/artifacts/release-cadence-pack/release-cadence-summary.json`
 - `docs/artifacts/release-cadence-pack/release-delivery-board.md`
 
-## Day 33 command lane
+## command lane
 
 ```bash
 python -m sdetkit demo-asset --format json --strict
@@ -93,17 +93,17 @@ python scripts/check_demo_asset_contract.py
 - [ ] Includes docs link and CLI command in caption or description
 - [ ] Raw source file and final export are both stored in artifact pack
 
-## Day 33 delivery board
+## delivery board
 
-- [ ] Day 33 script draft committed
-- [ ] Day 33 first cut rendered
-- [ ] Day 33 final cut + caption copy approved
-- [ ] Day 34 demo asset #2 backlog pre-scoped
-- [ ] Day 35 KPI instrumentation plan updated
+- [ ] script draft committed
+- [ ] first cut rendered
+- [ ] final cut + caption copy approved
+- [ ] demo asset #2 backlog pre-scoped
+- [ ] KPI instrumentation plan updated
 
 ## Scoring model
 
-Day 33 weighted score (0-100):
+weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -144,10 +144,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_demo_asset_cycle33 = any(
-        any(token in line for token in ("impact 33", "day 33", "name 33")) for line in lines
+        any(token in line for token in ("impact 33", "", "name 33")) for line in lines
     )
     has_demo_asset_cycle34 = any(
-        any(token in line for token in ("impact 34", "day 34", "name 34")) for line in lines
+        any(token in line for token in ("impact 34", "", "name 34")) for line in lines
     )
     return item_count, has_demo_asset_cycle33, has_demo_asset_cycle34
 
@@ -233,10 +233,10 @@ def build_demo_asset_summary_impl(
             "check_id": "top10_demo_asset_alignment",
             "weight": 5,
             "passed": (
-                "Day 33 \u2014 Demo asset #1" in top10_text
-                and "Day 34 \u2014 Demo asset #2" in top10_text
+                "\u2014 Demo asset #1" in top10_text
+                and "\u2014 Demo asset #2" in top10_text
             ),
-            "evidence": "Day 33 + Day 34 strategy chain",
+            "evidence": "+ strategy chain",
         },
         {
             "check_id": "release_cadence_summary_present",
@@ -274,8 +274,8 @@ def build_demo_asset_summary_impl(
             and board_has_demo_asset_cycle34,
             "evidence": {
                 "board_items": board_count,
-                "contains_demo_asset_cycle33": board_has_demo_asset_cycle33,
-                "contains_demo_asset_cycle34": board_has_demo_asset_cycle34,
+                "contains_previous": board_has_demo_asset_cycle33,
+                "contains_current": board_has_demo_asset_cycle34,
             },
         },
         {
@@ -315,21 +315,21 @@ def build_demo_asset_summary_impl(
             f"Release-cadence continuity is strict-pass with activation score={release_cadence_score}."
         )
     else:
-        misses.append("Day 32 strict continuity signal is missing.")
+        misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 32 cadence command and restore strict pass baseline before demo lock."
+            "Re-run cadence command and restore strict pass baseline before demo lock."
         )
 
     if board_count >= 5 and board_has_demo_asset_cycle33 and board_has_demo_asset_cycle34:
         wins.append(
-            f"Day 32 delivery board integrity validated with {board_count} checklist items."
+            f"delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 32 delivery board integrity is incomplete (needs >=5 items and Day 33/34 anchors)."
+            "delivery board integrity is incomplete (needs >=5 items and /34 anchors)."
         )
         handoff_actions.append(
-            "Repair Day 32 delivery board entries to include Day 33 and Day 34 anchors."
+            "Repair delivery board entries to include and anchors."
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -337,12 +337,12 @@ def build_demo_asset_summary_impl(
     else:
         misses.append("Demo contract, quality checklist, or delivery board entries are missing.")
         handoff_actions.append(
-            "Complete all Day 33 contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 33 demo asset #1 production is fully closed and ready for Day 34 sequencing."
+            "demo asset #1 production is fully closed and ready for sequencing."
         )
 
     return {
@@ -381,7 +381,7 @@ def build_demo_asset_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 33 demo asset summary\n"
+        "demo asset summary\n"
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -392,7 +392,7 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 33 demo asset summary",
+        "# demo asset summary",
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
@@ -401,9 +401,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Release-cadence continuity",
         "",
-        f"- Day 32 activation score: `{payload['rollup']['release_cadence_activation_score']}`",
-        f"- Day 32 checks evaluated: `{payload['rollup']['release_cadence_checks']}`",
-        f"- Day 32 delivery board checklist items: `{payload['rollup']['release_cadence_delivery_board_items']}`",
+        f"- activation score: `{payload['rollup']['release_cadence_activation_score']}`",
+        f"- checks evaluated: `{payload['rollup']['release_cadence_checks']}`",
+        f"- delivery board checklist items: `{payload['rollup']['release_cadence_delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -445,18 +445,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "demo-script.md",
-        "# Day 33 demo script\n\n"
+        "# demo script\n\n"
         "## Hook (0-10s)\n- Pain point + why this matters now\n\n"
         "## Command lane (10-45s)\n- Run: `python -m sdetkit doctor --json`\n- Highlight key output fields\n\n"
         "## Value proof + CTA (45-90s)\n- Trust signal + docs link + next step\n",
     )
     _write(
         target / "demo-delivery-board.md",
-        "# Day 33 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "demo-validation-commands.md",
-        "# Day 33 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        "# validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -487,7 +487,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 33 demo asset #1 production scorer.")
+    parser = argparse.ArgumentParser(description="demo asset #1 production scorer.")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -551,7 +551,7 @@ def build_demo_asset_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    """Canonical summary builder (legacy name retained as compatibility alias)."""
     return build_demo_asset_summary_impl(
         root,
         readme_path=readme_path,

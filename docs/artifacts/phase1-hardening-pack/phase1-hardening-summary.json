@@ -45,7 +45,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 11,
       "passed": false,
-      "evidence": "Day 29 \u2014 Phase-1 hardening"
+      "evidence": " \u2014 Phase-1 hardening"
     },
     {
       "check_id": "report_exists",

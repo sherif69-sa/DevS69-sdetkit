@@ -19,10 +19,10 @@ _DAY82_BOARD_PATH = (
     "docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/trust-faq-expansion-plan.json"
-_SECTION_HEADER = "# Day 83 \u2014 Trust FAQ expansion loop closeout lane"
+_SECTION_HEADER = '#  — Trust FAQ expansion loop closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Trust FAQ Expansion Closeout matters",
-    "## Required inputs (Day 82)",
+    '## Required inputs ()',
     "## Command lane",
     "## Trust FAQ expansion contract",
     "## Trust FAQ expansion quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_trust_faq_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 83 trust FAQ expansion execution and signoff.",
-    "The Day 83 lane references Day 82 outcomes, controls, and campaign continuity signals.",
-    "Every Day 83 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 83 closeout records trust FAQ content upgrades, escalation outcomes, and Day 84 evidence narrative priorities.",
+    'Single owner + backup reviewer are assigned for  trust FAQ expansion execution and signoff.',
+    'The  lane references  outcomes, controls, and campaign continuity signals.',
+    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records trust FAQ content upgrades, escalation outcomes, and  evidence narrative priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline trust FAQ coverage, objection segmentation assumptions, and response SLA targets",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes trust brief, FAQ expansion plan, template diffs, escalation ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 83 trust FAQ brief committed",
-    "- [ ] Day 83 trust FAQ expansion plan committed",
-    "- [ ] Day 83 trust template upgrade ledger exported",
-    "- [ ] Day 83 escalation outcomes ledger exported",
-    "- [ ] Day 84 evidence narrative priorities drafted from Day 83 outcomes",
+    '- [ ]  trust FAQ brief committed',
+    '- [ ]  trust FAQ expansion plan committed',
+    '- [ ]  trust template upgrade ledger exported',
+    '- [ ]  escalation outcomes ledger exported',
+    '- [ ]  evidence narrative priorities drafted from  outcomes',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,62 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 83 \u2014 Trust FAQ expansion loop closeout lane
-
-Day 83 closes with a major upgrade that folds Day 82 integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.
-
-## Why Trust FAQ Expansion Closeout matters
-
-- Turns Day 82 integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.
-- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 83 closeout into Day 84 evidence narrative priorities.
-
-## Required inputs (Day 82)
-
-- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`
-- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`
-- `docs/roadmap/plans/trust-faq-expansion-plan.json`
-
-## Command lane
-
-```bash
-python -m sdetkit trust-faq-expansion-closeout --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict
-python -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/trust-faq-expansion-closeout-pack/evidence --format json --strict
-python scripts/check_trust_faq_expansion_closeout_contract.py
-```
-
-## Trust FAQ expansion contract
-
-- Single owner + backup reviewer are assigned for Day 83 trust FAQ expansion execution and signoff.
-- The Day 83 lane references Day 82 outcomes, controls, and campaign continuity signals.
-- Every Day 83 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 83 closeout records trust FAQ content upgrades, escalation outcomes, and Day 84 evidence narrative priorities.
-
-## Trust FAQ expansion quality checklist
-
-- [ ] Includes baseline trust FAQ coverage, objection segmentation assumptions, and response SLA targets
-- [ ] Every trust lane row has owner, execution window, KPI threshold, and risk flag
-- [ ] CTA links point to trust docs/templates + runnable command evidence
-- [ ] Scorecard captures trust FAQ adoption delta, objection deflection delta, confidence, and rollback owner
-- [ ] Artifact pack includes trust brief, FAQ expansion plan, template diffs, escalation ledger, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 83 trust FAQ brief committed
-- [ ] Day 83 trust FAQ expansion plan committed
-- [ ] Day 83 trust template upgrade ledger exported
-- [ ] Day 83 escalation outcomes ledger exported
-- [ ] Day 84 evidence narrative priorities drafted from Day 83 outcomes
-
-## Scoring model
-
-Trust FAQ Expansion Closeout weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 82 continuity baseline quality (35)
-- Feedback evidence data + delivery board completeness (30)
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Trust FAQ expansion loop closeout lane\n\n closes with a major upgrade that folds  integration feedback outcomes into trust FAQ coverage upgrades and escalation-readiness execution.\n\n## Why Trust FAQ Expansion Closeout matters\n\n- Turns  integration feedback outcomes into deterministic trust FAQ expansion loops across docs, templates, and support operations.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  evidence narrative priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-closeout-summary.json`\n- `docs/artifacts/integration-feedback-closeout-pack/integration-feedback-delivery-board.md`\n- `docs/roadmap/plans/trust-faq-expansion-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit trust-faq-expansion-closeout --format json --strict\npython -m sdetkit trust-faq-expansion-closeout --emit-pack-dir docs/artifacts/trust-faq-expansion-closeout-pack --format json --strict\npython -m sdetkit trust-faq-expansion-closeout --execute --evidence-dir docs/artifacts/trust-faq-expansion-closeout-pack/evidence --format json --strict\npython scripts/check_trust_faq_expansion_closeout_contract.py\n```\n\n## Trust FAQ expansion contract\n\n- Single owner + backup reviewer are assigned for  trust FAQ expansion execution and signoff.\n- The  lane references  outcomes, controls, and campaign continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records trust FAQ content upgrades, escalation outcomes, and  evidence narrative priorities.\n\n## Trust FAQ expansion quality checklist\n\n- [ ] Includes baseline trust FAQ coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every trust lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to trust docs/templates + runnable command evidence\n- [ ] Scorecard captures trust FAQ adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes trust brief, FAQ expansion plan, template diffs, escalation ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  trust FAQ brief committed\n- [ ]  trust FAQ expansion plan committed\n- [ ]  trust template upgrade ledger exported\n- [ ]  escalation outcomes ledger exported\n- [ ]  evidence narrative priorities drafted from  outcomes\n\n## Scoring model\n\nTrust FAQ Expansion Closeout weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Feedback evidence data + delivery board completeness (30)\n'
 
 
 def _read_text(path: Path) -> str:
@@ -177,7 +122,7 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     board_text = _read_text(integration_feedback_board)
     board_count = _checklist_count(board_text)
     board_has_integration_feedback = (
-        "integration feedback" in board_text.lower() or "Day 82" in board_text
+        "integration feedback" in board_text.lower() or '' in board_text
     )
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
@@ -208,8 +153,8 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 82" in top10_text and "Day 83" in top10_text),
-            "evidence": "Day 82 + Day 83 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "integration_feedback_summary_present",
@@ -300,32 +245,32 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             f"Integration Feedback continuity baseline is stable with activation score={integration_feedback_score}."
         )
     else:
-        misses.append("Day 82 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
         handoff_actions.append(
-            "Re-run Day 82 closeout command and raise baseline quality above 85 with strict pass before Day 83 lock."
+            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
         )
 
     if board_count >= 5 and board_has_integration_feedback:
         wins.append(
-            f"Day 82 delivery board integrity validated with {board_count} checklist items."
+            f"82 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 82 delivery board integrity is incomplete (needs >=5 items and Day 82 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 82 delivery board entries to include Day 82 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 83 trust FAQ expansion dataset is available for launch execution.")
+        wins.append(' trust FAQ expansion dataset is available for launch execution.')
     else:
-        misses.append("Day 83 trust FAQ expansion dataset is missing required keys.")
+        misses.append(' trust FAQ expansion dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/trust-faq-expansion-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 83 trust FAQ expansion closeout lane is fully complete and ready for Day 84 evidence narrative priorities."
+            ' trust FAQ expansion closeout lane is fully complete and ready for  evidence narrative priorities.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -365,7 +310,7 @@ def build_trust_faq_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 83 trust FAQ expansion closeout summary",
+        ' trust FAQ expansion closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -386,8 +331,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "trust-faq-expansion-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "trust-faq-expansion-trust-faq-brief.md", "# Day 83 trust FAQ brief\n")
-    _write(target / "trust-faq-expansion-plan.md", "# Day 83 trust FAQ expansion plan\n")
+    _write(target / "trust-faq-expansion-trust-faq-brief.md", '#  trust FAQ brief\n')
+    _write(target / "trust-faq-expansion-plan.md", '#  trust FAQ expansion plan\n')
     _write(
         target / "trust-faq-expansion-trust-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -400,14 +345,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "trust-faq-expansion-trust-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "trust-faq-expansion-execution-log.md", "# Day 83 execution log\n")
+    _write(target / "trust-faq-expansion-execution-log.md", '#  execution log\n')
     _write(
         target / "trust-faq-expansion-delivery-board.md",
-        "\n".join(["# Day 83 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "trust-faq-expansion-validation-commands.md",
-        "# Day 83 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -435,12 +380,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_trust_faq_expansion_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_trust_faq_expansion_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 83 trust FAQ expansion closeout checks")
+    parser = argparse.ArgumentParser(description=' trust FAQ expansion closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 75 — Trust assets refresh:** turn Day 74 outcomes into governance-grade trust proof.\n"
-        "- **Day 76 — Contributor recognition board:** publish contributor spotlight and release credits model.\n",
+        '- ** — Trust assets refresh:** turn  outcomes into governance-grade trust proof.\n'
+        '- ** — Contributor recognition board:** publish contributor spotlight and release credits model.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-trust-assets-refresh-closeout.md").write_text(
         d75._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-75-big-upgrade-report.md").write_text(
-        "# Day 75 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -63,12 +63,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 74 delivery board",
-                "- [ ] Day 74 integration brief committed",
-                "- [ ] Day 74 distribution scaling plan committed",
-                "- [ ] Day 74 channel controls and assumptions log exported",
-                "- [ ] Day 74 KPI scorecard snapshot exported",
-                "- [ ] Day 75 trust refresh priorities drafted from Day 74 learnings",
+                '#  delivery board',
+                '- [ ]  integration brief committed',
+                '- [ ]  distribution scaling plan committed',
+                '- [ ]  channel controls and assumptions log exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  trust refresh priorities drafted from  learnings',
             ]
         )
         + "\n",

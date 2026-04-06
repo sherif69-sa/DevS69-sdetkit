@@ -21,7 +21,7 @@
       "passed": false,
       "evidence": {
         "missing_sections": [
-          "# Cycle 52 \u2014 Narrative closeout lane",
+          "# Cycle 52 — Narrative closeout lane",
           "## Why Cycle 52 matters",
           "## Required inputs (Cycle 51)",
           "## Cycle 52 command lane",
@@ -59,7 +59,7 @@
       "check_id": "top10_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Cycle 52 + Day 53 strategy chain"
+      "evidence": "Cycle 52 + strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -89,7 +89,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -102,7 +101,7 @@
           "- Single owner + backup reviewer are assigned for Cycle 52 narrative execution and KPI follow-up.",
           "- The Cycle 52 narrative lane references Cycle 51 case-snippet winners and misses with deterministic release-storytelling loops.",
           "- Every Cycle 52 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-          "- Cycle 52 closeout records narrative learnings and Day 53 expansion priorities."
+          "- Cycle 52 closeout records narrative learnings and expansion priorities."
         ]
       }
     },
@@ -124,7 +123,7 @@
           "- [ ] Cycle 52 narrative reviewed with owner + backup",
           "- [ ] Cycle 52 proof map exported",
           "- [ ] Cycle 52 KPI scorecard snapshot exported",
-          "- [ ] Day 53 expansion priorities drafted from Cycle 52 learnings"
+          "- [ ] expansion priorities drafted from Cycle 52 learnings"
         ]
       }
     }

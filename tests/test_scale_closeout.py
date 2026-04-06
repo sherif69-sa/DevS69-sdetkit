@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 44 — Scale closeout lane:** convert Day 43 acceleration proof into deterministic scale loops.\n"
-        "- **Day 45 — Expansion lane continuation:** convert Day 44 scale wins into expansion plays.\n",
+        '- ** — Scale closeout lane:** convert  acceleration proof into deterministic scale loops.\n'
+        '- ** — Expansion lane continuation:** convert  scale wins into expansion plays.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-scale-closeout.md").write_text(
         d44._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-44-big-upgrade-report.md").write_text(
-        "# Day 44 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 43 delivery board",
-                "- [ ] Day 43 acceleration plan draft committed",
-                "- [ ] Day 43 review notes captured with owner + backup",
-                "- [ ] Day 43 remediation matrix exported",
-                "- [ ] Day 43 KPI scorecard snapshot exported",
-                "- [ ] Day 44 scale priorities drafted from Day 43 learnings",
+                '#  delivery board',
+                '- [ ]  acceleration plan draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  remediation matrix exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  scale priorities drafted from  learnings',
             ]
         )
         + "\n",

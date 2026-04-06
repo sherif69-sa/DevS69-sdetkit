@@ -17,10 +17,10 @@ _DAY80_BOARD_PATH = (
     "docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/growth-campaign-plan.json"
-_SECTION_HEADER = "# Day 81 \u2014 Growth campaign closeout lane"
+_SECTION_HEADER = '#  — Growth campaign closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Growth Campaign Closeout matters",
-    "## Required inputs (Day 80)",
+    '## Required inputs ()',
     "## Command lane",
     "## Growth campaign contract",
     "## Growth campaign quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_growth_campaign_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 81 growth campaign execution and signoff.",
-    "The Day 81 lane references Day 80 outcomes, controls, and KPI continuity signals.",
-    "Every Day 81 section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 81 closeout records campaign outcomes, confidence notes, and Day 82 execution priorities.",
+    'Single owner + backup reviewer are assigned for  growth campaign execution and signoff.',
+    'The  lane references  outcomes, controls, and KPI continuity signals.',
+    'Every  section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records campaign outcomes, confidence notes, and  execution priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes campaign baseline, audience assumptions, and launch cadence",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, campaign plan, execution ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 81 integration brief committed",
-    "- [ ] Day 81 growth campaign plan committed",
-    "- [ ] Day 81 campaign execution ledger exported",
-    "- [ ] Day 81 campaign KPI scorecard snapshot exported",
-    "- [ ] Day 82 execution priorities drafted from Day 81 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  growth campaign plan committed',
+    '- [ ]  campaign execution ledger exported',
+    '- [ ]  campaign KPI scorecard snapshot exported',
+    '- [ ]  execution priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -67,62 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 81 \u2014 Growth campaign closeout lane
-
-Day 81 closes with a major upgrade that converts Day 80 partner outreach outcomes into a growth-campaign execution pack.
-
-## Why Growth Campaign Closeout matters
-
-- Turns Day 80 partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.
-- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 81 growth campaign closeout into Day 82 execution priorities.
-
-## Required inputs (Day 80)
-
-- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json`
-- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md`
-- `docs/roadmap/plans/growth-campaign-plan.json`
-
-## Command lane
-
-```bash
-python -m sdetkit growth-campaign-closeout --format json --strict
-python -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict
-python -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/growth-campaign-closeout-pack/evidence --format json --strict
-python scripts/check_growth_campaign_closeout_contract.py
-```
-
-## Growth campaign contract
-
-- Single owner + backup reviewer are assigned for Day 81 growth campaign execution and signoff.
-- The Day 81 lane references Day 80 outcomes, controls, and KPI continuity signals.
-- Every Day 81 section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 81 closeout records campaign outcomes, confidence notes, and Day 82 execution priorities.
-
-## Growth campaign quality checklist
-
-- [ ] Includes campaign baseline, audience assumptions, and launch cadence
-- [ ] Every campaign lane row has owner, execution window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures campaign score delta, partner carryover delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, campaign plan, execution ledger, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 81 integration brief committed
-- [ ] Day 81 growth campaign plan committed
-- [ ] Day 81 campaign execution ledger exported
-- [ ] Day 81 campaign KPI scorecard snapshot exported
-- [ ] Day 82 execution priorities drafted from Day 81 learnings
-
-## Scoring model
-
-Growth Campaign Closeout weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 80 continuity baseline quality (35)
-- Campaign evidence data + delivery board completeness (30)
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Growth campaign closeout lane\n\n closes with a major upgrade that converts  partner outreach outcomes into a growth-campaign execution pack.\n\n## Why Growth Campaign Closeout matters\n\n- Turns  partner outreach outcomes into growth campaign execution proof across docs, rollout, and demand loops.\n- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  growth campaign closeout into  execution priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-closeout-summary.json`\n- `docs/artifacts/partner-outreach-closeout-pack/partner-outreach-delivery-board.md`\n- `docs/roadmap/plans/growth-campaign-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit growth-campaign-closeout --format json --strict\npython -m sdetkit growth-campaign-closeout --emit-pack-dir docs/artifacts/growth-campaign-closeout-pack --format json --strict\npython -m sdetkit growth-campaign-closeout --execute --evidence-dir docs/artifacts/growth-campaign-closeout-pack/evidence --format json --strict\npython scripts/check_growth_campaign_closeout_contract.py\n```\n\n## Growth campaign contract\n\n- Single owner + backup reviewer are assigned for  growth campaign execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes campaign CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records campaign outcomes, confidence notes, and  execution priorities.\n\n## Growth campaign quality checklist\n\n- [ ] Includes campaign baseline, audience assumptions, and launch cadence\n- [ ] Every campaign lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures campaign score delta, partner carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, campaign plan, execution ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  integration brief committed\n- [ ]  growth campaign plan committed\n- [ ]  campaign execution ledger exported\n- [ ]  campaign KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\nGrowth Campaign Closeout weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Campaign evidence data + delivery board completeness (30)\n'
 
 
 def _read_text(path: Path) -> str:
@@ -165,7 +110,7 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(partner_outreach_board)
     board_count = _checklist_count(board_text)
-    board_has_partner_outreach = "partner outreach" in board_text.lower() or "Day 80" in board_text
+    board_has_partner_outreach = "partner outreach" in board_text.lower() or '' in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -195,8 +140,8 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 80" in top10_text and "Day 81" in top10_text),
-            "evidence": "Day 80 + Day 81 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "partner_outreach_summary_present",
@@ -287,32 +232,32 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
             f"Partner Outreach continuity baseline is stable with activation score={partner_outreach_score}."
         )
     else:
-        misses.append("Day 80 continuity baseline is below the floor (<85).")
+        misses.append(' continuity baseline is below the floor (<85).')
         handoff_actions.append(
-            "Re-run Day 80 closeout command and raise baseline quality above 85 before Day 81 lock."
+            'Re-run  closeout command and raise baseline quality above 85 before  lock.'
         )
 
     if board_count >= 5 and board_has_partner_outreach:
         wins.append(
-            f"Day 80 delivery board integrity validated with {board_count} checklist items."
+            f"80 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 80 delivery board integrity is incomplete (needs >=5 items and Day 80 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 80 delivery board entries to include Day 80 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 81 growth campaign dataset is available for launch execution.")
+        wins.append(' growth campaign dataset is available for launch execution.')
     else:
-        misses.append("Day 81 growth campaign dataset is missing required keys.")
+        misses.append(' growth campaign dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/growth-campaign-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 81 growth campaign closeout lane is fully complete and ready for Day 82 execution priorities."
+            ' growth campaign closeout lane is fully complete and ready for  execution priorities.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -352,7 +297,7 @@ def build_growth_campaign_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 81 growth campaign closeout summary",
+        ' growth campaign closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -370,8 +315,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(target / "growth-campaign-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "growth-campaign-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "growth-campaign-integration-brief.md", "# Day 81 integration brief\n")
-    _write(target / "growth-campaign-plan.md", "# Day 81 growth campaign plan\n")
+    _write(target / "growth-campaign-integration-brief.md", '#  integration brief\n')
+    _write(target / "growth-campaign-plan.md", '#  growth campaign plan\n')
     _write(
         target / "growth-campaign-campaign-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
@@ -380,14 +325,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "growth-campaign-campaign-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "growth-campaign-execution-log.md", "# Day 81 execution log\n")
+    _write(target / "growth-campaign-execution-log.md", '#  execution log\n')
     _write(
         target / "growth-campaign-delivery-board.md",
-        "\n".join(["# Day 81 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "growth-campaign-validation-commands.md",
-        "# Day 81 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -415,12 +360,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_growth_campaign_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_growth_campaign_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 81 growth campaign closeout checks")
+    parser = argparse.ArgumentParser(description=' growth campaign closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

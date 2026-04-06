@@ -6,9 +6,9 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-DAY_PATTERN = re.compile(r"day([0-9]{1,2})")
-TEST_NAME_PATTERN = re.compile(r"(def test_[^(]*?)_without_day\d{1,2}(\(tmp_path: Path\) -> None:)")
-PLAN_ID_PATTERN = re.compile(r'("plan_id"\s*:\s*")day[0-9]{1,2}-([^"\\n]+")')
+ANCHOR_PATTERN = re.compile(r"anchor([0-9]{1,2})")
+TEST_NAME_PATTERN = re.compile(r"(def test_[^(]*?)_without_anchor\d{1,2}(\(tmp_path: Path\) -> None:)")
+PLAN_ID_PATTERN = re.compile(r'("plan_id"\s*:\s*")anchor[0-9]{1,2}-([^"\\n]+")')
 
 
 def _iter_files(root: Path) -> list[Path]:
@@ -26,8 +26,8 @@ def build_inventory(root: Path) -> dict[str, dict[str, set[str]]]:
     for p in _iter_files(root):
         rel = p.relative_to(root).as_posix()
         text = p.read_text(encoding="utf-8", errors="ignore")
-        days = set(DAY_PATTERN.findall(text))
-        if not days:
+        anchors = set(ANCHOR_PATTERN.findall(text))
+        if not anchors:
             continue
         if rel.startswith("docs/artifacts/"):
             bucket = "artifacts"
@@ -41,8 +41,8 @@ def build_inventory(root: Path) -> dict[str, dict[str, set[str]]]:
             bucket = "active-scripts"
         else:
             bucket = "other"
-        for day in days:
-            grouped[bucket][day].add(rel)
+        for anchor in anchors:
+            grouped[bucket][anchor].add(rel)
     return grouped
 
 
@@ -61,7 +61,7 @@ def rewrite_tests(root: Path) -> tuple[int, int]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Inventory and optional cleanup for dayNN legacy naming")
+    ap = argparse.ArgumentParser(description="Inventory and optional cleanup for anchorNN legacy naming")
     ap.add_argument("--root", default=".", help="repo root")
     ap.add_argument("--fix-tests", action="store_true", help="rewrite test names and test fixture plan_ids")
     ns = ap.parse_args()
@@ -71,8 +71,8 @@ def main() -> int:
     print("Inventory:")
     for bucket in sorted(inv):
         print(f"[{bucket}]")
-        for day in sorted(inv[bucket], key=lambda d: int(d)):
-            print(f"  day{day}: {len(inv[bucket][day])} files")
+        for anchor in sorted(inv[bucket], key=lambda d: int(d)):
+            print(f"  anchor{anchor}: {len(inv[bucket][anchor])} files")
 
     if ns.fix_tests:
         renamed_tests, rewritten_plan_ids = rewrite_tests(root)

@@ -31,7 +31,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Cycle 64 — Integration expansion #1:** add advanced GitHub Actions reference workflow.\n"
-        "- **Day 65 — Weekly review #9:** report baseline movement and community signal quality.\n",
+        '- ** — Weekly review #9:** report baseline movement and community signal quality.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-expansion-closeout.md").write_text(

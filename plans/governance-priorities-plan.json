@@ -1,5 +1,5 @@
 {
-  "plan_id": "day88-governance-priorities-001",
+  "plan_id": "-governance-priorities-001",
   "contributors": ["maintainers", "governance-ops", "release-ops"],
   "narrative_channels": ["governance-brief", "roadmap-review", "risk-digest"],
   "baseline": {

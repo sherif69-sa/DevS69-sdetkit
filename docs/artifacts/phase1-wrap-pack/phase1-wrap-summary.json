@@ -6,8 +6,6 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase1-wrap.md",
     "top10": "docs/top-10-github-strategy.md",
-    "summary": "docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json",
-    "summary": "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
     "summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
     "summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
   },
@@ -56,22 +54,22 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 30 + Day 31 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
-      "check_id": "input_present",
+      "check_id": "baseline_input_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json"
     },
     {
-      "check_id": "input_present",
+      "check_id": "prior_input_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-pack/weekly-review-summary.json"
     },
     {
-      "check_id": "input_present",
+      "check_id": "current_input_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -89,8 +87,6 @@
     }
   ],
   "rollup": {
-    "activation_score": 100.0,
-    "activation_score": 100.0,
     "activation_score": 55.0,
     "average_activation_score": 85.0
   },
@@ -107,6 +103,6 @@
   ],
   "misses": [],
   "handoff_actions": [
-    "Fix Day 30 docs/discoverability contract gaps and rerun strict validation."
+    "Fix docs/discoverability contract gaps and rerun strict validation."
   ]
 }

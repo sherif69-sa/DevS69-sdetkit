@@ -20,7 +20,7 @@ _PLAN_PATH = "docs/roadmap/plans/partner-outreach-plan.json"
 _SECTION_HEADER = "# Partner outreach closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why partner outreach matters",
-    "## Required inputs (Day 79)",
+    "## Required inputs",
     "## Partner outreach command lane",
     "## Partner outreach contract",
     "## Partner outreach quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_partner_outreach_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 80 partner outreach execution and signoff.",
-    "The Day 80 lane references Day 79 outcomes, controls, and KPI continuity signals.",
-    "Every Day 80 section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 80 closeout records partner onboarding outcomes, confidence notes, and Day 81 growth campaign priorities.",
+    "Single owner + backup reviewer are assigned for partner outreach execution and signoff.",
+    "The lane references prior outcomes, controls, and KPI continuity signals.",
+    "Every section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    "Closeout records partner onboarding outcomes, confidence notes, and growth campaign priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes partner onboarding baseline, enablement cadence, and stakeholder assumptions",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, partner outreach plan, execution ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 80 integration brief committed",
-    "- [ ] Day 80 partner outreach plan committed",
-    "- [ ] Day 80 partner execution ledger exported",
-    "- [ ] Day 80 partner KPI scorecard snapshot exported",
-    "- [ ] Day 81 growth campaign priorities drafted from Day 80 learnings",
+    "- [ ] Integration brief committed",
+    "- [ ] Partner outreach plan committed",
+    "- [ ] Partner execution ledger exported",
+    "- [ ] Partner KPI scorecard snapshot exported",
+    "- [ ] Growth campaign priorities drafted from partner outreach learnings",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,15 +69,15 @@ _REQUIRED_DATA_KEYS = [
 
 _DEFAULT_PAGE_TEMPLATE = """# Partner outreach closeout lane
 
-Day 80 closes with a major upgrade that converts Day 79 scale outcomes into a partner-outreach execution pack.
+Partner outreach closes with a major upgrade that converts prior scale outcomes into a partner-outreach execution pack.
 
 ## Why partner outreach matters
 
-- Turns Day 79 scale outcomes into partner onboarding proof across docs, rollout, and adoption loops.
+- Turns prior scale outcomes into partner onboarding proof across docs, rollout, and adoption loops.
 - Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 80 partner outreach into Day 81 growth campaign priorities.
+- Creates a deterministic handoff from partner outreach into growth campaign priorities.
 
-## Required inputs (Day 79)
+## Required inputs
 
 - `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-closeout-summary.json`
 - `docs/artifacts/scale-upgrade-closeout-pack/scale-upgrade-delivery-board.md`
@@ -94,10 +94,10 @@ python scripts/check_partner_outreach_closeout_contract.py
 
 ## Partner outreach contract
 
-- Single owner + backup reviewer are assigned for Day 80 partner outreach execution and signoff.
-- The Day 80 lane references Day 79 outcomes, controls, and KPI continuity signals.
-- Every Day 80 section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 80 closeout records partner onboarding outcomes, confidence notes, and Day 81 growth campaign priorities.
+- Single owner + backup reviewer are assigned for partner outreach execution and signoff.
+- The lane references prior outcomes, controls, and KPI continuity signals.
+- Every section includes partner CTA, runnable command CTA, KPI threshold, and rollback guardrail.
+- Closeout records partner onboarding outcomes, confidence notes, and growth campaign priorities.
 
 ## Partner outreach quality checklist
 
@@ -109,18 +109,18 @@ python scripts/check_partner_outreach_closeout_contract.py
 
 ## Partner outreach delivery board
 
-- [ ] Day 80 integration brief committed
-- [ ] Day 80 partner outreach plan committed
-- [ ] Day 80 partner execution ledger exported
-- [ ] Day 80 partner KPI scorecard snapshot exported
-- [ ] Day 81 growth campaign priorities drafted from Day 80 learnings
+- [ ] Integration brief committed
+- [ ] Partner outreach plan committed
+- [ ] Partner execution ledger exported
+- [ ] Partner KPI scorecard snapshot exported
+- [ ] Growth campaign priorities drafted from partner outreach learnings
 
 ## Scoring model
 
-Day 80 weighted score (0-100):
+Weighted score (0-100):
 
 - Contract + command lane integrity (35)
-- Day 79 continuity baseline quality (35)
+- Prior continuity baseline quality (35)
 - Partner evidence data + delivery board completeness (30)
 """
 
@@ -166,7 +166,7 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
         if line.strip().startswith("- [")
     ]
     board_count = len(board_lines)
-    board_has_scale_upgrade = any("Day 79" in line for line in board_lines)
+    board_has_scale_upgrade = any("scale" in line.lower() for line in board_lines)
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -288,32 +288,32 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
             f"Scale Upgrade continuity baseline is stable with activation score={scale_upgrade_score}."
         )
     else:
-        misses.append("Day 79 continuity baseline is below the floor (<85).")
+        misses.append("Prior continuity baseline is below the floor (<85).")
         handoff_actions.append(
-            "Re-run Day 79 closeout command and raise baseline quality above 85 before Day 80 lock."
+            "Re-run prior closeout command and raise baseline quality above 85 before lock."
         )
 
     if board_count >= 5 and board_has_scale_upgrade:
         wins.append(
-            f"Day 79 delivery board integrity validated with {board_count} checklist items."
+            f"Prior delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 79 delivery board integrity is incomplete (needs >=5 items and Day 79 anchors)."
+            "Prior delivery board integrity is incomplete (needs >=5 items and prior anchors)."
         )
-        handoff_actions.append("Repair Day 79 delivery board entries to include Day 79 anchors.")
+        handoff_actions.append("Repair prior delivery board entries to include prior anchors.")
 
     if not missing_plan_keys:
-        wins.append("Day 80 partner outreach dataset is available for launch execution.")
+        wins.append("Partner outreach dataset is available for launch execution.")
     else:
-        misses.append("Day 80 partner outreach dataset is missing required keys.")
+        misses.append("Partner outreach dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/partner-outreach-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 80 partner outreach closeout lane is fully complete and ready for Day 81 growth campaign priorities."
+            "Partner outreach closeout lane is fully complete and ready for growth campaign priorities."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -374,8 +374,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "partner-outreach-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "partner-outreach-integration-brief.md", "# Day 80 integration brief\n")
-    _write(target / "partner-outreach-plan.md", "# Day 80 partner outreach plan\n")
+    _write(target / "partner-outreach-integration-brief.md", "# Integration brief\n")
+    _write(target / "partner-outreach-plan.md", "# Partner outreach plan\n")
     _write(
         target / "partner-outreach-partner-execution-ledger.json",
         json.dumps({"executions": []}, indent=2) + "\n",
@@ -384,14 +384,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "partner-outreach-partner-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "partner-outreach-execution-log.md", "# Day 80 execution log\n")
+    _write(target / "partner-outreach-execution-log.md", "# Execution log\n")
     _write(
         target / "partner-outreach-delivery-board.md",
-        "\n".join(["# Day 80 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# Delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "partner-outreach-validation-commands.md",
-        "# Day 80 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -419,7 +419,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_partner_outreach_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    """Compatibility alias for legacy builder name."""
     return build_partner_outreach_closeout_summary(root)
 
 

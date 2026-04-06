@@ -14,14 +14,14 @@ _DAY47_SUMMARY_PATH = (
     "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
 )
 _DAY47_BOARD_PATH = "docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md"
-_SECTION_HEADER = "# Day 48 \u2014 Objection closeout lane"
+_SECTION_HEADER = '#  — Objection closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 48 matters",
-    "## Required inputs (Day 47)",
-    "## Day 48 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Objection closeout contract",
     "## Objection quality checklist",
-    "## Day 48 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -36,10 +36,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_objection_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 48 objection lane execution and KPI follow-up.",
-    "The Day 48 objection lane references Day 47 reliability winners and misses with deterministic objection-handling loops.",
-    "Every Day 48 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 48 closeout records objection-handling learnings and Day 49 weekly-review priorities.",
+    'Single owner + backup reviewer are assigned for  objection lane execution and KPI follow-up.',
+    'The  objection lane references  reliability winners and misses with deterministic objection-handling loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records objection-handling learnings and  weekly-review priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes objection summary, FAQ update map, and rollback strategy",
@@ -49,69 +49,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes objection plan, FAQ map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 48 objection plan draft committed",
-    "- [ ] Day 48 review notes captured with owner + backup",
-    "- [ ] Day 48 FAQ objection map exported",
-    "- [ ] Day 48 KPI scorecard snapshot exported",
-    "- [ ] Day 49 weekly-review priorities drafted from Day 48 learnings",
+    '- [ ]  objection plan draft committed',
+    '- [ ]  review notes captured with owner + backup',
+    '- [ ]  FAQ objection map exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  weekly-review priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 48 \u2014 Objection closeout lane
-
-Day 48 closes with a major objection-handling upgrade that converts Day 47 reliability evidence into deterministic documentation hardening loops.
-
-## Why Day 48 matters
-
-- Converts Day 47 reliability proof into objection-first adoption motion.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from objection outcomes into Day 49 weekly-review priorities.
-
-## Required inputs (Day 47)
-
-- `docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json`
-- `docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md`
-
-## Day 48 command lane
-
-```bash
-python -m sdetkit objection-closeout --format json --strict
-python -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict
-python -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict
-python scripts/check_objection_closeout_contract.py
-```
-
-## Objection closeout contract
-
-- Single owner + backup reviewer are assigned for Day 48 objection lane execution and KPI follow-up.
-- The Day 48 objection lane references Day 47 reliability winners and misses with deterministic objection-handling loops.
-- Every Day 48 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 48 closeout records objection-handling learnings and Day 49 weekly-review priorities.
-
-## Objection quality checklist
-
-- [ ] Includes objection summary, FAQ update map, and rollback strategy
-- [ ] Every section has owner, publish window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes objection plan, FAQ map, KPI scorecard, and execution log
-
-## Day 48 delivery board
-
-- [ ] Day 48 objection plan draft committed
-- [ ] Day 48 review notes captured with owner + backup
-- [ ] Day 48 FAQ objection map exported
-- [ ] Day 48 KPI scorecard snapshot exported
-- [ ] Day 49 weekly-review priorities drafted from Day 48 learnings
-
-## Scoring model
-
-Day 48 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 47 continuity and strict baseline carryover: 35 points.
-- Objection contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Objection closeout lane\n\n closes with a major objection-handling upgrade that converts  reliability evidence into deterministic documentation hardening loops.\n\n## Why  matters\n\n- Converts  reliability proof into objection-first adoption motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from objection outcomes into  weekly-review priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json`\n- `docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md`\n\n##  command lane\n\n```bash\npython -m sdetkit objection-closeout --format json --strict\npython -m sdetkit objection-closeout --emit-pack-dir docs/artifacts/objection-closeout-pack --format json --strict\npython -m sdetkit objection-closeout --execute --evidence-dir docs/artifacts/objection-closeout-pack/evidence --format json --strict\npython scripts/check_objection_closeout_contract.py\n```\n\n## Objection closeout contract\n\n- Single owner + backup reviewer are assigned for  objection lane execution and KPI follow-up.\n- The  objection lane references  reliability winners and misses with deterministic objection-handling loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records objection-handling learnings and  weekly-review priorities.\n\n## Objection quality checklist\n\n- [ ] Includes objection summary, FAQ update map, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes objection plan, FAQ map, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  objection plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  FAQ objection map exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  weekly-review priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Objection contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -143,7 +88,7 @@ def _load_cycle47(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 47" in text, "Day 48" in text
+    return len(items), '' in text, '' in text
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -218,8 +163,8 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 48" in top10_text and "Day 49" in top10_text),
-            "evidence": "Day 48 + Day 49 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -286,23 +231,23 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 47 continuity is strict-pass with activation score={score}.")
+        wins.append(f"47 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 47 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 47 reliability closeout command and restore strict pass baseline before Day 48 lock."
+            'Re-run  reliability closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle47 and board_has_cycle48:
         wins.append(
-            f"Day 47 delivery board integrity validated with {board_count} checklist items."
+            f"47 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 47 delivery board integrity is incomplete (needs >=5 items and Day 47/48 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /48 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 47 delivery board entries to include Day 47 and Day 48 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -314,12 +259,12 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
             "Objection contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 48 objection contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  objection contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 48 objection closeout lane is fully complete and ready for Day 49 weekly-review lane."
+            ' objection closeout lane is fully complete and ready for  weekly-review lane.'
         )
 
     return {
@@ -357,14 +302,14 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 48 objection closeout summary",
+        ' objection closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 47 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 47 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 47 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 47 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 47 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 47 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -387,7 +332,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "objection-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "objection-plan-48.md",
-        "# Day 48 Objection Plan\n\n- Objective: close Day 48 with measurable objection-resolution and adoption gains.\n",
+        '#  Objection Plan\n\n- Objective: close  with measurable objection-resolution and adoption gains.\n',
     )
     _write(
         target / "faq-objection-map-48.csv",
@@ -414,19 +359,19 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log-48.md",
-        "# Day 48 Execution Log\n\n- [ ] 2026-03-16: Record misses, wins, and Day 49 weekly-review priorities.\n",
+        '#  Execution Log\n\n- [ ] 2026-03-16: Record misses, wins, and  weekly-review priorities.\n',
     )
     _write(
         target / "objection-delivery-board.md",
-        "# Day 48 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "delivery-board-48.md",
-        "# Day 48 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands-48.md",
-        "# Day 48 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  Validation Commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -466,7 +411,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_objection_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_objection_closeout_summary(root)
 
 

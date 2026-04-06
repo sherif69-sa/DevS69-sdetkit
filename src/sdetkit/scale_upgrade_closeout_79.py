@@ -20,7 +20,7 @@ _PLAN_PATH = "docs/roadmap/plans/scale-upgrade-plan.json"
 _SECTION_HEADER = "# Scale upgrade closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why scale upgrade matters",
-    "## Required inputs (Day 78)",
+    '## Required inputs ()',
     "## Scale upgrade command lane",
     "## Scale upgrade contract",
     "## Scale upgrade quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_scale_upgrade_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 79 scale upgrade execution and signoff.",
-    "The Day 79 lane references Day 78 outcomes, controls, and KPI continuity signals.",
-    "Every Day 79 section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 79 closeout records enterprise onboarding outcomes, confidence notes, and Day 80 partner outreach priorities.",
+    'Single owner + backup reviewer are assigned for  scale upgrade execution and signoff.',
+    'The  lane references  outcomes, controls, and KPI continuity signals.',
+    'Every  section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records enterprise onboarding outcomes, confidence notes, and  partner outreach priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes enterprise onboarding baseline, role coverage cadence, and stakeholder assumptions",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, scale upgrade plan, execution ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 79 integration brief committed",
-    "- [ ] Day 79 scale upgrade plan committed",
-    "- [ ] Day 79 enterprise execution ledger exported",
-    "- [ ] Day 79 enterprise KPI scorecard snapshot exported",
-    "- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  scale upgrade plan committed',
+    '- [ ]  enterprise execution ledger exported',
+    '- [ ]  enterprise KPI scorecard snapshot exported',
+    '- [ ]  partner outreach priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -67,62 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Scale upgrade closeout lane
-
-Day 79 closes with a major upgrade that converts Day 78 ecosystem priorities into an enterprise-scale onboarding execution pack.
-
-## Why scale upgrade matters
-
-- Turns Day 78 ecosystem priorities into enterprise onboarding readiness proof across docs, rollout, and adoption loops.
-- Protects scale quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 79 scale upgrades into Day 80 partner outreach priorities.
-
-## Required inputs (Day 78)
-
-- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json`
-- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md`
-- `docs/roadmap/plans/scale-upgrade-plan.json`
-
-## Scale upgrade command lane
-
-```bash
-python -m sdetkit scale-upgrade-closeout --format json --strict
-python -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/scale-upgrade-closeout-pack --format json --strict
-python -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/scale-upgrade-closeout-pack/evidence --format json --strict
-python scripts/check_scale_upgrade_closeout_contract.py
-```
-
-## Scale upgrade contract
-
-- Single owner + backup reviewer are assigned for Day 79 scale upgrade execution and signoff.
-- The Day 79 lane references Day 78 outcomes, controls, and KPI continuity signals.
-- Every Day 79 section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 79 closeout records enterprise onboarding outcomes, confidence notes, and Day 80 partner outreach priorities.
-
-## Scale upgrade quality checklist
-
-- [ ] Includes enterprise onboarding baseline, role coverage cadence, and stakeholder assumptions
-- [ ] Every scale lane row has owner, execution window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures scale score delta, ecosystem carryover delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, scale upgrade plan, execution ledger, KPI scorecard, and execution log
-
-## Scale upgrade delivery board
-
-- [ ] Day 79 integration brief committed
-- [ ] Day 79 scale upgrade plan committed
-- [ ] Day 79 enterprise execution ledger exported
-- [ ] Day 79 enterprise KPI scorecard snapshot exported
-- [ ] Day 80 partner outreach priorities drafted from Day 79 learnings
-
-## Scoring model
-
-Day 79 weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 78 continuity baseline quality (35)
-- Scale evidence data + delivery board completeness (30)
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Scale upgrade closeout lane\n\n closes with a major upgrade that converts  ecosystem priorities into an enterprise-scale onboarding execution pack.\n\n## Why scale upgrade matters\n\n- Turns  ecosystem priorities into enterprise onboarding readiness proof across docs, rollout, and adoption loops.\n- Protects scale quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  scale upgrades into  partner outreach priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-closeout-summary.json`\n- `docs/artifacts/ecosystem-priorities-closeout-pack/ecosystem-priorities-delivery-board.md`\n- `docs/roadmap/plans/scale-upgrade-plan.json`\n\n## Scale upgrade command lane\n\n```bash\npython -m sdetkit scale-upgrade-closeout --format json --strict\npython -m sdetkit scale-upgrade-closeout --emit-pack-dir docs/artifacts/scale-upgrade-closeout-pack --format json --strict\npython -m sdetkit scale-upgrade-closeout --execute --evidence-dir docs/artifacts/scale-upgrade-closeout-pack/evidence --format json --strict\npython scripts/check_scale_upgrade_closeout_contract.py\n```\n\n## Scale upgrade contract\n\n- Single owner + backup reviewer are assigned for  scale upgrade execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes enterprise CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records enterprise onboarding outcomes, confidence notes, and  partner outreach priorities.\n\n## Scale upgrade quality checklist\n\n- [ ] Includes enterprise onboarding baseline, role coverage cadence, and stakeholder assumptions\n- [ ] Every scale lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures scale score delta, ecosystem carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, scale upgrade plan, execution ledger, KPI scorecard, and execution log\n\n## Scale upgrade delivery board\n\n- [ ]  integration brief committed\n- [ ]  scale upgrade plan committed\n- [ ]  enterprise execution ledger exported\n- [ ]  enterprise KPI scorecard snapshot exported\n- [ ]  partner outreach priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Scale evidence data + delivery board completeness (30)\n'
 
 
 def _read_text(path: Path) -> str:
@@ -163,7 +108,7 @@ def build_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     board_text = _read_text(ecosystem_priorities_board)
     board_count = sum(1 for line in board_text.splitlines() if line.strip().startswith("- [ ]"))
     board_has_ecosystem_priorities = (
-        "ecosystem priorities" in board_text.lower() or "Day 78" in board_text
+        "ecosystem priorities" in board_text.lower() or '' in board_text
     )
 
     plan_text = _read_text(plan_path)
@@ -286,32 +231,32 @@ def build_scale_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             f"Ecosystem Priorities continuity baseline is stable with activation score={ecosystem_priorities_score}."
         )
     else:
-        misses.append("Day 78 continuity baseline is below the floor (<85).")
+        misses.append(' continuity baseline is below the floor (<85).')
         handoff_actions.append(
-            "Re-run Day 78 closeout command and raise baseline quality above 85 before Day 79 lock."
+            'Re-run  closeout command and raise baseline quality above 85 before  lock.'
         )
 
     if board_count >= 5 and board_has_ecosystem_priorities:
         wins.append(
-            f"Day 78 delivery board integrity validated with {board_count} checklist items."
+            f"78 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 78 delivery board integrity is incomplete (needs >=5 items and Day 78 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 78 delivery board entries to include Day 78 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 79 scale upgrade dataset is available for launch execution.")
+        wins.append(' scale upgrade dataset is available for launch execution.')
     else:
-        misses.append("Day 79 scale upgrade dataset is missing required keys.")
+        misses.append(' scale upgrade dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/scale-upgrade-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 79 scale upgrade closeout lane is fully complete and ready for Day 80 partner outreach priorities."
+            ' scale upgrade closeout lane is fully complete and ready for  partner outreach priorities.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -416,7 +361,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_scale_upgrade_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_scale_upgrade_closeout_summary(root)
 
 

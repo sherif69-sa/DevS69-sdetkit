@@ -12,7 +12,7 @@ _PAGE_PATH = "docs/integrations-expansion-automation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY40_SUMMARY_PATH = "docs/artifacts/scale-lane-pack/scale-lane-summary.json"
 _DAY40_BOARD_PATH = "docs/artifacts/scale-lane-pack/delivery-board.md"
-_SECTION_HEADER = "# Day 41 \u2014 Expansion automation lane"
+_SECTION_HEADER = '#  — Expansion automation lane'
 _REQUIRED_SECTIONS = [
     "## Why this lane matters",
     "## Required inputs (prior scale lane)",
@@ -34,10 +34,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_expansion_automation_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 41 expansion lane execution and KPI follow-up.",
-    "The Day 41 expansion lane references Day 40 scale winners and misses with deterministic remediation loops.",
-    "Every Day 41 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 41 closeout records expansion learnings and Day 42 optimization priorities.",
+    'Single owner + backup reviewer are assigned for  expansion lane execution and KPI follow-up.',
+    'The  expansion lane references  scale winners and misses with deterministic remediation loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records expansion learnings and  optimization priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes automation summary, expansion play matrix, and rollback strategy",
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes expansion plan, automation matrix, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 41 expansion plan draft committed",
-    "- [ ] Day 41 review notes captured with owner + backup",
-    "- [ ] Day 41 automation matrix exported",
-    "- [ ] Day 41 KPI scorecard snapshot exported",
-    "- [ ] Day 42 optimization priorities drafted from Day 41 learnings",
+    '- [ ]  expansion plan draft committed',
+    '- [ ]  review notes captured with owner + backup',
+    '- [ ]  automation matrix exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  optimization priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 41 \u2014 Expansion automation lane
-
-This lane closes with a major expansion automation upgrade that converts prior scale-lane evidence into repeatable workflows.
-
-## Why this lane matters
-
-- Converts Day 40 scale wins into automation-first operating motion.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from expansion outcomes into Day 42 optimization priorities.
-
-## Required inputs (prior scale lane)
-
-- `docs/artifacts/scale-lane-pack/scale-lane-summary.json`
-- `docs/artifacts/scale-lane-pack/delivery-board.md`
-
-## Command lane
-
-```bash
-python -m sdetkit expansion-automation --format json --strict
-python -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict
-python -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict
-python scripts/check_expansion_automation_contract.py
-```
-
-## Expansion automation contract
-
-- Single owner + backup reviewer are assigned for Day 41 expansion lane execution and KPI follow-up.
-- The Day 41 expansion lane references Day 40 scale winners and misses with deterministic remediation loops.
-- Every Day 41 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 41 closeout records expansion learnings and Day 42 optimization priorities.
-
-## Expansion quality checklist
-
-- [ ] Includes automation summary, expansion play matrix, and rollback strategy
-- [ ] Every section has owner, publish window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes expansion plan, automation matrix, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 41 expansion plan draft committed
-- [ ] Day 41 review notes captured with owner + backup
-- [ ] Day 41 automation matrix exported
-- [ ] Day 41 KPI scorecard snapshot exported
-- [ ] Day 42 optimization priorities drafted from Day 41 learnings
-
-## Scoring model
-
-Weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 40 continuity and strict baseline carryover: 35 points.
-- Expansion contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Expansion automation lane\n\nThis lane closes with a major expansion automation upgrade that converts prior scale-lane evidence into repeatable workflows.\n\n## Why this lane matters\n\n- Converts  scale wins into automation-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from expansion outcomes into  optimization priorities.\n\n## Required inputs (prior scale lane)\n\n- `docs/artifacts/scale-lane-pack/scale-lane-summary.json`\n- `docs/artifacts/scale-lane-pack/delivery-board.md`\n\n## Command lane\n\n```bash\npython -m sdetkit expansion-automation --format json --strict\npython -m sdetkit expansion-automation --emit-pack-dir docs/artifacts/expansion-automation-pack --format json --strict\npython -m sdetkit expansion-automation --execute --evidence-dir docs/artifacts/expansion-automation-pack/evidence --format json --strict\npython scripts/check_expansion_automation_contract.py\n```\n\n## Expansion automation contract\n\n- Single owner + backup reviewer are assigned for  expansion lane execution and KPI follow-up.\n- The  expansion lane references  scale winners and misses with deterministic remediation loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records expansion learnings and  optimization priorities.\n\n## Expansion quality checklist\n\n- [ ] Includes automation summary, expansion play matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes expansion plan, automation matrix, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  expansion plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  automation matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  optimization priorities drafted from  learnings\n\n## Scoring model\n\nWeighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Expansion contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -142,7 +87,7 @@ def _load_cycle40(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 40" in text, "Day 41" in text
+    return len(items), '' in text, '' in text
 
 
 def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
@@ -217,7 +162,7 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_expansion_automation_alignment",
             "weight": 5,
-            "passed": ("Day 41" in top10_text and "Day 42" in top10_text),
+            "passed": ('' in top10_text and '' in top10_text),
             "evidence": "Expansion automation + optimization strategy chain",
         },
         {
@@ -285,23 +230,23 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 40 continuity is strict-pass with activation score={score}.")
+        wins.append(f"40 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 40 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 40 scale lane command and restore strict pass baseline before Day 41 lock."
+            'Re-run  scale lane command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle40 and board_has_cycle41:
         wins.append(
-            f"Day 40 delivery board integrity validated with {board_count} checklist items."
+            f"40 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 40 delivery board integrity is incomplete (needs >=5 items and Day 40/41 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /41 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 40 delivery board entries to include Day 40 and Day 41 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -313,12 +258,12 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "Expansion contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 41 expansion contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  expansion contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 41 expansion automation lane is fully complete and ready for Day 42 optimization lane."
+            ' expansion automation lane is fully complete and ready for  optimization lane.'
         )
 
     return {
@@ -375,11 +320,11 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 40 continuity",
+        '##  continuity',
         "",
-        f"- Day 40 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 40 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 40 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 40 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 40 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 40 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -407,7 +352,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "expansion-plan.md",
         "# Expansion automation lane\n\n"
         "## Automation summary\n"
-        "- Day 40 scale winners were converted into reusable automation blocks.\n"
+        '-  scale winners were converted into reusable automation blocks.\n'
         "- Misses are paired with rollback-ready remediation loops.\n\n"
         "## Tactical checklist\n"
         "- [ ] Validate owner + backup approvals\n"
@@ -459,7 +404,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "# Expansion automation execution log\n\n"
         "- [ ] 2026-03-09: Publish expansion plan and collect internal review notes.\n"
         "- [ ] 2026-03-10: Execute automation matrix and capture first KPI pulse.\n"
-        "- [ ] 2026-03-11: Record misses, wins, and Day 42 optimization priorities.\n",
+        '- [ ] 2026-03-11: Record misses, wins, and  optimization priorities.\n',
     )
     _write(
         target / "delivery-board.md",
@@ -515,7 +460,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def build_expansion_automation_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_expansion_automation_summary(root)
 
 

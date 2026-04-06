@@ -155,11 +155,11 @@ jobs:
               '## Older CodeQL rules to batch together',
               ...(topOldCodeRules(codeAlerts).length
                 ? topOldCodeRules(codeAlerts).map(([rule, count]) => `- ${rule}: **${count}** alert(s) aged 14+ days`)
-                : ['- No code-scanning rules currently breach the 14-day SLA window.']),
+                : ['- No code-scanning rules currently breach the 14- SLA window.']),
               '',
               '## Suggested execution lane',
-              '- [ ] Convert every 14+ day high-severity code or Dependabot alert into an owned issue or PR.',
-              '- [ ] Group 14+ day CodeQL alerts by rule into one focused remediation batch and use Copilot Autofix when appropriate.',
+              '- [ ] Convert every 14+  high-severity code or Dependabot alert into an owned issue or PR.',
+              '- [ ] Group 14+  CodeQL alerts by rule into one focused remediation batch and use Copilot Autofix when appropriate.',
               '- [ ] Treat push-protection bypassed secret alerts as same-week work until resolved or explicitly dismissed.',
               '- [ ] Link resulting PRs or follow-up issues back to this SLA tracker for audit history.',
               '',

@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 88 + Day 89 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "governance_priorities_summary_present",
@@ -63,14 +63,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 89 \u2014 Governance scale closeout lane"
+      "evidence": "#  \u2014 Governance scale closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 88)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -84,10 +84,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 89 governance scale execution and signoff.",
-        "The Day 89 lane references Day 88 outcomes, controls, and trust continuity signals.",
-        "Every Day 89 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 89 closeout records governance scale pack upgrades, storyline outcomes, and Day 90 governance planning inputs."
+        "Single owner + backup reviewer are assigned for  governance scale execution and signoff.",
+        "The  lane references  outcomes, controls, and trust continuity signals.",
+        "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records governance scale pack upgrades, storyline outcomes, and  governance planning inputs."
       ]
     },
     {
@@ -101,11 +101,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 89 evidence brief committed",
-        "- [ ] Day 89 governance scale plan committed",
-        "- [ ] Day 89 narrative template upgrade ledger exported",
-        "- [ ] Day 89 storyline outcomes ledger exported",
-        "- [ ] Day 90 governance planning drafted from Day 89 outcomes"
+        "- [ ]  evidence brief committed",
+        "- [ ]  governance scale plan committed",
+        "- [ ]  narrative template upgrade ledger exported",
+        "- [ ]  storyline outcomes ledger exported",
+        "- [ ]  governance planning drafted from  outcomes"
       ]
     },
     {
@@ -128,13 +128,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 88 delivery board integrity validated with 5 checklist items.",
-    "Day 89 governance scale dataset is available for governance execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " governance scale dataset is available for governance execution."
   ],
   "misses": [
-    "Day 88 continuity baseline is below the floor (<85) or not strict-pass."
+    " continuity baseline is below the floor (<85) or not strict-pass."
   ],
   "handoff_actions": [
-    "Re-run Day 88 closeout command and raise baseline quality above 85 with strict pass before Day 89 lock."
+    "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
   ]
 }

@@ -1,4 +1,4 @@
-# Day 89 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit governance-scale-closeout --format json --strict

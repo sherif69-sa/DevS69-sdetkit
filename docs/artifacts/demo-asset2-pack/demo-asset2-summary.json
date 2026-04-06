@@ -53,7 +53,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 34 + Day 35 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -89,7 +89,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -133,13 +132,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 33 delivery board integrity validated with 5 checklist items.",
+    "delivery board integrity validated with 5 checklist items.",
     "Repo-audit production contract + quality checklist is fully locked for execution."
   ],
   "misses": [
-    "Day 33 strict continuity signal is missing."
+    "strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 33 demo asset command and restore strict pass baseline before Day 34 lock."
+    "Re-run demo asset command and restore strict pass baseline before lock."
   ]
 }

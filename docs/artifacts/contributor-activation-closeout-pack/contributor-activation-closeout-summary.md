@@ -1,4 +1,4 @@
-Contributor Activation Closeout summary (legacy: Day 55)
+Contributor Activation Closeout summary (legacy: )
 - Activation score: 48
 - Passed checks: 6
 - Failed checks: 8

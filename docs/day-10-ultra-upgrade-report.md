@@ -1,3 +1,3 @@
-# Day 10 ultra upgrade report
+#  ultra upgrade report
 
 Legacy compatibility report alias for docs references.

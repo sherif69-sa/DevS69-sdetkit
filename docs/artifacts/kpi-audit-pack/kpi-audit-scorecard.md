@@ -1,4 +1,4 @@
-Day 27 KPI audit summary
+ KPI audit summary
 score=52.0
 failed=required_sections_present,readme_integration_link,readme_command_lane,docs_index_links,top10_strategy_alignment
 critical=required_sections_present,top10_strategy_alignment

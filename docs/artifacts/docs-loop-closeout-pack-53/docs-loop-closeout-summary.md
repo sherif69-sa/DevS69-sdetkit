@@ -1,12 +1,12 @@
-Docs Loop Closeout summary (legacy: Day 53)
+Docs Loop Closeout summary (legacy: )
 - Activation score: 41
 - Passed checks: 5
 - Failed checks: 9
 - Critical failures: ['strict_baseline']
-- Day 52 activation score: `55.0`
-- Day 52 checks evaluated: `14`
-- Day 52 delivery board checklist items: `5`
+-  activation score: `55.0`
+-  checks evaluated: `14`
+-  delivery board checklist items: `5`
 - Misses:
-  - Day 52 strict continuity signal is missing.
-  - Day 52 delivery board integrity is incomplete (needs >=5 items and Day 52/53 anchors).
+  -  strict continuity signal is missing.
+  -  delivery board integrity is incomplete (needs >=5 items and /53 anchors).
   - Docs-loop contract, quality checklist, or delivery board entries are missing.

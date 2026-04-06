@@ -1,9 +1,9 @@
 apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: day68-self-hosted-enterprise
+  name: -self-hosted-enterprise
 spec:
-  description: Day 68 self-hosted enterprise reference pipeline for integration expansion closeout.
+  description:  self-hosted enterprise reference pipeline for integration expansion closeout.
   workspaces:
     - name: shared-workspace
   params:

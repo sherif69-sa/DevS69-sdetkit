@@ -10,7 +10,7 @@ LANE_REPORT = Path("docs/impact-11-ultra-upgrade-report.md")
 DOCS_NAV_ARTIFACT = Path("docs/artifacts/docs-governance-sample.md")
 
 README_EXPECTED = [
-    "## 🧭 Day 11 ultra: docs navigation tune-up",
+    '## 🧭  ultra: docs navigation tune-up',
     "python -m sdetkit docs-nav --format text --strict",
     "python -m sdetkit docs-nav --write-defaults --format json --strict",
     "python scripts/check_docs_navigation_contract_11.py",
@@ -18,8 +18,8 @@ README_EXPECTED = [
 ]
 
 DOCS_INDEX_EXPECTED = [
-    "[🧭 Day 11 ultra report](impact-11-ultra-upgrade-report.md)",
-    "## Day 11 ultra upgrades (docs navigation tune-up)",
+    '[🧭  ultra report](impact-11-ultra-upgrade-report.md)',
+    '##  ultra upgrades (docs navigation tune-up)',
     "sdetkit docs-nav --format text --strict",
     "sdetkit docs-nav --write-defaults --format json --strict",
     "Run first command in under 60 seconds",
@@ -35,14 +35,14 @@ DOCS_CLI_EXPECTED = [
 ]
 
 REPORT_EXPECTED = [
-    "Day 11 big upgrade",
+    ' big upgrade',
     "python -m sdetkit docs-nav --format json --strict",
     "python -m sdetkit docs-nav --write-defaults --format json --strict",
     "scripts/check_docs_navigation_contract_11.py",
 ]
 
 ARTIFACT_EXPECTED = [
-    "# Day 11 docs navigation tune-up",
+    '#  docs navigation tune-up',
     "- Score: **100.0** (12/12)",
 ]
 

@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 75 + Day 76 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "distribution_scaling_summary_present",
@@ -63,17 +63,17 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 75 \u2014 Trust assets refresh closeout lane"
+      "evidence": "#  \u2014 Trust assets refresh closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Why Day 75 matters",
-        "## Required inputs (Day 74)",
-        "## Day 75 command lane",
-        "## Day 75 delivery board"
+        "## Why  matters",
+        "## Required inputs ()",
+        "##  command lane",
+        "##  delivery board"
       ]
     },
     {
@@ -87,10 +87,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 75 trust assets refresh execution and signoff.",
-        "The Day 75 lane references Day 74 outcomes, controls, and KPI continuity signals.",
-        "Every Day 75 section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 75 closeout records trust outcomes, confidence notes, and Day 76 contributor-recognition priorities."
+        "Single owner + backup reviewer are assigned for  trust assets refresh execution and signoff.",
+        "The  lane references  outcomes, controls, and KPI continuity signals.",
+        "Every  section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records trust outcomes, confidence notes, and  contributor-recognition priorities."
       ]
     },
     {
@@ -104,11 +104,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 75 integration brief committed",
-        "- [ ] Day 75 trust assets refresh plan committed",
-        "- [ ] Day 75 trust controls and assumptions log exported",
-        "- [ ] Day 75 trust KPI scorecard snapshot exported",
-        "- [ ] Day 76 contributor-recognition priorities drafted from Day 75 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  trust assets refresh plan committed",
+        "- [ ]  trust controls and assumptions log exported",
+        "- [ ]  trust KPI scorecard snapshot exported",
+        "- [ ]  contributor-recognition priorities drafted from  learnings"
       ]
     },
     {
@@ -133,13 +133,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 74 delivery board integrity validated with 5 checklist items.",
-    "Day 75 trust assets refresh dataset is available for launch execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " trust assets refresh dataset is available for launch execution."
   ],
   "misses": [
-    "Day 74 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 74 closeout command and restore strict baseline before Day 75 lock."
+    "Re-run  closeout command and restore strict baseline before  lock."
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "case_id": "day70-triage-speed-prep-001",
+  "case_id": "-triage-speed-prep-001",
   "metric": "triage_median_minutes",
   "baseline": {
     "window": "2026-02-week1",

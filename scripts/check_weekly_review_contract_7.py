@@ -11,19 +11,19 @@ LANE_ARTIFACT = Path("docs/artifacts/weekly-review-sample-7.md")
 WEEKLY_MODULE = Path("src/sdetkit/weekly_review.py")
 
 REQUIRED_README_SNIPPETS = [
-    "## 📊 Day 7 ultra: weekly review #1",
+    '## 📊  ultra: weekly review #1',
     "python -m sdetkit weekly-review --format text",
     "python -m sdetkit weekly-review --format markdown --output docs/artifacts/weekly-review-sample-7.md",
     "docs/impact-7-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [
-    "Day 7 ultra upgrade report",
+    ' ultra upgrade report',
     "sdetkit weekly-review --format text",
 ]
 
 REQUIRED_REPORT_SNIPPETS = [
-    "Day 7 big upgrade",
+    ' big upgrade',
     "src/sdetkit/weekly_review.py",
     "tests/test_weekly_review.py",
     "python scripts/check_weekly_review_contract_7.py",
@@ -53,7 +53,7 @@ def main() -> int:
 
     for s in REQUIRED_REPORT_SNIPPETS:
         if s not in report:
-            errors.append(f"missing Day 7 report snippet: {s}")
+            errors.append(f"missing 7 report snippet: {s}")
 
     for p in [LANE_REPORT, LANE_ARTIFACT, WEEKLY_MODULE]:
         if not p.exists():

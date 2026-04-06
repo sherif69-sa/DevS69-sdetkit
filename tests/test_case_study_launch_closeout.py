@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 73 — Case-study launch:** lock publication-quality evidence and publication readiness handoff.\n"
-        "- **Day 74 — Distribution scaling:** convert Day 73 learnings into scaled distribution operations.\n",
+        '- ** — Case-study launch:** lock publication-quality evidence and publication readiness handoff.\n'
+        '- ** — Distribution scaling:** convert  learnings into scaled distribution operations.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-case-study-launch-closeout.md").write_text(
         d73._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-73-big-upgrade-report.md").write_text(
-        "# Day 73 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -62,12 +62,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 72 delivery board",
-                "- [ ] Day 72 integration brief committed",
-                "- [ ] Day 72 publication-quality case-study narrative published",
-                "- [ ] Day 72 controls and assumptions log exported",
-                "- [ ] Day 72 KPI scorecard snapshot exported",
-                "- [ ] Day 74 distribution scaling priorities drafted from Day 73 learnings",
+                '#  delivery board',
+                '- [ ]  integration brief committed',
+                '- [ ]  publication-quality case-study narrative published',
+                '- [ ]  controls and assumptions log exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  distribution scaling priorities drafted from  learnings',
             ]
         )
         + "\n",

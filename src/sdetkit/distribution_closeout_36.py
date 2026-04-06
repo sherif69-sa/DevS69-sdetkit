@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-distribution-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY35_SUMMARY_PATH = "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
 _DAY35_BOARD_PATH = "docs/artifacts/kpi-instrumentation-pack/delivery-board.md"
-_SECTION_HEADER = "# Day 36 \u2014 Community distribution closeout"
+_SECTION_HEADER = '#  — Community distribution closeout'
 _REQUIRED_SECTIONS = [
-    "## Why Day 36 matters",
-    "## Required inputs (Day 35)",
-    "## Day 36 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Distribution contract",
     "## Distribution quality checklist",
-    "## Day 36 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -36,80 +36,25 @@ _EXECUTION_COMMANDS = [
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for distribution publishing.",
     "Primary channels include GitHub, LinkedIn, and community newsletter with explicit audience goal.",
-    "Every post variant maps to one KPI from Day 35 with target delta and follow-up action.",
-    "Day 36 report includes at least three Day 37 experiments seeded from distribution misses.",
+    'Every post variant maps to one KPI from  with target delta and follow-up action.',
+    ' report includes at least three  experiments seeded from distribution misses.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes at least three channel-specific message variants",
     "- [ ] Every channel variant has CTA, KPI target, and owner",
     "- [ ] Posting schedule includes exact date/time and reviewer",
-    "- [ ] Engagement deltas include baseline from Day 35 metrics",
+    '- [ ] Engagement deltas include baseline from  metrics',
     "- [ ] Artifact pack includes launch plan, message kit, and experiment backlog",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 36 launch plan committed",
-    "- [ ] Day 36 message kit reviewed with owner + backup",
-    "- [ ] Day 36 posting windows locked",
-    "- [ ] Day 37 experiment backlog seeded from channel misses",
-    "- [ ] Day 37 summary owner confirmed",
+    '- [ ]  launch plan committed',
+    '- [ ]  message kit reviewed with owner + backup',
+    '- [ ]  posting windows locked',
+    '- [ ]  experiment backlog seeded from channel misses',
+    '- [ ]  summary owner confirmed',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 36 \u2014 Community distribution closeout
-
-Day 36 closes the distribution lane by converting the Day 35 KPI story into channel-ready messaging, schedule commitments, and Day 37 experiments.
-
-## Why Day 36 matters
-
-- Converts KPI insights into public distribution execution.
-- Protects consistency by defining owner, backup reviewer, and posting windows.
-- Creates a direct handoff from distribution misses into Day 37 experiment backlog.
-
-## Required inputs (Day 35)
-
-- `docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json`
-- `docs/artifacts/kpi-instrumentation-pack/delivery-board.md`
-
-## Day 36 command lane
-
-```bash
-python -m sdetkit distribution-closeout --format json --strict
-python -m sdetkit distribution-closeout --emit-pack-dir docs/artifacts/distribution-closeout-pack --format json --strict
-python -m sdetkit distribution-closeout --execute --evidence-dir docs/artifacts/distribution-closeout-pack/evidence --format json --strict
-python scripts/check_distribution_closeout_contract.py
-```
-
-## Distribution contract
-
-- Single owner + backup reviewer are assigned for distribution publishing.
-- Primary channels include GitHub, LinkedIn, and community newsletter with explicit audience goal.
-- Every post variant maps to one KPI from Day 35 with target delta and follow-up action.
-- Day 36 report includes at least three Day 37 experiments seeded from distribution misses.
-
-## Distribution quality checklist
-
-- [ ] Includes at least three channel-specific message variants
-- [ ] Every channel variant has CTA, KPI target, and owner
-- [ ] Posting schedule includes exact date/time and reviewer
-- [ ] Engagement deltas include baseline from Day 35 metrics
-- [ ] Artifact pack includes launch plan, message kit, and experiment backlog
-
-## Day 36 delivery board
-
-- [ ] Day 36 launch plan committed
-- [ ] Day 36 message kit reviewed with owner + backup
-- [ ] Day 36 posting windows locked
-- [ ] Day 37 experiment backlog seeded from channel misses
-- [ ] Day 37 summary owner confirmed
-
-## Scoring model
-
-Day 36 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 35 continuity and strict baseline carryover: 35 points.
-- Distribution contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Community distribution closeout\n\n closes the distribution lane by converting the  KPI story into channel-ready messaging, schedule commitments, and  experiments.\n\n## Why  matters\n\n- Converts KPI insights into public distribution execution.\n- Protects consistency by defining owner, backup reviewer, and posting windows.\n- Creates a direct handoff from distribution misses into  experiment backlog.\n\n## Required inputs ()\n\n- `docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json`\n- `docs/artifacts/kpi-instrumentation-pack/delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit distribution-closeout --format json --strict\npython -m sdetkit distribution-closeout --emit-pack-dir docs/artifacts/distribution-closeout-pack --format json --strict\npython -m sdetkit distribution-closeout --execute --evidence-dir docs/artifacts/distribution-closeout-pack/evidence --format json --strict\npython scripts/check_distribution_closeout_contract.py\n```\n\n## Distribution contract\n\n- Single owner + backup reviewer are assigned for distribution publishing.\n- Primary channels include GitHub, LinkedIn, and community newsletter with explicit audience goal.\n- Every post variant maps to one KPI from  with target delta and follow-up action.\n-  report includes at least three  experiments seeded from distribution misses.\n\n## Distribution quality checklist\n\n- [ ] Includes at least three channel-specific message variants\n- [ ] Every channel variant has CTA, KPI target, and owner\n- [ ] Posting schedule includes exact date/time and reviewer\n- [ ] Engagement deltas include baseline from  metrics\n- [ ] Artifact pack includes launch plan, message kit, and experiment backlog\n\n##  delivery board\n\n- [ ]  launch plan committed\n- [ ]  message kit reviewed with owner + backup\n- [ ]  posting windows locked\n- [ ]  experiment backlog seeded from channel misses\n- [ ]  summary owner confirmed\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Distribution contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -144,10 +89,10 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle36 = any(
-        any(token in line for token in ("impact 36", "day 36", "name 36")) for line in lines
+        any(token in line for token in ("impact 36", '', "name 36")) for line in lines
     )
     has_cycle37 = any(
-        any(token in line for token in ("impact 37", "day 37", "name 37")) for line in lines
+        any(token in line for token in ("impact 37", '', "name 37")) for line in lines
     )
     return item_count, has_cycle36, has_cycle37
 
@@ -226,8 +171,8 @@ def build_distribution_closeout_summary_impl(
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 36" in top10_text and "Day 37" in top10_text),
-            "evidence": "Day 36 + Day 37 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -294,23 +239,23 @@ def build_distribution_closeout_summary_impl(
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 35 continuity is strict-pass with activation score={score}.")
+        wins.append(f"35 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 35 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 35 KPI instrumentation command and restore strict pass baseline before Day 36 lock."
+            'Re-run  KPI instrumentation command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle36 and board_has_cycle37:
         wins.append(
-            f"Day 35 delivery board integrity validated with {board_count} checklist items."
+            f"35 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 35 delivery board integrity is incomplete (needs >=5 items and Day 36/37 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /37 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 35 delivery board entries to include Day 36 and Day 37 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -320,12 +265,12 @@ def build_distribution_closeout_summary_impl(
             "Distribution contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 36 distribution contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  distribution contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 36 community distribution closeout is fully complete and ready for Day 37 experiment execution."
+            ' community distribution closeout is fully complete and ready for  experiment execution.'
         )
 
     return {
@@ -364,7 +309,7 @@ def build_distribution_closeout_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 36 community distribution summary\n"
+        ' community distribution summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -375,18 +320,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 36 community distribution summary",
+        '#  community distribution summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 35 continuity",
+        '##  continuity',
         "",
-        f"- Day 35 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 35 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 35 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 35 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 35 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 35 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -412,9 +357,9 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "distribution-closeout-summary.md", _to_markdown(payload))
     _write(
         target / "distribution-message-kit.md",
-        "# Day 36 distribution message kit\n\n"
+        '#  distribution message kit\n\n'
         "## GitHub discussion post\n"
-        "- Hook: Day 35 KPI loop is closed and measurable.\n"
+        '- Hook:  KPI loop is closed and measurable.\n'
         "- CTA: Try `python -m sdetkit distribution-closeout --format json --strict` and share score deltas.\n"
         "- KPI target: `readme_to_command_ctr +2%`.\n\n"
         "## LinkedIn post\n"
@@ -435,18 +380,18 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "experiment-backlog.md",
-        "# Day 37 experiment backlog seeded on Day 36\n\n"
+        '#  experiment backlog seeded on \n\n'
         "- [ ] Test CTA variant: command-first vs narrative-first headline on GitHub discussion.\n"
         "- [ ] Compare morning vs afternoon LinkedIn posting window for CTR lift.\n"
         "- [ ] Add short GIF teaser to newsletter block and track reply rate delta.\n",
     )
     _write(
         target / "delivery-board.md",
-        "# Day 36 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "validation-commands.md",
-        "# Day 36 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -477,7 +422,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 36 community distribution closeout scorer.")
+    parser = argparse.ArgumentParser(description=' community distribution closeout scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -541,7 +486,7 @@ def build_distribution_closeout_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_distribution_closeout_summary_impl(
         root,
         readme_path=readme_path,

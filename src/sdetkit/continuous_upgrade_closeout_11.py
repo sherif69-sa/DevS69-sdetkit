@@ -69,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     "owner",
     "rollback_owner",
     "confidence_floor",
-    "cadence_days",
+    "cadence_interval",
 ]
 
 _CYCLE11_DEFAULT_PAGE = """# Cycle 11 \u2014 Continuous upgrade closeout lane
@@ -193,9 +193,9 @@ def _validate_plan_contract(
     if not isinstance(confidence_floor, (int, float)) or not (0 <= confidence_floor <= 1):
         hygiene_issues.append("confidence_floor: must be a number between 0 and 1")
 
-    cadence_days = plan_data.get("cadence_days")
-    if not isinstance(cadence_days, int) or cadence_days <= 0:
-        hygiene_issues.append("cadence_days: must be a positive integer")
+    cadence_interval = plan_data.get("cadence_interval")
+    if not isinstance(cadence_interval, int) or cadence_interval <= 0:
+        hygiene_issues.append("cadence_interval: must be a positive integer")
 
     return missing_keys, trajectory_issues, owner_issues, hygiene_issues
 
@@ -412,7 +412,7 @@ def build_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             "Cycle 11 plan hygiene checks failed for contributors/channels/confidence/cadence."
         )
         handoff_actions.append(
-            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_days bounds in docs/roadmap/plans/continuous-upgrade-plan-11.json."
+            "Fix contributors/upgrade_channels list shapes and confidence_floor/cadence_interval bounds in docs/roadmap/plans/continuous-upgrade-plan-11.json."
         )
 
     if not failed and not critical_failures:

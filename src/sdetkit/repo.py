@@ -2926,14 +2926,14 @@ def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[in
 
 
 def _policy_export(policy: RepoAuditPolicy, *, include_expired: bool) -> dict[str, Any]:
-    today = _today_date()
+    to= _today_date()
     entries = [_normalized_allowlist_entry(item, today) for item in policy.allowlist]
     if not include_expired:
         entries = [item for item in entries if item["status"] == "active"]
     entries.sort(key=lambda x: (x["rule_id"], x["path"], x.get("contains") or ""))
     return {
         "schema_version": "sdetkit.policy.v1",
-        "today": today.isoformat(),
+        "current_date": today.isoformat(),
         "org_packs": list(policy.org_packs),
         "allowlist": entries,
     }
@@ -3107,7 +3107,7 @@ def _apply_repo_audit_policy(
     actionable: list[dict[str, Any]] = []
     suppressed: list[dict[str, str]] = []
     expired: list[dict[str, str]] = []
-    today = _today_date()
+    to= _today_date()
     for finding in findings:
         item = dict(finding)
         rule_id = _repo_rule_id(item)

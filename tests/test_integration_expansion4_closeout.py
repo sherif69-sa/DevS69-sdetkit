@@ -20,7 +20,7 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- Day 68 integration expansion\n- Day 69 case study prep\n",
+        '-  integration expansion\n-  case study prep\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-expansion4-closeout.md").write_text(
@@ -54,7 +54,7 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 67 delivery board",
+                '#  delivery board',
                 "- [ ] task 1",
                 "- [ ] task 2",
                 "- [ ] task 3",

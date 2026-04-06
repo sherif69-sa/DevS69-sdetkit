@@ -21,8 +21,8 @@ _DAY77_BOARD_PATH = (
 _PLAN_PATH = "docs/roadmap/plans/ecosystem-priorities-plan.json"
 _SECTION_HEADER = "# Ecosystem priorities closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 78 matters",
-    "## Required inputs (Day 77)",
+    '## Why  matters',
+    '## Required inputs ()',
     "## Ecosystem priorities command lane",
     "## Ecosystem priorities contract",
     "## Ecosystem priorities quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_ecosystem_priorities_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 78 ecosystem priorities execution and signoff.",
-    "The Day 78 lane references Day 77 outcomes, controls, and KPI continuity signals.",
-    "Every Day 78 section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 78 closeout records ecosystem outcomes, confidence notes, and Day 79 scale priorities.",
+    'Single owner + backup reviewer are assigned for  ecosystem priorities execution and signoff.',
+    'The  lane references  outcomes, controls, and KPI continuity signals.',
+    'Every  section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records ecosystem outcomes, confidence notes, and  scale priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes ecosystem baseline, priority cadence, and stakeholder assumptions",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 78 integration brief committed",
-    "- [ ] Day 78 ecosystem priorities plan committed",
-    "- [ ] Day 78 ecosystem workstream ledger exported",
-    "- [ ] Day 78 ecosystem KPI scorecard snapshot exported",
-    "- [ ] Day 79 scale priorities drafted from Day 78 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  ecosystem priorities plan committed',
+    '- [ ]  ecosystem workstream ledger exported',
+    '- [ ]  ecosystem KPI scorecard snapshot exported',
+    '- [ ]  scale priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,64 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Ecosystem priorities closeout lane
-
-Day 78 closes with a major upgrade that converts Day 77 community-touchpoint outcomes into an ecosystem-priorities execution pack.
-
-## Why Day 78 matters
-
-- Turns Day 77 community-touchpoint outcomes into ecosystem-facing expansion proof across docs, governance, and release channels.
-- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 78 ecosystem priorities into Day 79 scale priorities.
-
-## Required inputs (Day 77)
-
-- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`
-- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`
-- `docs/roadmap/plans/ecosystem-priorities-plan.json`
-
-## Ecosystem priorities command lane
-
-```bash
-python -m sdetkit ecosystem-priorities-closeout --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict
-python -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict
-python scripts/check_ecosystem_priorities_closeout_contract.py
-```
-
-## Ecosystem priorities contract
-
-- Single owner + backup reviewer are assigned for Day 78 ecosystem priorities execution and signoff.
-- The Day 78 lane references Day 77 outcomes, controls, and KPI continuity signals.
-- Every Day 78 section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 78 closeout records ecosystem outcomes, confidence notes, and Day 79 scale priorities.
-
-## Ecosystem priorities quality checklist
-
-- [ ] Includes ecosystem baseline, priority cadence, and stakeholder assumptions
-- [ ] Every ecosystem lane row has owner, workstream window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures ecosystem score delta, touchpoint carryover delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log
-
-## Ecosystem priorities delivery board
-
-- [ ] Day 78 integration brief committed
-- [ ] Day 78 ecosystem priorities plan committed
-- [ ] Day 78 ecosystem workstream ledger exported
-- [ ] Day 78 ecosystem KPI scorecard snapshot exported
-- [ ] Day 79 scale priorities drafted from Day 78 learnings
-
-## Scoring model
-
-Day 78 weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 77 continuity baseline quality (35)
-- Ecosystem evidence data + delivery board completeness (30)
-
-Strict pass requires score >= 95 and zero critical failures.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Ecosystem priorities closeout lane\n\n closes with a major upgrade that converts  community-touchpoint outcomes into an ecosystem-priorities execution pack.\n\n## Why  matters\n\n- Turns  community-touchpoint outcomes into ecosystem-facing expansion proof across docs, governance, and release channels.\n- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  ecosystem priorities into  scale priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-closeout-summary.json`\n- `docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md`\n- `docs/roadmap/plans/ecosystem-priorities-plan.json`\n\n## Ecosystem priorities command lane\n\n```bash\npython -m sdetkit ecosystem-priorities-closeout --format json --strict\npython -m sdetkit ecosystem-priorities-closeout --emit-pack-dir docs/artifacts/ecosystem-priorities-closeout-pack --format json --strict\npython -m sdetkit ecosystem-priorities-closeout --execute --evidence-dir docs/artifacts/ecosystem-priorities-closeout-pack/evidence --format json --strict\npython scripts/check_ecosystem_priorities_closeout_contract.py\n```\n\n## Ecosystem priorities contract\n\n- Single owner + backup reviewer are assigned for  ecosystem priorities execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records ecosystem outcomes, confidence notes, and  scale priorities.\n\n## Ecosystem priorities quality checklist\n\n- [ ] Includes ecosystem baseline, priority cadence, and stakeholder assumptions\n- [ ] Every ecosystem lane row has owner, workstream window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures ecosystem score delta, touchpoint carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, ecosystem priorities plan, workstream ledger, KPI scorecard, and execution log\n\n## Ecosystem priorities delivery board\n\n- [ ]  integration brief committed\n- [ ]  ecosystem priorities plan committed\n- [ ]  ecosystem workstream ledger exported\n- [ ]  ecosystem KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Ecosystem evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
 
 
 def _read(path: Path) -> str:
@@ -167,7 +110,7 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         _load_community_touchpoint(community_touchpoint_summary)
     )
     board_count, board_has_community_touchpoint = _count_board_items(
-        community_touchpoint_board, "Day 77"
+        community_touchpoint_board, ''
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -290,7 +233,7 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
     else:
         misses.append("Community touchpoint continuity baseline is below the floor (<85).")
         handoff_actions.append(
-            "Re-run Day 77 closeout command and raise baseline quality above 85 before Day 78 lock."
+            'Re-run  closeout command and raise baseline quality above 85 before  lock.'
         )
 
     if board_count >= 5 and board_has_community_touchpoint:
@@ -299,14 +242,14 @@ def build_ecosystem_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         )
     else:
         misses.append(
-            "Day 77 delivery board integrity is incomplete (needs >=5 items and Day 77 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 77 delivery board entries to include Day 77 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
         wins.append("Ecosystem priorities dataset is available for launch execution.")
     else:
-        misses.append("Day 78 ecosystem priorities dataset is missing required keys.")
+        misses.append(' ecosystem priorities dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/ecosystem-priorities-plan.json to restore required keys."
         )
@@ -427,7 +370,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_ecosystem_priorities_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_ecosystem_priorities_closeout_summary(root)
 
 

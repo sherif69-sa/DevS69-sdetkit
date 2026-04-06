@@ -27,7 +27,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text("impact-28-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 28 — Weekly review #4:** document wins, misses, and corrective actions.\n",
+        '- ** — Weekly review #4:** document wins, misses, and corrective actions.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review.md").write_text(
@@ -89,7 +89,7 @@ def test_lane28_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_lane28_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/integrations-weekly-review.md").write_text(
-        "# Weekly review #4 (Day 28)\n", encoding="utf-8"
+        '# Weekly review #4 ()\n', encoding="utf-8"
     )
     rc = d28.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -99,4 +99,4 @@ def test_lane28_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 28 weekly review summary" in capsys.readouterr().out
+    assert ' weekly review summary' in capsys.readouterr().out

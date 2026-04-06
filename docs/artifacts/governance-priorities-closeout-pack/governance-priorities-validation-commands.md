@@ -1,4 +1,4 @@
-# Day 88 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit governance-priorities-closeout --format json --strict

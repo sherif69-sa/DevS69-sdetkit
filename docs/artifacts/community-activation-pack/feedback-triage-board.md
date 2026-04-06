@@ -1,4 +1,4 @@
-# Day 25 feedback triage board
+#  feedback triage board
 
 | Feedback item | Votes | Owner | Status | Decision date |
 | --- | ---: | --- | --- | --- |

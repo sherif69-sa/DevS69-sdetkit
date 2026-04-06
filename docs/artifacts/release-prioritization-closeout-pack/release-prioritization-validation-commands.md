@@ -1,4 +1,4 @@
-# Day 85 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit release-prioritization-closeout --format json --strict

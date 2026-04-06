@@ -53,7 +53,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": true,
-      "evidence": "Day 45 + Day 46 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -83,7 +83,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -125,10 +124,10 @@
     "strict_pass": true
   },
   "wins": [
-    "Day 44 continuity is strict-pass with activation score=100.0.",
-    "Day 44 delivery board integrity validated with 5 checklist items.",
+    "continuity is strict-pass with activation score=100.0.",
+    "delivery board integrity validated with 5 checklist items.",
     "Expansion execution contract + quality checklist is fully locked for execution.",
-    "Day 45 expansion closeout lane is fully complete and ready for Day 46 optimization lane."
+    "expansion closeout lane is fully complete and ready for optimization lane."
   ],
   "misses": [],
   "handoff_actions": []

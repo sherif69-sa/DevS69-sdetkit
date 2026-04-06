@@ -67,7 +67,7 @@ The repository had baseline issue and PR templates, but template quality checks 
 ## Rollback plan
 
 1. Revert `src/sdetkit/triage_templates.py` to the previous token-checking implementation.
-2. Revert `.github` template/config files to pre-Day-9 state.
+2. Revert `.github` template/config files to pre--9 state.
 3. Revert Cycle 9 docs/report updates and remove Cycle 9 contract checker if desired.
 
 This document is the Cycle 9 artifact report for contribution-template triage hardening and recovery automation.

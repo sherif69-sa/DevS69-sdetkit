@@ -407,7 +407,7 @@ def test_doctor_upgrade_audit_supports_release_age_filters_and_freshness_hints(
     meta = payload["checks"]["upgrade_audit"]["meta"]
     assert meta["packages_audited"] == 2
     assert meta["packages_in_scope"] == 1
-    assert meta["filters"]["max_release_age_days"] == 14
+    assert meta["filters"]["max_release_age"] == 14
     assert meta["priority_queue"][0]["name"] == "httpx"
     assert meta["release_freshness_summary"][0]["release_freshness"] == "fresh-release"
     assert any("release freshness fresh-release" in hint for hint in payload["hints"])

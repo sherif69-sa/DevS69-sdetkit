@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 74 — Distribution scaling:** convert Day 73 learnings into scaled channel operations.\n"
-        "- **Day 75 — Trust assets refresh:** turn Day 74 outcomes into governance-grade trust proof.\n",
+        '- ** — Distribution scaling:** convert  learnings into scaled channel operations.\n'
+        '- ** — Trust assets refresh:** turn  outcomes into governance-grade trust proof.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-distribution-scaling-closeout.md").write_text(
         d74._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-74-big-upgrade-report.md").write_text(
-        "# Day 74 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -62,12 +62,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 73 delivery board",
-                "- [ ] Day 73 integration brief committed",
-                "- [ ] Day 73 published case-study narrative committed",
-                "- [ ] Day 73 controls and assumptions log exported",
-                "- [ ] Day 73 KPI scorecard snapshot exported",
-                "- [ ] Day 74 distribution scaling priorities drafted from Day 73 learnings",
+                '#  delivery board',
+                '- [ ]  integration brief committed',
+                '- [ ]  published case-study narrative committed',
+                '- [ ]  controls and assumptions log exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  distribution scaling priorities drafted from  learnings',
             ]
         )
         + "\n",

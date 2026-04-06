@@ -56,7 +56,7 @@
       "source": "Onboarding diary samples"
     },
     {
-      "id": "pr_cycle_time",
+      "id": "pr_flow_time",
       "lane": "velocity",
       "metric": "PR impact time median",
       "target": "<24h",

@@ -27,7 +27,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text("impact-27-ultra-upgrade-report.md\n", encoding="utf-8")
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 27 — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).\n",
+        '- ** — KPI audit:** compare baseline vs current (stars/week, CTR, discussions, PRs).\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-kpi-audit.md").write_text(
@@ -82,7 +82,7 @@ def test_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/integrations-kpi-audit.md").write_text(
-        "# KPI audit (Day 27)\n", encoding="utf-8"
+        '# KPI audit ()\n', encoding="utf-8"
     )
     rc = kpa.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -92,4 +92,4 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["kpi-audit", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 27 KPI audit summary" in capsys.readouterr().out
+    assert ' KPI audit summary' in capsys.readouterr().out

@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 45 — Expansion closeout lane:** convert Day 44 scale proof into deterministic expansion loops.\n"
-        "- **Day 46 — Optimization lane continuation:** convert Day 45 expansion wins into optimization plays.\n",
+        '- ** — Expansion closeout lane:** convert  scale proof into deterministic expansion loops.\n'
+        '- ** — Optimization lane continuation:** convert  expansion wins into optimization plays.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-expansion-closeout.md").write_text(
         d45._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-45-big-upgrade-report.md").write_text(
-        "# Day 45 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 44 delivery board",
-                "- [ ] Day 44 scale plan draft committed",
-                "- [ ] Day 44 review notes captured with owner + backup",
-                "- [ ] Day 44 growth matrix exported",
-                "- [ ] Day 44 KPI scorecard snapshot exported",
-                "- [ ] Day 45 expansion priorities drafted from Day 44 learnings",
+                '#  delivery board',
+                '- [ ]  scale plan draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  growth matrix exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  expansion priorities drafted from  learnings',
             ]
         )
         + "\n",
@@ -126,4 +126,4 @@ def test_lane45_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["expansion-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 45 expansion closeout summary" in capsys.readouterr().out
+    assert ' expansion closeout summary' in capsys.readouterr().out

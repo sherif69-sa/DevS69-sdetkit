@@ -19,10 +19,10 @@ _INTEGRATION_EXPANSION_BOARD_PATH = (
     "docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md"
 )
 _INTEGRATION_EXPANSION_WORKFLOW_PATH = ".github/workflows/advanced-github-actions-reference-64.yml"
-_SECTION_HEADER = "# Day 65 \u2014 Weekly review #9 closeout lane"
+_SECTION_HEADER = '#  — Weekly review #9 closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Weekly Review Closeout matters",
-    "## Required inputs (Day 64)",
+    '## Required inputs ()',
     "## Weekly Review Closeout command lane",
     "## Weekly review contract",
     "## Weekly review quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_weekly_review_closeout_contract_2.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 65 weekly review scoring, risk triage, and handoff signoff.",
-    "The Day 65 lane references Day 64 integration evidence, delivery board completion, and strict baseline continuity.",
-    "Every Day 65 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 65 closeout records weekly KPI deltas, governance decisions, and Day 66 integration expansion priorities.",
+    'Single owner + backup reviewer are assigned for  weekly review scoring, risk triage, and handoff signoff.',
+    'The  lane references  integration evidence, delivery board completion, and strict baseline continuity.',
+    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records weekly KPI deltas, governance decisions, and  integration expansion priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes KPI baseline deltas, confidence band, and anomaly narrative",
@@ -54,70 +54,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes weekly brief, KPI dashboard, decision register, risk ledger, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 65 weekly brief committed",
-    "- [ ] Day 65 KPI dashboard snapshot exported",
-    "- [ ] Day 65 governance decision register published",
-    "- [ ] Day 65 risk and recovery ledger exported",
-    "- [ ] Day 66 integration expansion priorities drafted from Day 65 review",
+    '- [ ]  weekly brief committed',
+    '- [ ]  KPI dashboard snapshot exported',
+    '- [ ]  governance decision register published',
+    '- [ ]  risk and recovery ledger exported',
+    '- [ ]  integration expansion priorities drafted from  review',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 65 \u2014 Weekly review #9 closeout lane
-
-Day 65 closes with a major weekly review upgrade that converts Day 64 integration execution evidence into strict KPI governance and a deterministic Day 66 handoff.
-
-## Why Weekly Review Closeout matters
-
-- Consolidates Day 64 integration expansion signals into a high-confidence weekly KPI baseline.
-- Protects momentum with strict review contract coverage, runnable commands, and rollback safeguards.
-- Creates a deterministic handoff from Day 65 weekly review into Day 66 integration expansion #2.
-
-## Required inputs (Day 64)
-
-- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json`
-- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md`
-- `.github/workflows/advanced-github-actions-reference-64.yml`
-
-## Weekly Review Closeout command lane
-
-```bash
-python -m sdetkit weekly-review-closeout --format json --strict
-python -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-2-pack --format json --strict
-python -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-2-pack/evidence --format json --strict
-python scripts/check_weekly_review_closeout_contract_2.py
-```
-
-## Weekly review contract
-
-- Single owner + backup reviewer are assigned for Day 65 weekly review scoring, risk triage, and handoff signoff.
-- The Day 65 lane references Day 64 integration evidence, delivery board completion, and strict baseline continuity.
-- Every Day 65 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 65 closeout records weekly KPI deltas, governance decisions, and Day 66 integration expansion priorities.
-
-## Weekly review quality checklist
-
-- [ ] Includes KPI baseline deltas, confidence band, and anomaly narrative
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures pass-rate trend, reliability incidents, contributor signal quality, and recovery owner
-- [ ] Artifact pack includes weekly brief, KPI dashboard, decision register, risk ledger, and execution log
-
-## Weekly Review Closeout delivery board
-
-- [ ] Day 65 weekly brief committed
-- [ ] Day 65 KPI dashboard snapshot exported
-- [ ] Day 65 governance decision register published
-- [ ] Day 65 risk and recovery ledger exported
-- [ ] Day 66 integration expansion priorities drafted from Day 65 review
-
-## Scoring model
-
-Day 65 weighted score (0-100):
-
-- Contract + command lane completeness: 25 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 64 continuity and strict baseline carryover: 30 points.
-- Weekly review quality + governance handoff: 25 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Weekly review #9 closeout lane\n\n closes with a major weekly review upgrade that converts  integration execution evidence into strict KPI governance and a deterministic  handoff.\n\n## Why Weekly Review Closeout matters\n\n- Consolidates  integration expansion signals into a high-confidence weekly KPI baseline.\n- Protects momentum with strict review contract coverage, runnable commands, and rollback safeguards.\n- Creates a deterministic handoff from  weekly review into  integration expansion #2.\n\n## Required inputs ()\n\n- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-closeout-summary.json`\n- `docs/artifacts/integration-expansion-closeout-pack/integration-expansion-delivery-board.md`\n- `.github/workflows/advanced-github-actions-reference-64.yml`\n\n## Weekly Review Closeout command lane\n\n```bash\npython -m sdetkit weekly-review-closeout --format json --strict\npython -m sdetkit weekly-review-closeout --emit-pack-dir docs/artifacts/weekly-review-closeout-2-pack --format json --strict\npython -m sdetkit weekly-review-closeout --execute --evidence-dir docs/artifacts/weekly-review-closeout-2-pack/evidence --format json --strict\npython scripts/check_weekly_review_closeout_contract_2.py\n```\n\n## Weekly review contract\n\n- Single owner + backup reviewer are assigned for  weekly review scoring, risk triage, and handoff signoff.\n- The  lane references  integration evidence, delivery board completion, and strict baseline continuity.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records weekly KPI deltas, governance decisions, and  integration expansion priorities.\n\n## Weekly review quality checklist\n\n- [ ] Includes KPI baseline deltas, confidence band, and anomaly narrative\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures pass-rate trend, reliability incidents, contributor signal quality, and recovery owner\n- [ ] Artifact pack includes weekly brief, KPI dashboard, decision register, risk ledger, and execution log\n\n## Weekly Review Closeout delivery board\n\n- [ ]  weekly brief committed\n- [ ]  KPI dashboard snapshot exported\n- [ ]  governance decision register published\n- [ ]  risk and recovery ledger exported\n- [ ]  integration expansion priorities drafted from  review\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 25 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 30 points.\n- Weekly review quality + governance handoff: 25 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -167,7 +111,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         _load_integration_expansion(integration_expansion_summary)
     )
     board_count, board_has_integration_expansion = _count_board_items(
-        integration_expansion_board, "Day 64"
+        integration_expansion_board, ''
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -195,8 +139,8 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 65" in top10_text and "Day 66" in top10_text),
-            "evidence": "Day 65 + Day 66 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "integration_expansion_summary_present",
@@ -268,7 +212,7 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "integration_expansion_workflow_reference_present",
             "weight": 10,
-            "passed": "Day64 Advanced GitHub Actions Reference"
+            "passed": ' Advanced GitHub Actions Reference'
             in integration_expansion_workflow_text,
             "evidence": ".github/workflows/advanced-github-actions-reference-64.yml",
         },
@@ -287,35 +231,35 @@ def build_weekly_review_closeout_summary(root: Path) -> dict[str, Any]:
 
     if integration_expansion_strict:
         wins.append(
-            f"Day 64 continuity is strict-pass with activation score={integration_expansion_score}."
+            f"64 continuity is strict-pass with activation score={integration_expansion_score}."
         )
     else:
-        misses.append("Day 64 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 64 closeout command and restore strict baseline before Day 65 lock."
+            'Re-run  closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_integration_expansion:
         wins.append(
-            f"Day 64 delivery board integrity validated with {board_count} checklist items."
+            f"64 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 64 delivery board integrity is incomplete (needs >=5 items and Day 64 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 64 delivery board entries to include Day 64 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
-    if "Day64 Advanced GitHub Actions Reference" in integration_expansion_workflow_text:
-        wins.append("Day 64 workflow reference remains available for weekly KPI baseline review.")
+    if ' Advanced GitHub Actions Reference' in integration_expansion_workflow_text:
+        wins.append(' workflow reference remains available for weekly KPI baseline review.')
     else:
-        misses.append("Day 64 workflow reference is missing for weekly review context.")
+        misses.append(' workflow reference is missing for weekly review context.')
         handoff_actions.append(
-            "Restore integration_expansion workflow reference before publishing Day 65 outcomes."
+            'Restore integration_expansion workflow reference before publishing  outcomes.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 65 weekly review closeout lane is fully complete and ready for Day 66 integration expansion #2."
+            ' weekly review closeout lane is fully complete and ready for  integration expansion #2.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -380,7 +324,7 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "weekly-review-closeout-2-summary.md", _render_text(payload) + "\n")
     _write(
         target / "weekly-review-closeout-2-weekly-brief.md",
-        "# Day 65 weekly brief\n",
+        '#  weekly brief\n',
     )
     _write(
         target / "weekly-review-closeout-2-kpi-dashboard.json",
@@ -388,20 +332,20 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     )
     _write(
         target / "weekly-review-closeout-2-governance-decision-register.md",
-        "# Day 65 governance decision register\n",
+        '#  governance decision register\n',
     )
     _write(
         target / "weekly-review-closeout-2-risk-ledger.csv",
         "risk_id,severity,owner,mitigation,status\n",
     )
-    _write(target / "weekly-review-closeout-2-execution-log.md", "# Day 65 execution log\n")
+    _write(target / "weekly-review-closeout-2-execution-log.md", '#  execution log\n')
     _write(
         target / "weekly-review-closeout-2-delivery-board.md",
-        "\n".join(["# Day 65 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "weekly-review-closeout-2-validation-commands.md",
-        "# Day 65 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -429,12 +373,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_weekly_review_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_weekly_review_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 65 weekly review closeout checks")
+    parser = argparse.ArgumentParser(description=' weekly review closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

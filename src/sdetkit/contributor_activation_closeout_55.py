@@ -14,14 +14,14 @@ _PAGE_PATH = "docs/integrations-contributor-activation-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY53_SUMMARY_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
 _DAY53_BOARD_PATH = "docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md"
-_SECTION_HEADER = "# Day 55 \u2014 Contributor activation closeout lane"
+_SECTION_HEADER = "# \u2014 Contributor activation closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 55 matters",
-    "## Required inputs (Day 53)",
-    "## Day 55 command lane",
+    "## Why matters",
+    "## Required inputs ()",
+    "## command lane",
     "## Contributor activation contract",
     "## Contributor activation quality checklist",
-    "## Day 55 delivery board",
+    "## delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -36,10 +36,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_contributor_activation_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 55 contributor-activation execution and KPI follow-up.",
-    "The Day 55 lane references Day 53 docs-loop wins and misses with deterministic contributor follow-up loops.",
-    "Every Day 55 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 55 closeout records contributor-activation learnings and Day 56 prioritization inputs.",
+    "Single owner + backup reviewer are assigned for contributor-activation execution and KPI follow-up.",
+    "The lane references docs-loop wins and misses with deterministic contributor follow-up loops.",
+    "Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    "closeout records contributor-activation learnings and prioritization inputs.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes wins/misses digest, activation experiments, and rollback strategy",
@@ -49,29 +49,29 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes contributor brief, contributor ladder, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 55 contributor brief committed",
-    "- [ ] Day 55 activation plan reviewed with owner + backup",
-    "- [ ] Day 55 contributor ladder exported",
-    "- [ ] Day 55 KPI scorecard snapshot exported",
-    "- [ ] Day 56 priorities drafted from Day 55 learnings",
+    "- [ ] contributor brief committed",
+    "- [ ] activation plan reviewed with owner + backup",
+    "- [ ] contributor ladder exported",
+    "- [ ] KPI scorecard snapshot exported",
+    "- [ ] priorities drafted from learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 55 \u2014 Contributor activation closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 Contributor activation closeout lane
 
-Day 55 closes with a major contributor activation upgrade that turns Day 53 docs-loop evidence into a deterministic contributor follow-through lane.
+closes with a major contributor activation upgrade that turns docs-loop evidence into a deterministic contributor follow-through lane.
 
-## Why Day 55 matters
+## Why matters
 
-- Converts Day 53 docs-loop wins into repeatable contributor activation motions.
+- Converts docs-loop wins into repeatable contributor activation motions.
 - Protects quality with ownership, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Day 55 closeout into Day 56 planning.
+- Produces a deterministic handoff from closeout into planning.
 
-## Required inputs (Day 53)
+## Required inputs ()
 
 - `docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json`
 - `docs/artifacts/docs-loop-closeout-pack/docs-loop-delivery-board.md`
 
-## Day 55 command lane
+## command lane
 
 ```bash
 python -m sdetkit contributor-activation-closeout --format json --strict
@@ -82,10 +82,10 @@ python scripts/check_contributor_activation_closeout_contract.py
 
 ## Contributor activation contract
 
-- Single owner + backup reviewer are assigned for Day 55 contributor-activation execution and KPI follow-up.
-- The Day 55 lane references Day 53 docs-loop wins and misses with deterministic contributor follow-up loops.
-- Every Day 55 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 55 closeout records contributor-activation learnings and Day 56 prioritization inputs.
+- Single owner + backup reviewer are assigned for contributor-activation execution and KPI follow-up.
+- The lane references docs-loop wins and misses with deterministic contributor follow-up loops.
+- Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- closeout records contributor-activation learnings and prioritization inputs.
 
 ## Contributor activation quality checklist
 
@@ -95,17 +95,17 @@ python scripts/check_contributor_activation_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes contributor brief, contributor ladder, KPI scorecard, and execution log
 
-## Day 55 delivery board
+## delivery board
 
-- [ ] Day 55 contributor brief committed
-- [ ] Day 55 activation plan reviewed with owner + backup
-- [ ] Day 55 contributor ladder exported
-- [ ] Day 55 KPI scorecard snapshot exported
-- [ ] Day 56 priorities drafted from Day 55 learnings
+- [ ] contributor brief committed
+- [ ] activation plan reviewed with owner + backup
+- [ ] contributor ladder exported
+- [ ] KPI scorecard snapshot exported
+- [ ] priorities drafted from learnings
 
 ## Scoring model
 
-Day 55 weighted score (0-100):
+weighted score (0-100):
 
 - Contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -148,7 +148,7 @@ def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
 def _board_stats(path: Path) -> tuple[int, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(lines), ("Day 53" in text)
+    return len(lines), ("" in text)
 
 
 def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
@@ -175,7 +175,7 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
     docs_loop_closeout_score, docs_loop_closeout_strict, docs_loop_closeout_check_count = (
         _load_docs_loop_closeout_summary(docs_loop_closeout_summary)
     )
-    board_count, board_has_docs_loop_cycle53 = _board_stats(docs_loop_closeout_board)
+    board_count, board_has_required = _board_stats(docs_loop_closeout_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -220,8 +220,8 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 55" in top10_text and "Day 56" in top10_text),
-            "evidence": "Day 55 + Day 56 strategy chain",
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": "+ strategy chain",
         },
         {
             "check_id": "docs_loop_closeout_summary_present",
@@ -254,10 +254,10 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "docs_loop_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_docs_loop_cycle53,
+            "passed": board_count >= 5 and board_has_required,
             "evidence": {
                 "board_items": board_count,
-                "contains_docs_loop_cycle53": board_has_docs_loop_cycle53,
+                "contains_current": board_has_required,
             },
         },
         {
@@ -296,20 +296,20 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             f"Docs-loop continuity is strict-pass with activation score={docs_loop_closeout_score}."
         )
     else:
-        misses.append("Day 53 strict continuity signal is missing.")
+        misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 53 docs-loop closeout command and restore strict baseline before Day 55 lock."
+            "Re-run docs-loop closeout command and restore strict baseline before lock."
         )
 
-    if board_count >= 5 and board_has_docs_loop_cycle53:
+    if board_count >= 5 and board_has_required:
         wins.append(
-            f"Day 53 delivery board integrity validated with {board_count} checklist items."
+            f"delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 53 delivery board integrity is incomplete (needs >=5 items and Day 53 anchors)."
+            "delivery board integrity is incomplete (needs >=5 items and anchors)."
         )
-        handoff_actions.append("Repair Day 53 delivery board entries to include Day 53 anchors.")
+        handoff_actions.append("Repair delivery board entries to include anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append(
@@ -320,12 +320,12 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "Contributor activation contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 55 contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 55 contributor activation closeout lane is fully complete and ready for Day 56 execution lane."
+            "contributor activation closeout lane is fully complete and ready for execution lane."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -370,7 +370,7 @@ def build_contributor_activation_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Contributor Activation Closeout summary (legacy: Day 55)",
+        "Contributor Activation Closeout summary (legacy: )",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -391,20 +391,20 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "contributor-activation-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "contributor-activation-brief.md", "# Day 55 contributor activation brief\n")
+    _write(target / "contributor-activation-brief.md", "# contributor activation brief\n")
     _write(target / "contributor-ladder.csv", "stage,owner,kpi\n")
     _write(
         target / "contributor-activation-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "contributor-activation-execution-log.md", "# Day 55 execution log\n")
+    _write(target / "contributor-activation-execution-log.md", "# execution log\n")
     _write(
         target / "contributor-activation-delivery-board.md",
-        "\n".join(["# Day 55 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["# delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "contributor-activation-validation-commands.md",
-        "# Day 55 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -432,7 +432,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_contributor_activation_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    """Compatibility alias for legacy builder name."""
     return build_contributor_activation_closeout_summary(root)
 
 

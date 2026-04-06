@@ -19,14 +19,14 @@ _DAY73_BOARD_PATH = (
     "docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md"
 )
 _SCALING_PLAN_PATH = "docs/roadmap/plans/distribution-scaling-plan.json"
-_SECTION_HEADER = "# Day 74 \u2014 Distribution scaling closeout lane"
+_SECTION_HEADER = '#  — Distribution scaling closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 74 matters",
-    "## Required inputs (Day 73)",
-    "## Day 74 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Distribution scaling contract",
     "## Distribution quality checklist",
-    "## Day 74 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_distribution_scaling_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 74 distribution scaling execution and signoff.",
-    "The Day 74 lane references Day 73 publication outcomes, controls, and KPI continuity signals.",
-    "Every Day 74 section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 74 closeout records distribution outcomes, confidence notes, and Day 75 trust refresh priorities.",
+    'Single owner + backup reviewer are assigned for  distribution scaling execution and signoff.',
+    'The  lane references  publication outcomes, controls, and KPI continuity signals.',
+    'Every  section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records distribution outcomes, confidence notes, and  trust refresh priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes channel mix baseline, treatment cadence, and audience-segment assumptions",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, scaling plan, controls log, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 74 integration brief committed",
-    "- [ ] Day 74 distribution scaling plan committed",
-    "- [ ] Day 74 channel controls and assumptions log exported",
-    "- [ ] Day 74 KPI scorecard snapshot exported",
-    "- [ ] Day 75 trust refresh priorities drafted from Day 74 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  distribution scaling plan committed',
+    '- [ ]  channel controls and assumptions log exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  trust refresh priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,64 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 74 \u2014 Distribution scaling closeout lane
-
-Day 74 closes with a major upgrade that turns Day 73 published case-study outcomes into a scalable distribution execution pack with governance safeguards.
-
-## Why Day 74 matters
-
-- Converts Day 73 publication proof into repeatable multi-channel distribution operations.
-- Protects scaling quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 74 distribution scaling execution into Day 75 trust-asset refresh.
-
-## Required inputs (Day 73)
-
-- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json`
-- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md`
-- `docs/roadmap/plans/distribution-scaling-plan.json`
-
-## Day 74 command lane
-
-```bash
-python -m sdetkit distribution-scaling-closeout --format json --strict
-python -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict
-python -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict
-python scripts/check_distribution_scaling_closeout_contract.py
-```
-
-## Distribution scaling contract
-
-- Single owner + backup reviewer are assigned for Day 74 distribution scaling execution and signoff.
-- The Day 74 lane references Day 73 publication outcomes, controls, and KPI continuity signals.
-- Every Day 74 section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 74 closeout records distribution outcomes, confidence notes, and Day 75 trust refresh priorities.
-
-## Distribution quality checklist
-
-- [ ] Includes channel mix baseline, treatment cadence, and audience-segment assumptions
-- [ ] Every channel plan row has owner, launch window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures CTR delta, qualified lead delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, scaling plan, controls log, KPI scorecard, and execution log
-
-## Day 74 delivery board
-
-- [ ] Day 74 integration brief committed
-- [ ] Day 74 distribution scaling plan committed
-- [ ] Day 74 channel controls and assumptions log exported
-- [ ] Day 74 KPI scorecard snapshot exported
-- [ ] Day 75 trust refresh priorities drafted from Day 74 learnings
-
-## Scoring model
-
-Day 74 weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 73 continuity baseline quality (35)
-- Distribution evidence data + delivery board completeness (30)
-
-Strict pass requires score >= 95 and zero critical failures.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Distribution scaling closeout lane\n\n closes with a major upgrade that turns  published case-study outcomes into a scalable distribution execution pack with governance safeguards.\n\n## Why  matters\n\n- Converts  publication proof into repeatable multi-channel distribution operations.\n- Protects scaling quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  distribution scaling execution into  trust-asset refresh.\n\n## Required inputs ()\n\n- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-closeout-summary.json`\n- `docs/artifacts/case-study-launch-closeout-pack/case-study-launch-delivery-board.md`\n- `docs/roadmap/plans/distribution-scaling-plan.json`\n\n##  command lane\n\n```bash\npython -m sdetkit distribution-scaling-closeout --format json --strict\npython -m sdetkit distribution-scaling-closeout --emit-pack-dir docs/artifacts/distribution-scaling-closeout-pack --format json --strict\npython -m sdetkit distribution-scaling-closeout --execute --evidence-dir docs/artifacts/distribution-scaling-closeout-pack/evidence --format json --strict\npython scripts/check_distribution_scaling_closeout_contract.py\n```\n\n## Distribution scaling contract\n\n- Single owner + backup reviewer are assigned for  distribution scaling execution and signoff.\n- The  lane references  publication outcomes, controls, and KPI continuity signals.\n- Every  section includes channel CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records distribution outcomes, confidence notes, and  trust refresh priorities.\n\n## Distribution quality checklist\n\n- [ ] Includes channel mix baseline, treatment cadence, and audience-segment assumptions\n- [ ] Every channel plan row has owner, launch window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures CTR delta, qualified lead delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, scaling plan, controls log, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  distribution scaling plan committed\n- [ ]  channel controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  trust refresh priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Distribution evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
 
 
 def _read(path: Path) -> str:
@@ -169,7 +112,7 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
     prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
         prior_closeout_summary
     )
-    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "Day 73")
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, '')
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -200,8 +143,8 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 74" in top10_text and "Day 75" in top10_text),
-            "evidence": "Day 74 + Day 75 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "prior_closeout_summary_present",
@@ -291,35 +234,35 @@ def build_distribution_scaling_closeout_summary(root: Path) -> dict[str, Any]:
 
     if prior_closeout_strict:
         wins.append(
-            f"Day 73 continuity is strict-pass with activation score={prior_closeout_score}."
+            f"73 continuity is strict-pass with activation score={prior_closeout_score}."
         )
     else:
-        misses.append("Day 73 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 73 closeout command and restore strict baseline before Day 74 lock."
+            'Re-run  closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_prior_closeout:
         wins.append(
-            f"Day 73 delivery board integrity validated with {board_count} checklist items."
+            f"73 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 73 delivery board integrity is incomplete (needs >=5 items and Day 73 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 73 delivery board entries to include Day 73 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_scaling_plan_keys:
-        wins.append("Day 74 distribution scaling dataset is available for launch execution.")
+        wins.append(' distribution scaling dataset is available for launch execution.')
     else:
-        misses.append("Day 74 distribution scaling dataset is missing required keys.")
+        misses.append(' distribution scaling dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/distribution-scaling-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 74 distribution scaling closeout lane is fully complete and ready for Day 75 trust refresh."
+            ' distribution scaling closeout lane is fully complete and ready for  trust refresh.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -380,8 +323,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "distribution-scaling-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "distribution-scaling-integration-brief.md", "# Day 74 integration brief\n")
-    _write(target / "distribution-scaling-plan.md", "# Day 74 distribution scaling plan\n")
+    _write(target / "distribution-scaling-integration-brief.md", '#  integration brief\n')
+    _write(target / "distribution-scaling-plan.md", '#  distribution scaling plan\n')
     _write(
         target / "distribution-scaling-channel-controls-log.json",
         json.dumps({"controls": []}, indent=2) + "\n",
@@ -390,14 +333,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "distribution-scaling-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "distribution-scaling-execution-log.md", "# Day 74 execution log\n")
+    _write(target / "distribution-scaling-execution-log.md", '#  execution log\n')
     _write(
         target / "distribution-scaling-delivery-board.md",
-        "\n".join(["# Day 74 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "distribution-scaling-validation-commands.md",
-        "# Day 74 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -425,7 +368,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_distribution_scaling_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_distribution_scaling_closeout_summary(root)
 
 

@@ -12,8 +12,8 @@
       "check_id": "required_sections_present",
       "evidence": {
         "missing_sections": [
-          "# KPI audit (Day 27)",
-          "## Who should run Day 27"
+          "# KPI audit ()",
+          "## Who should run "
         ]
       },
       "passed": false,
@@ -52,7 +52,7 @@
     {
       "category": "strategy",
       "check_id": "top10_strategy_alignment",
-      "evidence": "Day 27 \u2014 KPI audit",
+      "evidence": " \u2014 KPI audit",
       "passed": false,
       "weight": 8
     },
@@ -132,8 +132,8 @@
   },
   "name": "kpi-audit",
   "strict_failures": [
-    "# KPI audit (Day 27)",
-    "## Who should run Day 27"
+    "# KPI audit ()",
+    "## Who should run "
   ],
   "summary": {
     "activation_score": 52.0,
@@ -149,8 +149,8 @@
       "top10_strategy_alignment"
     ],
     "recommendations": [
-      "Restore Day 27 KPI docs contract and command lane before closeout.",
-      "Add Day 27 KPI links and command examples in README/docs index for operator visibility."
+      "Restore  KPI docs contract and command lane before closeout.",
+      "Add  KPI links and command examples in README/docs index for operator visibility."
     ],
     "total_checks": 10
   }

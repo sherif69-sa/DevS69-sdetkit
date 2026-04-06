@@ -1,3 +1,3 @@
 # Acceleration plan
 
-- Objective: close Day 43 with measurable quality and throughput gains.
+- Objective: close  with measurable quality and throughput gains.

@@ -14,13 +14,13 @@ _CANONICAL_LANE_NAME = "phase2-kickoff"
 _LEGACY_LANE_NAME = "legacy-phase2-kickoff"
 _DAY30_SUMMARY_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json"
 _DAY30_BACKLOG_PATH = "docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md"
-_SECTION_HEADER = "# Day 31 \u2014 Phase-2 kickoff baseline"
+_SECTION_HEADER = '#  — Phase-2 kickoff baseline'
 _REQUIRED_SECTIONS = [
-    "## Why Day 31 matters",
-    "## Required inputs (Day 30)",
-    "## Day 31 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Baseline + weekly targets",
-    "## Day 31 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -41,62 +41,14 @@ _REQUIRED_WEEKLY_TARGET_LINES = [
     "Week-1 decision gate: if any target misses, publish corrective actions in the next weekly review.",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 31 baseline metrics snapshot emitted",
-    "- [ ] Day 32 release cadence checklist drafted",
-    "- [ ] Day 33 demo asset plan (doctor) assigned",
-    "- [ ] Day 34 demo asset plan (repo audit) assigned",
-    "- [ ] Day 35 weekly review preparation checklist ready",
+    '- [ ]  baseline metrics snapshot emitted',
+    '- [ ]  release cadence checklist drafted',
+    '- [ ]  demo asset plan (doctor) assigned',
+    '- [ ]  demo asset plan (repo audit) assigned',
+    '- [ ]  weekly review preparation checklist ready',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 31 \u2014 Phase-2 kickoff baseline
-
-Day 31 starts Phase-2 with a measurable baseline carried over from Day 30 and a fixed weekly growth target set.
-
-## Why Day 31 matters
-
-- Converts Day 30 handoff into a measurable execution contract.
-- Locks objective targets so weekly reviews can score progress without ambiguity.
-- Forces evidence-backed growth planning before feature/distribution expansion.
-
-## Required inputs (Day 30)
-
-- `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)
-- `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)
-
-## Day 31 command lane
-
-```bash
-python -m sdetkit phase2-kickoff --format json --strict
-python -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict
-python -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/phase2-kickoff-pack/evidence --format json --strict
-python scripts/check_phase2_kickoff_contract.py
-```
-
-## Baseline + weekly targets
-
-- Baseline source: Day 30 activation score and closeout rollup.
-- Week-1 Phase-2 target: maintain activation score >= 95 and preserve strict pass.
-- Week-1 growth target: publish 3 external-facing assets and 1 KPI checkpoint.
-- Week-1 quality gate: every shipped action includes command evidence and a summary artifact.
-- Week-1 decision gate: if any target misses, publish corrective actions in the next weekly review.
-
-## Day 31 delivery board
-
-- [ ] Day 31 baseline metrics snapshot emitted
-- [ ] Day 32 release cadence checklist drafted
-- [ ] Day 33 demo asset plan (doctor) assigned
-- [ ] Day 34 demo asset plan (repo audit) assigned
-- [ ] Day 35 weekly review preparation checklist ready
-
-## Scoring model
-
-Day 31 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 30 continuity and quality baseline: 35 points.
-- Week-1 target and delivery board lock: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Phase-2 kickoff baseline\n\n starts Phase-2 with a measurable baseline carried over from  and a fixed weekly growth target set.\n\n## Why  matters\n\n- Converts  handoff into a measurable execution contract.\n- Locks objective targets so weekly reviews can score progress without ambiguity.\n- Forces evidence-backed growth planning before feature/distribution expansion.\n\n## Required inputs ()\n\n- `docs/artifacts/phase1-wrap-pack/phase1-wrap-summary.json` (primary)\n- `docs/artifacts/phase1-wrap-pack/phase1-wrap-phase2-backlog.md` (primary)\n\n##  command lane\n\n```bash\npython -m sdetkit phase2-kickoff --format json --strict\npython -m sdetkit phase2-kickoff --emit-pack-dir docs/artifacts/phase2-kickoff-pack --format json --strict\npython -m sdetkit phase2-kickoff --execute --evidence-dir docs/artifacts/phase2-kickoff-pack/evidence --format json --strict\npython scripts/check_phase2_kickoff_contract.py\n```\n\n## Baseline + weekly targets\n\n- Baseline source:  activation score and closeout rollup.\n- Week-1 Phase-2 target: maintain activation score >= 95 and preserve strict pass.\n- Week-1 growth target: publish 3 external-facing assets and 1 KPI checkpoint.\n- Week-1 quality gate: every shipped action includes command evidence and a summary artifact.\n- Week-1 decision gate: if any target misses, publish corrective actions in the next weekly review.\n\n##  delivery board\n\n- [ ]  baseline metrics snapshot emitted\n- [ ]  release cadence checklist drafted\n- [ ]  demo asset plan (doctor) assigned\n- [ ]  demo asset plan (repo audit) assigned\n- [ ]  weekly review preparation checklist ready\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and quality baseline: 35 points.\n- Week-1 target and delivery board lock: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -132,10 +84,10 @@ def _backlog_stats(path: Path) -> tuple[int, bool, bool]:
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
     has_cycle31 = any(
-        any(token in line for token in ("impact 31", "day 31", "name 31")) for line in lines
+        any(token in line for token in ("impact 31", '', "name 31")) for line in lines
     )
     has_cycle32 = any(
-        any(token in line for token in ("impact 32", "day 32", "name 32")) for line in lines
+        any(token in line for token in ("impact 32", '', "name 32")) for line in lines
     )
     return item_count, has_cycle31, has_cycle32
 
@@ -216,10 +168,10 @@ def build_phase2_kickoff_summary_impl(
             "check_id": "top10_strategy_alignment",
             "weight": 5,
             "passed": (
-                "Day 31 \u2014 Phase-2 kickoff" in top10_text
-                and "Day 32 \u2014 Release cadence setup" in top10_text
+                ' — Phase-2 kickoff' in top10_text
+                and ' — Release cadence setup' in top10_text
             ),
-            "evidence": "Day 31 + Day 32 strategy chain",
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -287,35 +239,35 @@ def build_phase2_kickoff_summary_impl(
 
     if strict:
         wins.append(
-            f"Day 30 continuity is strict-pass with score={score} and avg={avg}."
+            f"30 continuity is strict-pass with score={score} and avg={avg}."
         )
     else:
-        misses.append("Day 30 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 30 wrap command and restore strict pass baseline before Phase-2 expansion."
+            'Re-run  wrap command and restore strict pass baseline before Phase-2 expansion.'
         )
 
     if backlog_count >= 8 and backlog_has_cycle31 and backlog_has_cycle32:
         wins.append(f"Phase-2 backlog integrity validated with {backlog_count} checklist items.")
     else:
         misses.append(
-            "Phase-2 backlog integrity is incomplete (needs >=8 items and Day 31/32 anchors)."
+            'Phase-2 backlog integrity is incomplete (needs >=8 items and /32 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 30 backlog to include at least 8 items with explicit Day 31 and Day 32 lines."
+            'Repair  backlog to include at least 8 items with explicit  and  lines.'
         )
 
     if not missing_targets and not missing_board_items:
-        wins.append("Week-1 targets and Day 31 delivery board are fully locked.")
+        wins.append('Week-1 targets and  delivery board are fully locked.')
     else:
         misses.append("Week-1 target contract or delivery board entries are missing.")
         handoff_actions.append(
-            "Complete all Day 31 target lines and delivery board checklist entries in integration docs."
+            'Complete all  target lines and delivery board checklist entries in integration docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 31 kickoff is fully closed and ready for Day 32 release-cadence execution."
+            ' kickoff is fully closed and ready for  release-cadence execution.'
         )
 
     return {
@@ -355,7 +307,7 @@ def build_phase2_kickoff_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 31 phase-2 kickoff summary\n"
+        ' phase-2 kickoff summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -366,18 +318,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 31 phase-2 kickoff summary",
+        '#  phase-2 kickoff summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## Day 30 continuity",
+        '##  continuity',
         "",
-        f"- Day 30 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 30 average activation score: `{payload['rollup']['average_activation_score']}`",
-        f"- Day 30 backlog checklist items: `{payload['rollup']['backlog_items']}`",
+        f"- 30 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 30 average activation score: `{payload['rollup']['average_activation_score']}`",
+        f"- 30 backlog checklist items: `{payload['rollup']['backlog_items']}`",
         "",
         "## Wins",
     ]
@@ -428,13 +380,13 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         target / "phase2-kickoff-baseline-snapshot.json",
         baseline_json,
     )
-    board_md = "# Day 31 delivery board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n"
+    board_md = '#  delivery board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n"
     _write(
         target / "phase2-kickoff-delivery-board.md",
         board_md,
     )
     validation_md = (
-        "# Day 31 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n"
     )
     _write(
         target / "phase2-kickoff-validation-commands.md",
@@ -471,7 +423,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 31 phase-2 kickoff baseline scorer.")
+    parser = argparse.ArgumentParser(description=' phase-2 kickoff baseline scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -535,7 +487,7 @@ def build_phase2_kickoff_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_phase2_kickoff_summary_impl(
         root,
         readme_path=readme_path,

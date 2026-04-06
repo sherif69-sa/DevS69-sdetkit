@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 80 — Partner outreach closeout:** publish partner onboarding execution checklist.\n"
-        "- **Day 81 — Growth campaign closeout:** convert partner outcomes into deterministic campaign controls.\n",
+        '- ** — Partner outreach closeout:** publish partner onboarding execution checklist.\n'
+        '- ** — Growth campaign closeout:** convert partner outcomes into deterministic campaign controls.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-growth-campaign-closeout.md").write_text(
         d81._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-81-big-upgrade-report.md").write_text(
-        "# Day 81 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = (
@@ -62,12 +62,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 80 delivery board",
-                "- [ ] Day 80 integration brief committed",
-                "- [ ] Day 80 partner outreach plan committed",
-                "- [ ] Day 80 partner execution ledger exported",
-                "- [ ] Day 80 partner KPI scorecard snapshot exported",
-                "- [ ] Day 81 growth campaign priorities drafted from Day 80 learnings",
+                '#  delivery board',
+                '- [ ]  integration brief committed',
+                '- [ ]  partner outreach plan committed',
+                '- [ ]  partner execution ledger exported',
+                '- [ ]  partner KPI scorecard snapshot exported',
+                '- [ ]  growth campaign priorities drafted from  learnings',
             ]
         )
         + "\n",
@@ -156,4 +156,4 @@ def test_lane81_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["growth-campaign-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 81 growth campaign closeout summary" in capsys.readouterr().out
+    assert ' growth campaign closeout summary' in capsys.readouterr().out

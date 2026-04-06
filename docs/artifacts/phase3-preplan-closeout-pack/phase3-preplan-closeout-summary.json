@@ -25,7 +25,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 59 + Day 60 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "phase2_hardening_summary_present",
@@ -62,14 +62,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 59 \u2014 Phase-3 pre-plan closeout lane"
+      "evidence": "#  \u2014 Phase-3 pre-plan closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 10,
       "passed": false,
       "evidence": [
-        "## Day 59 command lane"
+        "##  command lane"
       ]
     },
     {
@@ -116,11 +116,11 @@
     "Phase-3 pre-plan contract + quality checklist is fully locked for execution."
   ],
   "misses": [
-    "Day 58 strict continuity signal is missing.",
-    "Day 58 delivery board integrity is incomplete (needs >=5 items and Day 58 anchors)."
+    " strict continuity signal is missing.",
+    " delivery board integrity is incomplete (needs >=5 items and  anchors)."
   ],
   "handoff_actions": [
-    "Re-run Day 58 Phase-2 hardening closeout command and restore strict baseline before Day 59 lock.",
-    "Repair Day 58 delivery board entries to include Day 58 anchors."
+    "Re-run  Phase-2 hardening closeout command and restore strict baseline before  lock.",
+    "Repair  delivery board entries to include  anchors."
   ]
 }

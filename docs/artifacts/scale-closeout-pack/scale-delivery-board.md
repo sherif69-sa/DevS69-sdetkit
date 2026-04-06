@@ -1,7 +1,7 @@
 # Scale delivery board
 
-- [ ] Day 44 scale plan draft committed
-- [ ] Day 44 review notes captured with owner + backup
-- [ ] Day 44 growth matrix exported
-- [ ] Day 44 KPI scorecard snapshot exported
-- [ ] Day 45 expansion priorities drafted from Day 44 learnings
+- [ ]  scale plan draft committed
+- [ ]  review notes captured with owner + backup
+- [ ]  growth matrix exported
+- [ ]  KPI scorecard snapshot exported
+- [ ]  expansion priorities drafted from  learnings

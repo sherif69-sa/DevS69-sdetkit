@@ -21,8 +21,8 @@
       "passed": false,
       "evidence": {
         "missing_sections": [
-          "# Day 52 \u2014 Narrative closeout lane",
-          "## Day 52 command lane"
+          "# Narrative closeout lane",
+          "## command lane"
         ]
       }
     },
@@ -56,7 +56,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 52 + Day 53 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -86,7 +86,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -130,13 +129,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 51 delivery board integrity validated with 5 checklist items.",
+    "delivery board integrity validated with 5 checklist items.",
     "Narrative contract + quality checklist is fully locked for execution."
   ],
   "misses": [
-    "Day 51 strict continuity signal is missing."
+    "strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 51 case snippet closeout command and restore strict pass baseline before Day 52 lock."
+    "Re-run case snippet closeout command and restore strict pass baseline before lock."
   ]
 }

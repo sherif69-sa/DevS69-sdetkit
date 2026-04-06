@@ -16,14 +16,14 @@ _DAY57_SUMMARY_PATH = (
     "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
 )
 _DAY57_BOARD_PATH = "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md"
-_SECTION_HEADER = "# Day 58 \u2014 Phase-2 hardening closeout lane"
+_SECTION_HEADER = '#  — Phase-2 hardening closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 58 matters",
-    "## Required inputs (Day 57)",
-    "## Day 58 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Phase-2 hardening contract",
     "## Phase-2 hardening quality checklist",
-    "## Day 58 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase2_hardening_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 58 Phase-2 hardening execution and signal triage.",
-    "The Day 58 lane references Day 57 KPI deep-audit outcomes and unresolved risks.",
-    "Every Day 58 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 58 closeout records hardening outcomes and Day 59 pre-plan priorities.",
+    'Single owner + backup reviewer are assigned for  Phase-2 hardening execution and signal triage.',
+    'The  lane references  KPI deep-audit outcomes and unresolved risks.',
+    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records hardening outcomes and  pre-plan priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes friction-map digest, page hardening actions, and rollback strategy",
@@ -51,69 +51,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes hardening brief, risk ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 58 Phase-2 hardening brief committed",
-    "- [ ] Day 58 hardening plan reviewed with owner + backup",
-    "- [ ] Day 58 risk ledger exported",
-    "- [ ] Day 58 KPI scorecard snapshot exported",
-    "- [ ] Day 59 pre-plan priorities drafted from Day 58 learnings",
+    '- [ ]  Phase-2 hardening brief committed',
+    '- [ ]  hardening plan reviewed with owner + backup',
+    '- [ ]  risk ledger exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  pre-plan priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 58 \u2014 Phase-2 hardening closeout lane
-
-Day 58 closes with a major Phase-2 hardening upgrade that turns Day 57 KPI deep-audit outcomes into deterministic execution hardening governance.
-
-## Why Day 58 matters
-
-- Converts Day 57 KPI deep-audit evidence into repeatable hardening execution loops.
-- Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 58 closeout into Day 59 pre-plan execution planning.
-
-## Required inputs (Day 57)
-
-- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`
-- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`
-
-## Day 58 command lane
-
-```bash
-python -m sdetkit phase2-hardening-closeout --format json --strict
-python -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict
-python -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/phase2-hardening-closeout-pack/evidence --format json --strict
-python scripts/check_phase2_hardening_closeout_contract.py
-```
-
-## Phase-2 hardening contract
-
-- Single owner + backup reviewer are assigned for Day 58 Phase-2 hardening execution and signal triage.
-- The Day 58 lane references Day 57 KPI deep-audit outcomes and unresolved risks.
-- Every Day 58 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 58 closeout records hardening outcomes and Day 59 pre-plan priorities.
-
-## Phase-2 hardening quality checklist
-
-- [ ] Includes friction-map digest, page hardening actions, and rollback strategy
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
-- [ ] Artifact pack includes hardening brief, risk ledger, KPI scorecard, and execution log
-
-## Day 58 delivery board
-
-- [ ] Day 58 Phase-2 hardening brief committed
-- [ ] Day 58 hardening plan reviewed with owner + backup
-- [ ] Day 58 risk ledger exported
-- [ ] Day 58 KPI scorecard snapshot exported
-- [ ] Day 59 pre-plan priorities drafted from Day 58 learnings
-
-## Scoring model
-
-Day 58 weighted score (0-100):
-
-- Contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 57 continuity and strict baseline carryover: 35 points.
-- Phase-2 hardening contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Phase-2 hardening closeout lane\n\n closes with a major Phase-2 hardening upgrade that turns  KPI deep-audit outcomes into deterministic execution hardening governance.\n\n## Why  matters\n\n- Converts  KPI deep-audit evidence into repeatable hardening execution loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  pre-plan execution planning.\n\n## Required inputs ()\n\n- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json`\n- `docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit phase2-hardening-closeout --format json --strict\npython -m sdetkit phase2-hardening-closeout --emit-pack-dir docs/artifacts/phase2-hardening-closeout-pack --format json --strict\npython -m sdetkit phase2-hardening-closeout --execute --evidence-dir docs/artifacts/phase2-hardening-closeout-pack/evidence --format json --strict\npython scripts/check_phase2_hardening_closeout_contract.py\n```\n\n## Phase-2 hardening contract\n\n- Single owner + backup reviewer are assigned for  Phase-2 hardening execution and signal triage.\n- The  lane references  KPI deep-audit outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records hardening outcomes and  pre-plan priorities.\n\n## Phase-2 hardening quality checklist\n\n- [ ] Includes friction-map digest, page hardening actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes hardening brief, risk ledger, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  Phase-2 hardening brief committed\n- [ ]  hardening plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  pre-plan priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-2 hardening contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -149,7 +94,7 @@ def _load_board(path: Path) -> tuple[int, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines()]
     items = [line for line in lines if line.startswith("- [")]
-    has_kpi_deep_audit = any("Day 57" in line for line in lines)
+    has_kpi_deep_audit = any('' in line for line in lines)
     return len(items), has_kpi_deep_audit
 
 
@@ -197,8 +142,8 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 58" in top10_text and "Day 59" in top10_text),
-            "evidence": "Day 58 + Day 59 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "kpi_deep_audit_summary_present",
@@ -282,23 +227,23 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
 
     if kpi_deep_audit_strict:
         wins.append(
-            f"Day 57 continuity is strict-pass with activation score={kpi_deep_audit_score}."
+            f"57 continuity is strict-pass with activation score={kpi_deep_audit_score}."
         )
     else:
-        misses.append("Day 57 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 57 KPI deep-audit closeout command and restore strict baseline before Day 58 lock."
+            'Re-run  KPI deep-audit closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_kpi_deep_audit:
         wins.append(
-            f"Day 57 delivery board integrity validated with {board_count} checklist items."
+            f"57 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 57 delivery board integrity is incomplete (needs >=5 items and Day 57 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 57 delivery board entries to include Day 57 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Phase-2 hardening contract + quality checklist is fully locked for execution.")
@@ -307,12 +252,12 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
             "Phase-2 hardening contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 58 contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 58 Phase-2 hardening closeout lane is fully complete and ready for Day 59 pre-plan lane."
+            ' Phase-2 hardening closeout lane is fully complete and ready for  pre-plan lane.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
@@ -351,7 +296,7 @@ def build_phase2_hardening_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Phase 2 Hardening Closeout summary (legacy: Day 58)",
+        'Phase 2 Hardening Closeout summary (legacy: )',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -372,17 +317,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "phase2-hardening-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "phase2-hardening-brief.md", "# Day 58 Phase-2 hardening brief\n")
+    _write(target / "phase2-hardening-brief.md", '#  Phase-2 hardening brief\n')
     _write(target / "phase2-hardening-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "phase2-hardening-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "phase2-hardening-execution-log.md", "# Day 58 execution log\n")
+    _write(target / "phase2-hardening-execution-log.md", '#  execution log\n')
     _write(
         target / "phase2-hardening-delivery-board.md",
-        "\n".join(["# Day 58 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "phase2-hardening-validation-commands.md",
-        "# Day 58 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -410,7 +355,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_phase2_hardening_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_phase2_hardening_closeout_summary(root)
 
 

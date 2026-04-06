@@ -18,7 +18,7 @@ def _seed_repo(root: Path) -> None:
         "impact-76-big-upgrade-report.md\nintegrations-contributor-recognition-closeout.md\n",
         encoding="utf-8",
     )
-    (root / "docs/top-10-github-strategy.md").write_text("Day 75\nDay 76\n", encoding="utf-8")
+    (root / "docs/top-10-github-strategy.md").write_text('\n\n', encoding="utf-8")
     (root / "docs/integrations-contributor-recognition-closeout.md").write_text(
         d76._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
@@ -43,7 +43,7 @@ def _seed_repo(root: Path) -> None:
         / "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
     )
     board.write_text(
-        "\n".join(["# Day 75 delivery board", *["- [ ] Day 75 item" for _ in range(5)]]) + "\n",
+        "\n".join(['#  delivery board', *['- [ ]  item' for _ in range(5)]]) + "\n",
         encoding="utf-8",
     )
 

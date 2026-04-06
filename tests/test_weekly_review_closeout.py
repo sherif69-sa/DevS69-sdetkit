@@ -27,15 +27,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 49 — Weekly review closeout:** convert objection wins into deterministic weekly review loops.\n"
-        "- **Day 50 — Execution prioritization:** lock ownership and priorities for release motion.\n",
+        '- ** — Weekly review closeout:** convert objection wins into deterministic weekly review loops.\n'
+        '- ** — Execution prioritization:** lock ownership and priorities for release motion.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review-closeout.md").write_text(
         d49._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-49-big-upgrade-report.md").write_text(
-        "# Day 49 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/objection-closeout-pack/objection-closeout-summary.json"
@@ -54,12 +54,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 48 delivery board",
-                "- [ ] Day 48 objection plan draft committed",
-                "- [ ] Day 48 review notes captured with owner + backup",
-                "- [ ] Day 48 FAQ objection map exported",
-                "- [ ] Day 48 KPI scorecard snapshot exported",
-                "- [ ] Day 49 weekly-review priorities drafted from Day 48 learnings",
+                '#  delivery board',
+                '- [ ]  objection plan draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  FAQ objection map exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  weekly-review priorities drafted from  learnings',
             ]
         )
         + "\n",
@@ -125,7 +125,7 @@ def test_lane49_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["weekly-review-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 49 advanced weekly review control tower summary" in capsys.readouterr().out
+    assert ' advanced weekly review control tower summary' in capsys.readouterr().out
 
 
 def test_lane49_advanced_alias_cli_rejected(tmp_path: Path, capsys) -> None:

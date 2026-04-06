@@ -19,8 +19,8 @@ _DAY76_BOARD_PATH = (
 _PLAN_PATH = "docs/roadmap/plans/community-touchpoint-plan.json"
 _SECTION_HEADER = "# Community touchpoint closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 77 matters",
-    "## Required inputs (Day 76)",
+    '## Why  matters',
+    '## Required inputs ()',
     "## Community touchpoint command lane",
     "## Community touchpoint contract",
     "## Touchpoint quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_community_touchpoint_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 77 community touchpoint execution and signoff.",
-    "The Day 77 lane references Day 76 outcomes, controls, and KPI continuity signals.",
-    "Every Day 77 section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 77 closeout records touchpoint outcomes, confidence notes, and Day 78 ecosystem priorities.",
+    'Single owner + backup reviewer are assigned for  community touchpoint execution and signoff.',
+    'The  lane references  outcomes, controls, and KPI continuity signals.',
+    'Every  section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records touchpoint outcomes, confidence notes, and  ecosystem priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes community baseline, touchpoint cadence, and stakeholder assumptions",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, touchpoint plan, session ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 77 integration brief committed",
-    "- [ ] Day 77 community touchpoint plan committed",
-    "- [ ] Day 77 touchpoint session ledger exported",
-    "- [ ] Day 77 touchpoint KPI scorecard snapshot exported",
-    "- [ ] Day 78 ecosystem priorities drafted from Day 77 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  community touchpoint plan committed',
+    '- [ ]  touchpoint session ledger exported',
+    '- [ ]  touchpoint KPI scorecard snapshot exported',
+    '- [ ]  ecosystem priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -67,64 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Community touchpoint closeout lane
-
-Day 77 closes with a major upgrade that converts Day 76 contributor-recognition outcomes into a community-touchpoint execution pack.
-
-## Why Day 77 matters
-
-- Turns Day 76 contributor-recognition outcomes into community-facing touchpoint proof across docs, governance, and release channels.
-- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 77 community touchpoint into Day 78 ecosystem priorities.
-
-## Required inputs (Day 76)
-
-- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json`
-- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md`
-- `docs/roadmap/plans/community-touchpoint-plan.json`
-
-## Community touchpoint command lane
-
-```bash
-python -m sdetkit community-touchpoint-closeout --format json --strict
-python -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict
-python -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict
-python scripts/check_community_touchpoint_closeout_contract.py
-```
-
-## Community touchpoint contract
-
-- Single owner + backup reviewer are assigned for Day 77 community touchpoint execution and signoff.
-- The Day 77 lane references Day 76 outcomes, controls, and KPI continuity signals.
-- Every Day 77 section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 77 closeout records touchpoint outcomes, confidence notes, and Day 78 ecosystem priorities.
-
-## Touchpoint quality checklist
-
-- [ ] Includes community baseline, touchpoint cadence, and stakeholder assumptions
-- [ ] Every touchpoint lane row has owner, session window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures touchpoint score delta, trust carryover delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, touchpoint plan, session ledger, KPI scorecard, and execution log
-
-## Community touchpoint delivery board
-
-- [ ] Day 77 integration brief committed
-- [ ] Day 77 community touchpoint plan committed
-- [ ] Day 77 touchpoint session ledger exported
-- [ ] Day 77 touchpoint KPI scorecard snapshot exported
-- [ ] Day 78 ecosystem priorities drafted from Day 77 learnings
-
-## Scoring model
-
-Day 77 weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 76 continuity baseline quality (35)
-- Touchpoint evidence data + delivery board completeness (30)
-
-Strict pass requires score >= 95 and zero critical failures.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Community touchpoint closeout lane\n\n closes with a major upgrade that converts  contributor-recognition outcomes into a community-touchpoint execution pack.\n\n## Why  matters\n\n- Turns  contributor-recognition outcomes into community-facing touchpoint proof across docs, governance, and release channels.\n- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  community touchpoint into  ecosystem priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json`\n- `docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-delivery-board.md`\n- `docs/roadmap/plans/community-touchpoint-plan.json`\n\n## Community touchpoint command lane\n\n```bash\npython -m sdetkit community-touchpoint-closeout --format json --strict\npython -m sdetkit community-touchpoint-closeout --emit-pack-dir docs/artifacts/community-touchpoint-closeout-pack --format json --strict\npython -m sdetkit community-touchpoint-closeout --execute --evidence-dir docs/artifacts/community-touchpoint-closeout-pack/evidence --format json --strict\npython scripts/check_community_touchpoint_closeout_contract.py\n```\n\n## Community touchpoint contract\n\n- Single owner + backup reviewer are assigned for  community touchpoint execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes community CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records touchpoint outcomes, confidence notes, and  ecosystem priorities.\n\n## Touchpoint quality checklist\n\n- [ ] Includes community baseline, touchpoint cadence, and stakeholder assumptions\n- [ ] Every touchpoint lane row has owner, session window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures touchpoint score delta, trust carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, touchpoint plan, session ledger, KPI scorecard, and execution log\n\n## Community touchpoint delivery board\n\n- [ ]  integration brief committed\n- [ ]  community touchpoint plan committed\n- [ ]  touchpoint session ledger exported\n- [ ]  touchpoint KPI scorecard snapshot exported\n- [ ]  ecosystem priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Touchpoint evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
 
 
 def _read(path: Path) -> str:
@@ -167,7 +110,7 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
         contributor_recognition_check_count,
     ) = _load_contributor_recognition(contributor_recognition_summary)
     board_count, board_has_contributor_recognition = _count_board_items(
-        contributor_recognition_board, "Day 76"
+        contributor_recognition_board, ''
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -289,35 +232,35 @@ def build_community_touchpoint_closeout_summary(root: Path) -> dict[str, Any]:
 
     if contributor_recognition_strict:
         wins.append(
-            f"Day 76 continuity is strict-pass with activation score={contributor_recognition_score}."
+            f"76 continuity is strict-pass with activation score={contributor_recognition_score}."
         )
     else:
-        misses.append("Day 76 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 76 closeout command and restore strict baseline before Day 77 lock."
+            'Re-run  closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_contributor_recognition:
         wins.append(
-            f"Day 76 delivery board integrity validated with {board_count} checklist items."
+            f"76 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 76 delivery board integrity is incomplete (needs >=5 items and Day 76 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 76 delivery board entries to include Day 76 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 77 community touchpoint dataset is available for launch execution.")
+        wins.append(' community touchpoint dataset is available for launch execution.')
     else:
-        misses.append("Day 77 community touchpoint dataset is missing required keys.")
+        misses.append(' community touchpoint dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/community-touchpoint-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 77 community touchpoint closeout lane is fully complete and ready for Day 78 ecosystem priorities."
+            ' community touchpoint closeout lane is fully complete and ready for  ecosystem priorities.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -435,7 +378,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_community_touchpoint_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_community_touchpoint_closeout_summary(root)
 
 

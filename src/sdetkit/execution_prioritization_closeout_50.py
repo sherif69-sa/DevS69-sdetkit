@@ -17,14 +17,14 @@ _DAY49_SUMMARY_PATH = (
 )
 _DAY49_BOARD_PATH = "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
 _DAY49_LEGACY_BOARD_PATH = "docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md"
-_SECTION_HEADER = "# Day 50 \u2014 Execution prioritization closeout lane"
+_SECTION_HEADER = '#  — Execution prioritization closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 50 matters",
-    "## Required inputs (Day 49)",
-    "## Day 50 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Execution prioritization closeout contract",
     "## Execution prioritization quality checklist",
-    "## Day 50 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_execution_prioritization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 50 execution prioritization execution and KPI follow-up.",
-    "The Day 50 execution prioritization lane references Day 49 weekly-review winners and misses with deterministic execution-board loops.",
-    "Every Day 50 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 50 closeout records execution-board learnings and Day 51 release priorities.",
+    'Single owner + backup reviewer are assigned for  execution prioritization execution and KPI follow-up.',
+    'The  execution prioritization lane references  weekly-review winners and misses with deterministic execution-board loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records execution-board learnings and  release priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes wins/misses digest, risk register, and rollback strategy",
@@ -52,69 +52,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes execution brief, risk map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 50 execution prioritization brief committed",
-    "- [ ] Day 50 priorities reviewed with owner + backup",
-    "- [ ] Day 50 risk register exported",
-    "- [ ] Day 50 KPI scorecard snapshot exported",
-    "- [ ] Day 51 release priorities drafted from Day 50 learnings",
+    '- [ ]  execution prioritization brief committed',
+    '- [ ]  priorities reviewed with owner + backup',
+    '- [ ]  risk register exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  release priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 50 \u2014 Execution prioritization closeout lane
-
-Day 50 closes with a major execution-prioritization upgrade that converts Day 49 weekly-review evidence into a deterministic execution board and release-storytelling handoff.
-
-## Why Day 50 matters
-
-- Converts Day 49 weekly-review proof into execution-board discipline.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from execution priorities into Day 51 storytelling priorities.
-
-## Required inputs (Day 49)
-
-- `docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json`
-- `docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md`
-
-## Day 50 command lane
-
-```bash
-python -m sdetkit execution-prioritization-closeout --format json --strict
-python -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict
-python -m sdetkit execution-prioritization-closeout --execute --evidence-dir docs/artifacts/execution-prioritization-closeout-pack/evidence --format json --strict
-python scripts/check_execution_prioritization_closeout_contract.py
-```
-
-## Execution prioritization closeout contract
-
-- Single owner + backup reviewer are assigned for Day 50 execution prioritization execution and KPI follow-up.
-- The Day 50 execution prioritization lane references Day 49 weekly-review winners and misses with deterministic execution-board loops.
-- Every Day 50 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 50 closeout records execution-board learnings and Day 51 release priorities.
-
-## Execution prioritization quality checklist
-
-- [ ] Includes wins/misses digest, risk register, and rollback strategy
-- [ ] Every section has owner, review window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes execution brief, risk map, KPI scorecard, and execution log
-
-## Day 50 delivery board
-
-- [ ] Day 50 execution prioritization brief committed
-- [ ] Day 50 priorities reviewed with owner + backup
-- [ ] Day 50 risk register exported
-- [ ] Day 50 KPI scorecard snapshot exported
-- [ ] Day 51 release priorities drafted from Day 50 learnings
-
-## Scoring model
-
-Day 50 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 49 continuity and strict baseline carryover: 35 points.
-- Execution prioritization contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Execution prioritization closeout lane\n\n closes with a major execution-prioritization upgrade that converts  weekly-review evidence into a deterministic execution board and release-storytelling handoff.\n\n## Why  matters\n\n- Converts  weekly-review proof into execution-board discipline.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from execution priorities into  storytelling priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/weekly-review-closeout-pack-49/weekly-review-closeout-summary-49.json`\n- `docs/artifacts/weekly-review-closeout-pack-49/delivery-board-49.md`\n\n##  command lane\n\n```bash\npython -m sdetkit execution-prioritization-closeout --format json --strict\npython -m sdetkit execution-prioritization-closeout --emit-pack-dir docs/artifacts/execution-prioritization-closeout-pack --format json --strict\npython -m sdetkit execution-prioritization-closeout --execute --evidence-dir docs/artifacts/execution-prioritization-closeout-pack/evidence --format json --strict\npython scripts/check_execution_prioritization_closeout_contract.py\n```\n\n## Execution prioritization closeout contract\n\n- Single owner + backup reviewer are assigned for  execution prioritization execution and KPI follow-up.\n- The  execution prioritization lane references  weekly-review winners and misses with deterministic execution-board loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records execution-board learnings and  release priorities.\n\n## Execution prioritization quality checklist\n\n- [ ] Includes wins/misses digest, risk register, and rollback strategy\n- [ ] Every section has owner, review window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes execution brief, risk map, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  execution prioritization brief committed\n- [ ]  priorities reviewed with owner + backup\n- [ ]  risk register exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  release priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Execution prioritization contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -159,7 +104,7 @@ def _resolve_existing_path(root: Path, primary: str, legacy: str) -> Path:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(lines), ("Day 49" in text), ("Day 50" in text)
+    return len(lines), ('' in text), ('' in text)
 
 
 def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any]:
@@ -232,8 +177,8 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 50" in top10_text and "Day 51" in top10_text),
-            "evidence": "Day 50 + Day 51 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "summary_present",
@@ -300,23 +245,23 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
     handoff_actions: list[str] = []
 
     if strict:
-        wins.append(f"Day 49 continuity is strict-pass with activation score={score}.")
+        wins.append(f"49 continuity is strict-pass with activation score={score}.")
     else:
-        misses.append("Day 49 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 49 weekly review closeout command and restore strict pass baseline before Day 50 lock."
+            'Re-run  weekly review closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_cycle49 and board_has_cycle50:
         wins.append(
-            f"Day 49 delivery board integrity validated with {board_count} checklist items."
+            f"49 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 49 delivery board integrity is incomplete (needs >=5 items and Day 49/50 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /50 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 49 delivery board entries to include Day 49 and Day 50 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -328,12 +273,12 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
             "Execution prioritization contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 50 execution prioritization contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  execution prioritization contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 50 execution prioritization closeout lane is fully complete and ready for Day 51 execution lane."
+            ' execution prioritization closeout lane is fully complete and ready for  execution lane.'
         )
 
     return {
@@ -371,14 +316,14 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 50 execution prioritization closeout summary",
+        ' execution prioritization closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 49 activation score: `{payload['rollup']['activation_score']}`",
-        f"- Day 49 checks evaluated: `{payload['rollup']['checks']}`",
-        f"- Day 49 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
+        f"- 49 activation score: `{payload['rollup']['activation_score']}`",
+        f"- 49 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- 49 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -404,7 +349,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "execution-prioritization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "execution-prioritization-brief.md",
-        "# Day 50 Execution Prioritization Brief\n\n- Objective: close Day 50 with measurable execution-board discipline and prioritized release storytelling gains.\n",
+        '#  Execution Prioritization Brief\n\n- Objective: close  with measurable execution-board discipline and prioritized release storytelling gains.\n',
     )
     _write(
         target / "execution-prioritization-risk-register.csv",
@@ -431,15 +376,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-prioritization-execution-log.md",
-        "# Day 50 Execution Log\n\n- [ ] 2026-03-18: Record misses, wins, and Day 51 release priorities.\n",
+        '#  Execution Log\n\n- [ ] 2026-03-18: Record misses, wins, and  release priorities.\n',
     )
     _write(
         target / "execution-prioritization-delivery-board.md",
-        "# Day 50 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "execution-prioritization-validation-commands.md",
-        "# Day 50 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  Validation Commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -481,7 +426,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_execution_prioritization_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_execution_prioritization_closeout_summary(root)
 
 

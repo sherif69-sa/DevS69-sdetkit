@@ -58,7 +58,7 @@ python -m sdetkit kits expand --goal "add more bots workers search and repo expa
 - **`secret-protection-review-bot.yml`** — creates a weekly secret-protection review issue for push protection, delegated bypass, validity checks, and open secret-scanning backlog slices.
 - **`ghas-review-bot.yml`** — creates the weekly GHAS digest issue with open-alert counts, workflow freshness, and follow-up prompts.
 - **`ghas-campaign-bot.yml`** — creates a weekly GHAS campaign planner issue for Copilot Autofix-aware code scanning backlog slices, secret scanning age buckets, and push-protection follow-up.
-- **`ghas-alert-sla-bot.yml`** — creates a weekly GHAS SLA tracker issue that forces 7/14/30-day backlog slices into an owned remediation lane.
+- **`ghas-alert-sla-bot.yml`** — creates a weekly GHAS SLA tracker issue that forces 7/14/30- backlog slices into an owned remediation lane.
 - **`ghas-metrics-export-bot.yml`** — exports a weekly GHAS metrics artifact plus an issue-driven snapshot of alert totals, age buckets, and workflow freshness.
 - **`ghas-codeql-hotspots-bot.yml`** — creates a weekly CodeQL hotspot issue that groups the code-scanning queue by rule and file so fixes can land in batches.
 - **`security-configuration-audit-bot.yml`** — creates a monthly GHAS configuration audit issue covering repo-local workflow coverage, code security configuration visibility, and dependency submission posture.
@@ -126,8 +126,8 @@ This bot adds an explicit age-based operating contract to the GHAS queue so stal
 
 It now:
 
-- counts 7+, 14+, and 30+ day backlog slices across **code scanning**, **Dependabot**, and **secret scanning**,
-- highlights 14+ day **high-severity** code/dependency findings,
+- counts 7+, 14+, and 30+  backlog slices across **code scanning**, **Dependabot**, and **secret scanning**,
+- highlights 14+  **high-severity** code/dependency findings,
 - tracks **push-protection bypass** secret alerts that should be treated as same-week work,
 - groups older CodeQL findings by rule so maintainers can batch-fix them instead of triaging one-by-one,
 - opens a date-scoped `⏱️ GHAS alert SLA tracker (...)` issue.
@@ -162,7 +162,7 @@ This bot gives the repo a CodeQL-first remediation lane instead of treating the 
 It now:
 
 - groups open **code scanning** alerts by **rule**, **tool**, and **file/path**,
-- highlights 14+ and 30+ day hotspots so older findings are easier to batch-fix,
+- highlights 14+ and 30+  hotspots so older findings are easier to batch-fix,
 - exports `build/ghas-codeql-hotspots.json` for follow-up automation or dashboard reuse,
 - opens a date-scoped `🧪 GHAS CodeQL hotspots (...)` issue.
 
@@ -252,8 +252,8 @@ It now:
 ## Recommended weekly maintainer flow
 
 1. Open the latest **GHAS digest** issue.
-2. Open the latest **GHAS campaign planner** issue and group any 14+ day backlog into a focused remediation lane.
-3. Open the latest **GHAS alert SLA tracker** issue and convert every 14+ day breach into an owned issue or PR.
+2. Open the latest **GHAS campaign planner** issue and group any 14+  backlog into a focused remediation lane.
+3. Open the latest **GHAS alert SLA tracker** issue and convert every 14+  breach into an owned issue or PR.
 4. Review the **GHAS metrics snapshot** artifact before reporting progress or trend direction.
 5. Review the **GHAS CodeQL hotspots** issue and batch the top rule or top file into one remediation lane.
 6. Review the **secret protection review** issue and clear any push-protection bypass or delegated-bypass follow-up.

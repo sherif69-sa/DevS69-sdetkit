@@ -2,7 +2,7 @@
 
 ## What shipped (Cycle 1-6)
 
-| Day | Upgrade | Report | Artifact | Status |
+|  | Upgrade | Report | Artifact | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Core positioning + role onboarding | `docs/impact-1-ultra-upgrade-report.md` | `docs/artifacts/cycle1-onboarding-sample.md` | shipped ✅ |
 | 2 | 60-second demo workflow | `docs/impact-2-ultra-upgrade-report.md` | `docs/artifacts/cycle2-demo-sample.md` | shipped ✅ |

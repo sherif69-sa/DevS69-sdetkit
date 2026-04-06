@@ -55,7 +55,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 46 + Day 47 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -85,7 +85,6 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true,
         "contains": true
       }
     },
@@ -129,13 +128,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 46 delivery board integrity validated with 5 checklist items.",
+    "delivery board integrity validated with 5 checklist items.",
     "Reliability execution contract + quality checklist is fully locked for execution."
   ],
   "misses": [
-    "Day 46 strict continuity signal is missing."
+    "strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 46 optimization closeout command and restore strict pass baseline before Day 47 lock."
+    "Re-run optimization closeout command and restore strict pass baseline before lock."
   ]
 }

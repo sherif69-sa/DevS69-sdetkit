@@ -70,8 +70,8 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Why Day 78 matters",
-        "## Required inputs (Day 77)"
+        "## Why  matters",
+        "## Required inputs ()"
       ]
     },
     {
@@ -85,10 +85,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 78 ecosystem priorities execution and signoff.",
-        "The Day 78 lane references Day 77 outcomes, controls, and KPI continuity signals.",
-        "Every Day 78 section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 78 closeout records ecosystem outcomes, confidence notes, and Day 79 scale priorities."
+        "Single owner + backup reviewer are assigned for  ecosystem priorities execution and signoff.",
+        "The  lane references  outcomes, controls, and KPI continuity signals.",
+        "Every  section includes ecosystem CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records ecosystem outcomes, confidence notes, and  scale priorities."
       ]
     },
     {
@@ -102,11 +102,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 78 integration brief committed",
-        "- [ ] Day 78 ecosystem priorities plan committed",
-        "- [ ] Day 78 ecosystem workstream ledger exported",
-        "- [ ] Day 78 ecosystem KPI scorecard snapshot exported",
-        "- [ ] Day 79 scale priorities drafted from Day 78 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  ecosystem priorities plan committed",
+        "- [ ]  ecosystem workstream ledger exported",
+        "- [ ]  ecosystem KPI scorecard snapshot exported",
+        "- [ ]  scale priorities drafted from  learnings"
       ]
     },
     {
@@ -136,6 +136,6 @@
     "Community touchpoint continuity baseline is below the floor (<85)."
   ],
   "handoff_actions": [
-    "Re-run Day 77 closeout command and raise baseline quality above 85 before Day 78 lock."
+    "Re-run  closeout command and raise baseline quality above 85 before  lock."
   ]
 }

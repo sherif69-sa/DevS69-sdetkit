@@ -4,7 +4,7 @@
     "status": "on_track",
     "evidence_link": "ci://runs/mainline-pass-rate-prev"
   },
-  "pr_cycle_time": {
+  "pr_flow_time": {
     "current_value": "23h",
     "status": "watch",
     "evidence_link": "scm://analytics/pr-impact-time-prev"

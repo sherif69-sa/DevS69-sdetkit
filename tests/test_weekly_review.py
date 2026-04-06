@@ -9,16 +9,16 @@ from sdetkit import weekly_review
 
 def test_weekly_review_repo_passes_core_kpis() -> None:
     review = weekly_review.build_weekly_review(Path(".").resolve())
-    assert review.kpis["days_planned"] == 6
-    assert review.kpis["days_completed"] >= 6
+    assert review.kpis["planned_count"] == 6
+    assert review.kpis["completed_count"] >= 6
     assert review.kpis["completion_rate_percent"] == 100
 
 
 def test_week2_review_repo_passes_core_kpis() -> None:
     review = weekly_review.build_weekly_review(Path(".").resolve(), week=2)
     assert review.week == 2
-    assert review.kpis["days_planned"] == 6
-    assert review.kpis["days_completed"] >= 6
+    assert review.kpis["planned_count"] == 6
+    assert review.kpis["completed_count"] >= 6
     assert review.kpis["completion_rate_percent"] == 100
 
 
@@ -49,15 +49,15 @@ def test_weekly_review_flags_missing_files(tmp_path: Path) -> None:
     (tmp_path / "docs" / "impact-1-ultra-upgrade-report.md").write_text("ok\n", encoding="utf-8")
 
     review = weekly_review.build_weekly_review(tmp_path)
-    assert review.kpis["days_completed"] < review.kpis["days_planned"]
+    assert review.kpis["completed_count"] < review.kpis["planned_count"]
     assert any(item["status"] == "incomplete" for item in review.shipped)
 
 
 def test_week3_review_repo_passes_core_kpis() -> None:
     review = weekly_review.build_weekly_review(Path(".").resolve(), week=3)
     assert review.week == 3
-    assert review.kpis["days_planned"] == 6
-    assert review.kpis["days_completed"] >= 6
+    assert review.kpis["planned_count"] == 6
+    assert review.kpis["completed_count"] >= 6
     assert review.kpis["completion_rate_percent"] == 100
 
 

@@ -14,14 +14,14 @@ _PAGE_PATH = "docs/integrations-docs-loop-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY52_SUMMARY_PATH = "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json"
 _DAY52_BOARD_PATH = "docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md"
-_SECTION_HEADER = "# Day 53 \u2014 Docs loop optimization closeout lane"
+_SECTION_HEADER = "# \u2014 Docs loop optimization closeout lane"
 _REQUIRED_SECTIONS = [
-    "## Why Day 53 matters",
-    "## Required inputs (Day 52)",
-    "## Day 53 command lane",
+    "## Why matters",
+    "## Required inputs ()",
+    "## command lane",
     "## Docs loop optimization contract",
     "## Docs loop quality checklist",
-    "## Day 53 delivery board",
+    "## delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -36,10 +36,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_docs_loop_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 53 docs-loop execution and KPI follow-up.",
-    "The Day 53 docs-loop lane references Day 52 narrative winners and misses with deterministic cross-link remediation loops.",
-    "Every Day 53 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 53 closeout records docs-loop learnings and Day 54 re-engagement priorities.",
+    "Single owner + backup reviewer are assigned for docs-loop execution and KPI follow-up.",
+    "The docs-loop lane references narrative winners and misses with deterministic cross-link remediation loops.",
+    "Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    "closeout records docs-loop learnings and re-engagement priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes wins/misses digest, proof snippet draft, and rollback strategy",
@@ -49,29 +49,29 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes docs-loop brief, cross-link map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 53 docs-loop brief committed",
-    "- [ ] Day 53 docs-loop plan reviewed with owner + backup",
-    "- [ ] Day 53 cross-link map exported",
-    "- [ ] Day 53 KPI scorecard snapshot exported",
-    "- [ ] Day 54 re-engagement priorities drafted from Day 53 learnings",
+    "- [ ] docs-loop brief committed",
+    "- [ ] docs-loop plan reviewed with owner + backup",
+    "- [ ] cross-link map exported",
+    "- [ ] KPI scorecard snapshot exported",
+    "- [ ] re-engagement priorities drafted from learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 53 \u2014 Docs loop optimization closeout lane
+_DEFAULT_PAGE_TEMPLATE = """# \u2014 Docs loop optimization closeout lane
 
-Day 53 closes with a major docs loop optimization upgrade that converts Day 52 narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
+closes with a major docs loop optimization upgrade that converts narrative evidence into deterministic cross-link execution across demos, playbooks, and CLI docs.
 
-## Why Day 53 matters
+## Why matters
 
-- Converts Day 52 narrative proof into a durable docs-loop optimization discipline.
+- Converts narrative proof into a durable docs-loop optimization discipline.
 - Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from Day 53 docs-loop upgrades into Day 54 re-engagement execution.
+- Produces a deterministic handoff from docs-loop upgrades into re-engagement execution.
 
-## Required inputs (Day 52)
+## Required inputs ()
 
 - `docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json`
 - `docs/artifacts/narrative-closeout-pack/narrative-delivery-board.md`
 
-## Day 53 command lane
+## command lane
 
 ```bash
 python -m sdetkit docs-loop-closeout --format json --strict
@@ -82,10 +82,10 @@ python scripts/check_docs_loop_closeout_contract.py
 
 ## Docs loop optimization contract
 
-- Single owner + backup reviewer are assigned for Day 53 docs-loop execution and KPI follow-up.
-- The Day 53 docs-loop lane references Day 52 narrative winners and misses with deterministic cross-link remediation loops.
-- Every Day 53 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 53 closeout records docs-loop learnings and Day 54 re-engagement priorities.
+- Single owner + backup reviewer are assigned for docs-loop execution and KPI follow-up.
+- The docs-loop lane references narrative winners and misses with deterministic cross-link remediation loops.
+- Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
+- closeout records docs-loop learnings and re-engagement priorities.
 
 ## Docs loop quality checklist
 
@@ -95,17 +95,17 @@ python scripts/check_docs_loop_closeout_contract.py
 - [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
 - [ ] Artifact pack includes docs-loop brief, cross-link map, KPI scorecard, and execution log
 
-## Day 53 delivery board
+## delivery board
 
-- [ ] Day 53 docs-loop brief committed
-- [ ] Day 53 docs-loop plan reviewed with owner + backup
-- [ ] Day 53 cross-link map exported
-- [ ] Day 53 KPI scorecard snapshot exported
-- [ ] Day 54 re-engagement priorities drafted from Day 53 learnings
+- [ ] docs-loop brief committed
+- [ ] docs-loop plan reviewed with owner + backup
+- [ ] cross-link map exported
+- [ ] KPI scorecard snapshot exported
+- [ ] re-engagement priorities drafted from learnings
 
 ## Scoring model
 
-Day 53 weighted score (0-100):
+weighted score (0-100):
 
 - Docs contract + command lane completeness: 30 points.
 - Discoverability alignment (README/docs index/top-10): 20 points.
@@ -149,7 +149,7 @@ def _contains_all_lines(text: str, required_lines: list[str]) -> list[str]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip() for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(lines), ("Day 52" in text), ("Day 53" in text)
+    return len(lines), ("" in text), ("" in text)
 
 
 def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
@@ -181,7 +181,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     narrative_closeout_score, narrative_closeout_strict, narrative_closeout_check_count = (
         _load_narrative_closeout_summary(narrative_closeout_summary)
     )
-    board_count, board_has_narrative_closeout_cycle52, board_has_docs_loop_cycle53 = _board_stats(
+    board_count, board_has_previous, board_has_required = _board_stats(
         narrative_closeout_board
     )
 
@@ -228,8 +228,8 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 52" in top10_text and "Day 53" in top10_text),
-            "evidence": "Day 52 + Day 53 strategy chain",
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": "+ strategy chain",
         },
         {
             "check_id": "narrative_closeout_summary_present",
@@ -263,12 +263,12 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "narrative_closeout_board_integrity",
             "weight": 7,
             "passed": board_count >= 5
-            and board_has_narrative_closeout_cycle52
-            and board_has_docs_loop_cycle53,
+            and board_has_previous
+            and board_has_required,
             "evidence": {
                 "board_items": board_count,
-                "contains_narrative_closeout_cycle52": board_has_narrative_closeout_cycle52,
-                "contains_docs_loop_cycle53": board_has_docs_loop_cycle53,
+                "contains_previous": board_has_previous,
+                "contains_current": board_has_required,
             },
         },
         {
@@ -308,21 +308,21 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             f"Narrative-closeout continuity is strict-pass with activation score={narrative_closeout_score}."
         )
     else:
-        misses.append("Day 52 strict continuity signal is missing.")
+        misses.append("strict continuity signal is missing.")
         handoff_actions.append(
-            "Re-run Day 52 narrative closeout command and restore strict pass baseline before Day 53 lock."
+            "Re-run narrative closeout command and restore strict pass baseline before lock."
         )
 
-    if board_count >= 5 and board_has_narrative_closeout_cycle52 and board_has_docs_loop_cycle53:
+    if board_count >= 5 and board_has_previous and board_has_required:
         wins.append(
-            f"Day 52 delivery board integrity validated with {board_count} checklist items."
+            f"delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 52 delivery board integrity is incomplete (needs >=5 items and Day 52/53 anchors)."
+            "delivery board integrity is incomplete (needs >=5 items and /53 anchors)."
         )
         handoff_actions.append(
-            "Repair Day 52 delivery board entries to include Day 52 and Day 53 anchors."
+            "Repair delivery board entries to include and anchors."
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -332,12 +332,12 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "Docs-loop contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 53 docs-loop contract lines, quality checklist entries, and delivery board tasks in docs."
+            "Complete all docs-loop contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 53 docs-loop closeout lane is fully complete and ready for Day 54 execution lane."
+            "docs-loop closeout lane is fully complete and ready for execution lane."
         )
 
     return {
@@ -381,14 +381,14 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Docs Loop Closeout summary (legacy: Day 53)",
+        "Docs Loop Closeout summary (legacy: )",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 52 activation score: `{payload['rollup']['narrative_closeout_activation_score']}`",
-        f"- Day 52 checks evaluated: `{payload['rollup']['narrative_closeout_checks']}`",
-        f"- Day 52 delivery board checklist items: `{payload['rollup']['narrative_closeout_delivery_board_items']}`",
+        f"- activation score: `{payload['rollup']['narrative_closeout_activation_score']}`",
+        f"- checks evaluated: `{payload['rollup']['narrative_closeout_checks']}`",
+        f"- delivery board checklist items: `{payload['rollup']['narrative_closeout_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -414,7 +414,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     # Legacy compatibility aliases
     _write(
         target / "docs-loop-brief.md",
-        "# Day 53 Docs-loop Brief\n\n- Objective: close Day 53 with measurable docs-loop optimization gains and proof-backed cross-link quality.\n",
+        "# Docs-loop Brief\n\n- Objective: close with measurable docs-loop optimization gains and proof-backed cross-link quality.\n",
     )
     _write(
         target / "docs-loop-cross-link-map.csv",
@@ -441,15 +441,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "docs-loop-execution-log.md",
-        "# Day 53 Execution Log\n\n- [ ] 2026-03-20: Record misses, wins, and Day 54 re-engagement priorities.\n",
+        "# Execution Log\n\n- [ ] 2026-03-20: Record misses, wins, and re-engagement priorities.\n",
     )
     _write(
         target / "docs-loop-delivery-board.md",
-        "# Day 53 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "# Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "docs-loop-validation-commands.md",
-        "# Day 53 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "# Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
     # Legacy compatibility aliases
@@ -489,7 +489,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_docs_loop_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    """Compatibility alias for legacy builder name."""
     return build_docs_loop_closeout_summary(root)
 
 

@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 52 — Case snippet #2:** publish mini-case on reliability or quality gate value.\n"
-        "- **Day 53 — Docs loop optimization:** publish mini-case on security/ops workflow value.\n",
+        '- ** — Case snippet #2:** publish mini-case on reliability or quality gate value.\n'
+        '- ** — Docs loop optimization:** publish mini-case on security/ops workflow value.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-docs-loop-closeout.md").write_text(
         d53._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-53-big-upgrade-report.md").write_text(
-        "# Day 53 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/narrative-closeout-pack/narrative-closeout-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 52 delivery board",
-                "- [ ] Day 52 narrative brief committed",
-                "- [ ] Day 52 narrative reviewed with owner + backup",
-                "- [ ] Day 52 proof map exported",
-                "- [ ] Day 52 KPI scorecard snapshot exported",
-                "- [ ] Day 53 expansion priorities drafted from Day 52 learnings",
+                '#  delivery board',
+                '- [ ]  narrative brief committed',
+                '- [ ]  narrative reviewed with owner + backup',
+                '- [ ]  proof map exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  expansion priorities drafted from  learnings',
             ]
         )
         + "\n",

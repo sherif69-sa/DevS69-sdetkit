@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-weekly-review.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_SECTION_HEADER = "# Weekly review #4 (Day 28)"
+_SECTION_HEADER = '# Weekly review #4 ()'
 _REQUIRED_SECTIONS = [
-    "## Who should run Day 28",
+    '## Who should run ',
     "## Inputs from Cycles 25-27",
     "## Closeout checklist",
     "## Scoring model",
@@ -29,44 +29,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_weekly_review_contract.py --skip-evidence",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Weekly review #4 (Day 28)
-
-Day 28 closes the weekly growth loop by consolidating Day 25-27 outcomes into wins, misses, and corrective actions.
-
-## Who should run Day 28
-
-- Maintainers preparing Phase-1 closeout and Day 29 hardening priorities.
-- DevRel/community operators validating that activation efforts converted to contributions.
-- Engineering managers requiring an auditable weekly checkpoint before handoff.
-
-## Inputs from Cycles 25-27
-
-- Day 25: `docs/artifacts/community-activation-pack/community-activation-summary.json`
-- External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`
-- Day 27: `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`
-
-## Closeout checklist
-
-```bash
-python -m sdetkit weekly-review-lane --format json --strict
-python -m sdetkit weekly-review-lane --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict
-python -m sdetkit weekly-review-lane --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict
-python scripts/check_weekly_review_contract.py
-```
-
-## Scoring model
-
-Day 28 weighted score (0-100):
-
-- Docs contract + command lane completeness: 40 points.
-- Discoverability links in README/docs index: 20 points.
-- Roadmap alignment and closeout language quality: 15 points.
-- Input artifact availability from Cycles 25-27: 25 points.
-
-## Evidence mode
-
-`--execute` runs deterministic checks and captures command logs in `--evidence-dir`.
-"""
+_DEFAULT_PAGE_TEMPLATE = '# Weekly review #4 ()\n\n closes the weekly growth loop by consolidating -27 outcomes into wins, misses, and corrective actions.\n\n## Who should run \n\n- Maintainers preparing Phase-1 closeout and  hardening priorities.\n- DevRel/community operators validating that activation efforts converted to contributions.\n- Engineering managers requiring an auditable weekly checkpoint before handoff.\n\n## Inputs from Cycles 25-27\n\n- : `docs/artifacts/community-activation-pack/community-activation-summary.json`\n- External contribution: `docs/artifacts/external-contribution-pack/external-contribution-summary.json`\n- : `docs/artifacts/kpi-audit-pack/kpi-audit-summary.json`\n\n## Closeout checklist\n\n```bash\npython -m sdetkit weekly-review-lane --format json --strict\npython -m sdetkit weekly-review-lane --emit-pack-dir docs/artifacts/weekly-review-pack --format json --strict\npython -m sdetkit weekly-review-lane --execute --evidence-dir docs/artifacts/weekly-review-pack/evidence --format json --strict\npython scripts/check_weekly_review_contract.py\n```\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 40 points.\n- Discoverability links in README/docs index: 20 points.\n- Roadmap alignment and closeout language quality: 15 points.\n- Input artifact availability from Cycles 25-27: 25 points.\n\n## Evidence mode\n\n`--execute` runs deterministic checks and captures command logs in `--evidence-dir`.\n'
 
 
 def _read(path: Path) -> str:
@@ -163,8 +126,8 @@ def build_weekly_review_summary_impl(
             "check_id": "top10_strategy_alignment",
             "category": "strategy",
             "weight": 8,
-            "passed": "Day 28 \u2014 Weekly review #4" in top10_text,
-            "evidence": "Day 28 \u2014 Weekly review #4",
+            "passed": ' — Weekly review #4' in top10_text,
+            "evidence": ' — Weekly review #4',
         },
         {
             "check_id": "docs_mentions_wins_misses_actions",
@@ -213,11 +176,11 @@ def build_weekly_review_summary_impl(
     misses: list[str] = []
     corrective_actions: list[str] = []
     if ok and score >= 90:
-        wins.append(f"Day 25 community activation remained strong ({score}).")
+        wins.append(f"25 community activation remained strong ({score}).")
     else:
-        misses.append("Day 25 summary missing or below closeout target.")
+        misses.append(' summary missing or below closeout target.')
         corrective_actions.append(
-            "Re-run Day 25 pack generation and restore summary JSON for traceability."
+            'Re-run  pack generation and restore summary JSON for traceability.'
         )
     if external_contribution_ok and external_contribution_score >= 90:
         wins.append(f"External contribution stayed healthy ({external_contribution_score}).")
@@ -227,18 +190,18 @@ def build_weekly_review_summary_impl(
             "Re-run the external-contribution strict lane and publish an updated external-contribution summary."
         )
     if ok and score >= 90:
-        wins.append(f"Day 27 KPI audit preserved positive momentum ({score}).")
+        wins.append(f"27 KPI audit preserved positive momentum ({score}).")
     else:
-        misses.append("Day 27 KPI summary missing or below closeout target.")
+        misses.append(' KPI summary missing or below closeout target.')
         corrective_actions.append(
-            "Refresh KPI baseline/current snapshots and regenerate Day 27 artifacts."
+            'Refresh KPI baseline/current snapshots and regenerate  artifacts.'
         )
 
     if score >= 90 and not critical_failures:
-        wins.append("Day 28 weekly review #4 is ready for final phase-close communication.")
+        wins.append(' weekly review #4 is ready for final phase-close communication.')
     else:
         corrective_actions.append(
-            "Address Day 28 documentation and discoverability gaps before phase closeout."
+            'Address  documentation and discoverability gaps before phase closeout.'
         )
 
     return {
@@ -275,7 +238,7 @@ def build_weekly_review_summary_impl(
 def _to_text(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     return (
-        "Day 28 weekly review summary\n"
+        ' weekly review summary\n'
         f"Activation score: {summary['activation_score']}\n"
         f"Passed checks: {summary['passed_checks']}\n"
         f"Failed checks: {summary['failed_checks']}\n"
@@ -286,18 +249,18 @@ def _to_text(payload: dict[str, Any]) -> str:
 def _to_markdown(payload: dict[str, Any]) -> str:
     summary = payload["summary"]
     lines = [
-        "# Day 28 weekly review summary",
+        '#  weekly review summary',
         "",
         f"- Activation score: **{summary['activation_score']}**",
         f"- Passed checks: **{summary['passed_checks']}**",
         f"- Failed checks: **{summary['failed_checks']}**",
         f"- Critical failures: **{', '.join(summary['critical_failures']) if summary['critical_failures'] else 'none'}**",
         "",
-        "## KPI rollup (Day 25-27)",
+        '## KPI rollup (-27)',
         "",
-        f"- Day 25 score: `{payload['rollup']['activation_score']}`",
+        f"- 25 score: `{payload['rollup']['activation_score']}`",
         f"- External-contribution score: `{payload['rollup']['external_contribution_activation_score']}`",
-        f"- Day 27 score: `{payload['rollup']['activation_score']}`",
+        f"- 27 score: `{payload['rollup']['activation_score']}`",
         f"- Average score: `{payload['rollup']['average_activation_score']}`",
         "",
         "## Wins",
@@ -325,7 +288,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "weekly-review-kpi-rollup.md", _to_markdown(payload))
     _write(
         target / "weekly-review-wins-misses-actions.md",
-        "# Day 28 wins, misses, and corrective actions\n\n"
+        '#  wins, misses, and corrective actions\n\n'
         + "\n".join(
             [
                 "## Wins",
@@ -345,7 +308,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "weekly-review-validation-commands.md",
-        "# Day 28 validation commands\n\n```bash\n" + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_REQUIRED_COMMANDS) + "\n```\n",
     )
 
 
@@ -376,7 +339,7 @@ def _run_execution(root: Path, evidence_dir: Path) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 28 weekly review closeout scorer.")
+    parser = argparse.ArgumentParser(description=' weekly review closeout scorer.')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     parser.add_argument("--output")
@@ -440,7 +403,7 @@ def build_weekly_review_summary(
     docs_page_path: str = _PAGE_PATH,
     top10_path: str = _TOP10_PATH,
 ) -> dict[str, Any]:
-    """Canonical summary builder (day-based name retained as compatibility alias)."""
+    'Canonical summary builder (-based name retained as compatibility alias).'
     return build_weekly_review_summary_impl(
         root,
         readme_path=readme_path,

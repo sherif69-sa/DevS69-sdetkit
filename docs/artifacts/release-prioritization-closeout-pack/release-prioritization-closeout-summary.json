@@ -26,7 +26,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 84 + Day 85 strategy chain"
+      "evidence": " +  strategy chain"
     },
     {
       "check_id": "evidence_narrative_summary_present",
@@ -63,14 +63,14 @@
       "check_id": "page_header",
       "weight": 7,
       "passed": false,
-      "evidence": "# Day 85 \u2014 Release prioritization closeout lane"
+      "evidence": "#  \u2014 Release prioritization closeout lane"
     },
     {
       "check_id": "required_sections",
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Required inputs (Day 84)"
+        "## Required inputs ()"
       ]
     },
     {
@@ -84,10 +84,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 85 release prioritization execution and signoff.",
-        "The Day 85 lane references Day 84 outcomes, controls, and trust continuity signals.",
-        "Every Day 85 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 85 closeout records release prioritization pack upgrades, storyline outcomes, and Day 86 launch priorities."
+        "Single owner + backup reviewer are assigned for  release prioritization execution and signoff.",
+        "The  lane references  outcomes, controls, and trust continuity signals.",
+        "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records release prioritization pack upgrades, storyline outcomes, and  launch priorities."
       ]
     },
     {
@@ -101,11 +101,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 85 evidence brief committed",
-        "- [ ] Day 85 release prioritization plan committed",
-        "- [ ] Day 85 narrative template upgrade ledger exported",
-        "- [ ] Day 85 storyline outcomes ledger exported",
-        "- [ ] Day 86 launch priorities drafted from Day 85 outcomes"
+        "- [ ]  evidence brief committed",
+        "- [ ]  release prioritization plan committed",
+        "- [ ]  narrative template upgrade ledger exported",
+        "- [ ]  storyline outcomes ledger exported",
+        "- [ ]  launch priorities drafted from  outcomes"
       ]
     },
     {
@@ -128,13 +128,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 84 delivery board integrity validated with 5 checklist items.",
-    "Day 85 release prioritization dataset is available for launch execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " release prioritization dataset is available for launch execution."
   ],
   "misses": [
-    "Day 84 continuity baseline is below the floor (<85) or not strict-pass."
+    " continuity baseline is below the floor (<85) or not strict-pass."
   ],
   "handoff_actions": [
-    "Re-run Day 84 closeout command and raise baseline quality above 85 with strict pass before Day 85 lock."
+    "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
   ]
 }

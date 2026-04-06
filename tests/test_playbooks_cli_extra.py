@@ -22,9 +22,9 @@ def test_alias_helpers_and_discovery(tmp_path: Path) -> None:
 
 
 def test_search_filters_day_tokens() -> None:
-    assert pc._apply_search_list(["day-review", "weekly-review"], None) == ["weekly-review"]
-    assert pc._apply_search_list(["weekly-review", "release"], "day weekly") == ["weekly-review"]
-    assert pc._apply_search_aliases({"day-alias": "weekly-review", "stable": "release"}, None) == {
+    assert pc._apply_search_list(['-review', "weekly-review"], None) == ["weekly-review"]
+    assert pc._apply_search_list(["weekly-review", "release"], ' weekly') == ["weekly-review"]
+    assert pc._apply_search_aliases({'-alias': "weekly-review", "stable": "release"}, None) == {
         "stable": "release"
     }
 

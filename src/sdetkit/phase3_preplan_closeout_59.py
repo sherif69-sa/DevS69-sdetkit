@@ -18,14 +18,14 @@ _DAY58_SUMMARY_PATH = (
 _DAY58_BOARD_PATH = (
     "docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md"
 )
-_SECTION_HEADER = "# Day 59 \u2014 Phase-3 pre-plan closeout lane"
+_SECTION_HEADER = '#  — Phase-3 pre-plan closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 59 matters",
-    "## Required inputs (Day 58)",
-    "## Day 59 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Phase-3 pre-plan contract",
     "## Phase-3 pre-plan quality checklist",
-    "## Day 59 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -40,10 +40,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase3_preplan_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 59 Phase-3 pre-plan execution and signal triage.",
-    "The Day 59 lane references Day 58 Phase-2 hardening outcomes and unresolved risks.",
-    "Every Day 59 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 59 closeout records pre-plan outcomes and Day 60 execution priorities.",
+    'Single owner + backup reviewer are assigned for  Phase-3 pre-plan execution and signal triage.',
+    'The  lane references  Phase-2 hardening outcomes and unresolved risks.',
+    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records pre-plan outcomes and  execution priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes priority digest, lane-level plan actions, and rollback strategy",
@@ -53,69 +53,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes pre-plan brief, risk ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 59 Phase-3 pre-plan brief committed",
-    "- [ ] Day 59 pre-plan reviewed with owner + backup",
-    "- [ ] Day 59 risk ledger exported",
-    "- [ ] Day 59 KPI scorecard snapshot exported",
-    "- [ ] Day 60 execution priorities drafted from Day 59 learnings",
+    '- [ ]  Phase-3 pre-plan brief committed',
+    '- [ ]  pre-plan reviewed with owner + backup',
+    '- [ ]  risk ledger exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  execution priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 59 \u2014 Phase-3 pre-plan closeout lane
-
-Day 59 closes with a major Phase-3 pre-plan upgrade that turns Day 58 hardening outcomes into deterministic Day 60 execution priorities.
-
-## Why Day 59 matters
-
-- Converts Day 58 hardening evidence into repeatable Phase-3 planning loops.
-- Protects quality with ownership, command proof, and KPI rollback guardrails.
-- Produces a deterministic handoff from Day 59 closeout into Day 60 execution planning.
-
-## Required inputs (Day 58)
-
-- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json`
-- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md`
-
-## Day 59 command lane
-
-```bash
-python -m sdetkit phase3-preplan-closeout --format json --strict
-python -m sdetkit phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict
-python -m sdetkit phase3-preplan-closeout --execute --evidence-dir docs/artifacts/phase3-preplan-closeout-pack/evidence --format json --strict
-python scripts/check_phase3_preplan_closeout_contract.py
-```
-
-## Phase-3 pre-plan contract
-
-- Single owner + backup reviewer are assigned for Day 59 Phase-3 pre-plan execution and signal triage.
-- The Day 59 lane references Day 58 Phase-2 hardening outcomes and unresolved risks.
-- Every Day 59 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 59 closeout records pre-plan outcomes and Day 60 execution priorities.
-
-## Phase-3 pre-plan quality checklist
-
-- [ ] Includes priority digest, lane-level plan actions, and rollback strategy
-- [ ] Every section has owner, review window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI
-- [ ] Artifact pack includes pre-plan brief, risk ledger, KPI scorecard, and execution log
-
-## Day 59 delivery board
-
-- [ ] Day 59 Phase-3 pre-plan brief committed
-- [ ] Day 59 pre-plan reviewed with owner + backup
-- [ ] Day 59 risk ledger exported
-- [ ] Day 59 KPI scorecard snapshot exported
-- [ ] Day 60 execution priorities drafted from Day 59 learnings
-
-## Scoring model
-
-Day 59 weighted score (0-100):
-
-- Contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 58 continuity and strict baseline carryover: 35 points.
-- Phase-3 pre-plan contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Phase-3 pre-plan closeout lane\n\n closes with a major Phase-3 pre-plan upgrade that turns  hardening outcomes into deterministic  execution priorities.\n\n## Why  matters\n\n- Converts  hardening evidence into repeatable Phase-3 planning loops.\n- Protects quality with ownership, command proof, and KPI rollback guardrails.\n- Produces a deterministic handoff from  closeout into  execution planning.\n\n## Required inputs ()\n\n- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-closeout-summary.json`\n- `docs/artifacts/phase2-hardening-closeout-pack/phase2-hardening-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit phase3-preplan-closeout --format json --strict\npython -m sdetkit phase3-preplan-closeout --emit-pack-dir docs/artifacts/phase3-preplan-closeout-pack --format json --strict\npython -m sdetkit phase3-preplan-closeout --execute --evidence-dir docs/artifacts/phase3-preplan-closeout-pack/evidence --format json --strict\npython scripts/check_phase3_preplan_closeout_contract.py\n```\n\n## Phase-3 pre-plan contract\n\n- Single owner + backup reviewer are assigned for  Phase-3 pre-plan execution and signal triage.\n- The  lane references  Phase-2 hardening outcomes and unresolved risks.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records pre-plan outcomes and  execution priorities.\n\n## Phase-3 pre-plan quality checklist\n\n- [ ] Includes priority digest, lane-level plan actions, and rollback strategy\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, confidence, and recovery owner for each KPI\n- [ ] Artifact pack includes pre-plan brief, risk ledger, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  Phase-3 pre-plan brief committed\n- [ ]  pre-plan reviewed with owner + backup\n- [ ]  risk ledger exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  execution priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Phase-3 pre-plan contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -163,7 +108,7 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
     phase2_hardening_score, phase2_hardening_strict, phase2_hardening_check_count = (
         _load_phase2_hardening(phase2_hardening_summary)
     )
-    board_count, board_has_phase2_hardening = _count_board_items(phase2_hardening_board, "Day 58")
+    board_count, board_has_phase2_hardening = _count_board_items(phase2_hardening_board, '')
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -190,8 +135,8 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 59" in top10_text and "Day 60" in top10_text),
-            "evidence": "Day 59 + Day 60 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "phase2_hardening_summary_present",
@@ -275,23 +220,23 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
 
     if phase2_hardening_strict:
         wins.append(
-            f"Day 58 continuity is strict-pass with activation score={phase2_hardening_score}."
+            f"58 continuity is strict-pass with activation score={phase2_hardening_score}."
         )
     else:
-        misses.append("Day 58 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 58 Phase-2 hardening closeout command and restore strict baseline before Day 59 lock."
+            'Re-run  Phase-2 hardening closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_phase2_hardening:
         wins.append(
-            f"Day 58 delivery board integrity validated with {board_count} checklist items."
+            f"58 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 58 delivery board integrity is incomplete (needs >=5 items and Day 58 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 58 delivery board entries to include Day 58 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Phase-3 pre-plan contract + quality checklist is fully locked for execution.")
@@ -300,12 +245,12 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
             "Phase-3 pre-plan contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 59 contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 59 Phase-3 pre-plan closeout lane is fully complete and ready for Day 60 execution lane."
+            ' Phase-3 pre-plan closeout lane is fully complete and ready for  execution lane.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -344,7 +289,7 @@ def build_phase3_preplan_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Phase3 Preplan Closeout summary (legacy: Day 59)",
+        'Phase3 Preplan Closeout summary (legacy: )',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -362,17 +307,17 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     target = pack_dir if pack_dir.is_absolute() else root / pack_dir
     _write(target / "phase3-preplan-closeout-summary.json", json.dumps(payload, indent=2) + "\n")
     _write(target / "phase3-preplan-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "phase3-preplan-brief.md", "# Day 59 Phase-3 pre-plan brief\n")
+    _write(target / "phase3-preplan-brief.md", '#  Phase-3 pre-plan brief\n')
     _write(target / "phase3-preplan-risk-ledger.csv", "risk,owner,mitigation,status\n")
     _write(target / "phase3-preplan-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n")
-    _write(target / "phase3-preplan-execution-log.md", "# Day 59 execution log\n")
+    _write(target / "phase3-preplan-execution-log.md", '#  execution log\n')
     _write(
         target / "phase3-preplan-delivery-board.md",
-        "\n".join(["# Day 59 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "phase3-preplan-validation-commands.md",
-        "# Day 59 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -400,7 +345,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_phase3_preplan_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_phase3_preplan_closeout_summary(root)
 
 

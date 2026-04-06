@@ -75,7 +75,7 @@ python -m sdetkit kits discover --query "release integration forensics"
 For full rules, use [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md).
 
 
-## 🧭 Day 11 ultra: docs navigation tune-up
+## 🧭  ultra: docs navigation tune-up
 
 ```bash
 python -m sdetkit docs-nav --format text --strict

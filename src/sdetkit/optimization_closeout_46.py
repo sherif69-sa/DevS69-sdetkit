@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-optimization-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY45_SUMMARY_PATH = "docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json"
 _DAY45_BOARD_PATH = "docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md"
-_SECTION_HEADER = "# Day 46 \u2014 Optimization closeout lane"
+_SECTION_HEADER = '#  — Optimization closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 46 matters",
-    "## Required inputs (Day 45)",
-    "## Day 46 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Optimization closeout contract",
     "## Optimization quality checklist",
-    "## Day 46 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -34,10 +34,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_optimization_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 46 optimization lane execution and KPI follow-up.",
-    "The Day 46 optimization lane references Day 45 expansion winners and misses with deterministic optimization loops.",
-    "Every Day 46 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    "Day 46 closeout records optimization learnings and Day 47 reliability priorities.",
+    'Single owner + backup reviewer are assigned for  optimization lane execution and KPI follow-up.',
+    'The  optimization lane references  expansion winners and misses with deterministic optimization loops.',
+    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
+    ' closeout records optimization learnings and  reliability priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes optimization summary, bottleneck map, and rollback strategy",
@@ -47,69 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes optimization plan, bottleneck map, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 46 optimization plan draft committed",
-    "- [ ] Day 46 review notes captured with owner + backup",
-    "- [ ] Day 46 bottleneck map exported",
-    "- [ ] Day 46 KPI scorecard snapshot exported",
-    "- [ ] Day 47 reliability priorities drafted from Day 46 learnings",
+    '- [ ]  optimization plan draft committed',
+    '- [ ]  review notes captured with owner + backup',
+    '- [ ]  bottleneck map exported',
+    '- [ ]  KPI scorecard snapshot exported',
+    '- [ ]  reliability priorities drafted from  learnings',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 46 \u2014 Optimization closeout lane
-
-Day 46 closes with a major optimization upgrade that converts Day 45 expansion evidence into deterministic improvement loops.
-
-## Why Day 46 matters
-
-- Converts Day 45 expansion proof into optimization-first operating motion.
-- Protects quality with owner accountability, command proof, and KPI guardrails.
-- Produces a deterministic handoff from optimization outcomes into Day 47 reliability priorities.
-
-## Required inputs (Day 45)
-
-- `docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json`
-- `docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md`
-
-## Day 46 command lane
-
-```bash
-python -m sdetkit optimization-closeout --format json --strict
-python -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict
-python -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict
-python scripts/check_optimization_closeout_contract.py
-```
-
-## Optimization closeout contract
-
-- Single owner + backup reviewer are assigned for Day 46 optimization lane execution and KPI follow-up.
-- The Day 46 optimization lane references Day 45 expansion winners and misses with deterministic optimization loops.
-- Every Day 46 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.
-- Day 46 closeout records optimization learnings and Day 47 reliability priorities.
-
-## Optimization quality checklist
-
-- [ ] Includes optimization summary, bottleneck map, and rollback strategy
-- [ ] Every section has owner, publish window, KPI target, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI
-- [ ] Artifact pack includes optimization plan, bottleneck map, KPI scorecard, and execution log
-
-## Day 46 delivery board
-
-- [ ] Day 46 optimization plan draft committed
-- [ ] Day 46 review notes captured with owner + backup
-- [ ] Day 46 bottleneck map exported
-- [ ] Day 46 KPI scorecard snapshot exported
-- [ ] Day 47 reliability priorities drafted from Day 46 learnings
-
-## Scoring model
-
-Day 46 weighted score (0-100):
-
-- Docs contract + command lane completeness: 30 points.
-- Discoverability alignment (README/docs index/top-10): 20 points.
-- Day 45 continuity and strict baseline carryover: 35 points.
-- Optimization contract lock + delivery board readiness: 15 points.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Optimization closeout lane\n\n closes with a major optimization upgrade that converts  expansion evidence into deterministic improvement loops.\n\n## Why  matters\n\n- Converts  expansion proof into optimization-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from optimization outcomes into  reliability priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/expansion-closeout-pack/expansion-closeout-summary.json`\n- `docs/artifacts/expansion-closeout-pack/expansion-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit optimization-closeout --format json --strict\npython -m sdetkit optimization-closeout --emit-pack-dir docs/artifacts/optimization-closeout-pack --format json --strict\npython -m sdetkit optimization-closeout --execute --evidence-dir docs/artifacts/optimization-closeout-pack/evidence --format json --strict\npython scripts/check_optimization_closeout_contract.py\n```\n\n## Optimization closeout contract\n\n- Single owner + backup reviewer are assigned for  optimization lane execution and KPI follow-up.\n- The  optimization lane references  expansion winners and misses with deterministic optimization loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records optimization learnings and  reliability priorities.\n\n## Optimization quality checklist\n\n- [ ] Includes optimization summary, bottleneck map, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes optimization plan, bottleneck map, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  optimization plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  bottleneck map exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  reliability priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Optimization contract lock + delivery board readiness: 15 points.\n'
 
 
 def _read(path: Path) -> str:
@@ -141,7 +86,7 @@ def _load_expansion_closeout(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), "Day 45" in text, "Day 46" in text
+    return len(items), '' in text, '' in text
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -220,8 +165,8 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 46" in top10_text and "Day 47" in top10_text),
-            "evidence": "Day 46 + Day 47 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "expansion_closeout_summary_present",
@@ -291,24 +236,24 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
 
     if expansion_closeout_strict:
         wins.append(
-            f"Day 45 continuity is strict-pass with activation score={expansion_closeout_score}."
+            f"45 continuity is strict-pass with activation score={expansion_closeout_score}."
         )
     else:
-        misses.append("Day 45 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 45 expansion closeout command and restore strict pass baseline before Day 46 lock."
+            'Re-run  expansion closeout command and restore strict pass baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_expansion_closeout and board_has_optimization_closeout:
         wins.append(
-            f"Day 45 delivery board integrity validated with {board_count} checklist items."
+            f"45 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 45 delivery board integrity is incomplete (needs >=5 items and Day 45/46 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and /46 anchors).'
         )
         handoff_actions.append(
-            "Repair Day 45 delivery board entries to include Day 45 and Day 46 anchors."
+            'Repair  delivery board entries to include  and  anchors.'
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -320,12 +265,12 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             "Optimization contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            "Complete all Day 46 optimization contract lines, quality checklist entries, and delivery board tasks in docs."
+            'Complete all  optimization contract lines, quality checklist entries, and delivery board tasks in docs.'
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 46 optimization closeout lane is fully complete and ready for Day 47 reliability lane."
+            ' optimization closeout lane is fully complete and ready for  reliability lane.'
         )
 
     return {
@@ -363,14 +308,14 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 46 optimization closeout summary",
+        ' optimization closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 45 activation score: `{payload['rollup']['expansion_closeout_activation_score']}`",
-        f"- Day 45 checks evaluated: `{payload['rollup']['expansion_closeout_checks']}`",
-        f"- Day 45 delivery board checklist items: `{payload['rollup']['expansion_closeout_delivery_board_items']}`",
+        f"- 45 activation score: `{payload['rollup']['expansion_closeout_activation_score']}`",
+        f"- 45 checks evaluated: `{payload['rollup']['expansion_closeout_checks']}`",
+        f"- 45 delivery board checklist items: `{payload['rollup']['expansion_closeout_delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -393,7 +338,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "optimization-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "optimization-plan.md",
-        "# Day 46 Optimization Plan\n\n- Objective: close Day 46 with measurable efficiency and quality gains.\n",
+        '#  Optimization Plan\n\n- Objective: close  with measurable efficiency and quality gains.\n',
     )
     _write(
         target / "optimization-bottleneck-map.csv",
@@ -420,15 +365,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "optimization-execution-log.md",
-        "# Day 46 Execution Log\n\n- [ ] 2026-03-13: Record misses, wins, and Day 47 reliability priorities.\n",
+        '#  Execution Log\n\n- [ ] 2026-03-13: Record misses, wins, and  reliability priorities.\n',
     )
     _write(
         target / "optimization-delivery-board.md",
-        "# Day 46 Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "optimization-validation-commands.md",
-        "# Day 46 Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  Validation Commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -456,7 +401,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Day 46 optimization closeout checks")
+    parser = argparse.ArgumentParser(description=' optimization closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -468,7 +413,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_optimization_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_optimization_closeout_summary(root)
 
 

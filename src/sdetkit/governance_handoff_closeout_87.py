@@ -19,10 +19,10 @@ _DAY86_BOARD_PATH = (
     "docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/governance-handoff-plan.json"
-_SECTION_HEADER = "# Day 87 \u2014 Governance handoff closeout lane"
+_SECTION_HEADER = '#  — Governance handoff closeout lane'
 _REQUIRED_SECTIONS = [
     "## Why Governance Handoff Closeout matters",
-    "## Required inputs (Day 86)",
+    '## Required inputs ()',
     "## Command lane",
     "## Governance handoff contract",
     "## Governance handoff quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_governance_handoff_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 87 governance handoff execution and signoff.",
-    "The Day 87 lane references Day 86 outcomes, controls, and trust continuity signals.",
-    "Every Day 87 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 87 closeout records governance handoff pack upgrades, storyline outcomes, and Day 88 governance priorities.",
+    'Single owner + backup reviewer are assigned for  governance handoff execution and signoff.',
+    'The  lane references  outcomes, controls, and trust continuity signals.',
+    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records governance handoff pack upgrades, storyline outcomes, and  governance priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 87 evidence brief committed",
-    "- [ ] Day 87 governance handoff plan committed",
-    "- [ ] Day 87 narrative template upgrade ledger exported",
-    "- [ ] Day 87 storyline outcomes ledger exported",
-    "- [ ] Day 88 governance priorities drafted from Day 87 outcomes",
+    '- [ ]  evidence brief committed',
+    '- [ ]  governance handoff plan committed',
+    '- [ ]  narrative template upgrade ledger exported',
+    '- [ ]  storyline outcomes ledger exported',
+    '- [ ]  governance priorities drafted from  outcomes',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,58 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 87 \u2014 Governance handoff closeout lane
-
-Day 87 closes with a major upgrade that converts Day 86 launch readiness outcomes into a deterministic governance handoff operating lane.
-
-## Why Governance Handoff Closeout matters
-
-- Converts Day 86 launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.
-- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.
-- Creates a deterministic handoff from Day 87 closeout into Day 88 governance priorities.
-
-## Required inputs (Day 86)
-
-- `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json`
-- `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md`
-- `docs/roadmap/plans/governance-handoff-plan.json`
-
-## Command lane
-
-```bash
-python -m sdetkit governance-handoff-closeout --format json --strict
-python -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/governance-handoff-closeout-pack --format json --strict
-python -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/governance-handoff-closeout-pack/evidence --format json --strict
-python scripts/check_governance_handoff_closeout_contract.py
-```
-
-## Governance handoff contract
-
-- Single owner + backup reviewer are assigned for Day 87 governance handoff execution and signoff.
-- The Day 87 lane references Day 86 outcomes, controls, and trust continuity signals.
-- Every Day 87 section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 87 closeout records governance handoff pack upgrades, storyline outcomes, and Day 88 governance priorities.
-
-## Governance handoff quality checklist
-
-- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets
-- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag
-- [ ] CTA links point to narrative docs/templates + runnable command evidence
-- [ ] Scorecard captures governance handoff adoption delta, objection deflection delta, confidence, and rollback owner
-- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log
-
-## Delivery board
-
-- [ ] Day 87 evidence brief committed
-- [ ] Day 87 governance handoff plan committed
-- [ ] Day 87 narrative template upgrade ledger exported
-- [ ] Day 87 storyline outcomes ledger exported
-- [ ] Day 88 governance priorities drafted from Day 87 outcomes
-
-## Scoring model
-
-Day 87 weights continuity + execution contract + governance artifact readiness for a 100-point activation score.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Governance handoff closeout lane\n\n closes with a major upgrade that converts  launch readiness outcomes into a deterministic governance handoff operating lane.\n\n## Why Governance Handoff Closeout matters\n\n- Converts  launch readiness outcomes into reusable governance handoff decisions across governance rituals, roadmap reviews, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  governance priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-closeout-summary.json`\n- `docs/artifacts/launch-readiness-closeout-pack/launch-readiness-delivery-board.md`\n- `docs/roadmap/plans/governance-handoff-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit governance-handoff-closeout --format json --strict\npython -m sdetkit governance-handoff-closeout --emit-pack-dir docs/artifacts/governance-handoff-closeout-pack --format json --strict\npython -m sdetkit governance-handoff-closeout --execute --evidence-dir docs/artifacts/governance-handoff-closeout-pack/evidence --format json --strict\npython scripts/check_governance_handoff_closeout_contract.py\n```\n\n## Governance handoff contract\n\n- Single owner + backup reviewer are assigned for  governance handoff execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records governance handoff pack upgrades, storyline outcomes, and  governance priorities.\n\n## Governance handoff quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures governance handoff adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  governance handoff plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ]  governance priorities drafted from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n'
 
 
 def _read_text(path: Path) -> str:
@@ -166,7 +115,7 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(launch_readiness_board)
     board_count = _checklist_count(board_text)
-    board_has_launch_readiness = "Day 86" in board_text
+    board_has_launch_readiness = '' in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -196,8 +145,8 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 86" in top10_text and "Day 87" in top10_text),
-            "evidence": "Day 86 + Day 87 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "launch_readiness_summary_present",
@@ -288,32 +237,32 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
             f"Launch readiness continuity baseline is stable with activation score={launch_readiness_score}."
         )
     else:
-        misses.append("Day 86 continuity baseline is below the floor (<85) or not strict-pass.")
+        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
         handoff_actions.append(
-            "Re-run Day 86 closeout command and raise baseline quality above 85 with strict pass before Day 87 lock."
+            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
         )
 
     if board_count >= 5 and board_has_launch_readiness:
         wins.append(
-            f"Day 86 delivery board integrity validated with {board_count} checklist items."
+            f"86 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 86 delivery board integrity is incomplete (needs >=5 items and Day 86 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 86 delivery board entries to include Day 86 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 87 governance handoff dataset is available for governance execution.")
+        wins.append(' governance handoff dataset is available for governance execution.')
     else:
-        misses.append("Day 87 governance handoff dataset is missing required keys.")
+        misses.append(' governance handoff dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/governance-handoff-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 87 governance handoff closeout lane is fully complete and ready for Day 88 governance planning."
+            ' governance handoff closeout lane is fully complete and ready for  governance planning.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -353,7 +302,7 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        "Day 87 governance handoff closeout summary",
+        ' governance handoff closeout summary',
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -374,8 +323,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "governance-handoff-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "governance-handoff-evidence-brief.md", "# Day 87 governance handoff brief\n")
-    _write(target / "governance-handoff-plan.md", "# Day 87 governance handoff plan\n")
+    _write(target / "governance-handoff-evidence-brief.md", '#  governance handoff brief\n')
+    _write(target / "governance-handoff-plan.md", '#  governance handoff plan\n')
     _write(
         target / "governance-handoff-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -388,14 +337,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "governance-handoff-narrative-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "governance-handoff-execution-log.md", "# Day 87 execution log\n")
+    _write(target / "governance-handoff-execution-log.md", '#  execution log\n')
     _write(
         target / "governance-handoff-delivery-board.md",
-        "\n".join(["# Day 87 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "governance-handoff-validation-commands.md",
-        "# Day 87 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -423,12 +372,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_governance_handoff_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_governance_handoff_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Day 87 governance handoff closeout checks")
+    parser = argparse.ArgumentParser(description=' governance handoff closeout checks')
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

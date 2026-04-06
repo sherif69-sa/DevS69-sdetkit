@@ -1,4 +1,4 @@
-Day 89 governance scale closeout summary
+ governance scale closeout summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

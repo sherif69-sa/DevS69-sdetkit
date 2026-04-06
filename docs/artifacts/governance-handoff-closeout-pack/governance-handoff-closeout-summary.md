@@ -1,4 +1,4 @@
-Day 87 governance handoff closeout summary
+ governance handoff closeout summary
 - Activation score: 42
 - Passed checks: 6
 - Failed checks: 8

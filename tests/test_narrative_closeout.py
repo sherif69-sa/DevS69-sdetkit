@@ -31,7 +31,7 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs/top-10-github-strategy.md").write_text(
         "- **Cycle 52 — Narrative #1:** publish mini-case on reliability or quality gate value.\n"
-        "- **Day 53 — Narrative #2:** publish mini-case on security/ops workflow value.\n",
+        '- ** — Narrative #2:** publish mini-case on security/ops workflow value.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-narrative-closeout.md").write_text(

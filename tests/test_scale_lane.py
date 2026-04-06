@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 40 — Scale lane #1:** expand distribution and publication motion across channels.\n"
-        "- **Day 41 — Expansion lane kickoff:** convert Day 40 outcomes into repeatable automation.\n",
+        '- ** — Scale lane #1:** expand distribution and publication motion across channels.\n'
+        '- ** — Expansion lane kickoff:** convert  outcomes into repeatable automation.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-scale-lane.md").write_text(
         d40._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-40-big-upgrade-report.md").write_text(
-        "# Day 40 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/playbook-post-pack/playbook-post-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 39 delivery board",
-                "- [ ] Day 39 playbook draft committed",
-                "- [ ] Day 39 review notes captured with owner + backup",
-                "- [ ] Day 39 rollout timeline exported",
-                "- [ ] Day 39 KPI scorecard snapshot exported",
-                "- [ ] Day 40 scale priorities drafted from Day 39 learnings",
+                '#  delivery board',
+                '- [ ]  playbook draft committed',
+                '- [ ]  review notes captured with owner + backup',
+                '- [ ]  rollout timeline exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  scale priorities drafted from  learnings',
             ]
         )
         + "\n",
@@ -118,4 +118,4 @@ def test_lane40_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["scale-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert "Day 40 scale lane summary" in capsys.readouterr().out
+    assert ' scale lane summary' in capsys.readouterr().out

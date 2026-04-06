@@ -1,4 +1,4 @@
-# Day 25 roadmap-voting discussion template
+#  roadmap-voting discussion template
 
 ## Title
 Roadmap voting: help prioritize the next sdetkit upgrades

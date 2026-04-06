@@ -20,7 +20,7 @@
       "check_id": "docs_index_case_study_prep3_links",
       "weight": 8,
       "passed": false,
-      "evidence": "day-71-big-upgrade-report.md + integrations-case-study-prep3-closeout.md"
+      "evidence": "-71-big-upgrade-report.md + integrations-case-study-prep3-closeout.md"
     },
     {
       "check_id": "top10_case_study_prep3_alignment",
@@ -70,10 +70,10 @@
       "weight": 8,
       "passed": false,
       "evidence": [
-        "## Why Day 71 matters",
-        "## Required inputs (Day 70)",
-        "## Day 71 command lane",
-        "## Day 71 delivery board"
+        "## Why  matters",
+        "## Required inputs ()",
+        "##  command lane",
+        "##  delivery board"
       ]
     },
     {
@@ -87,10 +87,10 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "Single owner + backup reviewer are assigned for Day 71 escalation-quality case-study prep and signoff.",
-        "The Day 71 lane references Day 70 case-study prep outputs, governance decisions, and KPI continuity signals.",
-        "Every Day 71 section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-        "Day 71 closeout records before/after escalation-quality deltas, evidence confidence notes, and Day 72 prep priorities."
+        "Single owner + backup reviewer are assigned for  escalation-quality case-study prep and signoff.",
+        "The  lane references  case-study prep outputs, governance decisions, and KPI continuity signals.",
+        "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+        " closeout records before/after escalation-quality deltas, evidence confidence notes, and  prep priorities."
       ]
     },
     {
@@ -104,11 +104,11 @@
       "weight": 5,
       "passed": false,
       "evidence": [
-        "- [ ] Day 71 integration brief committed",
-        "- [ ] Day 71 escalation-quality case-study narrative published",
-        "- [ ] Day 71 controls and assumptions log exported",
-        "- [ ] Day 71 KPI scorecard snapshot exported",
-        "- [ ] Day 72 case-study prep priorities drafted from Day 71 learnings"
+        "- [ ]  integration brief committed",
+        "- [ ]  escalation-quality case-study narrative published",
+        "- [ ]  controls and assumptions log exported",
+        "- [ ]  KPI scorecard snapshot exported",
+        "- [ ]  case-study prep priorities drafted from  learnings"
       ]
     },
     {
@@ -133,13 +133,13 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 70 delivery board integrity validated with 5 checklist items.",
-    "Day 71 escalation-quality case-study dataset is available for case-study prep execution."
+    " delivery board integrity validated with 5 checklist items.",
+    " escalation-quality case-study dataset is available for case-study prep execution."
   ],
   "misses": [
-    "Day 70 strict continuity signal is missing."
+    " strict continuity signal is missing."
   ],
   "handoff_actions": [
-    "Re-run Day 70 closeout command and restore strict baseline before Day 71 lock."
+    "Re-run  closeout command and restore strict baseline before  lock."
   ]
 }

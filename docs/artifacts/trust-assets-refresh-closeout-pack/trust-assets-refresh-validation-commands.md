@@ -1,4 +1,4 @@
-# Day 75 validation commands
+#  validation commands
 
 ```bash
 python -m sdetkit trust-assets-refresh-closeout --format json --strict

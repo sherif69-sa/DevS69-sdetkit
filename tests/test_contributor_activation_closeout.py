@@ -30,15 +30,15 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        "- **Day 55 — Contributor activation #2:** escalate repeat contributors into owner tracks.\n"
-        "- **Day 56 — Stabilization lane:** enforce deterministic follow-through and verification.\n",
+        '- ** — Contributor activation #2:** escalate repeat contributors into owner tracks.\n'
+        '- ** — Stabilization lane:** enforce deterministic follow-through and verification.\n',
         encoding="utf-8",
     )
     (root / "docs/integrations-contributor-activation-closeout.md").write_text(
         d55._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
     (root / "docs/impact-55-big-upgrade-report.md").write_text(
-        "# Day 55 report\n", encoding="utf-8"
+        '#  report\n', encoding="utf-8"
     )
 
     summary = root / "docs/artifacts/docs-loop-closeout-pack/docs-loop-closeout-summary.json"
@@ -57,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 53 delivery board",
-                "- [ ] Day 53 docs-loop brief committed",
-                "- [ ] Day 53 docs-loop plan reviewed with owner + backup",
-                "- [ ] Day 53 cross-link map exported",
-                "- [ ] Day 53 KPI scorecard snapshot exported",
-                "- [ ] Day 55 contributor activation priorities drafted from Day 53 learnings",
+                '#  delivery board',
+                '- [ ]  docs-loop brief committed',
+                '- [ ]  docs-loop plan reviewed with owner + backup',
+                '- [ ]  cross-link map exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ]  contributor activation priorities drafted from  learnings',
             ]
         )
         + "\n",

@@ -116,7 +116,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
                 "owners": {},
                 "kpis": [
                     {
-                        "id": "pr_cycle_time",
+                        "id": "pr_flow_time",
                         "lane": "velocity",
                         "metric": "PR impact time",
                         "target": "<24h",
@@ -130,7 +130,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
     current_metrics_path.write_text(
         json.dumps(
             {
-                "pr_cycle_time": {
+                "pr_flow_time": {
                     "current_value": "21h",
                     "status": "watch",
                     "evidence_link": "scm://analytics/pr-impact-time",
@@ -143,7 +143,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
     previous_metrics_path.write_text(
         json.dumps(
             {
-                "pr_cycle_time": {
+                "pr_flow_time": {
                     "current_value": "23h",
                     "status": "watch",
                     "evidence_link": "scm://analytics/pr-impact-time-prev",
@@ -168,7 +168,7 @@ def test_generator_uses_previous_metrics_file_for_delta(tmp_path: Path) -> None:
     assert proc.returncode == 0
     text = output_path.read_text(encoding="utf-8")
     assert (
-        "| pr_cycle_time | velocity | PR impact time | `<24h` | 21h | -2.00h | watch | scm://analytics/pr-impact-time |"
+        "| pr_flow_time | velocity | PR impact time | `<24h` | 21h | -2.00h | watch | scm://analytics/pr-impact-time |"
         in text
     )
 
@@ -203,7 +203,7 @@ def test_generator_uses_na_delta_when_units_do_not_match(tmp_path: Path) -> None
                 "owners": {},
                 "kpis": [
                     {
-                        "id": "pr_cycle_time",
+                        "id": "pr_flow_time",
                         "lane": "velocity",
                         "metric": "PR impact time",
                         "target": "<24h",
@@ -217,7 +217,7 @@ def test_generator_uses_na_delta_when_units_do_not_match(tmp_path: Path) -> None
     metrics_path.write_text(
         json.dumps(
             {
-                "pr_cycle_time": {
+                "pr_flow_time": {
                     "current_value": "21h",
                     "previous_value": "88%",
                     "status": "watch",
@@ -241,7 +241,7 @@ def test_generator_uses_na_delta_when_units_do_not_match(tmp_path: Path) -> None
     assert proc.returncode == 0
     text = output_path.read_text(encoding="utf-8")
     assert (
-        "| pr_cycle_time | velocity | PR impact time | `<24h` | 21h | n/a | watch | scm://analytics/pr-impact-time |"
+        "| pr_flow_time | velocity | PR impact time | `<24h` | 21h | n/a | watch | scm://analytics/pr-impact-time |"
         in text
     )
 
@@ -377,7 +377,7 @@ def test_summary_target_eval_flags_below_and_above_target(tmp_path: Path) -> Non
                 "owners": {},
                 "kpis": [
                     {"id": "pass_rate", "lane": "reliability", "metric": "Pass", "target": ">=99%"},
-                    {"id": "cycle_time", "lane": "velocity", "metric": "Cycle", "target": "<24h"},
+                    {"id": "flow_time", "lane": "velocity", "metric": "Cycle", "target": "<24h"},
                 ],
             }
         ),
@@ -392,7 +392,7 @@ def test_summary_target_eval_flags_below_and_above_target(tmp_path: Path) -> Non
                     "status": "watch",
                     "evidence_link": "ci://x",
                 },
-                "cycle_time": {
+                "flow_time": {
                     "current_value": "30h",
                     "status": "risk",
                     "evidence_link": "scm://y",
@@ -425,7 +425,7 @@ def test_summary_target_eval_flags_below_and_above_target(tmp_path: Path) -> Non
         "above_target": 1,
         "unknown": 0,
     }
-    assert payload["breach_kpi_ids"] == ["pass_rate", "cycle_time"]
+    assert payload["breach_kpi_ids"] == ["pass_rate", "flow_time"]
 
 
 def test_fail_on_target_breach_returns_non_zero(tmp_path: Path) -> None:

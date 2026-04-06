@@ -63,12 +63,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                "# Day 50 delivery board",
-                "- [ ] Day 50 execution prioritization brief committed",
-                "- [ ] Day 50 priorities reviewed with owner + backup",
-                "- [ ] Day 50 risk register exported",
-                "- [ ] Day 50 KPI scorecard snapshot exported",
-                "- [ ] Cycle 51 release priorities drafted from Day 50 learnings",
+                '#  delivery board',
+                '- [ ]  execution prioritization brief committed',
+                '- [ ]  priorities reviewed with owner + backup',
+                '- [ ]  risk register exported',
+                '- [ ]  KPI scorecard snapshot exported',
+                '- [ ] Cycle 51 release priorities drafted from  learnings',
             ]
         )
         + "\n",

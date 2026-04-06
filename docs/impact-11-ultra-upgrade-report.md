@@ -1,4 +1,4 @@
-# Day 11 big upgrade report
+#  big upgrade report
 
 ## What shipped
 
@@ -16,4 +16,4 @@ python scripts/check_docs_navigation_contract_11.py
 
 ## Handoff
 
-Day 11 big upgrade closes docs navigation fundamentals with reproducible checks and report artifacts.
+ big upgrade closes docs navigation fundamentals with reproducible checks and report artifacts.

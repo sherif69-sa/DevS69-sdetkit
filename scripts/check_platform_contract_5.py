@@ -10,7 +10,7 @@ LANE_REPORT = Path("docs/impact-5-ultra-upgrade-report.md")
 LANE_ARTIFACT = Path("docs/artifacts/platform-onboarding-sample-5.md")
 
 REQUIRED_README_SNIPPETS = [
-    "## 🖥️ Day 5 ultra: platform onboarding boost",
+    '## 🖥️  ultra: platform onboarding boost',
     "python -m sdetkit onboarding --format text --platform all",
     "python -m sdetkit onboarding --format markdown --platform all --output docs/artifacts/platform-onboarding-sample-5.md",
     "docs/impact-5-ultra-upgrade-report.md",
@@ -22,7 +22,7 @@ REQUIRED_PLATFORM_SECTION_LINKS = [
 ]
 
 REQUIRED_REPORT_SNIPPETS = [
-    "Day 5 big boost",
+    ' big boost',
     "src/sdetkit/onboarding.py",
     "tests/test_onboarding_cli.py",
     "python -m sdetkit onboarding --format markdown --platform all --output docs/artifacts/platform-onboarding-sample-5.md",
@@ -30,7 +30,7 @@ REQUIRED_REPORT_SNIPPETS = [
 
 
 def _platform_section(text: str) -> str:
-    start = text.find("## 🖥️ Day 5 ultra: platform onboarding boost")
+    start = text.find('## 🖥️  ultra: platform onboarding boost')
     if start == -1:
         return ""
     remainder = text[start:]
@@ -55,11 +55,11 @@ def main() -> int:
             errors.append(f"missing README snippet: {snippet}")
 
     if not platform_section:
-        errors.append("missing Day 5 ultra section in README")
+        errors.append('missing  ultra section in README')
 
     for link in REQUIRED_PLATFORM_SECTION_LINKS:
         if link not in platform_section:
-            errors.append(f"missing Day 5 section link: {link}")
+            errors.append(f"missing 5 section link: {link}")
         if not Path(link).exists():
             errors.append(f"missing link target: {link}")
 
@@ -69,7 +69,7 @@ def main() -> int:
         report_text = LANE_REPORT.read_text(encoding="utf-8")
         for snippet in REQUIRED_REPORT_SNIPPETS:
             if snippet not in report_text:
-                errors.append(f"missing Day 5 report snippet: {snippet}")
+                errors.append(f"missing 5 report snippet: {snippet}")
 
     if not LANE_ARTIFACT.exists():
         errors.append("missing docs/artifacts/platform-onboarding-sample-5.md")

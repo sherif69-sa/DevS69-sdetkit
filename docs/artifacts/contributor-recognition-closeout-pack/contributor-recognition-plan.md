@@ -1,1 +1,1 @@
-# Day 76 contributor recognition plan
+#  contributor recognition plan

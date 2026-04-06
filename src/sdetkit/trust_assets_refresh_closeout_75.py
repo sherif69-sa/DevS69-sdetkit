@@ -19,14 +19,14 @@ _DAY74_BOARD_PATH = (
     "docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md"
 )
 _TRUST_PLAN_PATH = "docs/roadmap/plans/trust-assets-refresh-plan.json"
-_SECTION_HEADER = "# Day 75 \u2014 Trust assets refresh closeout lane"
+_SECTION_HEADER = '#  — Trust assets refresh closeout lane'
 _REQUIRED_SECTIONS = [
-    "## Why Day 75 matters",
-    "## Required inputs (Day 74)",
-    "## Day 75 command lane",
+    '## Why  matters',
+    '## Required inputs ()',
+    '##  command lane',
     "## Trust assets refresh contract",
     "## Trust refresh quality checklist",
-    "## Day 75 delivery board",
+    '##  delivery board',
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_trust_assets_refresh_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    "Single owner + backup reviewer are assigned for Day 75 trust assets refresh execution and signoff.",
-    "The Day 75 lane references Day 74 outcomes, controls, and KPI continuity signals.",
-    "Every Day 75 section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
-    "Day 75 closeout records trust outcomes, confidence notes, and Day 76 contributor-recognition priorities.",
+    'Single owner + backup reviewer are assigned for  trust assets refresh execution and signoff.',
+    'The  lane references  outcomes, controls, and KPI continuity signals.',
+    'Every  section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
+    ' closeout records trust outcomes, confidence notes, and  contributor-recognition priorities.',
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes trust-surface baseline, proof-link cadence, and stakeholder assumptions",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, trust refresh plan, controls log, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    "- [ ] Day 75 integration brief committed",
-    "- [ ] Day 75 trust assets refresh plan committed",
-    "- [ ] Day 75 trust controls and assumptions log exported",
-    "- [ ] Day 75 trust KPI scorecard snapshot exported",
-    "- [ ] Day 76 contributor-recognition priorities drafted from Day 75 learnings",
+    '- [ ]  integration brief committed',
+    '- [ ]  trust assets refresh plan committed',
+    '- [ ]  trust controls and assumptions log exported',
+    '- [ ]  trust KPI scorecard snapshot exported',
+    '- [ ]  contributor-recognition priorities drafted from  learnings',
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,64 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = """# Day 75 \u2014 Trust assets refresh closeout lane
-
-Day 75 closes with a major upgrade that turns Day 74 distribution outcomes into a governance-grade trust refresh execution pack.
-
-## Why Day 75 matters
-
-- Converts Day 74 scaling proof into trust-surface upgrades across security, governance, and reliability docs.
-- Protects trust quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.
-- Creates a deterministic handoff from Day 75 trust refresh execution into Day 76 contributor recognition.
-
-## Required inputs (Day 74)
-
-- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json`
-- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`
-- `docs/roadmap/plans/trust-assets-refresh-plan.json`
-
-## Day 75 command lane
-
-```bash
-python -m sdetkit trust-assets-refresh-closeout --format json --strict
-python -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict
-python -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/trust-assets-refresh-closeout-pack/evidence --format json --strict
-python scripts/check_trust_assets_refresh_closeout_contract.py
-```
-
-## Trust assets refresh contract
-
-- Single owner + backup reviewer are assigned for Day 75 trust assets refresh execution and signoff.
-- The Day 75 lane references Day 74 outcomes, controls, and KPI continuity signals.
-- Every Day 75 section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.
-- Day 75 closeout records trust outcomes, confidence notes, and Day 76 contributor-recognition priorities.
-
-## Trust refresh quality checklist
-
-- [ ] Includes trust-surface baseline, proof-link cadence, and stakeholder assumptions
-- [ ] Every trust lane row has owner, refresh window, KPI threshold, and risk flag
-- [ ] CTA links point to docs + runnable command evidence
-- [ ] Scorecard captures trust score delta, governance proof coverage delta, confidence, and rollback owner
-- [ ] Artifact pack includes integration brief, trust refresh plan, controls log, KPI scorecard, and execution log
-
-## Day 75 delivery board
-
-- [ ] Day 75 integration brief committed
-- [ ] Day 75 trust assets refresh plan committed
-- [ ] Day 75 trust controls and assumptions log exported
-- [ ] Day 75 trust KPI scorecard snapshot exported
-- [ ] Day 76 contributor-recognition priorities drafted from Day 75 learnings
-
-## Scoring model
-
-Day 75 weighted score (0-100):
-
-- Contract + command lane integrity (35)
-- Day 74 continuity baseline quality (35)
-- Trust evidence data + delivery board completeness (30)
-
-Strict pass requires score >= 95 and zero critical failures.
-"""
+_DEFAULT_PAGE_TEMPLATE = '#  — Trust assets refresh closeout lane\n\n closes with a major upgrade that turns  distribution outcomes into a governance-grade trust refresh execution pack.\n\n## Why  matters\n\n- Converts  scaling proof into trust-surface upgrades across security, governance, and reliability docs.\n- Protects trust quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  trust refresh execution into  contributor recognition.\n\n## Required inputs ()\n\n- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-closeout-summary.json`\n- `docs/artifacts/distribution-scaling-closeout-pack/distribution-scaling-delivery-board.md`\n- `docs/roadmap/plans/trust-assets-refresh-plan.json`\n\n##  command lane\n\n```bash\npython -m sdetkit trust-assets-refresh-closeout --format json --strict\npython -m sdetkit trust-assets-refresh-closeout --emit-pack-dir docs/artifacts/trust-assets-refresh-closeout-pack --format json --strict\npython -m sdetkit trust-assets-refresh-closeout --execute --evidence-dir docs/artifacts/trust-assets-refresh-closeout-pack/evidence --format json --strict\npython scripts/check_trust_assets_refresh_closeout_contract.py\n```\n\n## Trust assets refresh contract\n\n- Single owner + backup reviewer are assigned for  trust assets refresh execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes trust-surface CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records trust outcomes, confidence notes, and  contributor-recognition priorities.\n\n## Trust refresh quality checklist\n\n- [ ] Includes trust-surface baseline, proof-link cadence, and stakeholder assumptions\n- [ ] Every trust lane row has owner, refresh window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures trust score delta, governance proof coverage delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, trust refresh plan, controls log, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  trust assets refresh plan committed\n- [ ]  trust controls and assumptions log exported\n- [ ]  trust KPI scorecard snapshot exported\n- [ ]  contributor-recognition priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Trust evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
 
 
 def _read(path: Path) -> str:
@@ -167,7 +110,7 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
         _load_distribution_scaling(distribution_scaling_summary)
     )
     board_count, board_has_distribution_scaling = _count_board_items(
-        distribution_scaling_board, "Day 74"
+        distribution_scaling_board, ''
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -199,8 +142,8 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ("Day 75" in top10_text and "Day 76" in top10_text),
-            "evidence": "Day 75 + Day 76 strategy chain",
+            "passed": ('' in top10_text and '' in top10_text),
+            "evidence": ' +  strategy chain',
         },
         {
             "check_id": "distribution_scaling_summary_present",
@@ -290,35 +233,35 @@ def build_trust_assets_refresh_closeout_summary(root: Path) -> dict[str, Any]:
 
     if distribution_scaling_strict:
         wins.append(
-            f"Day 74 continuity is strict-pass with activation score={distribution_scaling_score}."
+            f"74 continuity is strict-pass with activation score={distribution_scaling_score}."
         )
     else:
-        misses.append("Day 74 strict continuity signal is missing.")
+        misses.append(' strict continuity signal is missing.')
         handoff_actions.append(
-            "Re-run Day 74 closeout command and restore strict baseline before Day 75 lock."
+            'Re-run  closeout command and restore strict baseline before  lock.'
         )
 
     if board_count >= 5 and board_has_distribution_scaling:
         wins.append(
-            f"Day 74 delivery board integrity validated with {board_count} checklist items."
+            f"74 delivery board integrity validated with {board_count} checklist items."
         )
     else:
         misses.append(
-            "Day 74 delivery board integrity is incomplete (needs >=5 items and Day 74 anchors)."
+            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
         )
-        handoff_actions.append("Repair Day 74 delivery board entries to include Day 74 anchors.")
+        handoff_actions.append('Repair  delivery board entries to include  anchors.')
 
     if not missing_plan_keys:
-        wins.append("Day 75 trust assets refresh dataset is available for launch execution.")
+        wins.append(' trust assets refresh dataset is available for launch execution.')
     else:
-        misses.append("Day 75 trust assets refresh dataset is missing required keys.")
+        misses.append(' trust assets refresh dataset is missing required keys.')
         handoff_actions.append(
             "Update docs/roadmap/plans/trust-assets-refresh-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            "Day 75 trust assets refresh closeout lane is fully complete and ready for Day 76 contributor recognition."
+            ' trust assets refresh closeout lane is fully complete and ready for  contributor recognition.'
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -379,8 +322,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "trust-assets-refresh-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "trust-assets-refresh-integration-brief.md", "# Day 75 integration brief\n")
-    _write(target / "trust-assets-refresh-plan.md", "# Day 75 trust assets refresh plan\n")
+    _write(target / "trust-assets-refresh-integration-brief.md", '#  integration brief\n')
+    _write(target / "trust-assets-refresh-plan.md", '#  trust assets refresh plan\n')
     _write(
         target / "trust-assets-refresh-trust-controls-log.json",
         json.dumps({"controls": []}, indent=2) + "\n",
@@ -389,14 +332,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "trust-assets-refresh-trust-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "trust-assets-refresh-execution-log.md", "# Day 75 execution log\n")
+    _write(target / "trust-assets-refresh-execution-log.md", '#  execution log\n')
     _write(
         target / "trust-assets-refresh-delivery-board.md",
-        "\n".join(["# Day 75 delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "trust-assets-refresh-validation-commands.md",
-        "# Day 75 validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -424,7 +367,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_trust_assets_refresh_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    """Compatibility alias for legacy day-based builder name."""
+    'Compatibility alias for legacy -based builder name.'
     return build_trust_assets_refresh_closeout_summary(root)
 
 

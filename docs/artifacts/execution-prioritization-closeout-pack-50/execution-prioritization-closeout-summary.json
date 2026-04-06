@@ -21,11 +21,11 @@
       "passed": false,
       "evidence": {
         "missing_sections": [
-          "# Day 50 \u2014 Execution prioritization closeout lane",
-          "## Why Day 50 matters",
-          "## Required inputs (Day 49)",
-          "## Day 50 command lane",
-          "## Day 50 delivery board"
+          "# Execution prioritization closeout lane",
+          "## Why matters",
+          "## Required inputs ()",
+          "## command lane",
+          "## delivery board"
         ]
       }
     },
@@ -59,7 +59,7 @@
       "check_id": "top10_strategy_alignment",
       "weight": 5,
       "passed": false,
-      "evidence": "Day 50 + Day 51 strategy chain"
+      "evidence": "+ strategy chain"
     },
     {
       "check_id": "summary_present",
@@ -89,7 +89,6 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains": false,
         "contains": false
       }
     },
@@ -99,10 +98,10 @@
       "passed": false,
       "evidence": {
         "missing_contract_lines": [
-          "- Single owner + backup reviewer are assigned for Day 50 execution prioritization execution and KPI follow-up.",
-          "- The Day 50 execution prioritization lane references Day 49 weekly-review winners and misses with deterministic execution-board loops.",
-          "- Every Day 50 section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-          "- Day 50 closeout records execution-board learnings and Day 51 release priorities."
+          "- Single owner + backup reviewer are assigned for execution prioritization execution and KPI follow-up.",
+          "- The execution prioritization lane references weekly-review winners and misses with deterministic execution-board loops.",
+          "- Every section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+          "- closeout records execution-board learnings and release priorities."
         ]
       }
     },
@@ -120,11 +119,11 @@
       "passed": false,
       "evidence": {
         "missing_board_items": [
-          "- [ ] Day 50 execution prioritization brief committed",
-          "- [ ] Day 50 priorities reviewed with owner + backup",
-          "- [ ] Day 50 risk register exported",
-          "- [ ] Day 50 KPI scorecard snapshot exported",
-          "- [ ] Day 51 release priorities drafted from Day 50 learnings"
+          "- [ ] execution prioritization brief committed",
+          "- [ ] priorities reviewed with owner + backup",
+          "- [ ] risk register exported",
+          "- [ ] KPI scorecard snapshot exported",
+          "- [ ] release priorities drafted from learnings"
         ]
       }
     }
@@ -142,14 +141,14 @@
     "strict_pass": false
   },
   "wins": [
-    "Day 49 continuity is strict-pass with activation score=100.0."
+    "continuity is strict-pass with activation score=100.0."
   ],
   "misses": [
-    "Day 49 delivery board integrity is incomplete (needs >=5 items and Day 49/50 anchors).",
+    "delivery board integrity is incomplete (needs >=5 items and /50 anchors).",
     "Execution prioritization contract, quality checklist, or delivery board entries are missing."
   ],
   "handoff_actions": [
-    "Repair Day 49 delivery board entries to include Day 49 and Day 50 anchors.",
-    "Complete all Day 50 execution prioritization contract lines, quality checklist entries, and delivery board tasks in docs."
+    "Repair delivery board entries to include and anchors.",
+    "Complete all execution prioritization contract lines, quality checklist entries, and delivery board tasks in docs."
   ]
 }

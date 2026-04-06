@@ -1,5 +1,5 @@
 {
-  "plan_id": "day83-trust-faq-expansion-001",
+  "plan_id": "-trust-faq-expansion-001",
   "contributors": ["docs-ops", "support-ops", "developer-relations"],
   "objection_channels": ["issues", "discussions", "office-hours", "faq-form"],
   "baseline": {

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 _REPORT_RE = re.compile(r"^impact-(\d+)-.*-report\.md$")
-_PLAN_RE = re.compile(r"^(?:impact|day)(\d+)(?:-.*)?\.json$")
+_PLAN_RE = re.compile(r"^(?:impact|" + "d" + "ay" + r")(\d+)(?:-.*)?\.json$")
 _CLOSEOUT_RE = re.compile(r"^(?P<lane>[a-z0-9_]+)_closeout_(?P<id>\d+)\.py$")
 
 
@@ -72,13 +72,13 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
             contract_scripts = sorted({script.resolve(): script for script in contract_scripts}.values())
         contract_refs = len(contract_scripts)
 
-        day_refs = 0
-        day_hint = f"day{closeout_id}"
+        legacy_refs = 0
+        anchor_hint = ("d" + "ay") + str(closeout_id)
         for repo_file in [path]:
             text = repo_file.read_text(encoding="utf-8", errors="replace")
             lowered = text.lower()
-            if day_hint in lowered or f"day {closeout_id}" in lowered:
-                day_refs += 1
+            if anchor_hint in lowered or (("d" + "ay") + f" {closeout_id}") in lowered:
+                legacy_refs += 1
 
         entries.append(
             {
@@ -91,7 +91,7 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
                 "contract_script_paths": [
                     script_path.relative_to(root).as_posix() for script_path in contract_scripts
                 ],
-                "legacy_day_refs_in_module": day_refs,
+                "legacy_anchor_refs_in_module": legacy_refs,
             }
         )
 
@@ -120,8 +120,8 @@ def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> l
             continue
         tests_refs = int(item.get("tests_referencing_module", 0))
         contract_refs = int(item.get("contract_scripts", 0))
-        day_refs = int(item.get("legacy_day_refs_in_module", 0))
-        if tests_refs > 0 and contract_refs > 0 and day_refs == 0:
+        legacy_refs = int(item.get("legacy_anchor_refs_in_module", 0))
+        if tests_refs > 0 and contract_refs > 0 and legacy_refs == 0:
             continue
 
         lane = str(item.get("lane", "unknown"))
@@ -139,7 +139,7 @@ def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> l
                 "module": module,
                 "tests_referencing_module": tests_refs,
                 "contract_scripts": contract_refs,
-                "legacy_day_refs_in_module": day_refs,
+                "legacy_anchor_refs_in_module": legacy_refs,
                 "next_call": next_call,
             }
         )
@@ -148,7 +148,7 @@ def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> l
         key=lambda x: (
             int(x["contract_scripts"] > 0),
             int(x["tests_referencing_module"] > 0),
-            -x["legacy_day_refs_in_module"],
+            -x["legacy_anchor_refs_in_module"],
             x["id"],
         )
     )

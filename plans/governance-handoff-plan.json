@@ -1,5 +1,5 @@
 {
-  "plan_id": "day87-governance-handoff-001",
+  "plan_id": "-governance-handoff-001",
   "contributors": ["maintainers", "release-ops", "community-ops"],
   "narrative_channels": ["governance-review", "roadmap-sync", "community-touchpoint"],
   "baseline": {

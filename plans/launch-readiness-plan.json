@@ -1,5 +1,5 @@
 {
-  "plan_id": "day86-launch-readiness-001",
+  "plan_id": "-launch-readiness-001",
   "contributors": ["maintainers", "release-ops", "docs-ops"],
   "narrative_channels": ["launch-brief", "release-report", "incident-review"],
   "baseline": {

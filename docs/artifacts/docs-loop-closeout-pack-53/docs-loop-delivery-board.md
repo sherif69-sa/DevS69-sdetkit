@@ -1,7 +1,7 @@
-# Day 53 Delivery Board
+#  Delivery Board
 
-- [ ] Day 53 docs-loop brief committed
-- [ ] Day 53 docs-loop plan reviewed with owner + backup
-- [ ] Day 53 cross-link map exported
-- [ ] Day 53 KPI scorecard snapshot exported
-- [ ] Day 54 re-engagement priorities drafted from Day 53 learnings
+- [ ]  docs-loop brief committed
+- [ ]  docs-loop plan reviewed with owner + backup
+- [ ]  cross-link map exported
+- [ ]  KPI scorecard snapshot exported
+- [ ]  re-engagement priorities drafted from  learnings
