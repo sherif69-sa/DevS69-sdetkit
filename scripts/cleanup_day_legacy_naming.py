@@ -7,7 +7,9 @@ from collections import defaultdict
 from pathlib import Path
 
 ANCHOR_PATTERN = re.compile(r"anchor([0-9]{1,2})")
-TEST_NAME_PATTERN = re.compile(r"(def test_[^(]*?)_without_anchor\d{1,2}(\(tmp_path: Path\) -> None:)")
+TEST_NAME_PATTERN = re.compile(
+    r"(def test_[^(]*?)_without_anchor\d{1,2}(\(tmp_path: Path\) -> None:)"
+)
 PLAN_ID_PATTERN = re.compile(r'("plan_id"\s*:\s*")anchor[0-9]{1,2}-([^"\\n]+")')
 
 
@@ -61,9 +63,13 @@ def rewrite_tests(root: Path) -> tuple[int, int]:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Inventory and optional cleanup for anchorNN legacy naming")
+    ap = argparse.ArgumentParser(
+        description="Inventory and optional cleanup for anchorNN legacy naming"
+    )
     ap.add_argument("--root", default=".", help="repo root")
-    ap.add_argument("--fix-tests", action="store_true", help="rewrite test names and test fixture plan_ids")
+    ap.add_argument(
+        "--fix-tests", action="store_true", help="rewrite test names and test fixture plan_ids"
+    )
     ns = ap.parse_args()
 
     root = Path(ns.root).resolve()
@@ -76,7 +82,9 @@ def main() -> int:
 
     if ns.fix_tests:
         renamed_tests, rewritten_plan_ids = rewrite_tests(root)
-        print(f"\nApplied fixes: renamed_tests={renamed_tests}, rewritten_plan_ids={rewritten_plan_ids}")
+        print(
+            f"\nApplied fixes: renamed_tests={renamed_tests}, rewritten_plan_ids={rewritten_plan_ids}"
+        )
 
     return 0
 

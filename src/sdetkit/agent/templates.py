@@ -370,7 +370,7 @@ def run_template(
                 _write_json(target, repo._to_sarif(audit))
                 artifacts.append(target.as_posix())
         elif step.action == "kits.optimize":
-            goal = str(params.get("goal", "")).strip() or None
+            goal = str(params.get("goal", "")).strip()
             limit = int(params.get("limit", 3) or 3)
             selected = params.get("kits") or []
             selected_kits = [str(item) for item in selected] if isinstance(selected, list) else []
@@ -391,7 +391,7 @@ def run_template(
                 artifacts.append(target.as_posix())
             payload = result
         elif step.action == "kits.expand":
-            goal = str(params.get("goal", "")).strip() or None
+            goal = str(params.get("goal", "")).strip()
             limit = int(params.get("limit", 3) or 3)
             selected = params.get("kits") or []
             selected_kits = [str(item) for item in selected] if isinstance(selected, list) else []

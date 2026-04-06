@@ -17,10 +17,10 @@ _DAY81_SUMMARY_PATH = (
 )
 _DAY81_BOARD_PATH = "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md"
 _PLAN_PATH = "docs/roadmap/plans/integration-feedback-plan.json"
-_SECTION_HEADER = '#  — Integration feedback loop closeout lane'
+_SECTION_HEADER = "#  — Integration feedback loop closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Feedback Closeout matters",
-    '## Required inputs ()',
+    "## Required inputs ()",
     "## Command lane",
     "## Integration feedback contract",
     "## Integration feedback quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_integration_feedback_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  integration feedback execution and signoff.',
-    'The  lane references  outcomes, controls, and campaign continuity signals.',
-    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records docs-template upgrades, community touchpoint outcomes, and  trust FAQ priorities.',
+    "Single owner + backup reviewer are assigned for  integration feedback execution and signoff.",
+    "The  lane references  outcomes, controls, and campaign continuity signals.",
+    "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records docs-template upgrades, community touchpoint outcomes, and  trust FAQ priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline feedback volume, segmentation assumptions, and response SLA targets",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, feedback plan, template diffs, office-hours ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  integration brief committed',
-    '- [ ]  integration feedback plan committed',
-    '- [ ]  template upgrade ledger exported',
-    '- [ ]  office-hours outcome ledger exported',
-    '- [ ]  trust FAQ priorities drafted from  feedback',
+    "- [ ]  integration brief committed",
+    "- [ ]  integration feedback plan committed",
+    "- [ ]  template upgrade ledger exported",
+    "- [ ]  office-hours outcome ledger exported",
+    "- [ ]  trust FAQ priorities drafted from  feedback",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -67,7 +67,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Integration feedback loop closeout lane\n\n closes with a major upgrade that folds  growth campaign outcomes into docs/template upgrades and community touchpoint execution.\n\n## Why Integration Feedback Closeout matters\n\n- Turns  growth campaign outcomes into deterministic integration feedback loops across docs, templates, and community operations.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  trust FAQ expansion priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json`\n- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md`\n- `docs/roadmap/plans/integration-feedback-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit integration-feedback-closeout --format json --strict\npython -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/integration-feedback-closeout-pack --format json --strict\npython -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/integration-feedback-closeout-pack/evidence --format json --strict\npython scripts/check_integration_feedback_closeout_contract.py\n```\n\n## Integration feedback contract\n\n- Single owner + backup reviewer are assigned for  integration feedback execution and signoff.\n- The  lane references  outcomes, controls, and campaign continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records docs-template upgrades, community touchpoint outcomes, and  trust FAQ priorities.\n\n## Integration feedback quality checklist\n\n- [ ] Includes baseline feedback volume, segmentation assumptions, and response SLA targets\n- [ ] Every upgrade lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to docs/templates + runnable command evidence\n- [ ] Scorecard captures docs adoption delta, community engagement delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, feedback plan, template diffs, office-hours ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  integration brief committed\n- [ ]  integration feedback plan committed\n- [ ]  template upgrade ledger exported\n- [ ]  office-hours outcome ledger exported\n- [ ]  trust FAQ priorities drafted from  feedback\n\n## Scoring model\n\nIntegration Feedback Closeout weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Feedback evidence data + delivery board completeness (30)\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Integration feedback loop closeout lane\n\n closes with a major upgrade that folds  growth campaign outcomes into docs/template upgrades and community touchpoint execution.\n\n## Why Integration Feedback Closeout matters\n\n- Turns  growth campaign outcomes into deterministic integration feedback loops across docs, templates, and community operations.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  trust FAQ expansion priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json`\n- `docs/artifacts/growth-campaign-closeout-pack/growth-campaign-delivery-board.md`\n- `docs/roadmap/plans/integration-feedback-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit integration-feedback-closeout --format json --strict\npython -m sdetkit integration-feedback-closeout --emit-pack-dir docs/artifacts/integration-feedback-closeout-pack --format json --strict\npython -m sdetkit integration-feedback-closeout --execute --evidence-dir docs/artifacts/integration-feedback-closeout-pack/evidence --format json --strict\npython scripts/check_integration_feedback_closeout_contract.py\n```\n\n## Integration feedback contract\n\n- Single owner + backup reviewer are assigned for  integration feedback execution and signoff.\n- The  lane references  outcomes, controls, and campaign continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records docs-template upgrades, community touchpoint outcomes, and  trust FAQ priorities.\n\n## Integration feedback quality checklist\n\n- [ ] Includes baseline feedback volume, segmentation assumptions, and response SLA targets\n- [ ] Every upgrade lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to docs/templates + runnable command evidence\n- [ ] Scorecard captures docs adoption delta, community engagement delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, feedback plan, template diffs, office-hours ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  integration brief committed\n- [ ]  integration feedback plan committed\n- [ ]  template upgrade ledger exported\n- [ ]  office-hours outcome ledger exported\n- [ ]  trust FAQ priorities drafted from  feedback\n\n## Scoring model\n\nIntegration Feedback Closeout weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Feedback evidence data + delivery board completeness (30)\n"
 
 
 def _read_text(path: Path) -> str:
@@ -108,7 +108,9 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
         else {}
     )
     growth_campaign_score = int(growth_campaign_summary_data.get("activation_score", 0) or 0)
-    growth_campaign_strict = coerce_bool(growth_campaign_summary_data.get("strict_pass", False), default=False)
+    growth_campaign_strict = coerce_bool(
+        growth_campaign_summary_data.get("strict_pass", False), default=False
+    )
     growth_campaign_check_count = (
         len(growth_campaign_data.get("checks", []))
         if isinstance(growth_campaign_data.get("checks"), list)
@@ -117,7 +119,7 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(growth_campaign_board)
     board_count = _checklist_count(board_text)
-    board_has_growth_campaign = "growth campaign" in board_text.lower() or '' in board_text
+    board_has_growth_campaign = "growth campaign" in board_text.lower() or "" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -147,8 +149,8 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "growth_campaign_summary_present",
@@ -239,32 +241,28 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
             f"Growth Campaign continuity baseline is stable with activation score={growth_campaign_score}."
         )
     else:
-        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
+        misses.append(" continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
-            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
+            "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
         )
 
     if board_count >= 5 and board_has_growth_campaign:
-        wins.append(
-            f"81 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"81 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_plan_keys:
-        wins.append(' integration feedback dataset is available for launch execution.')
+        wins.append(" integration feedback dataset is available for launch execution.")
     else:
-        misses.append(' integration feedback dataset is missing required keys.')
+        misses.append(" integration feedback dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/integration-feedback-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' integration feedback closeout lane is fully complete and ready for  trust FAQ priorities.'
+            " integration feedback closeout lane is fully complete and ready for  trust FAQ priorities."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -304,7 +302,7 @@ def build_integration_feedback_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        ' integration feedback closeout summary',
+        " integration feedback closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -325,8 +323,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "integration-feedback-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "integration-feedback-integration-brief.md", '#  integration brief\n')
-    _write(target / "integration-feedback-plan.md", '#  integration feedback plan\n')
+    _write(target / "integration-feedback-integration-brief.md", "#  integration brief\n")
+    _write(target / "integration-feedback-plan.md", "#  integration feedback plan\n")
     _write(
         target / "integration-feedback-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -339,14 +337,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "integration-feedback-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "integration-feedback-execution-log.md", '#  execution log\n')
+    _write(target / "integration-feedback-execution-log.md", "#  execution log\n")
     _write(
         target / "integration-feedback-delivery-board.md",
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "integration-feedback-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -374,12 +372,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_integration_feedback_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_integration_feedback_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=' integration feedback closeout checks')
+    parser = argparse.ArgumentParser(description=" integration feedback closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

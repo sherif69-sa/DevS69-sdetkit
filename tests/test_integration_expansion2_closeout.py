@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Integration expansion #2:** publish advanced GitLab CI implementation path.\n'
-        '- ** — Integration expansion #3:** publish advanced Jenkins implementation path.\n',
+        "- ** — Integration expansion #2:** publish advanced GitLab CI implementation path.\n"
+        "- ** — Integration expansion #3:** publish advanced Jenkins implementation path.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-expansion2-closeout.md").write_text(
         d66._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-66-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-66-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/weekly-review-closeout-pack-2/weekly-review-closeout-summary-2.json"
@@ -62,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  weekly brief committed',
-                '- [ ]  KPI dashboard snapshot exported',
-                '- [ ]  governance decision register published',
-                '- [ ]  risk and recovery ledger exported',
-                '- [ ]  integration expansion priorities drafted from  review',
+                "#  delivery board",
+                "- [ ]  weekly brief committed",
+                "- [ ]  KPI dashboard snapshot exported",
+                "- [ ]  governance decision register published",
+                "- [ ]  risk and recovery ledger exported",
+                "- [ ]  integration expansion priorities drafted from  review",
             ]
         )
         + "\n",

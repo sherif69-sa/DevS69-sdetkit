@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Trust assets refresh:** turn  outcomes into governance-grade trust proof.\n'
-        '- ** — Contributor recognition board:** publish contributor spotlight and release credits model.\n',
+        "- ** — Trust assets refresh:** turn  outcomes into governance-grade trust proof.\n"
+        "- ** — Contributor recognition board:** publish contributor spotlight and release credits model.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-trust-assets-refresh-closeout.md").write_text(
         d75._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-75-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-75-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  distribution scaling plan committed',
-                '- [ ]  channel controls and assumptions log exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  trust refresh priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  distribution scaling plan committed",
+                "- [ ]  channel controls and assumptions log exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  trust refresh priorities drafted from  learnings",
             ]
         )
         + "\n",

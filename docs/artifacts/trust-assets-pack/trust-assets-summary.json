@@ -1,45 +1,45 @@
 {
   "badge_checks": {
-    "ci_badge": true,
-    "mutation_badge": true,
-    "pages_badge": true,
-    "quality_badge": true,
-    "security_badge": true
+    "ci_badge": false,
+    "mutation_badge": false,
+    "pages_badge": false,
+    "quality_badge": false,
+    "security_badge": false
   },
   "checks": [
     {
       "category": "badges",
       "evidence": "actions/workflows/ci.yml/badge.svg",
       "key": "ci_badge",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/quality.yml/badge.svg",
       "key": "quality_badge",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/mutation-tests.yml/badge.svg",
       "key": "mutation_badge",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/security.yml/badge.svg",
       "key": "security_badge",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
       "category": "badges",
       "evidence": "actions/workflows/pages.yml/badge.svg",
       "key": "pages_badge",
-      "passed": true,
+      "passed": false,
       "weight": 10
     },
     {
@@ -121,6 +121,7 @@
     "security_guide_exists": false
   },
   "recommendations": [
+    "Restore missing trust badges in README so reliability status is visible at a glance.",
     "Ensure policy documents exist and are linked from README governance references.",
     "Keep CI/security/pages workflows and docs index trust references present for reviewers."
   ],
@@ -129,7 +130,7 @@
   "summary": {
     "category_coverage": {
       "badges": {
-        "passed": 5,
+        "passed": 0,
         "total": 5
       },
       "governance": {
@@ -144,11 +145,11 @@
     "critical_failures": [
       "security_doc_exists"
     ],
-    "failed_checks": 4,
+    "failed_checks": 9,
     "trust_label": "review",
-    "trust_score": 68.0,
+    "trust_score": 18.0,
     "weighted_points": {
-      "earned": 68,
+      "earned": 18,
       "total": 100
     }
   }

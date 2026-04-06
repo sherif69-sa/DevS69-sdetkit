@@ -641,7 +641,9 @@ def _release_is_python_compatible(
 
     compatibility_observed = False
     for release_file in release_files:
-        if not isinstance(release_file, dict) or coerce_bool(release_file.get("yanked"), default=False):
+        if not isinstance(release_file, dict) or coerce_bool(
+            release_file.get("yanked"), default=False
+        ):
             continue
         requires_python = release_file.get("requires_python")
         if requires_python is not None and not isinstance(requires_python, str):

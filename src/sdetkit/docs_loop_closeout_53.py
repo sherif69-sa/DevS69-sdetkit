@@ -181,9 +181,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     narrative_closeout_score, narrative_closeout_strict, narrative_closeout_check_count = (
         _load_narrative_closeout_summary(narrative_closeout_summary)
     )
-    board_count, board_has_previous, board_has_required = _board_stats(
-        narrative_closeout_board
-    )
+    board_count, board_has_previous, board_has_required = _board_stats(narrative_closeout_board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -262,9 +260,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "narrative_closeout_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5
-            and board_has_previous
-            and board_has_required,
+            "passed": board_count >= 5 and board_has_previous and board_has_required,
             "evidence": {
                 "board_items": board_count,
                 "contains_previous": board_has_previous,
@@ -314,16 +310,10 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     if board_count >= 5 and board_has_previous and board_has_required:
-        wins.append(
-            f"delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            "delivery board integrity is incomplete (needs >=5 items and /53 anchors)."
-        )
-        handoff_actions.append(
-            "Repair delivery board entries to include and anchors."
-        )
+        misses.append("delivery board integrity is incomplete (needs >=5 items and /53 anchors).")
+        handoff_actions.append("Repair delivery board entries to include and anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append("Docs-loop contract + quality checklist is fully locked for execution.")
@@ -336,9 +326,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     if not failed and not critical_failures:
-        wins.append(
-            "docs-loop closeout lane is fully complete and ready for execution lane."
-        )
+        wins.append("docs-loop closeout lane is fully complete and ready for execution lane.")
 
     return {
         "name": "docs-loop-closeout",

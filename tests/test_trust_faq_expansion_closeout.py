@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Integration feedback loop:** fold field feedback into docs/templates.\n'
-        '- ** — Trust FAQ expansion loop:** convert field objections into deterministic trust upgrades.\n',
+        "- ** — Integration feedback loop:** fold field feedback into docs/templates.\n"
+        "- ** — Trust FAQ expansion loop:** convert field objections into deterministic trust upgrades.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-trust-faq-expansion-closeout.md").write_text(
         d83._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-83-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-83-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  integration feedback plan committed',
-                '- [ ]  template upgrade ledger exported',
-                '- [ ]  office-hours outcome ledger exported',
-                '- [ ]  trust FAQ priorities drafted from  feedback',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  integration feedback plan committed",
+                "- [ ]  template upgrade ledger exported",
+                "- [ ]  office-hours outcome ledger exported",
+                "- [ ]  trust FAQ priorities drafted from  feedback",
             ]
         )
         + "\n",
@@ -167,4 +165,4 @@ def test_lane83_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["trust-faq-expansion-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' trust FAQ expansion closeout summary' in capsys.readouterr().out
+    assert " trust FAQ expansion closeout summary" in capsys.readouterr().out

@@ -300,13 +300,9 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     if board_count >= 5 and board_has_required:
-        wins.append(
-            f"delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            "delivery board integrity is incomplete (needs >=5 items and anchors)."
-        )
+        misses.append("delivery board integrity is incomplete (needs >=5 items and anchors).")
         handoff_actions.append("Repair delivery board entries to include anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -320,9 +316,7 @@ def build_stabilization_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     if not failed and not critical_failures:
-        wins.append(
-            "stabilization closeout lane is fully complete and ready for deep audit lane."
-        )
+        wins.append("stabilization closeout lane is fully complete and ready for deep audit lane.")
 
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     return {

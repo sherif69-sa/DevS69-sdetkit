@@ -19,14 +19,14 @@ _DAY72_BOARD_PATH = (
     "docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md"
 )
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/published-case-study.json"
-_SECTION_HEADER = '#  — Case-study launch closeout lane'
+_SECTION_HEADER = "#  — Case-study launch closeout lane"
 _REQUIRED_SECTIONS = [
-    '## Why  matters',
-    '## Required inputs ()',
-    '##  command lane',
+    "## Why  matters",
+    "## Required inputs ()",
+    "##  command lane",
     "## Case-study launch contract",
     "## Case-study quality checklist",
-    '##  delivery board',
+    "##  delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_case_study_launch_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  published case-study launch execution and signoff.',
-    'The  lane references  prep outputs, governance decisions, and KPI continuity signals.',
-    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records publication outcomes, evidence confidence notes, and  scaling priorities.',
+    "Single owner + backup reviewer are assigned for  published case-study launch execution and signoff.",
+    "The  lane references  prep outputs, governance decisions, and KPI continuity signals.",
+    "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records publication outcomes, evidence confidence notes, and  scaling priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline window, treatment window, and outlier handling notes",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  integration brief committed',
-    '- [ ]  published case-study narrative committed',
-    '- [ ]  controls and assumptions log exported',
-    '- [ ]  KPI scorecard snapshot exported',
-    '- [ ]  distribution scaling priorities drafted from  learnings',
+    "- [ ]  integration brief committed",
+    "- [ ]  published case-study narrative committed",
+    "- [ ]  controls and assumptions log exported",
+    "- [ ]  KPI scorecard snapshot exported",
+    "- [ ]  distribution scaling priorities drafted from  learnings",
 ]
 _REQUIRED_DATA_KEYS = [
     '"case_id"',
@@ -69,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Case-study launch closeout lane\n\n closes with a major upgrade that turns  publication-quality prep into a published case-study launch pack with rollout safeguards.\n\n## Why  matters\n\n- Converts  prep outputs into published case-study assets tied to measurable incident-response outcomes.\n- Protects publication quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  publication launch execution into  distribution scaling.\n\n## Required inputs ()\n\n- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json`\n- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md`\n- `docs/roadmap/plans/published-case-study.json`\n\n##  command lane\n\n```bash\npython -m sdetkit case-study-launch-closeout --format json --strict\npython -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict\npython -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict\npython scripts/check_case_study_launch_closeout_contract.py\n```\n\n## Case-study launch contract\n\n- Single owner + backup reviewer are assigned for  published case-study launch execution and signoff.\n- The  lane references  prep outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records publication outcomes, evidence confidence notes, and  scaling priorities.\n\n## Case-study quality checklist\n\n- [ ] Includes baseline window, treatment window, and outlier handling notes\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  published case-study narrative committed\n- [ ]  controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  distribution scaling priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Publication-quality evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Case-study launch closeout lane\n\n closes with a major upgrade that turns  publication-quality prep into a published case-study launch pack with rollout safeguards.\n\n## Why  matters\n\n- Converts  prep outputs into published case-study assets tied to measurable incident-response outcomes.\n- Protects publication quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  publication launch execution into  distribution scaling.\n\n## Required inputs ()\n\n- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-closeout-summary.json`\n- `docs/artifacts/case-study-prep4-closeout-pack/case-study-prep4-delivery-board.md`\n- `docs/roadmap/plans/published-case-study.json`\n\n##  command lane\n\n```bash\npython -m sdetkit case-study-launch-closeout --format json --strict\npython -m sdetkit case-study-launch-closeout --emit-pack-dir docs/artifacts/case-study-launch-closeout-pack --format json --strict\npython -m sdetkit case-study-launch-closeout --execute --evidence-dir docs/artifacts/case-study-launch-closeout-pack/evidence --format json --strict\npython scripts/check_case_study_launch_closeout_contract.py\n```\n\n## Case-study launch contract\n\n- Single owner + backup reviewer are assigned for  published case-study launch execution and signoff.\n- The  lane references  prep outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records publication outcomes, evidence confidence notes, and  scaling priorities.\n\n## Case-study quality checklist\n\n- [ ] Includes baseline window, treatment window, and outlier handling notes\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  published case-study narrative committed\n- [ ]  controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  distribution scaling priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Publication-quality evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
 
 
 def _read(path: Path) -> str:
@@ -112,7 +112,7 @@ def build_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]:
     prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
         prior_closeout_summary
     )
-    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, '')
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -143,8 +143,8 @@ def build_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "prior_closeout_summary_present",
@@ -233,36 +233,28 @@ def build_case_study_launch_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if prior_closeout_strict:
-        wins.append(
-            f"72 continuity is strict-pass with activation score={prior_closeout_score}."
-        )
+        wins.append(f"72 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
-        misses.append(' strict continuity signal is missing.')
-        handoff_actions.append(
-            'Re-run  closeout command and restore strict baseline before  lock.'
-        )
+        misses.append(" strict continuity signal is missing.")
+        handoff_actions.append("Re-run  closeout command and restore strict baseline before  lock.")
 
     if board_count >= 5 and board_has_prior_closeout:
-        wins.append(
-            f"72 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"72 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_case_data_keys:
-        wins.append(' published case-study dataset is available for launch execution.')
+        wins.append(" published case-study dataset is available for launch execution.")
     else:
-        misses.append(' published case-study dataset is missing required keys.')
+        misses.append(" published case-study dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/published-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' case-study launch closeout lane is fully complete and ready for  distribution scaling.'
+            " case-study launch closeout lane is fully complete and ready for  distribution scaling."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -323,8 +315,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "case-study-launch-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "case-study-launch-integration-brief.md", '#  integration brief\n')
-    _write(target / "case-study-launch-case-study-narrative.md", '#  case-study narrative\n')
+    _write(target / "case-study-launch-integration-brief.md", "#  integration brief\n")
+    _write(target / "case-study-launch-case-study-narrative.md", "#  case-study narrative\n")
     _write(
         target / "case-study-launch-controls-log.json",
         json.dumps({"controls": []}, indent=2) + "\n",
@@ -332,14 +324,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(
         target / "case-study-launch-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "case-study-launch-execution-log.md", '#  execution log\n')
+    _write(target / "case-study-launch-execution-log.md", "#  execution log\n")
     _write(
         target / "case-study-launch-delivery-board.md",
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "case-study-launch-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -367,7 +359,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_case_study_launch_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_case_study_launch_closeout_summary(root)
 
 

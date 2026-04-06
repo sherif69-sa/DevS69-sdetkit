@@ -16,7 +16,7 @@ _DAY42_SUMMARY_PATH = (
 _DAY42_BOARD_PATH = "docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md"
 _DAY42_LEGACY_SUMMARY_PATH = "docs/artifacts/optimization-closeout-foundation-pack/optimization-closeout-foundation-summary.json"
 _DAY42_LEGACY_BOARD_PATH = "docs/artifacts/optimization-closeout-foundation-pack/delivery-board.md"
-_SECTION_HEADER = '#  — Acceleration closeout lane'
+_SECTION_HEADER = "#  — Acceleration closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why this lane matters",
     "## Required inputs (optimization closeout foundation)",
@@ -38,10 +38,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_acceleration_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  acceleration lane execution and KPI follow-up.',
-    'The  acceleration lane references  optimization winners and misses with deterministic growth loops.',
-    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
-    ' closeout records acceleration learnings and  scale priorities.',
+    "Single owner + backup reviewer are assigned for  acceleration lane execution and KPI follow-up.",
+    "The  acceleration lane references  optimization winners and misses with deterministic growth loops.",
+    "Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    " closeout records acceleration learnings and  scale priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes acceleration summary, growth matrix, and rollback strategy",
@@ -51,14 +51,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  acceleration plan draft committed',
-    '- [ ]  review notes captured with owner + backup',
-    '- [ ]  growth matrix exported',
-    '- [ ]  KPI scorecard snapshot exported',
-    '- [ ]  scale priorities drafted from  learnings',
+    "- [ ]  acceleration plan draft committed",
+    "- [ ]  review notes captured with owner + backup",
+    "- [ ]  growth matrix exported",
+    "- [ ]  KPI scorecard snapshot exported",
+    "- [ ]  scale priorities drafted from  learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Acceleration closeout lane\n\nThis lane closes with a major acceleration upgrade that converts optimization evidence into deterministic improvement loops.\n\n## Why this lane matters\n\n- Converts  optimization proof into growth-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from acceleration outcomes into  scale priorities.\n\n## Required inputs (optimization closeout foundation)\n\n- `docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json`\n- `docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md`\n\n## Command lane\n\n```bash\npython -m sdetkit acceleration-closeout --format json --strict\npython -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict\npython -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict\npython scripts/check_acceleration_closeout_contract.py\n```\n\n## Acceleration closeout contract\n\n- Single owner + backup reviewer are assigned for  acceleration lane execution and KPI follow-up.\n- The  acceleration lane references  optimization winners and misses with deterministic growth loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records acceleration learnings and  scale priorities.\n\n## Acceleration quality checklist\n\n- [ ] Includes acceleration summary, growth matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  acceleration plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  growth matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Acceleration contract lock + delivery board readiness: 15 points.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Acceleration closeout lane\n\nThis lane closes with a major acceleration upgrade that converts optimization evidence into deterministic improvement loops.\n\n## Why this lane matters\n\n- Converts  optimization proof into growth-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from acceleration outcomes into  scale priorities.\n\n## Required inputs (optimization closeout foundation)\n\n- `docs/artifacts/optimization-closeout-pack-42/optimization-closeout-summary-42.json`\n- `docs/artifacts/optimization-closeout-pack-42/delivery-board-42.md`\n\n## Command lane\n\n```bash\npython -m sdetkit acceleration-closeout --format json --strict\npython -m sdetkit acceleration-closeout --emit-pack-dir docs/artifacts/acceleration-closeout-pack --format json --strict\npython -m sdetkit acceleration-closeout --execute --evidence-dir docs/artifacts/acceleration-closeout-pack/evidence --format json --strict\npython scripts/check_acceleration_closeout_contract.py\n```\n\n## Acceleration closeout contract\n\n- Single owner + backup reviewer are assigned for  acceleration lane execution and KPI follow-up.\n- The  acceleration lane references  optimization winners and misses with deterministic growth loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records acceleration learnings and  scale priorities.\n\n## Acceleration quality checklist\n\n- [ ] Includes acceleration summary, growth matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes acceleration plan, growth matrix, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  acceleration plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  growth matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Acceleration contract lock + delivery board readiness: 15 points.\n"
 
 
 def _read(path: Path) -> str:
@@ -91,7 +91,7 @@ def _load_optimization_closeout(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), '' in text, '' in text
+    return len(items), "" in text, "" in text
 
 
 def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
@@ -181,8 +181,8 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_acceleration_closeout_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "optimization_closeout_summary_present",
@@ -255,22 +255,16 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             f"42 continuity is strict-pass with activation score={optimization_closeout_score}."
         )
     else:
-        misses.append(' strict continuity signal is missing.')
+        misses.append(" strict continuity signal is missing.")
         handoff_actions.append(
-            'Re-run  optimization closeout command and restore strict pass baseline before  lock.'
+            "Re-run  optimization closeout command and restore strict pass baseline before  lock."
         )
 
     if board_count >= 5 and board_has_optimization_closeout and board_has_acceleration_closeout:
-        wins.append(
-            f"42 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"42 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and /43 anchors).'
-        )
-        handoff_actions.append(
-            'Repair  delivery board entries to include  and  anchors.'
-        )
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and /43 anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  and  anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append(
@@ -281,13 +275,11 @@ def build_acceleration_closeout_summary(root: Path) -> dict[str, Any]:
             "Acceleration contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            'Complete all  acceleration contract lines, quality checklist entries, and delivery board tasks in docs.'
+            "Complete all  acceleration contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
-        wins.append(
-            ' acceleration closeout lane is fully complete and ready for  scale lane.'
-        )
+        wins.append(" acceleration closeout lane is fully complete and ready for  scale lane.")
 
     return {
         "name": "acceleration-closeout",
@@ -356,7 +348,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "acceleration-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "acceleration-plan.md",
-        '# Acceleration plan\n\n- Objective: close  with measurable quality and throughput gains.\n',
+        "# Acceleration plan\n\n- Objective: close  with measurable quality and throughput gains.\n",
     )
     _write(
         target / "growth-matrix.csv",
@@ -383,7 +375,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log.md",
-        '# Acceleration execution log\n\n- [ ] 2026-03-12: Record misses, wins, and  scale priorities.\n',
+        "# Acceleration execution log\n\n- [ ] 2026-03-12: Record misses, wins, and  scale priorities.\n",
     )
     _write(
         target / "delivery-board.md",
@@ -433,7 +425,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_acceleration_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_acceleration_closeout_summary(root)
 
 

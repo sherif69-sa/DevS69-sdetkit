@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Distribution closeout:** publish channel-ready  KPI narrative with owners and posting windows.\n'
-        '- ** — Experiment lane:** convert  misses into controlled growth experiments.\n',
+        "- ** — Distribution closeout:** publish channel-ready  KPI narrative with owners and posting windows.\n"
+        "- ** — Experiment lane:** convert  misses into controlled growth experiments.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-distribution-closeout.md").write_text(
         d36._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-36-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-36-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/kpi-instrumentation-pack/kpi-instrumentation-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
@@ -57,12 +55,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  KPI dictionary committed',
-                '- [ ]  dashboard snapshot exported',
-                '- [ ]  alert policy reviewed with owner + backup',
-                '- [ ]  distribution message references KPI shifts',
-                '- [ ]  experiment backlog seeded from KPI misses',
+                "#  delivery board",
+                "- [ ]  KPI dictionary committed",
+                "- [ ]  dashboard snapshot exported",
+                "- [ ]  alert policy reviewed with owner + backup",
+                "- [ ]  distribution message references KPI shifts",
+                "- [ ]  experiment backlog seeded from KPI misses",
             ]
         )
         + "\n",
@@ -122,7 +120,7 @@ def test_lane36_strict_fails_when_lane35_inputs_missing(tmp_path: Path) -> None:
 def test_lane36_strict_fails_when_lane35_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/kpi-instrumentation-pack/delivery-board.md").write_text(
-        '- [ ]  distribution message references KPI shifts\n', encoding="utf-8"
+        "- [ ]  distribution message references KPI shifts\n", encoding="utf-8"
     )
     rc = d36.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -132,4 +130,4 @@ def test_lane36_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["distribution-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' community distribution summary' in capsys.readouterr().out
+    assert " community distribution summary" in capsys.readouterr().out

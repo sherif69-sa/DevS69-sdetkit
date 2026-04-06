@@ -26,18 +26,18 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        '-71-big-upgrade-report.md\nintegrations-case-study-prep3-closeout.md\n',
+        "-71-big-upgrade-report.md\nintegrations-case-study-prep3-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Case-study prep #3:** lock escalation-quality evidence and publication readiness handoff.\n'
-        '- ** — Weekly review #10:** assess integration adoption and feedback quality.\n',
+        "- ** — Case-study prep #3:** lock escalation-quality evidence and publication readiness handoff.\n"
+        "- ** — Weekly review #10:** assess integration adoption and feedback quality.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-case-study-prep3-closeout.md").write_text(
         d71._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/big-upgrade-report-71.md").write_text('#  report\n', encoding="utf-8")
+    (root / "docs/big-upgrade-report-71.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -60,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  triage-speed case-study narrative published',
-                '- [ ]  controls and assumptions log exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  case-study prep priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  triage-speed case-study narrative published",
+                "- [ ]  controls and assumptions log exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  case-study prep priorities drafted from  learnings",
             ]
         )
         + "\n",

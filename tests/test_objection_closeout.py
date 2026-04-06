@@ -25,16 +25,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Objection closeout lock:** convert reliability wins into deterministic objection playbooks.\n'
-        '- ** — Weekly review closeout:** harden the evidence-to-priorities loop.\n',
+        "- ** — Objection closeout lock:** convert reliability wins into deterministic objection playbooks.\n"
+        "- ** — Weekly review closeout:** harden the evidence-to-priorities loop.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-objection-closeout.md").write_text(
         d48._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-48-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-48-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
@@ -54,12 +52,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  reliability closeout brief committed',
-                '- [ ]  winners and misses reviewed with owner + backup',
-                '- [ ]  risk register exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  objection priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  reliability closeout brief committed",
+                "- [ ]  winners and misses reviewed with owner + backup",
+                "- [ ]  risk register exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  objection priorities drafted from  learnings",
             ]
         )
         + "\n",
@@ -120,4 +118,4 @@ def test_lane48_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["objection-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' objection closeout summary' in capsys.readouterr().out
+    assert " objection closeout summary" in capsys.readouterr().out

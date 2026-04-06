@@ -19,10 +19,10 @@ _DAY87_BOARD_PATH = (
     "docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/governance-priorities-plan.json"
-_SECTION_HEADER = '#  — Governance priorities closeout lane'
+_SECTION_HEADER = "#  — Governance priorities closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Governance Priorities Closeout matters",
-    '## Required inputs ()',
+    "## Required inputs ()",
     "## Command lane",
     "## Governance priorities contract",
     "## Governance priorities quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_governance_priorities_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  governance priorities execution and signoff.',
-    'The  lane references  outcomes, controls, and trust continuity signals.',
-    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records governance priorities pack upgrades, storyline outcomes, and  governance priorities.',
+    "Single owner + backup reviewer are assigned for  governance priorities execution and signoff.",
+    "The  lane references  outcomes, controls, and trust continuity signals.",
+    "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records governance priorities pack upgrades, storyline outcomes, and  governance priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  evidence brief committed',
-    '- [ ]  governance priorities plan committed',
-    '- [ ]  narrative template upgrade ledger exported',
-    '- [ ]  storyline outcomes ledger exported',
-    '- [ ]  governance priorities drafted from  outcomes',
+    "- [ ]  evidence brief committed",
+    "- [ ]  governance priorities plan committed",
+    "- [ ]  narrative template upgrade ledger exported",
+    "- [ ]  storyline outcomes ledger exported",
+    "- [ ]  governance priorities drafted from  outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Governance priorities closeout lane\n\n closes with a major upgrade that converts  governance handoff outcomes into a deterministic governance priorities operating lane.\n\n## Why Governance Priorities Closeout matters\n\n- Converts  governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  governance priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json`\n- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md`\n- `docs/roadmap/plans/governance-priorities-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit governance-priorities-closeout --format json --strict\npython -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict\npython -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/governance-priorities-closeout-pack/evidence --format json --strict\npython scripts/check_governance_priorities_closeout_contract.py\n```\n\n## Governance priorities contract\n\n- Single owner + backup reviewer are assigned for  governance priorities execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records governance priorities pack upgrades, storyline outcomes, and  governance priorities.\n\n## Governance priorities quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures governance priorities adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  governance priorities plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ]  governance priorities drafted from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Governance priorities closeout lane\n\n closes with a major upgrade that converts  governance handoff outcomes into a deterministic governance priorities operating lane.\n\n## Why Governance Priorities Closeout matters\n\n- Converts  governance handoff outcomes into reusable governance priorities decisions across governance rituals, roadmap reviews, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into  governance priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-closeout-summary.json`\n- `docs/artifacts/governance-handoff-closeout-pack/governance-handoff-delivery-board.md`\n- `docs/roadmap/plans/governance-priorities-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit governance-priorities-closeout --format json --strict\npython -m sdetkit governance-priorities-closeout --emit-pack-dir docs/artifacts/governance-priorities-closeout-pack --format json --strict\npython -m sdetkit governance-priorities-closeout --execute --evidence-dir docs/artifacts/governance-priorities-closeout-pack/evidence --format json --strict\npython scripts/check_governance_priorities_closeout_contract.py\n```\n\n## Governance priorities contract\n\n- Single owner + backup reviewer are assigned for  governance priorities execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records governance priorities pack upgrades, storyline outcomes, and  governance priorities.\n\n## Governance priorities quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures governance priorities adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  governance priorities plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ]  governance priorities drafted from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n"
 
 
 def _read_text(path: Path) -> str:
@@ -106,7 +106,9 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         else {}
     )
     governance_handoff_score = int(governance_handoff_summary_data.get("activation_score", 0) or 0)
-    governance_handoff_strict = coerce_bool(governance_handoff_summary_data.get("strict_pass", False), default=False)
+    governance_handoff_strict = coerce_bool(
+        governance_handoff_summary_data.get("strict_pass", False), default=False
+    )
     governance_handoff_check_count = (
         len(governance_handoff_data.get("checks", []))
         if isinstance(governance_handoff_data.get("checks"), list)
@@ -115,7 +117,7 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
 
     board_text = _read_text(governance_handoff_board)
     board_count = _checklist_count(board_text)
-    board_has_governance_handoff = '' in board_text
+    board_has_governance_handoff = "" in board_text
 
     missing_sections = [section for section in _REQUIRED_SECTIONS if section not in page_text]
     missing_commands = [command for command in _REQUIRED_COMMANDS if command not in page_text]
@@ -145,8 +147,8 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "governance_handoff_summary_present",
@@ -237,32 +239,28 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
             f"Governance handoff continuity baseline is stable with activation score={governance_handoff_score}."
         )
     else:
-        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
+        misses.append(" continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
-            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
+            "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
         )
 
     if board_count >= 5 and board_has_governance_handoff:
-        wins.append(
-            f"87 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"87 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_plan_keys:
-        wins.append(' governance priorities dataset is available for governance execution.')
+        wins.append(" governance priorities dataset is available for governance execution.")
     else:
-        misses.append(' governance priorities dataset is missing required keys.')
+        misses.append(" governance priorities dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/governance-priorities-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' governance priorities closeout lane is fully complete and ready for  governance planning.'
+            " governance priorities closeout lane is fully complete and ready for  governance planning."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -302,7 +300,7 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        ' governance priorities closeout summary',
+        " governance priorities closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -323,10 +321,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "governance-priorities-closeout-summary.md", _render_text(payload) + "\n")
-    _write(
-        target / "governance-priorities-evidence-brief.md", '#  governance priorities brief\n'
-    )
-    _write(target / "governance-priorities-plan.md", '#  governance priorities plan\n')
+    _write(target / "governance-priorities-evidence-brief.md", "#  governance priorities brief\n")
+    _write(target / "governance-priorities-plan.md", "#  governance priorities plan\n")
     _write(
         target / "governance-priorities-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -339,14 +335,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "governance-priorities-narrative-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "governance-priorities-execution-log.md", '#  execution log\n')
+    _write(target / "governance-priorities-execution-log.md", "#  execution log\n")
     _write(
         target / "governance-priorities-delivery-board.md",
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "governance-priorities-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -374,12 +370,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_governance_priorities_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_governance_priorities_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=' governance priorities closeout checks')
+    parser = argparse.ArgumentParser(description=" governance priorities closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

@@ -36,9 +36,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/integrations-community-touchpoint-closeout.md").write_text(
         d77._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-77-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-77-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -62,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  contributor recognition plan committed',
-                '- [ ]  recognition credits ledger exported',
-                '- [ ]  recognition KPI scorecard snapshot exported',
-                '- [ ]  scale priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  contributor recognition plan committed",
+                "- [ ]  recognition credits ledger exported",
+                "- [ ]  recognition KPI scorecard snapshot exported",
+                "- [ ]  scale priorities drafted from  learnings",
             ]
         )
         + "\n",

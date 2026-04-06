@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — KPI deep audit:** validate strict trendlines and blockers.\n'
-        '- ** — Execution sprint:** convert audit outcomes into shipped changes.\n',
+        "- ** — KPI deep audit:** validate strict trendlines and blockers.\n"
+        "- ** — Execution sprint:** convert audit outcomes into shipped changes.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-kpi-deep-audit-closeout.md").write_text(
         d57._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-57-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-57-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/stabilization-closeout-pack/stabilization-closeout-summary.json"
@@ -59,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  stabilization brief committed',
-                '- [ ]  stabilization plan reviewed with owner + backup',
-                '- [ ]  risk ledger exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  deep-audit priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  stabilization brief committed",
+                "- [ ]  stabilization plan reviewed with owner + backup",
+                "- [ ]  risk ledger exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  deep-audit priorities drafted from  learnings",
             ]
         )
         + "\n",

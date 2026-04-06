@@ -225,10 +225,7 @@ def test_radar_payload_exposes_dashboard_cards_and_watchlists(tmp_path: Path) ->
 
 def test_discover_payload_aligns_catalog_optimize_expand_and_radar(tmp_path: Path) -> None:
     (tmp_path / "pyproject.toml").write_text(
-        "[project]\n"
-        "name='x'\n"
-        "version='0.1.0'\n"
-        "dependencies=['httpx>=0.28.1,<1']\n",
+        "[project]\nname='x'\nversion='0.1.0'\ndependencies=['httpx>=0.28.1,<1']\n",
         encoding="utf-8",
     )
     src_dir = tmp_path / "src" / "demo"

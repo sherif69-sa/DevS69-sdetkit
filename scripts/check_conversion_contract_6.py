@@ -11,19 +11,19 @@ LANE_ARTIFACT = Path("docs/artifacts/conversion-qa-sample-6.md")
 DOCS_QA_MODULE = Path("src/sdetkit/docs_qa.py")
 
 REQUIRED_README_SNIPPETS = [
-    '## 🔗  ultra: conversion QA hardening',
+    "## 🔗  ultra: conversion QA hardening",
     "python -m sdetkit docs-qa --format text",
     "python -m sdetkit docs-qa --format markdown --output docs/artifacts/conversion-qa-sample-6.md",
     "docs/impact-6-ultra-upgrade-report.md",
 ]
 
 REQUIRED_INDEX_SNIPPETS = [
-    ' ultra upgrade report',
+    " ultra upgrade report",
     "sdetkit docs-qa --format text",
 ]
 
 REQUIRED_REPORT_SNIPPETS = [
-    ' big upgrade',
+    " big upgrade",
     "src/sdetkit/docs_qa.py",
     "tests/test_docs_qa.py",
     "python scripts/check_conversion_contract_6.py",

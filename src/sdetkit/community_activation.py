@@ -10,9 +10,9 @@ from typing import Any
 
 _PAGE_PATH = "docs/integrations-community-activation.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
-_SECTION_HEADER = '# Community activation ()'
+_SECTION_HEADER = "# Community activation ()"
 _REQUIRED_SECTIONS = [
-    '## Who should run ',
+    "## Who should run ",
     "## Roadmap-voting discussion contract",
     "## Launch checklist",
     "## Feedback triage SLA",
@@ -30,7 +30,7 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_community_activation_contract.py --skip-evidence",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '# Community activation ()\n\n converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.\n\n## Who should run \n\n- Maintainers preparing priorities for the next sprint or release train.\n- DevRel/community managers collecting qualitative and quantitative roadmap feedback.\n- Engineering leads that need transparent prioritization signals for backlog decisions.\n\n## Roadmap-voting discussion contract\n\n is complete when a public roadmap-voting thread is opened, tagged, and linked from docs so contributors can vote and comment on priority items.\n\n## Launch checklist\n\n```bash\npython -m sdetkit community-activation --format json --strict\npython -m sdetkit community-activation --emit-pack-dir docs/artifacts/community-activation-pack --format json --strict\npython -m sdetkit community-activation --execute --evidence-dir docs/artifacts/community-activation-pack/evidence --format json --strict\npython scripts/check_community_activation_contract.py\n```\n\n## Feedback triage SLA\n\n- Triage new roadmap votes/comments within 48 hours.\n- Label each item as `accepted`, `needs-info`, or `not-now`.\n- Publish weekly summary of wins, blockers, and next actions.\n\n## Activation scoring model\n\n computes weighted readiness score (0-100):\n\n- Docs contract + command lane completeness: 45 points.\n- Discoverability links in README/docs index: 25 points.\n- Top-10 roadmap alignment marker coverage: 20 points.\n- Evidence-lane readiness for strict validation: 10 points.\n\n## Execution evidence mode\n\n`--execute` runs deterministic  checks and writes logs to `--evidence-dir` for release review.\n'
+_DEFAULT_PAGE_TEMPLATE = "# Community activation ()\n\n converts passive roadmap readers into active contributors through a deterministic roadmap-voting and feedback loop.\n\n## Who should run \n\n- Maintainers preparing priorities for the next sprint or release train.\n- DevRel/community managers collecting qualitative and quantitative roadmap feedback.\n- Engineering leads that need transparent prioritization signals for backlog decisions.\n\n## Roadmap-voting discussion contract\n\n is complete when a public roadmap-voting thread is opened, tagged, and linked from docs so contributors can vote and comment on priority items.\n\n## Launch checklist\n\n```bash\npython -m sdetkit community-activation --format json --strict\npython -m sdetkit community-activation --emit-pack-dir docs/artifacts/community-activation-pack --format json --strict\npython -m sdetkit community-activation --execute --evidence-dir docs/artifacts/community-activation-pack/evidence --format json --strict\npython scripts/check_community_activation_contract.py\n```\n\n## Feedback triage SLA\n\n- Triage new roadmap votes/comments within 48 hours.\n- Label each item as `accepted`, `needs-info`, or `not-now`.\n- Publish weekly summary of wins, blockers, and next actions.\n\n## Activation scoring model\n\n computes weighted readiness score (0-100):\n\n- Docs contract + command lane completeness: 45 points.\n- Discoverability links in README/docs index: 25 points.\n- Top-10 roadmap alignment marker coverage: 20 points.\n- Evidence-lane readiness for strict validation: 10 points.\n\n## Execution evidence mode\n\n`--execute` runs deterministic  checks and writes logs to `--evidence-dir` for release review.\n"
 
 _SIGNALS = [
     {
@@ -76,7 +76,7 @@ _SIGNALS = [
         "check_id": "top10_strategy_alignment",
         "category": "strategy",
         "weight": 20,
-        "marker": ' — Community activation',
+        "marker": " — Community activation",
         "source": "top10",
     },
     {
@@ -187,19 +187,19 @@ def build_community_activation_summary(
     recommendations: list[str] = []
     if any(item["category"] == "contract" for item in failed):
         recommendations.append(
-            'Restore  docs contract sections and required command lane before launch.'
+            "Restore  docs contract sections and required command lane before launch."
         )
     if any(item["category"] == "discoverability" for item in failed):
         recommendations.append(
-            'Add  links and command snippets to README/docs index for contributor visibility.'
+            "Add  links and command snippets to README/docs index for contributor visibility."
         )
     if any(item["category"] == "strategy" for item in failed):
         recommendations.append(
-            'Align  outputs with top-10 roadmap activation objective and roadmap-voting messaging.'
+            "Align  outputs with top-10 roadmap activation objective and roadmap-voting messaging."
         )
     if not recommendations:
         recommendations.append(
-            ' community activation lane is healthy; keep weekly voting summaries flowing.'
+            " community activation lane is healthy; keep weekly voting summaries flowing."
         )
 
     return {
@@ -223,7 +223,7 @@ def build_community_activation_summary(
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        ' community activation summary',
+        " community activation summary",
         f"score={payload['summary']['activation_score']}",
         f"failed={','.join(payload['summary']['failed_checks']) or 'none'}",
         f"critical={','.join(payload['summary']['critical_failures']) or 'none'}",
@@ -250,7 +250,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     discussion.write_text(
         "\n".join(
             [
-                '#  roadmap-voting discussion template',
+                "#  roadmap-voting discussion template",
                 "",
                 "## Title",
                 "Roadmap voting: help prioritize the next sdetkit upgrades",
@@ -277,7 +277,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
     triage.write_text(
         "\n".join(
             [
-                '#  feedback triage board',
+                "#  feedback triage board",
                 "",
                 "| Feedback item | Votes | Owner | Status | Decision date |",
                 "| --- | ---: | --- | --- | --- |",
@@ -290,8 +290,7 @@ def emit_pack(root: Path, out_dir: Path, payload: dict[str, Any]) -> list[str]:
         encoding="utf-8",
     )
     validation.write_text(
-        "\n".join(['#  validation commands', "", "```bash", *_REQUIRED_COMMANDS, "```"])
-        + "\n",
+        "\n".join(["#  validation commands", "", "```bash", *_REQUIRED_COMMANDS, "```"]) + "\n",
         encoding="utf-8",
     )
 
@@ -330,7 +329,7 @@ def execute_commands(root: Path, evidence_dir: Path, timeout_sec: int) -> dict[s
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="sdetkit community-activation",
-        description=' community activation and roadmap-voting closeout lane.',
+        description=" community activation and roadmap-voting closeout lane.",
     )
     parser.add_argument("--root", default=".", help="Repository root path.")
     parser.add_argument(
@@ -341,13 +340,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--top10", default=_TOP10_PATH, help="Top-10 roadmap strategy path.")
     parser.add_argument(
-        "--write-defaults", action="store_true", help='Create default  integration page.'
+        "--write-defaults", action="store_true", help="Create default  integration page."
     )
     parser.add_argument(
-        "--emit-pack-dir", default="", help='Optional output directory for generated  files.'
+        "--emit-pack-dir", default="", help="Optional output directory for generated  files."
     )
     parser.add_argument(
-        "--execute", action="store_true", help='Run  command chain and emit evidence logs.'
+        "--execute", action="store_true", help="Run  command chain and emit evidence logs."
     )
     parser.add_argument(
         "--evidence-dir",

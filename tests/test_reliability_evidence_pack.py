@@ -167,7 +167,6 @@ def test_reliability_pack_help_prefers_canonical_summary_flags() -> None:
     assert "--cq_summary-summary" not in help_text
 
 
-
 def test_reliability_pack_load_json_requires_object(tmp_path: Path) -> None:
     p = tmp_path / "bad.json"
     p.write_text("[]\n", encoding="utf-8")

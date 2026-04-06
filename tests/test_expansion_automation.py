@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Expansion automation lane:** automate scale winners into repeatable workflows.\n'
-        '- ** — Optimization lane kickoff:** convert  execution into optimization loops.\n',
+        "- ** — Expansion automation lane:** automate scale winners into repeatable workflows.\n"
+        "- ** — Optimization lane kickoff:** convert  execution into optimization loops.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-expansion-automation.md").write_text(
         d41._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-41-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-41-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/scale-lane-pack/scale-lane-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
@@ -57,12 +55,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  scale plan draft committed',
-                '- [ ]  review notes captured with owner + backup',
-                '- [ ]  rollout timeline exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  expansion priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  scale plan draft committed",
+                "- [ ]  review notes captured with owner + backup",
+                "- [ ]  rollout timeline exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  expansion priorities drafted from  learnings",
             ]
         )
         + "\n",

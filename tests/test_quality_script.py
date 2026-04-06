@@ -76,7 +76,7 @@ def test_quality_script_registry_mode_runs_contract_chain() -> None:
     match = re.search(r"  registry\)\n(?P<body>.*?    ;;)", text, re.DOTALL)
     assert match is not None
     body = match.group("body")
-    assert "run_required \"feature_registry_contract\"" in body
+    assert 'run_required "feature_registry_contract"' in body
     assert "run_registry_contract" in body
     assert "--expect-command kits" in text
     assert "--expect-total 8" in text

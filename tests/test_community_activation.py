@@ -14,7 +14,7 @@ def _seed(root: Path) -> None:
         "docs/integrations-community-activation.md\ncommunity-activation\n", encoding="utf-8"
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Community activation:** open roadmap-voting discussion and collect feedback.\n',
+        "- ** — Community activation:** open roadmap-voting discussion and collect feedback.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-community-activation.md").write_text(
@@ -73,7 +73,7 @@ def test_community_emit_pack_and_execute(tmp_path: Path) -> None:
 def test_community_strict_fails_when_sections_missing(tmp_path: Path) -> None:
     _seed(tmp_path)
     (tmp_path / "docs/integrations-community-activation.md").write_text(
-        '# Community activation ()\n', encoding="utf-8"
+        "# Community activation ()\n", encoding="utf-8"
     )
 
     rc = ca.main(["--root", str(tmp_path), "--strict", "--format", "json"])
@@ -87,4 +87,4 @@ def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     rc = cli.main(["community-activation", "--root", str(tmp_path), "--format", "text"])
 
     assert rc == 0
-    assert ' community activation summary' in capsys.readouterr().out
+    assert " community activation summary" in capsys.readouterr().out

@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Release cadence setup:** lock weekly release rhythm and changelog publication checklist.\n'
-        '- ** — Demo asset #1:** produce/publish `doctor` workflow short video or GIF.\n',
+        "- ** — Release cadence setup:** lock weekly release rhythm and changelog publication checklist.\n"
+        "- ** — Demo asset #1:** produce/publish `doctor` workflow short video or GIF.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-release-cadence.md").write_text(
         d32._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-32-ultra-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-32-ultra-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
@@ -57,12 +55,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  baseline metrics snapshot emitted',
-                '- [ ]  release cadence checklist drafted',
-                '- [ ]  demo asset plan (doctor) assigned',
-                '- [ ]  demo asset plan (repo audit) assigned',
-                '- [ ]  weekly review preparation checklist ready',
+                "#  delivery board",
+                "- [ ]  baseline metrics snapshot emitted",
+                "- [ ]  release cadence checklist drafted",
+                "- [ ]  demo asset plan (doctor) assigned",
+                "- [ ]  demo asset plan (repo audit) assigned",
+                "- [ ]  weekly review preparation checklist ready",
             ]
         )
         + "\n",
@@ -117,7 +115,7 @@ def test_release_cadence_strict_fails_when_lane31_inputs_missing(tmp_path: Path)
 def test_release_cadence_strict_fails_when_lane31_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/phase2-kickoff-pack/phase2-kickoff-delivery-board.md").write_text(
-        '- [ ]  release cadence checklist drafted\n', encoding="utf-8"
+        "- [ ]  release cadence checklist drafted\n", encoding="utf-8"
     )
     rc = d32.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -127,4 +125,4 @@ def test_release_cadence_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["release-cadence", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' release cadence summary' in capsys.readouterr().out
+    assert " release cadence summary" in capsys.readouterr().out

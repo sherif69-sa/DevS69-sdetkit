@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n'
-        '- ** — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.\n',
+        "- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n"
+        "- ** — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-phase3-preplan-closeout.md").write_text(
         d59._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-59-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-59-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -62,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  Phase-2 hardening brief committed',
-                '- [ ]  hardening plan reviewed with owner + backup',
-                '- [ ]  risk ledger exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  pre-plan priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  Phase-2 hardening brief committed",
+                "- [ ]  hardening plan reviewed with owner + backup",
+                "- [ ]  risk ledger exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  pre-plan priorities drafted from  learnings",
             ]
         )
         + "\n",

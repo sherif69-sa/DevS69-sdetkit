@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Phase-1 wrap + handoff:** publish a full report and lock Phase-2 backlog.\n'
-        '- ** — Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets.\n',
+        "- ** — Phase-1 wrap + handoff:** publish a full report and lock Phase-2 backlog.\n"
+        "- ** — Phase-2 kickoff:** set baseline metrics from end of Phase 1 and define weekly growth targets.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-phase1-wrap.md").write_text(
         d30._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-30-ultra-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-30-ultra-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     for rel in [
         "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json",
@@ -98,4 +96,4 @@ def test_phase1_wrap_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["phase1-wrap", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' phase-1 wrap summary' in capsys.readouterr().out
+    assert " phase-1 wrap summary" in capsys.readouterr().out

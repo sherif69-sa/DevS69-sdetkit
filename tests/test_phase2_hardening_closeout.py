@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.\n'
-        '- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n',
+        "- ** — Phase-2 hardening:** polish highest-traffic pages and remove top friction points.\n"
+        "- ** — Phase-3 pre-plan:** convert Phase-2 learnings into Phase-3 priorities.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-phase2-hardening-closeout.md").write_text(
         d58._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-58-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-58-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/kpi-deep-audit-closeout-pack/kpi-deep-audit-closeout-summary.json"
@@ -59,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  KPI deep audit brief committed',
-                '- [ ]  deep-audit plan reviewed with owner + backup',
-                '- [ ]  risk ledger exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  execution priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  KPI deep audit brief committed",
+                "- [ ]  deep-audit plan reviewed with owner + backup",
+                "- [ ]  risk ledger exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  execution priorities drafted from  learnings",
             ]
         )
         + "\n",
