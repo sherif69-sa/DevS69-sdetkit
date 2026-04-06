@@ -39,11 +39,11 @@ need_cmd() {
   exit 127
 }
 
-valid_modes=(all ci verify fmt lint type doctor test full-test cov mut muthtml boost registry help)
+valid_modes=(all ci verify brutal fmt lint type doctor test full-test cov mut muthtml boost registry help)
 
 usage() {
   cat <<'USAGE' >&2
-Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}
+Usage: bash quality.sh {all|ci|verify|brutal|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}
 
 Profiles:
   quick     Fast local confidence / smoke profile.
@@ -54,6 +54,7 @@ Profiles:
 Modes:
   ci         Fast/smoke lane for local confidence; not merge truth.
   verify     Full verification lane before merge (doctor, format, lint, typing, full tests, security scan).
+  brutal     Maximum hardening lane (strict verify + mutation + premium full gate).
   all        Standard repo validation lane (auto-format, lint, typing, pytest, coverage).
   fmt        Apply Ruff formatting.
   lint       Run Ruff lint checks.
@@ -128,6 +129,21 @@ run_boost() {
   run_premium_fast
   run_topology_check
   run_optimize_summary
+}
+run_brutal() {
+  python -m sdetkit.checks run \
+    --profile strict \
+    --repo-root . \
+    --out-dir "$SDETKIT_OUT_DIR" \
+    --format text \
+    --json-output "$QUALITY_VERDICT_JSON" \
+    --markdown-output "$QUALITY_SUMMARY_MD"
+  run_mut
+  if [[ -f "premium-gate.sh" ]]; then
+    bash premium-gate.sh --mode full
+  else
+    echo "skip premium full gate: premium-gate.sh not found"
+  fi
 }
 run_full_test() { need_cmd pytest; python -m pytest -q -o addopts=; }
 run_test() { need_cmd pytest; python -m pytest; }
@@ -385,6 +401,12 @@ case "$mode" in
     echo "[quality] Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."
     python -m sdetkit.checks run       --profile strict       --repo-root .       --out-dir "$SDETKIT_OUT_DIR"       --format text       --json-output "$QUALITY_VERDICT_JSON"       --markdown-output "$QUALITY_SUMMARY_MD"
     exit $?
+    ;;
+  brutal)
+    profile_used="strict"
+    profile_notes="Maximum hardening lane: strict verify plus mutation and premium full gate."
+    echo "[quality] Brutal hardening lane (strict verify + mutation + premium full gate)."
+    run_required "brutal" "Brutal hardening lane" 1 "run_brutal"
     ;;
   all)
     profile_used="standard"

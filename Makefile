@@ -1,12 +1,15 @@
 # --- dev targets (bootstrap) ---
 
-.PHONY: bootstrap max venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry
+.PHONY: bootstrap max brutal venv install test cov lint fmt type docs-serve docs-build package-validate release-preflight release-verify-plan upgrade-audit upgrade-audit-ci registry
 
 bootstrap: venv
 	@bash -lc '. .venv/bin/activate && bash scripts/bootstrap.sh'
 
 max: bootstrap
 	@bash -lc '. .venv/bin/activate && bash quality.sh boost'
+
+brutal: bootstrap
+	@bash -lc '. .venv/bin/activate && bash quality.sh brutal'
 
 venv:
 	@test -x .venv/bin/python || python3 -m venv .venv
