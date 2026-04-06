@@ -217,12 +217,6 @@ def route_map_payload(
         text = p.read_text(encoding="utf-8", errors="ignore")
         if any(t in text.lower() for t in tokens):
             usage.append(str(p.relative_to(root)))
-    dep_text = (
-        root.joinpath("pyproject.toml").read_text(encoding="utf-8")
-        if root.joinpath("pyproject.toml").exists()
-        else ""
-    )
-    packages_audited = dep_text.count(">=") + dep_text.count("==")
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "ready",

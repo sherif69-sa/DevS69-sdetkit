@@ -174,7 +174,7 @@ class ActionRegistry:
         return ActionResult("report.build", True, {"output": output, "format": fmt})
 
     def _kits_blueprint(self, params: dict[str, Any]) -> ActionResult:
-        goal = str(params.get("goal", "")).strip() or None
+        goal = str(params.get("goal", "")).strip()
         output = str(params.get("output", ".sdetkit/agent/workdir/umbrella-blueprint.json"))
         limit = int(params.get("limit", 3) or 3)
         selected = params.get("kits") or []
@@ -211,7 +211,7 @@ class ActionRegistry:
         )
 
     def _kits_optimize(self, params: dict[str, Any]) -> ActionResult:
-        goal = str(params.get("goal", "")).strip() or None
+        goal = str(params.get("goal", "")).strip()
         output = str(params.get("output", ".sdetkit/agent/workdir/umbrella-optimize.json"))
         limit = int(params.get("limit", 3) or 3)
         selected = params.get("kits") or []
@@ -256,7 +256,7 @@ class ActionRegistry:
         )
 
     def _kits_expand(self, params: dict[str, Any]) -> ActionResult:
-        goal = str(params.get("goal", "")).strip() or None
+        goal = str(params.get("goal", "")).strip()
         output = str(params.get("output", ".sdetkit/agent/workdir/umbrella-expand.json"))
         limit = int(params.get("limit", 3) or 3)
         selected = params.get("kits") or []

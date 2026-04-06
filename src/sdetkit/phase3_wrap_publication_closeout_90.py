@@ -23,10 +23,10 @@ _CANONICAL_PACK_DIR = "docs/artifacts/phase3-wrap-publication-closeout-pack"
 _CANONICAL_SUMMARY_NAME = "phase3-wrap-publication-closeout-summary.json"
 _CANONICAL_BOARD_NAME = "phase3-wrap-publication-delivery-board.md"
 _CANONICAL_EVIDENCE_SUMMARY_NAME = "phase3-wrap-publication-execution-summary.json"
-_SECTION_HEADER = '#  — Phase-3 wrap publication closeout lane'
+_SECTION_HEADER = "#  — Phase-3 wrap publication closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Phase3 Wrap Publication Closeout matters",
-    '## Required inputs ()',
+    "## Required inputs ()",
     "## Command lane",
     "## Phase-3 wrap publication contract",
     "## Phase-3 wrap publication quality checklist",
@@ -45,10 +45,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_phase3_wrap_publication_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.',
-    'The  lane references  outcomes, controls, and trust continuity signals.',
-    'Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.',
+    "Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.",
+    "The  lane references  outcomes, controls, and trust continuity signals.",
+    "Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets",
@@ -58,11 +58,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  evidence brief committed',
-    '- [ ]  phase-3 wrap publication plan committed',
-    '- [ ]  narrative template upgrade ledger exported',
-    '- [ ]  storyline outcomes ledger exported',
-    '- [ ] Next-impact roadmap draft captured from  outcomes',
+    "- [ ]  evidence brief committed",
+    "- [ ]  phase-3 wrap publication plan committed",
+    "- [ ]  narrative template upgrade ledger exported",
+    "- [ ]  storyline outcomes ledger exported",
+    "- [ ] Next-impact roadmap draft captured from  outcomes",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -73,7 +73,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Phase-3 wrap publication closeout lane\n\n closes with a major upgrade that converts  governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.\n\n## Why Phase3 Wrap Publication Closeout matters\n\n- Converts  governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into the next-impact roadmap.\n\n## Required inputs ()\n\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`\n- `docs/roadmap/plans/phase3-wrap-publication-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit phase3-wrap-publication-closeout --format json --strict\npython -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict\npython -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict\npython scripts/check_phase3_wrap_publication_closeout_contract.py\n```\n\n## Phase-3 wrap publication contract\n\n- Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.\n\n## Phase-3 wrap publication quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures phase-3 wrap publication adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  phase-3 wrap publication plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ] Next-impact roadmap draft captured from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Phase-3 wrap publication closeout lane\n\n closes with a major upgrade that converts  governance scale outcomes into a deterministic phase-3 wrap and publication operating lane.\n\n## Why Phase3 Wrap Publication Closeout matters\n\n- Converts  governance scale outcomes into reusable publication decisions across release recap, roadmap governance, and maintainer escalation paths.\n- Protects quality with strict contract coverage, runnable commands, KPI thresholds, and rollback safety.\n- Creates a deterministic handoff from  closeout into the next-impact roadmap.\n\n## Required inputs ()\n\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-closeout-summary.json`\n- `docs/artifacts/governance-scale-closeout-pack/governance-scale-delivery-board.md`\n- `docs/roadmap/plans/phase3-wrap-publication-plan.json`\n\n## Command lane\n\n```bash\npython -m sdetkit phase3-wrap-publication-closeout --format json --strict\npython -m sdetkit phase3-wrap-publication-closeout --emit-pack-dir docs/artifacts/phase3-wrap-publication-closeout-pack --format json --strict\npython -m sdetkit phase3-wrap-publication-closeout --execute --evidence-dir docs/artifacts/phase3-wrap-publication-closeout-pack/evidence --format json --strict\npython scripts/check_phase3_wrap_publication_closeout_contract.py\n```\n\n## Phase-3 wrap publication contract\n\n- Single owner + backup reviewer are assigned for  phase-3 wrap publication execution and signoff.\n- The  lane references  outcomes, controls, and trust continuity signals.\n- Every  section includes docs/template CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records phase-3 wrap publication outputs, final report publication status, and next-impact roadmap inputs.\n\n## Phase-3 wrap publication quality checklist\n\n- [ ] Includes baseline evidence coverage, objection segmentation assumptions, and response SLA targets\n- [ ] Every narrative lane row has owner, execution window, KPI threshold, and risk flag\n- [ ] CTA links point to narrative docs/templates + runnable command evidence\n- [ ] Scorecard captures phase-3 wrap publication adoption delta, objection deflection delta, confidence, and rollback owner\n- [ ] Artifact pack includes narrative brief, evidence plan, template diffs, outcome ledger, KPI scorecard, and execution log\n\n## Delivery board\n\n- [ ]  evidence brief committed\n- [ ]  phase-3 wrap publication plan committed\n- [ ]  narrative template upgrade ledger exported\n- [ ]  storyline outcomes ledger exported\n- [ ] Next-impact roadmap draft captured from  outcomes\n\n## Scoring model\n\n weights continuity + execution contract + governance artifact readiness for a 100-point activation score.\n"
 
 
 def _read_text(path: Path) -> str:
@@ -110,7 +110,9 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
         else {}
     )
     governance_scale_score = int(governance_scale_summary_data.get("activation_score", 0) or 0)
-    governance_scale_strict = coerce_bool(governance_scale_summary_data.get("strict_pass", False), default=False)
+    governance_scale_strict = coerce_bool(
+        governance_scale_summary_data.get("strict_pass", False), default=False
+    )
     governance_scale_check_count = (
         len(governance_scale_data.get("checks", []))
         if isinstance(governance_scale_data.get("checks"), list)
@@ -149,8 +151,8 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "governance_scale_summary_present",
@@ -241,9 +243,9 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
             f"89 continuity baseline is stable with activation score={governance_scale_score}."
         )
     else:
-        misses.append(' continuity baseline is below the floor (<85) or not strict-pass.')
+        misses.append(" continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
-            'Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock.'
+            "Re-run  closeout command and raise baseline quality above 85 with strict pass before  lock."
         )
 
     if board_count >= 5 and board_has_governance_scale:
@@ -251,24 +253,20 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
             f"Governance scale delivery board integrity validated with {board_count} checklist items."
         )
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_plan_keys:
-        wins.append(
-            ' phase-3 wrap publication dataset is available for governance execution.'
-        )
+        wins.append(" phase-3 wrap publication dataset is available for governance execution.")
     else:
-        misses.append(' phase-3 wrap publication dataset is missing required keys.')
+        misses.append(" phase-3 wrap publication dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/phase3-wrap-publication-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' phase-3 wrap publication closeout lane is fully complete and ready for next-impact roadmap execution.'
+            " phase-3 wrap publication closeout lane is fully complete and ready for next-impact roadmap execution."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -308,7 +306,7 @@ def build_phase3_wrap_publication_closeout_summary(root: Path) -> dict[str, Any]
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        ' phase-3 wrap publication closeout summary',
+        " phase-3 wrap publication closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -331,9 +329,9 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
     _write(target / "phase3-wrap-publication-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "phase3-wrap-publication-evidence-brief.md",
-        '#  phase-3 wrap publication brief\n',
+        "#  phase-3 wrap publication brief\n",
     )
-    _write(target / "phase3-wrap-publication-plan.md", '#  phase-3 wrap publication plan\n')
+    _write(target / "phase3-wrap-publication-plan.md", "#  phase-3 wrap publication plan\n")
     _write(
         target / "phase3-wrap-publication-narrative-template-upgrade-ledger.json",
         json.dumps({"upgrades": []}, indent=2) + "\n",
@@ -346,14 +344,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "phase3-wrap-publication-narrative-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "phase3-wrap-publication-execution-log.md", '#  execution log\n')
+    _write(target / "phase3-wrap-publication-execution-log.md", "#  execution log\n")
     _write(
         target / _CANONICAL_BOARD_NAME,
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "phase3-wrap-publication-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -381,12 +379,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_phase3_wrap_publication_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_phase3_wrap_publication_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=' phase-3 wrap publication closeout checks')
+    parser = argparse.ArgumentParser(description=" phase-3 wrap publication closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

@@ -61,7 +61,7 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
         module_stem = path.stem
 
         tests_refs = 0
-        for test_file, text in test_contents.items():
+        for _test_file, text in test_contents.items():
             if module_stem in text:
                 tests_refs += 1
 

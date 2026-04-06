@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Release prioritization closeout lane:** convert trust outcomes into release-ready narrative proof packs.\n'
-        '- ** — Launch readiness closeout lane:** convert release priorities into deterministic launch execution lanes.\n',
+        "- ** — Release prioritization closeout lane:** convert trust outcomes into release-ready narrative proof packs.\n"
+        "- ** — Launch readiness closeout lane:** convert release priorities into deterministic launch execution lanes.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-launch-readiness-closeout.md").write_text(
         d86._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-86-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-86-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  evidence brief committed',
-                '- [ ]  release prioritization plan committed',
-                '- [ ]  narrative template upgrade ledger exported',
-                '- [ ]  storyline outcomes ledger exported',
-                '- [ ]  launch priorities drafted from  outcomes',
+                "#  delivery board",
+                "- [ ]  evidence brief committed",
+                "- [ ]  release prioritization plan committed",
+                "- [ ]  narrative template upgrade ledger exported",
+                "- [ ]  storyline outcomes ledger exported",
+                "- [ ]  launch priorities drafted from  outcomes",
             ]
         )
         + "\n",
@@ -164,4 +162,4 @@ def test_lane86_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["launch-readiness-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' launch readiness closeout summary' in capsys.readouterr().out
+    assert " launch readiness closeout summary" in capsys.readouterr().out

@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Governance priorities closeout lane:** convert governance handoff outcomes into governance priorities.\n'
-        '- ** — Governance scale closeout lane:** scale governance priorities into deterministic execution lanes.\n',
+        "- ** — Governance priorities closeout lane:** convert governance handoff outcomes into governance priorities.\n"
+        "- ** — Governance scale closeout lane:** scale governance priorities into deterministic execution lanes.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-governance-scale-closeout.md").write_text(
         d89._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-89-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-89-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  evidence brief committed',
-                '- [ ]  governance priorities plan committed',
-                '- [ ]  narrative template upgrade ledger exported',
-                '- [ ]  storyline outcomes ledger exported',
-                '- [ ]  governance priorities drafted from  outcomes',
+                "#  delivery board",
+                "- [ ]  evidence brief committed",
+                "- [ ]  governance priorities plan committed",
+                "- [ ]  narrative template upgrade ledger exported",
+                "- [ ]  storyline outcomes ledger exported",
+                "- [ ]  governance priorities drafted from  outcomes",
             ]
         )
         + "\n",
@@ -164,4 +162,4 @@ def test_lane89_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["governance-scale-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' governance scale closeout summary' in capsys.readouterr().out
+    assert " governance scale closeout summary" in capsys.readouterr().out

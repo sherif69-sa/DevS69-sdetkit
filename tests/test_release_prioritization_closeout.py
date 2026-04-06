@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Evidence narrative closeout lane:** convert field objections into deterministic trust upgrades.\n'
-        '- ** — Release prioritization closeout lane:** convert trust outcomes into release-ready narrative proof packs.\n',
+        "- ** — Evidence narrative closeout lane:** convert field objections into deterministic trust upgrades.\n"
+        "- ** — Release prioritization closeout lane:** convert trust outcomes into release-ready narrative proof packs.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-release-prioritization-closeout.md").write_text(
         d85._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-85-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-85-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  evidence brief committed',
-                '- [ ]  evidence narrative plan committed',
-                '- [ ]  narrative template upgrade ledger exported',
-                '- [ ]  storyline outcomes ledger exported',
-                '- [ ]  release priorities drafted from  outcomes',
+                "#  delivery board",
+                "- [ ]  evidence brief committed",
+                "- [ ]  evidence narrative plan committed",
+                "- [ ]  narrative template upgrade ledger exported",
+                "- [ ]  storyline outcomes ledger exported",
+                "- [ ]  release priorities drafted from  outcomes",
             ]
         )
         + "\n",
@@ -173,4 +171,4 @@ def test_lane85_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["release-prioritization-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' release prioritization closeout summary' in capsys.readouterr().out
+    assert " release prioritization closeout summary" in capsys.readouterr().out

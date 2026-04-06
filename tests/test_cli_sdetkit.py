@@ -162,7 +162,7 @@ def test_product_lane_alias_resolves_to_canonical(capsys):
         cli.main(["phase1-hardening", "--help"])
     assert excinfo.value.code == 0
     out = capsys.readouterr().out
-    assert ' phase-1 hardening scorer' in out
+    assert " phase-1 hardening scorer" in out
 
 
 def test_product_lane_canonical_help_is_available(capsys):

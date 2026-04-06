@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Trust FAQ expansion loop:** convert field objections into deterministic trust upgrades.\n'
-        '- ** — Evidence narrative closeout lane:** convert trust outcomes into release-ready narrative proof packs.\n',
+        "- ** — Trust FAQ expansion loop:** convert field objections into deterministic trust upgrades.\n"
+        "- ** — Evidence narrative closeout lane:** convert trust outcomes into release-ready narrative proof packs.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-evidence-narrative-closeout.md").write_text(
         d84._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-84-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-84-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  trust FAQ brief committed',
-                '- [ ]  trust FAQ expansion plan committed',
-                '- [ ]  trust template upgrade ledger exported',
-                '- [ ]  escalation outcomes ledger exported',
-                '- [ ]  evidence narrative priorities drafted from  outcomes',
+                "#  delivery board",
+                "- [ ]  trust FAQ brief committed",
+                "- [ ]  trust FAQ expansion plan committed",
+                "- [ ]  trust template upgrade ledger exported",
+                "- [ ]  escalation outcomes ledger exported",
+                "- [ ]  evidence narrative priorities drafted from  outcomes",
             ]
         )
         + "\n",
@@ -168,4 +166,4 @@ def test_lane84_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["evidence-narrative-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' evidence narrative closeout summary' in capsys.readouterr().out
+    assert " evidence narrative closeout summary" in capsys.readouterr().out

@@ -26,18 +26,18 @@ def _seed_repo(root: Path) -> None:
     )
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs/index.md").write_text(
-        '-72-big-upgrade-report.md\nintegrations-case-study-prep4-closeout.md\n',
+        "-72-big-upgrade-report.md\nintegrations-case-study-prep4-closeout.md\n",
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Case-study prep #4:** lock publication-quality evidence and publication readiness handoff.\n'
-        '- ** — Publication launch:** convert  outputs into externally shareable case study assets.\n',
+        "- ** — Case-study prep #4:** lock publication-quality evidence and publication readiness handoff.\n"
+        "- ** — Publication launch:** convert  outputs into externally shareable case study assets.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-case-study-prep4-closeout.md").write_text(
         d72._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/big-upgrade-report-72.md").write_text('#  report\n', encoding="utf-8")
+    (root / "docs/big-upgrade-report-72.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -60,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  triage-speed case-study narrative published',
-                '- [ ]  controls and assumptions log exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  publication launch priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  triage-speed case-study narrative published",
+                "- [ ]  controls and assumptions log exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  publication launch priorities drafted from  learnings",
             ]
         )
         + "\n",

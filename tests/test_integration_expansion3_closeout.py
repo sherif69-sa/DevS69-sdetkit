@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Integration expansion #3:** publish advanced Jenkins implementation path.\n'
-        '- ** — Integration expansion #4:** publish self-hosted enterprise implementation path.\n',
+        "- ** — Integration expansion #3:** publish advanced Jenkins implementation path.\n"
+        "- ** — Integration expansion #4:** publish self-hosted enterprise implementation path.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-expansion3-closeout.md").write_text(
         d67._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-67-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-67-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  advanced GitLab pipeline blueprint published',
-                '- [ ]  matrix and cache strategy exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  integration expansion priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  advanced GitLab pipeline blueprint published",
+                "- [ ]  matrix and cache strategy exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  integration expansion priorities drafted from  learnings",
             ]
         )
         + "\n",

@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Weekly review #9:** report baseline movement and community signal quality.\n'
-        '- ** — Integration expansion #2:** publish advanced GitLab CI implementation path.\n',
+        "- ** — Weekly review #9:** report baseline movement and community signal quality.\n"
+        "- ** — Integration expansion #2:** publish advanced GitLab CI implementation path.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-weekly-review-closeout-2.md").write_text(
         d65._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-65-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-65-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -63,12 +61,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  advanced workflow blueprint published',
-                '- [ ]  matrix and concurrency plan exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  weekly review priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  advanced workflow blueprint published",
+                "- [ ]  matrix and concurrency plan exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  weekly review priorities drafted from  learnings",
             ]
         )
         + "\n",
@@ -77,7 +75,7 @@ def _seed_repo(root: Path) -> None:
 
     workflow = root / ".github/workflows/advanced-github-actions-reference-64.yml"
     workflow.parent.mkdir(parents=True, exist_ok=True)
-    workflow.write_text('name:  Advanced GitHub Actions Reference\n', encoding="utf-8")
+    workflow.write_text("name:  Advanced GitHub Actions Reference\n", encoding="utf-8")
 
 
 def test_lane65_json(tmp_path: Path, capsys) -> None:

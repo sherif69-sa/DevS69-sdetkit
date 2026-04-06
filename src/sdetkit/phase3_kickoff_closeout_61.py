@@ -163,9 +163,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
     phase2_wrap_handoff_score, phase2_wrap_handoff_strict, phase2_wrap_handoff_check_count = (
         _load_phase2_wrap_handoff_summary(phase2_wrap_handoff_summary)
     )
-    board_count, board_has_required = _count_board_items(
-        phase2_wrap_handoff_board, ""
-    )
+    board_count, board_has_required = _count_board_items(phase2_wrap_handoff_board, "")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -286,13 +284,9 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     if board_count >= 5 and board_has_required:
-        wins.append(
-            f"delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            "delivery board integrity is incomplete (needs >=5 items and anchors)."
-        )
+        misses.append("delivery board integrity is incomplete (needs >=5 items and anchors).")
         handoff_actions.append("Repair delivery board entries to include anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:

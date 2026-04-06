@@ -62,7 +62,7 @@ RESERVED_NAMES: set[str] = (
     {"baseline", "playbooks"} | CORE_COMMANDS | DOC_AND_GOV_COMMANDS | set(RECOMMENDED_PLAYBOOKS)
 )
 
-_SERIES_PREFIX = re.compile('^(?:impact|)\\d+_')
+_SERIES_PREFIX = re.compile("^(?:impact|)\\d+_")
 _SERIES_CLOSEOUT = re.compile(r"^(.+_closeout)(?:_\d+)?$")
 
 # Stable product lanes promoted from legacy numeric-series naming.
@@ -107,7 +107,7 @@ _PLAYBOOK_ALIAS_TO_CANONICAL: dict[str, str] = {
 
 
 def _contains_day_token(name: str) -> bool:
-    return '' in re.split(r"[^a-z0-9]+", name.lower())
+    return "" in re.split(r"[^a-z0-9]+", name.lower())
 
 
 def _cmd_to_mod(cmd: str) -> str:
@@ -215,7 +215,7 @@ def _apply_search_list(xs: list[str], search: str | None) -> list[str]:
         return xs
     s = search.lower()
     if _contains_day_token(s):
-        s = " ".join(tok for tok in re.split(r"[^a-z0-9]+", s) if tok != '')
+        s = " ".join(tok for tok in re.split(r"[^a-z0-9]+", s) if tok != "")
         s = s.strip()
         if not s:
             return xs
@@ -228,7 +228,7 @@ def _apply_search_aliases(d: dict[str, str], search: str | None) -> dict[str, st
         return d
     s = search.lower()
     if _contains_day_token(s):
-        s = " ".join(tok for tok in re.split(r"[^a-z0-9]+", s) if tok != '')
+        s = " ".join(tok for tok in re.split(r"[^a-z0-9]+", s) if tok != "")
         s = s.strip()
         if not s:
             return d

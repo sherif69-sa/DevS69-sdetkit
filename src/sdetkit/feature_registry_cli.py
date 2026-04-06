@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 from dataclasses import asdict
+from typing import Any
 
 from .feature_registry import (
     load_feature_registry,
@@ -29,9 +30,15 @@ def _parse_count_expectations(items: list[str], *, label: str) -> tuple[dict[str
         try:
             parsed = int(value)
         except ValueError:
-            return {}, f"feature-registry: invalid {label} expectation `{token}` (count must be int)"
+            return (
+                {},
+                f"feature-registry: invalid {label} expectation `{token}` (count must be int)",
+            )
         if parsed < 0:
-            return {}, f"feature-registry: invalid {label} expectation `{token}` (count must be >= 0)"
+            return (
+                {},
+                f"feature-registry: invalid {label} expectation `{token}` (count must be >= 0)",
+            )
         out[key] = parsed
     return out, None
 
@@ -77,7 +84,9 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Assert total row count after filtering.",
     )
-    p.add_argument("--format", choices=["table", "json", "markdown", "summary-json"], default="table")
+    p.add_argument(
+        "--format", choices=["table", "json", "markdown", "summary-json"], default="table"
+    )
     return p
 
 
@@ -96,7 +105,9 @@ def main(argv: list[str] | None = None) -> int:
         rows = [item for item in rows if item.status == ns.status]
     commands = {item.command for item in rows}
 
-    missing_commands = sorted({str(name).strip() for name in ns.expect_command if str(name).strip()} - commands)
+    missing_commands = sorted(
+        {str(name).strip() for name in ns.expect_command if str(name).strip()} - commands
+    )
     if missing_commands:
         print(
             "feature-registry: missing expected command(s): " + ", ".join(missing_commands),
@@ -107,7 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.fail_on_empty and not rows:
         print("feature-registry: filtered result set is empty", file=sys.stderr)
         return 1
-    summary = summarize_feature_registry(rows)
+    summary: dict[str, Any] = summarize_feature_registry(rows)
 
     tier_expectations, tier_error = _parse_count_expectations(
         list(ns.expect_tier_count), label="tier-count"
@@ -116,7 +127,9 @@ def main(argv: list[str] | None = None) -> int:
         print(tier_error, file=sys.stderr)
         return 2
     for tier, expected in tier_expectations.items():
-        actual = int((summary.get("by_tier", {}) or {}).get(tier, 0))
+        by_tier = summary.get("by_tier")
+        tier_counts = by_tier if isinstance(by_tier, dict) else {}
+        actual = int(tier_counts.get(tier, 0))
         if actual != expected:
             print(
                 f"feature-registry: tier count mismatch for `{tier}` (expected {expected}, got {actual})",
@@ -131,7 +144,9 @@ def main(argv: list[str] | None = None) -> int:
         print(status_error, file=sys.stderr)
         return 2
     for status, expected in status_expectations.items():
-        actual = int((summary.get("by_status", {}) or {}).get(status, 0))
+        by_status = summary.get("by_status")
+        status_counts = by_status if isinstance(by_status, dict) else {}
+        actual = int(status_counts.get(status, 0))
         if actual != expected:
             print(
                 f"feature-registry: status count mismatch for `{status}` (expected {expected}, got {actual})",

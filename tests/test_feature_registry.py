@@ -63,7 +63,12 @@ def test_contract_script_runs_without_external_pythonpath() -> None:
     env.pop("PYTHONPATH", None)
 
     proc = subprocess.run(
-        [sys.executable, "scripts/check_feature_registry_contract.py", "--repo-root", str(repo_root)],
+        [
+            sys.executable,
+            "scripts/check_feature_registry_contract.py",
+            "--repo-root",
+            str(repo_root),
+        ],
         cwd=repo_root,
         env=env,
         capture_output=True,
@@ -81,7 +86,13 @@ def test_sync_script_check_mode_runs_without_external_pythonpath() -> None:
     env.pop("PYTHONPATH", None)
 
     proc = subprocess.run(
-        [sys.executable, "scripts/sync_feature_registry_docs.py", "--repo-root", str(repo_root), "--check"],
+        [
+            sys.executable,
+            "scripts/sync_feature_registry_docs.py",
+            "--repo-root",
+            str(repo_root),
+            "--check",
+        ],
         cwd=repo_root,
         env=env,
         capture_output=True,

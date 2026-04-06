@@ -22,7 +22,11 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
         json.dumps(
             {
                 "phases": [
-                    {"impact": 1, "report_file": "impact01-report.md", "plan_file": "impact01-plan.json"}
+                    {
+                        "impact": 1,
+                        "report_file": "impact01-report.md",
+                        "plan_file": "impact01-plan.json",
+                    }
                 ]
             }
         ),

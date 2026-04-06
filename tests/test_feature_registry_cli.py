@@ -65,7 +65,9 @@ def test_feature_registry_cli_expect_command_passes_when_present(capsys) -> None
 
 
 def test_feature_registry_cli_expect_command_fails_when_missing(capsys) -> None:
-    rc = feature_registry_cli.main(["--expect-command", "nope-nope-nope", "--format", "summary-json"])
+    rc = feature_registry_cli.main(
+        ["--expect-command", "nope-nope-nope", "--format", "summary-json"]
+    )
     assert rc == 2
     err = capsys.readouterr().err
     assert "missing expected command" in err
@@ -121,7 +123,9 @@ def test_feature_registry_cli_expect_tier_count_mismatch_fails(capsys) -> None:
 
 
 def test_feature_registry_cli_invalid_expectation_format_fails(capsys) -> None:
-    rc = feature_registry_cli.main(["--expect-tier-count", "bad-format", "--format", "summary-json"])
+    rc = feature_registry_cli.main(
+        ["--expect-tier-count", "bad-format", "--format", "summary-json"]
+    )
     assert rc == 2
     err = capsys.readouterr().err
     assert "invalid tier-count expectation" in err

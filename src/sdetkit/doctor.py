@@ -2267,7 +2267,9 @@ def main(argv: list[str] | None = None) -> int:
     if failed_checks:
         data["failed_checks"] = failed_checks
     if isinstance(getattr(ns, "apply_plan", None), str) and ns.apply_plan:
-        data["post_plan_ok"] = coerce_bool(data.get("ok"), default=False) and coerce_bool(data.get("plan_ok"), default=False)
+        data["post_plan_ok"] = coerce_bool(data.get("ok"), default=False) and coerce_bool(
+            data.get("plan_ok"), default=False
+        )
 
     if ns.format == "json" or ns.json:
         output = json.dumps(data, sort_keys=True) + "\n"

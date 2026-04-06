@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Experiment lane activation:** seed controlled experiments from  distribution misses and KPI deltas.\n'
-        '- ** — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n',
+        "- ** — Experiment lane activation:** seed controlled experiments from  distribution misses and KPI deltas.\n"
+        "- ** — Distribution batch #1:** publish coordinated posts linking demo assets to docs.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-experiment-lane.md").write_text(
         d37._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-37-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-37-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/distribution-closeout-pack/distribution-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
@@ -57,12 +55,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  launch plan committed',
-                '- [ ]  message kit reviewed with owner + backup',
-                '- [ ]  posting windows locked',
-                '- [ ]  experiment backlog seeded from channel misses',
-                '- [ ]  summary owner confirmed',
+                "#  delivery board",
+                "- [ ]  launch plan committed",
+                "- [ ]  message kit reviewed with owner + backup",
+                "- [ ]  posting windows locked",
+                "- [ ]  experiment backlog seeded from channel misses",
+                "- [ ]  summary owner confirmed",
             ]
         )
         + "\n",
@@ -119,7 +117,7 @@ def test_lane37_strict_fails_when_lane36_inputs_missing(tmp_path: Path) -> None:
 def test_lane37_strict_fails_when_lane36_board_is_not_ready(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (tmp_path / "docs/artifacts/distribution-closeout-pack/delivery-board.md").write_text(
-        '- [ ]  experiment backlog seeded from channel misses\n', encoding="utf-8"
+        "- [ ]  experiment backlog seeded from channel misses\n", encoding="utf-8"
     )
     rc = d37.main(["--root", str(tmp_path), "--strict", "--format", "json"])
     assert rc == 1
@@ -129,4 +127,4 @@ def test_lane37_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["experiment-lane", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' experiment lane summary' in capsys.readouterr().out
+    assert " experiment lane summary" in capsys.readouterr().out

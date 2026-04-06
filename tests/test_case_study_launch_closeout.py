@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Case-study launch:** lock publication-quality evidence and publication readiness handoff.\n'
-        '- ** — Distribution scaling:** convert  learnings into scaled distribution operations.\n',
+        "- ** — Case-study launch:** lock publication-quality evidence and publication readiness handoff.\n"
+        "- ** — Distribution scaling:** convert  learnings into scaled distribution operations.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-case-study-launch-closeout.md").write_text(
         d73._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-73-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-73-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -62,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  publication-quality case-study narrative published',
-                '- [ ]  controls and assumptions log exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  distribution scaling priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  publication-quality case-study narrative published",
+                "- [ ]  controls and assumptions log exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  distribution scaling priorities drafted from  learnings",
             ]
         )
         + "\n",

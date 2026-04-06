@@ -40,7 +40,9 @@ def test_coerce_bool_handles_string_flags(value: object, default: bool, expected
     assert coerce_bool(value, default=default) is expected
 
 
-def test_ops_policy_string_false_does_not_enable_shell(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_ops_policy_string_false_does_not_enable_shell(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.chdir(tmp_path)
     wf = Path("workflow.json")
     wf.write_text(

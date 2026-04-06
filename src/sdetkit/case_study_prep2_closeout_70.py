@@ -19,10 +19,10 @@ _DAY69_BOARD_PATH = (
     "docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md"
 )
 _CASE_STUDY_DATA_PATH = "docs/roadmap/plans/triage-speed-case-study.json"
-_SECTION_HEADER = '#  — Case-study prep #2 closeout lane'
+_SECTION_HEADER = "#  — Case-study prep #2 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Case Study Prep 2 Closeout matters",
-    '## Required inputs ()',
+    "## Required inputs ()",
     "## Case Study Prep 2 Closeout command lane",
     "## Case-study prep contract",
     "## Case-study quality checklist",
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_case_study_prep2_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  triage-speed case-study prep and signoff.',
-    'The  lane references  case-study prep outputs, governance decisions, and KPI continuity signals.',
-    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records before/after triage-speed deltas, evidence confidence notes, and  prep priorities.',
+    "Single owner + backup reviewer are assigned for  triage-speed case-study prep and signoff.",
+    "The  lane references  case-study prep outputs, governance decisions, and KPI continuity signals.",
+    "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records before/after triage-speed deltas, evidence confidence notes, and  prep priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes baseline window, treatment window, and outlier handling notes",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  integration brief committed',
-    '- [ ]  triage-speed case-study narrative published',
-    '- [ ]  controls and assumptions log exported',
-    '- [ ]  KPI scorecard snapshot exported',
-    '- [ ]  case-study prep priorities drafted from  learnings',
+    "- [ ]  integration brief committed",
+    "- [ ]  triage-speed case-study narrative published",
+    "- [ ]  controls and assumptions log exported",
+    "- [ ]  KPI scorecard snapshot exported",
+    "- [ ]  case-study prep priorities drafted from  learnings",
 ]
 _REQUIRED_DATA_KEYS = [
     '"case_id"',
@@ -69,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Case-study prep #2 closeout lane\n\n closes with a major upgrade that turns  integration outputs into a measurable triage-speed case-study prep pack.\n\n## Why Case Study Prep 2 Closeout matters\n\n- Converts  implementation signals into before/after triage-speed evidence.\n- Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.\n- Creates a deterministic handoff from  case-study prep #2 to  case-study prep #3.\n\n## Required inputs ()\n\n- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json`\n- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md`\n- `docs/roadmap/plans/triage-speed-case-study.json`\n\n## Case Study Prep 2 Closeout command lane\n\n```bash\npython -m sdetkit case-study-prep2-closeout --format json --strict\npython -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/case-study-prep2-closeout-pack --format json --strict\npython -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/case-study-prep2-closeout-pack/evidence --format json --strict\npython scripts/check_case_study_prep2_closeout_contract.py\n```\n\n## Case-study prep contract\n\n- Single owner + backup reviewer are assigned for  triage-speed case-study prep and signoff.\n- The  lane references  case-study prep outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records before/after triage-speed deltas, evidence confidence notes, and  prep priorities.\n\n## Case-study quality checklist\n\n- [ ] Includes baseline window, treatment window, and outlier handling notes\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log\n\n## Case Study Prep 2 Closeout delivery board\n\n- [ ]  integration brief committed\n- [ ]  triage-speed case-study narrative published\n- [ ]  controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  case-study prep priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Triage-speed evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Case-study prep #2 closeout lane\n\n closes with a major upgrade that turns  integration outputs into a measurable triage-speed case-study prep pack.\n\n## Why Case Study Prep 2 Closeout matters\n\n- Converts  implementation signals into before/after triage-speed evidence.\n- Protects case-study quality with strict contract coverage, runnable commands, and rollback safety.\n- Creates a deterministic handoff from  case-study prep #2 to  case-study prep #3.\n\n## Required inputs ()\n\n- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-closeout-summary.json`\n- `docs/artifacts/case-study-prep1-closeout-pack/case-study-prep1-delivery-board.md`\n- `docs/roadmap/plans/triage-speed-case-study.json`\n\n## Case Study Prep 2 Closeout command lane\n\n```bash\npython -m sdetkit case-study-prep2-closeout --format json --strict\npython -m sdetkit case-study-prep2-closeout --emit-pack-dir docs/artifacts/case-study-prep2-closeout-pack --format json --strict\npython -m sdetkit case-study-prep2-closeout --execute --evidence-dir docs/artifacts/case-study-prep2-closeout-pack/evidence --format json --strict\npython scripts/check_case_study_prep2_closeout_contract.py\n```\n\n## Case-study prep contract\n\n- Single owner + backup reviewer are assigned for  triage-speed case-study prep and signoff.\n- The  lane references  case-study prep outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records before/after triage-speed deltas, evidence confidence notes, and  prep priorities.\n\n## Case-study quality checklist\n\n- [ ] Includes baseline window, treatment window, and outlier handling notes\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures failure-rate delta, MTTR delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, case-study narrative, controls log, KPI scorecard, and execution log\n\n## Case Study Prep 2 Closeout delivery board\n\n- [ ]  integration brief committed\n- [ ]  triage-speed case-study narrative published\n- [ ]  controls and assumptions log exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  case-study prep priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Triage-speed evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
 
 
 def _read(path: Path) -> str:
@@ -112,7 +112,7 @@ def build_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
     prior_closeout_score, prior_closeout_strict, prior_closeout_check_count = _load_prior_closeout(
         prior_closeout_summary
     )
-    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, '')
+    board_count, board_has_prior_closeout = _count_board_items(prior_closeout_board, "")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -140,8 +140,8 @@ def build_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "prior_closeout_summary_present",
@@ -230,38 +230,28 @@ def build_case_study_prep2_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if prior_closeout_strict:
-        wins.append(
-            f"69 continuity is strict-pass with activation score={prior_closeout_score}."
-        )
+        wins.append(f"69 continuity is strict-pass with activation score={prior_closeout_score}.")
     else:
-        misses.append(' strict continuity signal is missing.')
-        handoff_actions.append(
-            'Re-run  closeout command and restore strict baseline before  lock.'
-        )
+        misses.append(" strict continuity signal is missing.")
+        handoff_actions.append("Re-run  closeout command and restore strict baseline before  lock.")
 
     if board_count >= 5 and board_has_prior_closeout:
-        wins.append(
-            f"69 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"69 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_case_data_keys:
-        wins.append(
-            ' triage-speed case-study dataset is available for case-study prep execution.'
-        )
+        wins.append(" triage-speed case-study dataset is available for case-study prep execution.")
     else:
-        misses.append(' triage-speed case-study dataset is missing required keys.')
+        misses.append(" triage-speed case-study dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/triage-speed-case-study.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' case-study prep #2 closeout lane is fully complete and ready for  case-study prep #3.'
+            " case-study prep #2 closeout lane is fully complete and ready for  case-study prep #3."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -322,22 +312,22 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "case-study-prep2-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "case-study-prep2-integration-brief.md", '#  integration brief\n')
-    _write(target / "case-study-prep2-case-study-narrative.md", '#  case-study narrative\n')
+    _write(target / "case-study-prep2-integration-brief.md", "#  integration brief\n")
+    _write(target / "case-study-prep2-case-study-narrative.md", "#  case-study narrative\n")
     _write(
         target / "case-study-prep2-controls-log.json", json.dumps({"controls": []}, indent=2) + "\n"
     )
     _write(
         target / "case-study-prep2-kpi-scorecard.json", json.dumps({"kpis": []}, indent=2) + "\n"
     )
-    _write(target / "case-study-prep2-execution-log.md", '#  execution log\n')
+    _write(target / "case-study-prep2-execution-log.md", "#  execution log\n")
     _write(
         target / "case-study-prep2-delivery-board.md",
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "case-study-prep2-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -365,12 +355,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_case_study_prep2_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_case_study_prep2_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=' case-study prep #2 closeout checks')
+    parser = argparse.ArgumentParser(description=" case-study prep #2 closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")

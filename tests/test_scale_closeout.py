@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Scale closeout lane:** convert  acceleration proof into deterministic scale loops.\n'
-        '- ** — Expansion lane continuation:** convert  scale wins into expansion plays.\n',
+        "- ** — Scale closeout lane:** convert  acceleration proof into deterministic scale loops.\n"
+        "- ** — Expansion lane continuation:** convert  scale wins into expansion plays.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-scale-closeout.md").write_text(
         d44._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-44-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-44-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = root / "docs/artifacts/acceleration-closeout-pack/acceleration-closeout-summary.json"
     summary.parent.mkdir(parents=True, exist_ok=True)
@@ -57,12 +55,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  acceleration plan draft committed',
-                '- [ ]  review notes captured with owner + backup',
-                '- [ ]  remediation matrix exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  scale priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  acceleration plan draft committed",
+                "- [ ]  review notes captured with owner + backup",
+                "- [ ]  remediation matrix exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  scale priorities drafted from  learnings",
             ]
         )
         + "\n",

@@ -41,9 +41,9 @@ _EXECUTION_COMMANDS = [
 ]
 _REQUIRED_CONTRACT_LINES = [
     "Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.",
-    'The Optimization Closeout Foundation optimization lane references  expansion winners and misses with deterministic remediation loops.',
+    "The Optimization Closeout Foundation optimization lane references  expansion winners and misses with deterministic remediation loops.",
     "Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
-    'Optimization Closeout Foundation closeout records optimization learnings and  acceleration priorities.',
+    "Optimization Closeout Foundation closeout records optimization learnings and  acceleration priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes optimization summary, remediation matrix, and rollback strategy",
@@ -57,10 +57,10 @@ _REQUIRED_DELIVERY_BOARD_LINES = [
     "- [ ] Optimization Closeout Foundation review notes captured with owner + backup",
     "- [ ] Optimization Closeout Foundation remediation matrix exported",
     "- [ ] Optimization Closeout Foundation KPI scorecard snapshot exported",
-    '- [ ]  acceleration priorities drafted from Optimization Closeout Foundation learnings',
+    "- [ ]  acceleration priorities drafted from Optimization Closeout Foundation learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '# Optimization Closeout Foundation — Optimization closeout lane\n\nOptimization Closeout Foundation closes with a major optimization upgrade that converts  expansion evidence into deterministic improvement loops.\n\n## Why Optimization Closeout Foundation matters\n\n- Converts  expansion proof into remediation-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from optimization outcomes into  acceleration priorities.\n\n## Required inputs (expansion automation)\n\n- `docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json`\n- `docs/artifacts/expansion-automation-pack-41/delivery-board-41.md`\n\n## Optimization Closeout Foundation command lane\n\n```bash\npython -m sdetkit optimization-closeout-foundation --format json --strict\npython -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict\npython -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/optimization-closeout-foundation-pack/evidence --format json --strict\npython scripts/check_optimization_closeout_contract.py\n```\n\n## Optimization closeout contract\n\n- Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.\n- The Optimization Closeout Foundation optimization lane references  expansion winners and misses with deterministic remediation loops.\n- Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n- Optimization Closeout Foundation closeout records optimization learnings and  acceleration priorities.\n\n## Optimization quality checklist\n\n- [ ] Includes optimization summary, remediation matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes optimization plan, remediation matrix, KPI scorecard, and execution log\n\n## Optimization Closeout Foundation delivery board\n\n- [ ] Optimization Closeout Foundation optimization plan draft committed\n- [ ] Optimization Closeout Foundation review notes captured with owner + backup\n- [ ] Optimization Closeout Foundation remediation matrix exported\n- [ ] Optimization Closeout Foundation KPI scorecard snapshot exported\n- [ ]  acceleration priorities drafted from Optimization Closeout Foundation learnings\n\n## Scoring model\n\nOptimization Closeout Foundation weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n- Expansion automation continuity and strict baseline carryover: 35 points.\n- Optimization contract lock + delivery board readiness: 15 points.\n'
+_DEFAULT_PAGE_TEMPLATE = "# Optimization Closeout Foundation — Optimization closeout lane\n\nOptimization Closeout Foundation closes with a major optimization upgrade that converts  expansion evidence into deterministic improvement loops.\n\n## Why Optimization Closeout Foundation matters\n\n- Converts  expansion proof into remediation-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from optimization outcomes into  acceleration priorities.\n\n## Required inputs (expansion automation)\n\n- `docs/artifacts/expansion-automation-pack-41/expansion-automation-summary-41.json`\n- `docs/artifacts/expansion-automation-pack-41/delivery-board-41.md`\n\n## Optimization Closeout Foundation command lane\n\n```bash\npython -m sdetkit optimization-closeout-foundation --format json --strict\npython -m sdetkit optimization-closeout-foundation --emit-pack-dir docs/artifacts/optimization-closeout-foundation-pack --format json --strict\npython -m sdetkit optimization-closeout-foundation --execute --evidence-dir docs/artifacts/optimization-closeout-foundation-pack/evidence --format json --strict\npython scripts/check_optimization_closeout_contract.py\n```\n\n## Optimization closeout contract\n\n- Single owner + backup reviewer are assigned for Optimization Closeout Foundation optimization lane execution and KPI follow-up.\n- The Optimization Closeout Foundation optimization lane references  expansion winners and misses with deterministic remediation loops.\n- Every Optimization Closeout Foundation section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n- Optimization Closeout Foundation closeout records optimization learnings and  acceleration priorities.\n\n## Optimization quality checklist\n\n- [ ] Includes optimization summary, remediation matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes optimization plan, remediation matrix, KPI scorecard, and execution log\n\n## Optimization Closeout Foundation delivery board\n\n- [ ] Optimization Closeout Foundation optimization plan draft committed\n- [ ] Optimization Closeout Foundation review notes captured with owner + backup\n- [ ] Optimization Closeout Foundation remediation matrix exported\n- [ ] Optimization Closeout Foundation KPI scorecard snapshot exported\n- [ ]  acceleration priorities drafted from Optimization Closeout Foundation learnings\n\n## Scoring model\n\nOptimization Closeout Foundation weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n- Expansion automation continuity and strict baseline carryover: 35 points.\n- Optimization contract lock + delivery board readiness: 15 points.\n"
 
 
 def _read(path: Path) -> str:
@@ -93,7 +93,7 @@ def _load_expansion_automation(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), '' in text, "Optimization Closeout Foundation" in text
+    return len(items), "" in text, "Optimization Closeout Foundation" in text
 
 
 def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
@@ -183,7 +183,7 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_optimization_closeout_foundation_alignment",
             "weight": 5,
-            "passed": ("Optimization Closeout Foundation" in top10_text and '' in top10_text),
+            "passed": ("Optimization Closeout Foundation" in top10_text and "" in top10_text),
             "evidence": "Optimization Closeout Foundation + acceleration strategy chain",
         },
         {
@@ -257,9 +257,9 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
             f"41 continuity is strict-pass with activation score={expansion_automation_score}."
         )
     else:
-        misses.append(' strict continuity signal is missing.')
+        misses.append(" strict continuity signal is missing.")
         handoff_actions.append(
-            'Re-run  expansion automation command and restore strict pass baseline before Optimization Closeout Foundation lock.'
+            "Re-run  expansion automation command and restore strict pass baseline before Optimization Closeout Foundation lock."
         )
 
     if (
@@ -267,15 +267,11 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
         and board_has_expansion_automation
         and board_has_optimization_closeout_foundation
     ):
-        wins.append(
-            f"41 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"41 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and /42 anchors).'
-        )
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and /42 anchors).")
         handoff_actions.append(
-            'Repair  delivery board entries to include  and Optimization Closeout Foundation anchors.'
+            "Repair  delivery board entries to include  and Optimization Closeout Foundation anchors."
         )
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
@@ -292,7 +288,7 @@ def build_optimization_closeout_summary(root: Path) -> dict[str, Any]:
 
     if not failed and not critical_failures:
         wins.append(
-            'Optimization Closeout Foundation optimization closeout lane is fully complete and ready for  acceleration lane.'
+            "Optimization Closeout Foundation optimization closeout lane is fully complete and ready for  acceleration lane."
         )
 
     return {
@@ -390,7 +386,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "execution-log.md",
-        '# Optimization Closeout Foundation Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and  acceleration priorities.\n',
+        "# Optimization Closeout Foundation Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and  acceleration priorities.\n",
     )
     _write(
         target / "delivery-board.md",
@@ -444,7 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_optimization_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_optimization_closeout_summary(root)
 
 

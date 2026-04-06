@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Launch readiness closeout lane:** convert launch readiness outcomes into governance ownership scorecards.\n'
-        '- ** — Governance handoff closeout lane:** convert launch readiness outcomes into governance ownership scorecards.\n',
+        "- ** — Launch readiness closeout lane:** convert launch readiness outcomes into governance ownership scorecards.\n"
+        "- ** — Governance handoff closeout lane:** convert launch readiness outcomes into governance ownership scorecards.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-governance-handoff-closeout.md").write_text(
         d87._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-87-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-87-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root
@@ -62,12 +60,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  evidence brief committed',
-                '- [ ]  launch readiness plan committed',
-                '- [ ]  narrative template upgrade ledger exported',
-                '- [ ]  storyline outcomes ledger exported',
-                '- [ ]  governance priorities drafted from  outcomes',
+                "#  delivery board",
+                "- [ ]  evidence brief committed",
+                "- [ ]  launch readiness plan committed",
+                "- [ ]  narrative template upgrade ledger exported",
+                "- [ ]  storyline outcomes ledger exported",
+                "- [ ]  governance priorities drafted from  outcomes",
             ]
         )
         + "\n",
@@ -167,4 +165,4 @@ def test_lane87_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["governance-handoff-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' governance handoff closeout summary' in capsys.readouterr().out
+    assert " governance handoff closeout summary" in capsys.readouterr().out

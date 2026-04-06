@@ -52,9 +52,7 @@ def _build_recommendations(
 ) -> list[str]:
     notes: list[str] = []
     if quality_deltas["completion_rate_percent"] < 0:
-        notes.append(
-            'Recover week-two completion rate by rerunning missing -13 closeout checks.'
-        )
+        notes.append("Recover week-two completion rate by rerunning missing -13 closeout checks.")
     if quality_deltas["artifact_coverage"] < 0:
         notes.append(
             "Regenerate missing artifacts and attach pack evidence before sprint closeout."
@@ -297,7 +295,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     quality_md.write_text(
         "\n".join(
             [
-                '#  quality scorecard',
+                "#  quality scorecard",
                 "",
                 f"- Completion rate delta: {payload['quality']['deltas']['completion_rate_percent']:+d}",
                 f"- Artifact coverage delta: {payload['quality']['deltas']['artifact_coverage']:+d}",
@@ -313,7 +311,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     action_plan.write_text(
         "\n".join(
             [
-                '#  contribution action plan',
+                "#  contribution action plan",
                 "",
                 "| Signal | Delta | Delta % | Action |",
                 "| --- | --- | --- | --- |",
@@ -331,7 +329,7 @@ def _emit_pack(repo_root: Path, out_dir: str, payload: dict[str, Any]) -> list[s
     checklist.write_text(
         "\n".join(
             [
-                '#  remediation checklist',
+                "#  remediation checklist",
                 "",
                 "- [ ] Review quality stability score and confirm no downward regression.",
                 "- [ ] Review contribution velocity score and assign owner for any negative signal.",

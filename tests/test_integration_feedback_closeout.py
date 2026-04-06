@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Growth campaign closeout:** convert partner outcomes into deterministic campaign controls.\n'
-        '- ** — Integration feedback loop:** fold field feedback into docs/templates.\n',
+        "- ** — Growth campaign closeout:** convert partner outcomes into deterministic campaign controls.\n"
+        "- ** — Integration feedback loop:** fold field feedback into docs/templates.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-integration-feedback-closeout.md").write_text(
         d82._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-82-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-82-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/growth-campaign-closeout-pack/growth-campaign-closeout-summary.json"
@@ -59,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  integration brief committed',
-                '- [ ]  growth campaign plan committed',
-                '- [ ]  campaign execution ledger exported',
-                '- [ ]  campaign KPI scorecard snapshot exported',
-                '- [ ]  execution priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  integration brief committed",
+                "- [ ]  growth campaign plan committed",
+                "- [ ]  campaign execution ledger exported",
+                "- [ ]  campaign KPI scorecard snapshot exported",
+                "- [ ]  execution priorities drafted from  learnings",
             ]
         )
         + "\n",
@@ -163,4 +161,4 @@ def test_lane82_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["integration-feedback-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0
-    assert ' integration feedback closeout summary' in capsys.readouterr().out
+    assert " integration feedback closeout summary" in capsys.readouterr().out

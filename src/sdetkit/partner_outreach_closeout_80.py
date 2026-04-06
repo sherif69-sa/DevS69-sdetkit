@@ -153,7 +153,9 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     scale_upgrade_score = int(
         scale_upgrade_payload.get("summary", {}).get("activation_score", 0) or 0
     )
-    scale_upgrade_strict = coerce_bool(scale_upgrade_payload.get("summary", {}).get("strict_pass", False), default=False)
+    scale_upgrade_strict = coerce_bool(
+        scale_upgrade_payload.get("summary", {}).get("strict_pass", False), default=False
+    )
     scale_upgrade_check_count = (
         len(scale_upgrade_payload.get("checks", []))
         if isinstance(scale_upgrade_payload.get("checks", []), list)
@@ -294,9 +296,7 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
         )
 
     if board_count >= 5 and board_has_scale_upgrade:
-        wins.append(
-            f"Prior delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"Prior delivery board integrity validated with {board_count} checklist items.")
     else:
         misses.append(
             "Prior delivery board integrity is incomplete (needs >=5 items and prior anchors)."

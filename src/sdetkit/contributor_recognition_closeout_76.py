@@ -19,14 +19,14 @@ _DAY75_BOARD_PATH = (
     "docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md"
 )
 _PLAN_PATH = "docs/roadmap/plans/contributor-recognition-plan.json"
-_SECTION_HEADER = '#  — Contributor recognition closeout lane'
+_SECTION_HEADER = "#  — Contributor recognition closeout lane"
 _REQUIRED_SECTIONS = [
-    '## Why  matters',
-    '## Required inputs ()',
-    '##  command lane',
+    "## Why  matters",
+    "## Required inputs ()",
+    "##  command lane",
     "## Contributor recognition contract",
     "## Recognition quality checklist",
-    '##  delivery board',
+    "##  delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -41,10 +41,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_contributor_recognition_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  contributor recognition execution and signoff.',
-    'The  lane references  outcomes, controls, and KPI continuity signals.',
-    'Every  section includes contributor CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records recognition outcomes, confidence notes, and  scale priorities.',
+    "Single owner + backup reviewer are assigned for  contributor recognition execution and signoff.",
+    "The  lane references  outcomes, controls, and KPI continuity signals.",
+    "Every  section includes contributor CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records recognition outcomes, confidence notes, and  scale priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes contributor baseline, recognition cadence, and stakeholder assumptions",
@@ -54,11 +54,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, recognition plan, credits ledger, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  integration brief committed',
-    '- [ ]  contributor recognition plan committed',
-    '- [ ]  recognition credits ledger exported',
-    '- [ ]  recognition KPI scorecard snapshot exported',
-    '- [ ]  scale priorities drafted from  learnings',
+    "- [ ]  integration brief committed",
+    "- [ ]  contributor recognition plan committed",
+    "- [ ]  recognition credits ledger exported",
+    "- [ ]  recognition KPI scorecard snapshot exported",
+    "- [ ]  scale priorities drafted from  learnings",
 ]
 _REQUIRED_DATA_KEYS = [
     '"plan_id"',
@@ -69,7 +69,7 @@ _REQUIRED_DATA_KEYS = [
     '"owner"',
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Contributor recognition closeout lane\n\n closes with a major upgrade that converts  trust refresh outcomes into a contributor-recognition execution pack.\n\n## Why  matters\n\n- Turns  trust outcomes into contributor-facing recognition proof across docs, governance, and release channels.\n- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  contributor recognition into  scale priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json`\n- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md`\n- `docs/roadmap/plans/contributor-recognition-plan.json`\n\n##  command lane\n\n```bash\npython -m sdetkit contributor-recognition-closeout --format json --strict\npython -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict\npython -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/contributor-recognition-closeout-pack/evidence --format json --strict\npython scripts/check_contributor_recognition_closeout_contract.py\n```\n\n## Contributor recognition contract\n\n- Single owner + backup reviewer are assigned for  contributor recognition execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes contributor CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records recognition outcomes, confidence notes, and  scale priorities.\n\n## Recognition quality checklist\n\n- [ ] Includes contributor baseline, recognition cadence, and stakeholder assumptions\n- [ ] Every recognition lane row has owner, publish window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures recognition score delta, trust carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, recognition plan, credits ledger, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  contributor recognition plan committed\n- [ ]  recognition credits ledger exported\n- [ ]  recognition KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Recognition evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Contributor recognition closeout lane\n\n closes with a major upgrade that converts  trust refresh outcomes into a contributor-recognition execution pack.\n\n## Why  matters\n\n- Turns  trust outcomes into contributor-facing recognition proof across docs, governance, and release channels.\n- Protects launch quality with strict contract coverage, runnable commands, rollout guardrails, and rollback safety.\n- Creates a deterministic handoff from  contributor recognition into  scale priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-closeout-summary.json`\n- `docs/artifacts/trust-assets-refresh-closeout-pack/trust-assets-refresh-delivery-board.md`\n- `docs/roadmap/plans/contributor-recognition-plan.json`\n\n##  command lane\n\n```bash\npython -m sdetkit contributor-recognition-closeout --format json --strict\npython -m sdetkit contributor-recognition-closeout --emit-pack-dir docs/artifacts/contributor-recognition-closeout-pack --format json --strict\npython -m sdetkit contributor-recognition-closeout --execute --evidence-dir docs/artifacts/contributor-recognition-closeout-pack/evidence --format json --strict\npython scripts/check_contributor_recognition_closeout_contract.py\n```\n\n## Contributor recognition contract\n\n- Single owner + backup reviewer are assigned for  contributor recognition execution and signoff.\n- The  lane references  outcomes, controls, and KPI continuity signals.\n- Every  section includes contributor CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records recognition outcomes, confidence notes, and  scale priorities.\n\n## Recognition quality checklist\n\n- [ ] Includes contributor baseline, recognition cadence, and stakeholder assumptions\n- [ ] Every recognition lane row has owner, publish window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures recognition score delta, trust carryover delta, confidence, and rollback owner\n- [ ] Artifact pack includes integration brief, recognition plan, credits ledger, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  integration brief committed\n- [ ]  contributor recognition plan committed\n- [ ]  recognition credits ledger exported\n- [ ]  recognition KPI scorecard snapshot exported\n- [ ]  scale priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane integrity (35)\n-  continuity baseline quality (35)\n- Recognition evidence data + delivery board completeness (30)\n\nStrict pass requires score >= 95 and zero critical failures.\n"
 
 
 def _read(path: Path) -> str:
@@ -109,9 +109,7 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
     trust_assets_refresh_score, trust_assets_refresh_strict, trust_assets_refresh_check_count = (
         _load_trust_assets_refresh(trust_assets_refresh_summary)
     )
-    board_count, board_has_trust_assets_refresh = _count_board_items(
-        trust_assets_refresh_board, ''
-    )
+    board_count, board_has_trust_assets_refresh = _count_board_items(trust_assets_refresh_board, "")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -142,8 +140,8 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "trust_assets_refresh_summary_present",
@@ -236,32 +234,26 @@ def build_contributor_recognition_closeout_summary(root: Path) -> dict[str, Any]
             f"75 continuity is strict-pass with activation score={trust_assets_refresh_score}."
         )
     else:
-        misses.append(' strict continuity signal is missing.')
-        handoff_actions.append(
-            'Re-run  closeout command and restore strict baseline before  lock.'
-        )
+        misses.append(" strict continuity signal is missing.")
+        handoff_actions.append("Re-run  closeout command and restore strict baseline before  lock.")
 
     if board_count >= 5 and board_has_trust_assets_refresh:
-        wins.append(
-            f"75 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"75 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_plan_keys:
-        wins.append(' contributor recognition dataset is available for launch execution.')
+        wins.append(" contributor recognition dataset is available for launch execution.")
     else:
-        misses.append(' contributor recognition dataset is missing required keys.')
+        misses.append(" contributor recognition dataset is missing required keys.")
         handoff_actions.append(
             "Update docs/roadmap/plans/contributor-recognition-plan.json to restore required keys."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' contributor recognition closeout lane is fully complete and ready for  scale priorities.'
+            " contributor recognition closeout lane is fully complete and ready for  scale priorities."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -322,8 +314,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "contributor-recognition-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "contributor-recognition-integration-brief.md", '#  integration brief\n')
-    _write(target / "contributor-recognition-plan.md", '#  contributor recognition plan\n')
+    _write(target / "contributor-recognition-integration-brief.md", "#  integration brief\n")
+    _write(target / "contributor-recognition-plan.md", "#  contributor recognition plan\n")
     _write(
         target / "contributor-recognition-credits-ledger.json",
         json.dumps({"credits": []}, indent=2) + "\n",
@@ -332,14 +324,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "contributor-recognition-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "contributor-recognition-execution-log.md", '#  execution log\n')
+    _write(target / "contributor-recognition-execution-log.md", "#  execution log\n")
     _write(
         target / "contributor-recognition-delivery-board.md",
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "contributor-recognition-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -367,7 +359,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_contributor_recognition_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_contributor_recognition_closeout_summary(root)
 
 

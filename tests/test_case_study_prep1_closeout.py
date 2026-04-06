@@ -18,7 +18,7 @@ def _seed_repo(root: Path) -> None:
         "impact-69-big-upgrade-report.md\nintegrations-case-study-prep1-closeout.md\n",
         encoding="utf-8",
     )
-    (root / "docs/top-10-github-strategy.md").write_text('\n\n', encoding="utf-8")
+    (root / "docs/top-10-github-strategy.md").write_text("\n\n", encoding="utf-8")
     (root / "docs/integrations-case-study-prep1-closeout.md").write_text(
         d69._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
@@ -45,12 +45,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  item 1',
-                '- [ ]  item 2',
-                '- [ ]  item 3',
-                '- [ ]  item 4',
-                '- [ ]  item 5',
+                "#  delivery board",
+                "- [ ]  item 1",
+                "- [ ]  item 2",
+                "- [ ]  item 3",
+                "- [ ]  item 4",
+                "- [ ]  item 5",
             ]
         )
         + "\n",

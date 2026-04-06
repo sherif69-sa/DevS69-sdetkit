@@ -12,14 +12,14 @@ _PAGE_PATH = "docs/integrations-expansion-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY44_SUMMARY_PATH = "docs/artifacts/scale-closeout-pack/scale-closeout-summary.json"
 _DAY44_BOARD_PATH = "docs/artifacts/scale-closeout-pack/scale-delivery-board.md"
-_SECTION_HEADER = '#  — Expansion closeout lane'
+_SECTION_HEADER = "#  — Expansion closeout lane"
 _REQUIRED_SECTIONS = [
-    '## Why  matters',
-    '## Required inputs ()',
-    '##  command lane',
+    "## Why  matters",
+    "## Required inputs ()",
+    "##  command lane",
     "## Expansion closeout contract",
     "## Expansion quality checklist",
-    '##  delivery board',
+    "##  delivery board",
     "## Scoring model",
 ]
 _REQUIRED_COMMANDS = [
@@ -34,10 +34,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_expansion_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  expansion lane execution and KPI follow-up.',
-    'The  expansion lane references  scale winners and misses with deterministic growth loops.',
-    'Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.',
-    ' closeout records expansion learnings and  optimization priorities.',
+    "Single owner + backup reviewer are assigned for  expansion lane execution and KPI follow-up.",
+    "The  expansion lane references  scale winners and misses with deterministic growth loops.",
+    "Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.",
+    " closeout records expansion learnings and  optimization priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes expansion summary, growth matrix, and rollback strategy",
@@ -47,14 +47,14 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes expansion plan, growth matrix, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  expansion plan draft committed',
-    '- [ ]  review notes captured with owner + backup',
-    '- [ ]  growth matrix exported',
-    '- [ ]  KPI scorecard snapshot exported',
-    '- [ ]  optimization priorities drafted from  learnings',
+    "- [ ]  expansion plan draft committed",
+    "- [ ]  review notes captured with owner + backup",
+    "- [ ]  growth matrix exported",
+    "- [ ]  KPI scorecard snapshot exported",
+    "- [ ]  optimization priorities drafted from  learnings",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Expansion closeout lane\n\n closes with a major expansion upgrade that converts  scale evidence into deterministic improvement loops.\n\n## Why  matters\n\n- Converts  scale proof into growth-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from expansion outcomes into  optimization priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`\n- `docs/artifacts/scale-closeout-pack/scale-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit expansion-closeout --format json --strict\npython -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict\npython -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict\npython scripts/check_expansion_closeout_contract.py\n```\n\n## Expansion closeout contract\n\n- Single owner + backup reviewer are assigned for  expansion lane execution and KPI follow-up.\n- The  expansion lane references  scale winners and misses with deterministic growth loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records expansion learnings and  optimization priorities.\n\n## Expansion quality checklist\n\n- [ ] Includes expansion summary, growth matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes expansion plan, growth matrix, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  expansion plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  growth matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  optimization priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Expansion contract lock + delivery board readiness: 15 points.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Expansion closeout lane\n\n closes with a major expansion upgrade that converts  scale evidence into deterministic improvement loops.\n\n## Why  matters\n\n- Converts  scale proof into growth-first operating motion.\n- Protects quality with owner accountability, command proof, and KPI guardrails.\n- Produces a deterministic handoff from expansion outcomes into  optimization priorities.\n\n## Required inputs ()\n\n- `docs/artifacts/scale-closeout-pack/scale-closeout-summary.json`\n- `docs/artifacts/scale-closeout-pack/scale-delivery-board.md`\n\n##  command lane\n\n```bash\npython -m sdetkit expansion-closeout --format json --strict\npython -m sdetkit expansion-closeout --emit-pack-dir docs/artifacts/expansion-closeout-pack --format json --strict\npython -m sdetkit expansion-closeout --execute --evidence-dir docs/artifacts/expansion-closeout-pack/evidence --format json --strict\npython scripts/check_expansion_closeout_contract.py\n```\n\n## Expansion closeout contract\n\n- Single owner + backup reviewer are assigned for  expansion lane execution and KPI follow-up.\n- The  expansion lane references  scale winners and misses with deterministic growth loops.\n- Every  section includes docs CTA, runnable command CTA, KPI target, and rollout guardrail.\n-  closeout records expansion learnings and  optimization priorities.\n\n## Expansion quality checklist\n\n- [ ] Includes expansion summary, growth matrix, and rollback strategy\n- [ ] Every section has owner, publish window, KPI target, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures baseline, current, delta, and confidence for each KPI\n- [ ] Artifact pack includes expansion plan, growth matrix, KPI scorecard, and execution log\n\n##  delivery board\n\n- [ ]  expansion plan draft committed\n- [ ]  review notes captured with owner + backup\n- [ ]  growth matrix exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  optimization priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Docs contract + command lane completeness: 30 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 35 points.\n- Expansion contract lock + delivery board readiness: 15 points.\n"
 
 
 def _read(path: Path) -> str:
@@ -87,7 +87,7 @@ def _load_scale_closeout(path: Path) -> tuple[float, bool, int]:
 def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     items = [line for line in text.splitlines() if line.strip().startswith("- [")]
-    return len(items), '' in text, '' in text
+    return len(items), "" in text, "" in text
 
 
 def _contains_all_lines(text: str, expected: list[str]) -> list[str]:
@@ -166,8 +166,8 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "scale_closeout_summary_present",
@@ -236,26 +236,18 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     handoff_actions: list[str] = []
 
     if scale_closeout_strict:
-        wins.append(
-            f"44 continuity is strict-pass with activation score={scale_closeout_score}."
-        )
+        wins.append(f"44 continuity is strict-pass with activation score={scale_closeout_score}.")
     else:
-        misses.append(' strict continuity signal is missing.')
+        misses.append(" strict continuity signal is missing.")
         handoff_actions.append(
-            'Re-run  scale closeout command and restore strict pass baseline before  lock.'
+            "Re-run  scale closeout command and restore strict pass baseline before  lock."
         )
 
     if board_count >= 5 and board_has_scale_closeout and board_has_expansion_closeout:
-        wins.append(
-            f"44 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"44 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and /45 anchors).'
-        )
-        handoff_actions.append(
-            'Repair  delivery board entries to include  and  anchors.'
-        )
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and /45 anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  and  anchors.")
 
     if not missing_contract_lines and not missing_quality_lines and not missing_board_items:
         wins.append(
@@ -266,13 +258,11 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "Expansion contract, quality checklist, or delivery board entries are missing."
         )
         handoff_actions.append(
-            'Complete all  expansion contract lines, quality checklist entries, and delivery board tasks in docs.'
+            "Complete all  expansion contract lines, quality checklist entries, and delivery board tasks in docs."
         )
 
     if not failed and not critical_failures:
-        wins.append(
-            ' expansion closeout lane is fully complete and ready for  optimization lane.'
-        )
+        wins.append(" expansion closeout lane is fully complete and ready for  optimization lane.")
 
     return {
         "name": "expansion-closeout",
@@ -309,7 +299,7 @@ def build_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
 def _render_text(payload: dict[str, Any]) -> str:
     lines = [
-        ' expansion closeout summary',
+        " expansion closeout summary",
         f"- Activation score: {payload['summary']['activation_score']}",
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
@@ -339,7 +329,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     _write(target / "expansion-closeout-summary.md", _render_text(payload) + "\n")
     _write(
         target / "expansion-plan.md",
-        '#  Expansion Plan\n\n- Objective: close  with measurable quality and throughput gains.\n',
+        "#  Expansion Plan\n\n- Objective: close  with measurable quality and throughput gains.\n",
     )
     _write(
         target / "expansion-growth-matrix.csv",
@@ -366,15 +356,15 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
     )
     _write(
         target / "expansion-execution-log.md",
-        '#  Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and  optimization priorities.\n',
+        "#  Execution Log\n\n- [ ] 2026-03-12: Record misses, wins, and  optimization priorities.\n",
     )
     _write(
         target / "expansion-delivery-board.md",
-        '#  Delivery Board\n\n' + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
+        "#  Delivery Board\n\n" + "\n".join(_REQUIRED_DELIVERY_BOARD_LINES) + "\n",
     )
     _write(
         target / "expansion-validation-commands.md",
-        '#  Validation Commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  Validation Commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -402,7 +392,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=' expansion closeout checks')
+    parser = argparse.ArgumentParser(description=" expansion closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")
     parser.add_argument("--strict", action="store_true")
@@ -414,7 +404,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def build_expansion_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_expansion_closeout_summary(root)
 
 

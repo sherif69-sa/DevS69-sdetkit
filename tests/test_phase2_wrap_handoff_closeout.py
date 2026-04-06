@@ -30,16 +30,14 @@ def _seed_repo(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "docs/top-10-github-strategy.md").write_text(
-        '- ** — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.\n'
-        '- ** — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n',
+        "- ** — Phase-2 wrap + handoff:** publish full Phase-2 report and lock Phase-3 execution board.\n"
+        "- ** — Phase-3 kickoff:** set Phase-3 baseline and define ecosystem/trust KPIs.\n",
         encoding="utf-8",
     )
     (root / "docs/integrations-phase2-wrap-handoff-closeout.md").write_text(
         d60._DEFAULT_PAGE_TEMPLATE, encoding="utf-8"
     )
-    (root / "docs/impact-60-big-upgrade-report.md").write_text(
-        '#  report\n', encoding="utf-8"
-    )
+    (root / "docs/impact-60-big-upgrade-report.md").write_text("#  report\n", encoding="utf-8")
 
     summary = (
         root / "docs/artifacts/phase3-preplan-closeout-pack/phase3-preplan-closeout-summary.json"
@@ -59,12 +57,12 @@ def _seed_repo(root: Path) -> None:
     board.write_text(
         "\n".join(
             [
-                '#  delivery board',
-                '- [ ]  Phase-3 pre-plan brief committed',
-                '- [ ]  pre-plan reviewed with owner + backup',
-                '- [ ]  risk ledger exported',
-                '- [ ]  KPI scorecard snapshot exported',
-                '- [ ]  execution priorities drafted from  learnings',
+                "#  delivery board",
+                "- [ ]  Phase-3 pre-plan brief committed",
+                "- [ ]  pre-plan reviewed with owner + backup",
+                "- [ ]  risk ledger exported",
+                "- [ ]  KPI scorecard snapshot exported",
+                "- [ ]  execution priorities drafted from  learnings",
             ]
         )
         + "\n",

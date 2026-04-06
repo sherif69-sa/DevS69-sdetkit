@@ -17,10 +17,10 @@ _INTEGRATION_EXPANSION2_BOARD_PATH = (
     "docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md"
 )
 _JENKINS_PATH = "templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile"
-_SECTION_HEADER = '#  — Integration expansion #3 closeout lane'
+_SECTION_HEADER = "#  — Integration expansion #3 closeout lane"
 _REQUIRED_SECTIONS = [
     "## Why Integration Expansion3 Closeout matters",
-    '## Required inputs ()',
+    "## Required inputs ()",
     "## Integration Expansion3 Closeout command lane",
     "## Integration expansion contract",
     "## Integration quality checklist",
@@ -39,10 +39,10 @@ _EXECUTION_COMMANDS = [
     "python scripts/check_integration_expansion3_closeout_contract.py --skip-evidence",
 ]
 _REQUIRED_CONTRACT_LINES = [
-    'Single owner + backup reviewer are assigned for  advanced Jenkins rollout and signoff.',
-    'The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.',
-    'Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.',
-    ' closeout records Jenkins pipeline stages, matrix controls, shared library strategy, and  integration priorities.',
+    "Single owner + backup reviewer are assigned for  advanced Jenkins rollout and signoff.",
+    "The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.",
+    "Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.",
+    " closeout records Jenkins pipeline stages, matrix controls, shared library strategy, and  integration priorities.",
 ]
 _REQUIRED_QUALITY_LINES = [
     "- [ ] Includes Jenkins stages + post conditions, matrix or parallel fan-out, and rollback trigger",
@@ -52,11 +52,11 @@ _REQUIRED_QUALITY_LINES = [
     "- [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log",
 ]
 _REQUIRED_DELIVERY_BOARD_LINES = [
-    '- [ ]  integration brief committed',
-    '- [ ]  advanced Jenkins pipeline blueprint published',
-    '- [ ]  matrix and cache strategy exported',
-    '- [ ]  KPI scorecard snapshot exported',
-    '- [ ]  integration expansion priorities drafted from  learnings',
+    "- [ ]  integration brief committed",
+    "- [ ]  advanced Jenkins pipeline blueprint published",
+    "- [ ]  matrix and cache strategy exported",
+    "- [ ]  KPI scorecard snapshot exported",
+    "- [ ]  integration expansion priorities drafted from  learnings",
 ]
 _REQUIRED_JENKINS_LINES = [
     "pipeline {",
@@ -67,7 +67,7 @@ _REQUIRED_JENKINS_LINES = [
     "parallel",
 ]
 
-_DEFAULT_PAGE_TEMPLATE = '#  — Integration expansion #3 closeout lane\n\n closes with a major integration upgrade that converts  integration outputs into an advanced Jenkins reference pipeline.\n\n## Why Integration Expansion3 Closeout matters\n\n- Converts  governance outputs into reusable Jenkins implementation patterns.\n- Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.\n- Creates a deterministic handoff from  integration expansion to  integration expansion #4.\n\n## Required inputs ()\n\n- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`\n- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`\n- `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`\n\n## Integration Expansion3 Closeout command lane\n\n```bash\npython -m sdetkit integration-expansion3-closeout --format json --strict\npython -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict\npython -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/integration-expansion3-closeout-pack/evidence --format json --strict\npython scripts/check_integration_expansion3_closeout_contract.py\n```\n\n## Integration expansion contract\n\n- Single owner + backup reviewer are assigned for  advanced Jenkins rollout and signoff.\n- The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records Jenkins pipeline stages, matrix controls, shared library strategy, and  integration priorities.\n\n## Integration quality checklist\n\n- [ ] Includes Jenkins stages + post conditions, matrix or parallel fan-out, and rollback trigger\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner\n- [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log\n\n## Integration Expansion3 Closeout delivery board\n\n- [ ]  integration brief committed\n- [ ]  advanced Jenkins pipeline blueprint published\n- [ ]  matrix and cache strategy exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  integration expansion priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 25 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 30 points.\n- Jenkins reference quality + guardrails: 25 points.\n'
+_DEFAULT_PAGE_TEMPLATE = "#  — Integration expansion #3 closeout lane\n\n closes with a major integration upgrade that converts  integration outputs into an advanced Jenkins reference pipeline.\n\n## Why Integration Expansion3 Closeout matters\n\n- Converts  governance outputs into reusable Jenkins implementation patterns.\n- Protects integration outcomes with strict contract coverage, runnable commands, and rollback safety.\n- Creates a deterministic handoff from  integration expansion to  integration expansion #4.\n\n## Required inputs ()\n\n- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-closeout-summary.json`\n- `docs/artifacts/integration-expansion2-closeout-pack/integration-expansion2-delivery-board.md`\n- `templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile`\n\n## Integration Expansion3 Closeout command lane\n\n```bash\npython -m sdetkit integration-expansion3-closeout --format json --strict\npython -m sdetkit integration-expansion3-closeout --emit-pack-dir docs/artifacts/integration-expansion3-closeout-pack --format json --strict\npython -m sdetkit integration-expansion3-closeout --execute --evidence-dir docs/artifacts/integration-expansion3-closeout-pack/evidence --format json --strict\npython scripts/check_integration_expansion3_closeout_contract.py\n```\n\n## Integration expansion contract\n\n- Single owner + backup reviewer are assigned for  advanced Jenkins rollout and signoff.\n- The  lane references  integration expansion outputs, governance decisions, and KPI continuity signals.\n- Every  section includes docs CTA, runnable command CTA, KPI threshold, and rollback guardrail.\n-  closeout records Jenkins pipeline stages, matrix controls, shared library strategy, and  integration priorities.\n\n## Integration quality checklist\n\n- [ ] Includes Jenkins stages + post conditions, matrix or parallel fan-out, and rollback trigger\n- [ ] Every section has owner, review window, KPI threshold, and risk flag\n- [ ] CTA links point to docs + runnable command evidence\n- [ ] Scorecard captures pipeline pass-rate, median runtime, cache efficiency, confidence, and recovery owner\n- [ ] Artifact pack includes integration brief, Jenkins blueprint, matrix plan, KPI scorecard, and execution log\n\n## Integration Expansion3 Closeout delivery board\n\n- [ ]  integration brief committed\n- [ ]  advanced Jenkins pipeline blueprint published\n- [ ]  matrix and cache strategy exported\n- [ ]  KPI scorecard snapshot exported\n- [ ]  integration expansion priorities drafted from  learnings\n\n## Scoring model\n\n weighted score (0-100):\n\n- Contract + command lane completeness: 25 points.\n- Discoverability alignment (README/docs index/top-10): 20 points.\n-  continuity and strict baseline carryover: 30 points.\n- Jenkins reference quality + guardrails: 25 points.\n"
 
 
 def _read(path: Path) -> str:
@@ -120,7 +120,7 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
         integration_expansion2_check_count,
     ) = _load_integration_expansion2(integration_expansion2_summary)
     board_count, board_has_integration_expansion2 = _count_board_items(
-        integration_expansion2_board, ''
+        integration_expansion2_board, ""
     )
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
@@ -149,8 +149,8 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "top10_strategy_alignment",
             "weight": 5,
-            "passed": ('' in top10_text and '' in top10_text),
-            "evidence": ' +  strategy chain',
+            "passed": ("" in top10_text and "" in top10_text),
+            "evidence": " +  strategy chain",
         },
         {
             "check_id": "integration_expansion2_summary_present",
@@ -243,34 +243,26 @@ def build_integration_expansion3_closeout_summary(root: Path) -> dict[str, Any]:
             f"66 continuity is strict-pass with activation score={integration_expansion2_score}."
         )
     else:
-        misses.append(' strict continuity signal is missing.')
-        handoff_actions.append(
-            'Re-run  closeout command and restore strict baseline before  lock.'
-        )
+        misses.append(" strict continuity signal is missing.")
+        handoff_actions.append("Re-run  closeout command and restore strict baseline before  lock.")
 
     if board_count >= 5 and board_has_integration_expansion2:
-        wins.append(
-            f"66 delivery board integrity validated with {board_count} checklist items."
-        )
+        wins.append(f"66 delivery board integrity validated with {board_count} checklist items.")
     else:
-        misses.append(
-            ' delivery board integrity is incomplete (needs >=5 items and  anchors).'
-        )
-        handoff_actions.append('Repair  delivery board entries to include  anchors.')
+        misses.append(" delivery board integrity is incomplete (needs >=5 items and  anchors).")
+        handoff_actions.append("Repair  delivery board entries to include  anchors.")
 
     if not missing_jenkins_lines:
-        wins.append(
-            ' Jenkins reference pipeline is available for integration expansion execution.'
-        )
+        wins.append(" Jenkins reference pipeline is available for integration expansion execution.")
     else:
-        misses.append(' Jenkins reference pipeline is missing required controls.')
+        misses.append(" Jenkins reference pipeline is missing required controls.")
         handoff_actions.append(
             "Update templates/ci/jenkins/jenkins-advanced-reference.Jenkinsfile to restore required controls."
         )
 
     if not failed and not critical_failures:
         wins.append(
-            ' integration expansion #3 closeout lane is fully complete and ready for  integration expansion #4.'
+            " integration expansion #3 closeout lane is fully complete and ready for  integration expansion #4."
         )
 
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
@@ -335,8 +327,8 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
     )
     _write(target / "integration-expansion3-closeout-summary.md", _render_text(payload) + "\n")
-    _write(target / "integration-expansion3-integration-brief.md", '#  integration brief\n')
-    _write(target / "integration-expansion3-jenkins-blueprint.md", '#  Jenkins blueprint\n')
+    _write(target / "integration-expansion3-integration-brief.md", "#  integration brief\n")
+    _write(target / "integration-expansion3-jenkins-blueprint.md", "#  Jenkins blueprint\n")
     _write(
         target / "integration-expansion3-matrix-plan.json",
         json.dumps({"matrix": []}, indent=2) + "\n",
@@ -345,14 +337,14 @@ def _emit_pack(root: Path, pack_dir: Path, payload: dict[str, Any]) -> None:
         target / "integration-expansion3-kpi-scorecard.json",
         json.dumps({"kpis": []}, indent=2) + "\n",
     )
-    _write(target / "integration-expansion3-execution-log.md", '#  execution log\n')
+    _write(target / "integration-expansion3-execution-log.md", "#  execution log\n")
     _write(
         target / "integration-expansion3-delivery-board.md",
-        "\n".join(['#  delivery board', *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
+        "\n".join(["#  delivery board", *_REQUIRED_DELIVERY_BOARD_LINES]) + "\n",
     )
     _write(
         target / "integration-expansion3-validation-commands.md",
-        '#  validation commands\n\n```bash\n' + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
+        "#  validation commands\n\n```bash\n" + "\n".join(_EXECUTION_COMMANDS) + "\n```\n",
     )
 
 
@@ -380,12 +372,12 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 
 def build_integration_expansion3_closeout_summary_impl(root: Path) -> dict[str, Any]:
-    'Compatibility alias for legacy -based builder name.'
+    "Compatibility alias for legacy -based builder name."
     return build_integration_expansion3_closeout_summary(root)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=' integration expansion #3 closeout checks')
+    parser = argparse.ArgumentParser(description=" integration expansion #3 closeout checks")
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["json", "text"], default="text")
     parser.add_argument("--strict", action="store_true")
