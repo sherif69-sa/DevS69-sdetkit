@@ -2926,7 +2926,7 @@ def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[in
 
 
 def _policy_export(policy: RepoAuditPolicy, *, include_expired: bool) -> dict[str, Any]:
-    to= _today_date()
+    today = _today_date()
     entries = [_normalized_allowlist_entry(item, today) for item in policy.allowlist]
     if not include_expired:
         entries = [item for item in entries if item["status"] == "active"]
@@ -3107,7 +3107,7 @@ def _apply_repo_audit_policy(
     actionable: list[dict[str, Any]] = []
     suppressed: list[dict[str, str]] = []
     expired: list[dict[str, str]] = []
-    to= _today_date()
+    today = _today_date()
     for finding in findings:
         item = dict(finding)
         rule_id = _repo_rule_id(item)
@@ -4236,7 +4236,9 @@ def main(argv: list[str] | None = None) -> int:
             fail_on=policy.fail_on,
             repo_root=str(root),
             config_used=ns.config,
-            incremental_used=coerce_bool(audit_summary.get("incremental", {}).get("used", False), default=False),
+            incremental_used=coerce_bool(
+                audit_summary.get("incremental", {}).get("used", False), default=False
+            ),
             changed_file_count=int(audit_summary.get("incremental", {}).get("changed_files", 0)),
             cache_summary=audit_summary.get("cache")
             if isinstance(audit_summary.get("cache"), dict)

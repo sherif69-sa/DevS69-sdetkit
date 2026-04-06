@@ -46,7 +46,7 @@ def _seed_repo(root: Path) -> None:
         / "docs/artifacts/community-touchpoint-closeout-pack/community-touchpoint-delivery-board.md"
     )
     board.write_text(
-        "\n".join(['#  delivery board', *['- [ ]  item' for _ in range(5)]]) + "\n",
+        "\n".join(["#  delivery board", *["- [ ]  item" for _ in range(5)]]) + "\n",
         encoding="utf-8",
     )
 
@@ -104,7 +104,7 @@ def test_lane78_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-kpi-scorecard.json"
     ).exists()
-    assert not any((tmp_path / "artifacts/ecosystem-priorities-pack").glob('**'))
+    assert any((tmp_path / "artifacts/ecosystem-priorities-pack").iterdir())
     assert (
         tmp_path
         / "artifacts/ecosystem-priorities-pack/evidence/ecosystem-priorities-execution-summary.json"

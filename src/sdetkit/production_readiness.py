@@ -110,8 +110,9 @@ def build_production_readiness_summary(root: Path) -> dict[str, Any]:
         ReadinessCheck(
             check_id="lockfiles_present",
             weight=10,
-            passed=all(_exists(root, p) for p in ["poetry.lock", "requirements.lock"]),
-            evidence="poetry.lock + requirements.lock",
+            passed=_exists(root, "poetry.lock")
+            and (_exists(root, "requirements.lock") or _exists(root, "requirements.txt.lock")),
+            evidence="poetry.lock + requirements.lock (or requirements.txt.lock)",
             remediation="Pin dependencies for reproducible installs.",
         ),
     ]

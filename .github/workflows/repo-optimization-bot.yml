@@ -1,0 +1,15 @@
+name: Repo Optimization Bot
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run optimize lane snapshot
+        run: |
+          python -m sdetkit kits optimize "repo optimization control loop" --format json --limit 3

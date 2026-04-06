@@ -1,0 +1,378 @@
+{
+  "checks": [
+    {
+      "expected_language": "go",
+      "kind": "application-service",
+      "name": "api-gateway",
+      "observed_language": "go",
+      "passed": true
+    },
+    {
+      "expected_language": "rust",
+      "kind": "application-service",
+      "name": "data-pipeline",
+      "observed_language": "rust",
+      "passed": true
+    },
+    {
+      "expected_language": "python",
+      "kind": "application-service",
+      "name": "ml-serving",
+      "observed_language": "python",
+      "passed": true
+    },
+    {
+      "evidence": {
+        "languages": [
+          "go",
+          "python",
+          "rust"
+        ],
+        "service_count": 3
+      },
+      "kind": "architecture",
+      "name": "heterogeneous-stack",
+      "passed": true,
+      "reason": "Need at least three distinct implementation languages across application services."
+    },
+    {
+      "kind": "data-resilience",
+      "name": "blob-store:backup-strategy",
+      "observed": "versioned",
+      "passed": true,
+      "role": "blob"
+    },
+    {
+      "kind": "data-resilience",
+      "name": "blob-store:multi-az",
+      "observed": true,
+      "passed": true,
+      "role": "blob"
+    },
+    {
+      "kind": "data-resilience",
+      "name": "cache-cluster:backup-strategy",
+      "observed": "snapshot-hourly",
+      "passed": true,
+      "role": "cache"
+    },
+    {
+      "kind": "data-resilience",
+      "name": "cache-cluster:multi-az",
+      "observed": true,
+      "passed": true,
+      "role": "cache"
+    },
+    {
+      "kind": "data-resilience",
+      "name": "orders-db:backup-strategy",
+      "observed": "point-in-time-recovery",
+      "passed": true,
+      "role": "transactional"
+    },
+    {
+      "kind": "data-resilience",
+      "name": "orders-db:multi-az",
+      "observed": true,
+      "passed": true,
+      "role": "transactional"
+    },
+    {
+      "expected_technology": "s3",
+      "kind": "data-service",
+      "name": "blob",
+      "observed_technology": "s3",
+      "passed": true
+    },
+    {
+      "expected_technology": "redis",
+      "kind": "data-service",
+      "name": "cache",
+      "observed_technology": "redis",
+      "passed": true
+    },
+    {
+      "expected_technology": "postgresql",
+      "kind": "data-service",
+      "name": "transactional",
+      "observed_technology": "postgresql",
+      "passed": true
+    },
+    {
+      "kind": "dependency-contract",
+      "missing_dependencies": [],
+      "name": "api-gateway",
+      "observed_dependencies": [
+        "application:ml-serving",
+        "mock:stripe-like-payments"
+      ],
+      "passed": true
+    },
+    {
+      "kind": "dependency-contract",
+      "missing_dependencies": [],
+      "name": "data-pipeline",
+      "observed_dependencies": [
+        "data:blob",
+        "data:transactional",
+        "mock:segment-like-events"
+      ],
+      "passed": true
+    },
+    {
+      "kind": "dependency-contract",
+      "missing_dependencies": [],
+      "name": "ml-serving",
+      "observed_dependencies": [
+        "data:cache",
+        "data:transactional"
+      ],
+      "passed": true
+    },
+    {
+      "kind": "deployment",
+      "name": "edge-gateway:environments",
+      "observed_environments": [
+        "prod",
+        "staging"
+      ],
+      "passed": true
+    },
+    {
+      "kind": "deployment",
+      "name": "edge-gateway:production-scale",
+      "passed": true,
+      "production_regions": [
+        "us-east-1"
+      ],
+      "production_replicas": [
+        3
+      ]
+    },
+    {
+      "kind": "deployment",
+      "name": "model-service:environments",
+      "observed_environments": [
+        "prod",
+        "staging"
+      ],
+      "passed": true
+    },
+    {
+      "kind": "deployment",
+      "name": "model-service:production-scale",
+      "passed": true,
+      "production_regions": [
+        "us-east-1"
+      ],
+      "production_replicas": [
+        4
+      ]
+    },
+    {
+      "kind": "deployment",
+      "name": "search-indexer:environments",
+      "observed_environments": [
+        "production",
+        "staging"
+      ],
+      "passed": true
+    },
+    {
+      "kind": "deployment",
+      "name": "search-indexer:production-scale",
+      "passed": true,
+      "production_regions": [
+        "us-west-2"
+      ],
+      "production_replicas": [
+        3
+      ]
+    },
+    {
+      "kind": "interface",
+      "name": "dashboard-graphql",
+      "passed": true
+    },
+    {
+      "kind": "interface",
+      "name": "internal-grpc",
+      "passed": true
+    },
+    {
+      "kind": "interface",
+      "name": "public-rest",
+      "passed": true
+    },
+    {
+      "kind": "mock-coverage",
+      "missing_platform_dependencies": [],
+      "name": "platform-dependencies",
+      "observed_platform_dependencies": [
+        "segment-like-events",
+        "stripe-like-payments"
+      ],
+      "passed": true,
+      "unexpected_platform_dependencies": []
+    },
+    {
+      "api_style": "event",
+      "fidelity": [
+        "error-codes",
+        "shape"
+      ],
+      "kind": "mock-platform",
+      "name": "segment-like-events",
+      "operation_count": 2,
+      "passed": true,
+      "protocol": "https"
+    },
+    {
+      "api_style": "rest",
+      "fidelity": [
+        "idempotency",
+        "shape"
+      ],
+      "kind": "mock-platform",
+      "name": "stripe-like-payments",
+      "operation_count": 2,
+      "passed": true,
+      "protocol": "https"
+    },
+    {
+      "kind": "observability",
+      "name": "edge-gateway:telemetry",
+      "passed": true,
+      "signals": {
+        "logs": true,
+        "metrics": true,
+        "traces": true
+      }
+    },
+    {
+      "kind": "observability",
+      "name": "model-service:telemetry",
+      "passed": true,
+      "signals": {
+        "logs": true,
+        "metrics": true,
+        "traces": true
+      }
+    },
+    {
+      "kind": "observability",
+      "name": "search-indexer:telemetry",
+      "passed": true,
+      "signals": {
+        "logs": true,
+        "metrics": true,
+        "traces": true
+      }
+    },
+    {
+      "kind": "service-contract",
+      "name": "edge-gateway:error-handling",
+      "observed": "typed-errors",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "edge-gateway:logging-format",
+      "observed": "json",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "edge-gateway:owner",
+      "observed": "platform-gateway",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "model-service:error-handling",
+      "observed": "exceptions",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "model-service:logging-format",
+      "observed": "json",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "model-service:owner",
+      "observed": "ml-platform",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "search-indexer:error-handling",
+      "observed": "result",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "search-indexer:logging-format",
+      "observed": "json",
+      "passed": true
+    },
+    {
+      "kind": "service-contract",
+      "name": "search-indexer:owner",
+      "observed": "search-platform",
+      "passed": true
+    }
+  ],
+  "inventory": {
+    "application_services": [
+      "edge-gateway",
+      "model-service",
+      "search-indexer"
+    ],
+    "counts": {
+      "application_services": 3,
+      "data_services": 3,
+      "dependency_edges": 7,
+      "mocked_platforms": 2
+    },
+    "data_services": [
+      "blob-store",
+      "cache-cluster",
+      "orders-db"
+    ],
+    "dependency_edges": [
+      "api-gateway->application:ml-serving",
+      "api-gateway->mock:stripe-like-payments",
+      "data-pipeline->data:blob",
+      "data-pipeline->data:transactional",
+      "data-pipeline->mock:segment-like-events",
+      "ml-serving->data:cache",
+      "ml-serving->data:transactional"
+    ],
+    "languages": [
+      "go",
+      "python",
+      "rust"
+    ],
+    "mocked_platforms": [
+      "segment-like-events",
+      "stripe-like-payments"
+    ],
+    "protocols": [
+      "graphql",
+      "grpc",
+      "rest"
+    ]
+  },
+  "profile_name": "heterogeneous-enterprise",
+  "schema_version": "sdetkit.integration.topology-check.v1",
+  "summary": {
+    "failed": 0,
+    "next_step": "Topology contract is ready for enterprise integration scenarios.",
+    "pass_rate": 100.0,
+    "passed": true,
+    "passed_checks": 40,
+    "total": 40
+  }
+}

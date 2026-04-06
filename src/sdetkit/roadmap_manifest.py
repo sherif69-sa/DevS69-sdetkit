@@ -48,7 +48,8 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
     entries: list[dict[str, Any]] = []
     test_files = sorted(tests_dir.glob("test_*.py"))
     test_contents = {
-        test_file: test_file.read_text(encoding="utf-8", errors="replace") for test_file in test_files
+        test_file: test_file.read_text(encoding="utf-8", errors="replace")
+        for test_file in test_files
     }
     contract_candidates = sorted(scripts_dir.glob("check_*closeout_contract*.py"))
     for path in sorted(src_dir.glob("*_closeout_*.py")):
@@ -69,7 +70,9 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
             for candidate in contract_candidates:
                 if _script_matches_closeout_lane(candidate, lane):
                     contract_scripts.append(candidate)
-            contract_scripts = sorted({script.resolve(): script for script in contract_scripts}.values())
+            contract_scripts = sorted(
+                {script.resolve(): script for script in contract_scripts}.values()
+            )
         contract_refs = len(contract_scripts)
 
         legacy_refs = 0
@@ -152,6 +155,24 @@ def _next_closeout_calls(repo_root: Path | None = None, *, limit: int = 10) -> l
             x["id"],
         )
     )
+    if not backlog:
+        for item in inventory[: max(1, limit)]:
+            if not isinstance(item, dict):
+                continue
+            module = str(item.get("module", "sdetkit.unknown"))
+            backlog.append(
+                {
+                    "id": int(item.get("id", 0)),
+                    "lane": str(item.get("lane", "unknown")),
+                    "module": module,
+                    "tests_referencing_module": int(item.get("tests_referencing_module", 0)),
+                    "contract_scripts": int(item.get("contract_scripts", 0)),
+                    "legacy_anchor_refs_in_module": int(
+                        item.get("legacy_anchor_refs_in_module", 0)
+                    ),
+                    "next_call": f"pytest -q -k {module.split('.')[-1]}",
+                }
+            )
     return backlog[: max(1, limit)]
 
 
