@@ -11,6 +11,14 @@ _PLAN_RE = re.compile(r"^(?:impact|day)(\d+)(?:-.*)?\.json$")
 _CLOSEOUT_RE = re.compile(r"^(?P<lane>[a-z0-9_]+)_closeout_(?P<id>\d+)\.py$")
 
 
+def _script_matches_closeout_lane(script: Path, lane: str) -> bool:
+    lane_tokens = [tok for tok in lane.lower().split("_") if tok]
+    if not lane_tokens:
+        return False
+    script_tokens = [tok for tok in script.stem.lower().split("_") if tok]
+    return all(token in script_tokens for token in lane_tokens)
+
+
 def _repo_root(start: Path | None = None) -> Path:
     here = (start or Path(__file__)).resolve()
     for p in [here] + list(here.parents):
@@ -38,6 +46,11 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
     tests_dir = root / "tests"
     scripts_dir = root / "scripts"
     entries: list[dict[str, Any]] = []
+    test_files = sorted(tests_dir.glob("test_*.py"))
+    test_contents = {
+        test_file: test_file.read_text(encoding="utf-8", errors="replace") for test_file in test_files
+    }
+    contract_candidates = sorted(scripts_dir.glob("check_*closeout_contract*.py"))
     for path in sorted(src_dir.glob("*_closeout_*.py")):
         m = _CLOSEOUT_RE.match(path.name)
         if not m:
@@ -47,12 +60,16 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
         module_stem = path.stem
 
         tests_refs = 0
-        for test_file in sorted(tests_dir.glob("test_*.py")):
-            text = test_file.read_text(encoding="utf-8", errors="replace")
+        for test_file, text in test_contents.items():
             if module_stem in text:
                 tests_refs += 1
 
         contract_scripts = sorted(scripts_dir.glob(f"check_*{closeout_id}*.py"))
+        if not contract_scripts:
+            for candidate in contract_candidates:
+                if _script_matches_closeout_lane(candidate, lane):
+                    contract_scripts.append(candidate)
+            contract_scripts = sorted({script.resolve(): script for script in contract_scripts}.values())
         contract_refs = len(contract_scripts)
 
         day_refs = 0
@@ -86,6 +103,7 @@ def _closeout_inventory(root: Path) -> dict[str, Any]:
     return {
         "count": len(entries),
         "fully_aligned_count": len(covered),
+        "readiness_percent": round((len(covered) / len(entries) * 100), 2) if entries else 0.0,
         "entries": entries,
     }
 

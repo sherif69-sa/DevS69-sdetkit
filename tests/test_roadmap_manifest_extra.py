@@ -19,6 +19,15 @@ def test_first_heading_and_repo_root_fallback(tmp_path: Path, monkeypatch) -> No
     assert rm._repo_root(Path("/tmp/missing/file.py")) == nested
 
 
+def test_script_matches_closeout_lane() -> None:
+    assert rm._script_matches_closeout_lane(
+        Path("scripts/check_community_touchpoint_closeout_contract.py"), "community_touchpoint"
+    )
+    assert not rm._script_matches_closeout_lane(
+        Path("scripts/check_community_program_closeout_contract.py"), "community_touchpoint"
+    )
+
+
 def test_build_manifest_merges_reports_and_plans(tmp_path: Path) -> None:
     reports = tmp_path / "docs" / "roadmap" / "reports"
     plans = tmp_path / "docs" / "roadmap" / "phase3" / "plans"
@@ -31,24 +40,54 @@ def test_build_manifest_merges_reports_and_plans(tmp_path: Path) -> None:
     (plans / "day4-plan.json").write_text('{"title": " Plan 4 "}', encoding="utf-8")
 
     manifest = rm.build_manifest(repo_root=tmp_path)
-    assert manifest == {
-        "phases": [
-            {
-                "impact": 3,
-                "report_path": "docs/roadmap/reports/impact-3-alpha-report.md",
-                "report_title": "Day 3 report",
-                "plan_path": "docs/roadmap/phase3/plans/day3-plan.json",
-                "plan_title": "Plan 3",
-            },
-            {
-                "impact": 4,
-                "report_path": "docs/roadmap/reports/impact-4-beta-report.md",
-                "report_title": "impact-4-beta-report.md",
-                "plan_path": "docs/roadmap/phase3/plans/day4-plan.json",
-                "plan_title": "Plan 4",
-            },
-        ]
-    }
+    assert manifest["phases"] == [
+        {
+            "impact": 3,
+            "report_path": "docs/roadmap/reports/impact-3-alpha-report.md",
+            "report_title": "Day 3 report",
+            "plan_path": "docs/roadmap/phase3/plans/day3-plan.json",
+            "plan_title": "Plan 3",
+        },
+        {
+            "impact": 4,
+            "report_path": "docs/roadmap/reports/impact-4-beta-report.md",
+            "report_title": "impact-4-beta-report.md",
+            "plan_path": "docs/roadmap/phase3/plans/day4-plan.json",
+            "plan_title": "Plan 4",
+        },
+    ]
+    assert manifest["closeout_alignment"]["count"] == 0
+    assert manifest["closeout_alignment"]["fully_aligned_count"] == 0
+    assert manifest["closeout_alignment"]["readiness_percent"] == 0.0
+    assert manifest["closeout_alignment"]["entries"] == []
+
+
+def test_closeout_inventory_matches_contract_by_lane_when_id_missing(tmp_path: Path) -> None:
+    src = tmp_path / "src" / "sdetkit"
+    tests = tmp_path / "tests"
+    scripts = tmp_path / "scripts"
+    src.mkdir(parents=True)
+    tests.mkdir(parents=True)
+    scripts.mkdir(parents=True)
+
+    (src / "community_touchpoint_closeout_77.py").write_text(
+        "def main():\n    return 'day77'\n", encoding="utf-8"
+    )
+    (tests / "test_community_touchpoint_closeout.py").write_text(
+        "from sdetkit import community_touchpoint_closeout_77\n", encoding="utf-8"
+    )
+    (scripts / "check_community_touchpoint_closeout_contract.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    inventory = rm._closeout_inventory(tmp_path)
+    assert inventory["count"] == 1
+    assert inventory["fully_aligned_count"] == 1
+    assert inventory["readiness_percent"] == 100.0
+    assert inventory["entries"][0]["contract_scripts"] == 1
+    assert inventory["entries"][0]["contract_script_paths"] == [
+        "scripts/check_community_touchpoint_closeout_contract.py"
+    ]
 
 
 def test_build_manifest_duplicate_report_and_plan_errors(tmp_path: Path) -> None:
