@@ -2847,7 +2847,7 @@ def _effective_packs(policy: RepoAuditPolicy, pack_csv: str | None) -> tuple[str
 
 def _policy_lint(policy: RepoAuditPolicy, *, fail_on: str, fmt: str) -> tuple[int, str]:
     known_rule_ids = {item.meta.id for item in load_rule_catalog().rules}
-    to= _today_date()
+    today = _today_date()
     warnings: list[dict[str, str]] = []
     errors: list[dict[str, str]] = []
     seen: set[tuple[str, str, str]] = set()
