@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-community-program-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY61_SUMMARY_PATH = (
@@ -135,7 +137,7 @@ def _load_day61(path: Path) -> tuple[int, bool, int]:
     summary_obj = payload_obj.get("summary")
     summary = summary_obj if isinstance(summary_obj, dict) else {}
     score = int(summary.get("activation_score", 0))
-    strict = bool(summary.get("strict_pass", False))
+    strict = coerce_bool(summary.get("strict_pass", False), default=False)
     checks_obj = payload_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     return score, strict, len(checks)

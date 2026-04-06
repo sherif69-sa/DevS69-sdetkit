@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-narrative-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY51_SUMMARY_PATH = "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
@@ -135,7 +137,7 @@ def _load_cycle51(path: Path) -> tuple[float, bool, int]:
     checks_obj = data_obj.get("checks")
     checks = checks_obj if isinstance(checks_obj, list) else []
     score = float(summary.get("activation_score", 0.0))
-    strict = bool(summary.get("strict_pass", False))
+    strict = coerce_bool(summary.get("strict_pass", False), default=False)
     check_count = len(checks)
     return score, strict, check_count
 

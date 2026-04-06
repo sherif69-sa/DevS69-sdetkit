@@ -10,6 +10,8 @@ from typing import Any
 
 from sdetkit.atomicio import atomic_write_text
 
+from ..bools import coerce_bool
+
 
 def _sort_key(item: dict[str, Any]) -> tuple[str, str]:
     return (str(item.get("captured_at", "")), str(item.get("hash", "")))
@@ -86,11 +88,11 @@ def summarize_history(history_dir: Path) -> dict[str, Any]:
             if isinstance(action, dict):
                 action_counter[str(action.get("action", "unknown"))] += 1
                 worker_counter[str(action.get("worker_id", "unknown"))] += 1
-                if bool(action.get("denied")):
+                if coerce_bool(action.get("denied"), default=False):
                     approvals["denied"] += 1
-                elif bool(action.get("approved")):
+                elif coerce_bool(action.get("approved"), default=False):
                     approvals["approved"] += 1
-                    if not bool(action.get("ok")):
+                    if not coerce_bool(action.get("ok"), default=False):
                         approvals["failed_after_approval"] += 1
         if str(run.get("status", "")) != "ok":
             failure_tasks.append(

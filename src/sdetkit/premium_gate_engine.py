@@ -15,6 +15,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 SEVERITY_WEIGHT = {
     "critical": 20,
     "high": 12,
@@ -595,7 +597,7 @@ def _failed_step_ids(payload: dict[str, Any]) -> set[str]:
     if not isinstance(steps, list):
         return failed
     for item in steps:
-        if not isinstance(item, dict) or bool(item.get("ok", True)):
+        if not isinstance(item, dict) or coerce_bool(item.get("ok", True), default=True):
             continue
         name = _safe_text(item.get("name"))
         if name:
@@ -678,7 +680,7 @@ def _catalog_candidates(
             _safe_text(item) for item in entry.get("trigger_steps", []) if _safe_text(item)
         }
         matched_steps = sorted(step for step in failed_steps if step in trigger_steps)
-        trigger_on_autofix = bool(entry.get("trigger_on_autofix", False))
+        trigger_on_autofix = coerce_bool(entry.get("trigger_on_autofix", False), default=False)
 
         if (
             not matched_sources
@@ -1301,7 +1303,7 @@ class _InsightsHandler(http.server.BaseHTTPRequestHandler):
                 _safe_text(body.get("title")),
                 _safe_text(body.get("body")),
                 body.get("tags", []) if isinstance(body.get("tags"), list) else [],
-                active=bool(body.get("active", True)),
+                active=coerce_bool(body.get("active", True), default=True),
             )
             self._json(200 if ok else 404, {"ok": ok})
             return

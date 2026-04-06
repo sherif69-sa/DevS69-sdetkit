@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-governance-priorities-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY87_SUMMARY_PATH = (
@@ -155,7 +157,7 @@ def build_governance_priorities_closeout_summary(root: Path) -> dict[str, Any]:
         else {}
     )
     governance_handoff_score = int(governance_handoff_summary_data.get("activation_score", 0) or 0)
-    governance_handoff_strict = bool(governance_handoff_summary_data.get("strict_pass", False))
+    governance_handoff_strict = coerce_bool(governance_handoff_summary_data.get("strict_pass", False), default=False)
     governance_handoff_check_count = (
         len(governance_handoff_data.get("checks", []))
         if isinstance(governance_handoff_data.get("checks"), list)

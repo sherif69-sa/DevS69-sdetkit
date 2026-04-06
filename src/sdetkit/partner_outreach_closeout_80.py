@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-partner-outreach-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY79_SUMMARY_PATH = (
@@ -151,7 +153,7 @@ def build_partner_outreach_closeout_summary(root: Path) -> dict[str, Any]:
     scale_upgrade_score = int(
         scale_upgrade_payload.get("summary", {}).get("activation_score", 0) or 0
     )
-    scale_upgrade_strict = bool(scale_upgrade_payload.get("summary", {}).get("strict_pass", False))
+    scale_upgrade_strict = coerce_bool(scale_upgrade_payload.get("summary", {}).get("strict_pass", False), default=False)
     scale_upgrade_check_count = (
         len(scale_upgrade_payload.get("checks", []))
         if isinstance(scale_upgrade_payload.get("checks", []), list)

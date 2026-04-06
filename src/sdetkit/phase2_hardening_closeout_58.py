@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-phase2-hardening-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY57_SUMMARY_PATH = (
@@ -138,7 +140,7 @@ def _load_kpi_deep_audit(path: Path) -> tuple[int, bool, int]:
     checks = checks_obj if isinstance(checks_obj, list) else []
     return (
         int(summary.get("activation_score", 0)),
-        bool(summary.get("strict_pass", False)),
+        coerce_bool(summary.get("strict_pass", False), default=False),
         len(checks),
     )
 

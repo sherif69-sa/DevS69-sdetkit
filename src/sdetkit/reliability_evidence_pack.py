@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/reliability-evidence-pack.md"
 
 _SECTION_HEADER = "# Reliability evidence pack"
@@ -150,7 +152,7 @@ def build_reliability_pack(
     strict_all_green = (
         bool(github_actions["strict"])
         and bool(gitlab_ci["strict"])
-        and not bool(contribution_quality_summary.get("strict_failures"))
+        and not coerce_bool(contribution_quality_summary.get("strict_failures"), default=False)
     )
     recommendations: list[str] = []
     if not strict_all_green:

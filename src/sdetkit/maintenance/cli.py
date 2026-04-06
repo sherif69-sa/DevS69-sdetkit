@@ -12,6 +12,7 @@ from typing import Any
 
 from sdetkit.security import safe_path
 
+from ..bools import coerce_bool
 from .registry import checks_for_mode
 from .types import CheckResult, MaintenanceContext
 
@@ -222,7 +223,7 @@ def _build_recommendations(checks: dict[str, dict[str, Any]]) -> list[str]:
             if not isinstance(action, dict):
                 continue
             title = str(action.get("title", "")).strip()
-            applied = bool(action.get("applied", False))
+            applied = coerce_bool(action.get("applied", False), default=False)
             if title and not applied:
                 suggested_actions.append(title)
     if suggested_actions:

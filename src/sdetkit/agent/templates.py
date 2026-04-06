@@ -434,7 +434,7 @@ def run_template(
             cmd = str(params.get("cmd", ""))
             shell_res = _run_shell(cmd, cwd=root)
             payload = shell_res
-            ok = bool(shell_res.get("ok"))
+            ok = _as_bool(shell_res.get("ok"))
             if isinstance(params.get("save_stdout"), str):
                 stdout_path = Path(str(params["save_stdout"]))
                 atomic_write_text(stdout_path, str(shell_res.get("stdout", "")))

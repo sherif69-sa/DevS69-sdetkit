@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
 
+from ..bools import coerce_bool
 from .base import CheckProfileName
 from .results import CheckRecord, FinalVerdict, build_final_verdict
 from .runner import CheckRunReport
@@ -226,14 +227,14 @@ def build_verdict_payload(
         "recommendation": verdict.recommendation,
         "targeting": {
             "modes": check_summary["target_modes"],
-            "used_targeted_execution": bool(check_summary["target_modes"].get("targeted", 0)),
-            "used_smoke_execution": bool(check_summary["target_modes"].get("smoke", 0)),
-            "used_full_execution": bool(check_summary["target_modes"].get("full", 0)),
+            "used_targeted_execution": coerce_bool(check_summary["target_modes"].get("targeted", 0), default=False),
+            "used_smoke_execution": coerce_bool(check_summary["target_modes"].get("smoke", 0), default=False),
+            "used_full_execution": coerce_bool(check_summary["target_modes"].get("full", 0), default=False),
         },
         "cache": {
-            "enabled": bool(metadata.get("cache_enabled", False)),
+            "enabled": coerce_bool(metadata.get("cache_enabled", False), default=False),
             "summary": check_summary["cache_status"],
-            "used_cache_hits": bool(check_summary["cache_status"].get("hit", 0)),
+            "used_cache_hits": coerce_bool(check_summary["cache_status"].get("hit", 0), default=False),
         },
         "execution": {
             "mode": execution.get("mode", "sequential")

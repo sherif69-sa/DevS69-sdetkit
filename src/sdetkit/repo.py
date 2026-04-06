@@ -25,6 +25,7 @@ from typing import Any, cast
 
 from . import _toml as _tomllib
 from .atomicio import atomic_write_text
+from .bools import coerce_bool
 from .ops_control import init_layout_at
 from .plugins import (
     Finding as PluginFinding,
@@ -1253,7 +1254,7 @@ def _to_sarif(payload: dict[str, Any]) -> dict[str, Any]:
                 "message": {"text": item["message"]},
                 "properties": {
                     "pack": item.get("pack", "core"),
-                    "fixable": bool(item.get("fixable", False)),
+                    "fixable": coerce_bool(item.get("fixable", False), default=False),
                     "suppression_status": item.get("suppression_status"),
                     "suppression_reason": item.get("suppression_reason"),
                 },
@@ -1600,7 +1601,7 @@ def _plan_repo_fix_audit(
                 line=int(item.get("line", 1)),
                 details={
                     "pack": item.get("pack", "core"),
-                    "fixable": bool(item.get("fixable", False)),
+                    "fixable": coerce_bool(item.get("fixable", False), default=False),
                     "fingerprint": item.get("fingerprint", ""),
                 },
                 fingerprint=str(item.get("fingerprint", "")),
@@ -3244,7 +3245,7 @@ def _to_ide_diagnostics(findings: list[dict[str, Any]]) -> dict[str, Any]:
             "severity": str(item.get("severity", "error")),
             "code": _repo_rule_id(item),
             "message": str(item.get("message", "")),
-            "fixable": bool(item.get("fixable", False)),
+            "fixable": coerce_bool(item.get("fixable", False), default=False),
         }
         col = item.get("column")
         if isinstance(col, int) and col > 0:
@@ -4235,7 +4236,7 @@ def main(argv: list[str] | None = None) -> int:
             fail_on=policy.fail_on,
             repo_root=str(root),
             config_used=ns.config,
-            incremental_used=bool(audit_summary.get("incremental", {}).get("used", False)),
+            incremental_used=coerce_bool(audit_summary.get("incremental", {}).get("used", False), default=False),
             changed_file_count=int(audit_summary.get("incremental", {}).get("changed_files", 0)),
             cache_summary=audit_summary.get("cache")
             if isinstance(audit_summary.get("cache"), dict)

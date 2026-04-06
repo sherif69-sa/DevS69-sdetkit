@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-governance-handoff-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY86_SUMMARY_PATH = (
@@ -155,7 +157,7 @@ def build_governance_handoff_closeout_summary(root: Path) -> dict[str, Any]:
         else {}
     )
     launch_readiness_score = int(launch_readiness_summary_data.get("activation_score", 0) or 0)
-    launch_readiness_strict = bool(launch_readiness_summary_data.get("strict_pass", False))
+    launch_readiness_strict = coerce_bool(launch_readiness_summary_data.get("strict_pass", False), default=False)
     launch_readiness_check_count = (
         len(launch_readiness_data.get("checks", []))
         if isinstance(launch_readiness_data.get("checks"), list)

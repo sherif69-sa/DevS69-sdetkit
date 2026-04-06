@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .bools import coerce_bool
+
 _PAGE_PATH = "docs/integrations-community-touchpoint-closeout.md"
 _TOP10_PATH = "docs/top-10-github-strategy.md"
 _DAY76_SUMMARY_PATH = "docs/artifacts/contributor-recognition-closeout-pack/contributor-recognition-closeout-summary.json"
@@ -137,7 +139,7 @@ def _load_contributor_recognition(summary_path: Path) -> tuple[int, bool, int]:
     checks = data.get("checks", [])
     return (
         int(summary.get("activation_score", 0)),
-        bool(summary.get("strict_pass", False)),
+        coerce_bool(summary.get("strict_pass", False), default=False),
         len(checks),
     )
 
