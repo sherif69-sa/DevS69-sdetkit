@@ -248,8 +248,8 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "passed": board_count >= 5 and board_has_cycle40 and board_has_cycle41,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle40,
-                "contains": board_has_cycle41,
+                "contains_previous_cycle": board_has_cycle40,
+                "contains_current_cycle": board_has_cycle41,
             },
         },
         {

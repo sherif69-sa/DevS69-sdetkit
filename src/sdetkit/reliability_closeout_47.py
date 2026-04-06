@@ -264,8 +264,8 @@ def build_reliability_closeout_summary(root: Path) -> dict[str, Any]:
             "passed": board_count >= 5 and board_has_cycle46 and board_has_cycle47,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle46,
-                "contains": board_has_cycle47,
+                "contains_previous_cycle": board_has_cycle46,
+                "contains_current_cycle": board_has_cycle47,
             },
         },
         {

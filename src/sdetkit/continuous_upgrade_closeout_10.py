@@ -281,7 +281,7 @@ def build_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_cycle9,
-            "evidence": {"board_items": board_count, "contains": board_has_cycle9},
+            "evidence": {"board_items": board_count, "contains_required_cycle": board_has_cycle9},
         },
         {
             "check_id": "page_header",

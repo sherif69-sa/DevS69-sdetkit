@@ -253,8 +253,8 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "passed": board_count >= 5 and board_has_cycle51 and board_has_cycle52,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle51,
-                "contains": board_has_cycle52,
+                "contains_previous_cycle": board_has_cycle51,
+                "contains_current_cycle": board_has_cycle52,
             },
         },
         {
@@ -468,7 +468,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
+def build_cycle52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_narrative_closeout_summary(root)
 

@@ -89,8 +89,8 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains": false,
-        "contains": false
+        "contains_previous_cycle": false,
+        "contains_current_cycle": false
       }
     },
     {

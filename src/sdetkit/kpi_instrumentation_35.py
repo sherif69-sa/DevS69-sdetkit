@@ -259,8 +259,8 @@ def build_kpi_instrumentation_summary_impl(
             "passed": board_count >= 5 and board_has_cycle35 and board_has_cycle36,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle35,
-                "contains": board_has_cycle36,
+                "contains_previous_cycle": board_has_cycle35,
+                "contains_current_cycle": board_has_cycle36,
             },
         },
         {

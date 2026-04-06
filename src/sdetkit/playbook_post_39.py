@@ -257,8 +257,8 @@ def build_playbook_post_summary_impl(
             "passed": board_count >= 5 and board_has_cycle38 and board_has_cycle39,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle38,
-                "contains": board_has_cycle39,
+                "contains_previous_cycle": board_has_cycle38,
+                "contains_current_cycle": board_has_cycle39,
             },
         },
         {

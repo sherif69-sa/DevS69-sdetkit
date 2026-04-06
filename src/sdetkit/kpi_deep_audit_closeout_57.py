@@ -242,7 +242,7 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle56,
-            "evidence": {"board_items": board_count, "contains": board_has_cycle56},
+            "evidence": {"board_items": board_count, "contains_required_cycle": board_has_cycle56},
         },
         {
             "check_id": "kpi_deep_audit_contract_locked",

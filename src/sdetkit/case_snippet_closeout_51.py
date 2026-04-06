@@ -268,8 +268,8 @@ def build_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
             "passed": board_count >= 5 and board_has_cycle50 and board_has_cycle51,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle50,
-                "contains": board_has_cycle51,
+                "contains_previous_cycle": board_has_cycle50,
+                "contains_current_cycle": board_has_cycle51,
             },
         },
         {
@@ -480,7 +480,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
+def build_cycle51_case_snippet_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_case_snippet_closeout_summary(root)
 

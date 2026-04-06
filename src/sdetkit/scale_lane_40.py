@@ -257,8 +257,8 @@ def build_scale_lane_summary_impl(
             "passed": board_count >= 5 and board_has_cycle39 and board_has_cycle40,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle39,
-                "contains": board_has_cycle40,
+                "contains_previous_cycle": board_has_cycle39,
+                "contains_current_cycle": board_has_cycle40,
             },
         },
         {

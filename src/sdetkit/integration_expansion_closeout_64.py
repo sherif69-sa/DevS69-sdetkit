@@ -227,7 +227,7 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_cycle63,
-            "evidence": {"board_items": board_count, "contains": board_has_cycle63},
+            "evidence": {"board_items": board_count, "contains_required_cycle": board_has_cycle63},
         },
         {
             "check_id": "page_header",
@@ -418,7 +418,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+def build_cycle64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_integration_expansion_closeout_summary(root)
 

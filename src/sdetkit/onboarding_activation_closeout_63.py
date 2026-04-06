@@ -217,7 +217,7 @@ def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle62,
-            "evidence": {"board_items": board_count, "contains": board_has_cycle62},
+            "evidence": {"board_items": board_count, "contains_required_cycle": board_has_cycle62},
         },
         {
             "check_id": "page_header",
@@ -399,7 +399,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
+def build_cycle63_onboarding_activation_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_onboarding_activation_closeout_summary(root)
 

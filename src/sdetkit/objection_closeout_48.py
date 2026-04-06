@@ -249,8 +249,8 @@ def build_objection_closeout_summary(root: Path) -> dict[str, Any]:
             "passed": board_count >= 5 and board_has_cycle47 and board_has_cycle48,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle47,
-                "contains": board_has_cycle48,
+                "contains_previous_cycle": board_has_cycle47,
+                "contains_current_cycle": board_has_cycle48,
             },
         },
         {

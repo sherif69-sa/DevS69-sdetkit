@@ -257,8 +257,8 @@ def build_experiment_lane_summary_impl(
             "passed": board_count >= 5 and board_has_cycle36 and board_has_cycle37,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle36,
-                "contains": board_has_cycle37,
+                "contains_previous_cycle": board_has_cycle36,
+                "contains_current_cycle": board_has_cycle37,
             },
         },
         {

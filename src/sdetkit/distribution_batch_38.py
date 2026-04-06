@@ -257,8 +257,8 @@ def build_distribution_batch_summary_impl(
             "passed": board_count >= 5 and board_has_cycle37 and board_has_cycle38,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle37,
-                "contains": board_has_cycle38,
+                "contains_previous_cycle": board_has_cycle37,
+                "contains_current_cycle": board_has_cycle38,
             },
         },
         {

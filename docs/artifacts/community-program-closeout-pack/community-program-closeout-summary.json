@@ -55,7 +55,7 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains": true
+        "contains_required_cycle": true
       }
     },
     {

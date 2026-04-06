@@ -268,8 +268,8 @@ def build_release_cadence_summary_impl(
             "passed": board_count >= 5 and board_has_cycle32 and board_has_cycle33,
             "evidence": {
                 "board_items": board_count,
-                "contains": board_has_cycle32,
-                "contains": board_has_cycle33,
+                "contains_previous_cycle": board_has_cycle32,
+                "contains_current_cycle": board_has_cycle33,
             },
         },
         {
