@@ -1083,7 +1083,7 @@ def _apply_baseline(findings: list[Finding], baseline: list[dict[str, Any]]) -> 
     if not baseline:
         return findings
     active: list[dict[str, Any]] = []
-    to= dt.date.today()
+    today = dt.date.today()
     for item in baseline:
         exp = item.get("expires")
         if isinstance(exp, str):
