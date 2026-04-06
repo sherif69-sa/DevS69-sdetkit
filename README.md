@@ -63,6 +63,7 @@ python -m sdetkit kits discover --query "release integration forensics"
 - Cleanup policy: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Release process: [`RELEASE.md`](RELEASE.md)
+- Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)
 
 ## Root-level rules (short version)
 
@@ -72,3 +73,14 @@ python -m sdetkit kits discover --query "release integration forensics"
 - Put generated outputs in `.sdetkit/` or `artifacts/`.
 
 For full rules, use [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md).
+
+
+## 🧭 Day 11 ultra: docs navigation tune-up
+
+```bash
+python -m sdetkit docs-nav --format text --strict
+python -m sdetkit docs-nav --write-defaults --format json --strict
+python scripts/check_docs_navigation_contract_11.py
+```
+
+- Report: `docs/impact-11-ultra-upgrade-report.md`

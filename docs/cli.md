@@ -124,3 +124,17 @@ sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-
 --evidence-dir
 --timeout-sec
 --emit-pack-dir
+
+
+## docs-nav
+
+```bash
+sdetkit docs-nav --format markdown --output docs/artifacts/docs-governance-sample.md
+sdetkit docs-nav --format text --strict
+sdetkit docs-nav --write-defaults --format json --strict
+```
+
+Options:
+
+- `--strict`
+- `--write-defaults`

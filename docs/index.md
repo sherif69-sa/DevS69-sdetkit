@@ -21,6 +21,7 @@ Use this page as the primary navigation for repository documentation.
 - [Repository cleanup plan](repo-cleanup-plan.md)
 - [Repo audit guide](repo-audit.md)
 - [Policy and baselines](policy-and-baselines.md)
+- [Enterprise readiness audit (April 2026)](enterprise-readiness-audit-2026-04.md)
 - [Feature registry](feature-registry.md)
 
 ## Adoption and rollout
@@ -40,6 +41,13 @@ Use this page as the primary navigation for repository documentation.
 [⚡ Fast start](#fast-start) · [🧭 Repo tour](repo-tour.md) · [📈 Top-10 strategy](top-10-github-strategy.md) · [🤖 AgentOS](agentos-foundation.md) · [🍳 Cookbook](agentos-cookbook.md) · [🛠 CLI commands](cli.md) · [🩺 Doctor checks](doctor.md) · [🤝 Contribute](contributing.md) · [📦 Legacy reports](#legacy-reports)
 
 </div>
+
+
+## Day 11 ultra upgrades (docs navigation tune-up)
+
+- [🧭 Day 11 ultra report](impact-11-ultra-upgrade-report.md)
+- `sdetkit docs-nav --format text --strict`
+- `sdetkit docs-nav --write-defaults --format json --strict`
 
 ## Legacy reports
 
