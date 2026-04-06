@@ -63,8 +63,10 @@
         "tests_referencing_module": 1
       },
       {
-        "contract_script_paths": [],
-        "contract_scripts": 0,
+        "contract_script_paths": [
+          "scripts/check_case_study_prep3_closeout_contract.py"
+        ],
+        "contract_scripts": 1,
         "id": 71,
         "lane": "case_study_prep3",
         "legacy_day_refs_in_module": 1,
@@ -97,14 +99,16 @@
         "tests_referencing_module": 1
       },
       {
-        "contract_script_paths": [],
-        "contract_scripts": 0,
+        "contract_script_paths": [
+          "scripts/check_community_touchpoint_closeout_contract.py"
+        ],
+        "contract_scripts": 1,
         "id": 77,
         "lane": "community_touchpoint",
         "legacy_day_refs_in_module": 1,
         "module": "sdetkit.community_touchpoint_closeout_77",
         "module_path": "src/sdetkit/community_touchpoint_closeout_77.py",
-        "tests_referencing_module": 2
+        "tests_referencing_module": 3
       },
       {
         "contract_script_paths": [
@@ -458,8 +462,10 @@
         "tests_referencing_module": 1
       },
       {
-        "contract_script_paths": [],
-        "contract_scripts": 0,
+        "contract_script_paths": [
+          "scripts/check_ecosystem_priorities_closeout_contract.py"
+        ],
+        "contract_scripts": 1,
         "id": 78,
         "lane": "ecosystem_priorities",
         "legacy_day_refs_in_module": 1,
@@ -876,7 +882,8 @@
         "tests_referencing_module": 1
       }
     ],
-    "fully_aligned_count": 56
+    "fully_aligned_count": 59,
+    "readiness_percent": 98.33
   },
   "phases": []
 }
