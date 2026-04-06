@@ -1,6 +1,0 @@
-{
-  "command": "python scripts/check_onboarding_activation_closeout_contract_63.py --skip-evidence",
-  "returncode": 0,
-  "stdout": "cycle63-onboarding-activation-closeout contract check passed\n",
-  "stderr": ""
-}
