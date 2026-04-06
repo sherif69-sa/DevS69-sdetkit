@@ -7,6 +7,7 @@ This is the canonical decoder for release-confidence evidence.
 Grounded in current workflow artifact uploads:
 - CI fast lane diagnostics: `ci-gate-diagnostics-py3.11` / `ci-gate-diagnostics-py3.12`
 - Release diagnostics: `release-diagnostics`
+- Fixture replay diagnostics: `adoption-real-repo-canonical` (see [Real repo adoption proof](real-repo-adoption.md))
 
 ## Artifact-to-action map
 

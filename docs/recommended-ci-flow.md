@@ -5,6 +5,7 @@ This page defines one canonical baseline CI path for deterministic release confi
 First-time local users should start with [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md) and [First run quickstart](ready-to-use.md).
 
 Canonical artifact decoding is in [CI artifact walkthrough](ci-artifact-walkthrough.md).
+For a narrow replayable fixture workflow, see [Real repo adoption proof](real-repo-adoption.md).
 
 ## Canonical baseline shape
 
