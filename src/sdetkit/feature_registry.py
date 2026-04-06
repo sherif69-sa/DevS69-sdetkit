@@ -101,10 +101,11 @@ def render_feature_registry_docs_block(rows: list[FeatureEntry]) -> str:
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for item in sorted(rows, key=lambda x: (x.tier, x.command)):
+        test_link = f"../{item.test_file}"
         docs_link = item.docs_page.removeprefix("docs/")
         lines.append(
             f"| `{item.command}` | {item.tier} | {item.status} | {item.problem_solved} | "
-            f"`{item.example}` | `{item.test_file}` | [{item.docs_page}]({docs_link}) |"
+            f"`{item.example}` | [{item.test_file}]({test_link}) | [{item.docs_page}]({docs_link}) |"
         )
     table = "\n".join(lines)
     return f"{_DOC_TABLE_START}\n{table}\n{_DOC_TABLE_END}"
