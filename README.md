@@ -25,6 +25,12 @@ Need the deepest whole-repo improvement lane? Run:
 make max
 ```
 
+Want the most aggressive hardening lane ("brutal mode")? Run:
+
+```bash
+make brutal
+```
+
 ## Repo health snapshot (how to track progress)
 
 Use these checks weekly and capture outputs in a PR note:
