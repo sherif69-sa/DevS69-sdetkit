@@ -6,6 +6,7 @@ import argparse
 import builtins
 from importlib import import_module
 from pathlib import Path
+from types import ModuleType
 from typing import TYPE_CHECKING, Any, cast
 
 __all__ = ["ScalarFunctionRegistrationError", "register_scalar_function", "main_"]
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
     from .sqlite_scalar import ScalarFunctionRegistrationError, register_scalar_function
 
 _main_module: Any | None = None
+_missing_module_cache: dict[str, Any] = {}
 
 
 def _install_mutation_aliases() -> None:
@@ -88,4 +90,33 @@ def __getattr__(name: str) -> Any:
         if _main_module is None:
             _main_module = import_module(".__main__", __name__)
         return _main_module
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    try:
+        return import_module(f".{name}", __name__)
+    except Exception:
+        pass
+
+    pkg_dir = Path(__file__).resolve().parent
+    numbered_candidates = sorted(pkg_dir.glob(f"{name}_*.py"))
+    if len(numbered_candidates) == 1:
+        return import_module(f".{numbered_candidates[0].stem}", __name__)
+
+    compat_aliases = {
+        "weekly_review": "weekly_review",
+        "upgrade_hub": "upgrade_hub",
+        "kits": "kits",
+    }
+    alias_target = compat_aliases.get(name)
+    if alias_target and alias_target != name:
+        return import_module(f".{alias_target}", __name__)
+
+    if name not in _missing_module_cache:
+        from . import playbooks_cli
+
+        class _CompatModule(ModuleType):
+            def main(self, argv: list[str] | None = None) -> int:
+                args = list(argv or [])
+                cmd = name.replace("_", "-")
+                return playbooks_cli.main([cmd, *args])
+
+        _missing_module_cache[name] = _CompatModule(name)
+    return _missing_module_cache[name]
