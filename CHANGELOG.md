@@ -1,5 +1,6 @@
 ## Unreleased
 
+- dependency upgrades: raised `twilio` floor to `>=9.10.4,<10` and aligned `tomli` to `2.4.1` across requirements and lock manifests.
 - add GHAS alert SLA + metrics export bots, wire them into maintenance coverage checks, and refresh GHAS automation docs.
 - add Name 86 launch readiness closeout lane command, docs, checks, and tests (`name86-launch-readiness-closeout`).
 - upgrade audit: parse modern `pyproject.toml` `[dependency-groups]` declarations, including `{include-group = "..."}` expansions.
