@@ -76,7 +76,7 @@ def _seed_repo(root: Path) -> None:
     scale_plan.write_text(
         json.dumps(
             {
-                "plan_id": "day79-scale-upgrade-001",
+                "plan_id": "scale-upgrade-001",
                 "contributors": ["maintainers", "enterprise-success"],
                 "scale_tracks": ["role-based-onboarding", "control-plane-rollout"],
                 "baseline": {"activated_orgs": 3, "setup_time_days": 12},
@@ -133,7 +133,7 @@ def test_lane79_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_lane79_strict_fails_without_day78(tmp_path: Path) -> None:
+def test_lane79_strict_fails_without_ecosystem_priorities_baseline(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path

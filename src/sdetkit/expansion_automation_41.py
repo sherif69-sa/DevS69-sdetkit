@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day40(path: Path) -> tuple[float, bool, int]:
+def _load_cycle40(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -169,10 +169,10 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day40_summary = root / _DAY40_SUMMARY_PATH
-    day40_board = root / _DAY40_BOARD_PATH
-    day40_score, day40_strict, day40_check_count = _load_day40(day40_summary)
-    board_count, board_has_day40, board_has_day41 = _board_stats(day40_board)
+    summary = root / _DAY40_SUMMARY_PATH
+    board = root / _DAY40_BOARD_PATH
+    score, strict, check_count = _load_cycle40(summary)
+    board_count, board_has_cycle40, board_has_cycle41 = _board_stats(board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -221,35 +221,35 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "evidence": "Expansion automation + optimization strategy chain",
         },
         {
-            "check_id": "day40_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": day40_summary.exists(),
-            "evidence": str(day40_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "day40_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": day40_board.exists(),
-            "evidence": str(day40_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "day40_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": day40_strict and day40_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "day40_score": day40_score,
-                "strict_pass": day40_strict,
-                "day40_checks": day40_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "day40_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day40 and board_has_day41,
+            "passed": board_count >= 5 and board_has_cycle40 and board_has_cycle41,
             "evidence": {
                 "board_items": board_count,
-                "contains_day40": board_has_day40,
-                "contains_day41": board_has_day41,
+                "contains": board_has_cycle40,
+                "contains": board_has_cycle41,
             },
         },
         {
@@ -275,24 +275,24 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day40_summary.exists() or not day40_board.exists():
-        critical_failures.append("day40_handoff_inputs")
-    if not day40_strict:
-        critical_failures.append("day40_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day40_strict:
-        wins.append(f"Day 40 continuity is strict-pass with activation score={day40_score}.")
+    if strict:
+        wins.append(f"Day 40 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 40 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 40 scale lane command and restore strict pass baseline before Day 41 lock."
         )
 
-    if board_count >= 5 and board_has_day40 and board_has_day41:
+    if board_count >= 5 and board_has_cycle40 and board_has_cycle41:
         wins.append(
             f"Day 40 delivery board integrity validated with {board_count} checklist items."
         )
@@ -328,18 +328,18 @@ def build_expansion_automation_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day40_summary": str(day40_summary.relative_to(root))
-            if day40_summary.exists()
-            else str(day40_summary),
-            "day40_delivery_board": str(day40_board.relative_to(root))
-            if day40_board.exists()
-            else str(day40_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "day40_activation_score": day40_score,
-            "day40_checks": day40_check_count,
-            "day40_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -377,9 +377,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 40 continuity",
         "",
-        f"- Day 40 activation score: `{payload['rollup']['day40_activation_score']}`",
-        f"- Day 40 checks evaluated: `{payload['rollup']['day40_checks']}`",
-        f"- Day 40 delivery board checklist items: `{payload['rollup']['day40_delivery_board_items']}`",
+        f"- Day 40 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Day 40 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- Day 40 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]

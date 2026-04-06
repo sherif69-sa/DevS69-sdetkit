@@ -133,7 +133,7 @@ def test_lane49_advanced_alias_cli_rejected(tmp_path: Path, capsys) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli.main(
             [
-                "day49-advanced-weekly-review-control-tower",
+                "legacy-weekly-review-control-tower",
                 "--root",
                 str(tmp_path),
                 "--format",

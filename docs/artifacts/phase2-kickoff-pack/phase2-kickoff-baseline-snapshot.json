@@ -1,9 +1,9 @@
 {
   "impact": 31,
   "baseline": {
-    "day30_activation_score": 69.0,
-    "day30_average_activation_score": 85.0,
-    "day30_backlog_items": 8
+    "activation_score": 69.0,
+    "average_activation_score": 85.0,
+    "backlog_items": 8
   },
   "week1_targets": {
     "activation_score_floor": 95,

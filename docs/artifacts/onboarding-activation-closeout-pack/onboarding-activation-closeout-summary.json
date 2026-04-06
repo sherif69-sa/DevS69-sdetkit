@@ -1,25 +1,25 @@
 {
-  "name": "day63-onboarding-activation-closeout",
+  "name": "cycle63-onboarding-activation-closeout",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
-    "docs_page": "docs/integrations-day63-onboarding-activation-closeout.md",
+    "docs_page": "docs/integrations-cycle63-onboarding-activation-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day62_summary": "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json",
-    "day62_delivery_board": "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
+    "summary": "docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json",
+    "delivery_board": "docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
   },
   "checks": [
     {
       "check_id": "readme_command_lane",
       "weight": 7,
       "passed": true,
-      "evidence": "README day63 command lane"
+      "evidence": "README cycle63 command lane"
     },
     {
       "check_id": "docs_index_links",
       "weight": 8,
       "passed": true,
-      "evidence": "impact-63-big-upgrade-report.md + integrations-day63-onboarding-activation-closeout.md"
+      "evidence": "impact-63-big-upgrade-report.md + integrations-cycle63-onboarding-activation-closeout.md"
     },
     {
       "check_id": "top10_strategy_alignment",
@@ -28,34 +28,34 @@
       "evidence": "Day 63 + Day 64 strategy chain"
     },
     {
-      "check_id": "day62_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-program-closeout-pack/community-program-closeout-summary.json"
     },
     {
-      "check_id": "day62_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/community-program-closeout-pack/community-program-delivery-board.md"
     },
     {
-      "check_id": "day62_quality_floor",
+      "check_id": "quality_floor",
       "weight": 15,
       "passed": true,
       "evidence": {
-        "day62_score": 95,
+        "score": 95,
         "strict_pass": true,
-        "day62_checks": 13
+        "checks": 13
       }
     },
     {
-      "check_id": "day62_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day62": true
+        "contains": true
       }
     },
     {
@@ -96,9 +96,9 @@
     }
   ],
   "rollup": {
-    "day62_activation_score": 95,
-    "day62_checks": 13,
-    "day62_delivery_board_items": 5
+    "activation_score": 95,
+    "checks": 13,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 95,

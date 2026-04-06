@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-narrative-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "cycle51_summary": "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json",
-    "cycle51_delivery_board": "docs/artifacts/case-snippet-closeout-pack/delivery-board.md"
+    "summary": "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json",
+    "delivery_board": "docs/artifacts/case-snippet-closeout-pack/delivery-board.md"
   },
   "checks": [
     {
@@ -38,59 +38,59 @@
       }
     },
     {
-      "check_id": "readme_cycle52_link",
+      "check_id": "readme_link",
       "weight": 8,
       "passed": false,
       "evidence": "docs/integrations-narrative-closeout.md"
     },
     {
-      "check_id": "readme_cycle52_command",
+      "check_id": "readme_command",
       "weight": 4,
       "passed": false,
       "evidence": "narrative-closeout"
     },
     {
-      "check_id": "docs_index_cycle52_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-52-big-upgrade-report.md + integrations-narrative-closeout.md"
     },
     {
-      "check_id": "top10_cycle52_alignment",
+      "check_id": "top10_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Cycle 52 + Day 53 strategy chain"
     },
     {
-      "check_id": "cycle51_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
     },
     {
-      "check_id": "cycle51_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/case-snippet-closeout-pack/delivery-board.md"
     },
     {
-      "check_id": "cycle51_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "cycle51_score": 55.0,
+        "score": 55.0,
         "strict_pass": false,
-        "cycle51_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "cycle51_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle51": true,
-        "contains_cycle52": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -130,16 +130,16 @@
     }
   ],
   "rollup": {
-    "cycle51_activation_score": 55.0,
-    "cycle51_checks": 14,
-    "cycle51_delivery_board_items": 5
+    "activation_score": 55.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 48,
     "passed_checks": 6,
     "failed_checks": 8,
     "critical_failures": [
-      "cycle51_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

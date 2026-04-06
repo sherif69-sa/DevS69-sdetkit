@@ -181,7 +181,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
     narrative_closeout_score, narrative_closeout_strict, narrative_closeout_check_count = (
         _load_narrative_closeout_summary(narrative_closeout_summary)
     )
-    board_count, board_has_narrative_closeout_day52, board_has_docs_loop_day53 = _board_stats(
+    board_count, board_has_narrative_closeout_cycle52, board_has_docs_loop_cycle53 = _board_stats(
         narrative_closeout_board
     )
 
@@ -263,12 +263,12 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "check_id": "narrative_closeout_board_integrity",
             "weight": 7,
             "passed": board_count >= 5
-            and board_has_narrative_closeout_day52
-            and board_has_docs_loop_day53,
+            and board_has_narrative_closeout_cycle52
+            and board_has_docs_loop_cycle53,
             "evidence": {
                 "board_items": board_count,
-                "contains_narrative_closeout_day52": board_has_narrative_closeout_day52,
-                "contains_docs_loop_day53": board_has_docs_loop_day53,
+                "contains_narrative_closeout_cycle52": board_has_narrative_closeout_cycle52,
+                "contains_docs_loop_cycle53": board_has_docs_loop_cycle53,
             },
         },
         {
@@ -313,7 +313,7 @@ def build_docs_loop_closeout_summary(root: Path) -> dict[str, Any]:
             "Re-run Day 52 narrative closeout command and restore strict pass baseline before Day 53 lock."
         )
 
-    if board_count >= 5 and board_has_narrative_closeout_day52 and board_has_docs_loop_day53:
+    if board_count >= 5 and board_has_narrative_closeout_cycle52 and board_has_docs_loop_cycle53:
         wins.append(
             f"Day 52 delivery board integrity validated with {board_count} checklist items."
         )

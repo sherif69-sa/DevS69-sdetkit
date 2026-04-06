@@ -11,19 +11,19 @@
   },
   "checks": [
     {
-      "check_id": "readme_cycle1_command",
+      "check_id": "readme_command",
       "weight": 5,
       "passed": false,
       "evidence": "README cycle1 command lane"
     },
     {
-      "check_id": "docs_index_cycle1_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "continuous-upgrade-cycle1-big-upgrade-report.md + integrations-continuous-upgrade-closeout-1.md"
     },
     {
-      "check_id": "top10_cycle1_align",
+      "check_id": "top10_align",
       "weight": 5,
       "passed": false,
       "evidence": "Phase-3 wrap publication + Cycle 1 strategy chain"

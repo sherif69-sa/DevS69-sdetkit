@@ -159,7 +159,7 @@ def _find_existing(paths: list[Path]) -> Path:
     raise AssertionError(f"none of these paths exist: {[str(p) for p in paths]}")
 
 
-def test_cycle7_json(tmp_path: Path, capsys) -> None:
+def test_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = c7.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -168,7 +168,7 @@ def test_cycle7_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_cycle7_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = c7.main(
         [
@@ -249,7 +249,7 @@ def test_cycle7_emit_pack_and_execute(tmp_path: Path) -> None:
     assert execution_data["strict_pass"] is True
 
 
-def test_cycle7_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
+def test_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatch) -> None:
     _seed_repo(tmp_path)
     monkeypatch.setattr(c7, "_EXECUTION_COMMANDS", ['python -c "import sys; sys.exit(3)"'])
     rc = c7.main(
@@ -276,7 +276,7 @@ def test_cycle7_execute_strict_fails_on_command_error(tmp_path: Path, monkeypatc
     assert execution_data["strict_pass"] is False
 
 
-def test_cycle7_strict_fails_without_previous_cycle(tmp_path: Path) -> None:
+def test_strict_fails_without_previous_cycle(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
 
     removed = False
@@ -302,7 +302,7 @@ def test_cycle7_strict_fails_without_previous_cycle(tmp_path: Path) -> None:
     assert c7.main(["--root", str(tmp_path), "--strict", "--format", "json"]) == 1
 
 
-def test_cycle7_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["continuous-upgrade-closeout-7", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

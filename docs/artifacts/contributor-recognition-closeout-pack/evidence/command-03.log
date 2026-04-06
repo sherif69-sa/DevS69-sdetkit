@@ -2,5 +2,5 @@
   "command": "python scripts/check_contributor_recognition_closeout_contract.py --skip-evidence",
   "returncode": 1,
   "stdout": "",
-  "stderr": "day76-contributor-recognition-closeout contract check failed:\n- activation_score too low: 67\n- strict_pass is false\n- failed checks: ['readme_command_lane', 'docs_index_links', 'top10_strategy_alignment', 'day75_quality_floor']\n"
+  "stderr": "cycle76-contributor-recognition-closeout contract check failed:\n- activation_score too low: 67\n- strict_pass is false\n- failed checks: ['readme_command_lane', 'docs_index_links', 'top10_strategy_alignment', 'quality_floor']\n"
 }

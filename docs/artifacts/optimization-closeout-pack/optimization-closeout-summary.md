@@ -2,7 +2,7 @@ Cycle 46 optimization closeout summary
 - Activation score: 65
 - Passed checks: 9
 - Failed checks: 5
-- Critical failures: ['day45_strict_baseline']
+- Critical failures: ['strict_baseline']
 - Cycle 45 activation score: `65.0`
 - Cycle 45 checks evaluated: `14`
 - Cycle 45 delivery board checklist items: `5`

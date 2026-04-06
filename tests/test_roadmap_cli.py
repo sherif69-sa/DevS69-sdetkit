@@ -10,11 +10,11 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
     manifest_dir = tmp_path / "docs" / "roadmap"
     manifest_dir.mkdir(parents=True)
 
-    report = tmp_path / "docs" / "roadmap" / "reports" / "day01-report.md"
+    report = tmp_path / "docs" / "roadmap" / "reports" / "impact01-report.md"
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text("report", encoding="utf-8")
 
-    plan = tmp_path / "docs" / "roadmap" / "phase3" / "plans" / "day01-plan.json"
+    plan = tmp_path / "docs" / "roadmap" / "phase3" / "plans" / "impact01-plan.json"
     plan.parent.mkdir(parents=True, exist_ok=True)
     plan.write_text("{}", encoding="utf-8")
 
@@ -22,7 +22,7 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
         json.dumps(
             {
                 "phases": [
-                    {"impact": 1, "report_file": "day01-report.md", "plan_file": "day01-plan.json"}
+                    {"impact": 1, "report_file": "impact01-report.md", "plan_file": "impact01-plan.json"}
                 ]
             }
         ),
@@ -33,19 +33,19 @@ def test_load_manifest_resolves_report_and_plan_paths(tmp_path: Path, monkeypatc
     entries = roadmap.load_manifest()
 
     assert len(entries) == 1
-    assert entries[0].report_path == "docs/roadmap/reports/day01-report.md"
-    assert entries[0].plan_path == "docs/roadmap/phase3/plans/day01-plan.json"
+    assert entries[0].report_path == "docs/roadmap/reports/impact01-report.md"
+    assert entries[0].plan_path == "docs/roadmap/phase3/plans/impact01-plan.json"
 
 
 def test_load_manifest_handles_dot_prefixed_plan_candidates(tmp_path: Path, monkeypatch) -> None:
     manifest_dir = tmp_path / "docs" / "roadmap"
     manifest_dir.mkdir(parents=True)
 
-    dot_plan = tmp_path / ".day02-plan.json"
+    dot_plan = tmp_path / ".impact02-plan.json"
     dot_plan.write_text("{}", encoding="utf-8")
     (manifest_dir / "manifest.json").write_text(
         json.dumps(
-            {"phases": [{"impact": 2, "report_file": None, "plan_file": ".day02-plan.json"}]}
+            {"phases": [{"impact": 2, "report_file": None, "plan_file": ".impact02-plan.json"}]}
         ),
         encoding="utf-8",
     )
@@ -55,16 +55,16 @@ def test_load_manifest_handles_dot_prefixed_plan_candidates(tmp_path: Path, monk
 
     assert len(entries) == 1
     assert entries[0].report_path is None
-    assert entries[0].plan_path == ".day02-plan.json"
+    assert entries[0].plan_path == ".impact02-plan.json"
 
 
 def test_roadmap_main_show_open_and_error_paths(monkeypatch, capsys, tmp_path: Path) -> None:
     entry = roadmap.RoadmapEntry(
         impact=9,
-        report_file="day09-report.md",
-        plan_file="day09-plan.json",
-        report_path="docs/day09-report.md",
-        plan_path="docs/day09-plan.json",
+        report_file="impact09-report.md",
+        plan_file="impact09-plan.json",
+        report_path="docs/impact09-report.md",
+        plan_path="docs/impact09-plan.json",
     )
     monkeypatch.setattr(roadmap, "load_manifest", lambda: [entry])
     monkeypatch.setattr(roadmap, "_repo_root", lambda: tmp_path)
@@ -75,10 +75,10 @@ def test_roadmap_main_show_open_and_error_paths(monkeypatch, capsys, tmp_path: P
 
     assert roadmap.main(["open", "9", "plan"]) == 0
     open_out = capsys.readouterr().out.strip()
-    assert open_out.endswith("/docs/day09-plan.json")
+    assert open_out.endswith("/docs/impact09-plan.json")
 
     assert roadmap.main(["open", "9", "report"]) == 0
-    assert capsys.readouterr().out.strip().endswith("/docs/day09-report.md")
+    assert capsys.readouterr().out.strip().endswith("/docs/impact09-report.md")
 
     assert roadmap.main(["show", "not-a-impact"]) == 2
     assert capsys.readouterr().err.strip() == "roadmap: invalid impact"
@@ -90,9 +90,9 @@ def test_roadmap_main_show_open_and_error_paths(monkeypatch, capsys, tmp_path: P
 def test_roadmap_open_file_not_found_for_selected_kind(monkeypatch, capsys) -> None:
     entry = roadmap.RoadmapEntry(
         impact=10,
-        report_file="day10-report.md",
-        plan_file="day10-plan.json",
-        report_path="docs/day10-report.md",
+        report_file="impact10-report.md",
+        plan_file="impact10-plan.json",
+        report_path="docs/impact10-report.md",
         plan_path=None,
     )
     monkeypatch.setattr(roadmap, "load_manifest", lambda: [entry])

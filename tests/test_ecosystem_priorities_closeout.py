@@ -53,7 +53,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/plans/ecosystem-priorities-plan.json").write_text(
         json.dumps(
             {
-                "plan_id": "day78-001",
+                "plan_id": "ecosystem-priorities-001",
                 "contributors": ["platform", "docs"],
                 "ecosystem_tracks": ["integrations", "playbooks"],
                 "baseline": {"score": 63},
@@ -104,12 +104,7 @@ def test_lane78_emit_pack_and_execute(tmp_path: Path) -> None:
     assert (
         tmp_path / "artifacts/ecosystem-priorities-pack/ecosystem-priorities-kpi-scorecard.json"
     ).exists()
-    assert not (
-        tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-workstream-ledger.json"
-    ).exists()
-    assert not (
-        tmp_path / "artifacts/ecosystem-priorities-pack/day78-ecosystem-kpi-scorecard.json"
-    ).exists()
+    assert not any((tmp_path / "artifacts/ecosystem-priorities-pack").glob("*day*"))
     assert (
         tmp_path
         / "artifacts/ecosystem-priorities-pack/evidence/ecosystem-priorities-execution-summary.json"

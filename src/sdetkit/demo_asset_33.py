@@ -143,13 +143,13 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_demo_asset_day33 = any(
+    has_demo_asset_cycle33 = any(
         any(token in line for token in ("impact 33", "day 33", "name 33")) for line in lines
     )
-    has_demo_asset_day34 = any(
+    has_demo_asset_cycle34 = any(
         any(token in line for token in ("impact 34", "day 34", "name 34")) for line in lines
     )
-    return item_count, has_demo_asset_day33, has_demo_asset_day34
+    return item_count, has_demo_asset_cycle33, has_demo_asset_cycle34
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -185,7 +185,7 @@ def build_demo_asset_summary_impl(
     release_cadence_score, release_cadence_strict, release_cadence_check_count = (
         _load_release_cadence_summary(release_cadence_summary)
     )
-    board_count, board_has_demo_asset_day33, board_has_demo_asset_day34 = _board_stats(
+    board_count, board_has_demo_asset_cycle33, board_has_demo_asset_cycle34 = _board_stats(
         release_cadence_board
     )
 
@@ -270,12 +270,12 @@ def build_demo_asset_summary_impl(
             "check_id": "release_cadence_board_integrity",
             "weight": 7,
             "passed": board_count >= 5
-            and board_has_demo_asset_day33
-            and board_has_demo_asset_day34,
+            and board_has_demo_asset_cycle33
+            and board_has_demo_asset_cycle34,
             "evidence": {
                 "board_items": board_count,
-                "contains_demo_asset_day33": board_has_demo_asset_day33,
-                "contains_demo_asset_day34": board_has_demo_asset_day34,
+                "contains_demo_asset_cycle33": board_has_demo_asset_cycle33,
+                "contains_demo_asset_cycle34": board_has_demo_asset_cycle34,
             },
         },
         {
@@ -320,7 +320,7 @@ def build_demo_asset_summary_impl(
             "Re-run Day 32 cadence command and restore strict pass baseline before demo lock."
         )
 
-    if board_count >= 5 and board_has_demo_asset_day33 and board_has_demo_asset_day34:
+    if board_count >= 5 and board_has_demo_asset_cycle33 and board_has_demo_asset_cycle34:
         wins.append(
             f"Day 32 delivery board integrity validated with {board_count} checklist items."
         )

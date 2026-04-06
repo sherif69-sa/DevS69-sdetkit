@@ -130,7 +130,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day56(path: Path) -> tuple[int, bool, int]:
+def _load_cycle56(path: Path) -> tuple[int, bool, int]:
     payload_obj = _load_json(path)
     if not isinstance(payload_obj, dict):
         return 0, False, 0
@@ -148,8 +148,8 @@ def _load_board(path: Path) -> tuple[int, bool]:
         return 0, False
     lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines()]
     items = [line for line in lines if line.startswith("- [")]
-    has_day56 = any("Day 56" in line for line in lines)
-    return len(items), has_day56
+    has_cycle56 = any("Day 56" in line for line in lines)
+    return len(items), has_cycle56
 
 
 def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
@@ -158,11 +158,11 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
     page_path = root / _PAGE_PATH
     page_text = _read(page_path)
     top10_text = _read(root / _TOP10_PATH)
-    day56_summary = root / _DAY56_SUMMARY_PATH
-    day56_board = root / _DAY56_BOARD_PATH
+    summary = root / _DAY56_SUMMARY_PATH
+    board = root / _DAY56_BOARD_PATH
 
-    day56_score, day56_strict, day56_check_count = _load_day56(day56_summary)
-    board_count, board_has_day56 = _load_board(day56_board)
+    score, strict, check_count = _load_cycle56(summary)
+    board_count, board_has_cycle56 = _load_board(board)
 
     missing_sections = [s for s in _REQUIRED_SECTIONS if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
@@ -217,32 +217,32 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "Day 57 + Day 58 strategy chain",
         },
         {
-            "check_id": "day56_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": day56_summary.exists(),
-            "evidence": str(day56_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "day56_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": day56_board.exists(),
-            "evidence": str(day56_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "day56_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": day56_strict and day56_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "day56_score": day56_score,
-                "strict_pass": day56_strict,
-                "day56_checks": day56_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "day56_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day56,
-            "evidence": {"board_items": board_count, "contains_day56": board_has_day56},
+            "passed": board_count >= 5 and board_has_cycle56,
+            "evidence": {"board_items": board_count, "contains": board_has_cycle56},
         },
         {
             "check_id": "kpi_deep_audit_contract_locked",
@@ -266,24 +266,24 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not day56_summary.exists() or not day56_board.exists():
-        critical_failures.append("day56_handoff_inputs")
-    if not day56_strict:
-        critical_failures.append("day56_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day56_strict:
-        wins.append(f"Day 56 continuity is strict-pass with activation score={day56_score}.")
+    if strict:
+        wins.append(f"Day 56 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 56 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 56 stabilization closeout command and restore strict baseline before Day 57 lock."
         )
 
-    if board_count >= 5 and board_has_day56:
+    if board_count >= 5 and board_has_cycle56:
         wins.append(
             f"Day 56 delivery board integrity validated with {board_count} checklist items."
         )
@@ -316,18 +316,18 @@ def build_kpi_deep_audit_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "day56_summary": str(day56_summary.relative_to(root))
-            if day56_summary.exists()
-            else str(day56_summary),
-            "day56_delivery_board": str(day56_board.relative_to(root))
-            if day56_board.exists()
-            else str(day56_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "day56_activation_score": day56_score,
-            "day56_checks": day56_check_count,
-            "day56_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,

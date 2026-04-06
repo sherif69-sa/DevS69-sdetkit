@@ -2,7 +2,7 @@ Cycle 45 expansion closeout summary
 - Activation score: 65
 - Passed checks: 9
 - Failed checks: 5
-- Critical failures: ['day44_strict_baseline']
+- Critical failures: ['strict_baseline']
 - Cycle 44 activation score: `40.0`
 - Cycle 44 checks evaluated: `14`
 - Cycle 44 delivery board checklist items: `5`

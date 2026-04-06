@@ -200,25 +200,25 @@ def _validate_plan_contract(
     return missing_keys, trajectory_issues, owner_issues, hygiene_issues
 
 
-def build_continuous_upgrade_cycle6_closeout_summary(root: Path) -> dict[str, Any]:
+def build_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
     top10_text = _read_text(root / _TOP10_PATH)
-    cycle5_summary = root / _CYCLE5_SUMMARY_PATH
-    cycle5_board = root / _CYCLE5_BOARD_PATH
+    summary = root / _CYCLE5_SUMMARY_PATH
+    board = root / _CYCLE5_BOARD_PATH
 
-    cycle5_data = _load_json(cycle5_summary)
-    cycle5_summary_data = (
-        cycle5_data.get("summary", {}) if isinstance(cycle5_data.get("summary"), dict) else {}
+    data = _load_json(summary)
+    summary_data = (
+        data.get("summary", {}) if isinstance(data.get("summary"), dict) else {}
     )
-    cycle5_score = int(cycle5_summary_data.get("activation_score", 0) or 0)
-    cycle5_strict = coerce_bool(cycle5_summary_data.get("strict_pass", False), default=False)
-    cycle5_check_count = (
-        len(cycle5_data.get("checks", [])) if isinstance(cycle5_data.get("checks"), list) else 0
+    score = int(summary_data.get("activation_score", 0) or 0)
+    strict = coerce_bool(summary_data.get("strict_pass", False), default=False)
+    check_count = (
+        len(data.get("checks", [])) if isinstance(data.get("checks"), list) else 0
     )
 
-    board_text = _read_text(cycle5_board)
+    board_text = _read_text(board)
     board_count = _checklist_count(board_text)
     board_has_cycle5 = "cycle 5" in board_text.lower()
 
@@ -235,13 +235,13 @@ def build_continuous_upgrade_cycle6_closeout_summary(root: Path) -> dict[str, An
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_cycle6_command",
+            "check_id": "readme_command",
             "weight": 5,
             "passed": ("continuous-upgrade-closeout-6" in readme_text),
             "evidence": "README cycle6 command lane",
         },
         {
-            "check_id": "docs_index_cycle6_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "integrations-continuous-upgrade-closeout-6.md" in docs_index_text
@@ -250,38 +250,38 @@ def build_continuous_upgrade_cycle6_closeout_summary(root: Path) -> dict[str, An
             "evidence": "integrations-continuous-upgrade-closeout-6.md",
         },
         {
-            "check_id": "top10_cycle6_align",
+            "check_id": "top10_align",
             "weight": 5,
             "passed": ("cycle 5" in top10_text.lower() and "cycle 6" in top10_text.lower()),
             "evidence": "Cycle 5 + Cycle 6 strategy chain",
         },
         {
-            "check_id": "cycle5_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle5_summary.exists(),
-            "evidence": str(cycle5_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle5_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 7,
-            "passed": cycle5_board.exists(),
-            "evidence": str(cycle5_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle5_quality_floor",
+            "check_id": "quality_floor",
             "weight": 13,
-            "passed": cycle5_score >= 85 and cycle5_strict,
+            "passed": score >= 85 and strict,
             "evidence": {
-                "cycle5_score": cycle5_score,
-                "strict_pass": cycle5_strict,
-                "cycle5_checks": cycle5_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle5_board_integrity",
+            "check_id": "board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_cycle5,
-            "evidence": {"board_items": board_count, "contains_cycle5": board_has_cycle5},
+            "evidence": {"board_items": board_count, "contains": board_has_cycle5},
         },
         {
             "check_id": "page_header",
@@ -347,15 +347,15 @@ def build_continuous_upgrade_cycle6_closeout_summary(root: Path) -> dict[str, An
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle5_summary.exists() or not cycle5_board.exists():
-        critical_failures.append("cycle5_handoff_inputs")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle5_score >= 85 and cycle5_strict:
-        wins.append(f"Cycle 6 continuity baseline is stable with activation score={cycle5_score}.")
+    if score >= 85 and strict:
+        wins.append(f"Cycle 6 continuity baseline is stable with activation score={score}.")
     else:
         misses.append("Cycle 5 continuity baseline is below the floor (<85) or not strict-pass.")
         handoff_actions.append(
@@ -421,19 +421,19 @@ def build_continuous_upgrade_cycle6_closeout_summary(root: Path) -> dict[str, An
             "docs_index": "docs/index.md",
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
-            "cycle5_summary": str(cycle5_summary.relative_to(root))
-            if cycle5_summary.exists()
-            else str(cycle5_summary),
-            "cycle5_delivery_board": str(cycle5_board.relative_to(root))
-            if cycle5_board.exists()
-            else str(cycle5_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
             "continuous_upgrade_plan": _PLAN_PATH,
         },
         "checks": checks,
         "rollup": {
-            "cycle5_activation_score": cycle5_score,
-            "cycle5_checks": cycle5_check_count,
-            "cycle5_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -545,7 +545,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _CYCLE6_DEFAULT_PAGE)
 
-    payload = build_continuous_upgrade_cycle6_closeout_summary(root)
+    payload = build_continuous_upgrade_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

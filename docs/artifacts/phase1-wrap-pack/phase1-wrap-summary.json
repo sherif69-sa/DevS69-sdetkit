@@ -1,15 +1,15 @@
 {
   "name": "phase1-wrap",
-  "legacy_name": "day30-phase1-wrap",
+  "legacy_name": "cycle30-phase1-wrap",
   "inputs": {
     "readme": "README.md",
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-phase1-wrap.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day27_summary": "docs/artifacts/kpi-audit-pack/day27-kpi-summary.json",
-    "day28_summary": "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
-    "day29_summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
-    "day29_summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
+    "summary": "docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json",
+    "summary": "docs/artifacts/weekly-review-pack/weekly-review-summary.json",
+    "summary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json",
+    "summary_primary": "docs/artifacts/phase1-hardening-pack/phase1-hardening-summary.json"
   },
   "checks": [
     {
@@ -44,7 +44,7 @@
       "check_id": "readme_command_lane",
       "weight": 5,
       "passed": false,
-      "evidence": "phase1-wrap (legacy: day30-phase1-wrap)"
+      "evidence": "phase1-wrap (legacy: cycle30-phase1-wrap)"
     },
     {
       "check_id": "docs_index_links",
@@ -59,19 +59,19 @@
       "evidence": "Day 30 + Day 31 strategy chain"
     },
     {
-      "check_id": "day27_input_present",
+      "check_id": "input_present",
       "weight": 8,
       "passed": true,
-      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/day27-kpi-summary.json"
+      "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/kpi-audit-pack/cycle27-kpi-summary.json"
     },
     {
-      "check_id": "day28_input_present",
+      "check_id": "input_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/weekly-review-pack/weekly-review-summary.json"
     },
     {
-      "check_id": "day29_input_present",
+      "check_id": "input_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -89,9 +89,9 @@
     }
   ],
   "rollup": {
-    "day27_activation_score": 100.0,
-    "day28_activation_score": 100.0,
-    "day29_activation_score": 55.0,
+    "activation_score": 100.0,
+    "activation_score": 100.0,
+    "activation_score": 55.0,
     "average_activation_score": 85.0
   },
   "summary": {

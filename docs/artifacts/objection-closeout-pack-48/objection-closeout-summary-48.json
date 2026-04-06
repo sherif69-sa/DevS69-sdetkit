@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-objection-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day47_summary": "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json",
-    "day47_delivery_board": "docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md"
+    "summary": "docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json",
+    "delivery_board": "docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md"
   },
   "checks": [
     {
@@ -56,35 +56,35 @@
       "evidence": "Day 48 + Day 49 strategy chain"
     },
     {
-      "check_id": "day47_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/reliability-closeout-pack-47/reliability-closeout-summary-47.json"
     },
     {
-      "check_id": "day47_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/reliability-closeout-pack-47/delivery-board-47.md"
     },
     {
-      "check_id": "day47_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day47_score": 100.0,
+        "score": 100.0,
         "strict_pass": true,
-        "day47_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "day47_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day47": true,
-        "contains_day48": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -113,9 +113,9 @@
     }
   ],
   "rollup": {
-    "day47_activation_score": 100.0,
-    "day47_checks": 14,
-    "day47_delivery_board_items": 5
+    "activation_score": 100.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

@@ -34,7 +34,7 @@ def test_onboarding_json_is_machine_readable(capsys):
     assert data["security"]["first_command"] == "sdetkit security --format markdown"
     assert "platform_setup" in data
     assert "windows" in data["platform_setup"]
-    assert data["platform_setup"] == data["day5_platform_setup"]
+    assert not any(k.startswith("day") for k in data)
 
 
 def test_onboarding_platform_filter_renders_selected_os(capsys):

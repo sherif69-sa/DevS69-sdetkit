@@ -78,7 +78,7 @@
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day43_score": 98.0,
+        "score": 98.0,
         "strict_pass": true,
         "acceleration_closeout_checks": 1
       }
@@ -89,8 +89,8 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_day43": false,
-        "contains_day44": false
+        "contains": false,
+        "contains": false
       }
     },
     {

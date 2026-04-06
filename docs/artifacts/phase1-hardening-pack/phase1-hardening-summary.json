@@ -1,6 +1,6 @@
 {
   "name": "phase1-hardening",
-  "legacy_name": "day29-phase1-hardening",
+  "legacy_name": "cycle29-phase1-hardening",
   "paths": {
     "root": "/workspace/DevS69-sdetkit",
     "docs_page": "docs/integrations-phase1-hardening.md",

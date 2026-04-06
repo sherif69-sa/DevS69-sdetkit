@@ -115,17 +115,17 @@ def build_phase1_wrap_summary_impl(
     missing_sections = [s for s in [_SECTION_HEADER, *_REQUIRED_SECTIONS] if s not in page_text]
     missing_commands = [c for c in _REQUIRED_COMMANDS if c not in page_text]
 
-    day27_path = root / "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
-    day28_path = root / "docs/artifacts/weekly-review-pack/weekly-review-summary.json"
-    day29_primary_path = root / _DAY29_CANONICAL_SUMMARY_PATH
-    day29_path = day29_primary_path
+    path = root / "docs/artifacts/kpi-audit-pack/kpi-audit-summary.json"
+    path = root / "docs/artifacts/weekly-review-pack/weekly-review-summary.json"
+    primary_path = root / _DAY29_CANONICAL_SUMMARY_PATH
+    path = primary_path
 
-    day27_score, day27_ok = _load_score(day27_path)
-    day28_score, day28_ok = _load_score(day28_path)
-    day29_score, day29_ok = _load_score(day29_path)
+    score, ok = _load_score(path)
+    score, ok = _load_score(path)
+    score, ok = _load_score(path)
     closeout_avg = (
-        round((day27_score + day28_score + day29_score) / 3, 2)
-        if (day27_ok and day28_ok and day29_ok)
+        round((score + score + score) / 3, 2)
+        if (ok and ok and ok)
         else 0.0
     )
 
@@ -181,24 +181,24 @@ def build_phase1_wrap_summary_impl(
             "evidence": "Day 30 + Day 31 strategy chain",
         },
         {
-            "check_id": "day27_input_present",
+            "check_id": "input_present",
             "weight": 8,
-            "passed": day27_ok,
-            "evidence": str(day27_path),
+            "passed": ok,
+            "evidence": str(path),
         },
         {
-            "check_id": "day28_input_present",
+            "check_id": "input_present",
             "weight": 8,
-            "passed": day28_ok,
-            "evidence": str(day28_path),
+            "passed": ok,
+            "evidence": str(path),
         },
         {
-            "check_id": "day29_input_present",
+            "check_id": "input_present",
             "weight": 8,
-            "passed": day29_ok,
+            "passed": ok,
             "evidence": {
-                "resolved": str(day29_path),
-                "primary": str(day29_primary_path),
+                "resolved": str(path),
+                "primary": str(primary_path),
             },
         },
         {
@@ -215,7 +215,7 @@ def build_phase1_wrap_summary_impl(
     critical_failures: list[str] = []
     if missing_sections or missing_commands:
         critical_failures.append("docs_contract")
-    if not (day27_ok and day28_ok and day29_ok):
+    if not (ok and ok and ok):
         critical_failures.append("input_artifacts")
     if backlog_count < 8:
         critical_failures.append("phase2_backlog")
@@ -224,7 +224,7 @@ def build_phase1_wrap_summary_impl(
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day27_ok and day28_ok and day29_ok:
+    if ok and ok and ok:
         wins.append(f"Cycles 27-29 closeout artifacts loaded successfully (avg={closeout_avg}).")
     else:
         misses.append("One or more Day 27-29 artifacts are missing or malformed.")
@@ -255,16 +255,16 @@ def build_phase1_wrap_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day27_summary": str(day27_path.relative_to(root)),
-            "day28_summary": str(day28_path.relative_to(root)),
-            "day29_summary": str(day29_path.relative_to(root)),
-            "day29_summary_primary": str(day29_primary_path.relative_to(root)),
+            "summary": str(path.relative_to(root)),
+            "summary": str(path.relative_to(root)),
+            "summary": str(path.relative_to(root)),
+            "summary_primary": str(primary_path.relative_to(root)),
         },
         "checks": checks,
         "rollup": {
-            "day27_activation_score": day27_score,
-            "day28_activation_score": day28_score,
-            "day29_activation_score": day29_score,
+            "activation_score": score,
+            "activation_score": score,
+            "activation_score": score,
             "average_activation_score": closeout_avg,
         },
         "summary": {
@@ -303,9 +303,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Closeout rollup (Day 27-29)",
         "",
-        f"- Day 27 score: `{payload['rollup']['day27_activation_score']}`",
-        f"- Day 28 score: `{payload['rollup']['day28_activation_score']}`",
-        f"- Day 29 score: `{payload['rollup']['day29_activation_score']}`",
+        f"- Day 27 score: `{payload['rollup']['activation_score']}`",
+        f"- Day 28 score: `{payload['rollup']['activation_score']}`",
+        f"- Day 29 score: `{payload['rollup']['activation_score']}`",
         f"- Average score: `{payload['rollup']['average_activation_score']}`",
         "",
         "## Wins",

@@ -2,7 +2,7 @@ Cycle 47 reliability closeout summary
 - Activation score: 65
 - Passed checks: 9
 - Failed checks: 5
-- Critical failures: ['day46_strict_baseline']
+- Critical failures: ['strict_baseline']
 - Cycle 46 activation score: `65.0`
 - Cycle 46 checks evaluated: `14`
 - Cycle 46 delivery board checklist items: `5`

@@ -163,7 +163,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
     phase2_wrap_handoff_score, phase2_wrap_handoff_strict, phase2_wrap_handoff_check_count = (
         _load_phase2_wrap_handoff_summary(phase2_wrap_handoff_summary)
     )
-    board_count, board_has_phase2_wrap_handoff_day60 = _count_board_items(
+    board_count, board_has_phase2_wrap_handoff_cycle60 = _count_board_items(
         phase2_wrap_handoff_board, "Day 60"
     )
 
@@ -220,10 +220,10 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
         {
             "check_id": "phase2_wrap_handoff_board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_phase2_wrap_handoff_day60,
+            "passed": board_count >= 5 and board_has_phase2_wrap_handoff_cycle60,
             "evidence": {
                 "board_items": board_count,
-                "contains_phase2_wrap_handoff_day60": board_has_phase2_wrap_handoff_day60,
+                "contains_phase2_wrap_handoff_cycle60": board_has_phase2_wrap_handoff_cycle60,
             },
         },
         {
@@ -285,7 +285,7 @@ def build_phase3_kickoff_closeout_summary(root: Path) -> dict[str, Any]:
             "Re-run Day 60 Phase-2 wrap + handoff closeout command and restore strict baseline before Day 61 lock."
         )
 
-    if board_count >= 5 and board_has_phase2_wrap_handoff_day60:
+    if board_count >= 5 and board_has_phase2_wrap_handoff_cycle60:
         wins.append(
             f"Day 60 delivery board integrity validated with {board_count} checklist items."
         )

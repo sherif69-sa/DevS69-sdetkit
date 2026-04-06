@@ -113,7 +113,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day30(path: Path) -> tuple[float, bool, float]:
+def _load_cycle30(path: Path) -> tuple[float, bool, float]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0.0
@@ -131,13 +131,13 @@ def _backlog_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day31 = any(
+    has_cycle31 = any(
         any(token in line for token in ("impact 31", "day 31", "name 31")) for line in lines
     )
-    has_day32 = any(
+    has_cycle32 = any(
         any(token in line for token in ("impact 32", "day 32", "name 32")) for line in lines
     )
-    return item_count, has_day31, has_day32
+    return item_count, has_cycle31, has_cycle32
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -165,12 +165,12 @@ def build_phase2_kickoff_summary_impl(
     )
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day30_summary_primary = root / _DAY30_SUMMARY_PATH
-    day30_backlog_primary = root / _DAY30_BACKLOG_PATH
-    day30_summary = day30_summary_primary
-    day30_backlog = day30_backlog_primary
-    day30_score, day30_strict, day30_avg = _load_day30(day30_summary)
-    backlog_count, backlog_has_day31, backlog_has_day32 = _backlog_stats(day30_backlog)
+    summary_primary = root / _DAY30_SUMMARY_PATH
+    backlog_primary = root / _DAY30_BACKLOG_PATH
+    summary = summary_primary
+    backlog = backlog_primary
+    score, strict, avg = _load_cycle30(summary)
+    backlog_count, backlog_has_cycle31, backlog_has_cycle32 = _backlog_stats(backlog)
 
     checks: list[dict[str, Any]] = [
         {
@@ -200,8 +200,8 @@ def build_phase2_kickoff_summary_impl(
         {
             "check_id": "readme_command_lane",
             "weight": 4,
-            "passed": ("phase2-kickoff" in readme_text) or ("day31-phase2-kickoff" in readme_text),
-            "evidence": "phase2-kickoff (legacy: legacy-phase2-kickoff; historical: day31-phase2-kickoff)",
+            "passed": ("phase2-kickoff" in readme_text) or ("cycle31-phase2-kickoff" in readme_text),
+            "evidence": "phase2-kickoff (legacy: legacy-phase2-kickoff; historical: cycle31-phase2-kickoff)",
         },
         {
             "check_id": "docs_index_links",
@@ -222,41 +222,41 @@ def build_phase2_kickoff_summary_impl(
             "evidence": "Day 31 + Day 32 strategy chain",
         },
         {
-            "check_id": "day30_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": day30_summary.exists(),
+            "passed": summary.exists(),
             "evidence": {
-                "resolved": str(day30_summary),
-                "primary": str(day30_summary_primary),
+                "resolved": str(summary),
+                "primary": str(summary_primary),
             },
         },
         {
-            "check_id": "day30_backlog_present",
+            "check_id": "backlog_present",
             "weight": 8,
-            "passed": day30_backlog.exists(),
+            "passed": backlog.exists(),
             "evidence": {
-                "resolved": str(day30_backlog),
-                "primary": str(day30_backlog_primary),
+                "resolved": str(backlog),
+                "primary": str(backlog_primary),
             },
         },
         {
-            "check_id": "day30_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": day30_strict and day30_score >= 95 and day30_avg >= 95,
+            "passed": strict and score >= 95 and avg >= 95,
             "evidence": {
-                "day30_score": day30_score,
-                "day30_average": day30_avg,
-                "strict_pass": day30_strict,
+                "score": score,
+                "average": avg,
+                "strict_pass": strict,
             },
         },
         {
             "check_id": "phase2_backlog_integrity",
             "weight": 7,
-            "passed": backlog_count >= 8 and backlog_has_day31 and backlog_has_day32,
+            "passed": backlog_count >= 8 and backlog_has_cycle31 and backlog_has_cycle32,
             "evidence": {
                 "backlog_items": backlog_count,
-                "contains_day31": backlog_has_day31,
-                "contains_day32": backlog_has_day32,
+                "contains": backlog_has_cycle31,
+                "contains": backlog_has_cycle32,
             },
         },
         {
@@ -276,18 +276,18 @@ def build_phase2_kickoff_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day30_summary.exists() or not day30_backlog.exists():
-        critical_failures.append("day30_handoff_inputs")
-    if not day30_strict:
-        critical_failures.append("day30_strict_baseline")
+    if not summary.exists() or not backlog.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day30_strict:
+    if strict:
         wins.append(
-            f"Day 30 continuity is strict-pass with score={day30_score} and avg={day30_avg}."
+            f"Day 30 continuity is strict-pass with score={score} and avg={avg}."
         )
     else:
         misses.append("Day 30 strict continuity signal is missing.")
@@ -295,7 +295,7 @@ def build_phase2_kickoff_summary_impl(
             "Re-run Day 30 wrap command and restore strict pass baseline before Phase-2 expansion."
         )
 
-    if backlog_count >= 8 and backlog_has_day31 and backlog_has_day32:
+    if backlog_count >= 8 and backlog_has_cycle31 and backlog_has_cycle32:
         wins.append(f"Phase-2 backlog integrity validated with {backlog_count} checklist items.")
     else:
         misses.append(
@@ -326,18 +326,18 @@ def build_phase2_kickoff_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day30_summary": str(day30_summary.relative_to(root))
-            if day30_summary.exists()
-            else str(day30_summary),
-            "day30_backlog": str(day30_backlog.relative_to(root))
-            if day30_backlog.exists()
-            else str(day30_backlog),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "backlog": str(backlog.relative_to(root))
+            if backlog.exists()
+            else str(backlog),
         },
         "checks": checks,
         "rollup": {
-            "day30_activation_score": day30_score,
-            "day30_average_activation_score": day30_avg,
-            "day30_backlog_items": backlog_count,
+            "activation_score": score,
+            "average_activation_score": avg,
+            "backlog_items": backlog_count,
         },
         "summary": {
             "activation_score": score,
@@ -375,9 +375,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 30 continuity",
         "",
-        f"- Day 30 activation score: `{payload['rollup']['day30_activation_score']}`",
-        f"- Day 30 average activation score: `{payload['rollup']['day30_average_activation_score']}`",
-        f"- Day 30 backlog checklist items: `{payload['rollup']['day30_backlog_items']}`",
+        f"- Day 30 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Day 30 average activation score: `{payload['rollup']['average_activation_score']}`",
+        f"- Day 30 backlog checklist items: `{payload['rollup']['backlog_items']}`",
         "",
         "## Wins",
     ]
@@ -408,11 +408,11 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
             {
                 "impact": 31,
                 "baseline": {
-                    "day30_activation_score": payload["rollup"]["day30_activation_score"],
-                    "day30_average_activation_score": payload["rollup"][
-                        "day30_average_activation_score"
+                    "activation_score": payload["rollup"]["activation_score"],
+                    "average_activation_score": payload["rollup"][
+                        "average_activation_score"
                     ],
-                    "day30_backlog_items": payload["rollup"]["day30_backlog_items"],
+                    "backlog_items": payload["rollup"]["backlog_items"],
                 },
                 "week1_targets": {
                     "activation_score_floor": 95,

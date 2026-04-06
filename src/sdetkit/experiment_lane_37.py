@@ -126,7 +126,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day36(path: Path) -> tuple[float, bool, int]:
+def _load_cycle36(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -143,13 +143,13 @@ def _board_stats(path: Path) -> tuple[int, bool, bool]:
     text = _read(path)
     lines = [line.strip().lower() for line in text.splitlines()]
     item_count = sum(1 for line in lines if line.startswith("- [ ]"))
-    has_day36 = any(
+    has_cycle36 = any(
         any(token in line for token in ("impact 36", "day 36", "name 36")) for line in lines
     )
-    has_day37 = any(
+    has_cycle37 = any(
         any(token in line for token in ("impact 37", "day 37", "name 37")) for line in lines
     )
-    return item_count, has_day36, has_day37
+    return item_count, has_cycle36, has_cycle37
 
 
 def _contains_all_lines(text: str, lines: list[str]) -> list[str]:
@@ -178,10 +178,10 @@ def build_experiment_lane_summary_impl(
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day36_summary = root / _DAY36_SUMMARY_PATH
-    day36_board = root / _DAY36_BOARD_PATH
-    day36_score, day36_strict, day36_check_count = _load_day36(day36_summary)
-    board_count, board_has_day36, board_has_day37 = _board_stats(day36_board)
+    summary = root / _DAY36_SUMMARY_PATH
+    board = root / _DAY36_BOARD_PATH
+    score, strict, check_count = _load_cycle36(summary)
+    board_count, board_has_cycle36, board_has_cycle37 = _board_stats(board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -230,35 +230,35 @@ def build_experiment_lane_summary_impl(
             "evidence": "Day 37 + Day 38 strategy chain",
         },
         {
-            "check_id": "day36_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": day36_summary.exists(),
-            "evidence": str(day36_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "day36_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": day36_board.exists(),
-            "evidence": str(day36_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "day36_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": day36_strict and day36_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "day36_score": day36_score,
-                "strict_pass": day36_strict,
-                "day36_checks": day36_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "day36_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day36 and board_has_day37,
+            "passed": board_count >= 5 and board_has_cycle36 and board_has_cycle37,
             "evidence": {
                 "board_items": board_count,
-                "contains_day36": board_has_day36,
-                "contains_day37": board_has_day37,
+                "contains": board_has_cycle36,
+                "contains": board_has_cycle37,
             },
         },
         {
@@ -284,24 +284,24 @@ def build_experiment_lane_summary_impl(
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day36_summary.exists() or not day36_board.exists():
-        critical_failures.append("day36_handoff_inputs")
-    if not day36_strict:
-        critical_failures.append("day36_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day36_strict:
-        wins.append(f"Day 36 continuity is strict-pass with activation score={day36_score}.")
+    if strict:
+        wins.append(f"Day 36 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 36 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 36 distribution closeout command and restore strict pass baseline before Day 37 lock."
         )
 
-    if board_count >= 5 and board_has_day36 and board_has_day37:
+    if board_count >= 5 and board_has_cycle36 and board_has_cycle37:
         wins.append(
             f"Day 36 delivery board integrity validated with {board_count} checklist items."
         )
@@ -335,18 +335,18 @@ def build_experiment_lane_summary_impl(
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day36_summary": str(day36_summary.relative_to(root))
-            if day36_summary.exists()
-            else str(day36_summary),
-            "day36_delivery_board": str(day36_board.relative_to(root))
-            if day36_board.exists()
-            else str(day36_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "day36_activation_score": day36_score,
-            "day36_checks": day36_check_count,
-            "day36_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -384,9 +384,9 @@ def _to_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Day 36 continuity",
         "",
-        f"- Day 36 activation score: `{payload['rollup']['day36_activation_score']}`",
-        f"- Day 36 checks evaluated: `{payload['rollup']['day36_checks']}`",
-        f"- Day 36 delivery board checklist items: `{payload['rollup']['day36_delivery_board_items']}`",
+        f"- Day 36 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Day 36 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- Day 36 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
         "",
         "## Wins",
     ]
@@ -469,7 +469,7 @@ def _emit_pack(root: Path, payload: dict[str, Any], pack_dir: Path) -> None:
         "# Day 37 decision log\n\n"
         "- [ ] 2026-03-01: Promote winning variant(s) into Day 38 distribution batch #1.\n"
         "- [ ] 2026-03-01: Pause losing variant(s) and record fallback plan.\n"
-        "- [ ] 2026-03-02: Publish day37 closeout summary with Day 38 rollout checklist.\n",
+        "- [ ] 2026-03-02: Publish cycle37 closeout summary with Day 38 rollout checklist.\n",
     )
     _write(
         target / "delivery-board.md",

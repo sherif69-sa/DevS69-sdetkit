@@ -169,7 +169,6 @@ def _build_payload(role: str, platform: str, journey: str) -> dict[str, Any]:
         "roles": _role_payload(role),
         "journeys": journeys,
         "platform_setup": setup,
-        "day5_platform_setup": setup,
         "recommended_sequence": [
             "sdetkit kits list",
             "sdetkit onboarding --journey fast-start --format markdown",

@@ -174,10 +174,10 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    cycle51_summary = root / _DAY51_SUMMARY_PATH
-    cycle51_board = root / _DAY51_BOARD_PATH
-    cycle51_score, cycle51_strict, cycle51_check_count = _load_cycle51(cycle51_summary)
-    board_count, board_has_cycle51, board_has_cycle52 = _board_stats(cycle51_board)
+    summary = root / _DAY51_SUMMARY_PATH
+    board = root / _DAY51_BOARD_PATH
+    score, strict, check_count = _load_cycle51(summary)
+    board_count, board_has_cycle51, board_has_cycle52 = _board_stats(board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -199,19 +199,19 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": {"missing_commands": missing_commands},
         },
         {
-            "check_id": "readme_cycle52_link",
+            "check_id": "readme_link",
             "weight": 8,
             "passed": "docs/integrations-narrative-closeout.md" in readme_text,
             "evidence": "docs/integrations-narrative-closeout.md",
         },
         {
-            "check_id": "readme_cycle52_command",
+            "check_id": "readme_command",
             "weight": 4,
             "passed": "narrative-closeout" in readme_text,
             "evidence": "narrative-closeout",
         },
         {
-            "check_id": "docs_index_cycle52_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-52-big-upgrade-report.md" in docs_index_text
@@ -220,41 +220,41 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-52-big-upgrade-report.md + integrations-narrative-closeout.md",
         },
         {
-            "check_id": "top10_cycle52_alignment",
+            "check_id": "top10_alignment",
             "weight": 5,
             "passed": ("Cycle 52" in top10_text and "Day 53" in top10_text),
             "evidence": "Cycle 52 + Day 53 strategy chain",
         },
         {
-            "check_id": "cycle51_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle51_summary.exists(),
-            "evidence": str(cycle51_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle51_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": cycle51_board.exists(),
-            "evidence": str(cycle51_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle51_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": cycle51_strict and cycle51_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle51_score": cycle51_score,
-                "strict_pass": cycle51_strict,
-                "cycle51_checks": cycle51_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle51_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
             "passed": board_count >= 5 and board_has_cycle51 and board_has_cycle52,
             "evidence": {
                 "board_items": board_count,
-                "contains_cycle51": board_has_cycle51,
-                "contains_cycle52": board_has_cycle52,
+                "contains": board_has_cycle51,
+                "contains": board_has_cycle52,
             },
         },
         {
@@ -280,17 +280,17 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if bool(c["passed"]))))
     critical_failures: list[str] = []
-    if not cycle51_summary.exists() or not cycle51_board.exists():
-        critical_failures.append("cycle51_handoff_inputs")
-    if not cycle51_strict:
-        critical_failures.append("cycle51_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle51_strict:
-        wins.append(f"Cycle 51 continuity is strict-pass with activation score={cycle51_score}.")
+    if strict:
+        wins.append(f"Cycle 51 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Cycle 51 strict continuity signal is missing.")
         handoff_actions.append(
@@ -331,18 +331,18 @@ def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "cycle51_summary": str(cycle51_summary.relative_to(root))
-            if cycle51_summary.exists()
-            else str(cycle51_summary),
-            "cycle51_delivery_board": str(cycle51_board.relative_to(root))
-            if cycle51_board.exists()
-            else str(cycle51_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle51_activation_score": cycle51_score,
-            "cycle51_checks": cycle51_check_count,
-            "cycle51_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -364,9 +364,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Cycle 51 activation score: `{payload['rollup']['cycle51_activation_score']}`",
-        f"- Cycle 51 checks evaluated: `{payload['rollup']['cycle51_checks']}`",
-        f"- Cycle 51 delivery board checklist items: `{payload['rollup']['cycle51_delivery_board_items']}`",
+        f"- Cycle 51 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Cycle 51 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- Cycle 51 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -468,7 +468,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def build_cycle52_narrative_closeout_summary(root: Path) -> dict[str, Any]:
+def build_narrative_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_narrative_closeout_summary(root)
 

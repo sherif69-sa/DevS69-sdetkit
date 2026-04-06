@@ -2,7 +2,7 @@ Docs Loop Closeout summary (legacy: Day 53)
 - Activation score: 41
 - Passed checks: 5
 - Failed checks: 9
-- Critical failures: ['day52_strict_baseline']
+- Critical failures: ['strict_baseline']
 - Day 52 activation score: `55.0`
 - Day 52 checks evaluated: `14`
 - Day 52 delivery board checklist items: `5`

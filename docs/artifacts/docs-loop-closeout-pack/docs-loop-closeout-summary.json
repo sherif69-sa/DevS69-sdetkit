@@ -97,8 +97,8 @@
       "passed": false,
       "evidence": {
         "board_items": 5,
-        "contains_narrative_closeout_day52": false,
-        "contains_docs_loop_day53": false
+        "contains_narrative_closeout_cycle52": false,
+        "contains_docs_loop_cycle53": false
       }
     },
     {

@@ -50,7 +50,7 @@ def _seed_repo(root: Path) -> None:
     (root / "docs/roadmap/plans/contributor-recognition-plan.json").write_text(
         json.dumps(
             {
-                "plan_id": "day76-001",
+                "plan_id": "contributor-recognition-001",
                 "contributors": ["alice", "bob"],
                 "recognition_tracks": ["docs", "release"],
                 "baseline": {"score": 60},

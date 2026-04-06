@@ -6,57 +6,57 @@
     "docs_page": "docs/integrations-integration-expansion-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
     "workflow": ".github/workflows/advanced-github-actions-reference-64.yml",
-    "cycle63_summary": "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json",
-    "cycle63_delivery_board": "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
+    "summary": "docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json",
+    "delivery_board": "docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
   },
   "checks": [
     {
-      "check_id": "readme_cycle64_command",
+      "check_id": "readme_command",
       "weight": 7,
       "passed": false,
       "evidence": "README cycle64 command lane"
     },
     {
-      "check_id": "docs_index_cycle64_links",
+      "check_id": "docs_index_links",
       "weight": 8,
       "passed": false,
       "evidence": "impact-64-big-upgrade-report.md + integrations-integration-expansion-closeout.md"
     },
     {
-      "check_id": "top10_cycle64_alignment",
+      "check_id": "top10_alignment",
       "weight": 5,
       "passed": false,
       "evidence": "Cycle 64 + Day 65 strategy chain"
     },
     {
-      "check_id": "cycle63_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack/onboarding-activation-closeout-summary.json"
     },
     {
-      "check_id": "cycle63_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 7,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/onboarding-activation-closeout-pack/delivery-board.md"
     },
     {
-      "check_id": "cycle63_quality_floor",
+      "check_id": "quality_floor",
       "weight": 13,
       "passed": true,
       "evidence": {
-        "cycle63_score": 95,
+        "score": 95,
         "strict_pass": true,
-        "cycle63_checks": 13
+        "checks": 13
       }
     },
     {
-      "check_id": "cycle63_board_integrity",
+      "check_id": "board_integrity",
       "weight": 5,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_cycle63": true
+        "contains": true
       }
     },
     {
@@ -121,9 +121,9 @@
     }
   ],
   "rollup": {
-    "cycle63_activation_score": 95,
-    "cycle63_checks": 13,
-    "cycle63_delivery_board_items": 5
+    "activation_score": 95,
+    "checks": 13,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 45,

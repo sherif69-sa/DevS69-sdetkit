@@ -33,7 +33,7 @@ python -m sdetkit github-actions-quickstart --format json --variant strict --str
 python -m sdetkit github-actions-quickstart --write-defaults --format json --strict
 python -m sdetkit github-actions-quickstart --emit-pack-dir docs/artifacts/cycle15-github-pack --format json --strict
 python -m sdetkit github-actions-quickstart --execute --evidence-dir docs/artifacts/cycle15-github-pack/evidence --format json --strict
-python scripts/check_day15_github_actions_quickstart_contract.py
+python scripts/check_github_actions_quickstart_contract.py
 ```
 
 ## Artifacts

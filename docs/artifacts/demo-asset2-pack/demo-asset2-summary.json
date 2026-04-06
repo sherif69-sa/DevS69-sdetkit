@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-demo-asset2.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day33_summary": "docs/artifacts/demo-asset-pack/demo-asset-summary.json",
-    "day33_delivery_board": "docs/artifacts/demo-asset-pack/demo-delivery-board.md"
+    "summary": "docs/artifacts/demo-asset-pack/demo-asset-summary.json",
+    "delivery_board": "docs/artifacts/demo-asset-pack/demo-delivery-board.md"
   },
   "checks": [
     {
@@ -56,7 +56,7 @@
       "evidence": "Day 34 + Day 35 strategy chain"
     },
     {
-      "check_id": "day33_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": {
@@ -65,7 +65,7 @@
       }
     },
     {
-      "check_id": "day33_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": {
@@ -74,23 +74,23 @@
       }
     },
     {
-      "check_id": "day33_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": false,
       "evidence": {
-        "day33_score": 65.0,
+        "score": 65.0,
         "strict_pass": false,
-        "day33_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "day33_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day34": true,
-        "contains_day35": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -119,16 +119,16 @@
     }
   ],
   "rollup": {
-    "day33_activation_score": 65.0,
-    "day33_checks": 14,
-    "day33_delivery_board_items": 5
+    "activation_score": 65.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 65,
     "passed_checks": 9,
     "failed_checks": 5,
     "critical_failures": [
-      "day33_strict_baseline"
+      "strict_baseline"
     ],
     "strict_pass": false
   },

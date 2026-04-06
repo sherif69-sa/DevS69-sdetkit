@@ -131,7 +131,7 @@ def _load_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
-def _load_day49(path: Path) -> tuple[float, bool, int]:
+def _load_cycle49(path: Path) -> tuple[float, bool, int]:
     data = _load_json(path)
     if data is None:
         return 0.0, False, 0
@@ -184,10 +184,10 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
     missing_quality_lines = _contains_all_lines(page_text, _REQUIRED_QUALITY_LINES)
     missing_board_items = _contains_all_lines(page_text, _REQUIRED_DELIVERY_BOARD_LINES)
 
-    day49_summary = root / _DAY49_SUMMARY_PATH
-    day49_board = _resolve_existing_path(root, _DAY49_BOARD_PATH, _DAY49_LEGACY_BOARD_PATH)
-    day49_score, day49_strict, day49_check_count = _load_day49(day49_summary)
-    board_count, board_has_day49, board_has_day50 = _board_stats(day49_board)
+    summary = root / _DAY49_SUMMARY_PATH
+    board = _resolve_existing_path(root, _DAY49_BOARD_PATH, _DAY49_LEGACY_BOARD_PATH)
+    score, strict, check_count = _load_cycle49(summary)
+    board_count, board_has_cycle49, board_has_cycle50 = _board_stats(board)
 
     checks: list[dict[str, Any]] = [
         {
@@ -236,35 +236,35 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
             "evidence": "Day 50 + Day 51 strategy chain",
         },
         {
-            "check_id": "day49_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": day49_summary.exists(),
-            "evidence": str(day49_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "day49_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 8,
-            "passed": day49_board.exists(),
-            "evidence": str(day49_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "day49_quality_floor",
+            "check_id": "quality_floor",
             "weight": 10,
-            "passed": day49_strict and day49_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "day49_score": day49_score,
-                "strict_pass": day49_strict,
-                "day49_checks": day49_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "day49_board_integrity",
+            "check_id": "board_integrity",
             "weight": 7,
-            "passed": board_count >= 5 and board_has_day49 and board_has_day50,
+            "passed": board_count >= 5 and board_has_cycle49 and board_has_cycle50,
             "evidence": {
                 "board_items": board_count,
-                "contains_day49": board_has_day49,
-                "contains_day50": board_has_day50,
+                "contains": board_has_cycle49,
+                "contains": board_has_cycle50,
             },
         },
         {
@@ -290,24 +290,24 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
     failed = [c for c in checks if not c["passed"]]
     score = int(round(sum(c["weight"] for c in checks if c["passed"])))
     critical_failures: list[str] = []
-    if not day49_summary.exists() or not day49_board.exists():
-        critical_failures.append("day49_handoff_inputs")
-    if not day49_strict:
-        critical_failures.append("day49_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if day49_strict:
-        wins.append(f"Day 49 continuity is strict-pass with activation score={day49_score}.")
+    if strict:
+        wins.append(f"Day 49 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Day 49 strict continuity signal is missing.")
         handoff_actions.append(
             "Re-run Day 49 weekly review closeout command and restore strict pass baseline before Day 50 lock."
         )
 
-    if board_count >= 5 and board_has_day49 and board_has_day50:
+    if board_count >= 5 and board_has_cycle49 and board_has_cycle50:
         wins.append(
             f"Day 49 delivery board integrity validated with {board_count} checklist items."
         )
@@ -343,18 +343,18 @@ def build_execution_prioritization_closeout_summary(root: Path) -> dict[str, Any
             "docs_index": docs_index_path,
             "docs_page": docs_page_path,
             "top10": top10_path,
-            "day49_summary": str(day49_summary.relative_to(root))
-            if day49_summary.exists()
-            else str(day49_summary),
-            "day49_delivery_board": str(day49_board.relative_to(root))
-            if day49_board.exists()
-            else str(day49_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "day49_activation_score": day49_score,
-            "day49_checks": day49_check_count,
-            "day49_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -376,9 +376,9 @@ def _render_text(payload: dict[str, Any]) -> str:
         f"- Passed checks: {payload['summary']['passed_checks']}",
         f"- Failed checks: {payload['summary']['failed_checks']}",
         f"- Critical failures: {payload['summary']['critical_failures']}",
-        f"- Day 49 activation score: `{payload['rollup']['day49_activation_score']}`",
-        f"- Day 49 checks evaluated: `{payload['rollup']['day49_checks']}`",
-        f"- Day 49 delivery board checklist items: `{payload['rollup']['day49_delivery_board_items']}`",
+        f"- Day 49 activation score: `{payload['rollup']['activation_score']}`",
+        f"- Day 49 checks evaluated: `{payload['rollup']['checks']}`",
+        f"- Day 49 delivery board checklist items: `{payload['rollup']['delivery_board_items']}`",
     ]
     if payload["wins"]:
         lines.append("- Wins:")
@@ -468,7 +468,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Execution prioritization closeout checks (legacy alias: day50-execution-prioritization-closeout)"
+        description="Execution prioritization closeout checks (legacy alias: cycle50-execution-prioritization-closeout)"
     )
     parser.add_argument("--root", default=".")
     parser.add_argument("--format", choices=["text", "json"], default="text")

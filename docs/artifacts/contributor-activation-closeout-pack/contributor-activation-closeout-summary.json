@@ -97,7 +97,7 @@
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_docs_loop_day53": true
+        "contains_docs_loop_cycle53": true
       }
     },
     {

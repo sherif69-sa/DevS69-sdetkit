@@ -6,9 +6,9 @@ bad = []
 bad.extend([str(p) for p in Path("docs/roadmap/plans").glob(".*.json")])
 
 legacy_root = [
-    ".gitlab-ci.day66-advanced-reference.yml",
-    ".jenkins.day67-advanced-reference.Jenkinsfile",
-    ".tekton.day68-self-hosted-reference.yaml",
+    ".gitlab-ci.cycle66-advanced-reference.yml",
+    ".jenkins.cycle67-advanced-reference.Jenkinsfile",
+    ".tekton.cycle68-self-hosted-reference.yaml",
 ]
 bad.extend([f"forbidden: {p}" for p in legacy_root if Path(p).exists()])
 

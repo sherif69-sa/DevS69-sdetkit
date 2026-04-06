@@ -5,8 +5,8 @@
     "docs_index": "docs/index.md",
     "docs_page": "docs/integrations-weekly-review-closeout.md",
     "top10": "docs/top-10-github-strategy.md",
-    "day48_summary": "docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json",
-    "day48_delivery_board": "docs/artifacts/objection-closeout-pack-48/delivery-board-48.md"
+    "summary": "docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json",
+    "delivery_board": "docs/artifacts/objection-closeout-pack-48/delivery-board-48.md"
   },
   "checks": [
     {
@@ -56,35 +56,35 @@
       "evidence": "Day 49 + Day 50 strategy chain"
     },
     {
-      "check_id": "day48_summary_present",
+      "check_id": "summary_present",
       "weight": 10,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/objection-closeout-pack-48/objection-closeout-summary-48.json"
     },
     {
-      "check_id": "day48_delivery_board_present",
+      "check_id": "delivery_board_present",
       "weight": 8,
       "passed": true,
       "evidence": "/workspace/DevS69-sdetkit/docs/artifacts/objection-closeout-pack-48/delivery-board-48.md"
     },
     {
-      "check_id": "day48_quality_floor",
+      "check_id": "quality_floor",
       "weight": 10,
       "passed": true,
       "evidence": {
-        "day48_score": 100.0,
+        "score": 100.0,
         "strict_pass": true,
-        "day48_checks": 14
+        "checks": 14
       }
     },
     {
-      "check_id": "day48_board_integrity",
+      "check_id": "board_integrity",
       "weight": 7,
       "passed": true,
       "evidence": {
         "board_items": 5,
-        "contains_day48": true,
-        "contains_day49": true
+        "contains": true,
+        "contains": true
       }
     },
     {
@@ -113,9 +113,9 @@
     }
   ],
   "rollup": {
-    "day48_activation_score": 100.0,
-    "day48_checks": 14,
-    "day48_delivery_board_items": 5
+    "activation_score": 100.0,
+    "checks": 14,
+    "delivery_board_items": 5
   },
   "summary": {
     "activation_score": 100,

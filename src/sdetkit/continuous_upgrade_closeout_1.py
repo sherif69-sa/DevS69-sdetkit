@@ -216,7 +216,7 @@ def _resolve_phase3_wrap_publication_inputs(root: Path) -> tuple[Path, Path]:
     return summary, board
 
 
-def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, Any]:
+def build_continuous_upgrade_closeout_summary(root: Path) -> dict[str, Any]:
     readme_text = _read_text(root / "README.md")
     docs_index_text = _read_text(root / "docs/index.md")
     page_text = _read_text(root / _PAGE_PATH)
@@ -261,13 +261,13 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_cycle1_command",
+            "check_id": "readme_command",
             "weight": 5,
             "passed": ("continuous-upgrade-closeout-1" in readme_text),
             "evidence": "README cycle1 command lane",
         },
         {
-            "check_id": "docs_index_cycle1_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "continuous-upgrade-cycle1-big-upgrade-report.md" in docs_index_text
@@ -276,7 +276,7 @@ def build_continuous_upgrade_cycle1_closeout_summary(root: Path) -> dict[str, An
             "evidence": "continuous-upgrade-cycle1-big-upgrade-report.md + integrations-continuous-upgrade-closeout-1.md",
         },
         {
-            "check_id": "top10_cycle1_align",
+            "check_id": "top10_align",
             "weight": 5,
             "passed": (
                 "phase-3 wrap publication" in top10_text.lower() and "cycle 1" in top10_text.lower()
@@ -586,7 +586,7 @@ def main(argv: list[str] | None = None) -> int:
     if ns.write_default_doc:
         _write(root / _PAGE_PATH, _CYCLE1_DEFAULT_PAGE)
 
-    payload = build_continuous_upgrade_cycle1_closeout_summary(root)
+    payload = build_continuous_upgrade_closeout_summary(root)
 
     if ns.emit_pack_dir:
         _emit_pack(root, Path(ns.emit_pack_dir), payload)

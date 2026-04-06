@@ -70,7 +70,7 @@ def _seed_repo(root: Path) -> None:
     )
 
 
-def test_cycle52_narrative_closeout_json(tmp_path: Path, capsys) -> None:
+def test_narrative_closeout_json(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = d52.main(["--root", str(tmp_path), "--format", "json", "--strict"])
     assert rc == 0
@@ -79,7 +79,7 @@ def test_cycle52_narrative_closeout_json(tmp_path: Path, capsys) -> None:
     assert out["summary"]["activation_score"] >= 95
 
 
-def test_cycle52_emit_pack_and_execute(tmp_path: Path) -> None:
+def test_emit_pack_and_execute(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     rc = d52.main(
         [
@@ -111,7 +111,7 @@ def test_cycle52_emit_pack_and_execute(tmp_path: Path) -> None:
     ).exists()
 
 
-def test_cycle52_strict_fails_when_cycle51_inputs_missing(tmp_path: Path) -> None:
+def test_strict_fails_when_inputs_missing(tmp_path: Path) -> None:
     _seed_repo(tmp_path)
     (
         tmp_path / "docs/artifacts/case-snippet-closeout-pack/case-snippet-closeout-summary.json"
@@ -120,7 +120,7 @@ def test_cycle52_strict_fails_when_cycle51_inputs_missing(tmp_path: Path) -> Non
     assert rc == 1
 
 
-def test_cycle52_cli_dispatch(tmp_path: Path, capsys) -> None:
+def test_cli_dispatch(tmp_path: Path, capsys) -> None:
     _seed_repo(tmp_path)
     rc = cli.main(["narrative-closeout", "--root", str(tmp_path), "--format", "text"])
     assert rc == 0

@@ -20,7 +20,7 @@ Lane closes with a major upgrade that converts Lane governance scale outcomes in
 python -m sdetkit continuous-upgrade-closeout-4 --format json --strict
 python -m sdetkit continuous-upgrade-closeout-4 --emit-pack-dir docs/artifacts/continuous-upgrade-closeout-4-pack --format json --strict
 python -m sdetkit continuous-upgrade-closeout-4 --execute --evidence-dir docs/artifacts/continuous-upgrade-closeout-4-pack/evidence --format json --strict
-python scripts/check_continuous_upgrade_cycle4_closeout_contract.py
+python scripts/check_continuous_upgrade_closeout_contract.py
 ```
 
 ## Continuous upgrade contract

@@ -2,7 +2,7 @@ Narrative Closeout summary (legacy: Cycle 52)
 - Activation score: 48
 - Passed checks: 6
 - Failed checks: 8
-- Critical failures: ['cycle51_strict_baseline']
+- Critical failures: ['strict_baseline']
 - Cycle 51 activation score: `55.0`
 - Cycle 51 checks evaluated: `14`
 - Cycle 51 delivery board checklist items: `5`

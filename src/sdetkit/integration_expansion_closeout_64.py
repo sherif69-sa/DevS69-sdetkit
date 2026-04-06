@@ -167,10 +167,10 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     top10_text = _read(root / _TOP10_PATH)
     workflow_text = _read(root / _WORKFLOW_PATH)
 
-    cycle63_summary = root / _DAY63_SUMMARY_PATH
-    cycle63_board = root / _DAY63_BOARD_PATH
-    cycle63_score, cycle63_strict, cycle63_check_count = _load_cycle63(cycle63_summary)
-    board_count, board_has_cycle63 = _count_board_items(cycle63_board, "Cycle 63")
+    summary = root / _DAY63_SUMMARY_PATH
+    board = root / _DAY63_BOARD_PATH
+    score, strict, check_count = _load_cycle63(summary)
+    board_count, board_has_cycle63 = _count_board_items(board, "Cycle 63")
 
     missing_sections = [x for x in _REQUIRED_SECTIONS if x not in page_text]
     missing_commands = [x for x in _REQUIRED_COMMANDS if x not in page_text]
@@ -181,13 +181,13 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     checks: list[dict[str, Any]] = [
         {
-            "check_id": "readme_cycle64_command",
+            "check_id": "readme_command",
             "weight": 7,
             "passed": ("integration-expansion-closeout" in readme_text),
             "evidence": "README cycle64 command lane",
         },
         {
-            "check_id": "docs_index_cycle64_links",
+            "check_id": "docs_index_links",
             "weight": 8,
             "passed": (
                 "impact-64-big-upgrade-report.md" in docs_index_text
@@ -196,38 +196,38 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "evidence": "impact-64-big-upgrade-report.md + integrations-integration-expansion-closeout.md",
         },
         {
-            "check_id": "top10_cycle64_alignment",
+            "check_id": "top10_alignment",
             "weight": 5,
             "passed": ("Cycle 64" in top10_text and "Day 65" in top10_text),
             "evidence": "Cycle 64 + Day 65 strategy chain",
         },
         {
-            "check_id": "cycle63_summary_present",
+            "check_id": "summary_present",
             "weight": 10,
-            "passed": cycle63_summary.exists(),
-            "evidence": str(cycle63_summary),
+            "passed": summary.exists(),
+            "evidence": str(summary),
         },
         {
-            "check_id": "cycle63_delivery_board_present",
+            "check_id": "delivery_board_present",
             "weight": 7,
-            "passed": cycle63_board.exists(),
-            "evidence": str(cycle63_board),
+            "passed": board.exists(),
+            "evidence": str(board),
         },
         {
-            "check_id": "cycle63_quality_floor",
+            "check_id": "quality_floor",
             "weight": 13,
-            "passed": cycle63_strict and cycle63_score >= 95,
+            "passed": strict and score >= 95,
             "evidence": {
-                "cycle63_score": cycle63_score,
-                "strict_pass": cycle63_strict,
-                "cycle63_checks": cycle63_check_count,
+                "score": score,
+                "strict_pass": strict,
+                "checks": check_count,
             },
         },
         {
-            "check_id": "cycle63_board_integrity",
+            "check_id": "board_integrity",
             "weight": 5,
             "passed": board_count >= 5 and board_has_cycle63,
-            "evidence": {"board_items": board_count, "contains_cycle63": board_has_cycle63},
+            "evidence": {"board_items": board_count, "contains": board_has_cycle63},
         },
         {
             "check_id": "page_header",
@@ -275,17 +275,17 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
 
     failed = [c for c in checks if not c["passed"]]
     critical_failures: list[str] = []
-    if not cycle63_summary.exists() or not cycle63_board.exists():
-        critical_failures.append("cycle63_handoff_inputs")
-    if not cycle63_strict:
-        critical_failures.append("cycle63_strict_baseline")
+    if not summary.exists() or not board.exists():
+        critical_failures.append("handoff_inputs")
+    if not strict:
+        critical_failures.append("strict_baseline")
 
     wins: list[str] = []
     misses: list[str] = []
     handoff_actions: list[str] = []
 
-    if cycle63_strict:
-        wins.append(f"Cycle 63 continuity is strict-pass with activation score={cycle63_score}.")
+    if strict:
+        wins.append(f"Cycle 63 continuity is strict-pass with activation score={score}.")
     else:
         misses.append("Cycle 63 strict continuity signal is missing.")
         handoff_actions.append(
@@ -326,18 +326,18 @@ def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
             "docs_page": _PAGE_PATH,
             "top10": _TOP10_PATH,
             "workflow": _WORKFLOW_PATH,
-            "cycle63_summary": str(cycle63_summary.relative_to(root))
-            if cycle63_summary.exists()
-            else str(cycle63_summary),
-            "cycle63_delivery_board": str(cycle63_board.relative_to(root))
-            if cycle63_board.exists()
-            else str(cycle63_board),
+            "summary": str(summary.relative_to(root))
+            if summary.exists()
+            else str(summary),
+            "delivery_board": str(board.relative_to(root))
+            if board.exists()
+            else str(board),
         },
         "checks": checks,
         "rollup": {
-            "cycle63_activation_score": cycle63_score,
-            "cycle63_checks": cycle63_check_count,
-            "cycle63_delivery_board_items": board_count,
+            "activation_score": score,
+            "checks": check_count,
+            "delivery_board_items": board_count,
         },
         "summary": {
             "activation_score": score,
@@ -418,7 +418,7 @@ def _execute_commands(root: Path, evidence_dir: Path) -> None:
     )
 
 
-def build_cycle64_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
+def build_integration_expansion_closeout_summary(root: Path) -> dict[str, Any]:
     """Compatibility alias for legacy cycle-based builder name."""
     return build_integration_expansion_closeout_summary(root)
 
