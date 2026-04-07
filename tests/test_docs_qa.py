@@ -157,3 +157,30 @@ def test_command_surface_policy_docs_avoid_legacy_primary_taxonomy() -> None:
     assert "`python -m sdetkit gate fast`" in command_surface
     assert "`python -m sdetkit gate release`" in command_surface
     assert "`python -m sdetkit doctor`" in command_surface
+
+
+def test_policy_chain_contract_keeps_canonical_first_time_primary() -> None:
+    stability = Path("docs/stability-levels.md").read_text(encoding="utf-8")
+    versioning = Path("docs/versioning-and-support.md").read_text(encoding="utf-8")
+    contract = Path("src/sdetkit/public_surface_contract.py").read_text(encoding="utf-8")
+
+    for text in (stability, versioning):
+        for tier in (
+            "Public / stable",
+            "Advanced but supported",
+            "Experimental / incubator",
+        ):
+            assert tier in text
+
+    assert "Primary first-time product surface" in contract
+    assert "first_time_recommended=True" in contract
+    assert "first_time_recommended=False" in contract
+    assert "Compatibility surfaces remain supported" in versioning
+    assert (
+        "does **not** make them the primary first-time recommendation"
+        in " ".join(versioning.split())
+    )
+
+    policy_chain = " ".join((stability, versioning, contract)).lower()
+    assert "legacy-primary" not in policy_chain
+    assert "primary recommendation for legacy" not in policy_chain
