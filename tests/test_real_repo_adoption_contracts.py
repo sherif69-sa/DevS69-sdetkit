@@ -7,9 +7,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = REPO_ROOT / "examples" / "adoption" / "real-repo"
 GOLDEN_ROOT = REPO_ROOT / "artifacts" / "adoption" / "real-repo-golden"
+CANONICAL_REPLAY_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "adoption-real-repo-canonical.yml"
 
 
 def test_real_repo_fixture_has_canonical_structure() -> None:
@@ -135,3 +138,48 @@ def test_real_repo_fixture_output_matches_golden_contract_projection(tmp_path: P
     assert _project_gate_contract(actual_gate) == _project_gate_contract(golden_gate)
     assert _project_release_contract(actual_release) == _project_release_contract(golden_release)
     assert _project_doctor_contract(actual_doctor) == _project_doctor_contract(golden_doctor)
+
+
+def test_canonical_replay_workflow_contract_is_stable() -> None:
+    assert CANONICAL_REPLAY_WORKFLOW.is_file(), "missing canonical replay workflow"
+
+    workflow = yaml.safe_load(CANONICAL_REPLAY_WORKFLOW.read_text(encoding="utf-8"))
+    replay_steps = workflow["jobs"]["replay"]["steps"]
+    run_scripts = "\n".join(step.get("run", "") for step in replay_steps if isinstance(step, dict))
+
+    expected_commands = (
+        "python -m sdetkit gate fast",
+        "python -m sdetkit gate release",
+        "python -m sdetkit doctor",
+    )
+    for cmd in expected_commands:
+        assert cmd in run_scripts, f"workflow drifted: missing canonical command `{cmd}`"
+
+    expected_build_files = (
+        "build/gate-fast.json",
+        "build/release-preflight.json",
+        "build/doctor.json",
+        "build/gate-fast.rc",
+        "build/release-preflight.rc",
+        "build/doctor.rc",
+    )
+    for rel_path in expected_build_files:
+        assert rel_path in run_scripts, f"workflow drifted: missing output write `{rel_path}`"
+
+    upload_step = next(
+        (
+            step
+            for step in replay_steps
+            if isinstance(step, dict) and str(step.get("uses", "")).startswith("actions/upload-artifact@")
+        ),
+        None,
+    )
+    assert upload_step is not None, "workflow drifted: missing artifact upload step"
+    upload_with = upload_step.get("with", {})
+    assert upload_with.get("name") == "adoption-real-repo-canonical"
+
+    upload_paths = str(upload_with.get("path", ""))
+    for rel_path in expected_build_files:
+        assert (
+            f"examples/adoption/real-repo/{rel_path}" in upload_paths
+        ), f"workflow drifted: missing uploaded artifact path for `{rel_path}`"
