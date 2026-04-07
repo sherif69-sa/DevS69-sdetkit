@@ -24,6 +24,9 @@ jobs:
       - name: Install sdetkit from this repo
         run: python -m pip install -e .
 
+      - name: Verify canonical goldens are fresh
+        run: python scripts/regenerate_real_repo_adoption_goldens.py --check
+
       - name: Run canonical fixture path (capture rc, keep artifacts)
         working-directory: examples/adoption/real-repo
         shell: bash

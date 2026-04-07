@@ -148,6 +148,7 @@ def test_canonical_replay_workflow_contract_is_stable() -> None:
     run_scripts = "\n".join(step.get("run", "") for step in replay_steps if isinstance(step, dict))
 
     expected_commands = (
+        "python scripts/regenerate_real_repo_adoption_goldens.py --check",
         "python -m sdetkit gate fast",
         "python -m sdetkit gate release",
         "python -m sdetkit doctor",

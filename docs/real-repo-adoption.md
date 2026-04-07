@@ -69,6 +69,8 @@ Workflow: `.github/workflows/adoption-real-repo-canonical.yml`
 The CI workflow runs the same three commands against the same fixture and
 uploads artifacts with the same filenames, plus per-command return code files
 (`*.rc`) to make pass/fail interpretation explicit during review.
+It also runs `python scripts/regenerate_real_repo_adoption_goldens.py --check`
+to fail fast when checked-in canonical goldens drift.
 
 ## Regeneration note
 
