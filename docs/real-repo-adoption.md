@@ -72,6 +72,12 @@ uploads artifacts with the same filenames, plus per-command return code files
 
 ## Regeneration note
 
+To verify whether checked-in goldens are fresh without rewriting files, run:
+
+```bash
+python scripts/regenerate_real_repo_adoption_goldens.py --check
+```
+
 To refresh golden artifacts after intentional changes to fixture or gate
 behavior, run:
 
