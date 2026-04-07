@@ -58,6 +58,11 @@ python -m sdetkit gate release
 python -m sdetkit doctor
 ```
 
+Quick purpose guide (same order everywhere):
+- `python -m sdetkit gate fast` — fast local quality gate signal before deeper checks.
+- `python -m sdetkit gate release` — release-readiness preflight with machine-readable evidence.
+- `python -m sdetkit doctor` — environment and diagnostics snapshot for troubleshooting context.
+
 For a condensed version, see `docs/first-contribution-quickstart.md`.
 For concrete, repo-grounded starter categories, use `docs/starter-work-inventory.md`.
 For file-placement and root-directory guidance, see `docs/project-structure.md`.

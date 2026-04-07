@@ -12,9 +12,10 @@ Use this page as a concise handoff, then follow the detailed path in [`CONTRIBUT
 2. Keep scope to one issue and one clear outcome.
 3. Validate locally before opening your PR.
 4. Preserve canonical release-confidence command language in docs/examples:
-   - `python -m sdetkit gate fast`
-   - `python -m sdetkit gate release`
-   - `python -m sdetkit doctor`
+   - `python -m sdetkit gate fast` — fast local quality gate signal.
+   - `python -m sdetkit gate release` — release-readiness preflight evidence.
+   - `python -m sdetkit doctor` — environment diagnostics snapshot.
+   - Detailed rationale and surrounding guidance: [`CONTRIBUTING.md`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CONTRIBUTING.md#canonical-release-confidence-alignment-check).
 
 ## What not to change in this docs sprint
 
