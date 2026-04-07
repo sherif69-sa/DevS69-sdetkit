@@ -33,6 +33,20 @@ What success means:
 What failure means:
 - `ok: false` and/or non-empty `failed_steps` gives the first deterministic remediation target.
 
+```text
+$ cd examples/adoption/real-repo
+$ python -m sdetkit gate fast
+exit 2  -> build/gate-fast.json: ok=false (fixture triage)
+$ python -m sdetkit gate release
+exit 2  -> build/release-preflight.json: ok=false (fixture triage)
+$ python -m sdetkit doctor
+exit 0  -> build/doctor.json: ok=true
+```
+
+Real fixture-oriented canonical flow; any failing gate result shown here is expected triage for the adoption fixture, not a product failure.
+
+Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
+
 ## Canonical local-to-CI journey
 
 - Canonical first proof: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
