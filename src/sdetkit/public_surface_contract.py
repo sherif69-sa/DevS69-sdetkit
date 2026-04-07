@@ -42,7 +42,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     ),
     CommandFamilyContract(
         name="supporting-utilities-and-automation",
-        role="Supporting utilities and automation lanes; useful but intentionally secondary to flagship kits.",
+        role="Supporting utilities and automation lanes; useful but intentionally secondary to the canonical public/stable first-time path.",
         stability_tier="Advanced but supported",
         first_time_recommended=False,
         transition_legacy_oriented=False,

@@ -2,7 +2,13 @@
 
 ## What changed
 
-SDETKit now treats umbrella kits as the primary public entry point:
+SDETKit now treats the canonical public/stable path as the first-time entry point:
+
+- `python -m sdetkit gate fast`
+- `python -m sdetkit gate release`
+- `python -m sdetkit doctor`
+
+Umbrella kits remain advanced but supported:
 
 - `sdetkit kits ...`
 - `sdetkit release ...`

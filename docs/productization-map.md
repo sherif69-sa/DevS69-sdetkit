@@ -42,11 +42,11 @@ These appear closest to stable product surface:
 - Docs navigation includes strong flagship pages plus a very large historical/report corpus in the same visible namespace.
 - Command naming has overlap in places (`weekly-review`, `weekly-review-lane`, impact-specific closeouts), which can feel incubator-like to external adopters.
 
-## 2) Classification of current contents (core / integrations / playbooks / experimental)
+## 2) Classification of current contents (public/stable / advanced but supported / experimental/incubator)
 
 Classification is based on current repository contents and naming patterns.
 
-## Core
+## Public / stable
 
 **Definition:** mandatory, high-confidence paths directly tied to release confidence / shipping readiness.
 
@@ -57,7 +57,7 @@ Classification is based on current repository contents and naming patterns.
 - Primary docs:
   - `README.md`, `docs/index.md`, `docs/ready-to-use.md`, `docs/release-confidence.md`, `docs/decision-guide.md`, `docs/recommended-ci-flow.md`, `docs/adoption.md`, `docs/adoption-troubleshooting.md`.
 
-## Integrations
+## Advanced but supported
 
 **Definition:** ecosystem connectors and platform-specific interoperability that extend the core.
 
@@ -68,16 +68,7 @@ Classification is based on current repository contents and naming patterns.
 - Example integration assets:
   - `examples/ci/*`, template-related CI docs/pages.
 
-## Playbooks
-
-**Definition:** guided rollout/use-case workflows for adoption and organizational execution.
-
-- Named playbook modules:
-  - `onboarding`, `weekly_review`, `demo`, `evidence-assets`, `first_contribution`, `contributor_funnel`, `triage_templates`, `startup_readiness`, `enterprise_readiness`.
-- Rollout-oriented narrative modules:
-  - `release_communications`, `release_readiness`, `reliability_evidence_pack`, `quality_contribution_delta`, `objection_handling`, `community_activation`, `external_contribution`, `kpi_audit`.
-- Playbook discovery/routing:
-  - `playbooks_cli.py`, `sdetkit playbooks`.
+Guided playbook workflows are included in this tier for rollout/use-case execution, including `sdetkit playbooks` and associated onboarding/adoption modules.
 
 ## Experimental
 
@@ -88,17 +79,18 @@ Classification is based on current repository contents and naming patterns.
 - Large archive of impact-based docs and integration closeout pages in `docs/`.
 - Long-tail command aliases and hidden command behavior currently needed to keep main help usable.
 
-## 3) Public/stable vs unclear boundary statement
+## 3) Public/stable vs boundary clarity statement
 
 ## Treat as public/stable now
 
-- `sdetkit gate ...`
-- `sdetkit doctor ...`
+- `python -m sdetkit gate fast`
+- `python -m sdetkit gate release`
+- `python -m sdetkit doctor`
 - `sdetkit security ...`
 - `sdetkit evidence ...`
 - `sdetkit repo ...`
 - `sdetkit ci ...`
-- `scripts/ready_to_use.sh quick|release`
+- `scripts/ready_to_use.sh quick|release` (compatible wrapper lane)
 
 ## Treat as "advanced but supported"
 
