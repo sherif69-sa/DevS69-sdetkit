@@ -4,26 +4,24 @@ For the complete workflow, use the repository guide: [`CONTRIBUTING.md`](https:/
 
 If this is your first external PR, start with [First contribution quickstart](first-contribution-quickstart.md).
 
-## First trustworthy contribution (docs-first path)
+## First trustworthy contribution (safe-first lane)
 
-1. Start from [Start here](index.md) and [Release confidence](release-confidence.md) to align language with the core product story.
-2. Keep canonical command truth stable in docs:
+Use this page as a concise handoff, then follow the detailed path in [`CONTRIBUTING.md`](https://github.com/sherif69-sa/DevS69-sdetkit/blob/main/CONTRIBUTING.md#first-trustworthy-contribution).
+
+1. Pick one safe-first change (docs clarification, focused tests, or lint/type hygiene).
+2. Keep scope to one issue and one clear outcome.
+3. Validate locally before opening your PR.
+4. Preserve canonical release-confidence command language in docs/examples:
    - `python -m sdetkit gate fast`
    - `python -m sdetkit gate release`
    - `python -m sdetkit doctor`
-3. Do not invent proof (no synthetic benchmarks, customer claims, or fake outputs).
-4. Prefer clarification, consolidation, and cross-linking over adding new surfaces.
-
-Secondary references for contributor context (do not replace canonical first-proof docs):
-- [SDETKit vs ad hoc](sdetkit-vs-ad-hoc.md)
-- [Repo cleanup plan](repo-cleanup-plan.md)
-- [Repo health dashboard](repo-health-dashboard.md)
 
 ## What not to change in this docs sprint
 
 - Do not add new product surfaces, kits, bots, workers, or integrations.
 - Do not change CLI behavior or command semantics.
 - Do not remove deep docs; demote/reorder/reframe instead.
+- For your first PR, avoid broad cross-cutting refactors; start with safe starter surfaces first.
 
 ## Baseline contributor validation commands
 
