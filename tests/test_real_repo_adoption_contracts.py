@@ -11,6 +11,13 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = REPO_ROOT / "examples" / "adoption" / "real-repo"
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+from real_repo_adoption_projection import (
+    project_doctor_contract,
+    project_gate_contract,
+    project_release_contract,
+)
 GOLDEN_ROOT = REPO_ROOT / "artifacts" / "adoption" / "real-repo-golden"
 CANONICAL_REPLAY_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "adoption-real-repo-canonical.yml"
 
@@ -80,52 +87,6 @@ def _run_fixture_command(args: list[str], out_path: Path) -> dict[str, Any]:
     return json.loads(out_path.read_text(encoding="utf-8"))
 
 
-def _normalize_cmd(parts: list[str]) -> list[str]:
-    normalized: list[str] = []
-    for part in parts:
-        if part in {str(FIXTURE_ROOT), str(REPO_ROOT)}:
-            normalized.append("<repo>")
-            continue
-        if part.endswith("/python") or part.endswith("\\python.exe"):
-            normalized.append("python")
-            continue
-        normalized.append(part.replace(str(FIXTURE_ROOT), "<repo>").replace(str(REPO_ROOT), "<repo>"))
-    return normalized
-
-
-def _project_gate_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "ok": payload["ok"],
-        "failed_steps": payload["failed_steps"],
-        "profile": payload["profile"],
-        "steps": [
-            {
-                "id": step["id"],
-                "ok": step["ok"],
-                "rc": step["rc"],
-                "cmd": _normalize_cmd(step["cmd"]),
-            }
-            for step in payload["steps"]
-        ],
-    }
-
-
-def _project_release_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    projected = _project_gate_contract(payload)
-    projected["dry_run"] = payload["dry_run"]
-    return projected
-
-
-def _project_doctor_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    quality = dict(payload["quality"])
-    quality["failed_check_ids"] = sorted(quality["failed_check_ids"])
-    return {
-        "ok": payload["ok"],
-        "quality": quality,
-        "recommendations": payload["recommendations"],
-    }
-
-
 def test_real_repo_fixture_output_matches_golden_contract_projection(tmp_path: Path) -> None:
     actual_gate = _run_fixture_command(["gate", "fast", "--stable-json"], tmp_path / "gate-fast.json")
     actual_release = _run_fixture_command(["gate", "release"], tmp_path / "release-preflight.json")
@@ -135,9 +96,9 @@ def test_real_repo_fixture_output_matches_golden_contract_projection(tmp_path: P
     golden_release = json.loads((GOLDEN_ROOT / "release-preflight.json").read_text(encoding="utf-8"))
     golden_doctor = json.loads((GOLDEN_ROOT / "doctor.json").read_text(encoding="utf-8"))
 
-    assert _project_gate_contract(actual_gate) == _project_gate_contract(golden_gate)
-    assert _project_release_contract(actual_release) == _project_release_contract(golden_release)
-    assert _project_doctor_contract(actual_doctor) == _project_doctor_contract(golden_doctor)
+    assert project_gate_contract(actual_gate, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT) == project_gate_contract(golden_gate, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
+    assert project_release_contract(actual_release, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT) == project_release_contract(golden_release, fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
+    assert project_doctor_contract(actual_doctor) == project_doctor_contract(golden_doctor)
 
 
 def test_canonical_replay_workflow_contract_is_stable() -> None:

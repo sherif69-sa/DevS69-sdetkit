@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from real_repo_adoption_projection import project_contract_for_artifact
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_ROOT = REPO_ROOT / "examples" / "adoption" / "real-repo"
 BUILD_DIR = FIXTURE_ROOT / "build"
@@ -81,62 +83,6 @@ def _run_command(cmd: list[str], expected_output: Path) -> None:
         )
 
 
-def _normalize_cmd(parts: list[str]) -> list[str]:
-    normalized: list[str] = []
-    for part in parts:
-        if part in {str(FIXTURE_ROOT), str(REPO_ROOT)}:
-            normalized.append("<repo>")
-            continue
-        if part.endswith("/python") or part.endswith("\\python.exe"):
-            normalized.append("python")
-            continue
-        normalized.append(part.replace(str(FIXTURE_ROOT), "<repo>").replace(str(REPO_ROOT), "<repo>"))
-    return normalized
-
-
-def _project_gate_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "ok": payload["ok"],
-        "failed_steps": payload["failed_steps"],
-        "profile": payload["profile"],
-        "steps": [
-            {
-                "id": step["id"],
-                "ok": step["ok"],
-                "rc": step["rc"],
-                "cmd": _normalize_cmd(step["cmd"]),
-            }
-            for step in payload["steps"]
-        ],
-    }
-
-
-def _project_release_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    projected = _project_gate_contract(payload)
-    projected["dry_run"] = payload["dry_run"]
-    return projected
-
-
-def _project_doctor_contract(payload: dict[str, Any]) -> dict[str, Any]:
-    quality = dict(payload["quality"])
-    quality["failed_check_ids"] = sorted(quality["failed_check_ids"])
-    return {
-        "ok": payload["ok"],
-        "quality": quality,
-        "recommendations": payload["recommendations"],
-    }
-
-
-def _project_contract(artifact: Path, payload: dict[str, Any]) -> dict[str, Any]:
-    if artifact.name == "gate-fast.json":
-        return _project_gate_contract(payload)
-    if artifact.name == "release-preflight.json":
-        return _project_release_contract(payload)
-    if artifact.name == "doctor.json":
-        return _project_doctor_contract(payload)
-    return payload
-
-
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -152,8 +98,8 @@ def _check_goldens() -> int:
     mismatches: list[str] = []
     for cmd, build_artifact, golden_artifact in CANONICAL_COMMANDS:
         _run_command(cmd, build_artifact)
-        generated = _project_contract(build_artifact, _load_json(build_artifact))
-        golden = _project_contract(golden_artifact, _load_json(golden_artifact))
+        generated = project_contract_for_artifact(build_artifact.name, _load_json(build_artifact), fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
+        golden = project_contract_for_artifact(golden_artifact.name, _load_json(golden_artifact), fixture_root=FIXTURE_ROOT, repo_root=REPO_ROOT)
         if generated != golden:
             mismatches.append(golden_artifact.name)
 
