@@ -1,6 +1,6 @@
 # Command surface inventory (stability-aware)
 
-SDETKit's public surface is unified around umbrella kits first, compatibility aliases second.
+SDETKit's public surface is unified around the canonical public/stable first-time path, with advanced and compatibility lanes secondary.
 
 ## Command-family contract snapshot
 
@@ -10,22 +10,20 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 
 | Command family | Purpose | Stability tier | First-time adopter default? | Transition-era / legacy-oriented? |
 |---|---|---|---|---|
-| `umbrella-kits` | Primary product surface for release confidence, test intelligence, integration assurance, and failure forensics. | Stable/Core | Yes | No |
-| `compatibility-aliases` | Backward-compatible direct lanes preserved for existing automation and muscle memory. | Stable/Compatibility | No | No |
-| `supporting-utilities-and-automation` | Supporting utilities and automation lanes; useful but intentionally secondary to flagship kits. | Stable/Supporting | No | No |
-| `playbooks` | Guided adoption and rollout lanes for operational outcomes. | Playbooks | No | No |
-| `experimental-transition-lanes` | Transition-era and legacy-oriented lanes retained for compatibility. | Experimental | No | Yes |
+| `release-confidence-canonical-path` | Primary first-time product surface for deterministic shipping readiness and release confidence. | Public / stable | Yes | No |
+| `umbrella-kits` | Umbrella kits remain fully supported for expanded release, intelligence, integration, and forensics workflows. | Advanced but supported | No | No |
+| `compatibility-aliases` | Backward-compatible direct lanes preserved for existing automation and muscle memory. | Public / stable | No | No |
+| `supporting-utilities-and-automation` | Supporting utilities and automation lanes; useful but intentionally secondary to the canonical public/stable first-time path. | Advanced but supported | No | No |
+| `playbooks` | Guided adoption and rollout lanes for operational outcomes. | Advanced but supported | No | No |
+| `experimental-transition-lanes` | Transition-era and legacy-oriented lanes retained for compatibility. | Experimental / incubator | No | Yes |
 
 <!-- END:PUBLIC_SURFACE_CONTRACT_TABLE -->
 
-## First-time path
+## First-time path (public / stable)
 
-1. `sdetkit kits list`
-2. `sdetkit release gate fast`
-3. `sdetkit release gate release`
-4. `sdetkit intelligence ...`
-5. `sdetkit integration ...`
-6. `sdetkit forensics ...`
+1. `python -m sdetkit gate fast`
+2. `python -m sdetkit gate release`
+3. `python -m sdetkit doctor`
 
 ## Compatibility path
 
@@ -33,7 +31,7 @@ Direct commands stay stable and supported:
 
 - `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
 
-Use these for existing scripts while migrating discovery/docs to umbrella-kit routes.
+Use these for existing scripts while keeping first-time discovery/docs on the canonical path.
 
 ## Supporting and experimental
 

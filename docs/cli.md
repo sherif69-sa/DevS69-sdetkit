@@ -1,8 +1,14 @@
 # CLI
 
-DevS69 SDETKit is organized around four umbrella kits. Use these first.
+DevS69 SDETKit first-time guidance is the canonical release-confidence path.
 
-## Primary product surface (umbrella kits)
+## Canonical first-time path (public / stable)
+
+1. `python -m sdetkit gate fast`
+2. `python -m sdetkit gate release`
+3. `python -m sdetkit doctor`
+
+## Advanced but supported surfaces (including umbrella kits)
 
 1. **Release Confidence Kit**: `sdetkit release ...`
 2. **Test Intelligence Kit**: `sdetkit intelligence ...`
@@ -10,11 +16,9 @@ DevS69 SDETKit is organized around four umbrella kits. Use these first.
 4. **Failure Forensics Kit**: `sdetkit forensics ...`
 5. **Kit discovery**: `sdetkit kits list` and `sdetkit kits describe <kit>`
 
-### First-run hero commands
+### Expanded hero commands after first proof
 
 - `sdetkit kits list`
-- `sdetkit release gate fast`
-- `sdetkit release gate release`
 - `sdetkit intelligence flake classify --history examples/kits/intelligence/flake-history.json`
 - `sdetkit integration check --profile examples/kits/integration/profile.json`
 - `sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json`
@@ -30,7 +34,7 @@ Supporting utilities remain available, but are no longer the primary discovery s
 
 - `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `ops`, `notify`, `agent`
 
-Playbook and transition-era lanes are preserved but intentionally secondary:
+Advanced playbook and experimental/incubator transition-era lanes are preserved but intentionally secondary:
 
 - `sdetkit playbooks`
 - legacy compatibility lanes and archived transition commands

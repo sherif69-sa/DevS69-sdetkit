@@ -10,44 +10,39 @@ This page defines practical ecosystem boundaries so future growth stays useful w
 
 Use this mental model when deciding where commands, docs, and workflows should live:
 
-1. **Stable/Core** = default release-confidence path for most teams.
-2. **Integrations** = optional environment/platform wiring around core checks.
-3. **Playbooks** = guided rollout/adoption operating lanes.
-4. **Experimental / transition-era** = incubator or historical lanes kept available but secondary.
+1. **Public / stable** = default release-confidence path for most teams.
+2. **Advanced but supported** = optional environment/platform wiring and guided operating lanes around core checks.
+3. **Experimental / incubator** = transition-era or historical lanes kept available but secondary.
 
 For formal tier definitions, see [stability-levels.md](stability-levels.md) and [versioning-and-support.md](versioning-and-support.md).
 
-## What belongs in Stable/Core
+## What belongs in Public / stable
 
-Put something in **Stable/Core** when it is broadly applicable to everyshipping-readiness decisions:
+Put something in **Public / stable** when it is broadly applicable to shipping-readiness decisions:
 
 - Core gate/security/doctor/evidence workflows used across repository types.
 - Deterministic pass/fail or policy outputs relied on for go/no-go decisions.
 - Installation and first-run docs that all adopters need.
 
-Core should stay focused on the default path (`quick` then `release`) and should avoid platform- or vendor-specific assumptions.
+This tier should stay focused on the canonical first-time path (`gate fast` then `gate release` then `doctor`) and should avoid platform- or vendor-specific assumptions.
 
-## What belongs in Integrations
+## What belongs in Advanced but supported
 
-Put something in **Integrations** when it connects core signals into a specific delivery environment:
+Put something in **Advanced but supported** when it connects core signals into a specific delivery environment or guided rollout flow:
 
 - CI provider wiring, artifact upload conventions, and external notification paths.
 - Adopter-facing guidance for using SDETKit in another repository or platform.
 - Optional integrations that depend on third-party services or environment-specific credentials.
 
-Integrations should reuse Stable/Core command outputs rather than redefining core decision logic.
-
-## What belongs in Playbooks
-
-Put something in **Playbooks** when it guides how teams adopt or operate, instead of adding a new core decision primitive:
+These lanes should reuse Public/stable command outputs rather than redefining core decision logic.
 
 - Rollout sequencing and team operating patterns.
 - Onboarding and contribution guidance.
 - Scenario- or organization-specific execution narratives.
 
-Playbooks may iterate faster than core command docs as long as they stay aligned with the current stability and support posture.
+Guided adoption lanes may iterate faster than core command docs as long as they stay aligned with the current stability and support posture.
 
-## What remains Experimental / transition-era
+## What remains Experimental / incubator
 
 Keep material in **Experimental** (or explicitly transition-era) when it is:
 
@@ -63,7 +58,7 @@ SDETKit keeps optional dependencies as opt-in extras (`dev`, `test`, `docs`, `pa
 
 Practical policy:
 
-- Stable/Core usage should not require optional integrations.
+- Public/stable usage should not require optional integrations.
 - Optional extras should be documented with explicit "use when" context.
 - Integration-specific dependencies should stay isolated from default install paths.
 
@@ -73,7 +68,7 @@ See installation guidance in [install.md](install.md) and [ready-to-use.md](read
 
 When proposing a new integration or extension surface:
 
-1. Prove value using existing Stable/Core outputs first.
+1. Prove value using existing Public/stable outputs first.
 2. Keep the integration optional and environment-scoped.
 3. Document setup, failure modes, and rollback/disable path.
 4. Cross-link stability tier and versioning/support implications.
@@ -83,12 +78,12 @@ When proposing a new integration or extension surface:
 
 Maintainers should avoid:
 
-- Promoting niche/vendor-specific integrations into Stable/Core too early.
+- Promoting niche/vendor-specific integrations into Public/stable too early.
 - Treating experimental or transition-era lanes as stable compatibility promises.
 - Expanding optional surfaces without matching docs/policy updates.
 - Introducing new extension claims (for example, a formal plugin API promise) unless truly implemented and supported.
 
-If uncertain, keep new capability in Integrations or Experimental first, gather adoption evidence, then promote deliberately.
+If uncertain, keep new capability in Advanced but supported or Experimental / incubator first, gather adoption evidence, then promote deliberately.
 
 ## Related references
 

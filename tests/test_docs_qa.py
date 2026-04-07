@@ -133,3 +133,27 @@ def test_canonical_visibility_policy_keeps_compatibility_lanes_secondary() -> No
     assert "Compatibility surfaces remain supported" in versioning
     assert "primary first-time recommendation" in versioning
     assert "new deprecation wave" in versioning
+
+
+def test_command_surface_policy_docs_avoid_legacy_primary_taxonomy() -> None:
+    command_surface = Path("docs/command-surface.md").read_text(encoding="utf-8")
+    boundary = Path("docs/integrations-and-extension-boundary.md").read_text(encoding="utf-8")
+
+    assert "Stable/Core" not in command_surface
+    assert "Integrations" not in command_surface
+    assert "| Playbooks |" not in command_surface
+    assert "Stable/Core" not in boundary
+    assert "## What belongs in Integrations" not in boundary
+    assert "## What belongs in Playbooks" not in boundary
+
+    for required in (
+        "Public / stable",
+        "Advanced but supported",
+        "Experimental / incubator",
+    ):
+        assert required in command_surface
+        assert required in boundary
+
+    assert "`python -m sdetkit gate fast`" in command_surface
+    assert "`python -m sdetkit gate release`" in command_surface
+    assert "`python -m sdetkit doctor`" in command_surface
