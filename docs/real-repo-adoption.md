@@ -73,5 +73,11 @@ uploads artifacts with the same filenames, plus per-command return code files
 ## Regeneration note
 
 To refresh golden artifacts after intentional changes to fixture or gate
-behavior, rerun the local commands above and copy outputs from
+behavior, run:
+
+```bash
+python scripts/regenerate_real_repo_adoption_goldens.py
+```
+
+This helper runs the same canonical commands and copies outputs from
 `examples/adoption/real-repo/build/` to `artifacts/adoption/real-repo-golden/`.
