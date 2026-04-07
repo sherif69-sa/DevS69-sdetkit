@@ -121,3 +121,15 @@ def test_versioning_and_stability_policy_terms_stay_aligned() -> None:
     assert "Playbooks" not in versioning
     assert "highest compatibility expectation" in stability
     assert "primary compatibility target" in versioning
+
+
+def test_canonical_visibility_policy_keeps_compatibility_lanes_secondary() -> None:
+    versioning = Path("docs/versioning-and-support.md").read_text(encoding="utf-8")
+
+    assert "## Canonical path vs compatibility lanes (visibility policy)" in versioning
+    assert "`python -m sdetkit gate fast`" in versioning
+    assert "`python -m sdetkit gate release`" in versioning
+    assert "`python -m sdetkit doctor`" in versioning
+    assert "Compatibility surfaces remain supported" in versioning
+    assert "primary first-time recommendation" in versioning
+    assert "new deprecation wave" in versioning

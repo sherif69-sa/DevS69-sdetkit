@@ -34,6 +34,7 @@ Context: [real-repo adoption fixture + golden artifacts](real-repo-adoption.md)
 
 If you want a guided run instead of the ultra-fast proof lane, use [First run quickstart](ready-to-use.md).
 For CLI-first orientation, run `python -m sdetkit --help` to see canonical path plus stability-tier grouping.
+Need compatibility-lane expectations? See [Versioning and support posture](versioning-and-support.md#canonical-path-vs-compatibility-lanes-visibility-policy).
 
 ## What artifacts appear
 
