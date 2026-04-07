@@ -278,27 +278,29 @@ Start here (canonical release-confidence path):
         help_text="Discover and run adoption/rollout playbooks",
     )
     _add_passthrough_subcommand(
-        sub, "kits", help_text="[Stable/Core] Umbrella kit catalog and kit details"
+        sub, "kits", help_text="[Advanced but supported] Umbrella kit catalog and kit details"
     )
 
     _add_passthrough_subcommand(
-        sub, "release", help_text="[Stable/Core] Release Confidence Kit (primary surface)"
+        sub, "release", help_text="[Public / stable] Release Confidence Kit (primary surface)"
     )
     _add_passthrough_subcommand(
-        sub, "intelligence", help_text="[Stable/Core] Test Intelligence Kit (primary surface)"
+        sub, "intelligence", help_text="[Advanced but supported] Test Intelligence Kit (primary surface)"
     )
     _add_passthrough_subcommand(
-        sub, "integration", help_text="[Stable/Core] Integration Assurance Kit (primary surface)"
+        sub,
+        "integration",
+        help_text="[Advanced but supported] Integration Assurance Kit (primary surface)",
     )
     _add_passthrough_subcommand(
         sub,
         "author",
-        help_text="[Stable/Core] Platform-style Python problem authoring workflow",
+        help_text="[Advanced but supported] Platform-style Python problem authoring workflow",
     )
     _add_passthrough_subcommand(
         sub,
         "forensics",
-        help_text="[Stable/Core] Failure Forensics Kit (experimental sublanes possible)",
+        help_text="[Advanced but supported] Failure Forensics Kit (experimental sublanes possible)",
     )
     _add_passthrough_subcommand(
         sub, "kv", help_text="Utility: parse key=value input into JSON (supporting surface)"
@@ -310,13 +312,13 @@ Start here (canonical release-confidence path):
     _add_passthrough_subcommand(
         sub,
         "doctor",
-        help_text="[Stable/Compatibility] Deterministic repo and release-readiness checks",
+        help_text="[Public / stable] Deterministic repo and release-readiness checks",
     )
 
     _add_passthrough_subcommand(
         sub,
         "gate",
-        help_text="[Stable/Compatibility] Quick confidence and strict release gate checks",
+        help_text="[Public / stable] Quick confidence and strict release gate checks",
     )
 
     _add_passthrough_subcommand(sub, "ci", help_text="CI template and pipeline validation")
@@ -331,7 +333,7 @@ Start here (canonical release-confidence path):
 
     initp = sub.add_parser(
         "init",
-        help="[Stable/Core] Bootstrap repo adoption with preset templates and optional config",
+        help="[Advanced but supported] Bootstrap repo adoption with preset templates and optional config",
     )
     initp.add_argument("--preset", choices=["enterprise_python"], default="enterprise_python")
     initp.add_argument("--root", default=".")
@@ -342,7 +344,7 @@ Start here (canonical release-confidence path):
     initp.add_argument("--write-config", action="store_true")
 
     _add_passthrough_subcommand(
-        sub, "repo", help_text="[Stable/Compatibility] Repository automation tasks"
+        sub, "repo", help_text="[Public / stable] Repository automation tasks"
     )
 
     _add_passthrough_subcommand(sub, "dev", help_text="Shortcut to `repo dev` workflows")
@@ -361,7 +363,7 @@ Start here (canonical release-confidence path):
     agt.add_argument("args", nargs=argparse.REMAINDER)
 
     sec = sub.add_parser(
-        "security", help="[Stable/Compatibility] Security policy checks and enforcement"
+        "security", help="[Public / stable] Security policy checks and enforcement"
     )
     sec.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -375,7 +377,7 @@ Start here (canonical release-confidence path):
     plc.add_argument("args", nargs=argparse.REMAINDER)
 
     evd = sub.add_parser(
-        "evidence", help="[Stable/Compatibility] Generate audit-friendly release evidence"
+        "evidence", help="[Public / stable] Generate audit-friendly release evidence"
     )
     evd.add_argument("args", nargs=argparse.REMAINDER)
 
