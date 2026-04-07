@@ -9,13 +9,15 @@ def _run(*args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, "-m", "sdetkit", *args], text=True, capture_output=True)
 
 
-def test_root_help_prioritizes_umbrella_then_compatibility() -> None:
+def test_root_help_prioritizes_canonical_path_then_umbrella_kits() -> None:
     proc = _run("--help")
     assert proc.returncode == 0
     out = proc.stdout
-    assert "umbrella kits" in out.lower()
-    assert "compatibility aliases" in out.lower()
-    assert out.index("umbrella kits") < out.index("compatibility aliases")
+    primary = "release confidence canonical path [Public / stable] (use first: yes;"
+    secondary = "umbrella kits [Advanced but supported] (use first: no;"
+    assert primary in out
+    assert secondary in out
+    assert out.index(primary) < out.index(secondary)
 
 
 def test_kits_list_and_describe_contract() -> None:

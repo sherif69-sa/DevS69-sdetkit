@@ -237,8 +237,8 @@ def _build_root_parser(
     *, show_hidden_commands: bool = False
 ) -> tuple[argparse.ArgumentParser, object]:
     help_description = """\
-DevS69 SDETKit is an operator-grade SDET platform with four umbrella kits:
-release confidence, test intelligence, integration assurance, and failure forensics.
+DevS69 SDETKit is an operator-grade SDET platform for deterministic release confidence
+and shipping readiness.
 
 Policy tiers: Public / stable, Advanced but supported, Experimental / incubator.
 
@@ -246,7 +246,7 @@ Start here (canonical release-confidence path):
   1) [Public / stable] python -m sdetkit gate fast
   2) [Public / stable] python -m sdetkit gate release
   3) [Public / stable] python -m sdetkit doctor
-  4) Then explore umbrella kits: python -m sdetkit kits list
+  4) Then expand into umbrella kits (advanced): python -m sdetkit kits list
 """
 
     help_epilog = render_root_help_groups()
