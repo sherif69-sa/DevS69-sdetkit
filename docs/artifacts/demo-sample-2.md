@@ -26,4 +26,4 @@
 - Use --format markdown --output demo.md to save a shareable run artifact.
 - If a snippet check fails, rerun a single command manually and compare output with the expected markers.
 
-Related docs: [Docs fast start](../index.md#fast-start), [repo audit](../repo-audit.md).
+Related docs: [Docs fast start](../index.md#what-to-run-first), [repo audit](../repo-audit.md).
