@@ -37,6 +37,9 @@ def test_root_help_exposes_canonical_first_time_path() -> None:
     for marker in canonical_markers:
         assert marker in normalized
 
+    assert "release confidence canonical path" in normalized
+    assert "umbrella kits [advanced but supported] (use first: no;" in normalized
+
 
 def test_root_help_includes_policy_tier_vocabulary() -> None:
     proc = _run("--help")

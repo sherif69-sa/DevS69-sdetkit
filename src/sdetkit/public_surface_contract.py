@@ -17,10 +17,18 @@ class CommandFamilyContract:
 
 PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
-        name="umbrella-kits",
-        role="Primary product surface for release confidence, test intelligence, integration assurance, and failure forensics.",
-        stability_tier="Advanced but supported",
+        name="release-confidence-canonical-path",
+        role="Primary first-time product surface for deterministic shipping readiness and release confidence.",
+        stability_tier="Public / stable",
         first_time_recommended=True,
+        transition_legacy_oriented=False,
+        top_level_commands=("gate", "doctor", "release"),
+    ),
+    CommandFamilyContract(
+        name="umbrella-kits",
+        role="Umbrella kits remain fully supported for expanded release, intelligence, integration, and forensics workflows.",
+        stability_tier="Advanced but supported",
+        first_time_recommended=False,
         transition_legacy_oriented=False,
         top_level_commands=("kits", "release", "intelligence", "integration", "forensics"),
     ),
@@ -92,5 +100,5 @@ def render_root_help_groups() -> str:
         lines.append(f"    {', '.join(family.top_level_commands)}")
         lines.append("")
     lines.append("Start with: python -m sdetkit gate fast -> gate release -> doctor")
-    lines.append("Then expand: python -m sdetkit kits list")
+    lines.append("Then expand (advanced): python -m sdetkit kits list")
     return "\n".join(lines)
