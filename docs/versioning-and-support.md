@@ -35,6 +35,22 @@ deprecation. It intentionally avoids guarantees we do not operationally enforce.
 This posture does not mean every command has the same change velocity.
 Compatibility expectations are intentionally tier-aware.
 
+## Canonical path vs compatibility lanes (visibility policy)
+
+For first-time adoption and release-confidence proof, use the canonical path:
+
+1. `python -m sdetkit gate fast`
+2. `python -m sdetkit gate release`
+3. `python -m sdetkit doctor`
+
+Compatibility surfaces remain supported, including umbrella kits and
+backward-compatible aliases used by existing automation. Their continued
+availability preserves transition continuity and advanced workflows, but does
+**not** make them the primary first-time recommendation.
+
+This section is guidance visibility only. It is **not** a new deprecation wave,
+removal announcement, or command-behavior change.
+
 ## Deprecation approach (current)
 
 - No blanket deprecation SLA/timeline is promised across all surfaces.
