@@ -8,7 +8,7 @@ SDETKit is a release-confidence command path for engineering teams that need cle
 
 ## Why trust it
 
-- The core flow is explicit and repeatable: `gate fast` → `gate release` → `doctor`.
+- The core flow is explicit and repeatable: `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
 - Outputs are machine-readable JSON artifacts, not only terminal logs.
 - Evidence examples in this repo use representative real output shapes (no fabricated customer claims or synthetic benchmarks).
 

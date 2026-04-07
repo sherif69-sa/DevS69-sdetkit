@@ -36,6 +36,19 @@ Use `docs/starter-work-inventory.md` for concrete categories mapped to this repo
 
 ## 3) Validate locally before opening a PR
 
+Keep first-contribution docs/examples aligned with the canonical command path:
+
+```bash
+python -m sdetkit gate fast
+python -m sdetkit gate release
+python -m sdetkit doctor
+```
+
+Purpose in order:
+- `python -m sdetkit gate fast` — quick local quality gate signal.
+- `python -m sdetkit gate release` — release-readiness preflight evidence.
+- `python -m sdetkit doctor` — environment diagnostics snapshot.
+
 Run minimum checks:
 
 ```bash
