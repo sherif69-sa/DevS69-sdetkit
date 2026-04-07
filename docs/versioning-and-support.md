@@ -4,87 +4,57 @@ SDETKit's flagship promise remains:
 
 > **Release confidence / shipping readiness for software teams.**
 
-This page documents the **current** trust-and-governance posture for versions,
-compatibility, support, and deprecation. It is intentionally compact and avoids
-promises that are not yet operationally guaranteed.
+This page is the operational policy for versioning, compatibility, support, and
+deprecation. It intentionally avoids guarantees we do not operationally enforce.
 
 ## Scope and intent
 
-- This is a **current policy** for users and maintainers.
-- It complements (not replaces) command docs, release workflow docs, and
-  stability-level guidance.
-- Where needed, this page uses terms like **intended direction** and
-  **best-effort** to stay honest about present-impact guarantees.
+- This is a **current policy** for maintainers and adopters.
+- It complements command docs and release workflow docs.
+- Tier definitions live in [stability-levels.md](stability-levels.md); this page
+  defines versioning/support behavior against those tiers.
 
 ## Versioning expectations
 
-- SDETKit uses a semantic version format (`MAJOR.MINOR.PATCH`) as the current
-  release convention.
-- Current intent:
+- SDETKit uses semantic version format (`MAJOR.MINOR.PATCH`).
+- Current maintainer intent:
   - `PATCH` for fixes/docs/internal non-breaking improvements.
   - `MINOR` for backward-compatible feature growth.
   - `MAJOR` for deliberate breaking changes.
-- Versioning is maintained with release process checks, but users should treat
-  this as a practical maintainer policy rather than a legal compatibility SLA.
+- Treat this as practical project policy, not a legal compatibility SLA.
 
-## Compatibility expectations
+## Compatibility and support posture by tier
 
-- **Stable/Core** commands and workflows are the primary compatibility target.
-- Integrations and playbooks are supported with best-effort compatibility,
-  recognizing third-party/environment variability.
-- Experimental and transition-era lanes may evolve faster and should be
-  validated before production reliance.
-- Compatibility expectations are intentionally tied to stability tiers rather
-  than assuming all surfaces have the same change velocity.
+- **Public / stable:** primary compatibility target and strongest change-control
+  expectation for release-confidence flows.
+- **Advanced but supported:** supported for production use, but docs/ergonomics
+  and integration-facing edges may iterate faster.
+- **Experimental / incubator:** opt-in and best-effort continuity; validate in
+  your own repo/CI before treating as a hard dependency.
 
-## Stability tiers and what they imply
-
-- **Stable/Core:** highest confidence for impact-to-impact release gating and shipping
-  readiness checks.
-- **Integrations:** suitable for production use after local/CI validation in
-  your environment.
-- **Playbooks:** supported and useful, but expected to iterate more than core
-  gates.
-- **Experimental:** opt-in, best-effort maintenance, and faster evolution.
-
-For tier definitions and rollout guidance, see
-[stability-levels.md](stability-levels.md).
+This posture does not mean every command has the same change velocity.
+Compatibility expectations are intentionally tier-aware.
 
 ## Deprecation approach (current)
 
-- No blanket hard timeline is promised for all deprecations.
+- No blanket deprecation SLA/timeline is promised across all surfaces.
 - Preferred approach:
-  1. Mark direction clearly in docs/CLI help/changelog where practical.
+  1. Mark direction in docs/CLI help/changelog where practical.
   2. Keep compatibility aliases/wrappers during transition windows when
      feasible.
   3. Remove or tighten behavior deliberately in a major version when impact is
      material.
-- Some historical and transition-era commands remain intentionally available for
-  auditability and migration support.
+- Some transition-era commands remain available for auditability and migration.
 
-## What users should treat as stable vs evolving
+## Maintainer release/changelog hygiene
 
-Treat as most stable for production rollout:
+When a change can affect compatibility expectations (behavior, outputs, install
+path, or integration-facing interfaces), release notes should:
 
-- Core release-confidence flow (`quick` then `release`).
-- Core gate/security/doctor/evidence command families.
-- Published installation and release-validation docs.
-
-Treat as evolving (validate before broad dependence):
-
-- Environment-specific integration edges.
-- Guided playbook narratives and transition-era/impact closeout lanes.
-- Newer or explicitly experimental command families.
-
-## Maintainer operational note (release/changelog hygiene)
-
-When a change can affect compatibility expectations (command behavior, output shape, install path, or integration-facing interfaces), maintainers should make the impact explicit in release materials:
-
-1. Call out the affected stability tier (**Stable/Core**, **Integrations**, **Playbooks**, or **Experimental**).
+1. Name the affected tier (**Public / stable**, **Advanced but supported**, or
+   **Experimental / incubator**).
 2. State whether the change is backward-compatible or transitionary.
-3. Keep `CHANGELOG.md` wording aligned with this page and [stability-levels.md](stability-levels.md).
-
-This keeps trust policy operational in everyreview and release decisions without adding heavy process overhead.
+3. Keep wording aligned with this page and [stability-levels.md](stability-levels.md).
 
 ## Related references
 
