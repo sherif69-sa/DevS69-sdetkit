@@ -101,3 +101,23 @@ def test_starter_work_inventory_keeps_contributor_path_references() -> None:
     assert "[First contribution quickstart](first-contribution-quickstart.md)" in text
     assert ".github/ISSUE_TEMPLATE/feature_request.yml" in text
     assert "docs/first-contribution-quickstart.md" in text
+
+
+def test_versioning_and_stability_policy_terms_stay_aligned() -> None:
+    versioning = Path("docs/versioning-and-support.md").read_text(encoding="utf-8")
+    stability = Path("docs/stability-levels.md").read_text(encoding="utf-8")
+
+    required_tiers = (
+        "Public / stable",
+        "Advanced but supported",
+        "Experimental / incubator",
+    )
+    for tier in required_tiers:
+        assert tier in versioning
+        assert tier in stability
+
+    assert "Stable/Core" not in versioning
+    assert "Integrations" not in versioning
+    assert "Playbooks" not in versioning
+    assert "highest compatibility expectation" in stability
+    assert "primary compatibility target" in versioning
