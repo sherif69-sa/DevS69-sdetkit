@@ -49,6 +49,13 @@ def test_root_help_includes_policy_tier_vocabulary() -> None:
         assert tier in proc.stdout
 
 
+def test_root_help_avoids_legacy_tier_labels() -> None:
+    proc = _run("--help")
+    assert proc.returncode == 0
+    assert "Stable/Core" not in proc.stdout
+    assert "Stable/Compatibility" not in proc.stdout
+
+
 def test_policy_tier_vocabulary_matches_public_contract_and_docs() -> None:
     contract_help = render_root_help_groups()
     docs_text = Path("docs/stability-levels.md").read_text(encoding="utf-8")
