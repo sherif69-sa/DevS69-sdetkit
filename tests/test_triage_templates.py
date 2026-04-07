@@ -101,3 +101,12 @@ def test_triage_templates_markdown_output_is_structured(tmp_path: Path, capsys):
     assert "## Missing checks" in out
     assert "## Triage SLA targets" in out
     assert "## Recovery actions" in out
+
+
+def test_feature_request_template_keeps_starter_scope_guidance() -> None:
+    text = Path(".github/ISSUE_TEMPLATE/feature_request.yml").read_text(encoding="utf-8")
+
+    assert "id: contributor-path" in text
+    assert "first contribution (small, reviewable in one PR)" in text
+    assert "id: starter-scope" in text
+    assert "label: Starter scope (for small contributions)" in text

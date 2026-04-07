@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 import pytest
 
 from sdetkit import docs_qa
+
+
+def _starter_inventory_text() -> str:
+    return Path("docs/starter-work-inventory.md").read_text(encoding="utf-8")
 
 
 def test_docs_qa_passes_repo_docs() -> None:
@@ -76,3 +81,23 @@ def test_docs_qa_markdown_output_is_structured(tmp_path: Path, capsys) -> None:
     assert "## Summary" in out
     assert "- Status: pass" in out
     assert "## Issues" in out
+
+
+def test_starter_work_inventory_keeps_first_contribution_structure() -> None:
+    text = _starter_inventory_text()
+    headings = {
+        match.group(1).strip().lower()
+        for match in re.finditer(r"^##\s+(.+)$", text, flags=re.MULTILINE)
+    }
+
+    assert "how to use this inventory" in headings
+    assert "starter contribution categories" in headings
+    assert "if no starter issue is available" in headings
+
+
+def test_starter_work_inventory_keeps_contributor_path_references() -> None:
+    text = _starter_inventory_text()
+
+    assert "[First contribution quickstart](first-contribution-quickstart.md)" in text
+    assert ".github/ISSUE_TEMPLATE/feature_request.yml" in text
+    assert "docs/first-contribution-quickstart.md" in text
