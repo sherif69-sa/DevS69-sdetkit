@@ -71,6 +71,7 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 Deep references, advanced integrations, and historical material remain available in navigation and are intentionally secondary to first-time adoption.
 
 If you need context after the canonical first-proof path is working:
+- New contributor? Start with the safe-first lane in [Contributing](contributing.md#first-trustworthy-contribution-safe-first-lane).
 - [SDETKit vs ad hoc tooling](sdetkit-vs-ad-hoc.md)
 - [Repo cleanup plan](repo-cleanup-plan.md)
 - [Repo health dashboard](repo-health-dashboard.md)

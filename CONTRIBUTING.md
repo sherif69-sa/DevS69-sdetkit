@@ -10,23 +10,53 @@ Thanks for helping improve **sdetkit**.
 
 ---
 
-## Start here (first external contribution)
+## First trustworthy contribution
 
-If this is your first PR to this repository, use this shortest safe path:
+If this is your first PR to this repository, follow this safe-first path to make a small, high-confidence contribution without touching unstable surfaces.
 
-1. **Set up locally**
-   ```bash
-   bash scripts/bootstrap.sh
-   source .venv/bin/activate
-   ```
-2. **Choose one small contribution type** from [Starter contribution types](#starter-contribution-types).
-3. **Make one focused change** and keep the PR scope small.
-4. **Validate before push**:
+### Safe starter surfaces (safe for first PR)
+
+Start in one of these areas:
+
+- **Docs clarification and cross-links** in `docs/` and `README.md` (wording, examples, broken internal links).
+- **Small targeted tests** under `tests/` for existing behavior (no command-surface changes).
+- **Lint/type hygiene fixes** that improve quality without changing behavior.
+- **Contributor workflow polish** (guidance, issue/PR template clarity, validation instructions).
+
+### Avoid first for your first PR (not forbidden forever)
+
+For your first PR, avoid starting with these higher-risk surfaces:
+
+- **Core CLI behavior/semantics** and top-level command-shape changes.
+- **Feature registry/tier metadata updates** unless your issue explicitly requires them.
+- **Broad command-family or cross-cutting refactors** that need deep architecture context.
+
+These areas are important; they are just better as a second/third contribution after you are familiar with the repo.
+
+### Issue -> change -> validation -> PR
+
+1. **Pick a scoped issue**: prefer labels such as `good first issue`, `help wanted`, `documentation`, or `tests`.
+2. **Make one focused change** in a safe starter surface.
+3. **Run baseline validation**:
    ```bash
    python -m pre_commit run -a
    bash quality.sh cov
+   mkdocs build
    ```
-5. **Open a PR** using `.github/PULL_REQUEST_TEMPLATE.md` and include the commands you ran.
+4. **Open your PR** using `.github/PULL_REQUEST_TEMPLATE.md` and include:
+   - the issue you solved,
+   - what changed,
+   - commands you ran and outcomes.
+
+### Canonical release-confidence alignment check
+
+Before you open a PR, verify your docs/examples stay aligned with the canonical release-confidence path:
+
+```bash
+python -m sdetkit gate fast
+python -m sdetkit gate release
+python -m sdetkit doctor
+```
 
 For a condensed version, see `docs/first-contribution-quickstart.md`.
 For concrete, repo-grounded starter categories, use `docs/starter-work-inventory.md`.
