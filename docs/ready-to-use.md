@@ -6,6 +6,12 @@ If you only want the fastest proof with minimal text, use [Blank repo to value i
 
 ## Guided run (5 minutes)
 
+0. Install in the target external repo (skip only if already installed):
+
+```bash
+python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
+```
+
 1. (Optional) Verify CLI wiring:
 
 ```bash
@@ -49,6 +55,12 @@ bash scripts/ready_to_use.sh release
 ```
 
 External repositories should use direct `python -m sdetkit ...` commands.
+
+## Contract truth model for first-time external runs
+
+- `gate fast` and `gate release` can legitimately fail on first run while still generating trustworthy JSON triage artifacts.
+- Trust breaks only when artifacts are missing or malformed.
+- Inspect `build/release-preflight.json` and `build/gate-fast.json` before raw logs.
 
 ## Next step routing
 

@@ -16,8 +16,15 @@ Move from local confidence checks to repeatable team gates with machine-readable
 Use [Install](install.md), then verify:
 
 ```bash
+python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
 python -m sdetkit --help
 python -m sdetkit gate --help
+```
+
+For maintainers validating the external-install contract itself (from this repository):
+
+```bash
+python -m pytest -q tests/test_external_first_run_contract.py
 ```
 
 ## Stage 1 — local proof in the team repo
