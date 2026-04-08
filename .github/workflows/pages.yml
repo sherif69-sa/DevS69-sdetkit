@@ -36,6 +36,9 @@ jobs:
         with:
           enablement: true
 
+      - name: Verify public surface alignment contract
+        run: python scripts/check_public_surface_alignment.py
+
       - name: Build mkdocs site
         run: NO_MKDOCS_2_WARNING=1 python -m mkdocs build --strict
 
