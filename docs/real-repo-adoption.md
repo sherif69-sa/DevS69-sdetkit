@@ -1,91 +1,85 @@
 # Real repo adoption proof (canonical fixture)
 
-This page documents one **realistic repository-shaped fixture** that proves the
-canonical SDETKit release-confidence path from local execution to CI artifact
-review.
+This is the **flagship trust lane** for repo adoption proof.
 
-It is fixture evidence, not a customer story or benchmark.
+A skeptical maintainer should only need this one path to verify:
+- what commands ran,
+- what artifacts were produced,
+- what passed vs failed,
+- why those outcomes are trustworthy,
+- and how local evidence maps to CI evidence.
 
-## Fixture
+## Canonical fixture
 
 Path: `examples/adoption/real-repo/`
 
-The fixture is intentionally small but realistic:
-
+Fixture shape (intentionally small, repo-realistic):
 - `pyproject.toml`
 - `src/app/__init__.py`
 - `src/app/main.py`
 - `tests/test_main.py`
 
-## Why this fixture exists
+## Canonical local replay (exact commands)
 
-- prove repeatable local execution of the canonical path
-- prove CI replay of the same path
-- provide truthful, inspectable artifact examples in one place
-
-## Local commands (exact path)
-
-From repository root:
+From repo root:
 
 ```bash
 python -m pip install -e .
 cd examples/adoption/real-repo
-python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
-python -m sdetkit gate release --format json --out build/release-preflight.json
-python -m sdetkit doctor --format json --out build/doctor.json
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json ; echo $? > build/gate-fast.rc
+python -m sdetkit gate release --format json --out build/release-preflight.json ; echo $? > build/release-preflight.rc
+python -m sdetkit doctor --format json --out build/doctor.json ; echo $? > build/doctor.rc
+python ../../../scripts/real_repo_adoption_projection.py --fixture-root . --repo-root ../../.. --build-dir build --out build/adoption-proof-summary.json
 ```
 
-## Golden artifacts (checked-in reference)
+## Canonical artifacts (single evidence pack)
 
-Path: `artifacts/adoption/real-repo-golden/`
+Both local replay and CI replay produce the same canonical files:
+- `build/gate-fast.json`
+- `build/release-preflight.json`
+- `build/doctor.json`
+- `build/gate-fast.rc`
+- `build/release-preflight.rc`
+- `build/doctor.rc`
+- `build/adoption-proof-summary.json`
 
-- `gate-fast.json`
-- `release-preflight.json`
-- `doctor.json`
+Checked-in golden references live at `artifacts/adoption/real-repo-golden/` with the same filenames.
 
-These files are generated reference artifacts from the fixture. They are not
-live CI artifacts.
+## Truthful expected outcomes (not theatrical)
 
-## Artifact reading order
+For this fixture, intentional first-run triage behavior is part of the trust signal:
 
-1. `release-preflight.json` (`ok`, `failed_steps`, `profile`)
-2. `gate-fast.json` (`ok`, `failed_steps`, `profile`)
-3. `doctor.json` (`ok`, `quality.failed_check_ids`, `recommendations`)
+| Command | Expected `rc` | Expected artifact `ok` | Why trustworthy |
+| --- | --- | --- | --- |
+| `gate fast` | `2` | `false` | Fails on missing full-repo policy/test wiring; this is realistic first-run adoption triage. |
+| `gate release` | `2` | `false` | Depends on release doctor + fast gate; failure mirrors realistic preflight gating. |
+| `doctor` | `0` | `true` | Produces actionable quality checks while command execution still succeeds. |
 
-## How to interpret success/failure
+Use `build/adoption-proof-summary.json` as the canonical decoder: it records command, artifact contract projection, observed rc/ok, expected rc/ok, and expectation-match booleans.
 
-- **Success for command execution** means each command produced its artifact.
-- **Gate pass** means `ok: true` in the gate artifact.
-- **Gate fail** means `ok: false` and `failed_steps` gives the next triage
-  target.
-
-The fixture intentionally demonstrates first-run triage behavior where gate
-artifacts can fail while still being valid, truthful evidence.
-
-## CI replay mirror
+## CI mirror (same story as local)
 
 Workflow: `.github/workflows/adoption-real-repo-canonical.yml`
 
-The CI workflow runs the same three commands against the same fixture and
-uploads artifacts with the same filenames, plus per-command return code files
-(`*.rc`) to make pass/fail interpretation explicit during review.
-It also runs `python scripts/regenerate_real_repo_adoption_goldens.py --check`
-to fail fast when checked-in canonical goldens drift.
+CI does three things in this exact order:
+1. `python scripts/regenerate_real_repo_adoption_goldens.py --check` (drift guard)
+2. replay canonical fixture commands and rc capture
+3. upload canonical artifacts as `adoption-real-repo-canonical`
 
-## Regeneration note
+No separate CI-only evidence format is used; CI uploads the same artifact names as local replay.
 
-To verify whether checked-in goldens are fresh without rewriting files, run:
+## Golden freshness and drift guard
+
+Check only (no rewrites):
 
 ```bash
 python scripts/regenerate_real_repo_adoption_goldens.py --check
 ```
 
-To refresh golden artifacts after intentional changes to fixture or gate
-behavior, run:
+Refresh intentionally (after fixture or gate-contract changes):
 
 ```bash
 python scripts/regenerate_real_repo_adoption_goldens.py
 ```
 
-This helper runs the same canonical commands and copies outputs from
-`examples/adoption/real-repo/build/` to `artifacts/adoption/real-repo-golden/`.
+The helper regenerates fixture artifacts, rc files, and the proof summary, then compares projected contracts so path-specific volatility does not create false drift.

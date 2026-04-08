@@ -1,0 +1,265 @@
+{
+  "all_expectations_met": true,
+  "commands": [
+    {
+      "artifact": "build/gate-fast.json",
+      "artifact_contract": {
+        "failed_steps": [
+          "doctor",
+          "ci_templates",
+          "pytest"
+        ],
+        "ok": false,
+        "profile": "fast",
+        "steps": [
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "doctor",
+              "--dev",
+              "--ci",
+              "--deps",
+              "--clean-tree",
+              "--repo",
+              "--fail-on",
+              "high",
+              "--format",
+              "json"
+            ],
+            "id": "doctor",
+            "ok": false,
+            "rc": 2
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "ci",
+              "validate-templates",
+              "--root",
+              "<repo>",
+              "--format",
+              "json",
+              "--strict"
+            ],
+            "id": "ci_templates",
+            "ok": false,
+            "rc": 2
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "ruff",
+              "check",
+              "."
+            ],
+            "id": "ruff",
+            "ok": true,
+            "rc": 0
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "ruff",
+              "format",
+              "--check",
+              "."
+            ],
+            "id": "ruff_format",
+            "ok": true,
+            "rc": 0
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "mypy",
+              "src"
+            ],
+            "id": "mypy",
+            "ok": true,
+            "rc": 0
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "pytest",
+              "-q",
+              "tests/test_gate_fast.py",
+              "tests/test_gate_baseline.py",
+              "tests/test_doctor_surgical.py",
+              "tests/test_baseline_umbrella.py"
+            ],
+            "id": "pytest",
+            "ok": false,
+            "rc": 4
+          }
+        ]
+      },
+      "cmd": [
+        "python",
+        "-m",
+        "sdetkit",
+        "gate",
+        "fast",
+        "--format",
+        "json",
+        "--stable-json",
+        "--out",
+        "build/gate-fast.json"
+      ],
+      "expected_ok": false,
+      "expected_rc": 2,
+      "id": "gate_fast",
+      "label": "gate fast",
+      "observed_ok": false,
+      "observed_rc": 2,
+      "ok_matches_expected": true,
+      "rc_file": "build/gate-fast.rc",
+      "rc_matches_expected": true,
+      "trust_note": "Fixture intentionally lacks full repo policy/test wiring so first-run triage is visible."
+    },
+    {
+      "artifact": "build/release-preflight.json",
+      "artifact_contract": {
+        "dry_run": false,
+        "failed_steps": [
+          "doctor_release",
+          "gate_fast"
+        ],
+        "ok": false,
+        "profile": "release",
+        "steps": [
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "doctor",
+              "--release",
+              "--format",
+              "json"
+            ],
+            "id": "doctor_release",
+            "ok": false,
+            "rc": 2
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "playbooks",
+              "validate",
+              "--recommended",
+              "--format",
+              "json"
+            ],
+            "id": "playbooks_validate",
+            "ok": true,
+            "rc": 0
+          },
+          {
+            "cmd": [
+              "python",
+              "-m",
+              "sdetkit",
+              "gate",
+              "fast",
+              "--root",
+              "<repo>",
+              "--format",
+              "json"
+            ],
+            "id": "gate_fast",
+            "ok": false,
+            "rc": 2
+          }
+        ]
+      },
+      "cmd": [
+        "python",
+        "-m",
+        "sdetkit",
+        "gate",
+        "release",
+        "--format",
+        "json",
+        "--out",
+        "build/release-preflight.json"
+      ],
+      "expected_ok": false,
+      "expected_rc": 2,
+      "id": "gate_release",
+      "label": "gate release",
+      "observed_ok": false,
+      "observed_rc": 2,
+      "ok_matches_expected": true,
+      "rc_file": "build/release-preflight.rc",
+      "rc_matches_expected": true,
+      "trust_note": "Release gate mirrors realistic preflight dependency on doctor+fast and fails truthfully here."
+    },
+    {
+      "artifact": "build/doctor.json",
+      "artifact_contract": {
+        "ok": true,
+        "quality": {
+          "actionable_checks": 4,
+          "checks_with_evidence": 0,
+          "checks_with_fix": 0,
+          "evidence_count": 0,
+          "failed_check_ids": [
+            "dev_tools",
+            "pyproject",
+            "venv"
+          ],
+          "failed_checks": 3,
+          "failed_severity_breakdown": {
+            "high": 0,
+            "low": 0,
+            "medium": 3
+          },
+          "fix_count": 0,
+          "highest_failure_severity": "medium",
+          "hint_count": 0,
+          "pass_rate": 25,
+          "passed_checks": 1,
+          "selected_checks": 13,
+          "skipped_checks": 9
+        },
+        "recommendations": [
+          "No immediate blockers detected. Keep CI, docs, and tests green for premium delivery quality."
+        ]
+      },
+      "cmd": [
+        "python",
+        "-m",
+        "sdetkit",
+        "doctor",
+        "--format",
+        "json",
+        "--out",
+        "build/doctor.json"
+      ],
+      "expected_ok": true,
+      "expected_rc": 0,
+      "id": "doctor",
+      "label": "doctor",
+      "observed_ok": true,
+      "observed_rc": 0,
+      "ok_matches_expected": true,
+      "rc_file": "build/doctor.rc",
+      "rc_matches_expected": true,
+      "trust_note": "Doctor runs successfully and returns actionable checks without blocking artifact generation."
+    }
+  ],
+  "explanation": "Expected failures in gate fast/release are intentional and preserved as trustworthy first-run triage evidence.",
+  "fixture": "examples/adoption/real-repo",
+  "lane": "adoption-real-repo-canonical"
+}
