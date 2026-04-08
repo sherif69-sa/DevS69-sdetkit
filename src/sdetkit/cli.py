@@ -246,7 +246,9 @@ Start here (canonical release-confidence path):
   1) [Public / stable] python -m sdetkit gate fast
   2) [Public / stable] python -m sdetkit gate release
   3) [Public / stable] python -m sdetkit doctor
-  4) Then expand into umbrella kits (advanced): python -m sdetkit kits list
+
+Then use stability-aware command discovery:
+  4) [Advanced but supported] python -m sdetkit kits list
 """
 
     help_epilog = render_root_help_groups()

@@ -1,144 +1,68 @@
-# CLI
+# CLI reference
 
-DevS69 SDETKit first-time guidance is the canonical release-confidence path.
+This page is the **current CLI reference for command discovery**.
+
+It intentionally prioritizes:
+
+1. the canonical public/stable first-time path,
+2. stability-aware expansion into advanced surfaces,
+3. clear demotion of transition-era or legacy-oriented material.
 
 ## Canonical first-time path (public / stable)
+
+Use this exact sequence first:
 
 1. `python -m sdetkit gate fast`
 2. `python -m sdetkit gate release`
 3. `python -m sdetkit doctor`
 
-## Advanced but supported surfaces (including umbrella kits)
+This is the primary product path for first-time adoption and release-confidence proof.
 
-1. **Release Confidence Kit**: `sdetkit release ...`
-2. **Test Intelligence Kit**: `sdetkit intelligence ...`
-3. **Integration Assurance Kit**: `sdetkit integration ...`
-4. **Failure Forensics Kit**: `sdetkit forensics ...`
-5. **Kit discovery**: `sdetkit kits list` and `sdetkit kits describe <kit>`
+## Stability-aware command discovery
 
-### Expanded hero commands after first proof
+After the canonical path is working, expand deliberately:
 
-- `sdetkit kits list`
-- `sdetkit intelligence flake classify --history examples/kits/intelligence/flake-history.json`
-- `sdetkit integration check --profile examples/kits/integration/profile.json`
-- `sdetkit integration topology-check --profile examples/kits/integration/heterogeneous-topology.json`
-- `sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json`
+### Advanced but supported
 
-## Compatibility and supporting surfaces
+- Umbrella kits: `sdetkit kits list`, `sdetkit kits describe <kit>`
+- Release Confidence Kit: `sdetkit release ...`
+- Test Intelligence Kit: `sdetkit intelligence ...`
+- Integration Assurance Kit: `sdetkit integration ...`
+- Failure Forensics Kit: `sdetkit forensics ...`
 
-Legacy direct commands remain fully supported for backward compatibility:
+### Public/stable compatibility aliases (secondary for discovery)
+
+These remain fully supported for existing automation and muscle memory:
 
 - `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
 
-Supporting utilities remain available, but are no longer the primary discovery surface:
+### Supporting utilities (secondary)
+
+Available utility lanes include:
 
 - `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `ops`, `notify`, `agent`
 
-Advanced playbook and experimental/incubator transition-era lanes are preserved but intentionally secondary:
+## Transition-era and legacy-oriented material
+
+Transition-era and archived lanes remain available for compatibility, but they are **not** first-time entrypoints:
 
 - `sdetkit playbooks`
-- legacy compatibility lanes and archived transition commands
+- archived transition commands and legacy compatibility lanes
 - canonical rename map: [public-surface-rename-map](public-surface-rename-map.md)
+- historical material: [archive index](archive/index.md)
 
 ## Contract expectations
 
 Public kit commands are contract-oriented:
 
-- Machine-readable JSON with `schema_version`
-- Deterministic ordering and reproducible artifacts
-- Stable exit code lanes (`0` success, `1` policy/contract failure, `2` invalid input/usage)
+- machine-readable JSON with `schema_version`
+- deterministic ordering and reproducible artifacts
+- stable exit-code lanes (`0` success, `1` policy/contract failure, `2` invalid input/usage)
 
-## References
+## Related references
 
+- [Command surface inventory (stability-aware)](command-surface.md)
+- [Stability levels](stability-levels.md)
+- [Versioning and support posture](versioning-and-support.md)
 - [Command taxonomy](command-taxonomy.md)
-- [Command surface](command-surface.md)
 - [Umbrella architecture](architecture/umbrella-kits.md)
-- [Release kit](kits/release-confidence.md)
-- [Intelligence kit](kits/test-intelligence.md)
-- [Integration kit](kits/integration-assurance.md)
-- [Forensics kit](kits/failure-forensics.md)
-
-## reliability-evidence-pack
-
---github-actions-summary
---gitlab-ci-summary
---contribution-quality-summary
---min-reliability-score
---write-defaults
---execute
---evidence-dir
---timeout-sec
---emit-pack-dir
-
-## objection-handling
-
---docs-page
---min-faq-score
---execute
---evidence-dir
---timeout-sec
---emit-pack-dir
-
-## release-readiness
-
-```bash
-python -m sdetkit release-readiness --format json --strict
-
-Options:
-
---reliability-summary
---weekly-review-summary
---min-release-score
---write-defaults
---execute
---evidence-dir
---timeout-sec
---emit-pack-dir
-
-## startup-readiness
-
-sdetkit startup-readiness --format markdown --output docs/artifacts/startup-readiness-sample.md
-sdetkit startup-readiness --emit-pack-dir docs/artifacts/startup-readiness-pack --format json --strict
---write-defaults
-
-## enterprise-readiness
-
-sdetkit enterprise-readiness --format markdown --output docs/artifacts/enterprise-readiness-sample.md
-sdetkit enterprise-readiness --emit-pack-dir docs/artifacts/enterprise-readiness-pack --format json --strict
-sdetkit enterprise-readiness --execute --evidence-dir docs/artifacts/enterprise-readiness-pack/evidence --format json --strict
---write-defaults
---evidence-dir
-
-## release-communications
-
---release-summary
---changelog
---min-release-score
---execute
---evidence-dir
---timeout-sec
---emit-pack-dir
-
-## trust-assets
-
---readme
---docs-index
---min-trust-score
---execute
---evidence-dir
---timeout-sec
---emit-pack-dir
-
-
-## docs-nav
-
-```bash
-sdetkit docs-nav --format markdown --output docs/artifacts/docs-governance-sample.md
-sdetkit docs-nav --format text --strict
-sdetkit docs-nav --write-defaults --format json --strict
-```
-
-Options:
-
-- `--strict`
-- `--write-defaults`

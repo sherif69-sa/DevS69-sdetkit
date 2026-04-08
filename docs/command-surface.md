@@ -1,6 +1,10 @@
 # Command surface inventory (stability-aware)
 
-SDETKit's public surface is unified around the canonical public/stable first-time path, with advanced and compatibility lanes secondary.
+SDETKit's public command surface is organized for coherent discovery:
+
+1. canonical public/stable first-time path,
+2. advanced but supported expansion lanes,
+3. compatibility and transition-era lanes kept available but secondary.
 
 ## Command-family contract snapshot
 
@@ -19,25 +23,22 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 
 <!-- END:PUBLIC_SURFACE_CONTRACT_TABLE -->
 
-## First-time path (public / stable)
+## Canonical first-time path (public / stable)
 
 1. `python -m sdetkit gate fast`
 2. `python -m sdetkit gate release`
 3. `python -m sdetkit doctor`
 
-## Compatibility path
+## Expansion and compatibility
 
-Direct commands stay stable and supported:
+- Advanced kits and discovery: `sdetkit kits list`, `sdetkit kits describe <kit>`, then `release`, `intelligence`, `integration`, `forensics`
+- Compatibility aliases: `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
+- Supporting utilities and automation: `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `dev`, `ci`, `ops`, `notify`, `agent`
 
-- `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
+## Transition-era and historical lanes
 
-Use these for existing scripts while keeping first-time discovery/docs on the canonical path.
-
-## Supporting and experimental
-
-- Supporting utilities: `kv`, `apiget`, `cassette-get`, `patch`, `maintenance`, `dev`, `ci`, `ops`, `notify`, `agent`
 - Playbooks catalog: `sdetkit playbooks`
-- Transition-era lanes: legacy compatibility lanes and archived transition commands
+- Transition-era compatibility lanes and archived commands
 - Canonical rename map: [public-surface-rename-map](public-surface-rename-map.md)
 
 Maintainer sync:

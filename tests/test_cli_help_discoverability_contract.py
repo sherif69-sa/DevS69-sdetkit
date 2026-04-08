@@ -38,6 +38,7 @@ def test_root_help_exposes_canonical_first_time_path() -> None:
         assert marker in normalized
 
     assert "release confidence canonical path" in normalized
+    assert "command discovery (stability-aware)" in normalized
     assert "umbrella kits [advanced but supported] (use first: no;" in normalized
 
 
