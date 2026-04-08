@@ -78,16 +78,22 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need lane routing: [Choose your path](choose-your-path.md)
 - Need team rollout: [Adopt in your repository](adoption.md)
 - Need CI rollout: [Recommended CI flow](recommended-ci-flow.md)
+- Need current references: [CLI reference](cli.md), [API](api.md), and [repo audit reference](repo-audit.md)
 - Need contributor workflow: [Contributing](contributing.md)
 - Need boundary guidance: [Stability levels](stability-levels.md) for adopters and contributors
 
-## Secondary and advanced references
+## Secondary references (current)
 
-This page is a product homepage/router, not a historical archive. Deep references, advanced integrations, and historical material remain available and are intentionally secondary to first-time adoption.
+This page is a product homepage/router, not a historical archive. Deep references and advanced material remain available and are intentionally secondary to first-time adoption.
 
 If you need context after the canonical first-proof path is working:
 - New contributor? Start with the safe-first lane in [Contributing](contributing.md#first-trustworthy-contribution-safe-first-lane).
 - [SDETKit vs ad hoc tooling](sdetkit-vs-ad-hoc.md)
 - [Repo cleanup plan](repo-cleanup-plan.md)
 - [Repo health dashboard](repo-health-dashboard.md)
+
+## Historical archive (non-primary)
+
+Historical and transition-era documentation is preserved for traceability, but intentionally demoted in primary navigation.
+
 - [Archive index](archive/index.md)

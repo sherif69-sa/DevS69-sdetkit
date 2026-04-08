@@ -83,7 +83,7 @@ extra_javascript:
 
 nav:
   - Start here: index.md
-  - First-time release-confidence path:
+  - Canonical first-proof path (primary):
       - Install (canonical): install.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - First run quickstart (guided canonical path): ready-to-use.md
@@ -93,7 +93,7 @@ nav:
       - Decision guide (is SDETKit a fit?): decision-guide.md
       - Choose your path (30-second router): choose-your-path.md
       - Doctor checks: doctor.md
-  - Team adoption and CI rollout:
+  - Team adoption and CI rollout (primary):
       - Adopt in your repository (canonical): adoption.md
       - Team rollout scenario: team-rollout-scenario.md
       - Example adoption flow: example-adoption-flow.md
@@ -105,7 +105,20 @@ nav:
       - Reporting and trends: reporting-and-trends.md
       - Sample outputs (exploratory, non-canonical): sample-outputs.md
       - Remediation cookbook: remediation-cookbook.md
-  - Contributing and maintenance:
+  - Current reference and discoverability (secondary):
+      - CLI reference: cli.md
+      - API: api.md
+      - Repo Audit: repo-audit.md
+      - Security Gate: security-gate.md
+      - Security model: security-model.md
+      - Security hardening: security.md
+      - Policy-as-Code: policy.md
+      - Feature registry: feature-registry.md
+      - Release confidence architecture note: architecture/umbrella-kits.md
+      - Release verification records: release-verification.md
+      - Roadmap: roadmap.md
+      - Changelog: changelog.md
+  - Contributing and maintenance (secondary):
       - Repo tour: repo-tour.md
       - First contribution quickstart: first-contribution-quickstart.md
       - Contributing: contributing.md
@@ -116,7 +129,6 @@ nav:
       - Automation bots and maintenance control loop: automation-bots.md
       - n8n integration (PR webhook automation): n8n.md
   - Kits (secondary umbrella):
-      - Umbrella architecture note: architecture/umbrella-kits.md
       - Release Confidence Kit: kits/release-confidence.md
       - Test Intelligence Kit: kits/test-intelligence.md
       - Integration Assurance Kit: kits/integration-assurance.md
@@ -125,16 +137,9 @@ nav:
       - Validation route map: kits/validation-route-map.md
       - Expansion lab: kits/expansion-lab.md
   - Advanced and reference (secondary):
-      - CLI reference: cli.md
       - Platform problem authoring: platform-problem-authoring.md
       - Command surface inventory: command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
-      - API: api.md
-      - Repo Audit: repo-audit.md
-      - Security Gate: security-gate.md
-      - Security model: security-model.md
-      - Security hardening: security.md
-      - Policy-as-Code: policy.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
       - Evidence Pack: evidence.md
@@ -157,15 +162,13 @@ nav:
       - Releasing sdetkit: releasing.md
       - Packaging/install/release-readiness audit: packaging-readiness-audit.md
       - Public release verification records: release-verification.md
-      - Changelog: changelog.md
-      - Roadmap: roadmap.md
       - License: license.md
   - Advanced live views (secondary):
       - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
       - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
       - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
       - DevS69 Visual HUD Showcase: hud-showcase.md
-  - Archive and history:
+  - Historical archive (non-primary):
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md
 
