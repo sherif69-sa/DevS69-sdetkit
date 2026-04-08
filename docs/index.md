@@ -28,6 +28,14 @@ Context: [real-repo adoption fixture + golden artifacts](real-repo-adoption.md)
 
 ## What to run first
 
+Canonical first-proof commands (same as README and first-run guides):
+
+```bash
+python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
+python -m sdetkit doctor
+```
+
 1. [Install (canonical)](install.md)
 2. [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
 3. [Release confidence explainer](release-confidence.md)

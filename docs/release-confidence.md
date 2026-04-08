@@ -10,7 +10,7 @@ Release confidence means a repository can answer **"Is this ready to ship?"** wi
 
 ```bash
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor
 ```
 

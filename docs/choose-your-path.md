@@ -7,7 +7,7 @@ Core promise: deterministic release-confidence checks and evidence-backed shippi
 | Who this is for | First page to open | First command or proof step | Expected outcome |
 | --- | --- | --- | --- |
 | Evaluating fit in a new repo | [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md) | `python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json` | You get immediate machine-readable go/no-go evidence. |
-| New user wanting guided onboarding | [First run quickstart](ready-to-use.md) | `python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json` | You complete the canonical local command path with clear artifacts. |
+| New user wanting guided onboarding | [First run quickstart](ready-to-use.md) | `python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json` then `python -m sdetkit gate release --format json --out build/release-preflight.json` | You complete the canonical local command path with clear artifacts. |
 | Team rolling out policy in CI | [Recommended CI flow](recommended-ci-flow.md) | Upload `build/*.json` artifacts from gate runs | Release checks become repeatable and reviewable in CI. |
 | Stakeholder asking “why this vs ad hoc?” | [Before/after evidence example](before-after-evidence-example.md) | Compare log-only triage vs JSON artifact triage | Decision quality and traceability become explicit. |
 

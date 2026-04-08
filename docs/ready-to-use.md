@@ -22,7 +22,7 @@ python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.js
 3. Run release gate:
 
 ```bash
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
 4. Run diagnostics:
