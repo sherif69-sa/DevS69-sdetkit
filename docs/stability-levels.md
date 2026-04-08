@@ -4,11 +4,14 @@
 
 This page declares the current product boundary so adopters and contributors can make consistent decisions about what is primary vs secondary without guesswork.
 
-## Flagship promise
+## Flagship promise (single primary identity)
 
 DevS69 SDETKit's flagship promise is:
 
 > **Deterministic release confidence / shipping readiness for software teams.**
+
+Primary outcome: decide if a change is ready to ship from explicit evidence.
+Primary first path: `gate fast` -> `gate release` -> `doctor`.
 
 ## This page is a declaration, not a refactor
 

@@ -2,9 +2,15 @@
 
 DevS69 SDETKit is a release-confidence CLI: it gives engineering teams deterministic ship/no-ship decisions with machine-readable evidence, using one repeatable command path from local to CI.
 
+**Primary outcome:** know if a change is ready to ship.
+
+**Canonical first path:** `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
+
 ## Product promise (30-second view)
 
 SDETKit's primary user outcome is **shipping readiness confidence**: a team can decide go/no-go from explicit JSON evidence instead of ad hoc interpretation.
+
+In plain terms: one clear product identity, one outcome, one first path.
 
 The primary path is always:
 
