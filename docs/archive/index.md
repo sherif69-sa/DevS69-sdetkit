@@ -6,7 +6,7 @@ This section preserves **historical, transition-era, and closeout material** tha
 
 If you're new to SDETKit, start with:
 
-- [Start here (core path)](../ready-to-use.md)
+- [Start here (core path)](../index.md)
 - [Team adoption lane](../adoption.md)
 - [CI and automation lane](../recommended-ci-flow.md)
 - [Advanced and reference lane](../cli.md)
