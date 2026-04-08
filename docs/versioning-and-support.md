@@ -2,7 +2,7 @@
 
 SDETKit's flagship promise remains:
 
-> **Release confidence / shipping readiness for software teams.**
+> **Release confidence / shipping readiness for software teams through one canonical command path.**
 
 This page is the operational policy for versioning, compatibility, support, and
 deprecation. It intentionally avoids guarantees we do not operationally enforce.

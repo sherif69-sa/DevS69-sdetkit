@@ -1,6 +1,6 @@
 # Command surface inventory (stability-aware)
 
-SDETKit's public command surface is organized for coherent discovery:
+SDETKit's public command surface is organized for one coherent product story:
 
 1. canonical public/stable first-time path,
 2. advanced but supported expansion lanes,
@@ -14,12 +14,12 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 
 | Command family | Purpose | Stability tier | First-time adopter default? | Transition-era / legacy-oriented? |
 |---|---|---|---|---|
-| `release-confidence-canonical-path` | Primary first-time product surface for deterministic shipping readiness and release confidence. | Public / stable | Yes | No |
-| `umbrella-kits` | Umbrella kits remain fully supported for expanded release, intelligence, integration, and forensics workflows. | Advanced but supported | No | No |
+| `release-confidence-canonical-path` | Primary first-time product surface for deterministic shipping readiness via one canonical command path. | Public / stable | Yes | No |
+| `umbrella-kits` | Umbrella kits are fully supported expansion surfaces for release, intelligence, integration, and forensics workflows. | Advanced but supported | No | No |
 | `compatibility-aliases` | Backward-compatible direct lanes preserved for existing automation and muscle memory. | Public / stable | No | No |
 | `supporting-utilities-and-automation` | Supporting utilities and automation lanes; useful but intentionally secondary to the canonical public/stable first-time path. | Advanced but supported | No | No |
 | `playbooks` | Guided adoption and rollout lanes for operational outcomes. | Advanced but supported | No | No |
-| `experimental-transition-lanes` | Transition-era and legacy-oriented lanes retained for compatibility. | Experimental / incubator | No | Yes |
+| `experimental-transition-lanes` | Transition-era and legacy-oriented lanes retained for compatibility and historical continuity. | Experimental / incubator | No | Yes |
 
 <!-- END:PUBLIC_SURFACE_CONTRACT_TABLE -->
 
@@ -29,7 +29,7 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 2. `python -m sdetkit gate release`
 3. `python -m sdetkit doctor`
 
-## Expansion and compatibility
+## Expansion and compatibility (secondary to first proof)
 
 - Advanced kits and discovery: `sdetkit kits list`, `sdetkit kits describe <kit>`, then `release`, `intelligence`, `integration`, `forensics`
 - Compatibility aliases: `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`
