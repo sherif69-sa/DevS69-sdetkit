@@ -2,7 +2,7 @@
 
 ## Why this page exists
 
-This page declares the current product boundary so adopters and contributors can make consistent decisions without guessing which surfaces are primary vs optional.
+This page declares the current product boundary so adopters and contributors can make consistent decisions about what is primary vs secondary without guesswork.
 
 ## Flagship promise
 

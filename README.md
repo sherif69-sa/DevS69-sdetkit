@@ -1,6 +1,16 @@
 # DevS69 SDETKit
 
-DevS69 SDETKit gives engineering teams deterministic release go/no-go decisions with machine-readable evidence, using one repeatable command path from local to CI.
+DevS69 SDETKit is a release-confidence CLI: it gives engineering teams deterministic ship/no-ship decisions with machine-readable evidence, using one repeatable command path from local to CI.
+
+## Product promise (30-second view)
+
+SDETKit's primary user outcome is **shipping readiness confidence**: a team can decide go/no-go from explicit JSON evidence instead of ad hoc interpretation.
+
+The primary path is always:
+
+`python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`
+
+Everything else (umbrella kits, utilities, historical/transition-era lanes) stays available, but is intentionally secondary to first-time adoption.
 
 ## Canonical first proof lane (start here)
 
@@ -76,7 +86,7 @@ Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 - Before/after evidence behavior: [`docs/before-after-evidence-example.md`](docs/before-after-evidence-example.md)
 - Real evidence artifacts from this repo: [`docs/evidence-showcase.md`](docs/evidence-showcase.md)
 
-## Secondary: broader surfaces and advanced lanes
+## Secondary surfaces (after canonical confidence path)
 
 These remain available after the core release-confidence lane is trusted.
 
@@ -117,8 +127,9 @@ artifacts/     # generated evidence packs
 - Release process: [`RELEASE.md`](RELEASE.md)
 - Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)
 
-### See also (secondary, after core lane is stable)
+### Historical and transition-era references (secondary)
 
 - Compare against ad hoc workflows: [`docs/sdetkit-vs-ad-hoc.md`](docs/sdetkit-vs-ad-hoc.md)
 - Repo hygiene boundaries: [`docs/repo-cleanup-plan.md`](docs/repo-cleanup-plan.md)
 - Ongoing repo status view: [`docs/repo-health-dashboard.md`](docs/repo-health-dashboard.md)
+- Historical archive index: [`docs/archive/index.md`](docs/archive/index.md)

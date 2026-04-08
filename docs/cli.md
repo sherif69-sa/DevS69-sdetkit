@@ -1,6 +1,6 @@
 # CLI reference
 
-This page is the **current CLI reference for command discovery**.
+This page is the **current CLI reference for command discovery** and mirrors the front-door product story.
 
 It intentionally prioritizes:
 
@@ -44,7 +44,7 @@ Available utility lanes include:
 
 ## Transition-era and legacy-oriented material
 
-Transition-era and archived lanes remain available for compatibility, but they are **not** first-time entrypoints:
+Transition-era and archived lanes remain available for compatibility, but they are **not** first-time entrypoints and should not dominate discovery:
 
 - `sdetkit playbooks`
 - archived transition commands and legacy compatibility lanes

@@ -18,7 +18,7 @@ class CommandFamilyContract:
 PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="release-confidence-canonical-path",
-        role="Primary first-time product surface for deterministic shipping readiness and release confidence.",
+        role="Primary first-time product surface for deterministic shipping readiness via one canonical command path.",
         stability_tier="Public / stable",
         first_time_recommended=True,
         transition_legacy_oriented=False,
@@ -26,7 +26,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     ),
     CommandFamilyContract(
         name="umbrella-kits",
-        role="Umbrella kits remain fully supported for expanded release, intelligence, integration, and forensics workflows.",
+        role="Umbrella kits are fully supported expansion surfaces for release, intelligence, integration, and forensics workflows.",
         stability_tier="Advanced but supported",
         first_time_recommended=False,
         transition_legacy_oriented=False,
@@ -77,7 +77,7 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     ),
     CommandFamilyContract(
         name="experimental-transition-lanes",
-        role="Transition-era and legacy-oriented lanes retained for compatibility.",
+        role="Transition-era and legacy-oriented lanes retained for compatibility and historical continuity.",
         stability_tier="Experimental / incubator",
         first_time_recommended=False,
         transition_legacy_oriented=True,

@@ -186,6 +186,34 @@ def test_policy_chain_contract_keeps_canonical_first_time_primary() -> None:
     assert "primary recommendation for legacy" not in policy_chain
 
 
+def test_front_door_story_alignment_across_readme_docs_and_cli_contract() -> None:
+    readme = Path("README.md").read_text(encoding="utf-8")
+    docs_home = Path("docs/index.md").read_text(encoding="utf-8")
+    command_surface = Path("docs/command-surface.md").read_text(encoding="utf-8")
+    cli_ref = Path("docs/cli.md").read_text(encoding="utf-8")
+    contract = Path("src/sdetkit/public_surface_contract.py").read_text(encoding="utf-8")
+
+    canonical_phrase = "deterministic ship/no-ship decisions with machine-readable evidence"
+    for text in (readme, docs_home):
+        assert canonical_phrase in text
+
+    canonical_commands = (
+        "`python -m sdetkit gate fast`",
+        "`python -m sdetkit gate release`",
+        "`python -m sdetkit doctor`",
+    )
+    for cmd in canonical_commands:
+        assert cmd in readme
+        assert cmd in docs_home
+        assert cmd in command_surface
+        assert cmd in cli_ref
+
+    assert "secondary" in readme.lower()
+    assert "product homepage/router" in docs_home
+    assert "archive index" in docs_home.lower()
+    assert "one canonical command path" in contract
+
+
 def test_cli_reference_keeps_current_surface_and_demotes_transition_appendix() -> None:
     cli_ref = Path("docs/cli.md").read_text(encoding="utf-8")
 

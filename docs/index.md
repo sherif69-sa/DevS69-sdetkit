@@ -1,10 +1,10 @@
 # Start here: deterministic release confidence
 
-DevS69 SDETKit gives engineering teams deterministic release go/no-go decisions with machine-readable evidence, using one repeatable command path from local to CI.
+DevS69 SDETKit is a release-confidence CLI: it gives engineering teams deterministic ship/no-ship decisions with machine-readable evidence, using one repeatable command path from local to CI.
 
 ## What this is
 
-SDETKit is a release-confidence command path for engineering teams that need clear ship/no-ship decisions backed by structured artifacts.
+SDETKit is a productized release-confidence path for engineering teams that need clear ship/no-ship decisions backed by structured artifacts.
 
 ## Why trust it
 
@@ -69,10 +69,11 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 
 ## Secondary and advanced references
 
-Deep references, advanced integrations, and historical material remain available in navigation and are intentionally secondary to first-time adoption.
+This page is a product homepage/router, not a historical archive. Deep references, advanced integrations, and historical material remain available and are intentionally secondary to first-time adoption.
 
 If you need context after the canonical first-proof path is working:
 - New contributor? Start with the safe-first lane in [Contributing](contributing.md#first-trustworthy-contribution-safe-first-lane).
 - [SDETKit vs ad hoc tooling](sdetkit-vs-ad-hoc.md)
 - [Repo cleanup plan](repo-cleanup-plan.md)
 - [Repo health dashboard](repo-health-dashboard.md)
+- [Archive index](archive/index.md)
