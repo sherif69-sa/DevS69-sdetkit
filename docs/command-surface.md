@@ -2,6 +2,8 @@
 
 SDETKit's public command surface is organized for one coherent product story: release-confidence shipping readiness via one canonical first path.
 
+Primary outcome: know if a change is ready to ship.
+
 1. canonical public/stable first-time path,
 2. advanced but supported expansion lanes,
 3. compatibility and transition-era lanes kept available but secondary.
@@ -14,7 +16,7 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 
 | Command family | Purpose | Stability tier | First-time adopter default? | Transition-era / legacy-oriented? |
 |---|---|---|---|---|
-| `release-confidence-canonical-path` | Primary first-time product surface for deterministic shipping readiness via one canonical command path. | Public / stable | Yes | No |
+| `release-confidence-canonical-path` | Primary first-time product surface for deterministic shipping readiness; one primary outcome (know if a change is ready to ship) and one canonical command path. | Public / stable | Yes | No |
 | `umbrella-kits` | Umbrella kits are fully supported expansion surfaces for release, intelligence, integration, and forensics workflows. | Advanced but supported | No | No |
 | `compatibility-aliases` | Backward-compatible direct lanes preserved for existing automation and muscle memory. | Public / stable | No | No |
 | `supporting-utilities-and-automation` | Supporting utilities and automation lanes; useful but intentionally secondary to the canonical public/stable first-time path. | Advanced but supported | No | No |

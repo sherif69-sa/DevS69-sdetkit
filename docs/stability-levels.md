@@ -10,8 +10,8 @@ DevS69 SDETKit's flagship promise is:
 
 > **Deterministic release confidence / shipping readiness for software teams.**
 
-Primary outcome: decide if a change is ready to ship from explicit evidence.
-Primary first path: `gate fast` -> `gate release` -> `doctor`.
+Primary outcome: know if a change is ready to ship from explicit evidence.
+Canonical first path: `python -m sdetkit gate fast` -> `python -m sdetkit gate release` -> `python -m sdetkit doctor`.
 
 ## This page is a declaration, not a refactor
 

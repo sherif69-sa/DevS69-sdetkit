@@ -36,6 +36,16 @@ def test_readme_and_docs_home_share_primary_identity_language() -> None:
         assert marker in docs_home
 
 
+def test_front_door_pages_share_same_primary_outcome_sentence() -> None:
+    expected_outcome = "know if a change is ready to ship"
+    pages = (README, DOCS_INDEX, DOCS_CLI, DOCS_COMMAND_SURFACE, DOCS_VERSIONING)
+
+    for page in pages:
+        content = _text(page)
+        assert "Primary outcome" in content, f"missing primary outcome label in {page}"
+        assert expected_outcome in content, f"missing shared primary outcome phrase in {page}"
+
+
 
 def test_front_door_and_reference_docs_keep_canonical_path_obvious() -> None:
     pages = (README, DOCS_INDEX, DOCS_CLI, DOCS_COMMAND_SURFACE, DOCS_VERSIONING)

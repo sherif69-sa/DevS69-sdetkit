@@ -18,7 +18,7 @@ class CommandFamilyContract:
 PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
     CommandFamilyContract(
         name="release-confidence-canonical-path",
-        role="Primary first-time product surface for deterministic shipping readiness; one clear outcome and one canonical command path.",
+        role="Primary first-time product surface for deterministic shipping readiness; one primary outcome (know if a change is ready to ship) and one canonical command path.",
         stability_tier="Public / stable",
         first_time_recommended=True,
         transition_legacy_oriented=False,
