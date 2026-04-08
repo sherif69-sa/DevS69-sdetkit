@@ -7,6 +7,8 @@ If you want the same path with more guidance, use [First run quickstart](ready-t
 ## Canonical first-proof command path
 
 ```bash
+mkdir my-repo && cd my-repo
+git init
 python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
@@ -34,6 +36,11 @@ A first proof is accepted when all of the following are true:
 3. Both files expose `ok`, `failed_steps`, and `profile`.
 4. `build/release-preflight.json` is reviewed first, then `build/gate-fast.json` if needed.
 
+First-run trust is about inspectable outcomes, not guaranteed green status:
+- It is valid for `gate fast`/`gate release` to return non-zero on an unprepared blank repo.
+- It is **not** valid for commands to fail without JSON artifacts.
+- A trustworthy first run always leaves machine-readable triage artifacts with `ok`, `failed_steps`, and `profile`.
+
 ## What to do if the first run fails
 
 1. Open `build/release-preflight.json` first.
@@ -42,6 +49,16 @@ A first proof is accepted when all of the following are true:
 4. Re-run the same command path.
 
 For canonical decode rules, use [CI artifact walkthrough](ci-artifact-walkthrough.md).
+
+## Automated proof that this external path stays real
+
+From this repository root, run:
+
+```bash
+python -m pytest -q tests/test_external_first_run_contract.py
+```
+
+This test creates a temporary blank external repo, installs SDETKit in a clean virtual environment, runs the canonical path, and verifies artifact contracts.
 
 ## Next step after proof
 

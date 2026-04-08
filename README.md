@@ -20,9 +20,11 @@ Everything else (umbrella kits, utilities, historical/transition-era lanes) stay
 
 ## Canonical first proof lane (start here)
 
-Run this exact command path first:
+Run this exact command path first in a brand-new repository (not this repo):
 
 ```bash
+mkdir my-repo && cd my-repo
+git init
 python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
@@ -48,6 +50,15 @@ What success means:
 
 What failure means:
 - `ok: false` and/or non-empty `failed_steps` gives the first deterministic remediation target.
+- A non-zero exit code with JSON artifacts present is still a trustworthy first run: inspect `failed_steps` instead of treating it as a hidden crash.
+
+External first-run contract proof (automated):
+
+```bash
+python -m pytest -q tests/test_external_first_run_contract.py
+```
+
+This acceptance test creates a truly fresh temporary repo, installs SDETKit into a clean virtual environment, executes the canonical commands, and verifies artifact contracts.
 
 ```text
 $ cd examples/adoption/real-repo

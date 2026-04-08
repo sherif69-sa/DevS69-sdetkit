@@ -9,6 +9,7 @@ Release confidence means a repository can answer **"Is this ready to ship?"** wi
 ## Canonical command path (primary)
 
 ```bash
+python -m pip install "git+https://github.com/sherif69-sa/DevS69-sdetkit.git"
 python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json
 python -m sdetkit gate release --format json --out build/release-preflight.json
 python -m sdetkit doctor
@@ -37,6 +38,16 @@ Go/no-go support model:
 - `ok` gives deterministic pass/fail.
 - `failed_steps` gives first remediation targets.
 - `profile` confirms which lane produced the result.
+
+External-first-run trust model:
+- First run is considered trustworthy when commands always emit inspectable JSON artifacts, even when gates fail.
+- Missing artifacts are contract failures; failing gates with artifacts are expected triage behavior in many fresh repos.
+
+Automated contract guard:
+
+```bash
+python -m pytest -q tests/test_external_first_run_contract.py
+```
 
 ## Primary vs optional
 
