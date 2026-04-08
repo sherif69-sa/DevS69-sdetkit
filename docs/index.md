@@ -10,7 +10,7 @@ DevS69 SDETKit is a release-confidence CLI: it gives engineering teams determini
 
 SDETKit is a productized release-confidence path for engineering teams that need clear ship/no-ship decisions backed by structured artifacts.
 
-Everything else is intentionally secondary until this first proof lane is trusted.
+Everything else is intentionally secondary until this canonical first-proof lane is trusted.
 
 ## Why trust it
 
@@ -47,7 +47,7 @@ python -m sdetkit doctor
 3. [Release confidence explainer](release-confidence.md)
 
 If you want a guided run instead of the ultra-fast proof lane, use [First run quickstart](ready-to-use.md).
-For CLI-first orientation, run `python -m sdetkit --help` to see canonical path plus stability-tier grouping.
+For CLI-first orientation, run `python -m sdetkit --help` to see the same canonical path plus stability-tier grouping.
 Need compatibility-lane expectations? See [Versioning and support posture](versioning-and-support.md#canonical-path-vs-compatibility-lanes-visibility-policy).
 
 ## What artifacts appear

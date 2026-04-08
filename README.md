@@ -10,7 +10,7 @@ DevS69 SDETKit is a release-confidence CLI: it gives engineering teams determini
 
 SDETKit's primary user outcome is **shipping readiness confidence**: a team can decide go/no-go from explicit JSON evidence instead of ad hoc interpretation.
 
-In plain terms: one clear product identity, one outcome, one first path.
+In plain terms: one clear product identity, one primary outcome, one canonical first path.
 
 The primary path is always:
 
@@ -81,12 +81,12 @@ Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 - Very low-risk repos that do not need structured release evidence.
 - Teams that only want raw tool invocations with fully custom orchestration.
 
-## Start here
+## Start here (canonical first path)
 
 - Install (canonical): [`docs/install.md`](docs/install.md)
-- Blank repo proof in 60 seconds: [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
-- Guided run (same path): [`docs/ready-to-use.md`](docs/ready-to-use.md)
-- Release-confidence model (canonical): [`docs/release-confidence.md`](docs/release-confidence.md)
+- Blank repo proof in 60 seconds (recommended first run): [`docs/blank-repo-to-value-60-seconds.md`](docs/blank-repo-to-value-60-seconds.md)
+- Guided run (same canonical path): [`docs/ready-to-use.md`](docs/ready-to-use.md)
+- Release-confidence model (why this product exists): [`docs/release-confidence.md`](docs/release-confidence.md)
 - Root CLI grouping and canonical path view: `python -m sdetkit --help`
 - Stability levels (policy boundary): [`docs/stability-levels.md`](docs/stability-levels.md) — understand what is stable vs advanced vs experimental
 - Before/after evidence behavior: [`docs/before-after-evidence-example.md`](docs/before-after-evidence-example.md)
@@ -94,7 +94,7 @@ Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 
 ## Secondary surfaces (after canonical confidence path)
 
-These remain available after the core release-confidence lane is trusted.
+These remain available and supported after the core release-confidence lane is trusted, but they are intentionally not the front-door recommendation.
 
 ### Extended repo lanes
 

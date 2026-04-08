@@ -2,6 +2,10 @@
 
 This page is the **current CLI reference for command discovery** and mirrors the front-door product story: release confidence first, expansion second.
 
+**Primary outcome:** know if a change is ready to ship.
+
+**Canonical first path:** `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
+
 It intentionally prioritizes:
 
 1. the canonical public/stable first-time path,
