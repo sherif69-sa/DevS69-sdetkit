@@ -8,6 +8,24 @@ import pytest
 from sdetkit import docs_qa
 
 
+CANONICAL_FIRST_PROOF_DOCS = (
+    Path("README.md"),
+    Path("docs/index.md"),
+    Path("docs/blank-repo-to-value-60-seconds.md"),
+    Path("docs/ready-to-use.md"),
+    Path("docs/release-confidence.md"),
+    Path("docs/adoption.md"),
+    Path("docs/choose-your-path.md"),
+    Path("docs/real-repo-adoption.md"),
+)
+
+CANONICAL_FAST_COMMAND = "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
+CANONICAL_RELEASE_COMMAND = "python -m sdetkit gate release --format json --out build/release-preflight.json"
+NON_CANONICAL_RELEASE_STABLE_JSON = (
+    "python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json"
+)
+
+
 def _starter_inventory_text() -> str:
     return Path("docs/starter-work-inventory.md").read_text(encoding="utf-8")
 
@@ -235,3 +253,31 @@ def test_cli_reference_keeps_current_surface_and_demotes_transition_appendix() -
         "## docs-nav",
     ):
         assert appendix_heading not in cli_ref
+
+
+def test_canonical_public_docs_lock_first_proof_command_contract() -> None:
+    for path in CANONICAL_FIRST_PROOF_DOCS:
+        text = path.read_text(encoding="utf-8")
+        assert CANONICAL_FAST_COMMAND in text, f"missing canonical fast command in {path}"
+        assert (
+            CANONICAL_RELEASE_COMMAND in text
+        ), f"missing canonical release command in {path}"
+
+        assert (
+            NON_CANONICAL_RELEASE_STABLE_JSON not in text
+        ), f"non-supported release --stable-json drifted into {path}"
+
+
+def test_canonical_public_docs_lock_first_artifact_paths() -> None:
+    required_artifacts = ("build/gate-fast.json", "build/release-preflight.json")
+    for path in (
+        Path("README.md"),
+        Path("docs/index.md"),
+        Path("docs/blank-repo-to-value-60-seconds.md"),
+        Path("docs/ready-to-use.md"),
+        Path("docs/release-confidence.md"),
+        Path("docs/real-repo-adoption.md"),
+    ):
+        text = path.read_text(encoding="utf-8")
+        for artifact in required_artifacts:
+            assert artifact in text, f"missing canonical artifact path {artifact} in {path}"

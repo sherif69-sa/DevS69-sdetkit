@@ -31,7 +31,7 @@ This is a signal-producing gate, not a guaranteed-green onboarding command.
 ## Stage 2 — baseline release confidence
 
 ```bash
-python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json
+python -m sdetkit gate release --format json --out build/release-preflight.json
 ```
 
 Add security budgets once the team has agreement on thresholds:

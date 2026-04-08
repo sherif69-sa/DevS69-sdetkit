@@ -20,6 +20,11 @@ from real_repo_adoption_projection import (
 )
 GOLDEN_ROOT = REPO_ROOT / "artifacts" / "adoption" / "real-repo-golden"
 CANONICAL_REPLAY_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "adoption-real-repo-canonical.yml"
+CANONICAL_FAST_COMMAND = "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
+CANONICAL_RELEASE_COMMAND = "python -m sdetkit gate release --format json --out build/release-preflight.json"
+NON_CANONICAL_RELEASE_STABLE_JSON = (
+    "python -m sdetkit gate release --format json --stable-json --out build/release-preflight.json"
+)
 
 
 def test_real_repo_fixture_has_canonical_structure() -> None:
@@ -145,3 +150,17 @@ def test_canonical_replay_workflow_contract_is_stable() -> None:
         assert (
             f"examples/adoption/real-repo/{rel_path}" in upload_paths
         ), f"workflow drifted: missing uploaded artifact path for `{rel_path}`"
+
+
+def test_real_repo_proof_docs_and_goldens_match_canonical_command_contract() -> None:
+    real_repo_doc = (REPO_ROOT / "docs" / "real-repo-adoption.md").read_text(encoding="utf-8")
+    golden_readme = (GOLDEN_ROOT / "README.md").read_text(encoding="utf-8")
+
+    for text in (real_repo_doc, golden_readme):
+        assert CANONICAL_FAST_COMMAND in text
+        assert CANONICAL_RELEASE_COMMAND in text
+        assert NON_CANONICAL_RELEASE_STABLE_JSON not in text
+
+    assert "build/gate-fast.json" in real_repo_doc
+    assert "build/release-preflight.json" in real_repo_doc
+    assert "build/doctor.json" in real_repo_doc
