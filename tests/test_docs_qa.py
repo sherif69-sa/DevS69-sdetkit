@@ -184,3 +184,26 @@ def test_policy_chain_contract_keeps_canonical_first_time_primary() -> None:
     policy_chain = " ".join((stability, versioning, contract)).lower()
     assert "legacy-primary" not in policy_chain
     assert "primary recommendation for legacy" not in policy_chain
+
+
+def test_cli_reference_keeps_current_surface_and_demotes_transition_appendix() -> None:
+    cli_ref = Path("docs/cli.md").read_text(encoding="utf-8")
+
+    assert "## Canonical first-time path (public / stable)" in cli_ref
+    assert "`python -m sdetkit gate fast`" in cli_ref
+    assert "`python -m sdetkit gate release`" in cli_ref
+    assert "`python -m sdetkit doctor`" in cli_ref
+    assert "## Stability-aware command discovery" in cli_ref
+    assert "## Transition-era and legacy-oriented material" in cli_ref
+
+    for appendix_heading in (
+        "## reliability-evidence-pack",
+        "## objection-handling",
+        "## release-readiness",
+        "## startup-readiness",
+        "## enterprise-readiness",
+        "## release-communications",
+        "## trust-assets",
+        "## docs-nav",
+    ):
+        assert appendix_heading not in cli_ref

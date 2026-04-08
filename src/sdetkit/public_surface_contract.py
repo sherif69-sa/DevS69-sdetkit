@@ -88,7 +88,14 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
 
 def render_root_help_groups() -> str:
     """Render concise command-family guidance for root CLI help text."""
-    lines = ["Command groups:", ""]
+    lines = [
+        "Command discovery (stability-aware):",
+        "",
+        "  Canonical first-time path (public / stable):",
+        "    python -m sdetkit gate fast -> gate release -> doctor",
+        "",
+        "  Then expand deliberately:",
+    ]
     for family in PUBLIC_SURFACE_CONTRACT:
         name = family.name.replace("-", " ")
         lines.append(
@@ -99,6 +106,5 @@ def render_root_help_groups() -> str:
         lines.append(f"    {family.role}")
         lines.append(f"    {', '.join(family.top_level_commands)}")
         lines.append("")
-    lines.append("Start with: python -m sdetkit gate fast -> gate release -> doctor")
-    lines.append("Then expand (advanced): python -m sdetkit kits list")
+    lines.append("Next step (advanced but supported): python -m sdetkit kits list")
     return "\n".join(lines)
