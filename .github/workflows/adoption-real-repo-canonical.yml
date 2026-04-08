@@ -7,6 +7,11 @@ on:
       - "examples/adoption/real-repo/**"
       - "artifacts/adoption/real-repo-golden/**"
       - "docs/real-repo-adoption.md"
+      - "docs/ci-artifact-walkthrough.md"
+      - "scripts/regenerate_real_repo_adoption_goldens.py"
+      - "scripts/real_repo_adoption_projection.py"
+      - "tests/test_real_repo_adoption_contracts.py"
+      - "tests/test_real_repo_adoption_regen_helper.py"
       - ".github/workflows/adoption-real-repo-canonical.yml"
 
 permissions:
@@ -43,6 +48,12 @@ jobs:
           python -m sdetkit doctor --format json --out build/doctor.json
           echo $? > build/doctor.rc
 
+          python ../../../scripts/real_repo_adoption_projection.py \
+            --fixture-root . \
+            --repo-root ../../.. \
+            --build-dir build \
+            --out build/adoption-proof-summary.json
+
           set -e
 
       - name: Upload canonical replay artifacts
@@ -57,4 +68,5 @@ jobs:
             examples/adoption/real-repo/build/gate-fast.rc
             examples/adoption/real-repo/build/release-preflight.rc
             examples/adoption/real-repo/build/doctor.rc
+            examples/adoption/real-repo/build/adoption-proof-summary.json
           if-no-files-found: error
