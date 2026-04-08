@@ -1,6 +1,6 @@
 # CLI reference
 
-This page is the **current CLI reference for command discovery** and mirrors the front-door product story.
+This page is the **current CLI reference for command discovery** and mirrors the front-door product story: release confidence first, expansion second.
 
 It intentionally prioritizes:
 
@@ -16,7 +16,7 @@ Use this exact sequence first:
 2. `python -m sdetkit gate release`
 3. `python -m sdetkit doctor`
 
-This is the primary product path for first-time adoption and release-confidence proof.
+This is the primary product path for first-time adoption and release-confidence proof. If a new visitor remembers only one thing, it should be this exact path.
 
 ## Stability-aware command discovery
 

@@ -1,6 +1,6 @@
 # Command surface inventory (stability-aware)
 
-SDETKit's public command surface is organized for one coherent product story:
+SDETKit's public command surface is organized for one coherent product story: release-confidence shipping readiness via one canonical first path.
 
 1. canonical public/stable first-time path,
 2. advanced but supported expansion lanes,
@@ -29,7 +29,7 @@ This table is sourced from `src/sdetkit/public_surface_contract.py`.
 2. `python -m sdetkit gate release`
 3. `python -m sdetkit doctor`
 
-## Expansion and compatibility (secondary to first proof)
+## Expansion and compatibility (intentionally secondary to first proof)
 
 - Advanced kits and discovery: `sdetkit kits list`, `sdetkit kits describe <kit>`, then `release`, `intelligence`, `integration`, `forensics`
 - Compatibility aliases: `gate`, `doctor`, `security`, `repo`, `evidence`, `report`, `policy`

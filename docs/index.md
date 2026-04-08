@@ -2,9 +2,15 @@
 
 DevS69 SDETKit is a release-confidence CLI: it gives engineering teams deterministic ship/no-ship decisions with machine-readable evidence, using one repeatable command path from local to CI.
 
+**Primary outcome:** know if a change is ready to ship.
+
+**Canonical first path:** `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
+
 ## What this is
 
 SDETKit is a productized release-confidence path for engineering teams that need clear ship/no-ship decisions backed by structured artifacts.
+
+Everything else is intentionally secondary until this first proof lane is trusted.
 
 ## Why trust it
 
