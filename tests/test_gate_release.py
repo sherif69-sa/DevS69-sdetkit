@@ -122,3 +122,29 @@ def test_gate_release_dry_run_normalizes_commands(monkeypatch, tmp_path: Path, c
     cmds = [step["cmd"] for step in payload["steps"]]
     assert all(cmd[0] == "python" for cmd in cmds)
     assert any("<repo>" in tok for tok in cmds[-1])
+
+
+def test_gate_release_adds_recommendation_for_failed_step(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        is_gate_fast = cmd[3:5] == ["gate", "fast"]
+        return {
+            "cmd": cmd,
+            "rc": 1 if is_gate_fast else 0,
+            "ok": not is_gate_fast,
+            "duration_ms": 1,
+            "stdout": "",
+            "stderr": "failed",
+        }
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(["release", "--format", "json"])
+    assert rc == 2
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["failed_steps"] == ["gate_fast"]
+    assert payload["recommendations"] == [
+        "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json."
+    ]

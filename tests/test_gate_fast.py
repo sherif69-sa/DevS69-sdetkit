@@ -238,3 +238,30 @@ def test_gate_fast_full_pytest_uses_entire_suite(monkeypatch, tmp_path: Path, ca
     assert rc == 0
     _ = json.loads(capsys.readouterr().out)
     assert calls[0][3:] == ["-q"]
+
+
+def test_gate_fast_adds_recommendation_for_missing_pytest(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    def fake_run(cmd: list[str], cwd: Path) -> dict[str, object]:
+        return {
+            "cmd": cmd,
+            "rc": 1,
+            "ok": False,
+            "duration_ms": 1,
+            "stdout": "",
+            "stderr": "/usr/bin/python: No module named 'pytest'",
+        }
+
+    monkeypatch.setattr(gate, "_run", fake_run)
+    monkeypatch.chdir(tmp_path)
+
+    rc = gate.main(
+        ["fast", "--format", "json", "--no-doctor", "--no-ci-templates", "--no-ruff", "--no-mypy"]
+    )
+    assert rc == 2
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["failed_steps"] == ["pytest"]
+    assert payload["recommendations"] == [
+        "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
+    ]
