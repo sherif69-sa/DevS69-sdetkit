@@ -265,3 +265,26 @@ def test_gate_fast_adds_recommendation_for_missing_pytest(
     assert payload["recommendations"] == [
         "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
     ]
+
+
+def test_gate_fast_fails_when_no_steps_are_enabled(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    proc = _run_sdetkit(
+        repo_root,
+        tmp_path,
+        "gate",
+        "fast",
+        "--format",
+        "json",
+        "--only",
+        "doctor",
+        "--skip",
+        "doctor",
+    )
+    assert proc.returncode == 2
+    payload = json.loads(proc.stdout)
+    assert payload["ok"] is False
+    assert payload["failed_steps"] == ["configuration"]
+    assert payload["steps"] == []
+    assert payload["recommendations"][0].startswith("No gate steps are enabled.")
+
