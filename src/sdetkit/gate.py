@@ -121,6 +121,10 @@ def _format_text(payload: dict[str, Any]) -> str:
         lines.append("failed_steps:")
         for s in payload["failed_steps"]:
             lines.append(f"- {s}")
+    if payload.get("recommendations"):
+        lines.append("recommendations:")
+        for item in payload["recommendations"]:
+            lines.append(f"- {item}")
     return "\n".join(lines) + "\n"
 
 
@@ -143,7 +147,55 @@ def _format_md(payload: dict[str, Any]) -> str:
         lines.append("#### Failed steps")
         for s in payload["failed_steps"]:
             lines.append(f"- `{s}`")
+    if payload.get("recommendations"):
+        lines.append("")
+        lines.append("#### Recommendations")
+        for item in payload["recommendations"]:
+            lines.append(f"- {item}")
     return "\n".join(lines) + "\n"
+
+
+def _contains_missing_module(step: dict[str, Any], module_name: str) -> bool:
+    stderr = str(step.get("stderr", ""))
+    stdout = str(step.get("stdout", ""))
+    marker = f"No module named {module_name!r}"
+    return marker in stderr or marker in stdout
+
+
+def _fast_recommendations(steps: list[dict[str, Any]], failed_steps: list[str]) -> list[str]:
+    recommendations: list[str] = []
+    for step in steps:
+        step_id = str(step.get("id", ""))
+        if step_id not in failed_steps:
+            continue
+        if step_id in {"ruff_fix", "ruff_format_apply", "ruff", "ruff_format"} and _contains_missing_module(
+            step, "ruff"
+        ):
+            recommendations.append(
+                "Ruff is missing in this environment. Install dev tooling: python -m pip install -e .[dev,test]."
+            )
+            continue
+        if step_id == "mypy" and _contains_missing_module(step, "mypy"):
+            recommendations.append(
+                "Mypy is missing in this environment. Install dev tooling: python -m pip install -e .[dev,test]."
+            )
+            continue
+        if step_id == "pytest" and _contains_missing_module(step, "pytest"):
+            recommendations.append(
+                "Pytest is missing in this environment. Install test tooling: python -m pip install -e .[test]."
+            )
+            continue
+        if step_id == "doctor":
+            recommendations.append(
+                "Inspect doctor evidence first: python -m sdetkit doctor --format json --out build/doctor.json."
+            )
+            continue
+        if step_id == "ci_templates":
+            recommendations.append(
+                "Validate your CI templates under templates/ci or skip this step with --skip ci_templates."
+            )
+            continue
+    return list(dict.fromkeys(recommendations))
 
 
 def _run_fast(ns: argparse.Namespace) -> int:
@@ -283,6 +335,9 @@ def _run_fast(ns: argparse.Namespace) -> int:
         "failed_steps": failed,
         "steps": steps,
     }
+    recommendations = _fast_recommendations(steps, failed)
+    if recommendations:
+        payload["recommendations"] = recommendations
 
     if ns.format == "json":
         if getattr(ns, "stable_json", False):
@@ -344,7 +399,20 @@ def _format_release_text(payload: dict[str, Any]) -> str:
         lines.append("failed_steps:")
         for item in payload["failed_steps"]:
             lines.append(f"- {item}")
+    if payload.get("recommendations"):
+        lines.append("recommendations:")
+        for item in payload["recommendations"]:
+            lines.append(f"- {item}")
     return "\n".join(lines) + "\n"
+
+
+def _release_recommendations(failed_steps: list[str]) -> list[str]:
+    mapping = {
+        "doctor_release": "Inspect release readiness output: python -m sdetkit doctor --release --format json --out build/doctor-release.json.",
+        "playbooks_validate": "Run playbook validation directly for details: python -m sdetkit playbooks validate --recommended --format json.",
+        "gate_fast": "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json.",
+    }
+    return [mapping[s] for s in failed_steps if s in mapping]
 
 
 def _normalize_release_steps(steps: list[dict[str, Any]], root: Path) -> list[dict[str, Any]]:
@@ -422,6 +490,9 @@ def _run_release(ns: argparse.Namespace) -> int:
         "failed_steps": failed,
         "steps": steps,
     }
+    recommendations = _release_recommendations(failed)
+    if recommendations:
+        payload["recommendations"] = recommendations
 
     rendered = (
         json.dumps(payload, sort_keys=True) + "\n"
