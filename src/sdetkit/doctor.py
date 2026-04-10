@@ -40,6 +40,10 @@ CHECK_ORDER = [
 SCHEMA_VERSION = "sdetkit.doctor.v2"
 EXIT_OK = 0
 EXIT_FAILED = 2
+EVIDENCE_SCHEMA_VERSION = "sdetkit.doctor.evidence.v2"
+EVIDENCE_MANIFEST_SCHEMA_VERSION = "sdetkit.doctor.evidence.manifest.v1"
+EVIDENCE_PROFILES = ("ci", "release", "full")
+EVIDENCE_INCLUDES = ("failed", "actionable", "all")
 
 SUPPORTED_POLICY_CHECKS = {
     "ascii",
@@ -1502,7 +1506,7 @@ def _evidence_diagnostics_rows(checks: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _structured_recommendations(data: dict[str, Any]) -> list[dict[str, Any]]:
     recs: list[dict[str, Any]] = []
-    for item in data.get("next_actions", []):
+    for priority, item in enumerate(data.get("next_actions", []), start=1):
         if not isinstance(item, dict):
             continue
         fixes = item.get("fix", [])
@@ -1514,13 +1518,85 @@ def _structured_recommendations(data: dict[str, Any]) -> list[dict[str, Any]]:
         recs.append(
             {
                 "check_id": str(item.get("id", "")),
+                "priority": priority,
+                "purpose": str(item.get("summary", "")),
                 "severity": str(item.get("severity", "medium")),
                 "summary": str(item.get("summary", "")),
+                "suggested_command": commands[0] if commands else "",
                 "commands": commands[:3],
                 "actions": fix_list[:5],
+                "related_checks": [str(item.get("id", ""))] if item.get("id") else [],
+                "related_evidence_refs": [],
             }
         )
+    evidence_refs = data.get("evidence_refs_by_check", {})
+    if isinstance(evidence_refs, dict):
+        for rec in recs:
+            check_id = str(rec.get("check_id", ""))
+            refs = evidence_refs.get(check_id, [])
+            if not isinstance(refs, list):
+                continue
+            rec["related_evidence_refs"] = sorted(str(ref) for ref in refs if str(ref).strip())[:5]
     return recs
+
+
+def _select_evidence_rows(
+    *,
+    profile: str,
+    include: str,
+    failed_checks: list[dict[str, Any]],
+    passing_controls: list[dict[str, Any]],
+    diagnostics_rows: list[dict[str, Any]],
+    structured_recommendations: list[dict[str, Any]],
+    evidence_refs: list[dict[str, str]],
+) -> dict[str, Any]:
+    failed_ids = {str(row.get("id", "")) for row in failed_checks}
+    actionable_ids = {
+        str(row.get("check_id", ""))
+        for row in structured_recommendations
+        if str(row.get("check_id", "")).strip()
+    }
+    if not actionable_ids:
+        actionable_ids = set(failed_ids)
+    selected_ids = set(failed_ids)
+    include_pass_controls = True
+    include_recommendations = True
+    if include == "failed":
+        include_pass_controls = False
+        include_recommendations = False
+    elif include == "actionable":
+        selected_ids = actionable_ids
+    elif include == "all":
+        selected_ids = {
+            str(row.get("id", ""))
+            for row in diagnostics_rows
+            if str(row.get("id", "")).strip()
+        }
+    if profile == "ci":
+        allowed = {"pyproject", "ci_workflows", "security_files", "pre_commit", "deps", "clean_tree"}
+        selected_ids = {check_id for check_id in selected_ids if check_id in allowed}
+    elif profile == "release":
+        allowed = {"pyproject", "clean_tree", "release_meta", "repo_readiness", "upgrade_audit", "ci_workflows"}
+        selected_ids = {check_id for check_id in selected_ids if check_id in allowed}
+    filtered_failed = [row for row in failed_checks if row.get("id") in selected_ids]
+    filtered_controls = [row for row in passing_controls if row.get("id") in selected_ids]
+    filtered_diag = [row for row in diagnostics_rows if row.get("id") in selected_ids]
+    filtered_recs = [
+        row for row in structured_recommendations if str(row.get("check_id", "")) in selected_ids
+    ]
+    filtered_refs = [row for row in evidence_refs if row.get("check_id") in selected_ids]
+    if not include_pass_controls:
+        filtered_controls = []
+    if not include_recommendations:
+        filtered_recs = []
+    return {
+        "failed_checks": filtered_failed,
+        "passing_controls": filtered_controls,
+        "diagnostics_rows": filtered_diag,
+        "structured_recommendations": filtered_recs,
+        "evidence_refs": filtered_refs,
+        "selected_check_ids": sorted(selected_ids),
+    }
 
 
 def _surface_consistency(data: dict[str, Any], checks: dict[str, Any]) -> dict[str, Any]:
@@ -1588,7 +1664,9 @@ def _surface_consistency(data: dict[str, Any], checks: dict[str, Any]) -> dict[s
     }
 
 
-def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tuple[bool, str]:
+def _write_evidence(
+    root: Path, evidence_dir: Path, data: dict[str, Any], *, profile: str, include: str
+) -> tuple[bool, str]:
     quality = data.get("quality", {})
     checks = data.get("checks", {})
     selected = data.get("selected_checks", [])
@@ -1606,6 +1684,7 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
     failed_checks: list[dict[str, Any]] = []
     passing_controls: list[dict[str, Any]] = []
     evidence_refs: list[dict[str, str]] = []
+    evidence_refs_by_check: dict[str, list[str]] = {}
 
     for check_id in CHECK_ORDER:
         item = checks.get(check_id)
@@ -1626,6 +1705,7 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
                 continue
             path = str(ev.get("path", "")).strip()
             if path:
+                evidence_refs_by_check.setdefault(check_id, []).append(path)
                 evidence_refs.append(
                     {
                         "check_id": check_id,
@@ -1642,12 +1722,24 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
         )
 
     diagnostics_rows = _evidence_diagnostics_rows(checks)
+    data["evidence_refs_by_check"] = evidence_refs_by_check
     structured_recommendations = _structured_recommendations(data)
     surface_consistency = _surface_consistency(data, checks)
+    filtered = _select_evidence_rows(
+        profile=profile,
+        include=include,
+        failed_checks=failed_checks,
+        passing_controls=passing_controls,
+        diagnostics_rows=diagnostics_rows,
+        structured_recommendations=structured_recommendations,
+        evidence_refs=evidence_refs,
+    )
 
     evidence_payload = {
-        "schema_version": "sdetkit.doctor.evidence.v1",
+        "schema_version": EVIDENCE_SCHEMA_VERSION,
         "doctor_schema_version": data.get("schema_version"),
+        "profile": profile,
+        "include": include,
         "ok": bool(data.get("ok")),
         "score": int(data.get("score", 0)),
         "policy": data.get("policy", {}),
@@ -1660,20 +1752,22 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
             "skipped_checks": int(quality.get("skipped_checks", 0)),
             "highest_failure_severity": str(quality.get("highest_failure_severity", "none")),
         },
-        "failed_checks": failed_checks,
-        "passing_controls": passing_controls,
+        "failed_checks": filtered["failed_checks"],
+        "passing_controls": filtered["passing_controls"],
         "next_commands": next_commands,
-        "structured_recommendations": structured_recommendations,
-        "diagnostics_rows": diagnostics_rows,
+        "structured_recommendations": filtered["structured_recommendations"],
+        "diagnostics_rows": filtered["diagnostics_rows"],
         "surface_consistency": surface_consistency,
         "evidence_refs": sorted(
-            evidence_refs,
+            filtered["evidence_refs"],
             key=lambda item: (item["check_id"], item["path"], item["message"]),
         ),
+        "selected_check_ids": filtered["selected_check_ids"],
         "artifacts": {
             "doctor_output": str(data.get("output_path", "")),
             "evidence_json": "doctor-evidence.json",
             "evidence_markdown": "doctor-evidence.md",
+            "evidence_manifest": "doctor-evidence-manifest.json",
         },
     }
 
@@ -1691,16 +1785,16 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
         "",
         "## Failed checks",
     ]
-    if failed_checks:
-        for row in failed_checks:
+    if evidence_payload["failed_checks"]:
+        for row in evidence_payload["failed_checks"]:
             evidence_lines.append(f"- `{row['id']}` ({row['severity']}): {row['summary']}")
     else:
         evidence_lines.append("- none")
 
     evidence_lines.append("")
     evidence_lines.append("## Stable passing controls")
-    if passing_controls:
-        for row in passing_controls:
+    if evidence_payload["passing_controls"]:
+        for row in evidence_payload["passing_controls"]:
             evidence_lines.append(f"- `{row['id']}` ({row['severity']}): {row['summary']}")
     else:
         evidence_lines.append("- none")
@@ -1717,7 +1811,7 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
     evidence_lines.append("## Diagnostics rows")
     evidence_lines.append("| Check | Status | Severity | Evidence | Actions |")
     evidence_lines.append("| --- | --- | --- | ---: | ---: |")
-    for row in diagnostics_rows:
+    for row in evidence_payload["diagnostics_rows"]:
         evidence_lines.append(
             f"| `{row['id']}` | {row['status']} | {row['severity']} | {row['evidence_count']} | {row['fix_count']} |"
         )
@@ -1746,14 +1840,56 @@ def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tup
                 f"- `{mismatch['check_id']}` / `{mismatch['field']}`: {mismatch['message']}"
             )
     evidence_lines.append("")
+    evidence_lines.append("## Evidence profile")
+    evidence_lines.append(f"- profile: `{profile}`")
+    evidence_lines.append(f"- include: `{include}`")
+    evidence_lines.append(
+        f"- selected checks: {', '.join(f'`{check_id}`' for check_id in evidence_payload['selected_check_ids']) or 'none'}"
+    )
+    evidence_lines.append("")
 
     evidence_dir.mkdir(parents=True, exist_ok=True)
+    manifest_payload = {
+        "schema_version": EVIDENCE_MANIFEST_SCHEMA_VERSION,
+        "doctor_schema_version": data.get("schema_version"),
+        "profile": profile,
+        "include": include,
+        "ok": bool(evidence_payload["ok"]),
+        "score": int(evidence_payload["score"]),
+        "summary": {
+            "selected_checks": len(evidence_payload["selected_check_ids"]),
+            "failed_checks": len(evidence_payload["failed_checks"]),
+            "passing_controls": len(evidence_payload["passing_controls"]),
+            "recommendations": len(evidence_payload["structured_recommendations"]),
+            "evidence_refs": len(evidence_payload["evidence_refs"]),
+        },
+        "artifacts": {
+            "doctor_output": str(data.get("output_path", "")),
+            "evidence_json": "doctor-evidence.json",
+            "evidence_markdown": "doctor-evidence.md",
+            "evidence_manifest": "doctor-evidence-manifest.json",
+        },
+        "ordering": {
+            "check_order_source": "sdetkit.doctor.CHECK_ORDER",
+            "evidence_refs_sorted_by": ["check_id", "path", "message"],
+            "structured_recommendations_sorted_by": ["priority", "check_id"],
+        },
+        "surface_consistency": {
+            "ok": bool(surface_consistency.get("ok", False)),
+            "mismatch_count": int(surface_consistency.get("mismatch_count", 0)),
+            "mismatches": list(surface_consistency.get("mismatches", []))[:5],
+        },
+    }
     (evidence_dir / "doctor-evidence.json").write_text(
         json.dumps(evidence_payload, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
     )
     (evidence_dir / "doctor-evidence.md").write_text(
         "\n".join(evidence_lines), encoding="utf-8"
+    )
+    (evidence_dir / "doctor-evidence-manifest.json").write_text(
+        json.dumps(manifest_payload, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
     )
     return True, ""
 
@@ -2096,6 +2232,18 @@ def main(argv: list[str] | None = None) -> int:
         dest="evidence_dir",
         default=None,
         help="Write doctor evidence files (doctor-evidence.json + doctor-evidence.md) to a target directory.",
+    )
+    parser.add_argument(
+        "--evidence-profile",
+        choices=list(EVIDENCE_PROFILES),
+        default="full",
+        help="Choose evidence density profile for doctor evidence output (default: full).",
+    )
+    parser.add_argument(
+        "--evidence-include",
+        choices=list(EVIDENCE_INCLUDES),
+        default="all",
+        help="Filter evidence output to failed, actionable, or all checks (default: all).",
     )
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
@@ -2680,7 +2828,13 @@ def main(argv: list[str] | None = None) -> int:
         data["output_path"] = ""
 
     if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
-        evidence_ok, evidence_error = _write_evidence(root, Path(ns.evidence_dir.strip()), data)
+        evidence_ok, evidence_error = _write_evidence(
+            root,
+            Path(ns.evidence_dir.strip()),
+            data,
+            profile=str(getattr(ns, "evidence_profile", "full")),
+            include=str(getattr(ns, "evidence_include", "all")),
+        )
         if not evidence_ok:
             if is_json:
                 fail_payload = {

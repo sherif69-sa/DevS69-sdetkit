@@ -77,8 +77,17 @@ def test_doctor_evidence_writes_json_and_markdown(tmp_path: Path, monkeypatch, c
     assert data["ok"] is False
     assert (evidence_dir / "doctor-evidence.json").exists()
     assert (evidence_dir / "doctor-evidence.md").exists()
+    assert (evidence_dir / "doctor-evidence-manifest.json").exists()
     evidence = json.loads((evidence_dir / "doctor-evidence.json").read_text(encoding="utf-8"))
-    assert evidence["schema_version"] == "sdetkit.doctor.evidence.v1"
+    manifest = json.loads(
+        (evidence_dir / "doctor-evidence-manifest.json").read_text(encoding="utf-8")
+    )
+    assert evidence["schema_version"] == "sdetkit.doctor.evidence.v2"
+    assert evidence["profile"] == "full"
+    assert evidence["include"] == "all"
+    assert manifest["schema_version"] == "sdetkit.doctor.evidence.manifest.v1"
+    assert manifest["profile"] == "full"
+    assert manifest["include"] == "all"
     assert evidence["failed_checks"]
     assert evidence["diagnostics_rows"]
     assert isinstance(evidence["structured_recommendations"], list)
@@ -94,6 +103,35 @@ def test_doctor_evidence_writes_json_and_markdown(tmp_path: Path, monkeypatch, c
         "answer",
     }
     assert forbidden.isdisjoint(set(evidence))
+
+
+def test_doctor_evidence_profile_and_include_filter(tmp_path: Path, monkeypatch, capsys):
+    root = tmp_path / "repo"
+    root.mkdir()
+    monkeypatch.chdir(root)
+
+    evidence_dir = root / "build" / "doctor-evidence"
+    rc = doctor.main(
+        [
+            "--ci",
+            "--json",
+            "--evidence-dir",
+            str(evidence_dir),
+            "--evidence-profile",
+            "ci",
+            "--evidence-include",
+            "failed",
+        ]
+    )
+    _ = json.loads(capsys.readouterr().out)
+
+    assert rc == 2
+    evidence = json.loads((evidence_dir / "doctor-evidence.json").read_text(encoding="utf-8"))
+    assert evidence["profile"] == "ci"
+    assert evidence["include"] == "failed"
+    assert evidence["passing_controls"] == []
+    assert evidence["structured_recommendations"] == []
+    assert all(row["id"] in {"ci_workflows", "security_files"} for row in evidence["failed_checks"])
 
 
 def test_doctor_evidence_fails_for_non_actionable_check_selection(tmp_path: Path, monkeypatch, capsys):
