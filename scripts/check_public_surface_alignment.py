@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -8,8 +9,10 @@ import yaml
 
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
+DOCS_STABILITY = Path("docs/stability-levels.md")
 MKDOCS = Path("mkdocs.yml")
 PAGES_WORKFLOW = Path(".github/workflows/pages.yml")
+PUBLIC_COMMAND_CONTRACT = Path("src/sdetkit/public_command_surface.json")
 
 CANONICAL_PROMISE = "deterministic ship/no-ship decisions with machine-readable evidence"
 CANONICAL_FAST_COMMAND = "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
@@ -31,7 +34,14 @@ def _missing_lines(path: Path, expected: tuple[str, ...]) -> list[str]:
 def main() -> int:
     errors: list[str] = []
 
-    required_files = (README, DOCS_INDEX, MKDOCS, PAGES_WORKFLOW)
+    required_files = (
+        README,
+        DOCS_INDEX,
+        DOCS_STABILITY,
+        MKDOCS,
+        PAGES_WORKFLOW,
+        PUBLIC_COMMAND_CONTRACT,
+    )
     for file_path in required_files:
         if not file_path.is_file():
             errors.append(f"missing required file: {file_path}")
@@ -42,13 +52,15 @@ def main() -> int:
             print(f" - {error}", file=sys.stderr)
         return 1
 
+    contract = json.loads(PUBLIC_COMMAND_CONTRACT.read_text(encoding="utf-8"))
+    canonical_path = tuple(contract.get("canonical_first_path", []))
+    required_tiers = tuple(contract.get("required_policy_tiers", []))
     readme_missing = _missing_lines(
         README,
         (
             "release-confidence CLI",
             CANONICAL_PROMISE,
-            CANONICAL_FAST_COMMAND,
-            CANONICAL_RELEASE_COMMAND,
+            *canonical_path,
         ),
     )
     docs_home_missing = _missing_lines(
@@ -57,12 +69,17 @@ def main() -> int:
             "release-confidence CLI",
             CANONICAL_PROMISE,
             "product homepage/router",
-            CANONICAL_FAST_COMMAND,
-            CANONICAL_RELEASE_COMMAND,
+            *canonical_path,
         ),
     )
     errors.extend(f"{README}: missing '{entry}'" for entry in readme_missing)
     errors.extend(f"{DOCS_INDEX}: missing '{entry}'" for entry in docs_home_missing)
+    if contract.get("advanced_supported_next_step") != "python -m sdetkit kits list":
+        errors.append("public command contract: advanced_supported_next_step must be 'python -m sdetkit kits list'")
+    stability_text = DOCS_STABILITY.read_text(encoding="utf-8")
+    for tier in required_tiers:
+        if tier not in stability_text:
+            errors.append(f"{DOCS_STABILITY}: missing policy tier '{tier}' from machine-readable contract")
 
     mkdocs_text = MKDOCS.read_text(encoding="utf-8")
     if "nav:" not in mkdocs_text:

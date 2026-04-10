@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 README = Path("README.md")
 DOCS_INDEX = Path("docs/index.md")
 DOCS_CLI = Path("docs/cli.md")

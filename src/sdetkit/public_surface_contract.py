@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
+from typing import cast
 
 
 @dataclass(frozen=True)
@@ -86,13 +89,36 @@ PUBLIC_SURFACE_CONTRACT: tuple[CommandFamilyContract, ...] = (
 )
 
 
+def load_public_command_surface_contract() -> dict[str, object]:
+    contract_path = Path(__file__).with_name("public_command_surface.json")
+    loaded = json.loads(contract_path.read_text(encoding="utf-8"))
+    if not isinstance(loaded, dict):
+        return {}
+    return cast(dict[str, object], loaded)
+
+
 def render_root_help_groups() -> str:
     """Render concise command-family guidance for root CLI help text."""
+    contract = load_public_command_surface_contract()
+    canonical_obj = contract.get(
+        "canonical_first_path",
+        [
+            "python -m sdetkit gate fast",
+            "python -m sdetkit gate release",
+            "python -m sdetkit doctor",
+        ],
+    )
+    canonical = canonical_obj if isinstance(canonical_obj, list) else []
+    next_step = contract.get("advanced_supported_next_step", "python -m sdetkit kits list")
+    canonical_summary = " -> ".join(
+        cmd.replace("python -m sdetkit ", "") if isinstance(cmd, str) else str(cmd)
+        for cmd in canonical
+    )
     lines = [
         "Command discovery (stability-aware):",
         "",
         "  Canonical first-time path (public / stable):",
-        "    python -m sdetkit gate fast -> gate release -> doctor",
+        f"    {canonical_summary}",
         "",
         "  Then expand deliberately:",
     ]
@@ -106,5 +132,5 @@ def render_root_help_groups() -> str:
         lines.append(f"    {family.role}")
         lines.append(f"    {', '.join(family.top_level_commands)}")
         lines.append("")
-    lines.append("Next step (advanced but supported): python -m sdetkit kits list")
+    lines.append(f"Next step (advanced but supported): {next_step}")
     return "\n".join(lines)

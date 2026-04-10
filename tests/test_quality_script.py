@@ -20,7 +20,7 @@ def test_quality_script_unknown_mode_suggests_closest_match() -> None:
 def test_quality_script_help_documents_fast_and_full_lanes() -> None:
     text = Path("quality.sh").read_text(encoding="utf-8")
     assert (
-        "Usage: bash quality.sh {all|ci|verify|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}"
+        "Usage: bash quality.sh {all|ci|verify|premerge|brutal|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}"
         in text
     )
     assert "quick     Fast local confidence / smoke profile." in text
@@ -35,6 +35,7 @@ def test_quality_script_help_documents_fast_and_full_lanes() -> None:
         "Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."
         in text
     )
+    assert "premerge   Strict changed-files gate (lint + typing + targeted tests)." in text
     assert "registry   Validate and smoke-test feature-registry docs/contracts surface." in text
 
 
@@ -58,6 +59,16 @@ def test_quality_script_ci_delegates_to_planner_runner() -> None:
     assert 'profile_used="quick"' in body
     assert "python -m sdetkit.checks run" in body
     assert "--profile quick" in body
+
+
+def test_quality_script_premerge_mode_runs_changed_file_gate() -> None:
+    text = Path("quality.sh").read_text(encoding="utf-8")
+    match = re.search(r"  premerge\)\n(?P<body>.*?    ;;)", text, re.DOTALL)
+    assert match is not None
+    body = match.group("body")
+    assert 'profile_used="strict"' in body
+    assert "run_premerge_changed" in body
+    assert "Changed-files pre-merge strict gate" in body
 
 
 def test_quality_script_writes_final_verdict_contract() -> None:

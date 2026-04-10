@@ -120,6 +120,12 @@ def _retry_after_seconds(headers: Any) -> float | None:
         return None
 
 
+def _normalized_timeout(timeout: float | httpx.Timeout | None) -> float | httpx.Timeout | None:
+    if isinstance(timeout, httpx.Timeout):
+        return timeout
+    return default_http_timeout(timeout)
+
+
 def _link_next_url(r: httpx.Response) -> str | None:
     link = r.headers.get("Link")
     if not link:
@@ -250,7 +256,7 @@ class SdetHttpClient:
                 if json is not None:
                     kwargs["json"] = json
                 r = self._client.request(
-                    method, url, timeout=default_http_timeout(timeout), **kwargs
+                    method, url, timeout=_normalized_timeout(timeout), **kwargs
                 )
             except httpx.TimeoutException as e:
                 if b is not None:
@@ -589,9 +595,9 @@ class SdetHttpClient:
 
             try:
                 if hdrs is None:
-                    r = self._client.get(url, timeout=default_http_timeout(timeout))
+                    r = self._client.get(url, timeout=_normalized_timeout(timeout))
                 else:
-                    r = self._client.get(url, headers=hdrs, timeout=default_http_timeout(timeout))
+                    r = self._client.get(url, headers=hdrs, timeout=_normalized_timeout(timeout))
             except httpx.TimeoutException as e:
                 if b is not None:
                     b.record_failure(self._clock())
@@ -887,10 +893,10 @@ class SdetAsyncHttpClient:
 
             try:
                 if hdrs is None:
-                    r = await self._client.get(url, timeout=default_http_timeout(timeout))
+                    r = await self._client.get(url, timeout=_normalized_timeout(timeout))
                 else:
                     r = await self._client.get(
-                        url, headers=hdrs, timeout=default_http_timeout(timeout)
+                        url, headers=hdrs, timeout=_normalized_timeout(timeout)
                     )
             except httpx.TimeoutException as e:
                 if b is not None:

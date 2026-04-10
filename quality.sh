@@ -39,11 +39,11 @@ need_cmd() {
   exit 127
 }
 
-valid_modes=(all ci verify brutal fmt lint type doctor test full-test cov mut muthtml boost registry help)
+valid_modes=(all ci verify premerge brutal fmt lint type doctor test full-test cov mut muthtml boost registry help)
 
 usage() {
   cat <<'USAGE' >&2
-Usage: bash quality.sh {all|ci|verify|brutal|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}
+Usage: bash quality.sh {all|ci|verify|premerge|brutal|fmt|lint|type|doctor|test|full-test|cov|mut|muthtml|boost|registry}
 
 Profiles:
   quick     Fast local confidence / smoke profile.
@@ -54,6 +54,7 @@ Profiles:
 Modes:
   ci         Fast/smoke lane for local confidence; not merge truth.
   verify     Full verification lane before merge (doctor, format, lint, typing, full tests, security scan).
+  premerge   Strict changed-files gate (lint + typing + targeted tests).
   brutal     Maximum hardening lane (strict verify + mutation + premium full gate).
   all        Standard repo validation lane (auto-format, lint, typing, pytest, coverage).
   fmt        Apply Ruff formatting.
@@ -189,6 +190,56 @@ run_registry_contract() {
     --expect-status-count stable=8 \
     --fail-on-empty \
     --format summary-json >/dev/null
+}
+
+run_premerge_changed() {
+  local base_ref="${QUALITY_DIFF_BASE:-HEAD~1}"
+  local changed=""
+
+  if git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
+    changed="$(git diff --name-only --diff-filter=ACMRTUXB "$base_ref" HEAD || true)"
+  fi
+  if [[ -z "$changed" ]]; then
+    changed="$(git ls-files '*.py' pyproject.toml || true)"
+  fi
+
+  local -a lint_targets=()
+  local -a type_targets=()
+  local -a test_targets=()
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    if [[ "$f" == *.py || "$f" == "pyproject.toml" ]]; then
+      lint_targets+=("$f")
+    fi
+    if [[ "$f" == src/sdetkit/*.py ]]; then
+      type_targets+=("$f")
+      local stem
+      stem="$(basename "$f" .py)"
+      local mapped_test="tests/test_${stem}.py"
+      if [[ -f "$mapped_test" ]]; then
+        test_targets+=("$mapped_test")
+      fi
+    fi
+  done <<< "$changed"
+
+  if (( ${#lint_targets[@]} > 0 )); then
+    python -m ruff check "${lint_targets[@]}"
+  else
+    echo "[premerge] no lint targets detected"
+  fi
+
+  if (( ${#type_targets[@]} > 0 )); then
+    python -m mypy --config-file pyproject.toml "${type_targets[@]}"
+  else
+    echo "[premerge] no typed src targets detected"
+  fi
+
+  if (( ${#test_targets[@]} > 0 )); then
+    python -m pytest -q "${test_targets[@]}"
+  else
+    echo "[premerge] no mapped tests detected; running contract smoke"
+    python -m pytest -q tests/test_cli_help_discoverability_contract.py
+  fi
 }
 
 SDETKIT_OUT_DIR="${SDETKIT_OUT_DIR:-.sdetkit/out}"
@@ -401,6 +452,11 @@ case "$mode" in
     echo "[quality] Full verification lane before merge (doctor, format, lint, typing, full tests, security scan)."
     python -m sdetkit.checks run       --profile strict       --repo-root .       --out-dir "$SDETKIT_OUT_DIR"       --format text       --json-output "$QUALITY_VERDICT_JSON"       --markdown-output "$QUALITY_SUMMARY_MD"
     exit $?
+    ;;
+  premerge)
+    profile_used="strict"
+    profile_notes="Changed-files pre-merge strict gate: lint + typing + targeted tests."
+    run_required "premerge_changed" "Changed-files pre-merge strict gate" 1 "run_premerge_changed"
     ;;
   brutal)
     profile_used="strict"
