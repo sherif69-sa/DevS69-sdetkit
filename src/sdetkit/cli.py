@@ -231,6 +231,11 @@ Then use stability-aware command discovery:
     _add_passthrough_subcommand(
         sub, "kv", help_text="Utility: parse key=value input into JSON (supporting surface)"
     )
+    _add_passthrough_subcommand(
+        sub,
+        "inspect",
+        help_text="[Advanced but supported] Inspect CSV/JSON evidence inputs for operational diagnostics",
+    )
 
     ag = sub.add_parser("apiget", help="Deterministic HTTP JSON fetch and replay helper")
     _add_apiget_args(ag)
@@ -1213,6 +1218,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if ns.cmd == "kv":
         return _run_module_main("sdetkit.kvcli", ns.args)
+
+    if ns.cmd == "inspect":
+        return _run_module_main("sdetkit.inspect_data", ns.args)
 
     if ns.cmd == "patch":
         return _run_module_main("sdetkit.patch", ns.args)

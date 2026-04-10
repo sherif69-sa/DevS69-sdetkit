@@ -1,0 +1,393 @@
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import sys
+from collections import Counter
+from pathlib import Path
+from typing import Any
+
+SCHEMA_VERSION = "sdetkit.inspect.v1"
+EXIT_OK = 0
+EXIT_FINDINGS = 2
+SUPPORTED_EXTENSIONS = {".csv", ".json"}
+
+
+def _safe_slug(value: str) -> str:
+    out = []
+    for ch in value.lower():
+        if ch.isalnum() or ch in {"-", "_", "."}:
+            out.append(ch)
+        else:
+            out.append("-")
+    slug = "".join(out).strip("-")
+    return slug or "input"
+
+
+def _read_json_records(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
+    notes: list[str] = []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if isinstance(payload, list):
+        rows = [row for row in payload if isinstance(row, dict)]
+        dropped = len(payload) - len(rows)
+        if dropped:
+            notes.append(f"dropped {dropped} non-object records from top-level array")
+        return rows, notes
+    if isinstance(payload, dict):
+        if isinstance(payload.get("records"), list):
+            records = payload["records"]
+            rows = [row for row in records if isinstance(row, dict)]
+            dropped = len(records) - len(rows)
+            if dropped:
+                notes.append(f"dropped {dropped} non-object records under records key")
+            return rows, notes
+        return [payload], notes
+    raise ValueError("JSON input must be an object, an array of objects, or include records[].")
+
+
+def _read_csv_records(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
+    notes: list[str] = []
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows = [dict(row) for row in reader]
+        if reader.fieldnames is None:
+            notes.append("csv has no header row")
+    return rows, notes
+
+
+def _row_fingerprint(row: dict[str, Any]) -> str:
+    stable = json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(stable.encode("utf-8")).hexdigest()
+
+
+def _missing(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip() == ""
+    return False
+
+
+def _infer_type_tag(value: Any) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int) and not isinstance(value, bool):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        stripped = value.strip()
+        if stripped == "":
+            return "empty"
+        if stripped.isdigit() or (stripped.startswith("-") and stripped[1:].isdigit()):
+            return "numeric_string"
+        return "string"
+    if isinstance(value, list):
+        return "array"
+    if isinstance(value, dict):
+        return "object"
+    return type(value).__name__
+
+
+def _find_record_id_field(rows: list[dict[str, Any]]) -> str | None:
+    if not rows:
+        return None
+    preferred = ("id", "record_id", "user_id", "order_id", "account_id")
+    keys = set().union(*(row.keys() for row in rows if isinstance(row, dict)))
+    for field in preferred:
+        if field in keys:
+            return field
+    return None
+
+
+def _analyze_file(path: Path) -> dict[str, Any]:
+    ext = path.suffix.lower()
+    if ext == ".csv":
+        rows, notes = _read_csv_records(path)
+        source_kind = "csv"
+    elif ext == ".json":
+        rows, notes = _read_json_records(path)
+        source_kind = "json"
+    else:
+        raise ValueError(f"unsupported file extension: {path.suffix}")
+
+    columns = sorted(set().union(*(row.keys() for row in rows))) if rows else []
+
+    missing_counts: dict[str, int] = {col: 0 for col in columns}
+    type_tags: dict[str, Counter[str]] = {col: Counter() for col in columns}
+    suspicious_rows: list[dict[str, Any]] = []
+
+    row_hashes: Counter[str] = Counter()
+    row_hash_to_index: dict[str, int] = {}
+
+    for idx, row in enumerate(rows):
+        row_hash = _row_fingerprint(row)
+        row_hashes[row_hash] += 1
+        row_hash_to_index.setdefault(row_hash, idx)
+
+        row_issues: list[str] = []
+        for col in columns:
+            value = row.get(col)
+            if _missing(value):
+                missing_counts[col] += 1
+            type_tags[col][_infer_type_tag(value)] += 1
+
+            if isinstance(value, str):
+                if value != value.strip():
+                    row_issues.append(f"{col}: leading_or_trailing_whitespace")
+                if any(ord(ch) < 32 and ch not in {"\t", "\n", "\r"} for ch in value):
+                    row_issues.append(f"{col}: control_characters")
+
+        if row_issues:
+            suspicious_rows.append(
+                {
+                    "row_index": idx,
+                    "issues": sorted(set(row_issues)),
+                    "record_preview": {k: row.get(k) for k in columns[:4]},
+                }
+            )
+
+    duplicate_rows = [
+        {
+            "row_index": row_hash_to_index[h],
+            "duplicate_count": c,
+            "fingerprint": h,
+        }
+        for h, c in sorted(row_hashes.items())
+        if c > 1
+    ]
+
+    missing_columns = [
+        {"column": col, "missing_count": cnt}
+        for col, cnt in sorted(missing_counts.items())
+        if cnt > 0
+    ]
+
+    inconsistent_type_columns = []
+    for col, tags in sorted(type_tags.items()):
+        live = {tag: count for tag, count in tags.items() if count > 0 and tag != "empty"}
+        if len(live) > 1:
+            inconsistent_type_columns.append({"column": col, "type_counts": live})
+
+    record_id_field = _find_record_id_field(rows)
+    record_ids: set[str] = set()
+    duplicate_record_ids: dict[str, int] = {}
+    if record_id_field:
+        id_counter: Counter[str] = Counter()
+        for row in rows:
+            value = row.get(record_id_field)
+            if _missing(value):
+                continue
+            normalized = str(value)
+            id_counter[normalized] += 1
+        record_ids = {record_id for record_id, count in id_counter.items() if count >= 1}
+        duplicate_record_ids = {
+            record_id: count for record_id, count in sorted(id_counter.items()) if count > 1
+        }
+
+    diagnostics = {
+        "suspicious_row_count": len(suspicious_rows),
+        "missing_value_columns": len(missing_columns),
+        "duplicate_row_groups": len(duplicate_rows),
+        "inconsistent_type_columns": len(inconsistent_type_columns),
+        "duplicate_record_id_count": len(duplicate_record_ids),
+    }
+
+    findings = sum(int(value) for value in diagnostics.values())
+    confidence = max(0.0, round(1.0 - min(findings, 20) / 20.0, 2))
+
+    return {
+        "path": path.as_posix(),
+        "source_kind": source_kind,
+        "row_count": len(rows),
+        "schema_overview": {"columns": columns},
+        "diagnostics": diagnostics,
+        "suspicious_rows": suspicious_rows[:50],
+        "missing_values": missing_columns,
+        "duplicate_rows": duplicate_rows,
+        "inconsistent_values": inconsistent_type_columns,
+        "record_id_field": record_id_field,
+        "record_id_duplicates": duplicate_record_ids,
+        "record_ids": sorted(record_ids),
+        "confidence": confidence,
+        "recommendations": _recommendations(diagnostics, record_id_field is not None),
+        "notes": notes,
+    }
+
+
+def _recommendations(diagnostics: dict[str, int], has_record_ids: bool) -> list[str]:
+    recs: list[str] = []
+    if diagnostics["missing_value_columns"]:
+        recs.append("Backfill or validate required fields before release decisioning.")
+    if diagnostics["duplicate_row_groups"]:
+        recs.append("De-duplicate repeated records in source export or ETL stage.")
+    if diagnostics["inconsistent_type_columns"]:
+        recs.append("Standardize inconsistent column types to a single operational shape.")
+    if has_record_ids and diagnostics["duplicate_record_id_count"]:
+        recs.append("Resolve duplicate record IDs to keep cross-file joins deterministic.")
+    if not recs:
+        recs.append("No high-signal anomalies detected; keep this snapshot as baseline evidence.")
+    return recs
+
+
+def _discover_supported_files(target: Path) -> tuple[list[Path], list[Path]]:
+    if target.is_file():
+        if target.suffix.lower() in SUPPORTED_EXTENSIONS:
+            return [target], []
+        return [], [target]
+
+    supported: list[Path] = []
+    skipped: list[Path] = []
+    for candidate in sorted(target.rglob("*")):
+        if not candidate.is_file():
+            continue
+        if candidate.suffix.lower() in SUPPORTED_EXTENSIONS:
+            supported.append(candidate)
+        else:
+            skipped.append(candidate)
+    return supported, skipped
+
+
+def _cross_file_diagnostics(reports: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    with_ids = [r for r in reports if r.get("record_id_field") and r.get("record_ids")]
+    mismatches: list[dict[str, Any]] = []
+    for idx, base in enumerate(with_ids):
+        base_ids = set(base.get("record_ids", []))
+        for other in with_ids[idx + 1 :]:
+            other_ids = set(other.get("record_ids", []))
+            only_base = sorted(base_ids - other_ids)
+            only_other = sorted(other_ids - base_ids)
+            if only_base or only_other:
+                mismatches.append(
+                    {
+                        "left_path": base["path"],
+                        "right_path": other["path"],
+                        "left_only_count": len(only_base),
+                        "right_only_count": len(only_other),
+                        "left_only_examples": only_base[:10],
+                        "right_only_examples": only_other[:10],
+                    }
+                )
+    return mismatches
+
+
+def _render_text(payload: dict[str, Any]) -> str:
+    lines = [
+        f"SDETKit inspect: {'OK' if payload['ok'] else 'FINDINGS'}",
+        f"input: {payload['input_path']}",
+        f"files_analyzed: {payload['summary']['files_analyzed']}",
+        f"total_records: {payload['summary']['total_records']}",
+        f"confidence: {payload['confidence']}",
+        "diagnostics:",
+    ]
+    for key, value in payload["summary"]["diagnostics"].items():
+        lines.append(f"- {key}: {value}")
+    if payload.get("cross_file_mismatches"):
+        lines.append("cross_file_mismatches:")
+        for item in payload["cross_file_mismatches"]:
+            lines.append(
+                f"- {item['left_path']} vs {item['right_path']}: "
+                f"left_only={item['left_only_count']} right_only={item['right_only_count']}"
+            )
+    lines.append("recommendations:")
+    for rec in payload["recommendations"]:
+        lines.append(f"- {rec}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="sdetkit inspect",
+        description="Inspect CSV/JSON business evidence and emit deterministic diagnostics.",
+    )
+    p.add_argument("path", help="CSV/JSON file or folder containing evidence files")
+    p.add_argument("--format", choices=["text", "json"], default="text")
+    p.add_argument(
+        "--out-dir",
+        default=None,
+        help="Directory for artifact outputs (default: .sdetkit/inspect/<input-name>).",
+    )
+    return p
+
+
+def main(argv: list[str] | None = None) -> int:
+    ns = _build_arg_parser().parse_args(argv)
+    target = Path(ns.path).resolve()
+    if not target.exists():
+        sys.stderr.write(f"inspect: input path does not exist: {target}\n")
+        return EXIT_FINDINGS
+
+    files, skipped = _discover_supported_files(target)
+    if not files:
+        sys.stderr.write("inspect: no supported evidence files found (expected .csv or .json)\n")
+        return EXIT_FINDINGS
+
+    reports = [_analyze_file(path) for path in files]
+    cross_file = _cross_file_diagnostics(reports)
+
+    summary = {
+        "files_analyzed": len(reports),
+        "total_records": sum(int(r["row_count"]) for r in reports),
+        "skipped_file_count": len(skipped),
+        "diagnostics": {
+            "suspicious_rows": sum(int(r["diagnostics"]["suspicious_row_count"]) for r in reports),
+            "missing_value_columns": sum(
+                int(r["diagnostics"]["missing_value_columns"]) for r in reports
+            ),
+            "duplicate_row_groups": sum(int(r["diagnostics"]["duplicate_row_groups"]) for r in reports),
+            "inconsistent_type_columns": sum(
+                int(r["diagnostics"]["inconsistent_type_columns"]) for r in reports
+            ),
+            "duplicate_record_ids": sum(
+                int(r["diagnostics"]["duplicate_record_id_count"]) for r in reports
+            ),
+            "cross_file_mismatches": len(cross_file),
+        },
+    }
+
+    findings_score = sum(int(v) for v in summary["diagnostics"].values())
+    confidence = max(0.0, round(1.0 - min(findings_score, 30) / 30.0, 2))
+    recommendations: list[str] = []
+    for report in reports:
+        for rec in report["recommendations"]:
+            if rec not in recommendations:
+                recommendations.append(rec)
+    if cross_file:
+        recommendations.append("Align record IDs across related exports before trusting combined metrics.")
+
+    payload: dict[str, Any] = {
+        "schema_version": SCHEMA_VERSION,
+        "tool": "sdetkit",
+        "workflow": "inspect",
+        "input_path": target.as_posix(),
+        "ok": findings_score == 0,
+        "summary": summary,
+        "file_reports": reports,
+        "cross_file_mismatches": cross_file,
+        "recommendations": recommendations,
+        "confidence": confidence,
+        "evidence": {
+            "machine_readable": "inspect.json",
+            "human_readable": "inspect.txt",
+        },
+    }
+
+    out_dir = Path(ns.out_dir) if ns.out_dir else Path(".sdetkit") / "inspect" / _safe_slug(target.name)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path = out_dir / "inspect.json"
+    txt_path = out_dir / "inspect.txt"
+    json_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    txt_path.write_text(_render_text(payload), encoding="utf-8")
+
+    output = json.dumps(payload, sort_keys=True) if ns.format == "json" else _render_text(payload)
+    sys.stdout.write(output + ("\n" if not output.endswith("\n") else ""))
+    return EXIT_OK if payload["ok"] else EXIT_FINDINGS
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
