@@ -15,8 +15,12 @@ PAGES_WORKFLOW = Path(".github/workflows/pages.yml")
 PUBLIC_COMMAND_CONTRACT = Path("src/sdetkit/public_command_surface.json")
 
 CANONICAL_PROMISE = "deterministic ship/no-ship decisions with machine-readable evidence"
-CANONICAL_FAST_COMMAND = "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
-CANONICAL_RELEASE_COMMAND = "python -m sdetkit gate release --format json --out build/release-preflight.json"
+CANONICAL_FAST_COMMAND = (
+    "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json"
+)
+CANONICAL_RELEASE_COMMAND = (
+    "python -m sdetkit gate release --format json --out build/release-preflight.json"
+)
 PRIMARY_NAV_SECTIONS = (
     "Start here",
     "Canonical first-proof path (primary)",
@@ -75,11 +79,15 @@ def main() -> int:
     errors.extend(f"{README}: missing '{entry}'" for entry in readme_missing)
     errors.extend(f"{DOCS_INDEX}: missing '{entry}'" for entry in docs_home_missing)
     if contract.get("advanced_supported_next_step") != "python -m sdetkit kits list":
-        errors.append("public command contract: advanced_supported_next_step must be 'python -m sdetkit kits list'")
+        errors.append(
+            "public command contract: advanced_supported_next_step must be 'python -m sdetkit kits list'"
+        )
     stability_text = DOCS_STABILITY.read_text(encoding="utf-8")
     for tier in required_tiers:
         if tier not in stability_text:
-            errors.append(f"{DOCS_STABILITY}: missing policy tier '{tier}' from machine-readable contract")
+            errors.append(
+                f"{DOCS_STABILITY}: missing policy tier '{tier}' from machine-readable contract"
+            )
 
     mkdocs_text = MKDOCS.read_text(encoding="utf-8")
     if "nav:" not in mkdocs_text:
@@ -100,7 +108,9 @@ def main() -> int:
     if ARCHIVE_NAV_SECTION not in top_level_labels:
         errors.append(f"mkdocs.yml: missing archive nav section '{ARCHIVE_NAV_SECTION}'")
     if ARCHIVE_NAV_SECTION in top_level_labels and top_level_labels[-1] != ARCHIVE_NAV_SECTION:
-        errors.append("mkdocs.yml: historical archive section must be the final top-level nav section")
+        errors.append(
+            "mkdocs.yml: historical archive section must be the final top-level nav section"
+        )
 
     workflow = yaml.safe_load(PAGES_WORKFLOW.read_text(encoding="utf-8"))
     build_steps = workflow.get("jobs", {}).get("build", {}).get("steps", [])

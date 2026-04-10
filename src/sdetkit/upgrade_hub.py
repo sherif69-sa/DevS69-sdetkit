@@ -137,18 +137,12 @@ def main(argv: list[str] | None = None) -> int:
         plans = payload["plan_inventory"]
         print("upgrade-hub")
         print(f"closeout modules: {payload['total_closeout_entries']}")
-        print(
-            "plans: "
-            f"{plans['valid_plan_files']}/{plans['total_plan_files']} valid"
-        )
+        print(f"plans: {plans['valid_plan_files']}/{plans['total_plan_files']} valid")
         if plans["owners"]:
             print("owners: " + ", ".join(plans["owners"][:5]))
         top_candidates = plans["top_upgrade_candidates"][: ns.top]
         if top_candidates:
             print("top plan upgrades:")
             for candidate in top_candidates:
-                print(
-                    f"- {candidate['metric']}: +{candidate['delta']} "
-                    f"({candidate['plan']})"
-                )
+                print(f"- {candidate['metric']}: +{candidate['delta']} ({candidate['plan']})")
     return 0

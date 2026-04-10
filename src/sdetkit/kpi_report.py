@@ -48,9 +48,13 @@ def _build_report(
 
     previous_metrics: dict[str, float | None] = {}
     if previous is not None:
-        prev_values = previous.get("metrics", {}) if isinstance(previous.get("metrics", {}), dict) else {}
+        prev_values = (
+            previous.get("metrics", {}) if isinstance(previous.get("metrics", {}), dict) else {}
+        )
         previous_metrics = {
-            "time_to_first_success_minutes": _safe_float(prev_values.get("time_to_first_success_minutes")),
+            "time_to_first_success_minutes": _safe_float(
+                prev_values.get("time_to_first_success_minutes")
+            ),
             "lint_debt_count": _safe_float(prev_values.get("lint_debt_count")),
             "type_debt_count": _safe_float(prev_values.get("type_debt_count")),
             "ci_cycle_minutes": _safe_float(prev_values.get("ci_cycle_minutes")),
@@ -98,17 +102,19 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     }
     for key, label in label_map.items():
         trend = payload["trends"][key]
-        lines.append(
-            f"| {label} | {trend['previous']} | {trend['current']} | {trend['delta']} |"
-        )
+        lines.append(f"| {label} | {trend['previous']} | {trend['current']} | {trend['delta']} |")
     lines.append("")
     return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build weekly release-confidence KPI pack artifacts.")
+    parser = argparse.ArgumentParser(
+        description="Build weekly release-confidence KPI pack artifacts."
+    )
     parser.add_argument("--current", required=True, help="Path to JSON with current KPI values.")
-    parser.add_argument("--previous", default=None, help="Optional previous KPI summary JSON for trend delta.")
+    parser.add_argument(
+        "--previous", default=None, help="Optional previous KPI summary JSON for trend delta."
+    )
     parser.add_argument("--week", default=datetime.now(UTC).date().isoformat())
     parser.add_argument("--out-json", default="build/release-confidence-kpi-pack.json")
     parser.add_argument("--out-md", default="build/release-confidence-kpi-pack.md")

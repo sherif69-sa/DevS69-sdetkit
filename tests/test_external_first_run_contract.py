@@ -7,7 +7,9 @@ import sys
 from pathlib import Path
 
 
-def _run(cmd: list[str], *, cwd: Path, env: dict[str, str], timeout: int = 240) -> subprocess.CompletedProcess[str]:
+def _run(
+    cmd: list[str], *, cwd: Path, env: dict[str, str], timeout: int = 240
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         cmd,
         cwd=cwd,
@@ -32,7 +34,9 @@ def test_canonical_first_path_runs_from_fresh_external_repo(tmp_path: Path) -> N
     env = os.environ.copy()
     env.pop("PYTHONPATH", None)
 
-    install = _run([str(python_bin), "-m", "pip", "install", str(repo_root)], cwd=external_repo, env=env)
+    install = _run(
+        [str(python_bin), "-m", "pip", "install", str(repo_root)], cwd=external_repo, env=env
+    )
     assert install.returncode == 0, (
         "package install failed in blank external repo fixture\n"
         f"stdout:\n{install.stdout}\n"
@@ -113,5 +117,7 @@ def test_canonical_first_path_runs_from_fresh_external_repo(tmp_path: Path) -> N
         "outcomes": outcomes,
     }
     summary_path = external_repo / "build/external-first-run-proof-summary.json"
-    summary_path.write_text(json.dumps(trust_summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    summary_path.write_text(
+        json.dumps(trust_summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     assert summary_path.is_file()

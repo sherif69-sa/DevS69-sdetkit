@@ -8,7 +8,15 @@ CANONICAL_LANE_SPEC: tuple[dict[str, Any], ...] = (
     {
         "id": "gate_fast",
         "label": "gate fast",
-        "args": ["gate", "fast", "--format", "json", "--stable-json", "--out", "build/gate-fast.json"],
+        "args": [
+            "gate",
+            "fast",
+            "--format",
+            "json",
+            "--stable-json",
+            "--out",
+            "build/gate-fast.json",
+        ],
         "artifact": "gate-fast.json",
         "rc_file": "gate-fast.rc",
         "expected_rc": 2,
@@ -54,7 +62,9 @@ def normalize_cmd(parts: list[str], *, fixture_root: Path, repo_root: Path) -> l
     return normalized
 
 
-def project_gate_contract(payload: dict[str, Any], *, fixture_root: Path, repo_root: Path) -> dict[str, Any]:
+def project_gate_contract(
+    payload: dict[str, Any], *, fixture_root: Path, repo_root: Path
+) -> dict[str, Any]:
     return {
         "ok": payload["ok"],
         "failed_steps": payload["failed_steps"],
@@ -71,7 +81,9 @@ def project_gate_contract(payload: dict[str, Any], *, fixture_root: Path, repo_r
     }
 
 
-def project_release_contract(payload: dict[str, Any], *, fixture_root: Path, repo_root: Path) -> dict[str, Any]:
+def project_release_contract(
+    payload: dict[str, Any], *, fixture_root: Path, repo_root: Path
+) -> dict[str, Any]:
     projected = project_gate_contract(payload, fixture_root=fixture_root, repo_root=repo_root)
     projected["dry_run"] = payload["dry_run"]
     return projected
@@ -87,7 +99,9 @@ def project_doctor_contract(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def project_contract_for_artifact(artifact_name: str, payload: dict[str, Any], *, fixture_root: Path, repo_root: Path) -> dict[str, Any]:
+def project_contract_for_artifact(
+    artifact_name: str, payload: dict[str, Any], *, fixture_root: Path, repo_root: Path
+) -> dict[str, Any]:
     if artifact_name == "gate-fast.json":
         return project_gate_contract(payload, fixture_root=fixture_root, repo_root=repo_root)
     if artifact_name == "release-preflight.json":
@@ -97,7 +111,9 @@ def project_contract_for_artifact(artifact_name: str, payload: dict[str, Any], *
     return payload
 
 
-def build_lane_proof_summary(*, fixture_root: Path, repo_root: Path, build_dir: Path) -> dict[str, Any]:
+def build_lane_proof_summary(
+    *, fixture_root: Path, repo_root: Path, build_dir: Path
+) -> dict[str, Any]:
     commands: list[dict[str, Any]] = []
     for spec in CANONICAL_LANE_SPEC:
         artifact_path = build_dir / spec["artifact"]
@@ -137,11 +153,12 @@ def build_lane_proof_summary(*, fixture_root: Path, repo_root: Path, build_dir: 
     }
 
 
-
 def main(argv: list[str] | None = None) -> int:
     import argparse
 
-    parser = argparse.ArgumentParser(description="Build canonical real-repo adoption proof summary.")
+    parser = argparse.ArgumentParser(
+        description="Build canonical real-repo adoption proof summary."
+    )
     parser.add_argument("--fixture-root", type=Path, required=True)
     parser.add_argument("--repo-root", type=Path, required=True)
     parser.add_argument("--build-dir", type=Path, required=True)

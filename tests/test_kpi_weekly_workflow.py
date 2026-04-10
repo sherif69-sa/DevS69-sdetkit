@@ -4,7 +4,6 @@ from pathlib import Path
 
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATH = REPO_ROOT / ".github" / "workflows" / "kpi-weekly.yml"
 
@@ -23,5 +22,9 @@ def test_weekly_kpi_workflow_exists_and_publishes_artifact() -> None:
     assert "python -m sdetkit kpi-report" in run_blob
     assert "kpi-metrics-current.json" in run_blob
 
-    upload_steps = [s for s in job["steps"] if isinstance(s, dict) and "upload-artifact" in str(s.get("uses", ""))]
+    upload_steps = [
+        s
+        for s in job["steps"]
+        if isinstance(s, dict) and "upload-artifact" in str(s.get("uses", ""))
+    ]
     assert upload_steps, "expected artifact upload step"

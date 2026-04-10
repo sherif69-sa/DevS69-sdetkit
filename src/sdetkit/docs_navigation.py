@@ -29,7 +29,7 @@ _TOP_JOURNEYS = [
 
 _DEFAULT_QUICK_JUMP_BLOCK = """<div class=\"quick-jump\" markdown>
 
-[\u26a1 Fast start](#fast-start) \u00b7 [\U0001f9ed Repo tour](repo-tour.md) \u00b7 [\U0001f4c8 Top-10 strategy](top-10-github-strategy.md) \u00b7 [\U0001f916 AgentOS](agentos-foundation.md) \u00b7 [\U0001f373 Cookbook](agentos-cookbook.md) \u00b7 [\U0001f6e0 CLI commands](cli.md) \u00b7 [\U0001fa7a Doctor checks](doctor.md) \u00b7 [\U0001f91d Contribute](contributing.md) \u00b7 [\U0001f4e6 Legacy reports](#legacy-reports)
+[\u26a1 Fast start](#fast-start) \u00b7 [\U0001f9ed Repo tour](repo-tour.md) \u00b7 [\U0001f6e0 CLI commands](cli.md) \u00b7 [\U0001fa7a Doctor checks](doctor.md) \u00b7 [\U0001f91d Contribute](contributing.md) \u00b7 [\U0001f4e6 Legacy reports](#legacy-reports)
 
 </div>
 """

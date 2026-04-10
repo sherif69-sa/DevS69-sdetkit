@@ -17,4 +17,6 @@ def test_fast_ci_workflow_runs_premerge_changed_files_gate_for_pull_requests() -
     step = premerge_steps[0]
     assert step.get("if") == "${{ github.event_name == 'pull_request' }}"
     assert step.get("run") == "bash quality.sh premerge"
-    assert step.get("env", {}).get("QUALITY_DIFF_BASE") == "${{ github.event.pull_request.base.sha }}"
+    assert (
+        step.get("env", {}).get("QUALITY_DIFF_BASE") == "${{ github.event.pull_request.base.sha }}"
+    )
