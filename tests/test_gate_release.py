@@ -148,3 +148,17 @@ def test_gate_release_adds_recommendation_for_failed_step(
     assert payload["recommendations"] == [
         "Inspect fast gate evidence: python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json."
     ]
+
+
+def test_gate_release_fails_when_no_checks_are_enabled(monkeypatch, tmp_path: Path, capsys) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(gate, "_release_commands", lambda ns, root: [])
+
+    rc = gate.main(["release", "--format", "json"])
+    assert rc == 2
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    assert payload["failed_steps"] == ["configuration"]
+    assert payload["steps"] == []
+    assert payload["recommendations"][0].startswith("No release checks are enabled.")

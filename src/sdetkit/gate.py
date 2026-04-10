@@ -217,6 +217,31 @@ def _run_fast(ns: argparse.Namespace) -> int:
             return False
         return step_id not in skip
 
+    selected_steps = [step_id for step_id in AVAILABLE_STEPS if should_run(step_id)]
+    if not selected_steps:
+        payload: dict[str, Any] = {
+            "profile": "fast",
+            "root": str(root),
+            "ok": False,
+            "steps": [],
+            "failed_steps": ["configuration"],
+            "recommendations": [
+                "No gate steps are enabled. Re-run with at least one step (example: python -m sdetkit gate fast --only doctor).",
+                "List available steps with: python -m sdetkit gate fast --list-steps.",
+            ],
+        }
+        text = (
+            _stable_json(payload)
+            if ns.format == "json" and ns.stable_json
+            else json.dumps(payload, sort_keys=True) + "\n"
+            if ns.format == "json"
+            else _format_md(payload)
+            if ns.format == "md"
+            else _format_text(payload)
+        )
+        _write_output(text, ns.out)
+        return 2
+
     steps: list[dict[str, Any]] = []
 
     if (ns.fix or ns.fix_only) and should_run("ruff_fix"):
@@ -429,8 +454,7 @@ def _normalize_release_steps(steps: list[dict[str, Any]], root: Path) -> list[di
     return normalized
 
 
-def _run_release(ns: argparse.Namespace) -> int:
-    root = Path(ns.root).resolve()
+def _release_commands(ns: argparse.Namespace, root: Path) -> list[tuple[str, list[str]]]:
     doctor_cmd = [sys.executable, "-m", "sdetkit", "doctor", "--release", "--format", "json"]
     if ns.release_full:
         doctor_cmd = [
@@ -443,7 +467,7 @@ def _run_release(ns: argparse.Namespace) -> int:
             "json",
         ]
 
-    commands: list[tuple[str, list[str]]] = [
+    return [
         ("doctor_release", doctor_cmd),
         (
             "playbooks_validate",
@@ -471,6 +495,27 @@ def _run_release(ns: argparse.Namespace) -> int:
             ],
         ),
     ]
+
+
+def _run_release(ns: argparse.Namespace) -> int:
+    root = Path(ns.root).resolve()
+    commands = _release_commands(ns, root)
+    if not commands:
+        payload: dict[str, Any] = {
+            "profile": "release",
+            "root": "<repo>",
+            "dry_run": bool(ns.dry_run),
+            "ok": False,
+            "failed_steps": ["configuration"],
+            "steps": [],
+            "recommendations": [
+                "No release checks are enabled. Re-run with default options: python -m sdetkit gate release.",
+                "Inspect available release checks by running: python -m sdetkit gate release --dry-run --format json.",
+            ],
+        }
+        rendered = json.dumps(payload, sort_keys=True) + "\n" if ns.format == "json" else _format_release_text(payload)
+        _write_output(rendered, ns.out)
+        return 2
 
     steps: list[dict[str, Any]] = []
     for step_id, cmd in commands:
