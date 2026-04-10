@@ -1440,6 +1440,324 @@ def _format_doctor_markdown(data: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _evidence_next_commands(data: dict[str, Any]) -> list[str]:
+    commands: list[str] = []
+    seen: set[str] = set()
+
+    def _add(candidate: str) -> None:
+        item = candidate.strip()
+        if not item:
+            return
+        lowered = item.lower()
+        if not (
+            item.startswith("python ")
+            or item.startswith("python3 ")
+            or item.startswith("sdetkit ")
+            or item.startswith("git ")
+            or lowered.startswith("run ")
+        ):
+            return
+        if item in seen:
+            return
+        seen.add(item)
+        commands.append(item)
+
+    for rec in data.get("recommendations", []):
+        if not isinstance(rec, str):
+            continue
+        _add(rec)
+        for token in rec.split("`"):
+            _add(token)
+
+    for action in data.get("next_actions", []):
+        if not isinstance(action, dict):
+            continue
+        for fix in action.get("fix", []):
+            if isinstance(fix, str):
+                _add(fix)
+
+    return commands[:8]
+
+
+def _evidence_diagnostics_rows(checks: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for check_id in CHECK_ORDER:
+        item = checks.get(check_id)
+        if not isinstance(item, dict) or item.get("skipped"):
+            continue
+        fix = item.get("fix", [])
+        evidence = item.get("evidence", [])
+        rows.append(
+            {
+                "id": check_id,
+                "status": "pass" if item.get("ok") else "fail",
+                "severity": str(item.get("severity", "medium")),
+                "summary": str(item.get("summary", "")),
+                "fix_count": len(fix) if isinstance(fix, list) else 0,
+                "evidence_count": len(evidence) if isinstance(evidence, list) else 0,
+            }
+        )
+    return rows
+
+
+def _structured_recommendations(data: dict[str, Any]) -> list[dict[str, Any]]:
+    recs: list[dict[str, Any]] = []
+    for item in data.get("next_actions", []):
+        if not isinstance(item, dict):
+            continue
+        fixes = item.get("fix", [])
+        fix_list = [str(fix) for fix in fixes if isinstance(fix, str)]
+        commands: list[str] = []
+        for candidate in fix_list:
+            if candidate.startswith("python ") or candidate.startswith("python3 "):
+                commands.append(candidate)
+        recs.append(
+            {
+                "check_id": str(item.get("id", "")),
+                "severity": str(item.get("severity", "medium")),
+                "summary": str(item.get("summary", "")),
+                "commands": commands[:3],
+                "actions": fix_list[:5],
+            }
+        )
+    return recs
+
+
+def _surface_consistency(data: dict[str, Any], checks: dict[str, Any]) -> dict[str, Any]:
+    sync_checks = [
+        ("ci_workflows", "ci_workflows"),
+        ("security_files", "security_files"),
+        ("pre_commit", "pre_commit"),
+        ("deps", "deps"),
+        ("clean_tree", "clean_tree"),
+        ("repo_readiness", "repo_readiness"),
+        ("upgrade_audit", "upgrade_audit"),
+    ]
+    key_alias = {
+        "ci_workflows": "ci_missing",
+        "security_files": "security_missing",
+        "pre_commit": "pre_commit_ok",
+        "deps": "deps_ok",
+        "clean_tree": "clean_tree_ok",
+        "repo_readiness": "repo_readiness_missing",
+        "upgrade_audit": "upgrade_audit_ok",
+    }
+    mismatches: list[dict[str, str]] = []
+    for check_id, alias_key in sync_checks:
+        item = checks.get(check_id)
+        if not isinstance(item, dict) or item.get("skipped"):
+            continue
+        if alias_key not in data:
+            continue
+        alias_value = data.get(alias_key)
+        check_ok = bool(item.get("ok"))
+        if alias_key.endswith("_ok"):
+            if bool(alias_value) != check_ok:
+                mismatches.append(
+                    {
+                        "check_id": check_id,
+                        "field": alias_key,
+                        "message": f"check status ({check_ok}) differs from {alias_key} ({bool(alias_value)})",
+                    }
+                )
+            continue
+        if isinstance(alias_value, list):
+            alias_ok = len(alias_value) == 0
+            if alias_ok != check_ok:
+                mismatches.append(
+                    {
+                        "check_id": check_id,
+                        "field": alias_key,
+                        "message": f"check status ({check_ok}) differs from {alias_key} emptiness ({alias_ok})",
+                    }
+                )
+            continue
+        normalized_key = key_alias.get(check_id, "")
+        if normalized_key and normalized_key in data and data[normalized_key] != alias_value:
+            mismatches.append(
+                {
+                    "check_id": check_id,
+                    "field": alias_key,
+                    "message": f"cross-surface alias mismatch for {check_id}",
+                }
+            )
+    return {
+        "ok": len(mismatches) == 0,
+        "mismatch_count": len(mismatches),
+        "mismatches": mismatches,
+    }
+
+
+def _write_evidence(root: Path, evidence_dir: Path, data: dict[str, Any]) -> tuple[bool, str]:
+    quality = data.get("quality", {})
+    checks = data.get("checks", {})
+    selected = data.get("selected_checks", [])
+    if (
+        not isinstance(quality, dict)
+        or not isinstance(checks, dict)
+        or not isinstance(selected, list)
+        or int(quality.get("actionable_checks", 0)) <= 0
+    ):
+        return (
+            False,
+            "doctor evidence requires at least one actionable check; rerun doctor with checks enabled",
+        )
+
+    failed_checks: list[dict[str, Any]] = []
+    passing_controls: list[dict[str, Any]] = []
+    evidence_refs: list[dict[str, str]] = []
+
+    for check_id in CHECK_ORDER:
+        item = checks.get(check_id)
+        if not isinstance(item, dict) or item.get("skipped"):
+            continue
+        row = {
+            "id": check_id,
+            "severity": str(item.get("severity", "medium")),
+            "summary": str(item.get("summary", "")),
+        }
+        if item.get("ok"):
+            if row["severity"] in {"high", "medium"}:
+                passing_controls.append(row)
+        else:
+            failed_checks.append(row)
+        for ev in item.get("evidence", []):
+            if not isinstance(ev, dict):
+                continue
+            path = str(ev.get("path", "")).strip()
+            if path:
+                evidence_refs.append(
+                    {
+                        "check_id": check_id,
+                        "path": path,
+                        "message": str(ev.get("message", "")).strip(),
+                    }
+                )
+
+    next_commands = _evidence_next_commands(data)
+    if not failed_checks and not passing_controls and not evidence_refs and not next_commands:
+        return (
+            False,
+            "doctor evidence is empty: no failures or actionable next commands were found",
+        )
+
+    diagnostics_rows = _evidence_diagnostics_rows(checks)
+    structured_recommendations = _structured_recommendations(data)
+    surface_consistency = _surface_consistency(data, checks)
+
+    evidence_payload = {
+        "schema_version": "sdetkit.doctor.evidence.v1",
+        "doctor_schema_version": data.get("schema_version"),
+        "ok": bool(data.get("ok")),
+        "score": int(data.get("score", 0)),
+        "policy": data.get("policy", {}),
+        "quality": quality,
+        "summary": {
+            "selected_checks": len(selected),
+            "actionable_checks": int(quality.get("actionable_checks", 0)),
+            "failed_checks": int(quality.get("failed_checks", 0)),
+            "passed_checks": int(quality.get("passed_checks", 0)),
+            "skipped_checks": int(quality.get("skipped_checks", 0)),
+            "highest_failure_severity": str(quality.get("highest_failure_severity", "none")),
+        },
+        "failed_checks": failed_checks,
+        "passing_controls": passing_controls,
+        "next_commands": next_commands,
+        "structured_recommendations": structured_recommendations,
+        "diagnostics_rows": diagnostics_rows,
+        "surface_consistency": surface_consistency,
+        "evidence_refs": sorted(
+            evidence_refs,
+            key=lambda item: (item["check_id"], item["path"], item["message"]),
+        ),
+        "artifacts": {
+            "doctor_output": str(data.get("output_path", "")),
+            "evidence_json": "doctor-evidence.json",
+            "evidence_markdown": "doctor-evidence.md",
+        },
+    }
+
+    evidence_lines = [
+        "# SDETKit doctor evidence",
+        "",
+        f"- overall: {'PASS' if evidence_payload['ok'] else 'FAIL'}",
+        f"- score: {evidence_payload['score']}%",
+        (
+            "- quality: "
+            f"{evidence_payload['summary']['passed_checks']} passed / "
+            f"{evidence_payload['summary']['failed_checks']} failed / "
+            f"{evidence_payload['summary']['skipped_checks']} skipped"
+        ),
+        "",
+        "## Failed checks",
+    ]
+    if failed_checks:
+        for row in failed_checks:
+            evidence_lines.append(f"- `{row['id']}` ({row['severity']}): {row['summary']}")
+    else:
+        evidence_lines.append("- none")
+
+    evidence_lines.append("")
+    evidence_lines.append("## Stable passing controls")
+    if passing_controls:
+        for row in passing_controls:
+            evidence_lines.append(f"- `{row['id']}` ({row['severity']}): {row['summary']}")
+    else:
+        evidence_lines.append("- none")
+
+    evidence_lines.append("")
+    evidence_lines.append("## Recommended next commands")
+    if next_commands:
+        for cmd in next_commands:
+            evidence_lines.append(f"- `{cmd}`")
+    else:
+        evidence_lines.append("- none")
+
+    evidence_lines.append("")
+    evidence_lines.append("## Diagnostics rows")
+    evidence_lines.append("| Check | Status | Severity | Evidence | Actions |")
+    evidence_lines.append("| --- | --- | --- | ---: | ---: |")
+    for row in diagnostics_rows:
+        evidence_lines.append(
+            f"| `{row['id']}` | {row['status']} | {row['severity']} | {row['evidence_count']} | {row['fix_count']} |"
+        )
+
+    evidence_lines.append("")
+    evidence_lines.append("## Evidence references")
+    if evidence_payload["evidence_refs"]:
+        for ref in evidence_payload["evidence_refs"][:20]:
+            detail = f"- `{ref['check_id']}`: `{ref['path']}`"
+            if ref["message"]:
+                detail += f" — {ref['message']}"
+            evidence_lines.append(detail)
+    else:
+        evidence_lines.append("- none")
+
+    evidence_lines.append("")
+    evidence_lines.append("## Surface consistency")
+    if surface_consistency["ok"]:
+        evidence_lines.append("- doctor evidence surfaces are consistent")
+    else:
+        evidence_lines.append(
+            f"- detected {surface_consistency['mismatch_count']} cross-surface mismatch(es)"
+        )
+        for mismatch in surface_consistency["mismatches"][:10]:
+            evidence_lines.append(
+                f"- `{mismatch['check_id']}` / `{mismatch['field']}`: {mismatch['message']}"
+            )
+    evidence_lines.append("")
+
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    (evidence_dir / "doctor-evidence.json").write_text(
+        json.dumps(evidence_payload, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (evidence_dir / "doctor-evidence.md").write_text(
+        "\n".join(evidence_lines), encoding="utf-8"
+    )
+    return True, ""
+
+
 def _resolve_policy_path(root: Path, policy_path: str | None) -> Path:
     if policy_path:
         return safe_path(root, policy_path, allow_absolute=True)
@@ -1538,6 +1856,8 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         "--only",
         "--skip",
+        "--bundle",
+        "--evidence-dir",
         "--apply-plan",
         "--snapshot",
         "--diff-snapshot",
@@ -1770,6 +2090,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--list-checks", action="store_true")
     parser.add_argument("--only", default=None)
     parser.add_argument("--skip", default=None)
+    parser.add_argument(
+        "--bundle",
+        "--evidence-dir",
+        dest="evidence_dir",
+        default=None,
+        help="Write doctor evidence files (doctor-evidence.json + doctor-evidence.md) to a target directory.",
+    )
 
     ns = parser.parse_args(list(argv) if argv is not None else None)
     if ns.format == "markdown":
@@ -2348,6 +2675,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if ns.out:
         Path(ns.out).write_text(output, encoding="utf-8")
+        data["output_path"] = str(ns.out)
+    else:
+        data["output_path"] = ""
+
+    if isinstance(ns.evidence_dir, str) and ns.evidence_dir.strip():
+        evidence_ok, evidence_error = _write_evidence(root, Path(ns.evidence_dir.strip()), data)
+        if not evidence_ok:
+            if is_json:
+                fail_payload = {
+                    "schema_version": SCHEMA_VERSION,
+                    "ok": False,
+                    "error": {
+                        "code": "doctor_evidence_empty",
+                        "message": evidence_error,
+                    },
+                }
+                sys.stdout.write(_stable_json(fail_payload))
+            sys.stderr.write(f"doctor: evidence write failed: {evidence_error}\n")
+            return EXIT_FAILED
 
     sys.stdout.write(output)
 

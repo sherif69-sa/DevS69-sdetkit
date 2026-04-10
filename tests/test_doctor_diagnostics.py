@@ -62,3 +62,48 @@ def test_doctor_pre_commit_and_deps_and_clean_tree(tmp_path: Path, monkeypatch, 
     assert data["pre_commit_ok"] is True
     assert data["deps_ok"] is True
     assert data["clean_tree_ok"] is True
+
+
+def test_doctor_evidence_writes_json_and_markdown(tmp_path: Path, monkeypatch, capsys):
+    root = tmp_path / "repo"
+    root.mkdir()
+    monkeypatch.chdir(root)
+
+    evidence_dir = root / "build" / "doctor-evidence"
+    rc = doctor.main(["--ci", "--json", "--evidence-dir", str(evidence_dir)])
+    data = json.loads(capsys.readouterr().out)
+
+    assert rc == 2
+    assert data["ok"] is False
+    assert (evidence_dir / "doctor-evidence.json").exists()
+    assert (evidence_dir / "doctor-evidence.md").exists()
+    evidence = json.loads((evidence_dir / "doctor-evidence.json").read_text(encoding="utf-8"))
+    assert evidence["schema_version"] == "sdetkit.doctor.evidence.v1"
+    assert evidence["failed_checks"]
+    assert evidence["diagnostics_rows"]
+    assert isinstance(evidence["structured_recommendations"], list)
+    assert "surface_consistency" in evidence
+    forbidden = {
+        "root_cause",
+        "correct_fix",
+        "wrong_fix",
+        "target",
+        "false_positive",
+        "control_label",
+        "hint",
+        "answer",
+    }
+    assert forbidden.isdisjoint(set(evidence))
+
+
+def test_doctor_evidence_fails_for_non_actionable_check_selection(tmp_path: Path, monkeypatch, capsys):
+    root = tmp_path / "repo"
+    root.mkdir()
+    monkeypatch.chdir(root)
+
+    skip_all = ",".join(doctor.CHECK_ORDER)
+    rc = doctor.main(["--json", "--skip", skip_all, "--evidence-dir", "build/doctor-evidence"])
+    data = json.loads(capsys.readouterr().out)
+
+    assert rc == 2
+    assert data["error"]["code"] == "doctor_evidence_empty"
