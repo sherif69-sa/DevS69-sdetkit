@@ -7,7 +7,6 @@ from pathlib import Path
 
 from sdetkit.public_surface_contract import render_root_help_groups
 
-
 POLICY_TIERS = (
     "Public / stable",
     "Advanced but supported",
@@ -55,6 +54,29 @@ def test_root_help_avoids_legacy_tier_labels() -> None:
     assert proc.returncode == 0
     assert "Stable/Core" not in proc.stdout
     assert "Stable/Compatibility" not in proc.stdout
+
+
+def test_root_help_exposes_legacy_namespace_but_hides_legacy_lanes() -> None:
+    proc = _run("--help")
+    assert proc.returncode == 0
+    assert "legacy" in proc.stdout
+    assert "weekly-review-lane" not in proc.stdout
+    assert "phase1-hardening" not in proc.stdout
+
+
+def test_legacy_namespace_routes_to_legacy_commands() -> None:
+    proc = _run("legacy", "weekly-review-lane", "--help")
+    assert proc.returncode == 0
+    assert "usage:" in proc.stdout.lower()
+
+
+def test_legacy_namespace_lists_contained_legacy_commands() -> None:
+    proc = _run("legacy", "list")
+    assert proc.returncode == 0
+    listed = set(proc.stdout.splitlines())
+    assert "weekly-review-lane" in listed
+    assert "phase1-hardening" in listed
+    assert "optimization-closeout-foundation" in listed
 
 
 def test_policy_tier_vocabulary_matches_public_contract_and_docs() -> None:

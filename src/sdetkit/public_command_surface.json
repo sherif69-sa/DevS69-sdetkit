@@ -1,0 +1,20 @@
+{
+  "contract_version": 1,
+  "primary_outcome": "know if a change is ready to ship",
+  "canonical_first_path": [
+    "python -m sdetkit gate fast",
+    "python -m sdetkit gate release",
+    "python -m sdetkit doctor"
+  ],
+  "public_stable_front_door_commands": [
+    "gate",
+    "doctor",
+    "release"
+  ],
+  "advanced_supported_next_step": "python -m sdetkit kits list",
+  "required_policy_tiers": [
+    "Public / stable",
+    "Advanced but supported",
+    "Experimental / incubator"
+  ]
+}

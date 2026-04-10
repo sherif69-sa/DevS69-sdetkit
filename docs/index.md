@@ -6,6 +6,8 @@ DevS69 SDETKit is a release-confidence CLI: it gives engineering teams determini
 
 **Canonical first path:** `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
 
+Need the fastest onboarding path? Start with [Start Here in 5 Minutes](start-here-5-minutes.md).
+
 ## What this is
 
 SDETKit is a productized release-confidence path for engineering teams that need clear ship/no-ship decisions backed by structured artifacts.
@@ -43,8 +45,9 @@ python -m sdetkit doctor
 ```
 
 1. [Install (canonical)](install.md)
-2. [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
-3. [Release confidence explainer](release-confidence.md)
+2. [Start Here in 5 Minutes](start-here-5-minutes.md)
+3. [Blank repo to value in 60 seconds](blank-repo-to-value-60-seconds.md)
+4. [Release confidence explainer](release-confidence.md)
 
 If you want a guided run instead of the ultra-fast proof lane, use [First run quickstart](ready-to-use.md).
 For CLI-first orientation, run `python -m sdetkit --help` to see the same canonical path plus stability-tier grouping.
@@ -78,6 +81,8 @@ Use [Decision guide](decision-guide.md) to confirm whether SDETKit is a good fit
 - Need lane routing: [Choose your path](choose-your-path.md)
 - Need team rollout: [Adopt in your repository](adoption.md)
 - Need CI rollout: [Recommended CI flow](recommended-ci-flow.md)
+- Need fast troubleshooting: [First failure triage](first-failure-triage.md), [Adoption troubleshooting](adoption-troubleshooting.md), [Remediation cookbook](remediation-cookbook.md)
+- Need compact navigation: [Docs map (compact)](docs-map.md)
 - Need current references: [CLI reference](cli.md), [API](api.md), and [repo audit reference](repo-audit.md)
 - Need contributor workflow: [Contributing](contributing.md)
 - Need boundary guidance: [Stability levels](stability-levels.md) for adopters and contributors

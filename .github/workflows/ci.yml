@@ -76,6 +76,20 @@ jobs:
       - name: Install project + dev/test extras
         run: python -m pip install -c constraints-ci.txt -e .[dev,test]
 
+      - name: Ruff lint baseline
+        run: python -m ruff check src tests
+
+      - name: Public surface alignment contract
+        run: |
+          python scripts/check_public_surface_alignment.py
+          python -m pytest -q tests/test_cli_help_discoverability_contract.py tests/test_public_surface_alignment.py
+
+      - name: Pre-merge changed-files strict gate
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          QUALITY_DIFF_BASE: ${{ github.event.pull_request.base.sha }}
+        run: bash quality.sh premerge
+
       - name: Canonical fast gate (offline default)
         if: ${{ github.event.inputs.run_network_tests != 'true' }}
         run: bash ci.sh quick --skip-docs --artifact-dir build
@@ -102,6 +116,13 @@ jobs:
           python -m sdetkit intelligence flake classify --history examples/kits/intelligence/flake-history.json > build/intelligence-flake.json
           python -m sdetkit integration check --profile examples/kits/integration/profile.json > build/integration-check.json
           python -m sdetkit forensics compare --from examples/kits/forensics/run-a.json --to examples/kits/forensics/run-b.json > build/forensics-compare.json
+          python -m sdetkit doctor --format json --out build/doctor.json || true
+
+      - name: Build unified CI summary artifact
+        if: always()
+        run: |
+          mkdir -p build
+          python scripts/build_ci_summary.py --artifact-dir build --out-json build/ci-summary.json --out-md build/ci-summary.md
 
       - name: Upload CI gate diagnostics
         if: always()
@@ -118,6 +139,9 @@ jobs:
             build/intelligence-flake.json
             build/integration-check.json
             build/forensics-compare.json
+            build/doctor.json
+            build/ci-summary.json
+            build/ci-summary.md
           retention-days: 14
           if-no-files-found: warn
 
@@ -172,11 +196,28 @@ jobs:
       - name: Wheel contents check
         run: python -m check_wheel_contents --ignore W009 dist/*.whl
 
+      - name: Emit package-validate summary
+        run: |
+          mkdir -p build
+          python - <<'PY'
+          import json
+          from datetime import UTC, datetime
+          payload = {
+            "ok": True,
+            "generated_at": datetime.now(UTC).isoformat(),
+            "checks": ["build", "twine_check", "wheel_contents_check"],
+          }
+          with open("build/package-validate.json", "w", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":")) + "\n")
+          PY
+
       - name: Upload dist artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: dist
-          path: dist/*
+          path: |
+            dist/*
+            build/package-validate.json
 
   smoke-install:
     name: Smoke install from built wheel (py${{ matrix.python-version }})

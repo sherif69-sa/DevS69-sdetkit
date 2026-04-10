@@ -113,10 +113,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
   "sdetkit.__main__",
-  "sdetkit.apiclient",
   "sdetkit.apiget",
-  "sdetkit.cli",
-  "sdetkit.netclient",
   "sdetkit.patch",
 ]
 ignore_errors = true

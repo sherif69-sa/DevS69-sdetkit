@@ -1,5 +1,6 @@
 ## Unreleased
 
+- release-confidence operating loop polish: added machine-readable public command surface enforcement, pre-merge changed-files strict gate, unified CI summary artifact, weekly KPI pack workflow (`sdetkit kpi-report`), and lazy root CLI command routing with legacy namespace support.
 - dependency upgrades: raised `twilio` floor to `>=9.10.4,<10` and aligned `tomli` to `2.4.1` across requirements and lock manifests.
 - add GHAS alert SLA + metrics export bots, wire them into maintenance coverage checks, and refresh GHAS automation docs.
 - add Name 86 launch readiness closeout lane command, docs, checks, and tests (`name86-launch-readiness-closeout`).

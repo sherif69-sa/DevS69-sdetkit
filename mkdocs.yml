@@ -84,6 +84,7 @@ extra_javascript:
 nav:
   - Start here: index.md
   - Canonical first-proof path (primary):
+      - Start Here in 5 Minutes (fast path): start-here-5-minutes.md
       - Install (canonical): install.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - First run quickstart (guided canonical path): ready-to-use.md
@@ -103,9 +104,11 @@ nav:
       - CI artifact walkthrough (canonical evidence decode): ci-artifact-walkthrough.md
       - CI contract (reference): ci-contract.md
       - Reporting and trends: reporting-and-trends.md
+      - Release confidence KPI pack: release-confidence-kpi-pack.md
       - Sample outputs (exploratory, non-canonical): sample-outputs.md
       - Remediation cookbook: remediation-cookbook.md
   - Current reference and discoverability (secondary):
+      - Docs map (compact): docs-map.md
       - CLI reference: cli.md
       - API: api.md
       - Repo Audit: repo-audit.md

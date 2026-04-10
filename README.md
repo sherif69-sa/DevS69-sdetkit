@@ -99,6 +99,7 @@ Context: [`docs/real-repo-adoption.md`](docs/real-repo-adoption.md)
 - Guided run (same canonical path): [`docs/ready-to-use.md`](docs/ready-to-use.md)
 - Release-confidence model (why this product exists): [`docs/release-confidence.md`](docs/release-confidence.md)
 - Root CLI grouping and canonical path view: `python -m sdetkit --help`
+- Machine-readable public command contract: [`src/sdetkit/public_command_surface.json`](src/sdetkit/public_command_surface.json)
 - Stability levels (policy boundary): [`docs/stability-levels.md`](docs/stability-levels.md) — understand what is stable vs advanced vs experimental
 - Before/after evidence behavior: [`docs/before-after-evidence-example.md`](docs/before-after-evidence-example.md)
 - Real evidence artifacts from this repo: [`docs/evidence-showcase.md`](docs/evidence-showcase.md)
@@ -113,6 +114,8 @@ These remain available and supported after the core release-confidence lane is t
 make bootstrap
 bash quality.sh ci
 python -m sdetkit kits list
+python -m sdetkit legacy list
+python -m sdetkit legacy <historical-command>
 python -m sdetkit --help --show-hidden
 ```
 

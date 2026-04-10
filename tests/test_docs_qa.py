@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
 from sdetkit import docs_qa
-
 
 CANONICAL_FIRST_PROOF_DOCS = (
     Path("README.md"),

@@ -1,0 +1,124 @@
+name: Weekly Release Confidence KPI Pack
+
+on:
+  schedule:
+    - cron: '0 13 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kpi-pack:
+    name: Build weekly KPI pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: pyproject.toml
+
+      - name: Install project + dev/test extras
+        run: python -m pip install -c constraints-ci.txt -e .[dev,test]
+
+      - name: Build KPI metric snapshot
+        run: |
+          set +e
+          mkdir -p build docs/artifacts/kpi-weekly
+          START_TS=$(date +%s)
+          python -m ruff check src tests --output-format json > build/ruff-report.json || true
+          python -m mypy src/sdetkit --hide-error-context --no-color-output --no-error-summary > build/mypy-report.txt || true
+
+          FIRST_SUCCESS_SEC=""
+          RELEASE_GATE_RC=1
+          for CMD in \
+            "python -m sdetkit gate fast --format json --stable-json --out build/gate-fast.json" \
+            "python -m sdetkit gate release --format json --out build/release-preflight.json" \
+            "python -m sdetkit doctor --format json --out build/doctor.json"; do
+            bash -lc "$CMD"
+            RC=$?
+            if [[ "$CMD" == *"gate release"* ]]; then
+              RELEASE_GATE_RC=$RC
+            fi
+            if [ "$RC" -eq 0 ] && [ -z "$FIRST_SUCCESS_SEC" ]; then
+              FIRST_SUCCESS_SEC=$(( $(date +%s) - START_TS ))
+            fi
+          done
+
+          END_TS=$(date +%s)
+          export START_TS END_TS FIRST_SUCCESS_SEC RELEASE_GATE_RC
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import os
+
+          start_ts = int(os.environ['START_TS'])
+          end_ts = int(os.environ['END_TS'])
+          first_success_sec = os.environ.get('FIRST_SUCCESS_SEC')
+          first_success_minutes = round((int(first_success_sec) / 60.0), 3) if first_success_sec else None
+
+          ruff_path = Path('build/ruff-report.json')
+          lint_debt_count = 0
+          if ruff_path.is_file():
+            try:
+              payload = json.loads(ruff_path.read_text(encoding='utf-8'))
+              if isinstance(payload, list):
+                lint_debt_count = len(payload)
+            except Exception:
+              lint_debt_count = 0
+
+          mypy_path = Path('build/mypy-report.txt')
+          type_debt_count = 0
+          if mypy_path.is_file():
+            type_debt_count = sum(1 for line in mypy_path.read_text(encoding='utf-8').splitlines() if ': error:' in line)
+
+          release = {}
+          release_path = Path('build/release-preflight.json')
+          if release_path.is_file():
+            try:
+              maybe = json.loads(release_path.read_text(encoding='utf-8'))
+              if isinstance(maybe, dict):
+                release = maybe
+            except Exception:
+              release = {}
+
+          snapshot = {
+            'time_to_first_success_minutes': first_success_minutes,
+            'lint_debt_count': lint_debt_count,
+            'type_debt_count': type_debt_count,
+            'ci_cycle_minutes': round((end_ts - start_ts) / 60.0, 3),
+            'release_gate_pass_rate': 1.0 if (release.get('ok') is True or os.environ.get('RELEASE_GATE_RC') == '0') else 0.0,
+          }
+          Path('build/kpi-metrics-current.json').write_text(json.dumps(snapshot, sort_keys=True), encoding='utf-8')
+          PY
+          set -e
+
+      - name: Build KPI pack artifacts
+        run: |
+          PREV=""
+          if [ -f docs/artifacts/kpi-weekly/latest-kpi-pack.json ]; then
+            PREV="--previous docs/artifacts/kpi-weekly/latest-kpi-pack.json"
+          fi
+          python -m sdetkit kpi-report \
+            --current build/kpi-metrics-current.json \
+            ${PREV} \
+            --week "$(date -u +%Y-%m-%d)" \
+            --out-json build/release-confidence-kpi-pack.json \
+            --out-md build/release-confidence-kpi-pack.md
+          cp build/release-confidence-kpi-pack.json docs/artifacts/kpi-weekly/latest-kpi-pack.json
+          cp build/release-confidence-kpi-pack.md docs/artifacts/kpi-weekly/latest-kpi-pack.md
+
+      - name: Upload weekly KPI pack artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: weekly-release-confidence-kpi-pack
+          path: |
+            build/kpi-metrics-current.json
+            build/release-confidence-kpi-pack.json
+            build/release-confidence-kpi-pack.md
+            docs/artifacts/kpi-weekly/latest-kpi-pack.json
+            docs/artifacts/kpi-weekly/latest-kpi-pack.md
+          retention-days: 28
