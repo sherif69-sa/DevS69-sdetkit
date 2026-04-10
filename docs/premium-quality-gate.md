@@ -26,7 +26,11 @@ mkdocs build
 
 ## Coverage expectations
 
-- The repository-wide gate is controlled by `COV_FAIL_UNDER`.
+- Coverage mode defaults are staged in `quality.sh`:
+  - `COV_MODE=standard` → fail-under `85` (default),
+  - `COV_MODE=strict` → fail-under `95` (merge/release truth),
+  - `COV_MODE=legacy` → fail-under `80` (temporary compatibility lane).
+- `COV_FAIL_UNDER` still overrides mode defaults when explicitly set.
 - For premium quality, prioritize adding tests in low-coverage modules before adding new features.
 - If behavior changes, include at least one failing-path test and one happy-path test.
 

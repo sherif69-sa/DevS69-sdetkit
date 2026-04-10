@@ -28,10 +28,6 @@ mode=${1:-all}
 if [[ "$mode" == "-h" || "$mode" == "--help" || "$mode" == "help" ]]; then
   mode=help
 fi
-# Keep the default gate realistic for full-repo runs, while still allowing
-# stricter enforcement in CI/release jobs via COV_FAIL_UNDER=95.
-cov_fail_under=${COV_FAIL_UNDER:-80}
-
 need_cmd() {
   command -v "$1" >/dev/null 2>&1 && return 0
   echo "missing tool: $1" >&2
@@ -68,6 +64,12 @@ Modes:
   muthtml    Build mutation HTML output.
   boost      Chain doctor, fast gate, premium fast gate, and optimization summary.
   registry   Validate and smoke-test feature-registry docs/contracts surface.
+
+Coverage staging:
+  Default coverage mode is COV_MODE=standard (fail-under 85).
+  Use COV_MODE=strict for fail-under 95 (merge/release truth).
+  Use COV_MODE=legacy for fail-under 80 during migration.
+  COV_FAIL_UNDER always overrides mode defaults.
 USAGE
 }
 
@@ -154,12 +156,53 @@ run_cov() {
   # - full: complete repository visibility (informational)
   # - core (default): strict gate on critical, stable modules
   cov_scope="${COV_SCOPE:-core}"
+  cov_mode="${COV_MODE:-standard}"
+  cov_fail_under_override="${COV_FAIL_UNDER:-}"
+  local cov_fail_under
 
-  if [[ "$cov_scope" == "full" ]]; then
-    python -m pytest --cov=sdetkit --cov-report=term-missing --cov-fail-under="$cov_fail_under"
-    return
+  if [[ -n "$cov_fail_under_override" ]]; then
+    cov_fail_under="$cov_fail_under_override"
+    cov_source="COV_FAIL_UNDER override"
+  else
+    case "$cov_mode" in
+      standard)
+        cov_fail_under=85
+        cov_source="COV_MODE=standard default"
+        ;;
+      strict)
+        cov_fail_under=95
+        cov_source="COV_MODE=strict default"
+        ;;
+      legacy)
+        cov_fail_under=80
+        cov_source="COV_MODE=legacy compatibility"
+        ;;
+      *)
+        echo "[quality] unknown COV_MODE='$cov_mode' (supported: standard, strict, legacy)" >&2
+        return 2
+        ;;
+    esac
   fi
 
+  echo "[quality] coverage config: scope=$cov_scope mode=$cov_mode fail-under=$cov_fail_under ($cov_source)"
+
+  if [[ "$cov_scope" == "full" ]]; then
+    set +e
+    python -m pytest --cov=sdetkit --cov-report=term-missing --cov-fail-under="$cov_fail_under"
+    rc=$?
+    set -e
+    if (( rc != 0 )); then
+      echo "[quality] coverage gate failed (mode=$cov_mode, scope=$cov_scope, fail-under=$cov_fail_under)." >&2
+      echo "[quality] temporary override: COV_FAIL_UNDER=80 bash quality.sh cov" >&2
+      echo "[quality] staged hardening: use COV_MODE=strict for 95 when validating merge/release truth." >&2
+    fi
+    return "$rc"
+  elif [[ "$cov_scope" != "core" ]]; then
+    echo "[quality] unknown COV_SCOPE='$cov_scope' (supported: core, full)" >&2
+    return 2
+  fi
+
+  set +e
   python -m pytest \
     --cov=sdetkit.__main__ \
     --cov=sdetkit._entrypoints \
@@ -172,6 +215,14 @@ run_cov() {
     --cov=sdetkit.textutil \
     --cov-report=term-missing \
     --cov-fail-under="$cov_fail_under"
+  rc=$?
+  set -e
+  if (( rc != 0 )); then
+    echo "[quality] coverage gate failed (mode=$cov_mode, scope=$cov_scope, fail-under=$cov_fail_under)." >&2
+    echo "[quality] temporary override: COV_FAIL_UNDER=80 bash quality.sh cov" >&2
+    echo "[quality] staged hardening: use COV_MODE=strict for 95 when validating merge/release truth." >&2
+  fi
+  return "$rc"
 }
 run_mut() { need_cmd mutmut; mutmut run; }
 run_muthtml() { need_cmd mutmut; mutmut html; }

@@ -140,6 +140,12 @@ python -m pre_commit run -a
 mkdocs build
 ```
 
+Coverage gate migration note:
+- Previous default was fail-under `80`.
+- Current default is `COV_MODE=standard` (fail-under `85`).
+- Temporary override remains available: `COV_FAIL_UNDER=80 bash quality.sh cov` (or `COV_MODE=legacy`).
+- For strict merge/release validation, use `COV_MODE=strict bash quality.sh cov` (fail-under `95`).
+
 ## Pull request checklist
 
 Reference: [docs/premium-quality-gate.md](docs/premium-quality-gate.md)

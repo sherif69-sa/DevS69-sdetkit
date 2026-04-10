@@ -128,6 +128,13 @@ ruff check .
 mutmut results
 ```
 
+### Coverage hardening migration (staged)
+
+- **Previous default:** `bash quality.sh cov` used `COV_FAIL_UNDER=80` when unset.
+- **New default (effective now):** `bash quality.sh cov` uses `COV_MODE=standard` (fail-under `85`).
+- **Temporary compatibility override:** `COV_FAIL_UNDER=80 bash quality.sh cov` (or `COV_MODE=legacy bash quality.sh cov`).
+- **Stricter enforcement target:** use `COV_MODE=strict` (fail-under `95`) for merge/release truth lanes by **July 1, 2026**.
+
 ### Project layout
 
 ```text

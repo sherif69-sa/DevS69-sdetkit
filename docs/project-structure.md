@@ -29,7 +29,7 @@ This page is the quickest way to understand **where things are**, **where new fi
 | --- | --- | --- |
 | New contributor | `README.md` | `CONTRIBUTING.md`, `docs/project-structure.md` |
 | CLI user | `docs/cli.md` | `docs/doctor.md`, `docs/repo-audit.md` |
-| Maintainer | `quality.sh` | `scripts/check.sh`, `noxfile.py`, `Makefile` |
+| Maintainer | `quality.sh` | `scripts/bootstrap.sh`, `noxfile.py`, `Makefile` |
 | Release owner | `RELEASE.md` | `docs/releasing.md`, `CHANGELOG.md` |
 | Docs editor | `docs/index.md` | `mkdocs.yml`, `docs/contributing.md` |
 
@@ -82,7 +82,7 @@ The repository root should stay reserved for **project-wide entrypoints and poli
 
 - `tests/` — feature tests, CLI tests, module unit tests, and mutation-test killer tests
 - `scripts/` — one-command workflows such as:
-  - `check.sh` (fmt/lint/types/tests/coverage/docs/all)
+  - `quality.sh` (fmt/lint/types/tests/coverage/docs/all)
   - `bootstrap.sh` (create local environment + install dependencies)
   - `env.sh` / `shell.sh` (venv PATH convenience)
 - `docs/` — user and maintainer documentation published via MkDocs

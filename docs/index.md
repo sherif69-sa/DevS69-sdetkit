@@ -14,6 +14,16 @@ SDETKit is a productized release-confidence path for engineering teams that need
 
 Everything else is intentionally secondary until this canonical first-proof lane is trusted.
 
+## How to use this docs site
+
+Use the navigation in this order to reduce decision fatigue:
+
+1. **Start Here (primary)** for first-run success on the canonical path.
+2. **Team Rollout / CI (primary)** when moving from local proof to team adoption.
+3. **Reference (secondary)** for command/options lookup and policy details.
+4. **Advanced (secondary)** for maintainer, platform, and extension workflows.
+5. **Archive / Historical (non-primary)** only when you need transition-era traceability.
+
 ## Why trust it
 
 - The core flow is explicit and repeatable: `python -m sdetkit gate fast` → `python -m sdetkit gate release` → `python -m sdetkit doctor`.
