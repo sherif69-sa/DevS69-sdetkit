@@ -145,6 +145,7 @@ artifacts/     # generated evidence packs
 - Docs hub: [`docs/index.md`](docs/index.md)
 - Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - Release process: [`RELEASE.md`](RELEASE.md)
+- Git workflow (branch tracking + ahead/behind): [`docs/git-workflow.md`](docs/git-workflow.md)
 - Enterprise readiness audit: [`docs/enterprise-readiness-audit-2026-04.md`](docs/enterprise-readiness-audit-2026-04.md)
 
 ### Historical and transition-era references (secondary)
