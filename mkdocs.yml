@@ -82,19 +82,18 @@ extra_javascript:
   - javascripts/mermaid-init.js
 
 nav:
-  - Start here: index.md
-  - Canonical first-proof path (primary):
+  - Start Here (primary):
+      - Homepage: index.md
       - Start Here in 5 Minutes (fast path): start-here-5-minutes.md
       - Install (canonical): install.md
       - Blank repo to value in 60 seconds: blank-repo-to-value-60-seconds.md
       - First run quickstart (guided canonical path): ready-to-use.md
       - Release confidence (canonical explainer): release-confidence.md
-      - Before/after evidence example: before-after-evidence-example.md
-      - Evidence showcase: evidence-showcase.md
       - Decision guide (is SDETKit a fit?): decision-guide.md
       - Choose your path (30-second router): choose-your-path.md
-      - Doctor checks: doctor.md
-  - Team adoption and CI rollout (primary):
+      - Before/after evidence example: before-after-evidence-example.md
+      - Evidence showcase: evidence-showcase.md
+  - Team Rollout / CI (primary):
       - Adopt in your repository (canonical): adoption.md
       - Team rollout scenario: team-rollout-scenario.md
       - Example adoption flow: example-adoption-flow.md
@@ -103,75 +102,78 @@ nav:
       - Recommended CI flow (canonical): recommended-ci-flow.md
       - CI artifact walkthrough (canonical evidence decode): ci-artifact-walkthrough.md
       - CI contract (reference): ci-contract.md
+      - Remediation cookbook: remediation-cookbook.md
       - Reporting and trends: reporting-and-trends.md
       - Release confidence KPI pack: release-confidence-kpi-pack.md
       - Sample outputs (exploratory, non-canonical): sample-outputs.md
-      - Remediation cookbook: remediation-cookbook.md
-  - Current reference and discoverability (secondary):
+  - Reference (secondary):
       - Docs map (compact): docs-map.md
       - CLI reference: cli.md
       - API: api.md
-      - Repo Audit: repo-audit.md
-      - Security Gate: security-gate.md
-      - Security model: security-model.md
-      - Security hardening: security.md
-      - Policy-as-Code: policy.md
+      - Doctor checks: doctor.md
+      - Repo audit: repo-audit.md
+      - Security:
+          - Security gate: security-gate.md
+          - Security model: security-model.md
+          - Security hardening: security.md
+          - Policy-as-Code: policy.md
       - Feature registry: feature-registry.md
       - Release confidence architecture note: architecture/umbrella-kits.md
-      - Release verification records: release-verification.md
-      - Roadmap: roadmap.md
-      - Changelog: changelog.md
-  - Contributing and maintenance (secondary):
-      - Repo tour: repo-tour.md
-      - First contribution quickstart: first-contribution-quickstart.md
-      - Contributing: contributing.md
-      - Starter work inventory: starter-work-inventory.md
-      - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
-      - "GitHub Action: sdetkit repo audit": github-action.md
-      - PR automation for audit auto-fixes: pr-automation.md
-      - Automation bots and maintenance control loop: automation-bots.md
-      - n8n integration (PR webhook automation): n8n.md
-  - Kits (secondary umbrella):
-      - Release Confidence Kit: kits/release-confidence.md
-      - Test Intelligence Kit: kits/test-intelligence.md
-      - Integration Assurance Kit: kits/integration-assurance.md
-      - Failure Forensics Kit: kits/failure-forensics.md
-      - Dependency radar dashboard: kits/dependency-radar-dashboard.md
-      - Validation route map: kits/validation-route-map.md
-      - Expansion lab: kits/expansion-lab.md
-  - Advanced and reference (secondary):
-      - Platform problem authoring: platform-problem-authoring.md
       - Command surface inventory: command-surface.md
       - Capability map and command taxonomy: command-taxonomy.md
       - Determinism checklist: determinism-checklist.md
       - Determinism contract: determinism-contract.md
-      - Evidence Pack: evidence.md
-      - Ops Control Plane: ops.md
-      - Tool server: tool-server.md
-      - IDE + pre-commit integration: ide-and-precommit.md
-      - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
-      - Plugins: plugins.md
-      - Plugins, rule packs, and fix-audit: plugins-and-fix.md
-      - Global production transformation playbook: global-production-transformation-playbook.md
-      - Why not just separate tools? (system value): why-not-just-tools.md
-      - Product strategy (release confidence): product-strategy.md
       - Stability levels (current policy): stability-levels.md
       - Versioning and support posture (current policy): versioning-and-support.md
       - Integrations and extension boundary (current policy): integrations-and-extension-boundary.md
-      - Productization map: productization-map.md
-      - Design notes: design.md
-      - Governance and org packs: governance-and-org-packs.md
-      - Project structure: project-structure.md
-      - Releasing sdetkit: releasing.md
-      - Packaging/install/release-readiness audit: packaging-readiness-audit.md
-      - Public release verification records: release-verification.md
+      - Release verification records: release-verification.md
+      - Roadmap: roadmap.md
+      - Changelog: changelog.md
       - License: license.md
-  - Advanced live views (secondary):
-      - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
-      - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
-      - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
-      - DevS69 Visual HUD Showcase: hud-showcase.md
-  - Historical archive (non-primary):
+  - Advanced (secondary):
+      - Contributing and maintenance:
+          - Repo tour: repo-tour.md
+          - First contribution quickstart: first-contribution-quickstart.md
+          - Contributing: contributing.md
+          - Starter work inventory: starter-work-inventory.md
+          - Maintainer starter-issue hygiene: maintainer-starter-issue-hygiene.md
+          - "GitHub Action: sdetkit repo audit": github-action.md
+          - PR automation for audit auto-fixes: pr-automation.md
+          - Automation bots and maintenance control loop: automation-bots.md
+          - n8n integration (PR webhook automation): n8n.md
+      - Kits (secondary umbrella):
+          - Release Confidence Kit: kits/release-confidence.md
+          - Test Intelligence Kit: kits/test-intelligence.md
+          - Integration Assurance Kit: kits/integration-assurance.md
+          - Failure Forensics Kit: kits/failure-forensics.md
+          - Dependency radar dashboard: kits/dependency-radar-dashboard.md
+          - Validation route map: kits/validation-route-map.md
+          - Expansion lab: kits/expansion-lab.md
+      - Platform and operations:
+          - Platform problem authoring: platform-problem-authoring.md
+          - Evidence Pack: evidence.md
+          - Ops Control Plane: ops.md
+          - Tool server: tool-server.md
+          - IDE + pre-commit integration: ide-and-precommit.md
+          - Omnichannel + MCP bridge: omnichannel-mcp-bridge.md
+          - Plugins: plugins.md
+          - Plugins, rule packs, and fix-audit: plugins-and-fix.md
+      - Product and governance:
+          - Why not just separate tools? (system value): why-not-just-tools.md
+          - Product strategy (release confidence): product-strategy.md
+          - Productization map: productization-map.md
+          - Design notes: design.md
+          - Governance and org packs: governance-and-org-packs.md
+          - Project structure: project-structure.md
+          - Releasing sdetkit: releasing.md
+          - Packaging/install/release-readiness audit: packaging-readiness-audit.md
+          - Global production transformation playbook: global-production-transformation-playbook.md
+      - Advanced live views:
+          - 🕹️ DevS69 Command HUD — Live Detail View: command-hud-live.md
+          - 🔄 DevS69 Diff-to-Decision — Live Detail View: diff-flow-live.md
+          - 🗺️ DevS69 Repo Map — Live Detail View: repo-map-live.md
+          - DevS69 Visual HUD Showcase: hud-showcase.md
+  - Archive / Historical (non-primary):
       - Archive overview: archive/index.md
       - Transition-era material map: archive/transition-era-material.md
 

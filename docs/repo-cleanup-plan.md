@@ -64,3 +64,11 @@ Before opening a PR:
 - Weekly: scan root for accidental drift.
 - Monthly: merge duplicate docs or stale variants into canonical pages.
 - Per release: validate that README “start here” links still match active command surfaces.
+
+## Docs drift checklist
+
+Use this quick check before merging documentation edits:
+
+- [ ] Verify every referenced file path exists in the current repository tree.
+- [ ] Verify each documented command example still runs (or is clearly marked as illustrative-only).
+- [ ] Verify each link target points to the current canonical page/path (not a superseded duplicate).

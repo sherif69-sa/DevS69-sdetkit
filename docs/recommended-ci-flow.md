@@ -53,7 +53,7 @@ jobs:
       - name: Main branch stricter checks
         if: github.ref == 'refs/heads/main'
         env:
-          COV_FAIL_UNDER: "95"
+          COV_MODE: strict
         run: |
           python -m pre_commit run -a
           bash quality.sh registry
